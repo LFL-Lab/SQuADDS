@@ -1,7 +1,50 @@
-# SQuADDS Database Project
+# ![Under Development](https://img.shields.io/badge/Status-Under%20Development-yellow) SQuADDS: 
 
-## Overview
+> :warning: **This project is currently under active development. Features and documentation may be incomplete.**
+
 The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Project is an open-source resource aimed at advancing research in superconducting quantum device designs. It provides a robust workflow for generating and simulating superconducting quantum device designs, facilitating the accurate prediction of Hamiltonian parameters across a wide range of design geometries.
+
+Paper Link: [SQuADDS: A Database for Superconducting Quantum Device Design and Simulation](https://)
+
+## Table of Contents
+
+- [Setup](#setup)
+- [Features](#features)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
+--- 
+
+## Setup
+
+Install using pip:
+
+```bash
+pip install SQuADDS
+```
+
+Install from source:
+
+### Prerequisites
+- [Python 3.7+](https://www.python.org/downloads/)
+- [pip](https://pip.pypa.io/en/stable/installing/)
+- [Git](https://git-scm.com/downloads)
+
+### Installation
+1. Clone the repository.
+```bash
+git clone
+```
+2. Install the required packages.
+```bash
+pip install -r requirements.txt
+```
+3. Run the setup script.
+```bash
+python setup.py install
+```
 
 ## Features
 - **Data-Driven Interpolation**: Utilizes a comprehensive database for interpolating Hamiltonian parameters, ensuring high precision in predictions.
@@ -9,11 +52,11 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 - **Experimental Validation**: Includes experimentally measured data for enhancing the reliability and accuracy of the simulations.
 - **Open-Source Collaboration**: Encourages contributions from the community, expanding the database and refining the simulation models.
 
-## Usage
-1. **Connect to the SQuADDS Database**: Initiate a connection to access a wide range of pre-simulated designs.
-2. **Select Circuit QED Elements**: Choose specific quantum electrodynamics elements such as transmon cross, coplanar waveguide (CPW), and CLT coupler.
-3. **Input Target Hamiltonian Parameters**: Define parameters like qubit frequency (f_q), anharmonicity (α), resonator frequency (f_r), and linewidth (κ).
-4. **Receive and Utilize Output**: The database provides the closest pre-simulated design along with Hamiltonian parameters and an interpolated design with simulation hyperparameters.
+## Tutorials
+- [Tutorial 1: Getting Started with SQuADDS](https://)
+- [Tutorial 2: Contributing to the SQuADDS Database](https://)
+- [Tutorial 3: Advanced Use Cases](https://)
+
 
 ## Contributing
 Contributions are welcome! If you have improvements or additions to the database, please follow these steps:
