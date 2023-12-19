@@ -10,12 +10,6 @@ setup(
     author='Sadman Ahmed Shanto',
     author_email='shanto@usc.edu',
     url='https://github.com/shanto268/SQuADDS',
-    """
-    install_requires=[
-        'dependency1',
-        'dependency2',
-    ],
-    """
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
