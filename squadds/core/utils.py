@@ -47,7 +47,3 @@ def send_email_via_client(dataset_name, institute, pi_name, date, dataset_link):
 
     mailto_link = create_mailto_link(recipients, subject, body)
     webbrowser.open(mailto_link)
-
-# Example usage
-send_email_via_client("Example Dataset", "Institute Name", "PI Name", "2023-01-01", "http://example.com/dataset")
-        

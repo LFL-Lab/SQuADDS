@@ -2,6 +2,36 @@
 from pathlib import Path
 from squadds.core.globals import *
 
+import json
+import hashlib
+import shutil
+import glob
+import os
+
+def copy_files_to_new_location(data_path, new_path):
+    new_names = []
+    for file in glob.glob(os.path.join(data_path)):
+        new_name = generate_file_name(file)
+        # copy file to new location
+        location = os.path.dirname(new_path)
+        new_file = os.path.join(location, new_name)
+        new_names.append(new_file) 
+        shutil.copy(file, new_file)
+    # alert if there are duplicates and show the files
+    if len(new_names) != len(set(new_names)):
+        print('There are duplicates!')
+        print(new_names)
+
+def generate_file_name(data_file):
+    with open(data_file, 'r') as file:
+        data = json.load(file)
+    grp = data['contributor']['group']
+    inst = data['contributor']['institution']
+    dc = data["contributor"]['date_created']
+    # create hash based on data
+    hash_fn = hashlib.sha256(json.dumps(data).encode()).hexdigest()[:16]
+    return f"{grp}_{inst}_{hash_fn}.json"
+
 def create_contributor_info():
     """
     Prompt the user for information and update the .env file.

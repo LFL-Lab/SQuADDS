@@ -30,19 +30,6 @@ class Contribute:
             token = os.getenv('HUGGINGFACE_API_KEY')
             login(token)
         return api, token
-        """
-        api_key = os.getenv('HUGGINGFACE_API_KEY')
-        if not api_key:
-            # Show the user the following page to get the API key
-            print("="*80)
-            print("\nPlease get your API key from the following page and add it to the .env file.")
-            print("https://huggingface.co/settings/token")
-            print("If you don't have an account, please create one here: https://huggingface.co/join (it's free)\n")
-            print("OR you can run the following command to set the API key:\n")
-            print("python -m squadds.core.utils set_huggingface_api_key\n")
-            print("="*80)
-        return api_key
-        """
             
     def create_dataset_name(self, components, data_type, data_nature, data_source, date=None):
         components_joined = "-".join(components)
@@ -53,7 +40,7 @@ class Contribute:
         return f"{base_string}_{uid_hash}"
 
     def get_dataset_link(self):
-        pass
+        raise NotImplementedError()
 
     def upload_dataset(self):
         checker = Checker()  
@@ -69,6 +56,7 @@ class Contribute:
         
         # Send notification email after successful upload
         send_email_via_client("Example Dataset", "Institute Name", "PI Name", "2023-01-01")
+        return
 
     def create_dataset_repository(self, components, data_type, data_nature, data_source):
         date = datetime.now().strftime('%Y%m%d')
@@ -83,27 +71,27 @@ class Contribute:
 
         
     def upload_dataset_no_validation(self, components, data_type, data_nature, data_source, files, date=None):
-            dataset_name = self.create_dataset_name(components, data_type, data_nature, data_source, date)
-            
-            # Create a repository for the dataset on HuggingFace (if it doesn't exist)
-            try:
-                self.api.create_repo(repo_id=dataset_name, token=self.token, repo_type="dataset")
-                print(f"Dataset repository {dataset_name} created.")
-            except Exception as e:
-                print(f"Error creating dataset repository: {e}")
+        dataset_name = self.create_dataset_name(components, data_type, data_nature, data_source, date)
+        
+        # Create a repository for the dataset on HuggingFace (if it doesn't exist)
+        try:
+            self.api.create_repo(repo_id=dataset_name, token=self.token, repo_type="dataset")
+            print(f"Dataset repository {dataset_name} created.")
+        except Exception as e:
+            print(f"Error creating dataset repository: {e}")
 
-            # Upload files to the dataset
-            for file_path in files:
-                try:
-                    self.api.upload_file(
-                        path_or_fileobj=file_path,
-                        path_in_repo=os.path.basename(file_path),
-                        repo_id=dataset_name,
-                        repo_type="dataset",
-                        token=self.token
-                    )
-                    print(f"Uploaded {file_path} to {dataset_name}.")
-                except Exception as e:
-                    print(f"Error uploading file {file_path}: {e}")
+        # Upload files to the dataset
+        for file_path in files:
+            try:
+                self.api.upload_file(
+                    path_or_fileobj=file_path,
+                    path_in_repo=os.path.basename(file_path),
+                    repo_id=dataset_name,
+                    repo_type="dataset",
+                    token=self.token
+                )
+                print(f"Uploaded {file_path} to {dataset_name}.")
+            except Exception as e:
+                print(f"Error uploading file {file_path}: {e}")
 
                     
