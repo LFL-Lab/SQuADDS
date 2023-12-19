@@ -1,0 +1,55 @@
+name: Build and Deploy Sphinx Documentation
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+
+    - name: Install squadds library
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install addict 
+
+    - name: Install documentation dependencies
+      run: |
+        pip install sphinx qiskit-sphinx-theme nbsphinx
+
+    - name: Install Pandoc
+      run: |
+        sudo apt-get install -y pandoc
+
+    - name: Generate documentation
+      run: |
+        cd docs
+        sphinx-apidoc -o source/ ../
+
+    - name: Move tutorials to docs/source/tutorials
+      run: |
+        cp tutorials/*.ipynb docs/source/tutorials
+
+    - name: Build documentation
+      run: |
+        cd docs
+        make html
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GH_PAT_CI }}
+        publish_dir: ./docs/build/html
+

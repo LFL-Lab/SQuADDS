@@ -9,6 +9,19 @@ import glob
 import os
 
 def copy_files_to_new_location(data_path, new_path):
+    """
+    Copy files from the given data path to the new location.
+
+    Args:
+        data_path (str): The path to the directory containing the files to be copied.
+        new_path (str): The path to the directory where the files will be copied to.
+
+    Returns:
+        None
+
+    Raises:
+        None
+    """
     new_names = []
     for file in glob.glob(os.path.join(data_path)):
         new_name = generate_file_name(file)
@@ -23,6 +36,16 @@ def copy_files_to_new_location(data_path, new_path):
         print(new_names)
 
 def generate_file_name(data_file):
+    """
+    Generate a unique file name based on the given data file.
+
+    Args:
+        data_file (str): The path to the data file.
+
+    Returns:
+        str: The generated file name.
+
+    """
     with open(data_file, 'r') as file:
         data = json.load(file)
     grp = data['contributor']['group']
@@ -35,6 +58,11 @@ def generate_file_name(data_file):
 def create_contributor_info():
     """
     Prompt the user for information and update the .env file.
+
+    This function prompts the user to enter information such as institution name, group name,
+    PI name, and user name. It then validates the input and updates the corresponding fields
+    in the .env file. If the fields already exist in the .env file, the function prompts the
+    user to confirm whether to overwrite the existing values.
 
     Raises:
         ValueError: If any of the input fields are empty.

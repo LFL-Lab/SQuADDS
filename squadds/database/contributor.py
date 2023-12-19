@@ -12,6 +12,28 @@ from huggingface_hub import HfApi, HfFolder, login
 load_dotenv(ENV_FILE_PATH)
 
 class Contribute:
+    """
+    Class representing a contributor for dataset creation and upload.
+
+    Attributes:
+        dataset_files (list): List of dataset file paths.
+        institute (str): Institution name.
+        pi_name (str): PI (Principal Investigator) name.
+        api (HfApi): Hugging Face API object.
+        token (str): Hugging Face API token.
+        dataset_name (str): Name of the dataset.
+        dataset_files (list): List of dataset file paths.
+        dataset_link (str): Link to the dataset.
+
+    Methods:
+        check_for_api_key: Checks for the presence of Hugging Face API key.
+        create_dataset_name: Creates a unique name for the dataset.
+        get_dataset_link: Retrieves the link to the dataset.
+        upload_dataset: Uploads the dataset to Hugging Face.
+        create_dataset_repository: Creates a repository for the dataset on Hugging Face.
+        upload_dataset_no_validation: Uploads the dataset to Hugging Face without validation.
+    """
+
     def __init__(self, data_files):
         self.dataset_files = data_files
         self.institute = os.getenv('INSTITUTION')
@@ -22,6 +44,16 @@ class Contribute:
         self.dataset_link = None
         
     def check_for_api_key(self):
+        """
+        Checks for the presence of Hugging Face API key.
+
+        Returns:
+            api (HfApi): Hugging Face API object.
+            token (str): Hugging Face API token.
+
+        Raises:
+            ValueError: If Hugging Face token is not found.
+        """
         api = HfApi()
         token = HfFolder.get_token()
         if token is None:
@@ -32,6 +64,19 @@ class Contribute:
         return api, token
             
     def create_dataset_name(self, components, data_type, data_nature, data_source, date=None):
+        """
+        Creates a unique name for the dataset.
+
+        Args:
+            components (list): List of components.
+            data_type (str): Type of the data.
+            data_nature (str): Nature of the data.
+            data_source (str): Source of the data.
+            date (str, optional): Date of the dataset creation. Defaults to None.
+
+        Returns:
+            str: Unique name for the dataset.
+        """
         components_joined = "-".join(components)
         date = date or datetime.now().strftime('%Y%m%d')
         base_string = f"{components_joined}_{data_type}_{data_nature}_{data_source}_{self.institute}_{self.pi_name}_{date}"
@@ -40,9 +85,21 @@ class Contribute:
         return f"{base_string}_{uid_hash}"
 
     def get_dataset_link(self):
+        """
+        Retrieves the link to the dataset.
+
+        Returns:
+            str: Link to the dataset.
+        """
         raise NotImplementedError()
 
     def upload_dataset(self):
+        """
+        Uploads the dataset to Hugging Face.
+
+        Raises:
+            NotImplementedError: If dataset upload is not implemented.
+        """
         checker = Checker()  
         for file in self.dataset_files:
             checker.check(file)
@@ -59,6 +116,15 @@ class Contribute:
         return
 
     def create_dataset_repository(self, components, data_type, data_nature, data_source):
+        """
+        Creates a repository for the dataset on HuggingFace (if it doesn't exist).
+
+        Args:
+            components (list): List of components.
+            data_type (str): Type of the data.
+            data_nature (str): Nature of the data.
+            data_source (str): Source of the data.
+        """
         date = datetime.now().strftime('%Y%m%d')
         dataset_name = self.create_dataset_name(components, data_type, data_nature, data_source, date)
         
@@ -71,6 +137,17 @@ class Contribute:
 
         
     def upload_dataset_no_validation(self, components, data_type, data_nature, data_source, files, date=None):
+        """
+        Uploads the dataset to HuggingFace without validation.
+
+        Args:
+            components (list): List of components.
+            data_type (str): Type of the data.
+            data_nature (str): Nature of the data.
+            data_source (str): Source of the data.
+            files (list): List of file paths.
+            date (str, optional): Date of the dataset creation. Defaults to None.
+        """
         dataset_name = self.create_dataset_name(components, data_type, data_nature, data_source, date)
         
         # Create a repository for the dataset on HuggingFace (if it doesn't exist)
