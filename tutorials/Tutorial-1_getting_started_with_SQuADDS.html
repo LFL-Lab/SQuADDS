@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <title>HuggingFace &mdash; SQuADDS 0.0.1 documentation</title>
+  <title>Tutorial 1: Getting Started with SQuADDS &mdash; SQuADDS 0.0.1 documentation</title>
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" /><script src="../_static/js/web-components/top-nav-bar.js"></script>
@@ -49,10 +49,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Documentation Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../how_to/index.html">How-to Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../apidocs/index.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../explanations/index.html">Explanations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Contribution Items</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html#id1">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html#contributors">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/index.html">References</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/shanto268/SQuADDS">GitHub</a></li>
 </ul>
 
@@ -125,7 +127,7 @@
         
           <li><a href="index.html">Tutorials</a> &gt;</li>
         
-      <li>HuggingFace</li>
+      <li>Tutorial 1: Getting Started with SQuADDS</li>
     
   </ul>
 </div>
@@ -173,13 +175,15 @@ Installing collected packages: SQuADDS
 Successfully installed SQuADDS-0.1
 </pre></div></div>
 </div>
+<section id="Tutorial-1:-Getting-Started-with-SQuADDS">
+<h1>Tutorial 1: Getting Started with SQuADDS<a class="headerlink" href="#Tutorial-1:-Getting-Started-with-SQuADDS" title="Link to this heading">¶</a></h1>
 <section id="HuggingFace">
-<h1>HuggingFace<a class="headerlink" href="#HuggingFace" title="Link to this heading">¶</a></h1>
+<h2>HuggingFace<a class="headerlink" href="#HuggingFace" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://huggingface.co/">HuggingFace</a></p></li>
 </ul>
 <section id="Creating-an-Account">
-<h2>Creating an Account<a class="headerlink" href="#Creating-an-Account" title="Link to this heading">¶</a></h2>
+<h3>Creating an Account<a class="headerlink" href="#Creating-an-Account" title="Link to this heading">¶</a></h3>
 <p>Follow the instructions here - <a class="reference external" href="https://huggingface.co/join">HuggingFace: Sign Up</a> - to create an account.</p>
 <p>Once you have created an account, you can get your API key from the <a class="reference external" href="https://huggingface.co/settings/token">settings page</a>.</p>
 <p>Please update the <code class="docutils literal notranslate"><span class="pre">HUGGINGFACE_API_KEY</span></code> variable in the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file with your API key or execute the following code to set the environment variable.</p>
@@ -202,6 +206,103 @@ API key already exists in .env file.
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from datasets import get_dataset_config_names
+from datasets import load_dataset
+
+configs = get_dataset_config_names(&quot;SQuADDS/SQuADDS_DB&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>configs
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qubit-TransmonCross-cap_matrix&#39;,
+ &#39;cavity_claw-RouterMeander-eigenmode&#39;,
+ &#39;coupler-NCap-cap_matrix&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>qubit_data = load_dataset(&quot;SQuADDS/SQuADDS_DB&quot;, configs[0])
+qubit_data
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+DatasetDict({
+    train: Dataset({
+        features: [&#39;notes&#39;, &#39;design&#39;, &#39;contributor&#39;, &#39;sim_results&#39;, &#39;sim_options&#39;],
+        num_rows: 1934
+    })
+})
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># print all the nested keys of qubit_data[&quot;train&quot;][0]
+for key in qubit_data[&quot;train&quot;][0].keys():
+    try:
+        print(f&quot;{key} has keys:&quot;)
+        for k in qubit_data[&quot;train&quot;][0][key].keys():
+            print(f&quot;\t{k}&quot;)
+    except:
+        pass
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+notes has keys:
+design has keys:
+        design_options
+        design_tool
+contributor has keys:
+        PI
+        date_created
+        group
+        institution
+        uploader
+sim_results has keys:
+        claw_to_claw
+        claw_to_ground
+        cross_to_claw
+        cross_to_cross
+        cross_to_ground
+        ground_to_ground
+        units
+sim_options has keys:
+        renderer_options
+        setup
+        simulator
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
@@ -209,6 +310,7 @@ API key already exists in .env file.
 </pre></div>
 </div>
 </div>
+</section>
 </section>
 </section>
 
@@ -263,8 +365,11 @@ API key already exists in .env file.
           <div class="pytorch-right-menu" id="pytorch-right-menu">
             <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">HuggingFace</a><ul>
+<li><a class="reference internal" href="#">Tutorial 1: Getting Started with SQuADDS</a><ul>
+<li><a class="reference internal" href="#HuggingFace">HuggingFace</a><ul>
 <li><a class="reference internal" href="#Creating-an-Account">Creating an Account</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

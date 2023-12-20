@@ -7,22 +7,36 @@ Getting Started with SQuADDS
 Installation
 ------------
 
-1. **Install Qiskit-Metal**: 
-   See `here <https://qiskit.org/documentation/metal/installation.html>`_.
+SQuADDS can be installed using pip.
 
-2. **Clone Repository**: 
+.. code-block:: bash
+
+   pip install SQuADDS
+
+Alternatively, you can install SQuADDS from source.
+
+1. **Clone Repository**: 
    Navigate to your chosen directory and clone the repository.
 
    .. code-block:: bash
 
-      cd <REPO PATH>
+      cd <REPO-PATH>
       git clone https://github.com/shanto268/SQuADDS
 
-3. **Install Dependencies**: 
+2. **Install Dependencies**: 
    Activate your Qiskit Metal conda environment and install dependencies.
 
    .. code-block:: bash
 
-      conda activate <QISKIT METAL ENV>
+      conda activate <YOUR-ENV>
       cd SQuADDS
       pip install .
+
+
+FAQ
+---
+
+**Q:** Placeholder?
+
+**A:** Placeholder.
+
