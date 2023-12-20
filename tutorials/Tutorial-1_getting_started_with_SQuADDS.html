@@ -143,8 +143,17 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
-  <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+  <section id="Tutorial-1:-Getting-Started-with-SQuADDS">
+<h1>Tutorial 1: Getting Started with SQuADDS<a class="headerlink" href="#Tutorial-1:-Getting-Started-with-SQuADDS" title="Link to this heading">¶</a></h1>
+<p>In this tutorial, we will walk you through some basic usage of SQuADDS. By the end of this tutorial, you will be able to:</p>
+<ul class="simple">
+<li><p>Have an HuggingFace account</p></li>
+<li><p>Access the SQuADDS Database</p></li>
+<li><p>Use the SQuADDS API to query for closest and “best-guess” interpolated device designs for your chosen Hamiltonian parameters</p></li>
+<li><p>Simulate the “best-guess” design using an EM solver tool</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
@@ -152,44 +161,25 @@
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>../.
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Obtaining file:///Users/shanto/LFL/SQuADDS/SQuADDS
-  Preparing metadata (setup.py) ... done
-Installing collected packages: SQuADDS
-  Attempting uninstall: SQuADDS
-    Found existing installation: SQuADDS 0.1
-    Uninstalling SQuADDS-0.1:
-      Successfully uninstalled SQuADDS-0.1
-  Running setup.py develop for SQuADDS
-Successfully installed SQuADDS-0.1
-</pre></div></div>
-</div>
-<section id="Tutorial-1:-Getting-Started-with-SQuADDS">
-<h1>Tutorial 1: Getting Started with SQuADDS<a class="headerlink" href="#Tutorial-1:-Getting-Started-with-SQuADDS" title="Link to this heading">¶</a></h1>
-<section id="HuggingFace">
-<h2>HuggingFace<a class="headerlink" href="#HuggingFace" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference external" href="https://huggingface.co/">HuggingFace</a></p></li>
-</ul>
+<p>Since the SQuADDS Database is hosted on <a class="reference external" href="https://huggingface.co/">HuggingFace</a>, we will need to create an account and get an API key to access the database.</p>
+<section id="HuggingFace-🤗">
+<h2>HuggingFace 🤗<a class="headerlink" href="#HuggingFace-🤗" title="Link to this heading">¶</a></h2>
+<p>HuggingFace is a company that provides a large number of NLP models and datasets. They also provide a platform to host your own models and datasets.</p>
 <section id="Creating-an-Account">
 <h3>Creating an Account<a class="headerlink" href="#Creating-an-Account" title="Link to this heading">¶</a></h3>
 <p>Follow the instructions here - <a class="reference external" href="https://huggingface.co/join">HuggingFace: Sign Up</a> - to create an account.</p>
 <p>Once you have created an account, you can get your API key from the <a class="reference external" href="https://huggingface.co/settings/token">settings page</a>.</p>
 <p>Please update the <code class="docutils literal notranslate"><span class="pre">HUGGINGFACE_API_KEY</span></code> variable in the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file with your API key or execute the following code to set the environment variable.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="n">set_huggingface_api_key</span>
@@ -198,16 +188,23 @@ Successfully installed SQuADDS-0.1
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+</section>
+<section id="Login">
+<h3>Login<a class="headerlink" href="#Login" title="Link to this heading">¶</a></h3>
+<p>To login to your HuggingFace account, run the following command in your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>huggingface-cli<span class="w"> </span>login
+</pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-API key already exists in .env file.
-</pre></div></div>
+<p>You will be prompted to enter your username and password. Once you have logged in, you can check your login status by running the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>huggingface-cli<span class="w"> </span>whoami
+</pre></div>
 </div>
+</section>
+<section id="Accessing-the-SQuADDS-Database-using-the-HuggingFace-API">
+<h3>Accessing the SQuADDS Database using the HuggingFace API<a class="headerlink" href="#Accessing-the-SQuADDS-Database-using-the-HuggingFace-API" title="Link to this heading">¶</a></h3>
+<p>The SQuADDS Database is hosted on HuggingFace. You can access the database using the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library from HuggingFace.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">get_dataset_config_names</span>
@@ -217,27 +214,16 @@ API key already exists in .env file.
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">configs</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-[&#39;qubit-TransmonCross-cap_matrix&#39;,
- &#39;cavity_claw-RouterMeander-eigenmode&#39;,
- &#39;coupler-NCap-cap_matrix&#39;]
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_data</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span><span class="p">,</span> <span class="n">configs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -245,64 +231,46 @@ API key already exists in .env file.
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</section>
+</section>
+<section id="Using-the-SQuADDS-API-to-access-and-anlyze-the-database">
+<h2>Using the SQuADDS API to access and anlyze the database<a class="headerlink" href="#Using-the-SQuADDS-API-to-access-and-anlyze-the-database" title="Link to this heading">¶</a></h2>
+<p>While it is possible to directly access the SQuADDS Database using the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library, we have created a simple API to make it easier to query the database.</p>
+<section id="Making-Systems-out-of-Circuit-QED-Elements">
+<h3>Making Systems out of Circuit QED Elements<a class="headerlink" href="#Making-Systems-out-of-Circuit-QED-Elements" title="Link to this heading">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-DatasetDict({
-    train: Dataset({
-        features: [&#39;notes&#39;, &#39;design&#39;, &#39;contributor&#39;, &#39;sim_results&#39;, &#39;sim_options&#39;],
-        num_rows: 1934
-    })
-})
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># print all the nested keys of qubit_data[&quot;train&quot;][0]</span>
-<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">qubit_data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> has keys:&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">qubit_data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="k">pass</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+</section>
+<section id="Querying-for-the-a-target-qubit-design">
+<h3>Querying for the a target qubit design<a class="headerlink" href="#Querying-for-the-a-target-qubit-design" title="Link to this heading">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-notes has keys:
-design has keys:
-        design_options
-        design_tool
-contributor has keys:
-        PI
-        date_created
-        group
-        institution
-        uploader
-sim_results has keys:
-        claw_to_claw
-        claw_to_ground
-        cross_to_claw
-        cross_to_cross
-        cross_to_ground
-        ground_to_ground
-        units
-sim_options has keys:
-        renderer_options
-        setup
-        simulator
-</pre></div></div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
 </div>
+</div>
+</section>
+<section id="Querying-for-a-target-qubit-cavity-design">
+<h3>Querying for a target qubit-cavity design<a class="headerlink" href="#Querying-for-a-target-qubit-cavity-design" title="Link to this heading">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Simulating-the-%22best-guess%22-design">
+<h3>Simulating the “best-guess” design<a class="headerlink" href="#Simulating-the-%22best-guess%22-design" title="Link to this heading">¶</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -314,6 +282,24 @@ sim_options has keys:
 </section>
 </section>
 </section>
+<section id="Next-Steps...">
+<h1>Next Steps…<a class="headerlink" href="#Next-Steps..." title="Link to this heading">¶</a></h1>
+<p>Let’s do a quick recap of what we have learned in this tutorial:</p>
+<ul class="simple">
+<li><p>We have created a HuggingFace account and got an API key</p></li>
+<li><p>We have used the SQuADDS API to query for closest and “best-guess” interpolated device designs for our chosen Hamiltonian parameters</p></li>
+<li><p>We have simulated the “best-guess” design using an EM solver tool</p></li>
+</ul>
+<p>In the next <a class="reference external" href="https://sadmanahmedshanto.com/SQuADDS/tutorials/Tutorial-2_Contributing_to_SQuADDS.html">tutorial</a>, we will learn how to contribute to the SQuADDS Database.</p>
+</section>
+<section id="License">
+<h1>License<a class="headerlink" href="#License" title="Link to this heading">¶</a></h1>
+<div style="width: 100%; background-color:#d5d9e0;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2023.</p>
+</p><p><p>This code is licensed under the MIT License. You mayobtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
 
 
              </article>
@@ -368,12 +354,23 @@ sim_options has keys:
             <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
               <ul>
 <li><a class="reference internal" href="#">Tutorial 1: Getting Started with SQuADDS</a><ul>
-<li><a class="reference internal" href="#HuggingFace">HuggingFace</a><ul>
+<li><a class="reference internal" href="#HuggingFace-🤗">HuggingFace 🤗</a><ul>
 <li><a class="reference internal" href="#Creating-an-Account">Creating an Account</a></li>
+<li><a class="reference internal" href="#Login">Login</a></li>
+<li><a class="reference internal" href="#Accessing-the-SQuADDS-Database-using-the-HuggingFace-API">Accessing the SQuADDS Database using the HuggingFace API</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Using-the-SQuADDS-API-to-access-and-anlyze-the-database">Using the SQuADDS API to access and anlyze the database</a><ul>
+<li><a class="reference internal" href="#Making-Systems-out-of-Circuit-QED-Elements">Making Systems out of Circuit QED Elements</a></li>
+<li><a class="reference internal" href="#Querying-for-the-a-target-qubit-design">Querying for the a target qubit design</a></li>
+<li><a class="reference internal" href="#Querying-for-a-target-qubit-cavity-design">Querying for a target qubit-cavity design</a></li>
+<li><a class="reference internal" href="#Simulating-the-%22best-guess%22-design">Simulating the “best-guess” design</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li><a class="reference internal" href="#Next-Steps...">Next Steps…</a></li>
+<li><a class="reference internal" href="#License">License</a></li>
 </ul>
 
             </div>
