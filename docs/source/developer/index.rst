@@ -9,10 +9,14 @@ Contribution Items
 ------------------
 
 | **Bug Reports** - Please report any bugs you find in the code or documentation by opening an issue on GitHub.
+
 | **Feature Requests** - If you have an idea for a new feature, please open an issue on GitHub.
+
 | **Pull Requests** - We welcome pull requests from the community. If you submit a pull request, please be patient as we review your work. If you have any questions about contributing, please contact us!
+
 | **Documentation** - We welcome contributions to the documentation. If you find any typos or errors, please open an issue on GitHub.
-| **Implementation of Next Release** - If you would like to help in implementing the next version of SQuADDS, please look at `In the Works <https://github.com/shanto268/SQuADDS?tab=readme-ov-file#next-release>`
+
+| **Implementation of Next Release** - If you would like to help in implementing the next version of SQuADDS, please look at what is worked on for the `next release <https://github.com/shanto268/SQuADDS?tab=readme-ov-file#next-release>`_
 
 
 Developers
