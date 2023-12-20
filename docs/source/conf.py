@@ -17,6 +17,14 @@ extensions = [
     'sphinx.ext.autodoc',
     'nbsphinx',
     'qiskit_sphinx_theme',
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.viewcode",
+    "jupyter_sphinx",
+    "sphinx_copybutton",
+    "sphinx_design",
+    "nbsphinx",
 ]
 
 autodoc_typehints = "none"
@@ -39,4 +47,31 @@ html_context = {
     "theme_announcement": "🎉 Our paper is out!",
     "announcement_url": "https://example.com",
     "announcement_url_text": "Check it out",
+}
+
+html_last_updated_fmt = "2023/12/19"
+
+# This allows RST files to put `|version|` in their file and
+# have it updated with the release set in conf.py.
+rst_prolog = f"""
+.. |version| replace:: {release}
+"""
+
+# Options for autodoc. These reflect the values from Terra.
+autosummary_generate = True
+autosummary_generate_overwrite = False
+autoclass_content = "both"
+autodoc_typehints = "description"
+autodoc_typehints_description_target = "documented_params"
+
+# This adds numbers to the captions for figures, tables,
+# and code blocks.
+numfig = True
+numfig_format = {"table": "Table %s"}
+
+# Settings for Jupyter notebooks.
+nbsphinx_execute = "never"
+nbsphinx_thumbnails = {
+    # Default image for thumbnails.
+    "**": "_static/images/logo.png",
 }
