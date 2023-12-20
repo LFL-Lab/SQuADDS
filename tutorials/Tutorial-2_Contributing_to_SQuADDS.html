@@ -8,6 +8,9 @@
   <title>Tutorial 2: Contributing to SQuADDS &mdash; SQuADDS 0.1.0 documentation</title>
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/jupyter-sphinx.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" type="text/css" />
   <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" /><script src="../_static/js/web-components/top-nav-bar.js"></script>
 
   <!-- SEGMENT ANALYTICS --></head>
@@ -144,8 +147,8 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[86]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
-%autoreload 2
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
 </pre></div>
 </div>
 </div>
@@ -162,7 +165,7 @@ The autoreload extension is already loaded. To reload it, use:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>!pip install -e ../.
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>../.
 </pre></div>
 </div>
 </div>
@@ -207,7 +210,7 @@ USER_NAME = &quot;&quot;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from squadds.database import *
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.database</span> <span class="kn">import</span> <span class="o">*</span>
 </pre></div>
 </div>
 </div>
@@ -215,7 +218,7 @@ USER_NAME = &quot;&quot;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>create_contributor_info()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">create_contributor_info</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -359,20 +362,20 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[79]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def combine_json_files(source_directory, output_file):
-    all_data = []
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">combine_json_files</span><span class="p">(</span><span class="n">source_directory</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
+    <span class="n">all_data</span> <span class="o">=</span> <span class="p">[]</span>
 
-    # List all JSON files in the directory
-    file_paths = glob.glob(os.path.join(source_directory, &quot;*.json&quot;))
+    <span class="c1"># List all JSON files in the directory</span>
+    <span class="n">file_paths</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">source_directory</span><span class="p">,</span> <span class="s2">&quot;*.json&quot;</span><span class="p">))</span>
 
-    for file_path in file_paths:
-        with open(file_path, &#39;r&#39;, encoding=&#39;utf-8&#39;) as file:
-            data = json.load(file)
-            all_data.append(data)
+    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">file_paths</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+            <span class="n">all_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-    # Write combined data to a single file
-    with open(output_file, &#39;w&#39;, encoding=&#39;utf-8&#39;) as outfile:
-        json.dump(all_data, outfile, indent=4)
+    <span class="c1"># Write combined data to a single file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">all_data</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <br/><br/></pre></div>
 </div>
 </div>
@@ -380,9 +383,9 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[80]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>source_directory = &quot;../data/qubit/TransmonCross/cap_matrix&quot;  # Replace with your source directory
-output_file = &quot;../data/combined_qubit_data.json&quot;  # Replace with your desired output file path
-combine_json_files(source_directory, output_file)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">source_directory</span> <span class="o">=</span> <span class="s2">&quot;../data/qubit/TransmonCross/cap_matrix&quot;</span>  <span class="c1"># Replace with your source directory</span>
+<span class="n">output_file</span> <span class="o">=</span> <span class="s2">&quot;../data/combined_qubit_data.json&quot;</span>  <span class="c1"># Replace with your desired output file path</span>
+<span class="n">combine_json_files</span><span class="p">(</span><span class="n">source_directory</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -390,9 +393,9 @@ combine_json_files(source_directory, output_file)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[81]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>source_directory = &quot;../data/coupler/NCap/cap_matrix&quot;  # Replace with your source directory
-output_file = &quot;../data/combined_coupler_data.json&quot;  # Replace with your desired output file path
-combine_json_files(source_directory, output_file)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">source_directory</span> <span class="o">=</span> <span class="s2">&quot;../data/coupler/NCap/cap_matrix&quot;</span>  <span class="c1"># Replace with your source directory</span>
+<span class="n">output_file</span> <span class="o">=</span> <span class="s2">&quot;../data/combined_coupler_data.json&quot;</span>  <span class="c1"># Replace with your desired output file path</span>
+<span class="n">combine_json_files</span><span class="p">(</span><span class="n">source_directory</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -400,9 +403,9 @@ combine_json_files(source_directory, output_file)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[82]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>source_directory = &quot;../data/cavity_claw/RouteMeander/eigenmode/&quot;  # Replace with your source directory
-output_file = &quot;../data/combined_cavity-claw_data.json&quot;  # Replace with your desired output file path
-combine_json_files(source_directory, output_file)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">source_directory</span> <span class="o">=</span> <span class="s2">&quot;../data/cavity_claw/RouteMeander/eigenmode/&quot;</span>  <span class="c1"># Replace with your source directory</span>
+<span class="n">output_file</span> <span class="o">=</span> <span class="s2">&quot;../data/combined_cavity-claw_data.json&quot;</span>  <span class="c1"># Replace with your desired output file path</span>
+<span class="n">combine_json_files</span><span class="p">(</span><span class="n">source_directory</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -410,14 +413,14 @@ combine_json_files(source_directory, output_file)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[83]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># rename the json files in data to &quot;LFL_USC_{hash}.json&quot; where the hash is based on the file contents
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># rename the json files in data to &quot;LFL_USC_{hash}.json&quot; where the hash is based on the file contents</span>
 
-for file in glob.glob(&quot;../data/*.json&quot;):
-    with open(file, &#39;r&#39;, encoding=&#39;utf-8&#39;) as f:
-        data = json.load(f)
-        hash = hashlib.md5(json.dumps(data, sort_keys=True).encode(&#39;utf-8&#39;)).hexdigest()
-        new_file = file.replace(&quot;.json&quot;, f&quot;LFL_USC_{hash}.json&quot;)
-        os.rename(file, new_file)
+<span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;../data/*.json&quot;</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="nb">hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="n">new_file</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;LFL_USC_</span><span class="si">{</span><span class="nb">hash</span><span class="si">}</span><span class="s2">.json&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">new_file</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -425,7 +428,7 @@ for file in glob.glob(&quot;../data/*.json&quot;):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[99]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>!datasets-cli test ../data/SQuADDS_DB.py --save_info --all_configs
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>datasets-cli<span class="w"> </span><span class="nb">test</span><span class="w"> </span>../data/SQuADDS_DB.py<span class="w"> </span>--save_info<span class="w"> </span>--all_configs
 </pre></div>
 </div>
 </div>
@@ -463,46 +466,46 @@ NotImplementedError
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[96]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import json
-import random
-import os
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
-def create_train_val_test_splits(source_files, output_directory, train_ratio=0.7, val_ratio=0.15):
-    &quot;&quot;&quot;
-    Splits the data from source JSON files into train, validation, and test sets.
-    &quot;&quot;&quot;
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
+<span class="k">def</span> <span class="nf">create_train_val_test_splits</span><span class="p">(</span><span class="n">source_files</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span> <span class="n">train_ratio</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">val_ratio</span><span class="o">=</span><span class="mf">0.15</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits the data from source JSON files into train, validation, and test sets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_directory</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_directory</span><span class="p">)</span>
 
-    all_data = []
+    <span class="n">all_data</span> <span class="o">=</span> <span class="p">[]</span>
 
-    # Load data from all source files
-    for file_path in source_files:
-        with open(file_path, &#39;r&#39;, encoding=&#39;utf-8&#39;) as file:
-            data = json.load(file)
-            all_data.extend(data)
+    <span class="c1"># Load data from all source files</span>
+    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">source_files</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+            <span class="n">all_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-    # Shuffle the data
-    random.shuffle(all_data)
+    <span class="c1"># Shuffle the data</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">all_data</span><span class="p">)</span>
 
-    # Split the data
-    total_data = len(all_data)
-    train_end = int(total_data * train_ratio)
-    val_end = train_end + int(total_data * val_ratio)
+    <span class="c1"># Split the data</span>
+    <span class="n">total_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_data</span><span class="p">)</span>
+    <span class="n">train_end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">total_data</span> <span class="o">*</span> <span class="n">train_ratio</span><span class="p">)</span>
+    <span class="n">val_end</span> <span class="o">=</span> <span class="n">train_end</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">total_data</span> <span class="o">*</span> <span class="n">val_ratio</span><span class="p">)</span>
 
-    train_data = all_data[:train_end]
-    val_data = all_data[train_end:val_end]
-    test_data = all_data[val_end:]
+    <span class="n">train_data</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[:</span><span class="n">train_end</span><span class="p">]</span>
+    <span class="n">val_data</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="n">train_end</span><span class="p">:</span><span class="n">val_end</span><span class="p">]</span>
+    <span class="n">test_data</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="n">val_end</span><span class="p">:]</span>
 
-    # Save the splits
-    with open(os.path.join(output_directory, &#39;train.json&#39;), &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:
-        json.dump(train_data, f, indent=4)
+    <span class="c1"># Save the splits</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_directory</span><span class="p">,</span> <span class="s1">&#39;train.json&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
-    with open(os.path.join(output_directory, &#39;validation.json&#39;), &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:
-        json.dump(val_data, f, indent=4)
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_directory</span><span class="p">,</span> <span class="s1">&#39;validation.json&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">val_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
-    with open(os.path.join(output_directory, &#39;test.json&#39;), &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:
-        json.dump(test_data, f, indent=4)
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_directory</span><span class="p">,</span> <span class="s1">&#39;test.json&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <br/><br/></pre></div>
 </div>
 </div>
@@ -510,14 +513,14 @@ def create_train_val_test_splits(source_files, output_directory, train_ratio=0.7
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[97]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>source_files = [
-    &quot;/Users/shanto/LFL/SQuADDS/SQuADDS/data/cavity_claw/LFL_USC_cavity_claw_3e95ba4a2e4da2141f9edaa9f9fa1653.json&quot;,
-    &quot;/Users/shanto/LFL/SQuADDS/SQuADDS/data/coupler/LFL_USC_coupler_e7855e5c7467f76edb09779d8f3a1a0c.json&quot;,
-    &quot;/Users/shanto/LFL/SQuADDS/SQuADDS/data/qubit/LFL_USC_qubit_e68f323df894ba4b2891bd64742a2c35.json&quot;,
-]
-output_directory = &#39;../data/&#39;
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">source_files</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;/Users/shanto/LFL/SQuADDS/SQuADDS/data/cavity_claw/LFL_USC_cavity_claw_3e95ba4a2e4da2141f9edaa9f9fa1653.json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;/Users/shanto/LFL/SQuADDS/SQuADDS/data/coupler/LFL_USC_coupler_e7855e5c7467f76edb09779d8f3a1a0c.json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;/Users/shanto/LFL/SQuADDS/SQuADDS/data/qubit/LFL_USC_qubit_e68f323df894ba4b2891bd64742a2c35.json&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">output_directory</span> <span class="o">=</span> <span class="s1">&#39;../data/&#39;</span>
 
-create_train_val_test_splits(source_files, output_directory)
+<span class="n">create_train_val_test_splits</span><span class="p">(</span><span class="n">source_files</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -555,6 +558,7 @@ create_train_val_test_splits(source_files, output_directory)
         &copy; Copyright 2023, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
 
     <!-- SHOW DATE PAGE LAST UPDATED -->
+      Last updated on 2023/12/19.
 
     </p>
   </div>
@@ -606,6 +610,11 @@ create_train_val_test_splits(source_files, output_directory)
       <script src="../_static/documentation_options.js?v=01f34227"></script>
       <script src="../_static/doctools.js?v=888ff710"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+      <script src="../_static/design-tabs.js?v=36754332"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
       <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
