@@ -16,12 +16,14 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.autodoc',
     'nbsphinx',
-    'qiskit_sphinx_theme'
+    'qiskit_sphinx_theme',
+    'sphinxcontrib.bibtex',
 ]
 
 autodoc_typehints = "none"
 nbsphinx_execute = 'never'
 templates_path = ['_templates']
+bibtex_bibfiles = ['references.bib']
 exclude_patterns = []
 
 
