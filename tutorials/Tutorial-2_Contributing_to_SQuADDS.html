@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+  <html class="no-js" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Tutorial 2: Contributing to SQuADDS &mdash; SQuADDS 0.0.1 documentation</title>
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" /><script src="../_static/js/web-components/top-nav-bar.js"></script>
+
+  <!-- SEGMENT ANALYTICS --></head>
+<body class="pytorch-body">
+  <!-- UNIFIED TOP MENU -->
+  <qiskit-ui-shell variant="hide-account"></qiskit-ui-shell>
+
+   
+
+    <!-- LEFT SIDE BAR -->
+
+    <!-- if translations available, display language dropdown menu -->
+    
+
+    <!-- Menu becomes dropdown in mobile view -->
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <!-- left side bar main content -->
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+    <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+      <div class="sidebar">
+    <div class="pytorch-left-menu-search">
+        <div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search SQuADDS Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+    </div>
+
+    <!-- render sidebar from the toctree -->
+    
+    
+        <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Documentation Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to/index.html">How-to Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apidocs/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanations/index.html">Explanations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/shanto268/SQuADDS">GitHub</a></li>
+</ul>
+
+    
+
+    <!-- PREVIOUS RELEASES -->
+        
+
+    </div>
+  </div>
+</nav>
+
+<!-- OPTIONAL EXPANDABLE FUNCTIONALITY -->
+
+
+<!-- STYLING -->
+<script>
+    // indent subheadings under captions
+    expandable_rows = document.getElementsByClassName("caption");
+    var i;
+    for (i = 0; i < expandable_rows.length; i++) {
+        expandable_rows[i].nextElementSibling.style.marginLeft = "1rem"
+
+        // un-bold subheadings in dropdown
+        var subheadings = expandable_rows[i].nextElementSibling
+        for (j = 0; j < subheadings.children.length; j++) {
+            subheadings.children[j].style.fontWeight = "unset"
+        }
+    }
+
+    // adjust toctree class name to style external links
+    var toc_rows = document.getElementsByClassName("toctree-l1");
+    var i;
+    for (i = 0; i < toc_rows.length; i++) {
+        if (toc_rows[i].children[0].className === "reference external") {
+            toc_rows[i].className = "toctree-l1-external"
+            }
+    }
+
+    // expand and unexpand previous releases dropdown when clicked
+    var release_rows = document.getElementsByClassName("sidebar-l1-expandable");
+    for (i = 0; i < release_rows.length; i++) {
+        release_rows[i].addEventListener("click", function() {
+            this.classList.toggle("open");
+            var clicked_subheadings = this.nextElementSibling;
+            if (clicked_subheadings.style.display === "block") {
+            clicked_subheadings.style.display = "none";
+            } else {
+            clicked_subheadings.style.display = "block";
+            }
+        });
+    }
+</script>
+
+    <div class="pytorch-container">
+
+      <!-- BREADCRUMB MINI MENU BELOW TOP NAV BAR -->
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+            SQuADDS  documentation
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="index.html">Tutorials</a> &gt;</li>
+        
+      <li>Tutorial 2: Contributing to SQuADDS</li>
+    
+  </ul>
+</div>
+        </div>
+      </div>
+
+      <!-- MAIN CENTRE CONTENT -->
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        
+        <div class="pytorch-content-left">
+          <div class="rst-content">
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[86]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
+%autoreload 2
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>!pip install -e ../.
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Obtaining file:///Users/shanto/LFL/SQuADDS/SQuADDS
+  Preparing metadata (setup.py) ... done
+Installing collected packages: SQuADDS
+  Attempting uninstall: SQuADDS
+    Found existing installation: SQuADDS 0.1
+    Uninstalling SQuADDS-0.1:
+      Successfully uninstalled SQuADDS-0.1
+  Running setup.py develop for SQuADDS
+Successfully installed SQuADDS-0.1
+</pre></div></div>
+</div>
+<section id="Tutorial-2:-Contributing-to-SQuADDS">
+<h1>Tutorial 2: Contributing to SQuADDS<a class="headerlink" href="#Tutorial-2:-Contributing-to-SQuADDS" title="Link to this heading">¶</a></h1>
+<p><strong>Table of Contents:</strong></p>
+<ol class="arabic simple" start="0">
+<li><p>Contribution Information Setup</p></li>
+<li><p>Understanding the terminology and database structure</p></li>
+<li><p>Contributing to an existing database node</p></li>
+<li><p>Creating new database node</p></li>
+<li><p>Building on top of others works</p></li>
+</ol>
+<hr class="docutils" />
+<section id="Contribution-Information-Setup">
+<h2>Contribution Information Setup<a class="headerlink" href="#Contribution-Information-Setup" title="Link to this heading">¶</a></h2>
+<p>In order to contribute to SQuADDS, you will need to provide some information about yourself. This information will be used to track your contributions and to give you credit for your work. You can provide this information by updating the following variables in the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file in the root directory of the repository:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>GROUP_NAME = &quot;&quot;
+PI_NAME = &quot;&quot;
+INSTITUTION = &quot;&quot;
+USER_NAME = &quot;&quot;
+</pre></div>
+</div>
+<p>Or you can provide this information by executing the following cell.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from squadds.database import *
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>create_contributor_info()
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Understanding-the-terminology-and-database-structure">
+<h2>Understanding the terminology and database structure<a class="headerlink" href="#Understanding-the-terminology-and-database-structure" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>HuggingFace</p></li>
+<li><p>Datasets</p></li>
+<li><p>Configurations</p></li>
+<li><p>Structure of SQuADDS_DB</p></li>
+<li><p>Adding to SQuADDS_DB</p></li>
+</ul>
+</section>
+<section id="Contributing-to-an-existing-database-node">
+<h2>Contributing to an existing database node<a class="headerlink" href="#Contributing-to-an-existing-database-node" title="Link to this heading">¶</a></h2>
+<section id="Hugging-Face-Native-Solution:">
+<h3>Hugging Face Native Solution:<a class="headerlink" href="#Hugging-Face-Native-Solution:" title="Link to this heading">¶</a></h3>
+<p><strong>To append to an existing configuration:</strong></p>
+<ol class="arabic simple">
+<li><p>Modify the existing <code class="docutils literal notranslate"><span class="pre">YourDatasetConfig</span></code> if needed.</p></li>
+<li><p>Update the <code class="docutils literal notranslate"><span class="pre">_split_generators</span></code> and <code class="docutils literal notranslate"><span class="pre">_generate_examples</span></code> methods to include your additions.</p></li>
+<li><p>Test your changes locally to ensure the dataset loads correctly.</p></li>
+<li><p>Update the documentation (<code class="docutils literal notranslate"><span class="pre">README.md</span></code>) to include your new configuration.</p></li>
+<li><p>Create a pull request with your changes.</p></li>
+</ol>
+</section>
+<section id="SQuADDS-API:">
+<h3>SQuADDS API:<a class="headerlink" href="#SQuADDS-API:" title="Link to this heading">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import glob
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Creating-a-new-database-node">
+<h2>Creating a new database node<a class="headerlink" href="#Creating-a-new-database-node" title="Link to this heading">¶</a></h2>
+<section id="HuggingFace-Native-Solution:">
+<h3>HuggingFace Native Solution:<a class="headerlink" href="#HuggingFace-Native-Solution:" title="Link to this heading">¶</a></h3>
+<p>One can use workflows developed by HuggingFace to create a new <strong>configuration</strong> to the SQuADDS_DB Dataset. The following is a list of steps to follow:</p>
+<p><strong>To add a new configuration:</strong></p>
+<ol class="arabic simple">
+<li><p>Add a new <code class="docutils literal notranslate"><span class="pre">YourDatasetConfig</span></code> to <code class="docutils literal notranslate"><span class="pre">BUILDER_CONFIGS</span></code> with a unique name, version, and description.</p></li>
+<li><p>Update <code class="docutils literal notranslate"><span class="pre">_URLs</span></code> with the download URL for the new configuration.</p></li>
+<li><p>Modify <code class="docutils literal notranslate"><span class="pre">_split_generators</span></code> and <code class="docutils literal notranslate"><span class="pre">_generate_examples</span></code> methods to handle the new configuration.</p></li>
+<li><p>Test your changes locally to ensure the dataset loads correctly.</p></li>
+<li><p>Update the documentation (<code class="docutils literal notranslate"><span class="pre">README.md</span></code>) to include your new configuration.</p></li>
+<li><p>Create a pull request with your changes.</p></li>
+</ol>
+</section>
+<section id="id1">
+<h3>SQuADDS API:<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>You can also use the SQuADDS API to create a new configuration. The following cells will walk you through the process.</p>
+<section id="Step-1:-Standardizing-your-data">
+<h4>Step 1: Standardizing your data<a class="headerlink" href="#Step-1:-Standardizing-your-data" title="Link to this heading">¶</a></h4>
+<p>We want the data to be in a <code class="docutils literal notranslate"><span class="pre">json</span></code> format with <strong>AT LEAST</strong> to have the following fields. You can add as many more supplementary fields as you want.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;design&quot;</span><span class="p">:{</span>
+<span class="w">        </span><span class="nt">&quot;design_options&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">desig</span><span class="kc">n</span><span class="err">_op</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;design_tool&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">desig</span><span class="kc">n</span><span class="err">_</span><span class="kc">t</span><span class="err">ool_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;sim_options&quot;</span><span class="p">:{</span>
+<span class="w">        </span><span class="nt">&quot;setup&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">sim_se</span><span class="kc">tu</span><span class="err">p_op</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;simulator&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">simula</span><span class="kc">t</span><span class="err">or_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;sim_results&quot;</span><span class="p">:{</span>
+<span class="w">        </span><span class="nt">&quot;result1&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">sim_resul</span><span class="kc">t</span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit1&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">u</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;result2&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">sim_resul</span><span class="kc">t</span><span class="mi">2</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit2&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">u</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;contributor&quot;</span><span class="p">:{</span>
+<span class="w">        </span><span class="nt">&quot;group&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">group_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;PI&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">pi_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;institution&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">i</span><span class="kc">nst</span><span class="err">i</span><span class="kc">tut</span><span class="err">io</span><span class="kc">n</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;uploader&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">user_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;date_created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YYYY-MM-DD-HHMMSS&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If all the <code class="docutils literal notranslate"><span class="pre">sim_results</span></code> has the same units you can just use a <code class="docutils literal notranslate"><span class="pre">&quot;units&quot;:units</span></code> field instead of repeating the unit for each result.</p>
+<p>Example Qiskit Metal Rendering Code to get <code class="docutils literal notranslate"><span class="pre">design</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<p>Example Simulation Code to get <code class="docutils literal notranslate"><span class="pre">sim_results</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<p>Use of SQuADDS API to upload dataset - adds <code class="docutils literal notranslate"><span class="pre">contributor</span></code> information automatically.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<p>Generate the <code class="docutils literal notranslate"><span class="pre">load_dataset</span></code> config file</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<p>Upload to <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[79]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def combine_json_files(source_directory, output_file):
+    all_data = []
+
+    # List all JSON files in the directory
+    file_paths = glob.glob(os.path.join(source_directory, &quot;*.json&quot;))
+
+    for file_path in file_paths:
+        with open(file_path, &#39;r&#39;, encoding=&#39;utf-8&#39;) as file:
+            data = json.load(file)
+            all_data.append(data)
+
+    # Write combined data to a single file
+    with open(output_file, &#39;w&#39;, encoding=&#39;utf-8&#39;) as outfile:
+        json.dump(all_data, outfile, indent=4)
+<br/><br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[80]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>source_directory = &quot;../data/qubit/TransmonCross/cap_matrix&quot;  # Replace with your source directory
+output_file = &quot;../data/combined_qubit_data.json&quot;  # Replace with your desired output file path
+combine_json_files(source_directory, output_file)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[81]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>source_directory = &quot;../data/coupler/NCap/cap_matrix&quot;  # Replace with your source directory
+output_file = &quot;../data/combined_coupler_data.json&quot;  # Replace with your desired output file path
+combine_json_files(source_directory, output_file)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[82]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>source_directory = &quot;../data/cavity_claw/RouteMeander/eigenmode/&quot;  # Replace with your source directory
+output_file = &quot;../data/combined_cavity-claw_data.json&quot;  # Replace with your desired output file path
+combine_json_files(source_directory, output_file)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[83]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># rename the json files in data to &quot;LFL_USC_{hash}.json&quot; where the hash is based on the file contents
+
+for file in glob.glob(&quot;../data/*.json&quot;):
+    with open(file, &#39;r&#39;, encoding=&#39;utf-8&#39;) as f:
+        data = json.load(f)
+        hash = hashlib.md5(json.dumps(data, sort_keys=True).encode(&#39;utf-8&#39;)).hexdigest()
+        new_file = file.replace(&quot;.json&quot;, f&quot;LFL_USC_{hash}.json&quot;)
+        os.rename(file, new_file)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[99]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>!datasets-cli test ../data/SQuADDS_DB.py --save_info --all_configs
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Loading Dataset Infos from /Users/shanto/.cache/huggingface/modules/datasets_modules/datasets/SQuADDS_DB/6c042e99be0aa47463aa5d9ae2ceeb87b02331a7e2aa159865c27f7b19e9316e
+Testing builder &#39;qubit-TransmonCross-cap_matrix&#39; (1/3)
+Generating dataset s_qu_adds_db (/Users/shanto/.cache/huggingface/datasets/s_qu_adds_db/qubit-TransmonCross-cap_matrix/1.0.0/6c042e99be0aa47463aa5d9ae2ceeb87b02331a7e2aa159865c27f7b19e9316e)
+Downloading and preparing dataset s_qu_adds_db/qubit-TransmonCross-cap_matrix to /Users/shanto/.cache/huggingface/datasets/s_qu_adds_db/qubit-TransmonCross-cap_matrix/1.0.0/6c042e99be0aa47463aa5d9ae2ceeb87b02331a7e2aa159865c27f7b19e9316e...
+Downloading data files: 100%|██████████████████| 3/3 [00:00&lt;00:00, 12458.33it/s]
+Downloading took 0.0 min
+Checksum Computation took 0.0 min
+Extracting data files: 100%|█████████████████████| 3/3 [00:00&lt;00:00, 853.43it/s]
+Generating train split
+Traceback (most recent call last):
+  File &#34;/Users/shanto/miniconda3/envs/qiskit_metal/bin/datasets-cli&#34;, line 8, in &lt;module&gt;
+    sys.exit(main())
+  File &#34;/Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/datasets/commands/datasets_cli.py&#34;, line 39, in main
+    service.run()
+  File &#34;/Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/datasets/commands/test.py&#34;, line 146, in run
+    builder.download_and_prepare(
+  File &#34;/Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/datasets/builder.py&#34;, line 948, in download_and_prepare
+    self._download_and_prepare(
+  File &#34;/Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/datasets/builder.py&#34;, line 1043, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File &#34;/Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/datasets/builder.py&#34;, line 1445, in _prepare_split
+    raise NotImplementedError()
+NotImplementedError
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[96]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import json
+import random
+import os
+
+def create_train_val_test_splits(source_files, output_directory, train_ratio=0.7, val_ratio=0.15):
+    &quot;&quot;&quot;
+    Splits the data from source JSON files into train, validation, and test sets.
+    &quot;&quot;&quot;
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+
+    all_data = []
+
+    # Load data from all source files
+    for file_path in source_files:
+        with open(file_path, &#39;r&#39;, encoding=&#39;utf-8&#39;) as file:
+            data = json.load(file)
+            all_data.extend(data)
+
+    # Shuffle the data
+    random.shuffle(all_data)
+
+    # Split the data
+    total_data = len(all_data)
+    train_end = int(total_data * train_ratio)
+    val_end = train_end + int(total_data * val_ratio)
+
+    train_data = all_data[:train_end]
+    val_data = all_data[train_end:val_end]
+    test_data = all_data[val_end:]
+
+    # Save the splits
+    with open(os.path.join(output_directory, &#39;train.json&#39;), &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:
+        json.dump(train_data, f, indent=4)
+
+    with open(os.path.join(output_directory, &#39;validation.json&#39;), &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:
+        json.dump(val_data, f, indent=4)
+
+    with open(os.path.join(output_directory, &#39;test.json&#39;), &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:
+        json.dump(test_data, f, indent=4)
+<br/><br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[97]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>source_files = [
+    &quot;/Users/shanto/LFL/SQuADDS/SQuADDS/data/cavity_claw/LFL_USC_cavity_claw_3e95ba4a2e4da2141f9edaa9f9fa1653.json&quot;,
+    &quot;/Users/shanto/LFL/SQuADDS/SQuADDS/data/coupler/LFL_USC_coupler_e7855e5c7467f76edb09779d8f3a1a0c.json&quot;,
+    &quot;/Users/shanto/LFL/SQuADDS/SQuADDS/data/qubit/LFL_USC_qubit_e68f323df894ba4b2891bd64742a2c35.json&quot;,
+]
+output_directory = &#39;../data/&#39;
+
+create_train_val_test_splits(source_files, output_directory)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+             </article>
+            </div>
+            <footer>
+<!-- USER FEEDBACK -->
+  
+
+  <!-- NEXT/PREVIOUS BUTTONS -->
+  <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+    
+      <a href="../how_to/index.html" class="btn btn-neutral float-right" title="How-to Guides" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-purple.svg" class="next-page"></a>
+    
+    
+      <a href="Tutorial-1_getting_started_with_SQuADDS.html" class="btn btn-neutral" title="HuggingFace" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-purple.svg" class="previous-page"> Previous</a>
+    
+  </div>
+
+  <div role="contentinfo">
+    <p>
+    <!-- SHOW QISKIT COPYRIGHT TEXT -->
+        &copy; Copyright 2023, Sadman Ahmed Shanto.
+
+    <!-- SHOW DATE PAGE LAST UPDATED -->
+
+    </p>
+  </div>
+
+<!-- SHOW 'MADE WITH SPHINX' TEXT -->
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/Qiskit/qiskit_sphinx_theme">Qiskit Sphinx Theme </a> (based on <a href="https://github.com/pytorch/pytorch_sphinx_theme"> PyTorch Sphinx Theme</a>).
+      </div>
+     
+<br>
+</footer>
+
+<script>
+  function clicked(ctaType) {
+    document.getElementById('was-helpful-thank-you').style.visibility = 'visible';
+    window.trackCta(`Helpful - ${ctaType}`);
+  }
+</script>
+
+          </div>
+        </div>
+
+        <!-- RIGHT SIDE AUTOSUMMARY MENU -->
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">Tutorial 2: Contributing to SQuADDS</a><ul>
+<li><a class="reference internal" href="#Contribution-Information-Setup">Contribution Information Setup</a></li>
+<li><a class="reference internal" href="#Understanding-the-terminology-and-database-structure">Understanding the terminology and database structure</a></li>
+<li><a class="reference internal" href="#Contributing-to-an-existing-database-node">Contributing to an existing database node</a><ul>
+<li><a class="reference internal" href="#Hugging-Face-Native-Solution:">Hugging Face Native Solution:</a></li>
+<li><a class="reference internal" href="#SQuADDS-API:">SQuADDS API:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Creating-a-new-database-node">Creating a new database node</a><ul>
+<li><a class="reference internal" href="#HuggingFace-Native-Solution:">HuggingFace Native Solution:</a></li>
+<li><a class="reference internal" href="#id1">SQuADDS API:</a><ul>
+<li><a class="reference internal" href="#Step-1:-Standardizing-your-data">Step 1: Standardizing your data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div> 
+
+  <!-- MOBILE MENU FOR SIDEBAR -->
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <!-- enable language dropdown menu expand -->
+  <script type="text/javascript">
+    jQuery(function () {
+        SphinxRtdTheme.Navigation.enable(true);
+    });
+  </script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+</body>
+</html>
