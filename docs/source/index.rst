@@ -12,8 +12,7 @@ Overview
 SQuADDS: a Superconducting Qubit And Device Design and Simulation database
 ---------------------------------------------------------------------------------------------------
 
-This open-source platform offers a rich collection of quantum device designs, primed for personalization. Seamlessly integrated with Qiskit Metal, each design is simulation-ready with advanced electromagnetic solvers. We ensure a dependable simulation process, with many designs backed by real-world testing. Navigate and adapt designs effortlessly through our intuitive interface, paving the way for researchers to innovate new device categories.
-
+SQuADDS is an open-source platform aimed at speeding up the design loop in the creation of superconducting quantum hardware. This tool bridges the gap between theoretical design and practical implementation, providing researchers and engineers with a well-characterized starting point for the development of device. SQuADDS enables rapid generation of "best-guess" and validated "pre-simulated" designs, underpinned by a vast repository of experimentally validated design and simulation parameters. SQuADDS aims to lowers the barrier to entry for research groups seeking to make a new class of devices by providing them a well-characterized starting point from which to refine their designs.
 
 .. toctree::
    :hidden:
@@ -21,11 +20,26 @@ This open-source platform offers a rich collection of quantum device designs, pr
    Documentation Home <self>
    Getting Started <getting_started>
    Tutorials <tutorials/index>
-   How-to Guides <how_to/index>
    API Reference <apidocs/index>
-   Explanations <explanations/index>
-   Release Notes <release_notes>
+   Release Logs<release_notes>
+   Developer Notes<developer/index>
+   References<references/index>
    GitHub <https://github.com/shanto268/SQuADDS>
+
+
+Citation
+--------
+
+If you use SQuADDS in your research, please support its continued development and maintenance. Use of scqubits in research publications is appropriately acknowledged by citing:
+
+.. code-block:: latex
+
+    @article{SQuADDS,
+        title={SQuADDS: A validated design database and simulation workflow for superconducting qubit design},
+        author={Sadman Ahmed Shanto, Andre Kuo, Clark Miyamoto, Haimeng Zhang, Vivek Maurya, Evangelos Vlachos, Malida Hecht, Chung Wa Shum and Eli Levenson-Falk},
+        journal={arXiv preprint arXiv:},
+        year={2023}
+    }
 
 
 Indices and tables
