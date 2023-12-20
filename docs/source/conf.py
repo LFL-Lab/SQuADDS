@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'SQuADDS'
-copyright = '2023, Sadman Ahmed Shanto'
+copyright = '2023, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
 release = '0.1.0'
 
@@ -35,10 +35,8 @@ html_theme_options = {
     "disable_ecosystem_logo": True,
 }
 
-"""
 html_context = {
     "theme_announcement": "🎉 Our paper is out!",
-    "announcement_url": "https://example.com"
+    "announcement_url": "https://example.com",
     "announcement_url_text": "Check it out",
 }
-"""
