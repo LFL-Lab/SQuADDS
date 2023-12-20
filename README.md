@@ -81,7 +81,9 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 
 ## Next Release:
 
+- [ ] More tutorials/examples/explanations on the website
 - [ ] Contribution via HuggingFace Hub API
-
+- [ ] More data points to existing configurations 
+- [ ] Contribute data points to new configurations 
 
 ---
