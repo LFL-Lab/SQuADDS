@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'SQuADDS'
 copyright = '2023, Sadman Ahmed Shanto'
 author = 'Sadman Ahmed Shanto'
-release = '0.0.1'
+release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -17,13 +17,11 @@ extensions = [
     'sphinx.ext.autodoc',
     'nbsphinx',
     'qiskit_sphinx_theme',
-    'sphinxcontrib.bibtex',
 ]
 
 autodoc_typehints = "none"
 nbsphinx_execute = 'never'
 templates_path = ['_templates']
-bibtex_bibfiles = ['references.bib']
 exclude_patterns = []
 
 

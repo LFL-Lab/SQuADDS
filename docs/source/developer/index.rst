@@ -1,15 +1,12 @@
-.. SQuADDS
-   Copyright (C) 2023, Sadman Ahmed Shanto & Eli Levenson-Falk
-
-.. _developers:
-
 .. note::
 
    Everyone is welcome to contribute to SQuADDS. Please see review the following section for more information or contact us!
 
+Developer Notes
+===============
 
 Contribution Items
-==================
+------------------
 
 | **Bug Reports** - Please report any bugs you find in the code or documentation by opening an issue on GitHub.
 | **Feature Requests** - If you have an idea for a new feature, please open an issue on GitHub.
@@ -19,18 +16,14 @@ Contribution Items
 
 
 Developers
-===========
+----------
 
 | `Sadman Ahmed Shanto <https:sadmanahmedshanto.com>`_ (University of Southern California)
 
-
-.. _developers-contributors:
-
 Contributors
-============
-
+------------
 
 | **Eli Levenson-Falk** (University of Southern California) - Eternal Guidance Provider 🙏🏽
-| **Andre Kuo** (University of Southern California) - Code contributor
-| **Clark Miyamoto** (New York University) - Code contributor
-| **Madison Howard** (California Institute of Tech) - Bug Hunter
+| **Andre Kuo** (University of Southern California) - Code contributor 💻
+| **Clark Miyamoto** (New York University) - Code contributor 💻
+| **Madison Howard** (California Institute of Technology) - Bug Hunter 🐛
