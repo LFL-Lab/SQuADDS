@@ -30,7 +30,8 @@ SQuADDS is an open-source platform aimed at speeding up the design loop in the c
 Citation
 --------
 
-If you use SQuADDS in your research, please support its continued development and maintenance. Use of scqubits in research publications is appropriately acknowledged by citing:
+Hi there! If you use SQuADDS in your research, please support its continued development and maintenance by citing our work. Thank you!
+
 
 .. code-block:: latex
 
