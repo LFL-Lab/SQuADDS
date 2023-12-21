@@ -4,6 +4,38 @@ from datasets import load_dataset
 from tabulate import tabulate
 import pprint
 import pandas as pd
+from addict import Dict
+import numpy as np
+
+# Function to convert numpy arrays to lists within an object
+def convert_numpy(obj):
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {k: convert_numpy(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy(v) for v in obj]
+    return obj
+
+# Function to create a unified design_options dictionary
+def create_unified_design_options(row):
+    cavity_dict = convert_numpy(row["design_options_cavity_claw"])
+    coupler_type = row["coupler_type"]
+    qubit_dict = convert_numpy(row["design_options_qubit"])
+
+    device_dict = {
+        "cavity_claw_options": {
+            "coupling_type": coupler_type,
+            "coupler_options": cavity_dict.get("cplr_opts", {}),
+            "cpw_options": {
+                "left_options": cavity_dict.get("cpw_opts", {})
+            }
+        },
+        "qubit_options": qubit_dict
+    }
+
+    return device_dict
+
 
 def flatten_df_second_level(df):
     # Initialize an empty dictionary to collect flattened data
@@ -364,15 +396,21 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         return df
 
     def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None):
-        # process the dfs to make them ready for merger
+        for merger_term in merger_terms:
+            # process the dfs to make them ready for merger
+            qubit_df[merger_term] = qubit_df['design_options'].apply(lambda x: x['connection_pads']['c'][merger_term])
+            cavity_df[merger_term] = cavity_df['design_options'].apply(lambda x: x['claw_opts']['connection_pads']['readout'][merger_term])
 
-        df = pd.merge(qubit_df, cavity_df, 
-                   on=merger_terms, 
-                   how='inner',
-                   suffixes=('_qubit', '_cavity'))
-        # process df to be in SQuADDS df format
+        # Merging the data frames based on merger terms
+        merged_df = pd.merge(qubit_df, cavity_df, on=merger_terms, how="inner", suffixes=('_qubit', '_cavity_claw'))
 
-        return df
+        # Dropping the merger terms
+        merged_df.drop(columns=merger_terms, inplace=True)
+
+        # Combining the qubit and cavity design options into one
+        merged_df['design_options'] = merged_df.apply(create_unified_design_options, axis=1)
+
+        return merged_df
 
     def unselect_all(self):
         self.selected_component_name = None

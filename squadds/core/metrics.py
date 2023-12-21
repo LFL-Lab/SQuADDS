@@ -2,7 +2,9 @@ from abc import ABC, abstractmethod
 import pandas as pd
 import numpy as np
 from numpy import linalg as LA
-from squadds import logging
+import logging
+logging.basicConfig(level=logging.INFO)
+
 
 class MetricStrategy(ABC):
     """Abstract class for metric strategies."""
