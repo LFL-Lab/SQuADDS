@@ -36,7 +36,3 @@ Alternatively, you can install SQuADDS from source.
 FAQ
 ---
 
-**Q:** Placeholder?
-
-**A:** Placeholder.
-

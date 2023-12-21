@@ -24,6 +24,26 @@ def flatten_df_second_level(df):
     new_df = pd.DataFrame(flattened_data)
     return new_df
 
+def filter_df_by_conditions(df, conditions):
+    # Ensure conditions is a dictionary
+    if not isinstance(conditions, dict):
+        print("Conditions must be provided as a dictionary.")
+        return None
+
+    # Start with the original DataFrame
+    filtered_df = df
+
+    # Apply each condition
+    for column, value in conditions.items():
+        if column in filtered_df.columns:
+            filtered_df = filtered_df[filtered_df[column] == value]
+    
+    # Check if the filtered DataFrame is empty
+    if filtered_df.empty:
+        print("Warning: No rows match the given conditions. Returning the original DataFrame.")
+        return df
+    else:
+        return filtered_df
 
 class SQuADDS_DB(metaclass=SingletonMeta):
     
@@ -38,6 +58,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.selected_cavity = None
         self.selected_coupler = None
         self.selected_system = None
+        self.selected_df = None
 
     def supported_components(self):
         components = []
@@ -269,10 +290,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return
         
     def select_coupler(self, coupler=None):
-        # check whether selected_component is coupler
+        # TODO: fix this method to work on NCap coupler sims
         self.selected_coupler = coupler
-        self.selected_component_name = coupler
-        self.selected_data_type = "cap_matrix" # TODO: handle dynamically
+        #self.selected_component_name = coupler
+        #self.selected_data_type = "cap_matrix" # TODO: handle dynamically
         
         # check if coupler is supported
         if self.selected_coupler not in self.supported_component_names()+["CLT"]: # TODO: handle dynamically
@@ -327,7 +348,72 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print("Selected system is not defined.")
             return
         elif isinstance(self.selected_system, str):
-            df = self.get_dataset(data_type=self.selected_data_type, component=self.selected_system, component_name=self.selected_component_name)
-            return df
+            df = self.get_dataset(data_type=self.selected_data_type, component=self.selected_component, component_name=self.selected_component_name)
+            # if coupler is selected, filter by coupler
+            if self.selected_coupler is not None:
+                df = filter_df_by_conditions(df, {"coupler": self.selected_coupler}) 
+            self.selected_df = df
         elif isinstance(self.selected_system, list):
-            pass
+            # get the qubit and cavity dfs
+            qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit) #TODO: handle dynamically
+            cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity) #TODO: handle dynamically
+            df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap']) #TODO: handle with user awareness
+            self.selected_system_df = df
+        else:
+            raise UserWarning("Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`")
+        return df
+
+    def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None):
+        # process the dfs to make them ready for merger
+
+        df = pd.merge(qubit_df, cavity_df, 
+                   on=merger_terms, 
+                   how='inner',
+                   suffixes=('_qubit', '_cavity'))
+        # process df to be in SQuADDS df format
+
+        return df
+
+    def unselect_all(self):
+        self.selected_component_name = None
+        self.selected_component = None
+        self.selected_data_type = None
+        self.selected_qubit = None
+        self.selected_cavity = None
+        self.selected_coupler = None
+        self.selected_system = None
+
+    def show_selections(self):
+        if isinstance(self.selected_system, list): #TODO: handle dynamically
+            print("Selected qubit: ", self.selected_qubit)
+            print("Selected cavity: ", self.selected_cavity)
+            print("Selected coupler: ", self.selected_coupler)
+            print("Selected system: ", self.selected_system)
+        elif isinstance(self.selected_system, str):
+            print("Selected component: ", self.selected_component)
+            print("Selected component name: ", self.selected_component_name)
+            print("Selected data type: ", self.selected_data_type)
+            print("Selected system: ", self.selected_system)
+            print("Selected coupler: ", self.selected_coupler)
+
+    def unselect(self, param):
+        if param == "component":
+            self.selected_component = None
+        elif param == "component_name":
+            self.selected_component_name = None
+        elif param == "data_type":
+            self.selected_data_type = None
+        elif param == "qubit":
+            self.selected_qubit = None
+        elif param == "cavity_claw":
+            self.selected_cavity = None
+        elif param == "coupler":
+            self.selected_coupler = None
+        elif param == "system":
+            self.selected_system = None
+        else:
+            print("Please specify a valid parameter to unselect.")
+            return
+    
+    def show_selected_system(self):
+        raise NotImplementedError("Waiting on Andre's code")
