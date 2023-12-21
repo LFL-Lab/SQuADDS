@@ -7,6 +7,7 @@ from scqubits.core.transmon import TunableTransmon
 from pandasai import SmartDataframe
 from pandasai.llm import OpenAI, Starcoder, Falcon
 from dotenv import load_dotenv
+from squadds.calcs import *
 
 from squadds.core.metrics import *
 from squadds.core.db import SQuADDS_DB
@@ -59,23 +60,61 @@ class Analyzer:
         self.selected_coupler = self.db.selected_coupler
         self.selected_system = self.db.selected_system
         self.df = self.db.selected_df
-        self.closest_designs = None
+        self.closest_design = None
         self.closest_df_entry = None
-        self.interpolate_design = None
+        self.interpolated_design = None
 
-        self.H_param_keys = self.db.target_param_keys
         self.metric_strategy = None  # Will be set dynamically
         self.custom_metric_func = None
         self.metric_weights = None
-        self.smart_df = None
-        self.coupling_type = None
+        self.target_params = None
+        
+        self.H_param_keys = self._get_H_param_keys()
+        
+    def _add_target_params_columns(self):
+        #TODO: make this more general and read the param keys from the database
+        if self.selected_system == "qubit":
+            qubit_H = TransmonCrossHamiltonian(self)
+            qubit_H.add_qubit_H_params()
+            self.df = qubit_H.df 
+        elif self.selected_system == "cavity_claw":
+            # rename the columns cavity_frequency_GHz and kappa_kHz and update the values
+            if ("cavity_frequency" in self.df.columns) or ("kappa" in self.df.columns):
+                self.df = self.df.rename(columns={"cavity_frequency": "cavity_frequency_GHz", "kappa": "kappa_kHz"})
+                self.df["cavity_frequency_GHz"] = self.df["cavity_frequency_GHz"] * 1e-9
+                self.df["kappa_kHz"] = self.df["kappa_kHz"] * 1e-3
+            else:
+                pass
+        elif self.selected_system == "coupler":
+            pass
+        elif (self.selected_system == ["qubit","cavity_claw"]) or (self.selected_system == ["cavity_claw","qubit"]):
+            self.db = self.add_qubit_params(self.db)
+            self.db = self.add_cavity_claw_params(self.db)
+            self.db = self.add_coupling_params(self.db) # adds g
+        else:
+            raise ValueError("Invalid system.")
+    
+    def _get_H_param_keys(self):
+        #TODO: make this more general and read the param keys from the database
+        self.H_param_keys = None
+        if self.selected_system == "qubit":
+            self.H_param_keys = ["qubit_frequency_GHz", "anharmonicity_MHz"]
+        elif self.selected_system == "cavity_claw":
+            self.H_param_keys = ["resonator_type", "cavity_frequency_GHz", "kappa_kHz"]
+        elif self.selected_system == "coupler":
+            pass
+        elif (self.selected_system == ["qubit","cavity_claw"]) or (self.selected_system == ["cavity_claw","qubit"]):
+            self.H_param_keys = ["qubit_frequency_GHz", "anharmonicity_MHz", "resonator_type", "cavity_frequency_GHz", "kappa_kHz", "g_MHz"]
+        else:
+            raise ValueError("Invalid system.")
+        return self.H_param_keys
 
     def target_param_keys(self):
         """
         Returns:
             list: The target parameter keys.
         """
-        return self.db.target_param_keys
+        return self.H_param_keys
 
     def set_metric_strategy(self, strategy: MetricStrategy):
         """
@@ -102,6 +141,7 @@ class Analyzer:
             bool: True if any value is outside of bounds. False if all values are inside bounds.
         """
         outside_bounds = False
+
         filtered_df = df.copy()
 
         for param, value in params.items():
@@ -144,6 +184,9 @@ class Analyzer:
         if (num_top > len(self.df)):
             raise ValueError('`num_top` cannot be bigger than size of read-in library.')
 
+        self.target_params = target_params
+        self._add_target_params_columns()
+
         # Log if parameters outside of library
         filtered_df = self.df[self.H_param_keys]  # Filter DataFrame based on H_param_keys
         self._outside_bounds(df=filtered_df, params=target_params, display=display)
@@ -164,11 +207,22 @@ class Analyzer:
             raise ValueError("Invalid metric.")
 
         # Main logic
+
+        # Filter DataFrame based on target parameters that are string
+        for param, value in target_params.items():
+            if isinstance(value, str):
+                filtered_df = filtered_df[filtered_df[param] == value]
+
+        # Calculate distances
         distances = filtered_df.apply(lambda row: self.metric_strategy.calculate(target_params, row), axis=1)
 
         # Sort distances and get the closest ones
         sorted_indices = distances.nsmallest(num_top).index
         closest_df = self.df.loc[sorted_indices]
+
+        # store the best design 
+        self.closest_df_entry = closest_df.iloc[0]
+        self.closest_design = closest_df.iloc[0]["design_options"]
 
         return closest_df
 

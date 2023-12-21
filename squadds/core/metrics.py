@@ -40,7 +40,7 @@ class EuclideanMetric(MetricStrategy):
         distance = 0.0
         for column, target_value in target_params.items():
             if isinstance(target_value, (int, float)):  # Only numerical columns
-                distance += ((df_row[column] - target_value)**2 / target_value)
+                distance += ((df_row[column] - target_value)**2 / target_value**2)
         return np.sqrt(distance)
 
 class ManhattanMetric(MetricStrategy):
