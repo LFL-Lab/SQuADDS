@@ -4,15 +4,12 @@ import warnings
 import os
 import scqubits as scq
 from scqubits.core.transmon import TunableTransmon
-from pymongo import MongoClient
 from pandasai import SmartDataframe
 from pandasai.llm import OpenAI, Starcoder, Falcon
 from dotenv import load_dotenv
 
-from squadds import logging
-from squadds.core.sweeper_helperfunctions import create_dict_list
-from squadds.utils.metrics import *
-from squadds.core.database import SQuADDS_DB
+from squadds.core.metrics import *
+from squadds.core.db import SQuADDS_DB
 
 
 """
