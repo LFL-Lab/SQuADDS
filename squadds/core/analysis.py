@@ -8,6 +8,7 @@ from pandasai import SmartDataframe
 from pandasai.llm import OpenAI, Starcoder, Falcon
 from dotenv import load_dotenv
 from squadds.calcs import *
+import seaborn as sns
 
 from squadds.core.metrics import *
 from squadds.core.db import SQuADDS_DB
@@ -60,8 +61,11 @@ class Analyzer:
         self.selected_coupler = self.db.selected_coupler
         self.selected_system = self.db.selected_system
         self.df = self.db.selected_df
-        self.closest_design = None
         self.closest_df_entry = None
+        self.closest_design = None
+        self.presimmed_closest_cpw_design = None
+        self.presimmed_closest_qubit_design = None
+        self.presimmed_closest_coupler_design = None
         self.interpolated_design = None
 
         self.metric_strategy = None  # Will be set dynamically
@@ -228,6 +232,9 @@ class Analyzer:
         self.closest_df_entry = closest_df.iloc[0]
         self.closest_design = closest_df.iloc[0]["design_options"]
 
+        if len(self.selected_system) == 2: #TODO: make this more general
+            self.presimmed_closest_cpw_design = self.closest_design["cavity_claw"]
+
         return closest_df
 
     def get_interpolated_design(self,
@@ -251,8 +258,46 @@ class Analyzer:
         """
         raise NotImplementedError
 
-    def interpolate_design(self, updated_design1, updated_design2):
-        """
-        Interpolates the design parameters of the resonator and qubit to the design dict.
-        """
-        raise NotImplementedError
+
+    def show_chosen_points(self):
+        # Set Seaborn style and context
+        sns.set_style("whitegrid")
+        sns.set_context("paper", font_scale=1.4)
+
+        # Create a colormap for the scatter plot points
+        viridis_cmap = plt.cm.get_cmap('viridis')
+        color_sim = viridis_cmap(0.2)
+        color_presim = viridis_cmap(0.9)
+        color_database = viridis_cmap(0.6)
+
+        # Create the figure with two subplots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+
+        # First subplot: kappa_kHz vs fres
+        ax1.scatter(x=self.df['cavity_frequency_GHz'], y=self.df['kappa_kHz'], c=color_presim, marker=".", s=50, label="Pre-Simulated")
+        ax1.scatter(x=self.target_params["cavity_frequency_GHz"], y=self.target_params["kappa_kHz"], c='red', s=100, marker='x', label='Target')
+        closest_fres = self.closest_df_entry["cavity_frequency_GHz"]
+        closest_kappa_kHz = self.closest_df_entry["kappa_kHz"]
+        ax1.scatter(closest_fres, closest_kappa_kHz, c=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
+        ax1.set_xlabel(r'$f_{res}$ (Hz)', fontweight='bold', fontsize=24)
+        ax1.set_ylabel(r'$\kappa / 2 \pi$ (Hz)', fontweight='bold', fontsize=24)
+        ax1.tick_params(axis='both', which='major', labelsize=20)
+        legend1 = ax1.legend(loc='upper left', fontsize=16)
+        for text in legend1.get_texts():
+            text.set_fontweight('bold')
+
+        # Second subplot: g vs alpha
+        ax2.scatter(x=self.df['anharmonicity_MHz'], y=self.df['g_MHz'], c=color_presim, marker=".", s=50, label="Pre-Simulated")
+        ax2.scatter(x=self.target_params["anharmonicity_MHz"], y=self.target_params["g_MHz"], c='red', s=100, marker='x', label='Target')
+        closest_alpha = [self.closest_df_entry["anharmonicity_MHz"]]
+        closest_g = [self.closest_df_entry["g_MHz"]]
+        ax2.scatter(closest_alpha, closest_g, c=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
+        ax2.set_xlabel(r'$\alpha / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
+        ax2.set_ylabel(r'$g / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
+        ax2.tick_params(axis='both', which='major', labelsize=20)
+        legend2 = ax2.legend(loc='lower left', fontsize=16)
+        for text in legend2.get_texts():
+            text.set_fontweight('bold')
+
+        plt.tight_layout()
+        plt.show() 
