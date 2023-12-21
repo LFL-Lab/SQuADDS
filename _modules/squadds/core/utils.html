@@ -149,6 +149,156 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">huggingface_hub</span> <span class="kn">import</span> <span class="n">HfApi</span><span class="p">,</span> <span class="n">HfFolder</span>
 <span class="kn">from</span> <span class="nn">squadds.core.globals</span> <span class="kn">import</span> <span class="n">ENV_FILE_PATH</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="get_sim_results_keys">
+<a class="viewcode-back" href="../../../squadds.core.html#squadds.core.utils.get_sim_results_keys">[docs]</a>
+<span class="k">def</span> <span class="nf">get_sim_results_keys</span><span class="p">(</span><span class="n">dataframes</span><span class="p">):</span>
+    <span class="c1"># Initialize an empty list to store all keys</span>
+    <span class="n">all_keys</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Ensure the input is a list, even if it&#39;s a single dataframe</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataframes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">dataframes</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataframes</span><span class="p">]</span>
+
+    <span class="c1"># Iterate over each dataframe</span>
+    <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">dataframes</span><span class="p">:</span>
+        <span class="c1"># Check if &#39;sim_results&#39; column exists in the dataframe</span>
+        <span class="k">if</span> <span class="s1">&#39;sim_results&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="c1"># Extract keys from each row&#39;s &#39;sim_results&#39; and add them to the list</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;sim_results&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>  <span class="c1"># Ensure the row is a dictionary</span>
+                    <span class="n">all_keys</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="c1"># Remove duplicates from the list</span>
+    <span class="n">unique_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_keys</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">unique_keys</span></div>
+
+
+<div class="viewcode-block" id="convert_numpy">
+<a class="viewcode-back" href="../../../squadds.core.html#squadds.core.utils.convert_numpy">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_numpy</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts NumPy arrays to Python lists recursively.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj: The object to be converted.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The converted object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">convert_numpy</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">convert_numpy</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">obj</span></div>
+
+
+<span class="c1"># Function to create a unified design_options dictionary</span>
+<div class="viewcode-block" id="create_unified_design_options">
+<a class="viewcode-back" href="../../../squadds.core.html#squadds.core.utils.create_unified_design_options">[docs]</a>
+<span class="k">def</span> <span class="nf">create_unified_design_options</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a unified design options dictionary based on the given row.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        row (pandas.Series): The row containing the design options.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: The unified design options dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cavity_dict</span> <span class="o">=</span> <span class="n">convert_numpy</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">])</span>
+    <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span>
+    <span class="n">qubit_dict</span> <span class="o">=</span> <span class="n">convert_numpy</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">])</span>
+
+    <span class="n">device_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;coupling_type&quot;</span><span class="p">:</span> <span class="n">coupler_type</span><span class="p">,</span>
+            <span class="s2">&quot;coupler_options&quot;</span><span class="p">:</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="s2">&quot;cpw_options&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;left_options&quot;</span><span class="p">:</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;qubit_options&quot;</span><span class="p">:</span> <span class="n">qubit_dict</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">device_dict</span></div>
+
+
+
+<div class="viewcode-block" id="flatten_df_second_level">
+<a class="viewcode-back" href="../../../squadds.core.html#squadds.core.utils.flatten_df_second_level">[docs]</a>
+<span class="k">def</span> <span class="nf">flatten_df_second_level</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flattens a DataFrame by expanding dictionary-like data in the second level of columns.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): The DataFrame to be flattened.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: A new DataFrame with the flattened data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Initialize an empty dictionary to collect flattened data</span>
+    <span class="n">flattened_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Iterate over each column in the DataFrame</span>
+    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="c1"># Check if the column contains dictionary-like data</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># Iterate over second-level keys and create new columns</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">flattened_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># For non-dictionary data, keep as is</span>
+            <span class="n">flattened_data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+
+    <span class="c1"># Create a new DataFrame with the flattened data</span>
+    <span class="n">new_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">flattened_data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_df</span></div>
+
+
+<div class="viewcode-block" id="filter_df_by_conditions">
+<a class="viewcode-back" href="../../../squadds.core.html#squadds.core.utils.filter_df_by_conditions">[docs]</a>
+<span class="k">def</span> <span class="nf">filter_df_by_conditions</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">conditions</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter a DataFrame based on given conditions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): The DataFrame to be filtered.</span>
+<span class="sd">        conditions (dict): A dictionary containing column-value pairs as conditions.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: The filtered DataFrame.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure conditions is a dictionary</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">conditions</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Conditions must be provided as a dictionary.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Start with the original DataFrame</span>
+    <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">df</span>
+
+    <span class="c1"># Apply each condition</span>
+    <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">conditions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="p">[</span><span class="n">filtered_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">]</span>
+    
+    <span class="c1"># Check if the filtered DataFrame is empty</span>
+    <span class="k">if</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No rows match the given conditions. Returning the original DataFrame.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">filtered_df</span></div>
+
 
 <div class="viewcode-block" id="set_huggingface_api_key">
 <a class="viewcode-back" href="../../../squadds.core.html#squadds.core.utils.set_huggingface_api_key">[docs]</a>
