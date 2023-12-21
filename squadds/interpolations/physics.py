@@ -55,7 +55,6 @@ class ScalingInterpolator(Interpolator):
         target_params_cavity = {'cavity_frequency_GHz': f_res_target, 'kappa_kHz': kappa_target, 'resonator_type': res_type}
 
         closest_cavity_cpw_design = self.analyzer.find_closest(target_params_cavity, num_top=1)
-        print(closest_cavity_cpw_design.iloc[0]["design_options"])
 
         closest_kappa = closest_cavity_cpw_design['kappa_kHz'].values[0]
         closest_f_cavity = closest_cavity_cpw_design['cavity_frequency_GHz'].values[0]
@@ -87,7 +86,6 @@ class ScalingInterpolator(Interpolator):
         self.analyzer.df = merged_df
         self.analyzer.selected_system = system_chosen
         self.analyzer.H_param_keys = H_params_chosen
-        print(closest_cavity_cpw_design.iloc[0]["design_options"])
 
         # a dataframe with three empty colums
         interpolated_designs_df = pd.DataFrame(columns=["design_options_qubit", "design_options_cavity_claw", "design_options"])
@@ -107,12 +105,13 @@ class ScalingInterpolator(Interpolator):
         cavity_design_options["cpw_opts"]['total_length'] = f"{updated_resonator_length}um"
         cavity_design_options['cplr_opts']['coupling_length'] = f"{updated_coupling_length}um"
 
-        # Update the coupler options
-        coupler_design_options = cavity_design_options['cplr_opts']
+
 
         interpolated_designs_df = pd.DataFrame({
             "design_options_qubit": [qubit_design_options],
             "design_options_cavity_claw": [cavity_design_options],
+            "sim_options_qubit": [closest_qubit_claw_design["setup_qubit"].iloc[0]],
+            "sim_options_cavity_claw": [closest_cavity_cpw_design["setup_cavity_claw"].iloc[0]],
         })
 
         device_design_options = create_unified_design_options(interpolated_designs_df.iloc[0])

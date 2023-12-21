@@ -309,7 +309,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print(f"An error occurred while loading the dataset: {e}")
             return
 
-    def selected_system_df(self):
+    def create_system_df(self):
         if self.selected_system is None:
             print("Selected system is not defined.")
             return
