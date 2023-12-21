@@ -13,8 +13,9 @@ setup(
     long_description_content_type='text/markdown',
     author='Sadman Ahmed Shanto',
     author_email='shanto@usc.edu',
+    include_package_data=True,
     url='https://github.com/LFL-Lab/SQuADDS',
-#    install_requires=required, 
+#    install_requires=required, # required for pypi installations
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
