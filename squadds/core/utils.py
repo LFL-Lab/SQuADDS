@@ -4,6 +4,141 @@ import getpass
 import os
 from huggingface_hub import HfApi, HfFolder
 from squadds.core.globals import ENV_FILE_PATH
+import pandas as pd
+import numpy as np
+
+def get_sim_results_keys(dataframes):
+    # Initialize an empty list to store all keys
+    all_keys = []
+
+    # Ensure the input is a list, even if it's a single dataframe
+    if not isinstance(dataframes, list):
+        dataframes = [dataframes]
+
+    # Iterate over each dataframe
+    for df in dataframes:
+        # Check if 'sim_results' column exists in the dataframe
+        if 'sim_results' in df.columns:
+            # Extract keys from each row's 'sim_results' and add them to the list
+            for row in df['sim_results']:
+                if isinstance(row, dict):  # Ensure the row is a dictionary
+                    all_keys.extend(row.keys())
+
+    # Remove duplicates from the list
+    unique_keys = list(set(all_keys))
+
+    return unique_keys
+
+def convert_numpy(obj):
+    """
+    Converts NumPy arrays to Python lists recursively.
+
+    Args:
+        obj: The object to be converted.
+
+    Returns:
+        The converted object.
+
+    """
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {k: convert_numpy(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy(v) for v in obj]
+    return obj
+
+# Function to create a unified design_options dictionary
+def create_unified_design_options(row):
+    """
+    Create a unified design options dictionary based on the given row.
+
+    Args:
+        row (pandas.Series): The row containing the design options.
+
+    Returns:
+        dict: The unified design options dictionary.
+    """
+    cavity_dict = convert_numpy(row["design_options_cavity_claw"])
+    coupler_type = row["coupler_type"]
+    qubit_dict = convert_numpy(row["design_options_qubit"])
+
+    device_dict = {
+        "cavity_claw_options": {
+            "coupling_type": coupler_type,
+            "coupler_options": cavity_dict.get("cplr_opts", {}),
+            "cpw_options": {
+                "left_options": cavity_dict.get("cpw_opts", {})
+            }
+        },
+        "qubit_options": qubit_dict
+    }
+
+    return device_dict
+
+
+def flatten_df_second_level(df):
+    """
+    Flattens a DataFrame by expanding dictionary-like data in the second level of columns.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to be flattened.
+
+    Returns:
+        pandas.DataFrame: A new DataFrame with the flattened data.
+    """
+    # Initialize an empty dictionary to collect flattened data
+    flattened_data = {}
+
+    # Iterate over each column in the DataFrame
+    for column in df.columns:
+        # Check if the column contains dictionary-like data
+        if isinstance(df[column].iloc[0], dict):
+            # Iterate over second-level keys and create new columns
+            for key in df[column].iloc[0].keys():
+                flattened_data[f"{key}"] = df[column].apply(lambda x: x[key] if key in x else None)
+        else:
+            # For non-dictionary data, keep as is
+            flattened_data[column] = df[column]
+
+    # Create a new DataFrame with the flattened data
+    new_df = pd.DataFrame(flattened_data)
+    return new_df
+
+def filter_df_by_conditions(df, conditions):
+    """
+    Filter a DataFrame based on given conditions.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to be filtered.
+        conditions (dict): A dictionary containing column-value pairs as conditions.
+
+    Returns:
+        pandas.DataFrame: The filtered DataFrame.
+
+    Raises:
+        None
+
+    """
+    # Ensure conditions is a dictionary
+    if not isinstance(conditions, dict):
+        print("Conditions must be provided as a dictionary.")
+        return None
+
+    # Start with the original DataFrame
+    filtered_df = df
+
+    # Apply each condition
+    for column, value in conditions.items():
+        if column in filtered_df.columns:
+            filtered_df = filtered_df[filtered_df[column] == value]
+    
+    # Check if the filtered DataFrame is empty
+    if filtered_df.empty:
+        print("Warning: No rows match the given conditions. Returning the original DataFrame.")
+        return df
+    else:
+        return filtered_df
 
 def set_huggingface_api_key():
     """

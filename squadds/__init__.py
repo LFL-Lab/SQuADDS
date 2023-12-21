@@ -10,3 +10,4 @@ __library_path__ = os.path.join(__repo_path__, "library")
 
 
 from squadds.core.db import SQuADDS_DB
+from squadds.core.analysis import Analyzer

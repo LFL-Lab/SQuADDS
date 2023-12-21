@@ -6,76 +6,7 @@ import pprint
 import pandas as pd
 from addict import Dict
 import numpy as np
-
-# Function to convert numpy arrays to lists within an object
-def convert_numpy(obj):
-    if isinstance(obj, np.ndarray):
-        return obj.tolist()
-    elif isinstance(obj, dict):
-        return {k: convert_numpy(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [convert_numpy(v) for v in obj]
-    return obj
-
-# Function to create a unified design_options dictionary
-def create_unified_design_options(row):
-    cavity_dict = convert_numpy(row["design_options_cavity_claw"])
-    coupler_type = row["coupler_type"]
-    qubit_dict = convert_numpy(row["design_options_qubit"])
-
-    device_dict = {
-        "cavity_claw_options": {
-            "coupling_type": coupler_type,
-            "coupler_options": cavity_dict.get("cplr_opts", {}),
-            "cpw_options": {
-                "left_options": cavity_dict.get("cpw_opts", {})
-            }
-        },
-        "qubit_options": qubit_dict
-    }
-
-    return device_dict
-
-
-def flatten_df_second_level(df):
-    # Initialize an empty dictionary to collect flattened data
-    flattened_data = {}
-
-    # Iterate over each column in the DataFrame
-    for column in df.columns:
-        # Check if the column contains dictionary-like data
-        if isinstance(df[column].iloc[0], dict):
-            # Iterate over second-level keys and create new columns
-            for key in df[column].iloc[0].keys():
-                flattened_data[f"{key}"] = df[column].apply(lambda x: x[key] if key in x else None)
-        else:
-            # For non-dictionary data, keep as is
-            flattened_data[column] = df[column]
-
-    # Create a new DataFrame with the flattened data
-    new_df = pd.DataFrame(flattened_data)
-    return new_df
-
-def filter_df_by_conditions(df, conditions):
-    # Ensure conditions is a dictionary
-    if not isinstance(conditions, dict):
-        print("Conditions must be provided as a dictionary.")
-        return None
-
-    # Start with the original DataFrame
-    filtered_df = df
-
-    # Apply each condition
-    for column, value in conditions.items():
-        if column in filtered_df.columns:
-            filtered_df = filtered_df[filtered_df[column] == value]
-    
-    # Check if the filtered DataFrame is empty
-    if filtered_df.empty:
-        print("Warning: No rows match the given conditions. Returning the original DataFrame.")
-        return df
-    else:
-        return filtered_df
+from squadds.core.utils import *
 
 class SQuADDS_DB(metaclass=SingletonMeta):
     
@@ -91,6 +22,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.selected_coupler = None
         self.selected_system = None
         self.selected_df = None
+        self.target_param_keys = None
+        self.units = None
 
     def supported_components(self):
         components = []
@@ -370,6 +303,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         config = f"{component}-{component_name}-{data_type}"
         try:
             df = load_dataset(self.repo_name, config)["train"].to_pandas()
+            self._set_target_param_keys(df)
             return flatten_df_second_level(df)
         except Exception as e:
             print(f"An error occurred while loading the dataset: {e}")
@@ -390,7 +324,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit) #TODO: handle dynamically
             cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity) #TODO: handle dynamically
             df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap']) #TODO: handle with user awareness
-            self.selected_system_df = df
+            self.selected_df = df
         else:
             raise UserWarning("Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`")
         return df
@@ -433,6 +367,30 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print("Selected data type: ", self.selected_data_type)
             print("Selected system: ", self.selected_system)
             print("Selected coupler: ", self.selected_coupler)
+
+    def _set_target_param_keys(self, df):
+        # ensure selected_df is not None
+        if self.selected_system is None:
+            raise UserWarning("No selected system df is created. Please check `self.selected_df`")
+        else:
+            # check if self.target_param_keys is None
+            if self.target_param_keys is None:
+                self.target_param_keys = get_sim_results_keys(df)
+            #check if target_param_keys is type list and system has more than one element
+            elif isinstance(self.target_param_keys, list) and len(self.selected_system) == 2:
+                self.target_param_keys += get_sim_results_keys(df)
+            #check if target_param_keys is type list and system has only one element
+            elif isinstance(self.target_param_keys, list) and len(self.selected_system) != 1:
+                self.target_param_keys = get_sim_results_keys(df)
+            else:
+                raise UserWarning("target_param_keys is not None or a list. Please check `self.target_param_keys`")
+
+            # update the attribute to remove any elements that start with "unit"
+            self.target_param_keys = [key for key in self.target_param_keys if not key.startswith("unit")]
+    
+    def _get_units(self, df):
+        # TODO: needs implementation 
+        raise NotImplementedError()
 
     def unselect(self, param):
         if param == "component":

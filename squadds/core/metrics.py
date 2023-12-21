@@ -5,7 +5,6 @@ from numpy import linalg as LA
 import logging
 logging.basicConfig(level=logging.INFO)
 
-
 class MetricStrategy(ABC):
     """Abstract class for metric strategies."""
 
@@ -109,7 +108,7 @@ class WeightedEuclideanMetric(MetricStrategy):
             if isinstance(target_value, (int, float)):
                 simulated_value = row.get(param, 0)
                 weight = self.weights.get(param, 1)
-                distance += weight * ((target_value - simulated_value) ** 2) / target_value
+                distance += weight * ((target_value - simulated_value) ** 2) / target_value**2
         return distance
 
 class CustomMetric(MetricStrategy):
