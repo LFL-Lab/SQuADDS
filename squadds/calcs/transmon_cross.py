@@ -43,11 +43,17 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         self.EJ = EJ
         return EJ
 
-    def calculate_target_quantities(self, f_res, alpha, g, w_q, N, Z_0=50):
+    def calculate_target_quantities(self, f_res, alpha, g, w_q, res_type, Z_0=50):
         EJ, EC = Transmon.find_EJ_EC(w_q, alpha)
         C_q = Convert.Cs_from_Ec(EC, units_in='GHz', units_out='fF')
         omega_r = 2 * np.pi * f_res
-        prefactor = np.sqrt(N * Z_0 * e**2 / (hbar * np.pi)) * (EJ / (8 * EC))**(1/4)
+        if res_type == "half":
+            res_type = 2
+        elif res_type == "quarter":
+            res_type = 4
+        else:
+            raise ValueError("res_type must be either 'half' or 'quarter'")
+        prefactor = np.sqrt(res_type * Z_0 * e**2 / (hbar * np.pi)) * (EJ / (8 * EC))**(1/4)
         denominator = omega_r * prefactor
         numerator = g * C_q
         C_c = numerator / denominator
@@ -65,7 +71,6 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
 
     def g_alpha_freq(self, C, C_c, EJ, f_r, res_type, Z0=50):
         scq.set_units("GHz")
-        C, C_c = abs(C) * 1e-15, abs(C_c) * 1e-15
         C_q = C + C_c
         if res_type == "half":
             res_type = 2
@@ -74,7 +79,7 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         else:
             raise ValueError("res_type must be either 'half' or 'quarter'")
         g = self.g_from_cap_matrix(C, C_c, EJ, f_r, res_type, Z0)
-        EC = Convert.Ec_from_Cs(C_q, units_in='F', units_out='GHz')
+        EC = Convert.Ec_from_Cs(C_q, units_in='fF', units_out='GHz')
         transmon = Transmon(EJ=EJ, EC=EC, ng=0, ncut=30)
         alpha = transmon.anharmonicity() * 1E3  # MHz
         freq = transmon.E01()

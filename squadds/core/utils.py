@@ -50,6 +50,7 @@ def convert_numpy(obj):
 
 # Function to create a unified design_options dictionary
 def create_unified_design_options(row):
+    # TODO: no hardcoding
     """
     Create a unified design options dictionary based on the given row.
 
@@ -60,7 +61,10 @@ def create_unified_design_options(row):
         dict: The unified design options dictionary.
     """
     cavity_dict = convert_numpy(row["design_options_cavity_claw"])
-    coupler_type = row["coupler_type"]
+    try:
+        coupler_type = row["coupler_type"]
+    except:
+        coupler_type = "CLT"
     qubit_dict = convert_numpy(row["design_options_qubit"])
 
     device_dict = {

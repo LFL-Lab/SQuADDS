@@ -1,17 +1,8 @@
 import numpy as np
 import pandas as pd
-import warnings
-import os
-import scqubits as scq
-from scqubits.core.transmon import TunableTransmon
-from pandasai import SmartDataframe
-from pandasai.llm import OpenAI, Starcoder, Falcon
-from dotenv import load_dotenv
 from squadds.calcs import *
 import seaborn as sns
-
 from squadds.core.metrics import *
-from squadds.core.db import SQuADDS_DB
 
 
 """
@@ -196,7 +187,7 @@ class Analyzer:
         self._add_target_params_columns()
 
         # Log if parameters outside of library
-        filtered_df = self.df[self.H_param_keys]  # Filter DataFrame based on H_param_keys
+        filtered_df = self.df[self.target_params]  # Filter DataFrame based on H_param_keys
         self._outside_bounds(df=filtered_df, params=target_params, display=display)
 
         # Set strategy dynamically based on the metric parameter
@@ -233,7 +224,8 @@ class Analyzer:
         self.closest_design = closest_df.iloc[0]["design_options"]
 
         if len(self.selected_system) == 2: #TODO: make this more general
-            self.presimmed_closest_cpw_design = self.closest_design["cavity_claw"]
+            self.presimmed_closest_cpw_design = self.closest_df_entry["design_options_cavity_claw"]
+            self.presimmed_closest_qubit_design = self.closest_df_entry["design_options_qubit"]
 
         return closest_df
 
@@ -259,7 +251,7 @@ class Analyzer:
         raise NotImplementedError
 
 
-    def show_chosen_points(self):
+    def show_closest_point(self):
         # Set Seaborn style and context
         sns.set_style("whitegrid")
         sns.set_context("paper", font_scale=1.4)
@@ -274,11 +266,11 @@ class Analyzer:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
 
         # First subplot: kappa_kHz vs fres
-        ax1.scatter(x=self.df['cavity_frequency_GHz'], y=self.df['kappa_kHz'], c=color_presim, marker=".", s=50, label="Pre-Simulated")
-        ax1.scatter(x=self.target_params["cavity_frequency_GHz"], y=self.target_params["kappa_kHz"], c='red', s=100, marker='x', label='Target')
+        ax1.scatter(x=self.df['cavity_frequency_GHz'], y=self.df['kappa_kHz'], color=color_presim, marker=".", s=50, label="Pre-Simulated")
+        ax1.scatter(x=self.target_params["cavity_frequency_GHz"], y=self.target_params["kappa_kHz"], color='red', s=100, marker='x', label='Target')
         closest_fres = self.closest_df_entry["cavity_frequency_GHz"]
         closest_kappa_kHz = self.closest_df_entry["kappa_kHz"]
-        ax1.scatter(closest_fres, closest_kappa_kHz, c=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
+        ax1.scatter(closest_fres, closest_kappa_kHz, color=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
         ax1.set_xlabel(r'$f_{res}$ (Hz)', fontweight='bold', fontsize=24)
         ax1.set_ylabel(r'$\kappa / 2 \pi$ (Hz)', fontweight='bold', fontsize=24)
         ax1.tick_params(axis='both', which='major', labelsize=20)
@@ -287,11 +279,11 @@ class Analyzer:
             text.set_fontweight('bold')
 
         # Second subplot: g vs alpha
-        ax2.scatter(x=self.df['anharmonicity_MHz'], y=self.df['g_MHz'], c=color_presim, marker=".", s=50, label="Pre-Simulated")
-        ax2.scatter(x=self.target_params["anharmonicity_MHz"], y=self.target_params["g_MHz"], c='red', s=100, marker='x', label='Target')
+        ax2.scatter(x=self.df['anharmonicity_MHz'], y=self.df['g_MHz'], color=color_presim, marker=".", s=50, label="Pre-Simulated")
+        ax2.scatter(x=self.target_params["anharmonicity_MHz"], y=self.target_params["g_MHz"], color='red', s=100, marker='x', label='Target')
         closest_alpha = [self.closest_df_entry["anharmonicity_MHz"]]
         closest_g = [self.closest_df_entry["g_MHz"]]
-        ax2.scatter(closest_alpha, closest_g, c=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
+        ax2.scatter(closest_alpha, closest_g, color=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
         ax2.set_xlabel(r'$\alpha / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
         ax2.set_ylabel(r'$g / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
         ax2.tick_params(axis='both', which='major', labelsize=20)
