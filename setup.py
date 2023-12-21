@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='SQuADDS',
-    version='0.0.1',
+    version='0.0.2',
     packages=find_packages(),
     description='Our project introduces an open-source database of programmatically generated and experimentally validated superconducting quantum device designs, accessible through a user-friendly interface, significantly lowering the entry barrier for research in this field.',
     long_description=open('README.md').read(),
@@ -15,7 +15,7 @@ setup(
     author_email='shanto@usc.edu',
     include_package_data=True,
     url='https://github.com/LFL-Lab/SQuADDS',
-#    install_requires=required, # required for pypi installations
+    install_requires=required, # required for pypi installations
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',

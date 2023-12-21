@@ -5,7 +5,7 @@ from squadds.calcs.qubit import QubitHamiltonian
 from scqubits.core.transmon import Transmon
 from pyEPR.calcs import Convert
 from scipy.constants import e, h, hbar
-
+import pprint
 class TransmonCrossHamiltonian(QubitHamiltonian):
     #TODO: make method handling more general
     def __init__(self, analysis):
@@ -57,21 +57,44 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
     def g_and_alpha(self, C, C_c, f_q, EJ, f_r, res_type, Z0=50):
         C, C_c = abs(C) * 1e-15, abs(C_c) * 1e-15
         C_q = C + C_c
-        g = self.calculate_g_with_C(C, C_c, EJ, f_r, res_type, Z0)
+        g = self.g_from_cap_matrix(C, C_c, EJ, f_r, res_type, Z0)
         EC = Convert.Ec_from_Cs(C_q, units_in='F', units_out='GHz')
         transmon = Transmon(EJ=EJ, EC=EC, ng=0, ncut=30)
         alpha = transmon.anharmonicity() * 1E3  # MHz
         return g, alpha
 
     def g_alpha_freq(self, C, C_c, EJ, f_r, res_type, Z0=50):
+        scq.set_units("GHz")
         C, C_c = abs(C) * 1e-15, abs(C_c) * 1e-15
         C_q = C + C_c
-        g = self.calculate_g_with_C(C, C_c, EJ, f_r, res_type, Z0)
+        if res_type == "half":
+            res_type = 2
+        elif res_type == "quarter":
+            res_type = 4
+        else:
+            raise ValueError("res_type must be either 'half' or 'quarter'")
+        g = self.g_from_cap_matrix(C, C_c, EJ, f_r, res_type, Z0)
         EC = Convert.Ec_from_Cs(C_q, units_in='F', units_out='GHz')
         transmon = Transmon(EJ=EJ, EC=EC, ng=0, ncut=30)
         alpha = transmon.anharmonicity() * 1E3  # MHz
         freq = transmon.E01()
         return g, alpha, freq
+
+    def g_from_cap_matrix(self, C, C_c, EJ, f_r, res_type, Z0=50):
+        C = abs(C) * 1e-15  # F
+        C_c = abs(C_c) * 1e-15  # F
+        C_q = C_c + C
+        omega_r = 2 * np.pi * f_r * 1e9
+        EC = Convert.Ec_from_Cs(C_q, units_in='F', units_out='GHz')
+
+        if res_type == "half":
+            res_type = 2
+        elif res_type == "quarter":
+            res_type = 4
+
+        g = (abs(C_c) / C_q) * omega_r * np.sqrt(res_type * Z0 * e**2 / (hbar * np.pi)) * (EJ / (8 * EC))**(1/4)
+        return (g * 1E-6) / (2 * np.pi)  # MHz
+
 
     def get_freq_alpha_fixed_LJ(self, fig4_df, LJ_target):
         EJ = Convert.Ej_from_Lj(LJ_target, units_in='nH', units_out='GHz')
@@ -80,15 +103,6 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         alpha = [transmon.anharmonicity() * 1E3 for transmon in transmons]
         freq = [transmon.E01() for transmon in transmons]
         return freq, alpha
-
-    def g_from_cap_matrix(self, C, C_c, EJ, f_r, res_type, Z0=50):
-        C = abs(C) * 1e-15  # F
-        C_c = abs(C_c) * 1e-15  # F
-        C_q = C_c + C
-        omega_r = 2 * np.pi * f_r * 1e9
-        EC = Convert.Ec_from_Cs(C_q, units_in='F', units_out='GHz')
-        g = (abs(C_c) / C_q) * omega_r * np.sqrt(res_type * Z0 * e**2 / (hbar * np.pi)) * (EJ / (8 * EC))**(1/4)
-        return (g * 1E-6) / (2 * np.pi)  # MHz
 
     def E01_and_anharmonicity(self, EJ, EC, ng=0, ncut=30):
         transmon = Transmon(EJ=EJ, EC=EC, ng=ng, ncut=ncut)
@@ -114,4 +128,11 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
 
     def add_cavity_coupled_H_params(self):
         self.add_qubit_H_params()
-        self.df['g_MHz'] = self.df.apply(lambda row: self.compute_g_alpha_freq(row['C'], row['C_c'], row['EJ'], row['f_r'], row['res_type'], row['Z0'])[0], axis=1)
+        #pprint.pprint(self.df.head())
+        #pprint.pprint(self.df.columns)
+        self.df['g_MHz'] = self.df.apply(lambda row: self.g_from_cap_matrix(C=row['cross_to_ground'], 
+                          C_c=row['cross_to_claw'], 
+                          EJ=row['EJ'],
+                          f_r=row['cavity_frequency_GHz'],
+                          res_type=row['resonator_type'], 
+                          Z0=50), axis=1)

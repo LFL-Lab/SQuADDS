@@ -78,21 +78,25 @@ class Analyzer:
             qubit_H.add_qubit_H_params()
             self.df = qubit_H.df 
         elif self.selected_system == "cavity_claw":
-            # rename the columns cavity_frequency_GHz and kappa_kHz and update the values
-            if ("cavity_frequency" in self.df.columns) or ("kappa" in self.df.columns):
-                self.df = self.df.rename(columns={"cavity_frequency": "cavity_frequency_GHz", "kappa": "kappa_kHz"})
-                self.df["cavity_frequency_GHz"] = self.df["cavity_frequency_GHz"] * 1e-9
-                self.df["kappa_kHz"] = self.df["kappa_kHz"] * 1e-3
-            else:
-                pass
+            self._fix_cavity_claw_df()
         elif self.selected_system == "coupler":
             pass
         elif (self.selected_system == ["qubit","cavity_claw"]) or (self.selected_system == ["cavity_claw","qubit"]):
-            self.db = self.add_qubit_params(self.db)
-            self.db = self.add_cavity_claw_params(self.db)
-            self.db = self.add_coupling_params(self.db) # adds g
+            self._fix_cavity_claw_df()
+            qubit_H = TransmonCrossHamiltonian(self)
+            qubit_H.add_cavity_coupled_H_params()
+            self.df = qubit_H.df 
         else:
             raise ValueError("Invalid system.")
+    
+    def _fix_cavity_claw_df(self):
+        # rename the columns cavity_frequency_GHz and kappa_kHz and update the values
+        if ("cavity_frequency" in self.df.columns) or ("kappa" in self.df.columns):
+            self.df = self.df.rename(columns={"cavity_frequency": "cavity_frequency_GHz", "kappa": "kappa_kHz"})
+            self.df["cavity_frequency_GHz"] = self.df["cavity_frequency_GHz"] * 1e-9
+            self.df["kappa_kHz"] = self.df["kappa_kHz"] * 1e-3
+        else:
+            pass
     
     def _get_H_param_keys(self):
         #TODO: make this more general and read the param keys from the database
