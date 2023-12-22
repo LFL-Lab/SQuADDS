@@ -1,6 +1,6 @@
-# ![Under Development](https://img.shields.io/badge/Status-Under%20Development-yellow) SQuADDS: 
+# ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow) SQuADDS: 
 
-> :warning: **This project is currently under active development. Features and documentation may be incomplete.**
+> :warning: **This project is an alpha release and currently under active development. Some features and documentation may be incomplete.**
 
 The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Project is an open-source resource aimed at advancing research in superconducting quantum device designs. It provides a robust workflow for generating and simulating superconducting quantum device designs, facilitating the accurate prediction of Hamiltonian parameters across a wide range of design geometries.
 
