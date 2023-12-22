@@ -5,7 +5,7 @@
 The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Project is an open-source resource aimed at advancing research in superconducting quantum device designs. It provides a robust workflow for generating and simulating superconducting quantum device designs, facilitating the accurate prediction of Hamiltonian parameters across a wide range of design geometries.
 
 Paper Link: [SQuADDS: A Database for Superconducting Quantum Device Design and Simulation](https://)
-Website Link: [SQuADDS](https://sadmanahmedshanto.com/SQuADDS/)
+Website Link: [SQuADDS](https://lfl-lab.github.io/SQuADDS/)
 
 ## Table of Contents
 
@@ -43,9 +43,9 @@ git clone
 ```bash
 pip install -r requirements.txt
 ```
-3. Run the setup script.
+3. Run the setup script locally
 ```bash
-python setup.py install
+pip install -e .
 ```
 
 ## Features
@@ -56,8 +56,11 @@ python setup.py install
 - **Open-Source Collaboration**: Encourages contributions from the community, expanding the database and refining the simulation models.
 
 ## Tutorials
-- [Tutorial 1: Getting Started with SQuADDS](https://sadmanahmedshanto.com/SQuADDS/tutorials/Tutorial-1_getting_started_with_SQuADDS.html)
-- [Tutorial 2: Contributing to the SQuADDS Database](https://sadmanahmedshanto.com/SQuADDS/tutorials/Tutorial-2_Contributing_to_SQuADDS.html)
+- [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/tutorials/Tutorial-1_getting_started_with_SQuADDS.html)
+- [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
+- [Tutorial 3: Contributing to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/tutorials/Tutorial-3_Contributing_to_SQuADDS.html)
+- [Tutorial 4: Adding your own Qubit Hamiltonian Calculator]()
+- [Tutorial 5: Creating your own Interpolater]()
 
 
 ## Contributing
