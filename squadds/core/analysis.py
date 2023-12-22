@@ -11,7 +11,16 @@ HELPER FUNCTIONS
 """
 # Helper function to scale values with 'um' in them
 def scale_value(value, ratio):
-    # Remove 'um' from the value, convert to float, scale and convert back to string
+    """
+    Scales the given value by the specified ratio.
+
+    Parameters:
+    value (str): The value to be scaled, in the format 'Xum' where X is a number.
+    ratio (float): The scaling ratio.
+
+    Returns:
+    str: The scaled value in the format 'Xum' where X is the scaled number.
+    """
     scaled_value = str(float(value.replace('um', '')) * ratio) + 'um'
     return scaled_value
 
@@ -66,6 +75,15 @@ class Analyzer:
         self.H_param_keys = self._get_H_param_keys()
         
     def _add_target_params_columns(self):
+        """
+        Adds target parameter columns to the dataframe based on the selected system.
+
+        If the selected system is "qubit", it adds qubit Hamiltonian parameters to the dataframe.
+        If the selected system is "cavity_claw", it fixes the dataframe for the cavity_claw system.
+        If the selected system is "coupler", it does nothing.
+        If the selected system is ["qubit", "cavity_claw"] or ["cavity_claw", "qubit"], it fixes the dataframe for the cavity_claw system and adds cavity-coupled Hamiltonian parameters to the dataframe.
+        Raises a ValueError if the selected system is invalid.
+        """
         #TODO: make this more general and read the param keys from the database
         if self.selected_system == "qubit":
             qubit_H = TransmonCrossHamiltonian(self)
@@ -84,7 +102,19 @@ class Analyzer:
             raise ValueError("Invalid system.")
     
     def _fix_cavity_claw_df(self):
-        # rename the columns cavity_frequency_GHz and kappa_kHz and update the values
+        """
+        Fix the cavity claw DataFrame by renaming columns and updating values.
+
+        If the columns 'cavity_frequency' or 'kappa' exist in the DataFrame, they will be renamed to
+        'cavity_frequency_GHz' and 'kappa_kHz' respectively. The values in these columns will also be
+        updated by multiplying them with appropriate conversion factors.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         if ("cavity_frequency" in self.df.columns) or ("kappa" in self.df.columns):
             self.df = self.df.rename(columns={"cavity_frequency": "cavity_frequency_GHz", "kappa": "kappa_kHz"})
             self.df["cavity_frequency_GHz"] = self.df["cavity_frequency_GHz"] * 1e-9
@@ -93,6 +123,15 @@ class Analyzer:
             pass
     
     def _get_H_param_keys(self):
+        """
+        Get the parameter keys for the Hamiltonian (H) based on the selected system.
+
+        Returns:
+            list: A list of parameter keys for the Hamiltonian.
+        
+        Raises:
+            ValueError: If the selected system is invalid.
+        """
         #TODO: make this more general and read the param keys from the database
         self.H_param_keys = None
         if self.selected_system == "qubit":
@@ -168,11 +207,25 @@ class Analyzer:
 
 
     def find_closest(self,
-                     target_params: dict,
-                     num_top: int,
-                     metric: str = 'Euclidean',
-                     display: bool = True):
+                         target_params: dict,
+                         num_top: int,
+                         metric: str = 'Euclidean',
+                         display: bool = True):
         """
+        Find the closest designs in the library based on the target parameters.
+
+        Parameters:
+        - target_params (dict): A dictionary containing the target parameters.
+        - num_top (int): The number of closest designs to retrieve.
+        - metric (str, optional): The distance metric to use for calculating distances. Defaults to 'Euclidean'.
+        - display (bool, optional): Whether to display warnings for parameters outside of the library bounds. Defaults to True.
+
+        Returns:
+        - closest_df (DataFrame): A DataFrame containing the closest designs.
+
+        Raises:
+        - ValueError: If the specified metric is not supported or if num_top is bigger than the size of the library.
+        - ValueError: If the metric is invalid.
         """
         ### Checks
         # Check for supported metric
@@ -251,6 +304,14 @@ class Analyzer:
 
 
     def closest_design_in_H_space(self):
+        """
+        Plots a scatter plot of the closest design in the H-space.
+
+        This method creates a scatter plot with two subplots. The first subplot shows the relationship between 'cavity_frequency_GHz' and 'kappa_kHz', while the second subplot shows the relationship between 'anharmonicity_MHz' and 'g_MHz'. The scatter plot includes pre-simulated data, target data, and the closest design entry from the database.
+
+        Returns:
+            None
+        """
         # Set Seaborn style and context
         sns.set_style("whitegrid")
         sns.set_context("paper", font_scale=1.4)
@@ -291,4 +352,4 @@ class Analyzer:
             text.set_fontweight('bold')
 
         plt.tight_layout()
-        plt.show() 
+        plt.show()

@@ -5,13 +5,29 @@ from squadds.core import *
 from pyEPR.calcs import Convert
 
 def string_to_float(string):
+    """
+    Converts a string representation of a number to a float.
+
+    Args:
+        string (str): The string representation of the number.
+
+    Returns:
+        float: The converted float value.
+    """
     return float(string[:-2])
+
 class ScalingInterpolator(Interpolator):
     """Class for scaling-based interpolation."""
     def __init__(self, analyzer: Analyzer, target_params: dict):
         super().__init__(analyzer, target_params)
 
     def get_design(self) -> pd.DataFrame:
+        """
+        Retrieves the design options for qubit and cavity based on target parameters.
+        
+        Returns:
+            pd.DataFrame: A DataFrame containing the design options for qubit and cavity.
+        """
         # Extract target parameters
         f_q_target = self.target_params['qubit_frequency_GHz']
         g_target = self.target_params['g_MHz']

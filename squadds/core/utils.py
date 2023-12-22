@@ -8,6 +8,15 @@ import pandas as pd
 import numpy as np
 
 def get_sim_results_keys(dataframes):
+    """
+    Get the unique keys from the 'sim_results' column of the given dataframes.
+
+    Parameters:
+    dataframes (list or pandas.DataFrame): A list of dataframes or a single dataframe.
+
+    Returns:
+    list: A list of unique keys extracted from the 'sim_results' column.
+    """
     # Initialize an empty list to store all keys
     all_keys = []
 
