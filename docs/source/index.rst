@@ -25,6 +25,7 @@ SQuADDS is an open-source platform aimed at speeding up the design loop in the c
    Release Logs<release_notes>
    API Reference <apidocs/index>
    GitHub <https://github.com/shanto268/SQuADDS>
+   Paper <https://arxiv.org/pdf/2312.13483.pdf>
 
 
 Citation
@@ -38,7 +39,7 @@ Hi there! If you use SQuADDS in your research, please support its continued deve
     @article{SQuADDS,
         title={SQuADDS: A validated design database and simulation workflow for superconducting qubit design},
         author={Sadman Ahmed Shanto, Andre Kuo, Clark Miyamoto, Haimeng Zhang, Vivek Maurya, Evangelos Vlachos, Malida Hecht, Chung Wa Shum and Eli Levenson-Falk},
-        journal={arXiv preprint arXiv:},
+        journal={arXiv preprint arXiv: https://arxiv.org/pdf/2312.13483.pdf},
         year={2023}
     }
 
