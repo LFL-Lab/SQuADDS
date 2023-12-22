@@ -251,7 +251,7 @@ class Analyzer:
         raise NotImplementedError
 
 
-    def show_closest_point(self):
+    def closest_design_in_H_space(self):
         # Set Seaborn style and context
         sns.set_style("whitegrid")
         sns.set_context("paper", font_scale=1.4)
