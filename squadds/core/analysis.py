@@ -2,7 +2,7 @@ import pandas as pd
 from squadds.calcs import *
 import seaborn as sns
 from squadds.core.metrics import *
-
+import matplotlib.pyplot as plt
 
 """
 =====================================================================================
