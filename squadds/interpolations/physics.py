@@ -2,7 +2,6 @@ from squadds.interpolations import Interpolator
 import pandas as pd
 from squadds.calcs import *
 from squadds.core import *
-import matplotlib.pyplot as plt 
 from pyEPR.calcs import Convert
 
 def string_to_float(string):

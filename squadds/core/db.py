@@ -4,8 +4,6 @@ from datasets import load_dataset
 from tabulate import tabulate
 import pprint
 import pandas as pd
-from addict import Dict
-import numpy as np
 from squadds.core.utils import *
 
 class SQuADDS_DB(metaclass=SingletonMeta):

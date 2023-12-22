@@ -5,7 +5,6 @@ from squadds.calcs.qubit import QubitHamiltonian
 from scqubits.core.transmon import Transmon
 from pyEPR.calcs import Convert
 from scipy.constants import e, h, hbar
-import pprint
 class TransmonCrossHamiltonian(QubitHamiltonian):
     #TODO: make method handling more general
     def __init__(self, analysis):

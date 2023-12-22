@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from squadds.calcs import *
 import seaborn as sns
