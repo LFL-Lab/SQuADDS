@@ -265,6 +265,48 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             self.view_component_names("coupler")
             return
 
+    def see_dataset(self, data_type=None, component=None, component_name=None):
+        # Use the instance attributes if the user does not provide them
+        component = component if component is not None else self.selected_system
+        component_name = component_name if component_name is not None else self.selected_component_name
+        
+        # Check if system and component_name are still None
+        if component is None or component_name is None:
+            print("Both system and component name must be defined.")
+            return
+        
+        if data_type is None:
+            print("Please specify a data type.")
+            return
+        
+        # Check if the component is supported
+        if component not in self.supported_components():
+            print("Component not supported. Available components are:")
+            print(self.supported_components())
+            return
+        
+        # Check if the component name is supported
+        if component_name not in self.supported_component_names():
+            print("Component name not supported. Available component names are:")
+            print(self.supported_component_names())
+            return
+        
+        # Check if the data type is supported
+        if data_type not in self.supported_data_types():
+            print("Data type not supported. Available data types are:")
+            print(self.supported_data_types())
+            return
+
+        # Construct the configuration string based on the provided or default values
+        config = f"{component}-{component_name}-{data_type}"
+        try:
+            df = load_dataset(self.repo_name, config)["train"].to_pandas()
+            return flatten_df_second_level(df)
+        except Exception as e:
+            print(f"An error occurred while loading the dataset: {e}")
+            return
+
+
     def get_dataset(self, data_type=None, component=None, component_name=None):
         # Use the instance attributes if the user does not provide them
         component = component if component is not None else self.selected_system
