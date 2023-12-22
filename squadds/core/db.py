@@ -7,15 +7,8 @@ import pandas as pd
 from squadds.core.utils import *
 
 class SQuADDS_DB(metaclass=SingletonMeta):
-    """
-    SQuADDS_DB is a singleton class that represents the database for the SQuADDS project.
-    It provides methods to interact with the database and retrieve information about supported components, datasets, contributors, etc.
-    """
-
+    
     def __init__(self):
-        """
-        Initializes the SQuADDS_DB instance.
-        """
         self.repo_name = "SQuADDS/SQuADDS_DB"
         self.configs = self.supported_config_names()
         self.selected_component_name = None
@@ -31,67 +24,32 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.units = None
 
     def supported_components(self):
-        """
-        Returns a list of supported components based on the available dataset configurations.
-
-        Returns:
-            list: A list of supported components.
-        """
         components = []
         for config in self.configs:
             components.append(config.split("-")[0])
         return components
     
     def supported_component_names(self):
-        """
-        Returns a list of supported component names based on the available dataset configurations.
-
-        Returns:
-            list: A list of supported component names.
-        """
         component_names = []
         for config in self.configs:
             component_names.append(config.split("-")[1])
         return component_names
     
     def supported_data_types(self):
-        """
-        Returns a list of supported data types based on the available dataset configurations.
-
-        Returns:
-            list: A list of supported data types.
-        """
         data_types = []
         for config in self.configs:
             data_types.append(config.split("-")[2])
         return data_types
 
     def supported_config_names(self):
-        """
-        Returns a list of supported dataset configuration names.
-
-        Returns:
-            list: A list of supported dataset configuration names.
-        """
         configs = get_dataset_config_names(self.repo_name)
         return configs
 
     def get_configs(self):
-        """
-        Prints the supported dataset configuration names.
-        """
+        # pretty print the config names
         pprint.pprint(self.configs)
 
     def get_component_names(self, component=None):
-        """
-        Returns a list of component names for the specified component.
-
-        Args:
-            component (str): The component for which to retrieve the component names.
-
-        Returns:
-            list: A list of component names.
-        """
         if component is None:
             print("Please specify a component")
             return
@@ -107,12 +65,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return component_names
         
     def view_component_names(self, component=None):
-        """
-        Prints the component names for the specified component.
-
-        Args:
-            component (str): The component for which to view the component names.
-        """
         if component is None:
             print("Please specify a component")
         if component not in self.supported_components():
@@ -125,6 +77,185 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                     component_names.append(config.split("-")[1])
             print(component_names+["CLT"]) #TODO: handle dynamically
 
+
+    def view_datasets(self):
+        components = self.supported_components()
+        component_names = self.supported_component_names()
+        data_types = self.supported_data_types()
+
+        # Create a list of rows for the table
+        table = [components, component_names, data_types]
+
+        # Transpose the table (convert columns to rows)
+        table = list(map(list, zip(*table)))
+
+        # Print the table with headers
+        print(tabulate(table, headers=["Component", "Component Name", "Data Available"],tablefmt="fancy_grid"))
+
+    def get_dataset_info(self, component=None, component_name=None, data_type=None):
+        # do checks
+        if component is None:
+            print("Please specify a component")
+            return
+        if component_name is None:
+            print("Please specify a component type")
+            return
+        if data_type is None:
+            print("Please specify a data type")
+            return
+        
+        if component not in self.supported_components():
+            print("Component not supported. Available components are:")
+            print(self.supported_components())
+            return
+        
+        if component_name not in self.supported_component_names():
+            print("Component name not supported. Available component names are:")
+            print(self.supported_component_names())
+            return
+        if data_type not in self.supported_data_types():
+            print("Data type not supported. Available data types are:")
+            print(self.supported_data_types())
+            return
+        
+        # print the table of the dataset configs
+        config = component + "-" + component_name + "-" + data_type
+        
+        dataset = load_dataset(self.repo_name, config)["train"]
+        # describe the dataset and print in table format
+        print("="*80)
+        print("Dataset Features:")
+        pprint.pprint(dataset.features, depth=2)
+        print("\nDataset Description:")
+        print(dataset.description)
+        print("\nDataset Citation:")
+        print(dataset.citation)
+        print("\nDataset Homepage:")
+        print(dataset.homepage)
+        print("\nDataset License:")
+        print(dataset.license)
+        print("\nDataset Size in Bytes:")
+        print(dataset.size_in_bytes)
+        print("="*80)
+        
+    def view_all_contributors(self):
+        # Placeholder for the full contributor info
+        unique_contributors_info = []
+
+        for config in self.configs:
+            dataset = load_dataset(self.repo_name, config)["train"]
+            configs_contrib_info = dataset["contributor"]
+            
+            for contrib_info in configs_contrib_info:
+                # Extracting the relevant information
+                relevant_info = {key: contrib_info[key] for key in ['uploader', 'PI', 'group', 'institution']}
+                relevant_info['config'] = config  # Add the config to the relevant info
+
+                # Check if this combination of info is already in the list
+                if not any(existing_info['config'] == config and
+                            existing_info['uploader'] == relevant_info['uploader'] and
+                            existing_info['PI'] == relevant_info['PI'] and
+                            existing_info['group'] == relevant_info['group'] and
+                            existing_info['institution'] == relevant_info['institution']
+                            for existing_info in unique_contributors_info):
+                    unique_contributors_info.append(relevant_info)
+
+        print(tabulate(unique_contributors_info, headers="keys", tablefmt="fancy_grid"))
+
+    def view_contributors_of_config(self, config):
+        dataset = load_dataset(self.repo_name, config)["train"]
+        configs_contrib_info = dataset["contributor"]
+        unique_contributors_info = []
+        
+        for contrib_info in configs_contrib_info:
+            # Extracting the relevant information
+            relevant_info = {key: contrib_info[key] for key in ['uploader', 'PI', 'group', 'institution']}
+            if relevant_info not in unique_contributors_info:
+                unique_contributors_info.append(relevant_info)
+        
+        print(tabulate(unique_contributors_info, headers='keys', tablefmt="fancy_grid"))
+
+    def view_contributors_of(self, component=None, component_name=None, data_type=None):
+        config = component + "-" + component_name + "-" + data_type
+        self.view_contributors_of_config(config)
+
+    def select_components(self, component_dict=None):
+        # check if dict or string
+        if isinstance(component_dict, dict):
+            config = component_dict["component"] + "-" + component_dict["component_name"] + "-" + component_dict["data_type"]
+        elif isinstance(component_dict, str):
+            config = component_dict
+        print("Selected config: ", config)
+        
+    def select_system(self, components=None):
+        # Validation and checks
+        if isinstance(components, list):
+            for component in components:
+                if component not in self.supported_components():
+                    print(f"Component `{component}` not supported. Available components are:")
+                    print(self.supported_components())
+                    return
+                else:
+                    self.selected_system = components
+
+        elif isinstance(components, str):
+            if components not in self.supported_components():
+                print(f"Component `{components}` not supported. Available components are:")
+                print(self.supported_components())
+                return
+            else:
+                self.selected_system = components
+                self.selected_component = components
+    
+    def select_qubit(self, qubit=None):
+        # check whether selected_component is qubit
+        if (self.selected_system == "qubit") or ("qubit" in self.selected_system):
+            self.selected_qubit = qubit
+            self.selected_component_name = qubit
+            self.selected_data_type = "cap_matrix" # TODO: handle dynamically
+        else:
+            raise UserWarning("Selected system is either not specified or does not contain a qubit! Please check `self.selected_system`")
+        
+        # check if qubit is supported
+        if self.selected_qubit not in self.supported_component_names():
+            print(f"Qubit `{self.selected_qubit}` not supported. Available qubits are:")
+            self.view_component_names("qubit")
+            return
+
+    def select_cavity_claw(self, cavity=None):
+        # check whether selected_component is cavity
+        if (self.selected_system == "cavity_claw") or ("cavity_claw" in self.selected_system):
+            self.selected_cavity = cavity
+            self.selected_component_name = cavity
+            self.selected_data_type = "eigenmode" # TODO: handle dynamically
+        else:
+            raise UserWarning("Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`")
+        
+        # check if cavity is supported
+        if self.selected_cavity not in self.supported_component_names():
+            print(f"Cavity `{self.selected_cavity}` not supported. Available cavities are:")
+            self.view_component_names("cavity_claw")
+            return
+
+    def select_cavity(self, cavity=None):
+        # check whether selected_component is cavity
+        if (self.selected_system == "cavity") or ("cavity" in self.selected_system):
+            self.selected_cavity = cavity
+            self.selected_component_name = cavity
+            self.selected_data_type = "eigenmode" # TODO: handle dynamically
+        else:
+            raise UserWarning("Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`")
+        
+        # check if cavity is supported
+        if self.selected_cavity not in self.supported_component_names():
+            print(f"Cavity `{self.selected_cavity}` not supported. Available cavities are:")
+            self.view_component_names("cavity")
+            return
+        
+    def select_coupler(self, coupler=None):
+        # TODO: fix this method to work on NCap coupler sims
+        self.selected_coupler = coupler
+        #self.selected_component_name = coupler
         #self.selected_data_type = "cap_matrix" # TODO: handle dynamically
         
         # check if coupler is supported
@@ -135,47 +266,36 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return
 
     def get_dataset(self, data_type=None, component=None, component_name=None):
-        """
-        Retrieves a dataset based on the specified data type, component, and component name.
-
-        Args:
-            data_type (str): The type of data to retrieve.
-            component (str): The component to retrieve the dataset from.
-            component_name (str): The name of the component to retrieve the dataset from.
-
-        Returns:
-            pandas.DataFrame: The retrieved dataset.
-
-        Raises:
-            ValueError: If the system or component name is not defined.
-            ValueError: If the data type is not specified.
-            ValueError: If the component is not supported.
-            ValueError: If the component name is not supported.
-            ValueError: If the data type is not supported.
-            Exception: If an error occurs while loading the dataset.
-        """
         # Use the instance attributes if the user does not provide them
         component = component if component is not None else self.selected_system
         component_name = component_name if component_name is not None else self.selected_component_name
         
         # Check if system and component_name are still None
         if component is None or component_name is None:
-            raise ValueError("Both system and component name must be defined.")
+            print("Both system and component name must be defined.")
+            return
         
         if data_type is None:
-            raise ValueError("Please specify a data type.")
+            print("Please specify a data type.")
+            return
         
         # Check if the component is supported
         if component not in self.supported_components():
-            raise ValueError("Component not supported. Available components are: {}".format(self.supported_components()))
+            print("Component not supported. Available components are:")
+            print(self.supported_components())
+            return
         
         # Check if the component name is supported
         if component_name not in self.supported_component_names():
-            raise ValueError("Component name not supported. Available component names are: {}".format(self.supported_component_names()))
+            print("Component name not supported. Available component names are:")
+            print(self.supported_component_names())
+            return
         
         # Check if the data type is supported
         if data_type not in self.supported_data_types():
-            raise ValueError("Data type not supported. Available data types are: {}".format(self.supported_data_types()))
+            print("Data type not supported. Available data types are:")
+            print(self.supported_data_types())
+            return
 
         # Construct the configuration string based on the provided or default values
         config = f"{component}-{component_name}-{data_type}"
@@ -184,26 +304,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             self._set_target_param_keys(df)
             return flatten_df_second_level(df)
         except Exception as e:
-            raise Exception("An error occurred while loading the dataset: {}".format(e))
+            print(f"An error occurred while loading the dataset: {e}")
+            return
 
     def create_system_df(self):
-        """
-        Creates and returns a DataFrame based on the selected system.
-
-        If the selected system is a single component, it retrieves the dataset based on the selected data type, component, and component name.
-        If a coupler is selected, it filters the DataFrame by the coupler.
-        The resulting DataFrame is stored in `self.selected_df`.
-
-        If the selected system is a list of components (qubit and cavity), it retrieves the qubit and cavity DataFrames.
-        It then creates a new DataFrame by merging the qubit and cavity DataFrames using the specified merger terms.
-        The resulting DataFrame is stored in `self.selected_df`.
-
-        Raises:
-            UserWarning: If the selected system is either not specified or does not contain a cavity.
-
-        Returns:
-            pandas.DataFrame: The created DataFrame based on the selected system.
-        """
         if self.selected_system is None:
             print("Selected system is not defined.")
             return
@@ -224,20 +328,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         return df
 
     def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None):
-        """
-        Creates a merged DataFrame by merging the qubit_df and cavity_df based on the specified merger terms.
-
-        Args:
-            qubit_df (pandas.DataFrame): DataFrame containing qubit data.
-            cavity_df (pandas.DataFrame): DataFrame containing cavity data.
-            merger_terms (list): List of column names to be used for merging the DataFrames. Defaults to None.
-
-        Returns:
-            pandas.DataFrame: Merged DataFrame with qubit and cavity data.
-
-        Raises:
-            None
-        """
         for merger_term in merger_terms:
             # process the dfs to make them ready for merger
             qubit_df[merger_term] = qubit_df['design_options'].apply(lambda x: x['connection_pads']['c'][merger_term])
@@ -255,9 +345,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         return merged_df
 
     def unselect_all(self):
-        """
-        Unselects all the components and data types in the system.
-        """
         self.selected_component_name = None
         self.selected_component = None
         self.selected_data_type = None
@@ -267,12 +354,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.selected_system = None
 
     def show_selections(self):
-        """
-        Prints the selected system, component, and data type.
-
-        If the selected system is a list, it prints the selected qubit, cavity, coupler, and system.
-        If the selected system is a string, it prints the selected component, component name, data type, system, and coupler.
-        """
         if isinstance(self.selected_system, list): #TODO: handle dynamically
             print("Selected qubit: ", self.selected_qubit)
             print("Selected cavity: ", self.selected_cavity)
@@ -286,16 +367,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print("Selected coupler: ", self.selected_coupler)
 
     def _set_target_param_keys(self, df):
-        """
-        Sets the target parameter keys based on the provided dataframe.
-
-        Args:
-            df (pandas.DataFrame): The dataframe containing simulation results.
-
-        Raises:
-            UserWarning: If no selected system dataframe is created or if target_param_keys is not None or a list.
-
-        """
         # ensure selected_df is not None
         if self.selected_system is None:
             raise UserWarning("No selected system df is created. Please check `self.selected_df`")
@@ -316,15 +387,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             self.target_param_keys = [key for key in self.target_param_keys if not key.startswith("unit")]
     
     def _get_units(self, df):
-        """
-        Retrieves the units from the given DataFrame.
-
-        Args:
-            df (pandas.DataFrame): The DataFrame containing the data.
-
-        Returns:
-            list: A list of units extracted from the DataFrame.
-        """
         # TODO: needs implementation 
         raise NotImplementedError()
 

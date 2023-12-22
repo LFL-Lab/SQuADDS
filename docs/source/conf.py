@@ -24,7 +24,6 @@ extensions = [
     "jupyter_sphinx",
     "sphinx_copybutton",
     "sphinx_design",
-    "nbsphinx",
 ]
 
 autodoc_typehints = "none"
@@ -70,7 +69,6 @@ numfig = True
 numfig_format = {"table": "Table %s"}
 
 # Settings for Jupyter notebooks.
-nbsphinx_execute = "never"
 nbsphinx_thumbnails = {
     # Default image for thumbnails.
     "**": "_static/images/logo.png",
