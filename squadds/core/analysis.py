@@ -1,7 +1,7 @@
 import pandas as pd
 from squadds.calcs.transmon_cross import TransmonCrossHamiltonian
 import seaborn as sns
-#from squadds.core.metrics import *
+from squadds.core.metrics import *
 import matplotlib.pyplot as plt
 
 """
