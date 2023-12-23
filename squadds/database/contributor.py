@@ -4,7 +4,6 @@ import json
 
 from datetime import datetime
 from dotenv import load_dotenv
-from ..core.globals import *
 from ..core.utils import *
 from .checker import Checker
 from huggingface_hub import HfApi, HfFolder, login

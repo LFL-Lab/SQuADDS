@@ -1,7 +1,7 @@
 from .interpolator import Interpolator
+from squadds import Analyze
 import pandas as pd
-from ..calcs import *
-from ..core import *
+from ..core.utils import *
 from pyEPR.calcs import Convert
 
 def string_to_float(string):
