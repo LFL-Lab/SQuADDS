@@ -79,8 +79,6 @@ html_theme_options = {
             "icon": "fas fa-box",
         },
     ],
-    "navbar_start": ["navbar-logo"],
-    "navbar_end": ["navbar-icon-links"],
     "navigation_depth": 5,
     "show_nav_level": 3,
     "collapse_navigation": True,
