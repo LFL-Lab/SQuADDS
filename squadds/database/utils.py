@@ -1,6 +1,6 @@
 """Utilities for the database package."""
 from pathlib import Path
-from ..core.globals import *
+from squadds.core.globals import *
 
 import json
 import hashlib
