@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from squadds.core import Analyzer
+from ..core import Analyzer
 import pandas as pd
 
 class Interpolator(ABC):

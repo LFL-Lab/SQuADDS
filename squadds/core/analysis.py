@@ -1,5 +1,5 @@
 import pandas as pd
-from squadds.calcs import *
+from ..calcs import *
 import seaborn as sns
 from metrics import *
 import matplotlib.pyplot as plt

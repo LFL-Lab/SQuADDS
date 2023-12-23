@@ -1,10 +1,10 @@
-from design_patterns import SingletonMeta
+from .design_patterns import SingletonMeta
 from datasets import get_dataset_config_names
 from datasets import load_dataset
 from tabulate import tabulate
 import pprint
 import pandas as pd
-from utils import *
+from .utils import *
 
 class SQuADDS_DB(metaclass=SingletonMeta):
     

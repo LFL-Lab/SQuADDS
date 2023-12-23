@@ -4,9 +4,9 @@ import json
 
 from datetime import datetime
 from dotenv import load_dotenv
-from squadds.core.globals import *
-from squadds.core.utils import *
-from squadds.database.checker import Checker
+from ..core.globals import *
+from ..core.utils import *
+from ..database.checker import Checker
 from huggingface_hub import HfApi, HfFolder, login
 
 load_dotenv(ENV_FILE_PATH)
