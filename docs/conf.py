@@ -41,7 +41,6 @@ autodoc_typehints = "none"
 nbsphinx_execute = 'never'
 templates_path = ['_templates']
 
-autodoc_mock_imports = ["qutip", "scqubits"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

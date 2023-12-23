@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import scqubits as scq
 from squadds.calcs.qubit import QubitHamiltonian
 from scqubits.core.transmon import Transmon
 from pyEPR.calcs import Convert
@@ -17,6 +16,7 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         Parameters:
         - analysis: The analysis object associated with the Hamiltonian.
         """
+        import scqubits as scq
         super().__init__(analysis)
         scq.set_units("GHz")
         
@@ -176,6 +176,7 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         Returns:
         tuple: A tuple containing the coupling strength (g), anharmonicity (alpha), and transition frequency (freq).
         """
+        import scqubits as scq
         scq.set_units("GHz")
         C_q = C + C_c
         if res_type == "half":
