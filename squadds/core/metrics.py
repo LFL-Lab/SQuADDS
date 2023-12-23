@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from numpy import linalg as LA
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 class MetricStrategy(ABC):

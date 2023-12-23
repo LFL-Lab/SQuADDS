@@ -3,7 +3,7 @@ import webbrowser
 import getpass
 import os
 from huggingface_hub import HfApi, HfFolder
-from squadds.core.globals import ENV_FILE_PATH
+from globals import ENV_FILE_PATH
 import pandas as pd
 import numpy as np
 
