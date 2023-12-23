@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+  <html class="no-js" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Tutorial 3: Contributing to SQuADDS &mdash; SQuADDS 0.1.6</title>
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/jupyter-sphinx.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/katex-math.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" /><script src="../../_static/js/web-components/top-nav-bar.js"></script>
+
+  <!-- SEGMENT ANALYTICS --></head>
+<body class="pytorch-body">
+  <!-- UNIFIED TOP MENU -->
+  <qiskit-ui-shell variant="hide-account"></qiskit-ui-shell>
+
+   
+
+    <!-- LEFT SIDE BAR -->
+
+    <!-- if translations available, display language dropdown menu -->
+    
+
+    <!-- Menu becomes dropdown in mobile view -->
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <!-- left side bar main content -->
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+    <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+      <div class="sidebar">
+    <div class="pytorch-left-menu-search">
+        <div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search SQuADDS Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+    </div>
+
+    <!-- render sidebar from the toctree -->
+    
+    
+        <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Documentation Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/index.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apidocs/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/shanto268/SQuADDS">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/pdf/2312.13483.pdf">Paper</a></li>
+</ul>
+
+    
+
+    <!-- PREVIOUS RELEASES -->
+        
+
+    </div>
+  </div>
+</nav>
+
+<!-- OPTIONAL EXPANDABLE FUNCTIONALITY -->
+
+<script>
+    var expandable_rows = document.getElementsByClassName("caption");
+    var i;
+    var j;
+    for (i = 0; i < expandable_rows.length; i++) {
+        // add the chevron icon
+        expandable_rows[i].classList.add("expandable")
+        // expand the dropdown if user is currently on a page included in the dropdown
+        var subheadings = expandable_rows[i].nextElementSibling
+        if (subheadings.classList.contains("current")) {
+            subheadings.style.display = "block"
+            subheadings.style.marginLeft = "0.5rem";
+            expandable_rows[i].classList.add("open");
+        } else {subheadings.style.display = "none"}
+
+        // expand and unexpand dropdown when clicked
+        expandable_rows[i].addEventListener("click", function() {
+            this.classList.toggle("open");
+            var clicked_subheadings = this.nextElementSibling;
+            if (clicked_subheadings.style.display === "block") {
+            clicked_subheadings.style.display = "none";
+            } else {
+            clicked_subheadings.style.display = "block";
+            }
+        });
+
+    }
+</script>
+
+
+<!-- STYLING -->
+<script>
+    // indent subheadings under captions
+    expandable_rows = document.getElementsByClassName("caption");
+    var i;
+    for (i = 0; i < expandable_rows.length; i++) {
+        expandable_rows[i].nextElementSibling.style.marginLeft = "1rem"
+
+        // un-bold subheadings in dropdown
+        var subheadings = expandable_rows[i].nextElementSibling
+        for (j = 0; j < subheadings.children.length; j++) {
+            subheadings.children[j].style.fontWeight = "unset"
+        }
+    }
+
+    // adjust toctree class name to style external links
+    var toc_rows = document.getElementsByClassName("toctree-l1");
+    var i;
+    for (i = 0; i < toc_rows.length; i++) {
+        if (toc_rows[i].children[0].className === "reference external") {
+            toc_rows[i].className = "toctree-l1-external"
+            }
+    }
+
+    // expand and unexpand previous releases dropdown when clicked
+    var release_rows = document.getElementsByClassName("sidebar-l1-expandable");
+    for (i = 0; i < release_rows.length; i++) {
+        release_rows[i].addEventListener("click", function() {
+            this.classList.toggle("open");
+            var clicked_subheadings = this.nextElementSibling;
+            if (clicked_subheadings.style.display === "block") {
+            clicked_subheadings.style.display = "none";
+            } else {
+            clicked_subheadings.style.display = "block";
+            }
+        });
+    }
+</script>
+
+    <div class="pytorch-container">
+
+      <!-- BREADCRUMB MINI MENU BELOW TOP NAV BAR -->
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../../index.html">
+            SQuADDS  documentation
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="index.html">Tutorials</a> &gt;</li>
+        
+      <li>Tutorial 3: Contributing to SQuADDS</li>
+    
+  </ul>
+</div>
+        </div>
+      </div>
+
+      <!-- MAIN CENTRE CONTENT -->
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        
+        <div class="pytorch-content-left">
+          <div class="rst-content">
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <section id="Tutorial-3:-Contributing-to-SQuADDS">
+<h1>Tutorial 3: Contributing to SQuADDS<a class="headerlink" href="#Tutorial-3:-Contributing-to-SQuADDS" title="Link to this heading">¶</a></h1>
+<p>In this tutorial, we will go over the basics of contributing to SQuADDS. We will cover the following topics:</p>
+<ol class="arabic simple" start="0">
+<li><p>Contribution Information Setup</p></li>
+<li><p>Understanding the terminology and database structure</p></li>
+<li><p>Contributing to an existing database node</p></li>
+<li><p>Creating new database node</p></li>
+<li><p>Building on top of others works</p></li>
+</ol>
+<hr class="docutils" />
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[86]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>../.
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Obtaining file:///Users/shanto/LFL/SQuADDS/SQuADDS
+  Preparing metadata (setup.py) ... done
+Installing collected packages: SQuADDS
+  Attempting uninstall: SQuADDS
+    Found existing installation: SQuADDS 0.1
+    Uninstalling SQuADDS-0.1:
+      Successfully uninstalled SQuADDS-0.1
+  Running setup.py develop for SQuADDS
+Successfully installed SQuADDS-0.1
+</pre></div></div>
+</div>
+<section id="Contribution-Information-Setup">
+<h2>Contribution Information Setup<a class="headerlink" href="#Contribution-Information-Setup" title="Link to this heading">¶</a></h2>
+<p>In order to contribute to SQuADDS, you will need to provide some information about yourself. This information will be used to track your contributions and to give you credit for your work. You can provide this information by updating the following variables in the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file in the root directory of the repository:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>GROUP_NAME = &quot;&quot;
+PI_NAME = &quot;&quot;
+INSTITUTION = &quot;&quot;
+USER_NAME = &quot;&quot;
+</pre></div>
+</div>
+<p>Or you can provide this information by executing the following cell.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.database</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">create_contributor_info</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Understanding-the-terminology-and-database-structure">
+<h2>Understanding the terminology and database structure<a class="headerlink" href="#Understanding-the-terminology-and-database-structure" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>HuggingFace</p></li>
+<li><p>Datasets</p></li>
+<li><p>Configurations</p></li>
+<li><p>Structure of SQuADDS_DB</p></li>
+<li><p>Adding to SQuADDS_DB</p></li>
+</ul>
+</section>
+<section id="Where-we-left-of-in-Tutorial-1---Contributing-to-an-existing-configuration">
+<h2>Where we left of in Tutorial 1 - <em>Contributing to an existing configuration</em><a class="headerlink" href="#Where-we-left-of-in-Tutorial-1---Contributing-to-an-existing-configuration" title="Link to this heading">¶</a></h2>
+<p>Format the result from Tutorial 1 to be compatible with SQuADDS.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<section id="How-to-contribute-to-an-existing-configuration:">
+<h3>How to contribute to an existing configuration:<a class="headerlink" href="#How-to-contribute-to-an-existing-configuration:" title="Link to this heading">¶</a></h3>
+<ol class="arabic">
+<li><p><strong>Clone/Fork the Repository</strong>: If you have not already forked or cloned the repository, do so.</p></li>
+<li><p><strong>Create or Checkout a Branch</strong>: If adding new data, it might be best to do it on a new branch:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>add_to_configuration
+</pre></div>
+</div>
+</li>
+<li><p><strong>Modify the Configuration</strong>: Add or modify the data files as necessary for the configuration. Make sure to follow any guidelines provided by the dataset maintainers for the specific structure and format required.</p></li>
+<li><p><strong>Commit and Push Your Changes</strong>: Commit the new data and push it to your fork:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add new data to configuration Y&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>add_to_configuration
+</pre></div>
+</div>
+</li>
+<li><p><strong>Pull Request</strong>: Create a pull request against the original repository.</p></li>
+</ol>
+<hr class="docutils" />
+<p>Show how to add this new data entry to the SQuADDS database by creating a PR.</p>
+<ol class="arabic simple">
+<li><p>Code to fork the repo and create a new branch.</p></li>
+<li><p>Code to add the new data to the chosen configuration.</p></li>
+<li><p>Code to commit and push the changes.</p></li>
+<li><p>Code to create a PR.</p></li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Contributing-a-New-Configuration">
+<h2>Contributing a New Configuration<a class="headerlink" href="#Contributing-a-New-Configuration" title="Link to this heading">¶</a></h2>
+<p>We may find that we possess a dataset that is not currently included in SQuADDS. In this case, we can add a new configuration to SQuADDS.</p>
+<p>But before we do that, we need to make sure that the dataset is in a format that is compatible with SQuADDS. In order to do this, we need to refer back to the structure of SQuADDS.</p>
+<section id="Data-Processing:">
+<h3>Data Processing:<a class="headerlink" href="#Data-Processing:" title="Link to this heading">¶</a></h3>
+<p>We want the data to be in a <code class="docutils literal notranslate"><span class="pre">json</span></code> format with <strong>AT LEAST</strong> to have the following fields. You can add as many more supplementary fields as you want.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;design&quot;</span><span class="p">:{</span>
+<span class="w">        </span><span class="nt">&quot;design_options&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">desig</span><span class="kc">n</span><span class="err">_op</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;design_tool&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">desig</span><span class="kc">n</span><span class="err">_</span><span class="kc">t</span><span class="err">ool_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;sim_options&quot;</span><span class="p">:{</span>
+<span class="w">        </span><span class="nt">&quot;setup&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">sim_se</span><span class="kc">tu</span><span class="err">p_op</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;simulator&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">simula</span><span class="kc">t</span><span class="err">or_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;sim_results&quot;</span><span class="p">:{</span>
+<span class="w">        </span><span class="nt">&quot;result1&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">sim_resul</span><span class="kc">t</span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit1&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">u</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;result2&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">sim_resul</span><span class="kc">t</span><span class="mi">2</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit2&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">u</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;contributor&quot;</span><span class="p">:{</span>
+<span class="w">        </span><span class="nt">&quot;group&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">group_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;PI&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">pi_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;institution&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">i</span><span class="kc">nst</span><span class="err">i</span><span class="kc">tut</span><span class="err">io</span><span class="kc">n</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;uploader&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">user_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;date_created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YYYY-MM-DD-HHMMSS&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If all the <code class="docutils literal notranslate"><span class="pre">sim_results</span></code> has the same units you can just use a <code class="docutils literal notranslate"><span class="pre">&quot;units&quot;:units</span></code> field instead of repeating the unit for each result.</p>
+</section>
+<section id="Metadata:">
+<h3>Metadata:<a class="headerlink" href="#Metadata:" title="Link to this heading">¶</a></h3>
+<p>The metadata for the configuration should include</p>
+<ul class="simple">
+<li><p>the name of the configuration</p></li>
+<li><p>a description of the configuration</p></li>
+<li><p>contributors to the configuration</p></li>
+<li><p>device design, design tool and name</p></li>
+<li><p>simulation setup and simulator name</p></li>
+<li><p>simulation code <code class="docutils literal notranslate"><span class="pre">Simulator</span></code></p></li>
+<li><p>simulation result parameters</p></li>
+<li><p>measured parameters</p></li>
+</ul>
+<p>Code to help generate portions of the metadata and guide the user to create custom <code class="docutils literal notranslate"><span class="pre">Simulator</span></code> (future release and tutorial)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="How-to-contribute-a-new-configuration:">
+<h3>How to contribute a new configuration:<a class="headerlink" href="#How-to-contribute-a-new-configuration:" title="Link to this heading">¶</a></h3>
+<ol class="arabic">
+<li><p><strong>Fork the Dataset Repository</strong>: On the Hugging Face Hub, fork the dataset repository you want to contribute to.</p></li>
+<li><p><strong>Clone Your Fork Locally</strong>: Clone the forked repository to your local machine using the following command:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://huggingface.co/datasets/YOUR_USERNAME/DATASET_NAME
+</pre></div>
+</div>
+</li>
+<li><p><strong>Create a New Branch</strong>: It’s a good practice to create a new branch for your configuration contribution:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>new_configuration
+</pre></div>
+</div>
+</li>
+<li><p><strong>Add Your Configuration</strong>: Depending on the dataset’s structure, this might involve adding new files or modifying existing ones. If the dataset uses the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library’s builder configurations, you will need to modify the Python script that defines the configurations.</p></li>
+<li><p><strong>Commit Your Changes</strong>: Commit the changes with a clear commit message:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add new configuration for circuit element X&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Push to Your Fork</strong>: Push your new branch to your fork on the Hugging Face Hub:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>new_configuration
+</pre></div>
+</div>
+</li>
+<li><p><strong>Create a Pull Request</strong>: Go to the Hugging Face Hub, navigate to your fork, and create a pull request for your new branch. The pull request will be reviewed by the dataset maintainers.</p></li>
+</ol>
+<p>Show</p>
+<ol class="arabic simple">
+<li><p>Code to fork the repo and create a new branch.</p></li>
+<li><p>Code to add the new data to a new configuration.</p></li>
+<li><p>Code to add metadata to the configuration.</p></li>
+<li><p>Code to commit and push the changes.</p></li>
+<li><p>Code to create a PR.</p></li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Building-on-top-of-others-works">
+<h2>Building on top of others works<a class="headerlink" href="#Building-on-top-of-others-works" title="Link to this heading">¶</a></h2>
+<p>We might have some data that can be appended to an existing dataset in SQuADDS. In this case, we can add to the existing configuration in <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> without pushing new entries to the original dataset.</p>
+<ol class="arabic simple">
+<li><p>Code to fork the repo and create a new branch.</p></li>
+<li><p>Code to add the new data to the chosen configuration.</p>
+<ul class="simple">
+<li><p>handling contributions (appending code gives uploader name and institute only and notes)</p></li>
+</ul>
+</li>
+<li><p>Code to commit and push the changes.</p></li>
+<li><p>Code to create a PR.</p></li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="License">
+<h2>License<a class="headerlink" href="#License" title="Link to this heading">¶</a></h2>
+<div style="width: 100%; background-color:#d5d9e0;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2023.</p>
+</p><p><p>This code is licensed under the MIT License. You mayobtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
+</section>
+
+
+             </article>
+            </div>
+            <footer>
+<!-- USER FEEDBACK -->
+  
+
+  <!-- NEXT/PREVIOUS BUTTONS -->
+  <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+    
+      <a href="../developer/index.html" class="btn btn-neutral float-right" title="Developer Notes" accesskey="n" rel="next">Next <img src="../../_static/images/chevron-right-purple.svg" class="next-page"></a>
+    
+    
+      <a href="Tutorial-2_Simulate_interpolated_designs.html" class="btn btn-neutral" title="Tutorial 2: Simulating Interpolated Designs" accesskey="p" rel="prev"><img src="../../_static/images/chevron-right-purple.svg" class="previous-page"> Previous</a>
+    
+  </div>
+
+  <div role="contentinfo">
+    <p>
+    <!-- SHOW QISKIT COPYRIGHT TEXT -->
+        &copy; Copyright 2023, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+
+    <!-- SHOW DATE PAGE LAST UPDATED -->
+      Last updated on 2023/12/23.
+
+    </p>
+  </div>
+
+<!-- SHOW 'MADE WITH SPHINX' TEXT -->
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/Qiskit/qiskit_sphinx_theme">Qiskit Sphinx Theme </a> (based on <a href="https://github.com/pytorch/pytorch_sphinx_theme"> PyTorch Sphinx Theme</a>).
+      </div>
+     
+<br>
+</footer>
+
+<script>
+  function clicked(ctaType) {
+    document.getElementById('was-helpful-thank-you').style.visibility = 'visible';
+    window.trackCta(`Helpful - ${ctaType}`);
+  }
+</script>
+
+          </div>
+        </div>
+
+        <!-- RIGHT SIDE AUTOSUMMARY MENU -->
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">Tutorial 3: Contributing to SQuADDS</a><ul>
+<li><a class="reference internal" href="#Contribution-Information-Setup">Contribution Information Setup</a></li>
+<li><a class="reference internal" href="#Understanding-the-terminology-and-database-structure">Understanding the terminology and database structure</a></li>
+<li><a class="reference internal" href="#Where-we-left-of-in-Tutorial-1---Contributing-to-an-existing-configuration">Where we left of in Tutorial 1 - <em>Contributing to an existing configuration</em></a><ul>
+<li><a class="reference internal" href="#How-to-contribute-to-an-existing-configuration:">How to contribute to an existing configuration:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Contributing-a-New-Configuration">Contributing a New Configuration</a><ul>
+<li><a class="reference internal" href="#Data-Processing:">Data Processing:</a></li>
+<li><a class="reference internal" href="#Metadata:">Metadata:</a></li>
+<li><a class="reference internal" href="#How-to-contribute-a-new-configuration:">How to contribute a new configuration:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Building-on-top-of-others-works">Building on top of others works</a></li>
+<li><a class="reference internal" href="#License">License</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div> 
+
+  <!-- MOBILE MENU FOR SIDEBAR -->
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+      <script src="../../_static/design-tabs.js?v=36754332"></script>
+      <script src="../../_static/katex.min.js?v=48ec3933"></script>
+      <script src="../../_static/auto-render.min.js?v=8b9f325c"></script>
+      <script src="../../_static/katex_autorenderer.js?v=bebc588a"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <!-- enable language dropdown menu expand -->
+  <script type="text/javascript">
+    jQuery(function () {
+        SphinxRtdTheme.Navigation.enable(true);
+    });
+  </script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+</body>
+</html>

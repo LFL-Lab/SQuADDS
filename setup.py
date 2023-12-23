@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from squadds import __version__
 
 # Read requirements from the requirements.txt file
 with open('requirements.txt') as f:
@@ -6,7 +7,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='SQuADDS',
-    version='0.1.7',
+    version=__version__,
     packages=find_packages(),
     description='Our project introduces an open-source database of programmatically generated and experimentally validated superconducting quantum device designs, accessible through a user-friendly interface, significantly lowering the entry barrier for research in this field.',
     long_description=open('README.md').read(),
