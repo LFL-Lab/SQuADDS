@@ -7,15 +7,22 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'SQuADDS'
 copyright = '2023, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
-release = '0.1.0'
+release = '0.1.6'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+# Sphinx should ignore these patterns when building.
+exclude_patterns = [
+    "_build",
+    "**.ipynb_checkpoints",
+    "jupyter_execute",
+]
 
 
 extensions = [
     'sphinx.ext.autodoc',
     'nbsphinx',
+    "sphinx.ext.extlinks",
     'qiskit_sphinx_theme',
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
@@ -39,16 +46,23 @@ exclude_patterns = []
 html_theme = 'qiskit_sphinx_theme'
 html_static_path = ['_static']
 html_theme_options = {
+    "logo_only": True,
     "disable_ecosystem_logo": True,
+    "display_version": True,
+    "prev_next_buttons_location": "bottom",
 }
 
 html_context = {
+    "analytics_enabled": True,
+    "expandable_sidebar": True,
     "theme_announcement": "🎉 Our paper is out!",
-    "announcement_url": "https://example.com",
+    "announcement_url": "https://arxiv.org/pdf/2312.13483.pdf",
     "announcement_url_text": "Check it out",
 }
 
-html_last_updated_fmt = "2023/12/19"
+html_last_updated_fmt = "2023/12/22"
+html_title = f"{project} {release}"
+
 
 # This allows RST files to put `|version|` in their file and
 # have it updated with the release set in conf.py.
