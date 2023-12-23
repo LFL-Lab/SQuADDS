@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import pandas as pd
 
 class QubitHamiltonian(ABC):
     #TODO: make method names more general

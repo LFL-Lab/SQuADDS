@@ -1,7 +1,7 @@
 import pandas as pd
-from ..calcs import *
+from ..calcs.transmon_cross import TransmonCrossHamiltonian
 import seaborn as sns
-from metrics import *
+from .metrics import *
 import matplotlib.pyplot as plt
 
 """
