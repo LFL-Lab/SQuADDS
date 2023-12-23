@@ -23,8 +23,6 @@ def main():
         "squadds.core.design_patterns",
         "squadds.core.analysis",
         "squadds.database.utils",
-        "squadds.database.design_patterns",
-        "squadds.database.analysis",
         "squadds.interpolations.interpolator",
         "squadds.calcs.qubit",
         "squadds.calcs.transmon_cross"
