@@ -7,8 +7,10 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   squadds.calcs
    squadds.core
    squadds.database
+   squadds.interpolations
 
 Module contents
 ---------------

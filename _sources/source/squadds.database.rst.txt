@@ -28,22 +28,6 @@ squadds.database.contributor module
    :undoc-members:
    :show-inheritance:
 
-squadds.database.db module
---------------------------
-
-.. automodule:: squadds.database.db
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-squadds.database.reader module
-------------------------------
-
-.. automodule:: squadds.database.reader
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 squadds.database.utils module
 -----------------------------
 

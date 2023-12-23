@@ -1,10 +1,10 @@
 Release Notes
 =============
 
-Version 0.1.0 (2023-12-20)
+Version 0.1.6 (2023-12-20)
 --------------------
 
-* **MVP Version**
+* **Alpha Version**
 
   - Database hosted on `HuggingFace <https://huggingface.co/datasets/SQuADDS/SQuADDS_DB>`_
 
