@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.1.7 (2023-12-23)
+--------------------------
+
+* **Alpha Version 0.1.7**
+
+- Fixed issues with automated docsite generator
+
+- Standardized path imports in all files
+
+- Version to merge with simulator functionalities
+
 Version 0.1.6 (2023-12-20)
 --------------------------
 
