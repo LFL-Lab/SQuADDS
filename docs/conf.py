@@ -16,6 +16,7 @@ exclude_patterns = [
     "_build",
     "**.ipynb_checkpoints",
     "jupyter_execute",
+    "setup.py",
 ]
 
 
@@ -31,6 +32,9 @@ extensions = [
     "jupyter_sphinx",
     "sphinx_copybutton",
     "sphinx_design",
+    "sphinx.ext.intersphinx",
+    "sphinxcontrib.katex",
+    "reno.sphinxext",
 ]
 
 autodoc_typehints = "none"
@@ -53,15 +57,28 @@ html_theme_options = {
 }
 
 html_context = {
-    "analytics_enabled": True,
+#    "analytics_enabled": True,
     "expandable_sidebar": True,
     "theme_announcement": "🎉 Our paper is out!",
     "announcement_url": "https://arxiv.org/pdf/2312.13483.pdf",
     "announcement_url_text": "Check it out",
 }
 
-html_last_updated_fmt = "2023/12/22"
+html_last_updated_fmt = "%Y/%m/%d"
 html_title = f"{project} {release}"
+
+add_module_names = True
+modindex_common_prefix = ["squadds."]
+
+autodoc_typehints = "description"
+# Only add type hints from signature to description body if the parameter has documentation.  The
+# return type is always added to the description (if in the signature).
+autodoc_typehints_description_target = "documented_params"
+
+autoclass_content = "both"
+
+autosummary_generate = True
+autosummary_generate_overwrite = False
 
 
 # This allows RST files to put `|version|` in their file and
