@@ -62,5 +62,11 @@ class AnsysSimulator:
         a, fq = find_a_fq(cross2cpw, cross2ground, Lj)
         print(f"qubit anharmonicity = {round(a)} MHz \nqubit frequency = {round(fq, 3)} GHz")
 
-    def plot_device(device_dict):
-        print(device_dict)
+    def plot_device(self, device_dict):
+        self.design.delete_all_components()
+        if "g" in device_dict["sim_results"]:
+            qc = QubitCavity(self.design, "qubit_cavity", options=device_dict["design"]["design_options"])
+
+        self.gui.rebuild()
+        self.gui.autoscale()
+        self.gui.screenshot()
