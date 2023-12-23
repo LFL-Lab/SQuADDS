@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scqubits as scq
-from .qubit import QubitHamiltonian
+from squadds.calcs.qubit import QubitHamiltonian
 from scqubits.core.transmon import Transmon
 from pyEPR.calcs import Convert
 from scipy.constants import e, h, hbar

@@ -6,8 +6,6 @@ __copyright__ = 'Sadman Ahmed Shanto, Eli Levenson-Falk 2023'
 __author__ = 'Sadman Ahmed Shanto, Eli Levenson-Falk'
 __status__ = "Alpha"
 __repo_path__ = os.path.dirname(os.path.abspath(__file__))
-__library_path__ = os.path.join(__repo_path__, "library")
-
 
 from squadds.core.db import SQuADDS_DB
 from squadds.core.analysis import Analyzer
