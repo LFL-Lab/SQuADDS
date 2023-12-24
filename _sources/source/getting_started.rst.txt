@@ -21,7 +21,7 @@ Alternatively, you can install SQuADDS from source.
    .. code-block:: bash
 
       cd <REPO-PATH>
-      git clone https://github.com/shanto268/SQuADDS
+      git clone https://github.com/LFL-Lab/SQuADDS.git
 
 2. **Install Dependencies**: 
    Activate your Qiskit Metal conda environment and install dependencies.
@@ -30,7 +30,7 @@ Alternatively, you can install SQuADDS from source.
 
       conda activate <YOUR-ENV>
       cd SQuADDS
-      pip install .
+      pip install -e .
 
 
 FAQ
@@ -38,5 +38,5 @@ FAQ
 
 - **Getting `ModuleNotFoundError: No module named 'squadds'` after running `pip install SQuADDS`** in Jupyter Notebook
 
-You may need to restart the kernel after installing `SQuADDS`
+- You may need to restart the kernel after installing `SQuADDS`
 
