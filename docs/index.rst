@@ -21,11 +21,11 @@ SQuADDS is an open-source platform aimed at speeding up the design loop in the c
    Getting Started <source/getting_started>
    Tutorials <source/tutorials/index>
    Developer Notes<source/developer/index>
-   References<source/references/index>
-   Release Logs<source/release_notes>
    API Reference <source/apidocs/index>
+   Release Logs<source/release_notes>
    GitHub <https://github.com/shanto268/SQuADDS>
    Paper <https://arxiv.org/pdf/2312.13483.pdf>
+   References<source/references/index>
 
 
 Citation

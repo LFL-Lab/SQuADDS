@@ -1,13 +1,13 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
+from squadds import __version__
 
 project = 'SQuADDS'
 copyright = '2023, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
-release = '0.1.7'
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -16,7 +16,13 @@ exclude_patterns = [
     "_build",
     "**.ipynb_checkpoints",
     "jupyter_execute",
+    "*/setup.py",
+    "../setup.py",
     "setup.py",
+    "README.md",
+    "../README.md",
+    "../imports_test.py",
+    "imports_test.py",
 ]
 
 
@@ -45,28 +51,48 @@ templates_path = ['_templates']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'qiskit_sphinx_theme'
+html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
-html_theme_options = {
-    "logo_only": True,
-    "disable_ecosystem_logo": True,
-    "display_version": True,
-    "prev_next_buttons_location": "bottom",
-}
+
 
 html_context = {
 #    "analytics_enabled": True,
+    "theme_announcement": "🎉 Our <a href='https://arxiv.org/pdf/2312.13483.pdf'>paper</a> is out! ",
     "expandable_sidebar": True,
-    "theme_announcement": "🎉 Our paper is out!",
-    "announcement_url": "https://arxiv.org/pdf/2312.13483.pdf",
-    "announcement_url_text": "Check it out",
 }
 
+html_theme_options = {
+  #  "logo_only": True,
+  #  "disable_ecosystem_logo": True,
+    "display_version": True,
+    "prev_next_buttons_location": "bottom",
+    "github_url": "https://github.com/LFL-Lab/SQuADDS",
+    "icon_links": [
+        {
+            "name": "LFL Lab",
+            "url": "https://dornsife.usc.edu/lfl/",
+            "icon": "fas fa-hand-peace",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/SQuADDS/",
+            "icon": "fab fa-python",
+        },
+    ],
+    "navigation_depth": 5,
+    "show_nav_level": 3,
+    "collapse_navigation": True,
+}
+
+
+
+
 html_last_updated_fmt = "%Y/%m/%d"
-html_title = f"{project} {release}"
+html_title = f"{project} v{release}"
 
 add_module_names = True
 modindex_common_prefix = ["squadds."]
+autodoc_mock_imports = ["qutip", "scqubits"]
 
 autodoc_typehints = "description"
 # Only add type hints from signature to description body if the parameter has documentation.  The
@@ -78,6 +104,7 @@ autoclass_content = "both"
 autosummary_generate = True
 autosummary_generate_overwrite = False
 
+add_module_names = True
 
 # This allows RST files to put `|version|` in their file and
 # have it updated with the release set in conf.py.
