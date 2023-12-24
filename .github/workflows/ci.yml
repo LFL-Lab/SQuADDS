@@ -34,12 +34,11 @@ jobs:
     - name: Install Qiskit Metal via Conda
       run: |
         sudo apt install graphviz=2.42.2-6 pandoc=2.9.2.1-3ubuntu2 qtbase5-dev=5.15.3+dfsg-2ubuntu0.2 qt5-qmake=5.15.3+dfsg-2ubuntu0.2
+        echo "source $CONDA/etc/profile.d/conda.sh" >> $GITHUB_ENV
         conda create -n myenv python=3.11 -y
-        echo "source activate myenv" > ~/.bashrc
-        source ~/.bashrc
+        echo "conda activate myenv" >> $GITHUB_ENV
         conda install -c conda-forge qiskit-metal -y
-      
-      
+    
     - name: Install squadds recs
       run: |
         ~/miniconda3/envs/myenv/bin/pip install datasets
