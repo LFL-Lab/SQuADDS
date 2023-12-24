@@ -7,8 +7,8 @@ from qiskit_metal import draw, Dict, designs, MetalGUI
 from qiskit_metal.toolbox_metal import math_and_overrides
 from qiskit_metal.qlibrary.core import QComponent
 import qiskit_metal as metal
-from squadds.simulations.just_claw import TransmonClaw
-from squadds.simulations.qubit_cavity import QubitCavity
+from squadds.components.claw_coupler import TransmonClaw
+from squadds.components.coupled_systems import QubitCavity
 from qiskit_metal.qlibrary.terminations.launchpad_wb import LaunchpadWirebond
 from qiskit_metal.qlibrary.terminations.short_to_ground import ShortToGround
 from qiskit_metal.qlibrary.tlines.straight_path import RouteStraight
