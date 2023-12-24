@@ -89,6 +89,10 @@ class QubitCavity(QComponent):
         # self.add_qgeometry('poly', self.qubit.qgeometry_dict('poly'), subtract = True, chip = p.chip)
 
     def make_cavity(self):
+        """
+        This method is used to create a cavity in the coupled system.
+        It calls the make_coupler() and make_cpws() methods to create the necessary components.
+        """
         self.make_coupler()
         self.make_cpws()
         # p = self.p

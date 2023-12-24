@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'SQuADDS'
 copyright = '2023, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
-release = "0.1.8"
+release = "0.1.9"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -16,10 +16,12 @@ exclude_patterns = [
     "jupyter_execute",
     "*/setup.py",
     "../setup.py",
+    "../../setup.py",
     "setup.py",
     "README.md",
     "../README.md",
     "../imports_test.py",
+    "../../imports_test.py",
     "imports_test.py",
 ]
 
@@ -90,7 +92,7 @@ html_title = f"{project} v{release}"
 
 add_module_names = True
 modindex_common_prefix = ["squadds."]
-autodoc_mock_imports = ["qutip", "scqubits", "pyaedt", "qiskit-metal"]
+autodoc_mock_imports = ["qutip", "scqubits", "pyaedt", "qiskit-metal", "setup"]
 
 autodoc_typehints = "description"
 # Only add type hints from signature to description body if the parameter has documentation.  The
