@@ -9,3 +9,4 @@ __repo_path__ = os.path.dirname(os.path.abspath(__file__))
 
 from squadds.core.db import SQuADDS_DB
 from squadds.core.analysis import Analyzer
+from squadds.simulations.ansys_simulator import AnsysSimulator
