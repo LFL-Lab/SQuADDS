@@ -76,7 +76,7 @@ html_theme_options = {
         {
             "name": "PyPI",
             "url": "https://pypi.org/project/SQuADDS/",
-            "icon": "fas fa-box",
+            "icon": "fas fa-python",
         },
     ],
     "navigation_depth": 5,
@@ -104,6 +104,7 @@ autoclass_content = "both"
 autosummary_generate = True
 autosummary_generate_overwrite = False
 
+add_module_names = True
 
 # This allows RST files to put `|version|` in their file and
 # have it updated with the release set in conf.py.
