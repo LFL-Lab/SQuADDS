@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.2 (2023-12-24)
+--------------------------
+
+* **Alpha Version 0.2**
+
+- Simulator functionalities added
+
+- Tutorial-2_Simulate_interpolated_designs added
+
+- Issues with automated docsite generator persist
+
+
 Version 0.1.7 (2023-12-23)
 --------------------------
 

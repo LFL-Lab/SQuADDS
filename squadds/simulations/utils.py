@@ -31,35 +31,7 @@ from datetime import datetime
 
 
 def getMeshScreenshot(projectname,designname,solutiontype="Eigenmode"):
-    """Interfaces w/ ANSYS via pyEPR for more custom automation.
-    1. Connect to ANSYS
-    2. Change Silicon permitivity to 11.45; represents ultra cold silicon.
-    3. Checks for prexisting Setups, deletes them...
-    """
-
-    hfss = Hfss(projectname=projectname, 
-                designname=designname, 
-                solution_type=solutiontype,
-                new_desktop_session=False, 
-                close_on_exit=False)
-
-
-    # Speculative command to show the mesh in the HFSS graphical interface
-    #hfss.oeditor.ShowWindow(["NAME:WindowParameters", "ShowMesh:=", True])
-
-    # Export the design preview to a JPG file
-    #hfss.export_design_preview_to_jpg('output.jpg')
-
-    mesh_view_script = """
-    oDesktop.RestoreWindow
-    o3DLayout = oProject.SetActiveEditor("3D Modeler")
-    o3DLayout.ShowWindow("Mesh")
-    """
-
-    hfss.oeditor.AddScriptCommand(mesh_view_script, True)
-
-    # Export the design preview to a JPG file
-    hfss.export_design_preview_to_jpg('output2.jpg')
+    raise NotImplementedError()
 
 def generate_bbox(component: QComponent) -> Dict[str, float]:
     """
