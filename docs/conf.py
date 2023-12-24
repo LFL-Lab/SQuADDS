@@ -76,7 +76,7 @@ html_theme_options = {
         {
             "name": "PyPI",
             "url": "https://pypi.org/project/SQuADDS/",
-            "icon": "fas fa-python",
+            "icon": "fab fa-python",
         },
     ],
     "navigation_depth": 5,
