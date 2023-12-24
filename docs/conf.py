@@ -90,7 +90,7 @@ html_title = f"{project} v{release}"
 
 add_module_names = True
 modindex_common_prefix = ["squadds."]
-autodoc_mock_imports = ["qutip", "scqubits", "qiskit_metal"]
+autodoc_mock_imports = ["qutip", "scqubits", "qiskit_metal", "pyaedt"]
 
 autodoc_typehints = "description"
 # Only add type hints from signature to description body if the parameter has documentation.  The
