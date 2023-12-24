@@ -23,10 +23,16 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install build twine
 
-    - name: Build package
-      run: |
-        python setup.py sdist bdist_wheel
-
+    - name: Install Wheel
+      run: pip install wheel
+      
+    - name: Build Source and Wheel distribution
+      run: python setup.py sdist bdist_wheel
+      shell: /usr/bin/bash -e {0}
+      env:
+        pythonLocation: /opt/hostedtoolcache/Python/3.10.13/x64
+        LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.13/x64/lib
+      
     - name: Publish package
       env:
         TWINE_USERNAME: __token__
