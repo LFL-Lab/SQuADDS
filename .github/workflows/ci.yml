@@ -34,18 +34,20 @@ jobs:
     - name: Install Qiskit Metal via Conda
       run: |
         sudo apt install graphviz=2.42.2-6 pandoc=2.9.2.1-3ubuntu2 qtbase5-dev=5.15.3+dfsg-2ubuntu0.2 qt5-qmake=5.15.3+dfsg-2ubuntu0.2
-        conda install -c conda-forge qiskit-metal --yes
+        conda create -n myenv python=3.11
+        conda activate myenv
+        conda install -c conda-forge qiskit-metal 
       
     - name: Install squadds recs
       run: |
-        pip install datasets
-        pip install pyEPR-quantum
-        pip install dotnetcore2
-        pip install -r requirements.txt 
-      
+        ~/miniconda3/envs/myenv/bin/pip install datasets
+        ~/miniconda3/envs/myenv/bin/pip install pyEPR-quantum
+        ~/miniconda3/envs/myenv/bin/pip install dotnetcore2
+        ~/miniconda3/envs/myenv/bin/pip install -r requirements.txt 
+    
     - name: Install squadds library
       run: |
-        pip install -e . -vvv
+        ~/miniconda3/envs/myenv/bin/pip install -e . -vvv
 
     - name: Verify qutip and scqubits Installation
       run: |
