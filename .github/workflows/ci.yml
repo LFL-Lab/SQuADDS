@@ -25,15 +25,22 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-
-    - name: Install squadds library
+    
+    - name: Ensure pip is installed
       run: |
+        python -m ensurepip
         python -m pip install --upgrade pip
+
+    - name: Install squadds recs
+      run: |
         pip install datasets
         pip install pyEPR-quantum
         pip install dotnetcore2
-        pip install -e . 
-        pip install -r requirements.txt
+        pip install -r requirements.txt -vvv
+      
+    - name: Install squadds library
+      run: |
+        pip install -e . -vvv
 
     - name: Verify qutip and scqubits Installation
       run: |
