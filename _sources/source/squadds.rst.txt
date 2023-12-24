@@ -11,6 +11,8 @@ Subpackages
    squadds.core
    squadds.database
    squadds.interpolations
+   squadds.simulations
+   squadds.components
 
 Module contents
 ---------------
