@@ -2,7 +2,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
 
-roject = 'SQuADDS'
+project = 'SQuADDS'
 copyright = '2023, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
 release = "0.1.8"
@@ -90,7 +90,7 @@ html_title = f"{project} v{release}"
 
 add_module_names = True
 modindex_common_prefix = ["squadds."]
-autodoc_mock_imports = ["qutip", "scqubits"]
+autodoc_mock_imports = ["qutip", "scqubits", "pyaedt", "qiskit-metal"]
 
 autodoc_typehints = "description"
 # Only add type hints from signature to description body if the parameter has documentation.  The
