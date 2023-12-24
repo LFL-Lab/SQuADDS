@@ -8,5 +8,6 @@ Tutorials
    Tutorial-2_Simulate_interpolated_designs.ipynb
    Tutorial-3_Contributing_to_SQuADDS.ipynb
 
-| Tutorials 2 and 3 are currently under construction 🛠️. Please stay tuned 🙏🏽 
+| Tutorials 3 is currently under construction 🛠️. Please stay tuned 🙏🏽 
+
 | More Tutorials Coming Soon!
