@@ -40,9 +40,6 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
                         |  |________________
                         |_________
 
-    .. meta::
-        Transmon Claw
-
     BaseQubit Default Options:
         * connection_pads: Empty Dict -- The dictionary which contains all active connection lines for the qubit.
         * _default_connection_pads: empty Dict -- The default values for the (if any) connection lines of the qubit.
