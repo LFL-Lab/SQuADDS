@@ -18,13 +18,9 @@ from qiskit_metal.qlibrary.core import BaseQubit
 
 
 class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
-    """The base `TransmonCross` class.
+    """The base `TransmonClaw` class.
 
     Inherits `BaseQubit` class.
-
-    Simple Metal Transmon Cross object. Creates the X cross-shaped island,
-    the "junction" on the south end, and up to 3 connectors on the remaining arms
-    (claw or gap).
 
     'claw_width' and 'claw_gap' define the width/gap of the CPW line that
     makes up the connector. Note, DC SQUID currently represented by single
@@ -34,7 +30,7 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
     information.
 
     Sketch:
-        Below is a sketch of the qubit
+        Below is a sketch of the claw
         ::
 
                                         claw_length
@@ -44,12 +40,8 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
                         |  |________________
                         |_________
 
-
-    .. image::
-        transmon_cross.png
-
     .. meta::
-        Transmon Cross
+        Transmon Claw
 
     BaseQubit Default Options:
         * connection_pads: Empty Dict -- The dictionary which contains all active connection lines for the qubit.

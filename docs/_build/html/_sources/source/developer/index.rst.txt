@@ -16,13 +16,13 @@ Contribution Items
 
 | **Documentation** - We welcome contributions to the documentation. If you find any typos or errors, please open an issue on GitHub.
 
-| **Implementation of Next Release** - If you would like to help in implementing the next version of SQuADDS, please look at what is worked on for the `next release <https://github.com/shanto268/SQuADDS?tab=readme-ov-file#next-release>`_
+| **Implementation of Next Release** - If you would like to help in implementing the next version of SQuADDS, please look at what is being worked on for the `next release <https://github.com/shanto268/SQuADDS?tab=readme-ov-file#next-release>`_
 
 
 Developers
 ----------
 
-| `Sadman Ahmed Shanto <https:sadmanahmedshanto.com>`_ (University of Southern California)
+| `Sadman Ahmed Shanto <https://www.sadmanahmedshanto.com>`_ (University of Southern California)
 
 Contributors
 ------------
