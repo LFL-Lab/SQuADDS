@@ -61,6 +61,7 @@ html_theme_options = {
 html_context = {
     "theme_announcement": "🎉 Our <a href='https://arxiv.org/pdf/2312.13483.pdf'>paper</a> is out! ",
     "expandable_sidebar": True,
+    "google_analytics_id": "G-R5QKJDWM2W", 
 }
 html_last_updated_fmt = "%Y/%m/%d"
 html_title = f"{project} v{release}"
