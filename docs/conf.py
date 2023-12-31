@@ -38,6 +38,9 @@ extensions = [
     'recommonmark', # Add this for Markdown support
 ]
 
+# Templates path
+templates_path = ['_templates']
+
 # HTML output configuration
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
