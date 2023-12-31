@@ -60,6 +60,8 @@ class AnsysSimulator:
         Lj = xmon_dict["design"]["design_options"]["aedt_q3d_inductance"] * (1 if xmon_dict["design"]["design_options"]["aedt_q3d_inductance"] > 1e-9 else 1e-9)
         a, fq = find_a_fq(cross2cpw, cross2ground, Lj)
         print(f"qubit anharmonicity = {round(a)} MHz \nqubit frequency = {round(fq, 3)} GHz")
+        # return a json object
+        return dict("qubit_frequency_GHz": fq, "anharmonicity_MHz":a)
 
     def plot_device(self, device_dict):
         self.design.delete_all_components()

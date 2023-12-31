@@ -35,6 +35,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinxcontrib.katex",
     "reno.sphinxext",
+    'recommonmark', # Add this for Markdown support
 ]
 
 # HTML output configuration
@@ -79,6 +80,9 @@ autosummary_generate_overwrite = False
 # nbsphinx settings
 nbsphinx_execute = 'never'
 
+# allow html
+nbsphinx_allow_html = True
+
 # Jupyter notebook settings
 nbsphinx_thumbnails = {
     "**": "_static/images/logo.png",
@@ -95,6 +99,14 @@ nitpicky = True
 # Exclude some files from being included in the output
 exclude_patterns = ['README.md', 'imports_test.py', 'setup.py']
 
+# Ensure that MathJax knows to look for LaTeX delimiters
+mathjax_config = {
+    'TeX': {'equationNumbers': {'autoNumber': 'AMS', 'useLabelIds': True}},
+    'tex2jax': {
+        'inlineMath': [['$', '$'], ['\\(', '\\)']],
+        'displayMath': [['$$', '$$'], ['\\[', '\\]']],
+    },
+}
 
 html_meta = {
     "description": "SQuADDS: A Python package for design and simulation of superconducting quantum devices",

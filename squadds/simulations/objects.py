@@ -93,12 +93,12 @@ def get_sim_results(emode_df = {}, lom_df = {}):
     # print(Lj)
     gg, aa, ff_q = find_g_a_fq(cross2cpw, cross2ground, f_r, Lj, N=4)
     data = dict(
-        f_cavity = f_r,
+        cavity_frequency_GHz = f_r,
         Q = emode_df["sim_results"]["Q"],
-        kappa = emode_df["sim_results"]["kappa"],
-        g = gg,
-        a = aa,
-        f_qubit = ff_q
+        kappa_kHz = emode_df["sim_results"]["kappa"],
+        g_MHz = gg,
+        anharmonicity_MHz = aa,
+        qubit_frequency_GHz = ff_q
     )
 
     # return_df = dict(
