@@ -42,16 +42,16 @@ extensions = [
 templates_path = ['_templates']
 
 # HTML output configuration
-html_logo = "./_static/images/squadds_logo_transparent.png"
-html_favicon = "./_static/images/squadds_logo.jpg"
+html_logo = "./_static/images/squadds_logo_dark.png"
+html_favicon = "./_static/images/squadds_logo_dark.png"
 
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 html_theme_options = {
     "logo": {
         "alt_text": "SQuADDS Logo",
-        "image_light": "_static/images/squadds_logo_transparent.png",
-        "image_dark": "_static/images/squadds.svg",
+        "image_light": "_static/images/squadds_logo_light_name.png",
+        "image_dark": "_static/images/squadds_logo_dark_name.png",
         "link": "../SQuADDS"
     },
     "github_url": "https://github.com/LFL-Lab/SQuADDS",
