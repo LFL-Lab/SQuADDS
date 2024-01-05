@@ -1,4 +1,4 @@
-# ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow) SQuADDS: 
+# ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow) ![SQuADDS Logo](docs/_static/images/squadds_logo_transparent.png)SQuADDS: 
 
 > :warning: **This project is an alpha release and currently under active development. Some features and documentation may be incomplete. Please update to the latest release.**
 

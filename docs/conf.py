@@ -52,7 +52,7 @@ html_theme_options = {
         "alt_text": "SQuADDS Logo",
         "image_light": "_static/images/squadds_logo_transparent.png",
         "image_dark": "_static/images/squadds.svg",
-        "link": "../index"
+        "link": "../SQuADDS"
     },
     "github_url": "https://github.com/LFL-Lab/SQuADDS",
     "icon_links": [
