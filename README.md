@@ -1,7 +1,7 @@
 <div align="left" style="display: flex; align-items: center; gap: 10px;">
-  <img src="https://img.shields.io/badge/Status-Alpha%20Version-yellow" alt="Alpha Version" style="flex-shrink: 0;">
-  <h1 style="margin: 0; padding: 0;">SQuADDS: Superconducting Qubit And Device Design and Simulation</h1>
   <img src="docs/_static/images/squadds_logo.jpg" height="120" alt="SQuADDS Logo" style="flex-shrink: 0;">
+  <h1 style="margin: 0; padding: 0;">SQuADDS: Superconducting Qubit And Device Design and Simulation</h1>
+  <img src="https://img.shields.io/badge/Status-Alpha%20Version-yellow" alt="Alpha Version" style="flex-shrink: 0;">
 </div>
 
 
