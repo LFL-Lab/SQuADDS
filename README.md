@@ -1,8 +1,8 @@
-<div align="left" style="display: flex; align-items: center; gap: 10px;">
-  <img src="docs/_static/images/squadds_logo_dark.png" height="70" alt="SQuADDS Logo"/> <!-- Adjust height to match the badge -->
-  <h1 style="margin: 0; padding: 0; display: inline; font-size: 2.0em;">SQuADDS: Superconducting Qubit And Device Design and Simulation</h1>
-  <img src="https://img.shields.io/badge/Status-Alpha%20Version-yellow" alt="Alpha Version" style="height: 20px;"/> <!-- Adjust height as necessary -->
-</div>
+<center>
+  <img src="docs/_static/images/squadds_logo_dark_name.png" width="80%" alt="SQuADDS Logo" /> <!-- This will stretch the logo to the full container width -->
+</center>
+
+# ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow) Superconducting Qubit And Device Design and Simulation database
 
 > :warning: **This project is an alpha release and currently under active development. Some features and documentation may be incomplete. Please update to the latest release.**
 
@@ -48,12 +48,13 @@ pip install -e .
 ```
 
 ## Tutorials
-- [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/tutorials/Tutorial-1_getting_started_with_SQuADDS.html)
-- [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
-- [Tutorial 3: Contributing to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/tutorials/Tutorial-3_Contributing_to_SQuADDS.html)
+- [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html)
+- [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
+- [Tutorial 3: Contributing to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_to_SQuADDS.html)
 - [(COMING SOON) Tutorial 4: Adding your own Qubit Hamiltonian Calculator]()
 - [(COMING SOON) Tutorial 5: Creating your own Interpolater]()
 - [(COMING SOON) Tutorial 6: Creating your own Simulator]()
+
 
 
 ## Contributing
