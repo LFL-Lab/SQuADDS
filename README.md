@@ -82,6 +82,6 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 
 ## Next Release:
 
-### [Version 0.3 Features](next_release.md)):
+### [Version 0.3 Features](next_release.md):
 
 ---
