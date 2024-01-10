@@ -7,77 +7,75 @@ on:
     paths:
       - 'squadds/**' # Trigger when changes are made to any file in 'squadds' directory
       - 'docs/**' # Trigger when changes are made to any file in 'docs' directory
-      
+
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
 
-    - name: Cache Python dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-    - name: Install squadds library
-      run: |
-        python -m pip install --upgrade pip
-        pip install datasets
-        pip install pyEPR-quantum
-        pip install pyaedt
-        pip install -e . 
-        pip install -r requirements.txt
+      - name: Install squadds library
+        run: |
+          python -m pip install --upgrade pip
+          pip install datasets
+          pip install pyEPR-quantum
+          pip install pyaedt
+          pip install -e . 
+          pip install -r requirements.txt
 
-    - name: Verify qutip and scqubits Installation
-      run: |
-        python -c "import qutip; print(qutip.__version__)"
-        python -c "import scqubits; print(scqubits.__version__)"
-      
-    - name: Test Python Imports
-      run: python imports_test.py
+      - name: Verify qutip and scqubits Installation
+        run: |
+          python -c "import qutip; print(qutip.__version__)"
+          python -c "import scqubits; print(scqubits.__version__)"
 
-    - name: Install documentation dependencies
-      run: |
-        pip install sphinx qiskit-sphinx-theme nbsphinx jupyter_sphinx sphinx_copybutton sphinx_design reno sphinxcontrib-katex pydata_sphinx_theme recommonmark
+      - name: Test Python Imports
+        run: python imports_test.py
 
-    - name: Install Pandoc v 2.18
-      run: |
-        sudo apt-get remove -y pandoc
-        wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb
-        sudo dpkg -i pandoc-2.18-1-amd64.deb
-      
+      - name: Install documentation dependencies
+        run: |
+          pip install sphinx qiskit-sphinx-theme nbsphinx jupyter_sphinx sphinx_copybutton sphinx_design reno sphinxcontrib-katex pydata_sphinx_theme recommonmark
 
-    - name: List files
-      run: ls -lah
+      - name: Install Pandoc v 2.18
+        run: |
+          sudo apt-get remove -y pandoc
+          wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb
+          sudo dpkg -i pandoc-2.18-1-amd64.deb
 
-    - name: Generate documentation
-      run: |
-        cd docs
-        sphinx-apidoc -f -o source/ ../ 
+      - name: List files
+        run: ls -lah
 
-    - name: Move tutorials to docs/source/tutorials
-      run: |
-        cp tutorials/Tutorial*.ipynb docs/source/tutorials
+      - name: Generate documentation
+        run: |
+          cd docs
+          sphinx-apidoc -f -o source/ ../
 
-    - name: Build documentation
-      run: |
-        cd docs
-        make clean
-        make html
+      - name: Move tutorials to docs/source/tutorials
+        run: |
+          cp tutorials/Tutorial*.ipynb docs/source/tutorials
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.SQuADDS}}
-        publish_dir: ./docs/build/html
+      - name: Build documentation
+        run: |
+          cd docs
+          make clean
+          make html
 
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.SQuADDS}}
+          publish_dir: ./docs/build/html

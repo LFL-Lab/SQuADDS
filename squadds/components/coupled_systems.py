@@ -1,10 +1,11 @@
+from collections import OrderedDict
+
 import numpy as np
 from qiskit_metal import Dict
-from collections import OrderedDict
-from qiskit_metal.qlibrary.core import QRoute, QRoutePoint
-from qiskit_metal.qlibrary.core import QComponent
+from qiskit_metal.qlibrary.core import QComponent, QRoute, QRoutePoint
 # from cavity_feedline import CavityFeedline
 from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
+
 
 class QubitCavity(QComponent):
     
@@ -130,13 +131,15 @@ class QubitCavity(QComponent):
         #     temp_opts.update({k:p.cavity_options.coupler_options[k]})
 
         if(p.cavity_options['coupling_type'].upper() == "CLT"):
-            from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
+            from qiskit_metal.qlibrary.couplers.coupled_line_tee import \
+                CoupledLineTee
             self.coupler = CoupledLineTee(self.design, "{}_CLT_coupler".format(self.name), options=temp_opts)
         # elif(p.cavity_options['coupling_type'] == 'inductive'):
         #     from inductive_coupler import InductiveCoupler
         #     self.coupler = InductiveCoupler(self.design, "{}_ind_coupler".format(self.name), options=temp_opts)
         elif(p.cavity_options['coupling_type'].lower() == 'capn' or p.cavity_options['coupling_type'].lower() == 'ncap'):
-            from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import CapNInterdigitalTee
+            from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import \
+                CapNInterdigitalTee
             self.coupler = CapNInterdigitalTee(self.design, '{}_capn_coupler'.format(self.name), options=temp_opts)
         # self.add_qgeometry('path', self.coupler.qgeometry_dict('path'), chip = p.chip)
         # self.add_qgeometry('poly', self.coupler.qgeometry_dict('poly'), chip = p.chip)

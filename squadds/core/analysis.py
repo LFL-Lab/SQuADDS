@@ -1,8 +1,9 @@
-import pandas as pd
-from squadds.calcs.transmon_cross import TransmonCrossHamiltonian
-import seaborn as sns
-from squadds.core.metrics import *
 import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+
+from squadds.calcs.transmon_cross import TransmonCrossHamiltonian
+from squadds.core.metrics import *
 
 """
 =====================================================================================
@@ -164,12 +165,11 @@ class Analyzer:
             ValueError: If the specified metric is not supported.
         """
 
-        self.metric_strategy = strategy
+        self.metric_strategy = strategy 
 
     def _outside_bounds(self, df: pd.DataFrame, params: dict, display=True) -> bool:
         """
         Check if entered parameters are outside the bounds of a dataframe.
-
         Args:
             df (pd.DataFrame): Dataframe to give warning.
             params (dict): Keys are column names of `df`. Values are values to check for bounds.
