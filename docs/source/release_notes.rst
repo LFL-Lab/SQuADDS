@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.2.1 (2023-12-24)
+--------------------------
+
+* **Alpha Version 0.2.1**
+
+- Bug fixes:
+  - change "c" to "readout" in both code and database entries
+- Handled Warnings from pyaedt
+
 Version 0.2 (2023-12-24)
 --------------------------
 

@@ -96,31 +96,6 @@ class QubitCavity(QComponent):
         """
         self.make_coupler()
         self.make_cpws()
-        # p = self.p
-
-        # cavity_opts = Dict()
-        # self.copier(cavity_opts, p.cavity_options)
-        # cavity_opts['cpw_options'].update({'pin_inputs':Dict(
-        #                                     start_pin = Dict(
-        #                                         component = self.qubit.name,
-        #                                         pin = 'c'
-        #                                     ),
-        #                                     end_pin = Dict(
-        #                                         component = '',
-        #                                         pin = ''
-        #                                     )
-        #                                     )})
-        # self.cavity = CavityFeedline(self.design, "{}_cavityfeedline".format(self.name), options = cavity_opts)
-        # self.add_qgeometry('path', self.cavity.qgeometry_dict('path'), layer = 1, chip = p.chip)
-        # self.add_qgeometry('poly', self.cavity.qgeometry_dict('poly'), layer = 1, chip = p.chip)
-
-
-    # def make_pins(self):
-    #     p = self.p
-    #     start_dict = self.cavity.get_pin('prime_start')
-    #     end_dict = self.cavity.get_pin('prime_end')
-    #     self.add_pin('prime_start', start_dict['points'], start_dict['width'], chip = p.chip)
-    #     self.add_pin('prime_end', end_dict['points'], end_dict['width'], chip = p.chip)
 
     def make_coupler(self):
         p = self.p

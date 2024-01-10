@@ -1,10 +1,20 @@
-from squadds.core.design_patterns import SingletonMeta
-from datasets import get_dataset_config_names
-from datasets import load_dataset
-from tabulate import tabulate
+import os
+import platform
 import pprint
+import shutil
+import sys
+import warnings
+
 import pandas as pd
+from datasets import get_dataset_config_names, load_dataset
+from tabulate import tabulate
+
+from squadds.core.design_patterns import SingletonMeta
 from squadds.core.utils import *
+
+#* HANDLE WARNING MESSAGES
+if sys.platform == "darwin":  # Checks if the operating system is macOS
+    warnings.filterwarnings("ignore", category=UserWarning, module="pyaedt") # ANSYS is not a mac product
 
 class SQuADDS_DB(metaclass=SingletonMeta):
     
@@ -41,8 +51,35 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             data_types.append(config.split("-")[2])
         return data_types
 
+    def _delete_cache(self):
+        # Determine the root cache directory for 'datasets'
+        # Default cache directory is '~/.cache/huggingface/datasets' on Unix systems
+        # and 'C:\\Users\\<username>\\.cache\\huggingface\\datasets' on Windows
+        cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "huggingface", "datasets")
+        
+        # Adjust the path for Windows if necessary
+        if platform.system() == "Windows":
+            cache_dir = os.path.join(os.path.expanduser("~"), "AppData", "Local", "huggingface", "datasets")
+
+        # Define the specific dataset cache directory name
+        dataset_cache_dir_name = "SQuADDS___s_qu_adds_db"
+
+        # Path for the specific dataset cache
+        dataset_cache_dir = os.path.join(cache_dir, dataset_cache_dir_name)
+
+        # Check if the cache directory exists
+        if os.path.exists(dataset_cache_dir):
+            try:
+                # Delete the dataset cache directory
+                shutil.rmtree(dataset_cache_dir)
+            except OSError as e:
+                print(f"Error occurred while deleting cache: {e}")
+        else:
+            pass
+        
     def supported_config_names(self):
-        configs = get_dataset_config_names(self.repo_name)
+        self._delete_cache()
+        configs = get_dataset_config_names(self.repo_name, download_mode='force_redownload')
         return configs
 
     def get_configs(self):
@@ -342,7 +379,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         # Construct the configuration string based on the provided or default values
         config = f"{component}-{component_name}-{data_type}"
         try:
-            df = load_dataset(self.repo_name, config)["train"].to_pandas()
+            df = load_dataset(self.repo_name, config, cache_dir=None)["train"].to_pandas()
             self._set_target_param_keys(df)
             return flatten_df_second_level(df)
         except Exception as e:
@@ -372,7 +409,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
     def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None):
         for merger_term in merger_terms:
             # process the dfs to make them ready for merger
-            qubit_df[merger_term] = qubit_df['design_options'].apply(lambda x: x['connection_pads']['c'][merger_term])
+            qubit_df[merger_term] = qubit_df['design_options'].apply(lambda x: x['connection_pads']['readout'][merger_term])
             cavity_df[merger_term] = cavity_df['design_options'].apply(lambda x: x['claw_opts']['connection_pads']['readout'][merger_term])
 
         # Merging the data frames based on merger terms

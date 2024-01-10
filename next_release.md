@@ -1,15 +1,14 @@
 # Bug fixes:
 
-- [ ] change "c" to "readout" in both code and database entries
-- [ ] Handle `Warnings`
-- [ ] create proper train/test/splits and changing `SQuADDS_DB()` to always return all data
-- [ ] handling selected_data_type in select_COMPONENT methods
+- [x] change "c" to "readout" in both code and database entries
+- [x] Handle `Warnings`
 - [ ] fix the autodoc generator workflow
 
 ---
 
 # Features to add:
 
+- [ ] Versioning of the database and allowing people to download specific versions
 - [ ] Contribution via HuggingFace Hub API
 - [ ] HuggingFace Workflow Action for sending emails upon PR
 - [ ] Standardize the way we handle units for simulated results + impmelent necessary changes in backend
@@ -26,3 +25,8 @@
 - [ ] Update HF data cards
 
 ---
+
+# Documentation requests:
+
+- [ ] completed contribution tutorials
+- [ ] documenting reliable simulation methodologies we have learned and resources

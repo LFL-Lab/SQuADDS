@@ -1,8 +1,10 @@
-from squadds.interpolations.interpolator import Interpolator
-from squadds import Analyzer
 import pandas as pd
-from squadds.core.utils import *
 from pyEPR.calcs import Convert
+
+from squadds import Analyzer
+from squadds.core.utils import *
+from squadds.interpolations.interpolator import Interpolator
+
 
 def string_to_float(string):
     """
@@ -47,7 +49,7 @@ class ScalingInterpolator(Interpolator):
 
         # Scale qubit and claw dimensions
         updated_cross_length = string_to_float(closest_qubit_claw_design["design_options_qubit"].iloc[0]['cross_length']) * alpha_scaling.values[0]
-        updated_claw_length = string_to_float(closest_qubit_claw_design["design_options_qubit"].iloc[0]["connection_pads"]["c"]['claw_length']) * g_scaling.values[0] * alpha_scaling.values[0]
+        updated_claw_length = string_to_float(closest_qubit_claw_design["design_options_qubit"].iloc[0]["connection_pads"]["readout"]['claw_length']) * g_scaling.values[0] * alpha_scaling.values[0]
 
         # Scaling logic for cavity-coupler designs
         # Filter DataFrame based on qubit coupling claw capacitance
@@ -108,13 +110,13 @@ class ScalingInterpolator(Interpolator):
         # Update the qubit and cavity design options
         qubit_design_options = closest_qubit_claw_design["design_options_qubit"].iloc[0]
         qubit_design_options['cross_length'] = f"{updated_cross_length}um"
-        qubit_design_options["connection_pads"]["c"]['claw_length'] = f"{updated_claw_length}um"
+        qubit_design_options["connection_pads"]["readout"]['claw_length'] = f"{updated_claw_length}um"
         required_Lj = Convert.Lj_from_Ej(closest_qubit_claw_design['EJ'].iloc[0], units_in='GHz', units_out='nH') 
         qubit_design_options['aedt_hfss_inductance'] = required_Lj*1e-9
         qubit_design_options['aedt_q3d_inductance'] = required_Lj*1e-9
         qubit_design_options['q3d_inductance'] = required_Lj*1e-9
         qubit_design_options['hfss_inductance'] = required_Lj*1e-9
-        qubit_design_options["connection_pads"]["c"]['Lj'] = f"{required_Lj}nH"
+        qubit_design_options["connection_pads"]["readout"]['Lj'] = f"{required_Lj}nH"
 
         cavity_design_options = closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]
         cavity_design_options["cpw_opts"]['total_length'] = f"{updated_resonator_length}um"
@@ -133,6 +135,6 @@ class ScalingInterpolator(Interpolator):
 
         # add the device design options to the dataframe
         interpolated_designs_df["design_options"] = [device_design_options]
-        interpolated_designs_df.iloc[0]["design_options"]["qubit_options"]["connection_pads"]["c"]["claw_cpw_length"] = "0um"
+        interpolated_designs_df.iloc[0]["design_options"]["qubit_options"]["connection_pads"]["readout"]["claw_cpw_length"] = "0um"
 
         return interpolated_designs_df
