@@ -1,8 +1,14 @@
 # from utils import *
-from squadds.simulations.objects import *
-from qiskit_metal import draw, Dict, designs, MetalGUI
-from qiskit_metal.toolbox_metal import math_and_overrides
+import sys
+# warn using `warnings` if os is mac that this is not supported
+import warnings
+
 import qiskit_metal as metal
+from qiskit_metal import Dict, MetalGUI, designs, draw
+from qiskit_metal.toolbox_metal import math_and_overrides
+
+from squadds.simulations.objects import *
+
 
 class AnsysSimulator:
 
@@ -16,8 +22,13 @@ class AnsysSimulator:
         self.design = metal.designs.design_planar.DesignPlanar()
         self.gui = metal.MetalGUI(self.design)
         self.design.overwrite_enabled = True
+        self._warnings()
 
         print(f"selected system: {self.analyzer.selected_system}")
+
+    def _warnings(self):
+        if sys.platform == "darwin":  # Checks if the operating system is macOS
+            warnings.warn("`AnsysSimulator` is not supported on MacOS since Ansys does not have a Mac App. Please use Windows or Linux for simulations.")
 
     def get_design_screenshot(self):
         self.gui.rebuild()
@@ -61,7 +72,7 @@ class AnsysSimulator:
         a, fq = find_a_fq(cross2cpw, cross2ground, Lj)
         print(f"qubit anharmonicity = {round(a)} MHz \nqubit frequency = {round(fq, 3)} GHz")
         # return a json object
-        return dict("qubit_frequency_GHz": fq, "anharmonicity_MHz":a)
+        return {"qubit_frequency_GHz": fq, "anharmonicity_MHz": a}
 
     def plot_device(self, device_dict):
         self.design.delete_all_components()
