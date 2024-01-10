@@ -3,6 +3,7 @@ name: Publish Python 🐍 distributions 📦 to PyPI
 on:
   release:
     types: [created]
+  workflow_dispatch:
 
 jobs:
   build-n-publish:
@@ -10,32 +11,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out code
-      uses: actions/checkout@v3
+      - name: Check out code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.10'  # Use the version of Python you need
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10' # Use the version of Python you need
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install build twine
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build twine
 
-    - name: Install Wheel
-      run: pip install wheel
-      
-    - name: Build Source and Wheel distribution
-      run: python setup.py sdist bdist_wheel
-      shell: /usr/bin/bash -e {0}
-      env:
-        pythonLocation: /opt/hostedtoolcache/Python/3.10.13/x64
-        LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.13/x64/lib
-      
-    - name: Publish package
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: twine upload dist/*
+      - name: Install Wheel
+        run: pip install wheel
 
+      - name: Build Source and Wheel distribution
+        run: python setup.py sdist bdist_wheel
+        shell: /usr/bin/bash -e {0}
+        env:
+          pythonLocation: /opt/hostedtoolcache/Python/3.10.13/x64
+          LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.13/x64/lib
+
+      - name: Publish package
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
