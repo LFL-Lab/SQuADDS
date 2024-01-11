@@ -3,34 +3,46 @@
 This file contains utility functions for the simulation.
 ========================================================================================================================
 """
-from qiskit_metal import draw, Dict, designs, MetalGUI
-from qiskit_metal.toolbox_metal import math_and_overrides
-from qiskit_metal.qlibrary.core import QComponent
-import qiskit_metal as metal
-from squadds.components.claw_coupler import TransmonClaw
-from squadds.components.coupled_systems import QubitCavity
-from qiskit_metal.qlibrary.terminations.launchpad_wb import LaunchpadWirebond
-from qiskit_metal.qlibrary.terminations.short_to_ground import ShortToGround
-from qiskit_metal.qlibrary.tlines.straight_path import RouteStraight
-from qiskit_metal.qlibrary.tlines.anchored_path import RouteAnchors
-from qiskit_metal.qlibrary.tlines.mixed_path import RouteMixed
-from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
-from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
-from qiskit_metal.qlibrary.terminations.open_to_ground import OpenToGround
-from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
-from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import CapNInterdigitalTee
-from qiskit_metal.qlibrary.couplers.line_tee import LineTee
-
-from collections import OrderedDict
-
-import numpy as np
-import scqubits as scq
-from pyaedt import Hfss
 import json
+from collections import OrderedDict
 from datetime import datetime
 
+import numpy as np
+import qiskit_metal as metal
+import scqubits as scq
+from pyaedt import Hfss
+from qiskit_metal import Dict, MetalGUI, designs, draw
+from qiskit_metal.qlibrary.core import QComponent
+from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import \
+    CapNInterdigitalTee
+from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
+from qiskit_metal.qlibrary.couplers.line_tee import LineTee
+from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
+from qiskit_metal.qlibrary.terminations.launchpad_wb import LaunchpadWirebond
+from qiskit_metal.qlibrary.terminations.open_to_ground import OpenToGround
+from qiskit_metal.qlibrary.terminations.short_to_ground import ShortToGround
+from qiskit_metal.qlibrary.tlines.anchored_path import RouteAnchors
+from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
+from qiskit_metal.qlibrary.tlines.mixed_path import RouteMixed
+from qiskit_metal.qlibrary.tlines.straight_path import RouteStraight
+from qiskit_metal.toolbox_metal import math_and_overrides
 
-def getMeshScreenshot(projectname,designname,solutiontype="Eigenmode"):
+from squadds.components.claw_coupler import TransmonClaw
+from squadds.components.coupled_systems import QubitCavity
+
+
+def getMeshScreenshot(projectname, designname, solutiontype="Eigenmode"):
+    """
+    Get a screenshot of the mesh for a given project, design, and solution type.
+
+    Parameters:
+        projectname (str): The name of the project.
+        designname (str): The name of the design.
+        solutiontype (str, optional): The type of solution. Defaults to "Eigenmode".
+
+    Raises:
+        NotImplementedError: This function is not implemented yet.
+    """
     raise NotImplementedError()
 
 def generate_bbox(component: QComponent) -> Dict[str, float]:
@@ -53,10 +65,16 @@ def generate_bbox(component: QComponent) -> Dict[str, float]:
     return bbox
 
 def setMaterialProperties(projectname,designname,solutiontype="Eigenmode"):
-    """Interfaces w/ ANSYS via pyEPR for more custom automation.
-    1. Connect to ANSYS
-    2. Change Silicon permitivity to 11.45; represents ultra cold silicon.
-    3. Checks for prexisting Setups, deletes them...
+    """
+    Interfaces with ANSYS via pyEPR for more custom automation.
+    1. Connects to ANSYS.
+    2. Changes Silicon permittivity to 11.45, representing ultra cold silicon.
+    3. Deletes any preexisting setups.
+
+    Parameters:
+        projectname (str): The name of the project.
+        designname (str): The name of the design.
+        solutiontype (str, optional): The type of solution. Defaults to "Eigenmode".
     """
 
     aedt = Hfss(projectname=projectname, 
@@ -205,21 +223,63 @@ def add_ground_strip_and_mesh(modeler, coupler, mesh_lengths):
         modeler.mesh_length(mesh_name, mesh_info['objects'], MaxLength=mesh_info['MaxLength'])
 
 def create_qubitcavity(opts, design):
+    """
+    Create a QubitCavity object.
+
+    Args:
+        opts (dict): Options for the QubitCavity object.
+        design (str): Design name.
+
+    Returns:
+        QubitCavity: The created QubitCavity object.
+    """
     qubitcavity = QubitCavity(design, "qubitcavity", options=opts)
     return qubitcavity
 
 def create_claw(opts, cpw_length, design):
+    """
+    Create a TransmonClaw object with the given options, cpw_length, and design.
+
+    Args:
+        opts (dict): A dictionary of options for the TransmonClaw object.
+        cpw_length (int): The length of the cpw.
+        design (str): The design name.
+
+    Returns:
+        TransmonClaw: The created TransmonClaw object.
+    """
     opts["orientation"] = "-90"
     opts["pos_x"] = "-1500um" if cpw_length > 2500 else "-1000um"
     claw = TransmonClaw(design, 'claw', options=opts)
     return claw
 
 def create_coupler(opts, design):
+    """
+    Create a coupler based on the given options and design.
+
+    Args:
+        opts (dict): A dictionary containing the options for the coupler.
+        design: The design object.
+
+    Returns:
+        The created coupler object.
+    """
     opts["orientation"] = "-90"
     cplr = CapNInterdigitalTee(design, 'cplr', options = opts) if "finger_count" in opts.keys() else CoupledLineTee(design, 'cplr', options = opts)
     return cplr
 
 def create_cpw(opts, cplr, design):
+    """
+    Create a coplanar waveguide (CPW) based on the given options, coupler, and design.
+
+    Args:
+        opts (dict): Options for creating the CPW.
+        cplr (Coupler): Coupler object used for creating the CPW.
+        design (Design): Design object used for creating the CPW.
+
+    Returns:
+        RouteMeander: The created coplanar waveguide (CPW).
+    """
     adj_distance = int("".join(filter(str.isdigit, cplr.options["coupling_length"]))) if int("".join(filter(str.isdigit, cplr.options["coupling_length"]))) > 150 else 0
     jogs = OrderedDict()
     jogs[0] = ["R90", f'{adj_distance/(1.5)}um']
@@ -241,15 +301,45 @@ def create_cpw(opts, cplr, design):
     return cpw
 
 def as_list(x):
+    """
+    Converts the input to a list if it is not already a list.
+
+    Args:
+        x: The input value.
+
+    Returns:
+        A list containing the input value if it is not already a list.
+
+    """
     return x if type(x) is list else [x]
 
 def save_simulation_data_to_json(data, filename):
+    """
+    Save simulation data to a JSON file.
+
+    Args:
+        data (dict): The simulation data to be saved.
+        filename (str): The name of the file to save the data to.
+
+    Returns:
+        None
+    """
     filename = f"{filename}.json"
     
     with open(filename, 'w') as outfile:
         json.dump(data, outfile, indent=4)
 
 def chunk_sweep_options(sweep_opts, N):
+    """
+    Divide the sweep options into multiple chunks based on the number of computers.
+
+    Args:
+        sweep_opts (dict): The sweep options dictionary.
+        N (int): The number of computers to divide the sweep options into.
+
+    Returns:
+        list: A list of dictionaries, each containing a chunk of the sweep options.
+    """
     # Extract claw_lengths and total_lengths from sweep_opts
     claw_lengths = sweep_opts['claw_opts']['connection_pads']['readout']['claw_length']
     total_lengths = sweep_opts['cpw_opts']['total_length']
@@ -289,6 +379,17 @@ def chunk_sweep_options(sweep_opts, N):
     return chunks
 
 def find_a_fq(C_g, C_B, Lj):
+    """
+    Calculate the anharmonicity and frequency of a transmon qubit.
+
+    Args:
+        C_g (float): Gate capacitance in Farads.
+        C_B (float): Bias capacitance in Farads.
+        Lj (float): Josephson inductance in Henries.
+
+    Returns:
+        tuple: A tuple containing the anharmonicity (a) in linear MHz and the frequency (f_q) in linear GHz.
+    """
     # Constants
     e = 1.602e-19  # elementary charge in C
     hbar = 1.054e-34  # reduced Planck constant in Js
@@ -310,6 +411,22 @@ def find_a_fq(C_g, C_B, Lj):
     return a, f_q
 
 def find_g_a_fq(C_g, C_B, f_r, Lj, N):
+    """
+    Calculate the values of g, a, and f_q for a transmon qubit.
+
+    Args:
+        C_g (float): Capacitance of the gate in Farads.
+        C_B (float): Capacitance of the bias in Farads.
+        f_r (float): Resonance frequency of the resonator in Hz.
+        Lj (float): Josephson inductance in Henries.
+        N (int): Number of photons in the resonator.
+
+    Returns:
+        tuple: A tuple containing the values of g, a, and f_q.
+            - g (float): Coupling strength in MHz.
+            - a (float): Anharmonicity in MHz.
+            - f_q (float): Transition frequency in GHz.
+    """
     # Constants
     e = 1.602e-19  # elementary charge in C
     hbar = 1.054e-34  # reduced Planck constant in Js
@@ -330,14 +447,3 @@ def find_g_a_fq(C_g, C_B, f_r, Lj, N):
     f_q = transmon.E01() # Linear GHz
     
     return g, a, f_q
-
-if __name__ == "__main__":
-    # Usage
-    mesh_lengths = {
-        'mesh1': {"objects": ["ground_strip"], "MaxLength": '4um'},
-        'mesh2': {"objects": [f"prime_cpw_{coupler.name}", f"second_cpw_{coupler.name}", f"trace_{cpw.name}", f"readout_connector_arm_{claw.name}"], "MaxLength": '4um'},
-        # 'mesh3': {"objects": [f"Port_{coupler.name}_prime_end", f"Port_{coupler.name}_prime_start"], "MaxLength": '4um'}
-    }
-    center, dimensions = calculate_center_and_dimensions(bbox)
-    draw_and_update_model(modeler, center, dimensions, coupler, cpw, claw, mesh_lengths)
-    get_freq_Q_kappa(epra, test_hfss)

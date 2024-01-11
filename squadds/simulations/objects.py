@@ -4,13 +4,43 @@ SimulationConfig
 ========================================================================================================================
 """
 
-from qiskit_metal.analyses.quantization import EPRanalysis
+from qiskit_metal.analyses.quantization import EPRanalysis, LOManalysis
+
 from squadds.simulations.utils import *
-from qiskit_metal.analyses.quantization import LOManalysis
+
 
 class SimulationConfig:
+    """
+    Represents the configuration for a simulation.
+
+    Args:
+        design_name (str): The name of the design.
+        renderer_type (str): The type of renderer.
+        sim_type (str): The type of simulation.
+        setup_name (str): The name of the setup.
+        max_passes (int): The maximum number of passes.
+        max_delta_f (float): The maximum delta frequency.
+        min_converged_passes (int): The minimum number of converged passes.
+        Lj (float): The value of Lj.
+        Cj (float): The value of Cj.
+    """
+
     def __init__(self, design_name="CavitySweep", renderer_type="hfss", sim_type="eigenmode",
                  setup_name="Setup", max_passes=49, max_delta_f=0.05, min_converged_passes=2, Lj=0, Cj=0):
+        """
+        Initialize the Simulation object.
+
+        Args:
+            design_name (str): The name of the design.
+            renderer_type (str): The type of renderer to be used.
+            sim_type (str): The type of simulation.
+            setup_name (str): The name of the setup.
+            max_passes (int): The maximum number of passes.
+            max_delta_f (float): The maximum change in frequency.
+            min_converged_passes (int): The minimum number of converged passes.
+            Lj (float): The value of inductance.
+            Cj (float): The value of capacitance.
+        """
         self.design_name = design_name
         self.renderer_type = renderer_type
         self.sim_type = sim_type
@@ -22,6 +52,19 @@ class SimulationConfig:
         self.Cj = Cj
 
 def simulate_whole_device(design, cross_dict, cavity_dict, LOM_options, eigenmode_options):
+    """
+    Simulates the whole device by running eigenmode and LOM simulations.
+
+    Args:
+        design (metal.designs.design_planar.DesignPlanar): The design object.
+        cross_dict (dict): Dictionary containing qubit options.
+        cavity_dict (dict): Dictionary containing cavity options.
+        LOM_options (dict): Dictionary containing LOM setup options.
+        eigenmode_options (dict): Dictionary containing eigenmode setup options.
+
+    Returns:
+        tuple: A tuple containing the simulation results, LOM analysis object, and eigenmode analysis object.
+    """
     design.delete_all_components()
     # print(cavity_dict)
     emode_df, epra = run_eigenmode(design, cavity_dict, eigenmode_options)
@@ -66,6 +109,20 @@ def simulate_whole_device(design, cross_dict, cavity_dict, LOM_options, eigenmod
     return return_df, loma, epra
 
 def simulate_single_design(design, gui, device_dict, sim_options):
+    """
+    Simulates a single design using the provided parameters.
+
+    Args:
+        design (Design): The design object representing the design.
+        gui (GUI): The GUI object for displaying simulation results.
+        device_dict (dict): A dictionary containing device options.
+        sim_options (dict): A dictionary containing simulation options.
+
+    Returns:
+        dict or tuple: The simulation results. If eigenmode simulation is performed, returns a dictionary
+        containing the eigenmode results. If LOM simulation is performed, returns a tuple containing the
+        LOM dataframe and LOM object.
+    """
     design.delete_all_components()
     emode_df = {}
     lom_df = {}
@@ -81,6 +138,17 @@ def simulate_single_design(design, gui, device_dict, sim_options):
     return emode_df if emode_df != {} else (lom_df, lom_obj)
 
 def get_sim_results(emode_df = {}, lom_df = {}):
+    """
+    Retrieves simulation results from the provided dataframes and calculates additional parameters.
+
+    Args:
+        emode_df (dict): Dataframe containing eigenmode simulation results.
+        lom_df (dict): Dataframe containing lumped element model simulation results.
+
+    Returns:
+        dict: A dictionary containing the calculated simulation results.
+
+    """
     data_emode = {} if emode_df == {} else emode_df["sim_results"]
     data_lom = {} if lom_df == {} else lom_df["sim_results"]
 
@@ -101,34 +169,41 @@ def get_sim_results(emode_df = {}, lom_df = {}):
         qubit_frequency_GHz = ff_q
     )
 
-    # return_df = dict(
-    #     sim_options = dict(
-    #         setup = dict(
-    #             eigenmode_setup = emode_df["sim_options"]["setup"],
-    #             LOM_setup = lom_df["sim_options"]["setup"]
-    #         ),
-    #         simulator = "Ansys HFSS"
-    #     ),
-    #     sim_results = data,
-    #     design = dict(
-    #         design_options = device_dict
-    #     )
-    # )
-
     return data
 
 
 def run_eigenmode(design, geometry_dict, sim_options):
-    # return device_dict["design"]["design_options"]
-    # design = metal.designs.design_planar.DesignPlanar()
-    # gui = metal.MetalGUI(design)
-    # design.overwrite_enabled = True
+    """
+    Runs the eigenmode simulation for a given design using Ansys HFSS.
 
-    # sim_json = open(filename)
-    # sim_data = json.load(sim_json)
-    # geometry_dict = device_dict["design"]["design_options"]
-    # print(sim_options["setup"])
+    Args:
+        design (str): The name of the design.
+        geometry_dict (dict): A dictionary containing the geometry options for the simulation.
+        sim_options (dict): A dictionary containing the simulation options.
 
+    Returns:
+        tuple: A tuple containing the simulation results and the EPRAnalysis object.
+            The simulation results are stored in a dictionary with the following structure:
+            {
+                "design": {
+                    "coupler_type": "CLT",
+                    "design_options": geometry_dict,
+                    "design_tool": "Qiskit Metal"
+                },
+                "sim_options": {
+                    "sim_type": "epr",
+                    "setup": setup,
+                    "simulator": "Ansys HFSS"
+                },
+                "sim_results": {
+                    "cavity_frequency": f_rough,
+                    "Q": Q,
+                    "kappa": kappa
+                },
+                "misc": data
+            }
+            The EPRAnalysis object is returned for further analysis or post-processing.
+    """
     cpw_length = int("".join(filter(str.isdigit, geometry_dict["cpw_opts"]["total_length"])))
     claw = create_claw(geometry_dict["claw_opts"], cpw_length, design)
     coupler = create_coupler(geometry_dict["cplr_opts"], design)
@@ -179,6 +254,20 @@ def run_eigenmode(design, geometry_dict, sim_options):
     return data_df, epra
 
 def run_capn_LOM(design, param, sim_options):
+    """
+    Run capacitance analysis using Qiskit Metal and Ansys HFSS.
+
+    Args:
+        design (metal.designs.design_planar.DesignPlanar): The design object.
+        param (dict): Design options for the coupler.
+        sim_options (dict): Simulation options.
+
+    Returns:
+        tuple: A tuple containing the following:
+            - data_df (dict): Dictionary containing design, simulation options, simulation results, and miscellaneous data.
+            - loma (LOManalysis): The LOManalysis object.
+
+    """
     # design = metal.designs.design_planar.DesignPlanar()
     # gui = metal.MetalGUI(design)
     # design.overwrite_enabled = True
@@ -231,6 +320,17 @@ def run_capn_LOM(design, param, sim_options):
     return data_df, loma
 
 def run_xmon_LOM(design, cross_dict, sim_options):
+    """
+    Runs the XMON LOM simulation.
+
+    Args:
+        design (metal.designs.design_planar.DesignPlanar): The design object.
+        cross_dict (dict): The dictionary containing cross connection information.
+        sim_options (dict): The simulation options.
+
+    Returns:
+        tuple: A tuple containing the simulation data and the LOManalysis object.
+    """
     # design = metal.designs.design_planar.DesignPlanar()
     # gui = metal.MetalGUI(design)
     # design.overwrite_enabled = True
@@ -288,6 +388,18 @@ def run_xmon_LOM(design, cross_dict, sim_options):
     return data, c1
 
 def CLT_epr_sweep(design, sweep_opts, filename):    
+    """
+    Perform a parameter sweep for a CLT (Coupled-Line T-Junction) EPR (Electrically Parallel Resonator) simulation.
+
+    Args:
+        design (str): The design name.
+        sweep_opts (dict): The sweep options.
+        filename (str): The filename to save the simulation data.
+
+    Returns:
+        None
+    """
+    #! TODO: extractQsweepParameters needs definition
     for param in extract_QSweep_parameters(sweep_opts):
         cpw_length = int("".join(filter(str.isdigit, param["cpw_opts"]["total_length"])))
         claw = create_claw(param["claw_opts"], cpw_length, design)
@@ -334,6 +446,16 @@ def CLT_epr_sweep(design, sweep_opts, filename):
         save_simulation_data_to_json(data_df, filename)
 
 def NCap_epr_sweep(design, sweep_opts):    
+    """
+    Perform a parameter sweep for NCap EPR simulations.
+
+    Args:
+        design (Design): The design object.
+        sweep_opts (dict): The sweep options.
+
+    Returns:
+        None
+    """
     for param in extract_QSweep_parameters(sweep_opts):
         claw = create_claw(param["claw_opts"], design)
         coupler = create_coupler(param["cplr_opts"], design)
@@ -374,6 +496,16 @@ def NCap_epr_sweep(design, sweep_opts):
         save_simulation_data_to_json(data_df, filename)
 
 def NCap_LOM_sweep(design, sweep_opts):
+    """
+    Perform a sweep analysis for NCap LOManalysis.
+
+    Args:
+        design (Design): The design object.
+        sweep_opts (dict): The sweep options.
+
+    Returns:
+        None
+    """
     for param in extract_QSweep_parameters(sweep_opts):
         # claw = create_claw(param["claw_opts"], design)
         coupler = create_coupler(param, design)
@@ -493,13 +625,3 @@ def render_simulation_no_ports(epra, components, open_pins, ansys_design_name, s
                      vars_to_initialize=setup_vars,
                      box_plus_buffer=True)
     print("Sim rendered into HFSS!")
-
-
-if __name__ == "__main__":
-    # Usage
-    config = SimulationConfig()
-    bbox = generate_bbox(coupler)
-    epra, hfss = start_simulation(design, config)
-    setup = set_simulation_hyperparameters(epra, config)
-    render_simulation(epra, config.design_name, setup.vars, coupler)
-    modeler = hfss.pinfo.design.modeler

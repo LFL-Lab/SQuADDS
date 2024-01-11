@@ -16,9 +16,9 @@
 
 # Documentation requests:
 
-- [ ] updated documentation for all code
+- [x] updated documentation for all code
+- [x] documenting reliable simulation methodologies we have learned and resources
 - [ ] completed contribution tutorials
-- [ ] documenting reliable simulation methodologies we have learned and resources
 - [ ] tutorial to show how to demo analysis (H params against device params)
 
 ---
@@ -26,7 +26,7 @@
 # Database changes:
 
 - [ ] More data points to existing configurations
-- [ ] Update HF data cards
-- [ ] Update HF repo info
+- [x] Update HF data cards
+- [x] Update HF repo info
 
 ---
