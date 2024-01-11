@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.2.2 (2024-01-10)
+--------------------------
+
+* **Alpha Version 0.2.2**
+
+- Documentation added to the entire codebase
+
+
 Version 0.2.1 (2024-01-10)
 --------------------------
 
