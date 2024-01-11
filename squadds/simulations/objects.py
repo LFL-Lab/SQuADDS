@@ -5,9 +5,9 @@ SimulationConfig
 """
 
 from qiskit_metal.analyses.quantization import EPRanalysis, LOManalysis
-from sweeper_helperfunctions import extract_QSweep_parameters
 
-from squadds.simulations.utils import *
+from .sweeper_helperfunctions import extract_QSweep_parameters
+from .utils import *
 
 
 class SimulationConfig:
