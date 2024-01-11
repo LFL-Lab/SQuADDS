@@ -581,12 +581,15 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for squadds.calcs.transmon_cross</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">squadds.calcs.qubit</span> <span class="kn">import</span> <span class="n">QubitHamiltonian</span>
-<span class="kn">from</span> <span class="nn">scqubits.core.transmon</span> <span class="kn">import</span> <span class="n">Transmon</span>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pyEPR.calcs</span> <span class="kn">import</span> <span class="n">Convert</span>
 <span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="kn">import</span> <span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">hbar</span>
+<span class="kn">from</span> <span class="nn">scqubits.core.transmon</span> <span class="kn">import</span> <span class="n">Transmon</span>
+
+<span class="kn">from</span> <span class="nn">squadds.calcs.qubit</span> <span class="kn">import</span> <span class="n">QubitHamiltonian</span>
+
+
 <div class="viewcode-block" id="TransmonCrossHamiltonian">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian">[docs]</a>
 <span class="k">class</span> <span class="nc">TransmonCrossHamiltonian</span><span class="p">(</span><span class="n">QubitHamiltonian</span><span class="p">):</span>
@@ -598,8 +601,8 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the TransmonCrossHamiltonian object.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - analysis: The analysis object associated with the Hamiltonian.</span>
+<span class="sd">        Attributes:</span>
+<span class="sd">            - analysis: The analysis object associated with the Hamiltonian.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">scqubits</span> <span class="k">as</span> <span class="nn">scq</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
@@ -611,8 +614,8 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the data from the given DataFrame.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - data_frame: The DataFrame containing the data to be plotted.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - data_frame: The DataFrame containing the data to be plotted.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_frame</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;box&#39;</span><span class="p">,</span> <span class="n">subplots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
@@ -624,12 +627,12 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the charging energy (EC) of the transmon qubit.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - cross_to_claw: Capacitance between the cross and the claw.</span>
-<span class="sd">        - cross_to_ground: Capacitance between the cross and the ground.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - cross_to_claw: Capacitance between the cross and the claw.</span>
+<span class="sd">            - cross_to_ground: Capacitance between the cross and the ground.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        - EC: The charging energy of the transmon qubit.</span>
+<span class="sd">            - EC: The charging energy of the transmon qubit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">C_eff_fF</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cross_to_ground</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cross_to_claw</span><span class="p">)</span>
         <span class="n">EC</span> <span class="o">=</span> <span class="n">Convert</span><span class="o">.</span><span class="n">Ec_from_Cs</span><span class="p">(</span><span class="n">C_eff_fF</span><span class="p">,</span> <span class="n">units_in</span><span class="o">=</span><span class="s1">&#39;fF&#39;</span><span class="p">,</span><span class="n">units_out</span><span class="o">=</span><span class="s1">&#39;GHz&#39;</span><span class="p">)</span>
@@ -640,15 +643,15 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the target qubit parameters (EJ, EC, EJEC, Lj) based on the given qubit frequency (w_q) and anharmonicity (alpha).</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - w_q: The qubit frequency.</span>
-<span class="sd">        - alpha: The anharmonicity of the qubit.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - w_q: The qubit frequency.</span>
+<span class="sd">            - alpha: The anharmonicity of the qubit.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        - EJ: The Josephson energy of the qubit.</span>
-<span class="sd">        - EC: The charging energy of the qubit.</span>
-<span class="sd">        - EJEC: The ratio of EJ to EC.</span>
-<span class="sd">        - Lj: The Josephson inductance of the qubit.</span>
+<span class="sd">            - EJ: The Josephson energy of the qubit.</span>
+<span class="sd">            - EC: The charging energy of the qubit.</span>
+<span class="sd">            - EJEC: The ratio of EJ to EC.</span>
+<span class="sd">            - Lj: The Josephson inductance of the qubit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span> <span class="o">=</span> <span class="n">Transmon</span><span class="o">.</span><span class="n">find_EJ_EC</span><span class="p">(</span><span class="n">w_q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
         <span class="n">EJEC</span> <span class="o">=</span> <span class="n">EJ</span> <span class="o">/</span> <span class="n">EC</span>
@@ -665,13 +668,13 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the Josephson energy (EJ) and Josephson inductance (Lj) based on the given qubit frequency (w_q) and anharmonicity (alpha).</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - w_q: The qubit frequency.</span>
-<span class="sd">        - alpha: The anharmonicity of the qubit.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - w_q: The qubit frequency.</span>
+<span class="sd">            - alpha: The anharmonicity of the qubit.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        - EJ: The Josephson energy of the qubit.</span>
-<span class="sd">        - Lj: The Josephson inductance of the qubit.</span>
+<span class="sd">            - EJ: The Josephson energy of the qubit.</span>
+<span class="sd">            - Lj: The Josephson inductance of the qubit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span> <span class="o">=</span> <span class="n">Transmon</span><span class="o">.</span><span class="n">find_EJ_EC</span><span class="p">(</span><span class="n">w_q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
         <span class="n">Lj</span> <span class="o">=</span> <span class="n">Convert</span><span class="o">.</span><span class="n">Lj_from_Ej</span><span class="p">(</span><span class="n">EJ</span><span class="p">,</span> <span class="n">units_in</span><span class="o">=</span><span class="s1">&#39;GHz&#39;</span><span class="p">,</span> <span class="n">units_out</span><span class="o">=</span><span class="s1">&#39;nH&#39;</span><span class="p">)</span>
@@ -686,12 +689,12 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the Josephson energy (EJ) based on the given qubit frequency (w_q) and anharmonicity (alpha).</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - w_q: The qubit frequency.</span>
-<span class="sd">        - alpha: The anharmonicity of the qubit.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - w_q: The qubit frequency.</span>
+<span class="sd">            - alpha: The anharmonicity of the qubit.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        - EJ: The Josephson energy of the qubit.</span>
+<span class="sd">            - EJ: The Josephson energy of the qubit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span> <span class="o">=</span> <span class="n">Transmon</span><span class="o">.</span><span class="n">find_EJ_EC</span><span class="p">(</span><span class="n">w_q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">EJ</span> <span class="o">=</span> <span class="n">EJ</span>
@@ -704,20 +707,20 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the target quantities (C_q, C_c, EJ, EC, EJ_EC_ratio) based on the given parameters.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - f_res: The resonator frequency.</span>
-<span class="sd">        - alpha: The anharmonicity of the qubit.</span>
-<span class="sd">        - g: The coupling strength between the qubit and the resonator.</span>
-<span class="sd">        - w_q: The qubit frequency.</span>
-<span class="sd">        - res_type: The type of resonator.</span>
-<span class="sd">        - Z_0: The characteristic impedance of the resonator.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - f_res: The resonator frequency.</span>
+<span class="sd">            - alpha: The anharmonicity of the qubit.</span>
+<span class="sd">            - g: The coupling strength between the qubit and the resonator.</span>
+<span class="sd">            - w_q: The qubit frequency.</span>
+<span class="sd">            - res_type: The type of resonator.</span>
+<span class="sd">            - Z_0: The characteristic impedance of the resonator.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        - C_q: The total capacitance of the qubit.</span>
-<span class="sd">        - C_c: The coupling capacitance between the qubit and the resonator.</span>
-<span class="sd">        - EJ: The Josephson energy of the qubit.</span>
-<span class="sd">        - EC: The charging energy of the qubit.</span>
-<span class="sd">        - EJ_EC_ratio: The ratio of EJ to EC.</span>
+<span class="sd">            - C_q: The total capacitance of the qubit.</span>
+<span class="sd">            - C_c: The coupling capacitance between the qubit and the resonator.</span>
+<span class="sd">            - EJ: The Josephson energy of the qubit.</span>
+<span class="sd">            - EC: The charging energy of the qubit.</span>
+<span class="sd">            - EJ_EC_ratio: The ratio of EJ to EC.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span> <span class="o">=</span> <span class="n">Transmon</span><span class="o">.</span><span class="n">find_EJ_EC</span><span class="p">(</span><span class="n">w_q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
         <span class="n">C_q</span> <span class="o">=</span> <span class="n">Convert</span><span class="o">.</span><span class="n">Cs_from_Ec</span><span class="p">(</span><span class="n">EC</span><span class="p">,</span> <span class="n">units_in</span><span class="o">=</span><span class="s1">&#39;GHz&#39;</span><span class="p">,</span> <span class="n">units_out</span><span class="o">=</span><span class="s1">&#39;fF&#39;</span><span class="p">)</span>
@@ -742,18 +745,18 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the coupling strength (g) and anharmonicity (alpha) based on the given parameters.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - C: The capacitance between the qubit and the ground.</span>
-<span class="sd">        - C_c: The coupling capacitance between the qubit and the resonator.</span>
-<span class="sd">        - f_q: The qubit frequency.</span>
-<span class="sd">        - EJ: The Josephson energy of the qubit.</span>
-<span class="sd">        - f_r: The resonator frequency.</span>
-<span class="sd">        - res_type: The type of resonator.</span>
-<span class="sd">        - Z0: The characteristic impedance of the resonator.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - C: The capacitance between the qubit and the ground.</span>
+<span class="sd">            - C_c: The coupling capacitance between the qubit and the resonator.</span>
+<span class="sd">            - f_q: The qubit frequency.</span>
+<span class="sd">            - EJ: The Josephson energy of the qubit.</span>
+<span class="sd">            - f_r: The resonator frequency.</span>
+<span class="sd">            - res_type: The type of resonator.</span>
+<span class="sd">            - Z0: The characteristic impedance of the resonator.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        - g: The coupling strength between the qubit and the resonator.</span>
-<span class="sd">        - alpha: The anharmonicity of the qubit.</span>
+<span class="sd">            - g: The coupling strength between the qubit and the resonator.</span>
+<span class="sd">            - alpha: The anharmonicity of the qubit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">C</span><span class="p">,</span> <span class="n">C_c</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-15</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">C_c</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-15</span>
         <span class="n">C_q</span> <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">C_c</span>
@@ -770,16 +773,16 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the coupling strength, anharmonicity, and transition frequency of a transmon qubit.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        C (float): Total capacitance of the transmon qubit.</span>
-<span class="sd">        C_c (float): Coupling capacitance between the transmon qubit and the resonator.</span>
-<span class="sd">        EJ (float): Josephson energy of the transmon qubit.</span>
-<span class="sd">        f_r (float): Resonator frequency.</span>
-<span class="sd">        res_type (str): Type of resonator. Must be either &#39;half&#39; or &#39;quarter&#39;.</span>
-<span class="sd">        Z0 (float, optional): Characteristic impedance of the transmission line. Defaults to 50.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - C (float): Total capacitance of the transmon qubit.</span>
+<span class="sd">            - C_c (float): Coupling capacitance between the transmon qubit and the resonator.</span>
+<span class="sd">            - EJ (float): Josephson energy of the transmon qubit.</span>
+<span class="sd">            - f_r (float): Resonator frequency.</span>
+<span class="sd">            - res_type (str): Type of resonator. Must be either &#39;half&#39; or &#39;quarter&#39;.</span>
+<span class="sd">            - Z0 (float, optional): Characteristic impedance of the transmission line. Defaults to 50.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        tuple: A tuple containing the coupling strength (g), anharmonicity (alpha), and transition frequency (freq).</span>
+<span class="sd">            - (g, alpha, freq) (tuple): A tuple containing the coupling strength (g), anharmonicity (alpha), and transition frequency (freq).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">scqubits</span> <span class="k">as</span> <span class="nn">scq</span>
         <span class="n">scq</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="s2">&quot;GHz&quot;</span><span class="p">)</span>
@@ -806,15 +809,15 @@ document.write(`
 <span class="sd">        based on the capacitance matrix.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            C (float): Capacitance between the qubit and the resonator (in femtofarads, fF).</span>
-<span class="sd">            C_c (float): Coupling capacitance of the resonator (in femtofarads, fF).</span>
-<span class="sd">            EJ (float): Josephson energy of the qubit (in GHz).</span>
-<span class="sd">            f_r (float): Resonator frequency (in GHz).</span>
-<span class="sd">            res_type (str): Type of resonator. Can be &#39;half&#39; or &#39;quarter&#39;.</span>
-<span class="sd">            Z0 (float, optional): Characteristic impedance of the transmission line (in ohms). Default is 50 ohms.</span>
+<span class="sd">            - C (float): Capacitance between the qubit and the resonator (in femtofarads, fF).</span>
+<span class="sd">            - C_c (float): Coupling capacitance of the resonator (in femtofarads, fF).</span>
+<span class="sd">            - EJ (float): Josephson energy of the qubit (in GHz).</span>
+<span class="sd">            - f_r (float): Resonator frequency (in GHz).</span>
+<span class="sd">            - res_type (str): Type of resonator. Can be &#39;half&#39; or &#39;quarter&#39;.</span>
+<span class="sd">            - Z0 (float, optional): Characteristic impedance of the transmission line (in ohms). Default is 50 ohms.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            float: Coupling strength &#39;g&#39; between the qubit and the resonator (in MHz).</span>
+<span class="sd">            - g (float): Coupling strength &#39;g&#39; between the qubit and the resonator (in MHz).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">C</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-15</span>  <span class="c1"># F</span>
         <span class="n">C_c</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">C_c</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-15</span>  <span class="c1"># F</span>
@@ -838,13 +841,13 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the frequencies and anharmonicities of transmons with a fixed LJ value.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - fig4_df: DataFrame containing the values of EC for different transmons.</span>
-<span class="sd">        - LJ_target: Target value of LJ in nH.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - fig4_df: DataFrame containing the values of EC for different transmons.</span>
+<span class="sd">            - LJ_target: Target value of LJ in nH.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        - freq: List of frequencies of the transmons.</span>
-<span class="sd">        - alpha: List of anharmonicities of the transmons.</span>
+<span class="sd">            - freq: List of frequencies of the transmons.</span>
+<span class="sd">            - alpha: List of anharmonicities of the transmons.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">EJ</span> <span class="o">=</span> <span class="n">Convert</span><span class="o">.</span><span class="n">Ej_from_Lj</span><span class="p">(</span><span class="n">LJ_target</span><span class="p">,</span> <span class="n">units_in</span><span class="o">=</span><span class="s1">&#39;nH&#39;</span><span class="p">,</span> <span class="n">units_out</span><span class="o">=</span><span class="s1">&#39;GHz&#39;</span><span class="p">)</span>
         <span class="n">EC</span> <span class="o">=</span> <span class="n">fig4_df</span><span class="p">[</span><span class="s2">&quot;EC&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
@@ -860,15 +863,15 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the energy of the first excited state (E01) and the anharmonicity (alpha) of a transmon qubit.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - EJ (float): Josephson energy of the transmon qubit.</span>
-<span class="sd">        - EC (float): Charging energy of the transmon qubit.</span>
-<span class="sd">        - ng (float, optional): Offset charge on the transmon qubit. Defaults to 0.</span>
-<span class="sd">        - ncut (int, optional): Truncation level for the transmon qubit&#39;s Hilbert space. Defaults to 30.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - EJ (float): Josephson energy of the transmon qubit.</span>
+<span class="sd">            - EC (float): Charging energy of the transmon qubit.</span>
+<span class="sd">            - ng (float, optional): Offset charge on the transmon qubit. Defaults to 0.</span>
+<span class="sd">            - ncut (int, optional): Truncation level for the transmon qubit&#39;s Hilbert space. Defaults to 30.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        - E01 (float): Energy of the first excited state (E01) in GHz.</span>
-<span class="sd">        - alpha (float): Anharmonicity (alpha) in MHz.</span>
+<span class="sd">            - E01 (float): Energy of the first excited state (E01) in GHz.</span>
+<span class="sd">            - alpha (float): Anharmonicity (alpha) in MHz.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">transmon</span> <span class="o">=</span> <span class="n">Transmon</span><span class="p">(</span><span class="n">EJ</span><span class="o">=</span><span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="o">=</span><span class="n">EC</span><span class="p">,</span> <span class="n">ng</span><span class="o">=</span><span class="n">ng</span><span class="p">,</span> <span class="n">ncut</span><span class="o">=</span><span class="n">ncut</span><span class="p">)</span>
         <span class="n">E01</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">E01</span><span class="p">()</span>
@@ -882,14 +885,14 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the energy of the first excited state (E01) of a transmon qubit.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - EJ (float): Josephson energy of the transmon qubit.</span>
-<span class="sd">        - EC (float): Charging energy of the transmon qubit.</span>
-<span class="sd">        - ng (float, optional): Offset charge on the transmon qubit. Default is 0.</span>
-<span class="sd">        - ncut (int, optional): Truncation level for the transmon qubit&#39;s Hilbert space. Default is 30.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - EJ (float): Josephson energy of the transmon qubit.</span>
+<span class="sd">            - EC (float): Charging energy of the transmon qubit.</span>
+<span class="sd">            - ng (float, optional): Offset charge on the transmon qubit. Default is 0.</span>
+<span class="sd">            - ncut (int, optional): Truncation level for the transmon qubit&#39;s Hilbert space. Default is 30.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        - E01 (float): Energy of the first excited state (E01) of the transmon qubit.</span>
+<span class="sd">            - E01 (float): Energy of the first excited state (E01) of the transmon qubit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">transmon</span> <span class="o">=</span> <span class="n">Transmon</span><span class="p">(</span><span class="n">EJ</span><span class="o">=</span><span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="o">=</span><span class="n">EC</span><span class="p">,</span> <span class="n">ng</span><span class="o">=</span><span class="n">ng</span><span class="p">,</span> <span class="n">ncut</span><span class="o">=</span><span class="n">ncut</span><span class="p">)</span>
         <span class="n">E01</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">E01</span><span class="p">()</span>
