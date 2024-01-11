@@ -1,9 +1,7 @@
-.. note::
-
-   Everyone is welcome to contribute to SQuADDS. Please see review the following section for more information or contact us!
-
 Developer Notes
 ===============
+
+Everyone is welcome to contribute to SQuADDS. Please see review the following section for more information or contact us!
 
 Contribution Items
 ------------------
@@ -18,6 +16,10 @@ Contribution Items
 
 | **Implementation of Next Release** - If you would like to help in implementing the next version of SQuADDS, please look at what is being worked on for the `next release <https://github.com/shanto268/SQuADDS?tab=readme-ov-file#next-release>`_
 
+
+.. note::
+
+   If at any point you are convinced that something is wrong but the documentation/code says otherwise, you may **absolutely be right**. Please open an issue on GitHub and we will address it as soon as possible.
 
 Developers
 ----------
