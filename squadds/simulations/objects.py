@@ -5,6 +5,7 @@ SimulationConfig
 """
 
 from qiskit_metal.analyses.quantization import EPRanalysis, LOManalysis
+from sweeper_helperfunctions import extract_QSweep_parameters
 
 from squadds.simulations.utils import *
 
@@ -399,7 +400,6 @@ def CLT_epr_sweep(design, sweep_opts, filename):
     Returns:
         None
     """
-    #! TODO: extractQsweepParameters needs definition
     for param in extract_QSweep_parameters(sweep_opts):
         cpw_length = int("".join(filter(str.isdigit, param["cpw_opts"]["total_length"])))
         claw = create_claw(param["claw_opts"], cpw_length, design)

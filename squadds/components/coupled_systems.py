@@ -3,11 +3,14 @@ from collections import OrderedDict
 import numpy as np
 from qiskit_metal import Dict
 from qiskit_metal.qlibrary.core import QComponent, QRoute, QRoutePoint
-# from cavity_feedline import CavityFeedline
 from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
 
 
 class QubitCavity(QComponent):
+    """
+    QubitCavity class represents a coupled qubit-cavity system.
+    It contains methods to create the qubit, cavity, coupler, and CPWs.
+    """
     
     default_options = Dict(
         chip = 'main',
@@ -78,6 +81,12 @@ class QubitCavity(QComponent):
         self.make_pins()
         
     def make_qubit(self):
+        """
+        Creates a qubit based on the specified qubit options.
+
+        Returns:
+            None
+        """
         p = self.p
         # print(p.cavity_options['cpw_options'].total_length)
 
@@ -98,6 +107,12 @@ class QubitCavity(QComponent):
         self.make_cpws()
 
     def make_coupler(self):
+        """
+        Creates a coupler based on the specified coupling type in the cavity options.
+
+        Returns:
+            None
+        """
         p = self.p
 
         temp_opts = Dict()
@@ -120,6 +135,12 @@ class QubitCavity(QComponent):
         # self.add_qgeometry('poly', self.coupler.qgeometry_dict('poly'), chip = p.chip)
 
     def make_cpws(self):
+        """
+        Creates the CPWs (Coplanar Waveguides) for the coupled systems.
+
+        Returns:
+            None
+        """
         # print(f"COUPLER NAME: " + self.coupler.name)
         from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
 
@@ -210,6 +231,17 @@ class QubitCavity(QComponent):
 
         
     def make_pins(self):
+        """
+        Adds pins to the coupled system.
+
+        Retrieves pin information from the coupler and adds the pins to the system.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         start_dict = self.coupler.get_pin('prime_start')
         end_dict = self.coupler.get_pin('prime_end')
         self.add_pin('prime_start', start_dict['points'], start_dict['width'])

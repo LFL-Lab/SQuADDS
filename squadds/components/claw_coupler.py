@@ -13,7 +13,7 @@
 # that they have been altered from the originals.
 
 import numpy as np
-from qiskit_metal import draw, Dict
+from qiskit_metal import Dict, draw
 from qiskit_metal.qlibrary.core import BaseQubit
 
 
@@ -87,14 +87,23 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
     def make(self):
         """This is executed by the GUI/user to generate the qgeometry for the
         component."""
-        # self.make_pocket()
         self.make_connection_pads()
 
 ###################################TRANSMON#############################################################
 
     def make_pocket(self):
-        """Makes a basic Crossmon, 4 arm cross."""
+        """
+        Creates a pocket for the claw coupler.
 
+        This method uses the parsed values from the user options to determine the dimensions of the pocket.
+        The pocket is created based on the cross width, cross length, cross gap, and chip name.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         # self.p allows us to directly access parsed values (string -> numbers) form the user option
         p = self.p
 
@@ -104,39 +113,6 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
 
         # access to chip name
         chip = p.chip
-
-        # Creates the cross and the etch equivalent.
-        # cross_line = draw.shapely.ops.unary_union([
-        #     draw.LineString([(0, cross_length), (0, -cross_length)]),
-        #     draw.LineString([(cross_length, 0), (-cross_length, 0)])
-        # ])
-
-        # cross = cross_line.buffer(cross_width / 2, cap_style=2)
-        # cross_etch = cross.buffer(cross_gap, cap_style=3, join_style=2)
-
-        # The junction/SQUID
-        #rect_jj = draw.rectangle(cross_width, cross_gap)
-        #rect_jj = draw.translate(rect_jj, 0, -cross_length-cross_gap/2)
-        # rect_jj = draw.LineString([(0, -cross_length),
-        #                            (0, -cross_length - cross_gap)])
-
-        #rotate and translate
-        # polys = [cross, cross_etch, rect_jj]
-        # polys = draw.rotate(polys, p.orientation, origin=(0, 0))
-        # polys = draw.translate(polys, p.pos_x, p.pos_y)
-
-        # [cross, cross_etch, rect_jj] = polys
-
-        # # generate qgeometry
-        # self.add_qgeometry('poly', dict(cross=cross), chip=chip)
-        # self.add_qgeometry('poly',
-        #                    dict(cross_etch=cross_etch),
-        #                    subtract=True,
-        #                    chip=chip)
-        # self.add_qgeometry('junction',
-        #                    dict(rect_jj=rect_jj),
-        #                    width=cross_width,
-        #                    chip=chip)
 
 
 ############################CONNECTORS##################################################################################################

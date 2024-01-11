@@ -300,19 +300,6 @@ def create_cpw(opts, cplr, design):
     cpw = RouteMeander(design, 'cpw', options = opts)
     return cpw
 
-def as_list(x):
-    """
-    Converts the input to a list if it is not already a list.
-
-    Args:
-        x: The input value.
-
-    Returns:
-        A list containing the input value if it is not already a list.
-
-    """
-    return x if type(x) is list else [x]
-
 def save_simulation_data_to_json(data, filename):
     """
     Save simulation data to a JSON file.
