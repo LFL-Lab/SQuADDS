@@ -98,7 +98,7 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
         This method uses the parsed values from the user options to determine the dimensions of the pocket.
         The pocket is created based on the cross width, cross length, cross gap, and chip name.
 
-        Parameters:
+        Args:
             None
 
         Returns:

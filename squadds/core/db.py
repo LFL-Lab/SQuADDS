@@ -17,8 +17,48 @@ if sys.platform == "darwin":  # Checks if the operating system is macOS
     warnings.filterwarnings("ignore", category=UserWarning, module="pyaedt") # ANSYS is not a mac product
 
 class SQuADDS_DB(metaclass=SingletonMeta):
+    """
+    A class representing the SQuADDS database.
+
+    Methods:
+        supported_components(): Get a list of supported components.
+        supported_component_names(): Get a list of supported component names.
+        supported_data_types(): Get a list of supported data types.
+        _delete_cache(): Delete the dataset cache directory.
+        supported_config_names(): Get a list of supported configuration names.
+        get_configs(): Print the supported configuration names.
+        get_component_names(component): Get a list of component names for a given component.
+        view_component_names(component): Print the component names for a given component.
+        view_datasets(): Print a table of available datasets.
+        get_dataset_info(component, component_name, data_type): Print information about a specific dataset.
+        view_all_contributors(): Print a table of all contributors.
+        view_contributors_of_config(config): Print a table of contributors for a specific configuration.
+        view_contributors_of(component, component_name, data_type): Print a table of contributors for a specific component, component name, and data type.
+        select_components(component_dict): Select a configuration based on a component dictionary or string.
+        select_system(components): Select a system based on a list of components or a single component.
+        select_qubit(qubit): Select a qubit.
+        select_cavity_claw(cavity): Select a cavity.
+    """
     
     def __init__(self):
+        """
+        Constructor for the SQuADDS_DB class.
+
+        Attributes:
+            repo_name (str): The name of the repository.
+            configs (list): List of supported configuration names.
+            selected_component_name (str): The name of the selected component.
+            selected_component (str): The selected component.
+            selected_data_type (str): The selected data type.
+            selected_confg (str): The selected configuration.
+            selected_qubit (str): The selected qubit.
+            selected_cavity (str): The selected cavity.
+            selected_coupler (str): The selected coupler.
+            selected_system (str): The selected system.
+            selected_df (str): The selected dataframe.
+            target_param_keys (str): The target parameter keys.
+            units (str): The units.
+        """
         self.repo_name = "SQuADDS/SQuADDS_DB"
         self.configs = self.supported_config_names()
         self.selected_component_name = None
@@ -34,24 +74,45 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.units = None
 
     def supported_components(self):
+        """
+        Returns a list of supported components based on the configurations.
+
+        Returns:
+            list: A list of supported components.
+        """
         components = []
         for config in self.configs:
             components.append(config.split("-")[0])
         return components
     
     def supported_component_names(self):
+        """
+        Returns a list of supported component names extracted from the configs.
+
+        Returns:
+            list: A list of supported component names.
+        """
         component_names = []
         for config in self.configs:
             component_names.append(config.split("-")[1])
         return component_names
     
     def supported_data_types(self):
+        """
+        Returns a list of supported data types.
+
+        Returns:
+            list: A list of supported data types.
+        """
         data_types = []
         for config in self.configs:
             data_types.append(config.split("-")[2])
         return data_types
 
     def _delete_cache(self):
+        """
+        Deletes the cache directory for the specific dataset.
+        """
         # Determine the root cache directory for 'datasets'
         # Default cache directory is '~/.cache/huggingface/datasets' on Unix systems
         # and 'C:\\Users\\<username>\\.cache\\huggingface\\datasets' on Windows
@@ -78,15 +139,36 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             pass
         
     def supported_config_names(self):
+        """
+        Retrieves the supported configuration names from the repository.
+
+        Returns:
+            A list of supported configuration names.
+        """
         self._delete_cache()
         configs = get_dataset_config_names(self.repo_name, download_mode='force_redownload')
         return configs
 
     def get_configs(self):
+        """
+        Returns the configurations stored in the database.
+
+        Returns:
+            list: A list of configuration names.
+        """
         # pretty print the config names
         pprint.pprint(self.configs)
 
     def get_component_names(self, component=None):
+        """
+        Get the names of the components associated with a specific component.
+
+        Args:
+            component (str): The specific component to retrieve names for.
+
+        Returns:
+            list: A list of component names associated with the specified component.
+        """
         if component is None:
             print("Please specify a component")
             return
@@ -102,6 +184,15 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return component_names
         
     def view_component_names(self, component=None):
+        """
+        Prints the names of the components available in the database.
+
+        Args:
+            component (str): The specific component to view names for. If None, all component names will be printed.
+
+        Returns:
+            None
+        """
         if component is None:
             print("Please specify a component")
         if component not in self.supported_components():
@@ -116,6 +207,12 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
 
     def view_datasets(self):
+        """
+        View the datasets available in the database.
+
+        This method retrieves the supported components, component names, and data types
+        from the database and displays them in a tabular format.
+        """
         components = self.supported_components()
         component_names = self.supported_component_names()
         data_types = self.supported_data_types()
@@ -130,6 +227,17 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         print(tabulate(table, headers=["Component", "Component Name", "Data Available"],tablefmt="fancy_grid"))
 
     def get_dataset_info(self, component=None, component_name=None, data_type=None):
+        """
+        Retrieves and prints information about a dataset.
+
+        Args:
+            component (str): The component of the dataset.
+            component_name (str): The name of the component.
+            data_type (str): The type of data.
+
+        Returns:
+            None
+        """
         # do checks
         if component is None:
             print("Please specify a component")
@@ -176,6 +284,14 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         print("="*80)
         
     def view_all_contributors(self):
+        """
+        View all unique contributors and their relevant information.
+
+        This method iterates through the configurations and extracts the relevant information
+        of each contributor. It checks if the combination of uploader, PI, group, and institution
+        is already in the list of unique contributors. If not, it adds the relevant information
+        to the list. Finally, it prints the list of unique contributors in a tabular format.
+        """
         # Placeholder for the full contributor info
         unique_contributors_info = []
 
@@ -200,6 +316,15 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         print(tabulate(unique_contributors_info, headers="keys", tablefmt="fancy_grid"))
 
     def view_contributors_of_config(self, config):
+        """
+        View the contributors of a specific configuration.
+
+        Args:
+            config (str): The name of the configuration.
+
+        Returns:
+            None
+        """
         dataset = load_dataset(self.repo_name, config)["train"]
         configs_contrib_info = dataset["contributor"]
         unique_contributors_info = []
@@ -213,10 +338,32 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         print(tabulate(unique_contributors_info, headers='keys', tablefmt="fancy_grid"))
 
     def view_contributors_of(self, component=None, component_name=None, data_type=None):
+        """
+        View contributors of a specific component, component name, and data type.
+
+        Args:
+            component (str): The component of interest.
+            component_name (str): The name of the component.
+            data_type (str): The type of data.
+
+        Returns:
+            None
+        """
         config = component + "-" + component_name + "-" + data_type
         self.view_contributors_of_config(config)
 
     def select_components(self, component_dict=None):
+        """
+        Selects components based on the provided component dictionary or string.
+
+        Args:
+            component_dict (dict or str): A dictionary containing the component details
+                (component, component_name, data_type) or a string representing the component.
+
+        Returns:
+            None
+
+        """
         # check if dict or string
         if isinstance(component_dict, dict):
             config = component_dict["component"] + "-" + component_dict["component_name"] + "-" + component_dict["data_type"]
@@ -225,6 +372,20 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         print("Selected config: ", config)
         
     def select_system(self, components=None):
+        """
+        Selects the system and component(s) to be used.
+
+        Args:
+            components (list or str): The component(s) to be selected. If a list is provided,
+                each component will be checked against the supported components. If a string
+                is provided, it will be checked against the supported components.
+
+        Returns:
+            None
+
+        Raises:
+            None
+        """
         # Validation and checks
         if isinstance(components, list):
             for component in components:
@@ -245,6 +406,18 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                 self.selected_component = components
     
     def select_qubit(self, qubit=None):
+        """
+        Selects a qubit and sets the necessary attributes for the selected qubit.
+
+        Args:
+            qubit (str): The name of the qubit to be selected.
+
+        Raises:
+            UserWarning: If the selected system is not specified or does not contain a qubit.
+
+        Returns:
+            None
+        """
         # check whether selected_component is qubit
         if (self.selected_system == "qubit") or ("qubit" in self.selected_system):
             self.selected_qubit = qubit
@@ -260,6 +433,18 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return
 
     def select_cavity_claw(self, cavity=None):
+        """
+        Selects a cavity claw component.
+
+        Args:
+            cavity (str): The name of the cavity to select.
+
+        Raises:
+            UserWarning: If the selected system is not specified or does not contain a cavity.
+
+        Returns:
+            None
+        """
         # check whether selected_component is cavity
         if (self.selected_system == "cavity_claw") or ("cavity_claw" in self.selected_system):
             self.selected_cavity = cavity
@@ -275,6 +460,18 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return
 
     def select_cavity(self, cavity=None):
+        """
+        Selects a cavity and sets the necessary attributes for further operations.
+
+        Parameters:
+            cavity (str): The name of the cavity to be selected.
+
+        Raises:
+            UserWarning: If the selected system is either not specified or does not contain a cavity.
+
+        Returns:
+            None
+        """
         # check whether selected_component is cavity
         if (self.selected_system == "cavity") or ("cavity" in self.selected_system):
             self.selected_cavity = cavity
@@ -290,7 +487,16 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return
         
     def select_coupler(self, coupler=None):
-        # TODO: fix this method to work on NCap coupler sims
+        """
+        Selects a coupler for the database.
+
+        Args:
+            coupler (str, optional): The name of the coupler to select. Defaults to None.
+
+        Returns:
+            None
+        """
+        #! TODO: fix this method to work on NCap coupler sims
         self.selected_coupler = coupler
         #self.selected_component_name = coupler
         #self.selected_data_type = "cap_matrix" # TODO: handle dynamically
@@ -303,6 +509,25 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return
 
     def see_dataset(self, data_type=None, component=None, component_name=None):
+        """
+        View a dataset based on the provided data type, component, and component name.
+
+        Args:
+            data_type (str): The type of data to view.
+            component (str): The component to use. If not provided, the selected system will be used.
+            component_name (str): The name of the component. If not provided, the selected component name will be used.
+
+        Returns:
+            pandas.DataFrame: The flattened dataset.
+
+        Raises:
+            ValueError: If both system and component name are not defined.
+            ValueError: If data type is not specified.
+            ValueError: If the component is not supported.
+            ValueError: If the component name is not supported.
+            ValueError: If the data type is not supported.
+            Exception: If an error occurs while loading the dataset.
+        """
         # Use the instance attributes if the user does not provide them
         component = component if component is not None else self.selected_system
         component_name = component_name if component_name is not None else self.selected_component_name
@@ -345,6 +570,25 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
 
     def get_dataset(self, data_type=None, component=None, component_name=None):
+        """
+        Retrieves a dataset based on the specified data type, component, and component name.
+
+        Args:
+            data_type (str): The type of data to retrieve.
+            component (str): The component to retrieve the data from.
+            component_name (str): The name of the component to retrieve the data from.
+
+        Returns:
+            pandas.DataFrame: The retrieved dataset.
+
+        Raises:
+            ValueError: If the system and component name are not defined.
+            ValueError: If the data type is not specified.
+            ValueError: If the component is not supported.
+            ValueError: If the component name is not supported.
+            ValueError: If the data type is not supported.
+            Exception: If an error occurs while loading the dataset.
+        """
         # Use the instance attributes if the user does not provide them
         component = component if component is not None else self.selected_system
         component_name = component_name if component_name is not None else self.selected_component_name
@@ -387,6 +631,25 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return
 
     def create_system_df(self):
+        """
+        Creates and returns a DataFrame based on the selected system.
+
+        If the selected system is a single component, it retrieves the dataset based on the selected data type, component, and component name.
+        If a coupler is selected, the DataFrame is filtered by the coupler.
+        The resulting DataFrame is stored in the `selected_df` attribute.
+
+        If the selected system is a list of components (qubit and cavity), it retrieves the qubit and cavity DataFrames.
+        The qubit DataFrame is obtained based on the selected qubit component name and data type "cap_matrix".
+        The cavity DataFrame is obtained based on the selected cavity component name and data type "eigenmode".
+        The qubit and cavity DataFrames are merged into a single DataFrame using the merger terms ['claw_width', 'claw_length', 'claw_gap'].
+        The resulting DataFrame is stored in the `selected_df` attribute.
+
+        Raises:
+            UserWarning: If the selected system is either not specified or does not contain a cavity.
+
+        Returns:
+            pandas.DataFrame: The created DataFrame based on the selected system.
+        """
         if self.selected_system is None:
             print("Selected system is not defined.")
             return
@@ -407,6 +670,20 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         return df
 
     def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None):
+        """
+        Creates a merged DataFrame by merging the qubit and cavity DataFrames based on the specified merger terms.
+
+        Args:
+            qubit_df (pandas.DataFrame): The DataFrame containing qubit data.
+            cavity_df (pandas.DataFrame): The DataFrame containing cavity data.
+            merger_terms (list): A list of column names to be used for merging the DataFrames. Defaults to None.
+
+        Returns:
+            pandas.DataFrame: The merged DataFrame.
+
+        Raises:
+            None
+        """
         for merger_term in merger_terms:
             # process the dfs to make them ready for merger
             qubit_df[merger_term] = qubit_df['design_options'].apply(lambda x: x['connection_pads']['readout'][merger_term])
@@ -424,6 +701,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         return merged_df
 
     def unselect_all(self):
+        """
+        Clears the selected component, data type, qubit, cavity, coupler, and system.
+        """
         self.selected_component_name = None
         self.selected_component = None
         self.selected_data_type = None
@@ -433,6 +713,12 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.selected_system = None
 
     def show_selections(self):
+        """
+        Prints the selected system, component, and data type.
+
+        If the selected system is a list, it prints the selected qubit, cavity, coupler, and system.
+        If the selected system is a string, it prints the selected component, component name, data type, system, and coupler.
+        """
         if isinstance(self.selected_system, list): #TODO: handle dynamically
             print("Selected qubit: ", self.selected_qubit)
             print("Selected cavity: ", self.selected_cavity)
@@ -446,6 +732,15 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print("Selected coupler: ", self.selected_coupler)
 
     def _set_target_param_keys(self, df):
+        """
+        Sets the target parameter keys based on the provided DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The DataFrame containing simulation results.
+
+        Raises:
+            UserWarning: If no selected system DataFrame is created or if target_param_keys is not None or a list.
+        """
         # ensure selected_df is not None
         if self.selected_system is None:
             raise UserWarning("No selected system df is created. Please check `self.selected_df`")
@@ -470,6 +765,22 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         raise NotImplementedError()
 
     def unselect(self, param):
+        """
+        Unselects the specified parameter.
+
+        Parameters:
+        param (str): The parameter to unselect. Valid options are:
+            - "component"
+            - "component_name"
+            - "data_type"
+            - "qubit"
+            - "cavity_claw"
+            - "coupler"
+            - "system"
+
+        Returns:
+        None
+        """
         if param == "component":
             self.selected_component = None
         elif param == "component_name":

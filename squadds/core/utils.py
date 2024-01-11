@@ -1,21 +1,24 @@
-import urllib.parse
-import webbrowser
 import getpass
 import os
-from huggingface_hub import HfApi, HfFolder
-from squadds.core.globals import ENV_FILE_PATH
-import pandas as pd
+import urllib.parse
+import webbrowser
+
 import numpy as np
+import pandas as pd
+from huggingface_hub import HfApi, HfFolder
+
+from squadds.core.globals import ENV_FILE_PATH
+
 
 def get_sim_results_keys(dataframes):
     """
     Get the unique keys from the 'sim_results' column of the given dataframes.
 
-    Parameters:
-    dataframes (list or pandas.DataFrame): A list of dataframes or a single dataframe.
+    Args:
+        dataframes (list or pandas.DataFrame): A list of dataframes or a single dataframe.
 
     Returns:
-    list: A list of unique keys extracted from the 'sim_results' column.
+        list: A list of unique keys extracted from the 'sim_results' column.
     """
     # Initialize an empty list to store all keys
     all_keys = []

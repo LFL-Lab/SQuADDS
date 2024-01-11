@@ -1,9 +1,12 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from squadds.calcs.qubit import QubitHamiltonian
-from scqubits.core.transmon import Transmon
+import numpy as np
 from pyEPR.calcs import Convert
 from scipy.constants import e, h, hbar
+from scqubits.core.transmon import Transmon
+
+from squadds.calcs.qubit import QubitHamiltonian
+
+
 class TransmonCrossHamiltonian(QubitHamiltonian):
     """
     Class representing the Hamiltonian for a transmon qubit in a cross-coupled configuration.
@@ -13,8 +16,8 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Initialize the TransmonCrossHamiltonian object.
 
-        Parameters:
-        - analysis: The analysis object associated with the Hamiltonian.
+        Attributes:
+            - analysis: The analysis object associated with the Hamiltonian.
         """
         import scqubits as scq
         super().__init__(analysis)
@@ -24,8 +27,8 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Plot the data from the given DataFrame.
 
-        Parameters:
-        - data_frame: The DataFrame containing the data to be plotted.
+        Args:
+            - data_frame: The DataFrame containing the data to be plotted.
         """
         data_frame.plot(kind='box', subplots=True, layout=(1, 3), sharex=False, sharey=False)
         plt.show()
@@ -34,12 +37,12 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the charging energy (EC) of the transmon qubit.
 
-        Parameters:
-        - cross_to_claw: Capacitance between the cross and the claw.
-        - cross_to_ground: Capacitance between the cross and the ground.
+        Args:
+            - cross_to_claw: Capacitance between the cross and the claw.
+            - cross_to_ground: Capacitance between the cross and the ground.
 
         Returns:
-        - EC: The charging energy of the transmon qubit.
+            - EC: The charging energy of the transmon qubit.
         """
         C_eff_fF = abs(cross_to_ground) + abs(cross_to_claw)
         EC = Convert.Ec_from_Cs(C_eff_fF, units_in='fF',units_out='GHz')
@@ -49,15 +52,15 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the target qubit parameters (EJ, EC, EJEC, Lj) based on the given qubit frequency (w_q) and anharmonicity (alpha).
 
-        Parameters:
-        - w_q: The qubit frequency.
-        - alpha: The anharmonicity of the qubit.
+        Args:
+            - w_q: The qubit frequency.
+            - alpha: The anharmonicity of the qubit.
 
         Returns:
-        - EJ: The Josephson energy of the qubit.
-        - EC: The charging energy of the qubit.
-        - EJEC: The ratio of EJ to EC.
-        - Lj: The Josephson inductance of the qubit.
+            - EJ: The Josephson energy of the qubit.
+            - EC: The charging energy of the qubit.
+            - EJEC: The ratio of EJ to EC.
+            - Lj: The Josephson inductance of the qubit.
         """
         EJ, EC = Transmon.find_EJ_EC(w_q, alpha)
         EJEC = EJ / EC
@@ -72,13 +75,13 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the Josephson energy (EJ) and Josephson inductance (Lj) based on the given qubit frequency (w_q) and anharmonicity (alpha).
 
-        Parameters:
-        - w_q: The qubit frequency.
-        - alpha: The anharmonicity of the qubit.
+        Args:
+            - w_q: The qubit frequency.
+            - alpha: The anharmonicity of the qubit.
 
         Returns:
-        - EJ: The Josephson energy of the qubit.
-        - Lj: The Josephson inductance of the qubit.
+            - EJ: The Josephson energy of the qubit.
+            - Lj: The Josephson inductance of the qubit.
         """
         EJ, EC = Transmon.find_EJ_EC(w_q, alpha)
         Lj = Convert.Lj_from_Ej(EJ, units_in='GHz', units_out='nH')
@@ -90,12 +93,12 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the Josephson energy (EJ) based on the given qubit frequency (w_q) and anharmonicity (alpha).
 
-        Parameters:
-        - w_q: The qubit frequency.
-        - alpha: The anharmonicity of the qubit.
+        Args:
+            - w_q: The qubit frequency.
+            - alpha: The anharmonicity of the qubit.
 
         Returns:
-        - EJ: The Josephson energy of the qubit.
+            - EJ: The Josephson energy of the qubit.
         """
         EJ, EC = Transmon.find_EJ_EC(w_q, alpha)
         self.EJ = EJ
@@ -105,20 +108,20 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the target quantities (C_q, C_c, EJ, EC, EJ_EC_ratio) based on the given parameters.
 
-        Parameters:
-        - f_res: The resonator frequency.
-        - alpha: The anharmonicity of the qubit.
-        - g: The coupling strength between the qubit and the resonator.
-        - w_q: The qubit frequency.
-        - res_type: The type of resonator.
-        - Z_0: The characteristic impedance of the resonator.
+        Args:
+            - f_res: The resonator frequency.
+            - alpha: The anharmonicity of the qubit.
+            - g: The coupling strength between the qubit and the resonator.
+            - w_q: The qubit frequency.
+            - res_type: The type of resonator.
+            - Z_0: The characteristic impedance of the resonator.
 
         Returns:
-        - C_q: The total capacitance of the qubit.
-        - C_c: The coupling capacitance between the qubit and the resonator.
-        - EJ: The Josephson energy of the qubit.
-        - EC: The charging energy of the qubit.
-        - EJ_EC_ratio: The ratio of EJ to EC.
+            - C_q: The total capacitance of the qubit.
+            - C_c: The coupling capacitance between the qubit and the resonator.
+            - EJ: The Josephson energy of the qubit.
+            - EC: The charging energy of the qubit.
+            - EJ_EC_ratio: The ratio of EJ to EC.
         """
         EJ, EC = Transmon.find_EJ_EC(w_q, alpha)
         C_q = Convert.Cs_from_Ec(EC, units_in='GHz', units_out='fF')
@@ -140,18 +143,18 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the coupling strength (g) and anharmonicity (alpha) based on the given parameters.
 
-        Parameters:
-        - C: The capacitance between the qubit and the ground.
-        - C_c: The coupling capacitance between the qubit and the resonator.
-        - f_q: The qubit frequency.
-        - EJ: The Josephson energy of the qubit.
-        - f_r: The resonator frequency.
-        - res_type: The type of resonator.
-        - Z0: The characteristic impedance of the resonator.
+        Args:
+            - C: The capacitance between the qubit and the ground.
+            - C_c: The coupling capacitance between the qubit and the resonator.
+            - f_q: The qubit frequency.
+            - EJ: The Josephson energy of the qubit.
+            - f_r: The resonator frequency.
+            - res_type: The type of resonator.
+            - Z0: The characteristic impedance of the resonator.
 
         Returns:
-        - g: The coupling strength between the qubit and the resonator.
-        - alpha: The anharmonicity of the qubit.
+            - g: The coupling strength between the qubit and the resonator.
+            - alpha: The anharmonicity of the qubit.
         """
         C, C_c = abs(C) * 1e-15, abs(C_c) * 1e-15
         C_q = C + C_c
@@ -165,16 +168,16 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the coupling strength, anharmonicity, and transition frequency of a transmon qubit.
 
-        Parameters:
-        C (float): Total capacitance of the transmon qubit.
-        C_c (float): Coupling capacitance between the transmon qubit and the resonator.
-        EJ (float): Josephson energy of the transmon qubit.
-        f_r (float): Resonator frequency.
-        res_type (str): Type of resonator. Must be either 'half' or 'quarter'.
-        Z0 (float, optional): Characteristic impedance of the transmission line. Defaults to 50.
+        Args:
+            - C (float): Total capacitance of the transmon qubit.
+            - C_c (float): Coupling capacitance between the transmon qubit and the resonator.
+            - EJ (float): Josephson energy of the transmon qubit.
+            - f_r (float): Resonator frequency.
+            - res_type (str): Type of resonator. Must be either 'half' or 'quarter'.
+            - Z0 (float, optional): Characteristic impedance of the transmission line. Defaults to 50.
 
         Returns:
-        tuple: A tuple containing the coupling strength (g), anharmonicity (alpha), and transition frequency (freq).
+            - (g, alpha, freq) (tuple): A tuple containing the coupling strength (g), anharmonicity (alpha), and transition frequency (freq).
         """
         import scqubits as scq
         scq.set_units("GHz")
@@ -198,15 +201,15 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         based on the capacitance matrix.
 
         Args:
-            C (float): Capacitance between the qubit and the resonator (in femtofarads, fF).
-            C_c (float): Coupling capacitance of the resonator (in femtofarads, fF).
-            EJ (float): Josephson energy of the qubit (in GHz).
-            f_r (float): Resonator frequency (in GHz).
-            res_type (str): Type of resonator. Can be 'half' or 'quarter'.
-            Z0 (float, optional): Characteristic impedance of the transmission line (in ohms). Default is 50 ohms.
+            - C (float): Capacitance between the qubit and the resonator (in femtofarads, fF).
+            - C_c (float): Coupling capacitance of the resonator (in femtofarads, fF).
+            - EJ (float): Josephson energy of the qubit (in GHz).
+            - f_r (float): Resonator frequency (in GHz).
+            - res_type (str): Type of resonator. Can be 'half' or 'quarter'.
+            - Z0 (float, optional): Characteristic impedance of the transmission line (in ohms). Default is 50 ohms.
 
         Returns:
-            float: Coupling strength 'g' between the qubit and the resonator (in MHz).
+            - g (float): Coupling strength 'g' between the qubit and the resonator (in MHz).
         """
         C = abs(C) * 1e-15  # F
         C_c = abs(C_c) * 1e-15  # F
@@ -227,13 +230,13 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the frequencies and anharmonicities of transmons with a fixed LJ value.
 
-        Parameters:
-        - fig4_df: DataFrame containing the values of EC for different transmons.
-        - LJ_target: Target value of LJ in nH.
+        Args:
+            - fig4_df: DataFrame containing the values of EC for different transmons.
+            - LJ_target: Target value of LJ in nH.
 
         Returns:
-        - freq: List of frequencies of the transmons.
-        - alpha: List of anharmonicities of the transmons.
+            - freq: List of frequencies of the transmons.
+            - alpha: List of anharmonicities of the transmons.
         """
         EJ = Convert.Ej_from_Lj(LJ_target, units_in='nH', units_out='GHz')
         EC = fig4_df["EC"].values
@@ -246,15 +249,15 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the energy of the first excited state (E01) and the anharmonicity (alpha) of a transmon qubit.
 
-        Parameters:
-        - EJ (float): Josephson energy of the transmon qubit.
-        - EC (float): Charging energy of the transmon qubit.
-        - ng (float, optional): Offset charge on the transmon qubit. Defaults to 0.
-        - ncut (int, optional): Truncation level for the transmon qubit's Hilbert space. Defaults to 30.
+        Args:
+            - EJ (float): Josephson energy of the transmon qubit.
+            - EC (float): Charging energy of the transmon qubit.
+            - ng (float, optional): Offset charge on the transmon qubit. Defaults to 0.
+            - ncut (int, optional): Truncation level for the transmon qubit's Hilbert space. Defaults to 30.
 
         Returns:
-        - E01 (float): Energy of the first excited state (E01) in GHz.
-        - alpha (float): Anharmonicity (alpha) in MHz.
+            - E01 (float): Energy of the first excited state (E01) in GHz.
+            - alpha (float): Anharmonicity (alpha) in MHz.
         """
         transmon = Transmon(EJ=EJ, EC=EC, ng=ng, ncut=ncut)
         E01 = transmon.E01()
@@ -265,14 +268,14 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the energy of the first excited state (E01) of a transmon qubit.
 
-        Parameters:
-        - EJ (float): Josephson energy of the transmon qubit.
-        - EC (float): Charging energy of the transmon qubit.
-        - ng (float, optional): Offset charge on the transmon qubit. Default is 0.
-        - ncut (int, optional): Truncation level for the transmon qubit's Hilbert space. Default is 30.
+        Args:
+            - EJ (float): Josephson energy of the transmon qubit.
+            - EC (float): Charging energy of the transmon qubit.
+            - ng (float, optional): Offset charge on the transmon qubit. Default is 0.
+            - ncut (int, optional): Truncation level for the transmon qubit's Hilbert space. Default is 30.
 
         Returns:
-        - E01 (float): Energy of the first excited state (E01) of the transmon qubit.
+            - E01 (float): Energy of the first excited state (E01) of the transmon qubit.
         """
         transmon = Transmon(EJ=EJ, EC=EC, ng=ng, ncut=ncut)
         E01 = transmon.E01()

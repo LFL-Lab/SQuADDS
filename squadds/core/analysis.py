@@ -15,12 +15,12 @@ def scale_value(value, ratio):
     """
     Scales the given value by the specified ratio.
 
-    Parameters:
-    value (str): The value to be scaled, in the format 'Xum' where X is a number.
-    ratio (float): The scaling ratio.
+    Args:
+        - value (str): The value to be scaled, in the format 'Xum' where X is a number.
+        - ratio (float): The scaling ratio.
 
     Returns:
-    str: The scaled value in the format 'Xum' where X is the scaled number.
+        scaled_value (str): The scaled value in the format 'Xum' where X is the scaled number.
     """
     scaled_value = str(float(value.replace('um', '')) * ratio) + 'um'
     return scaled_value
@@ -31,23 +31,53 @@ Analyzer
 =====================================================================================
 """
 class Analyzer:
+    """
+    The Analyzer class is responsible for analyzing designs and finding the closest designs based on target parameters.
+
+    Methods:
+        _add_target_params_columns(): Adds target parameter columns to the dataframe based on the selected system.
+        _fix_cavity_claw_df(): Fixes the cavity claw DataFrame by renaming columns and updating values.
+        _get_H_param_keys(): Gets the parameter keys for the Hamiltonian based on the selected system.
+        target_param_keys(): Returns the target parameter keys.
+        set_metric_strategy(strategy: MetricStrategy): Sets the metric strategy to use for calculating the distance metric.
+        _outside_bounds(df: pd.DataFrame, params: dict, display=True) -> bool: Checks if entered parameters are outside the bounds of a dataframe.
+        find_closest(target_params: dict, num_top: int, metric: str = 'Euclidean', display: bool = True): Finds the closest designs in the library based on the target parameters.
+        get_interpolated_design(target_params: dict, metric: str = 'Euclidean', display: bool = True): Gets the interpolated design based on the target parameters.
+        get_design(df): Extracts the design parameters from the dataframe and returns a dict.
+    """
 
     __supported_metrics__ = ['Euclidean', 'Manhattan', 'Chebyshev', 'Weighted Euclidean' , 'Custom']
     __supported_estimation_methods__ = ['Interpolation']
 
     def __init__(self, db):
         """
-        Args:
-            db (SQuADDS_DB): The database to analyze.
+        Initializes an instance of the Analysis class.
+
+        Parameters:
+            - db: The database object.
 
         Attributes:
-            db (SQuADDS_DB): The database to analyze.
-            metric_strategy (MetricStrategy): The strategy to use for calculating the distance metric.
-            custom_metric_func (function): The custom function to use for calculating the distance metric.
-            metric_weights (dict): The weights to use for calculating the weighted distance metric.
-
-        Raises:
-            ValueError: If the specified metric is not supported.
+            - db: The database object.
+            - selected_component_name: The name of the selected component.
+            - selected_component: The selected component.
+            - selected_data_type: The selected data type.
+            - selected_confg: The selected configuration.
+            - selected_qubit: The selected qubit.
+            - selected_cavity: The selected cavity.
+            - selected_coupler: The selected coupler.
+            - selected_system: The selected system.
+            - df: The selected dataframe.
+            - closest_df_entry: The closest dataframe entry.
+            - closest_design: The closest design.
+            - presimmed_closest_cpw_design: The presimmed closest CPW design.
+            - presimmed_closest_qubit_design: The presimmed closest qubit design.
+            - presimmed_closest_coupler_design: The presimmed closest coupler design.
+            - interpolated_design: The interpolated design.
+            - metric_strategy: The metric strategy (will be set dynamically).
+            - custom_metric_func: The custom metric function.
+            - metric_weights: The metric weights.
+            - target_params: The target parameters.
+            - H_param_keys: The H parameter keys.
         """
 
         self.db = db
@@ -83,9 +113,11 @@ class Analyzer:
         If the selected system is "cavity_claw", it fixes the dataframe for the cavity_claw system.
         If the selected system is "coupler", it does nothing.
         If the selected system is ["qubit", "cavity_claw"] or ["cavity_claw", "qubit"], it fixes the dataframe for the cavity_claw system and adds cavity-coupled Hamiltonian parameters to the dataframe.
-        Raises a ValueError if the selected system is invalid.
+
+        Raises:
+            a ValueError if the selected system is invalid.
         """
-        #TODO: make this more general and read the param keys from the database
+        #! TODO: make this more general and read the param keys from the database
         if self.selected_system == "qubit":
             qubit_H = TransmonCrossHamiltonian(self)
             qubit_H.add_qubit_H_params()
@@ -133,7 +165,7 @@ class Analyzer:
         Raises:
             ValueError: If the selected system is invalid.
         """
-        #TODO: make this more general and read the param keys from the database
+        #! TODO: make this more general and read the param keys from the database
         self.H_param_keys = None
         if self.selected_system == "qubit":
             self.H_param_keys = ["qubit_frequency_GHz", "anharmonicity_MHz"]
@@ -214,18 +246,18 @@ class Analyzer:
         """
         Find the closest designs in the library based on the target parameters.
 
-        Parameters:
-        - target_params (dict): A dictionary containing the target parameters.
-        - num_top (int): The number of closest designs to retrieve.
-        - metric (str, optional): The distance metric to use for calculating distances. Defaults to 'Euclidean'.
-        - display (bool, optional): Whether to display warnings for parameters outside of the library bounds. Defaults to True.
+        Args:
+            - target_params (dict): A dictionary containing the target parameters.
+            - num_top (int): The number of closest designs to retrieve.
+            - metric (str, optional): The distance metric to use for calculating distances. Defaults to 'Euclidean'.
+            - display (bool, optional): Whether to display warnings for parameters outside of the library bounds. Defaults to True.
 
         Returns:
-        - closest_df (DataFrame): A DataFrame containing the closest designs.
+            - closest_df (DataFrame): A DataFrame containing the closest designs.
 
         Raises:
-        - ValueError: If the specified metric is not supported or if num_top is bigger than the size of the library.
-        - ValueError: If the metric is invalid.
+            - ValueError: If the specified metric is not supported or if num_top is bigger than the size of the library.
+            - ValueError: If the metric is invalid.
         """
         ### Checks
         # Check for supported metric
@@ -275,7 +307,7 @@ class Analyzer:
         self.closest_df_entry = closest_df.iloc[0]
         self.closest_design = closest_df.iloc[0]["design_options"]
 
-        if len(self.selected_system) == 2: #TODO: make this more general
+        if len(self.selected_system) == 2: #! TODO: make this more general
             self.presimmed_closest_cpw_design = self.closest_df_entry["design_options_cavity_claw"]
             self.presimmed_closest_qubit_design = self.closest_df_entry["design_options_qubit"]
 
@@ -293,6 +325,9 @@ class Analyzer:
     def get_design(self, df):
         """
         Extracts the design parameters from the dataframe and returns a dict.
+
+        Returns:
+            dict: A dict containing the design parameters.
         """
         return df["design_options"].to_dict()[0]
 

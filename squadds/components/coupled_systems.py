@@ -236,7 +236,7 @@ class QubitCavity(QComponent):
 
         Retrieves pin information from the coupler and adds the pins to the system.
 
-        Parameters:
+        Args:
             None
 
         Returns:

@@ -19,25 +19,25 @@ class QubitHamiltonian(ABC):
 
     @abstractmethod
     def plot_data(self, data_frame):
-            """
-            Plot the given data frame.
+        """
+        Plot the given data frame.
 
-            Args:
-                data_frame (pandas.DataFrame): The data frame to be plotted.
-            """
-            pass
+        Args:
+            data_frame (pandas.DataFrame): The data frame to be plotted.
+        """
+        pass
 
     @abstractmethod
     def E01(self, EJ, EC):
         """
         Calculate the energy difference between the ground state (|0>) and the first excited state (|1>) of a qubit.
 
-        Parameters:
-        - EJ (float): Josephson energy of the qubit.
-        - EC (float): Charging energy of the qubit.
+        Args:
+            - EJ (float): Josephson energy of the qubit.
+            - EC (float): Charging energy of the qubit.
 
         Returns:
-        - float: Energy difference between the ground state and the first excited state.
+            - float: Energy difference between the ground state and the first excited state.
         """
         pass
 
@@ -46,13 +46,13 @@ class QubitHamiltonian(ABC):
         """
         Calculate the energy of the first excited state (E01) and the anharmonicity of a qubit.
 
-        Parameters:
-        - EJ (float): Josephson energy of the qubit.
-        - EC (float): Charging energy of the qubit.
+        Args:
+            - EJ (float): Josephson energy of the qubit.
+            - EC (float): Charging energy of the qubit.
 
         Returns:
-        - E01 (float): Energy of the first excited state.
-        - anharmonicity (float): Anharmonicity of the qubit.
+            - E01 (float): Energy of the first excited state.
+            - anharmonicity (float): Anharmonicity of the qubit.
         """
         pass
 
@@ -62,12 +62,12 @@ class QubitHamiltonian(ABC):
         Calculate the Josephson energy (EJ) and the Josephson inductance (LJ) 
         for a given qubit frequency (f_q) and anharmonicity (alpha).
 
-        Parameters:
-        f_q (float): The qubit frequency in Hz.
-        alpha (float): The anharmonicity of the qubit in Hz.
+        Args:
+            f_q (float): The qubit frequency in Hz.
+            alpha (float): The anharmonicity of the qubit in Hz.
 
         Returns:
-        tuple: A tuple containing the Josephson energy (EJ) and the Josephson inductance (LJ).
+            tuple: A tuple containing the Josephson energy (EJ) and the Josephson inductance (LJ).
         """
         pass
 
@@ -76,12 +76,12 @@ class QubitHamiltonian(ABC):
         """
         Calculate the Josephson energy (EJ) of a qubit.
 
-        Parameters:
-        f_q (float): The qubit frequency in Hz.
-        alpha (float): The anharmonicity parameter.
+        Args:
+            f_q (float): The qubit frequency in Hz.
+            alpha (float): The anharmonicity parameter.
 
         Returns:
-        float: The Josephson energy (EJ) in Joules.
+            float: The Josephson energy (EJ) in Joules.
         """
         pass
 
@@ -104,16 +104,16 @@ class QubitHamiltonian(ABC):
         """
         Calculate the target quantities for a qubit.
 
-        Parameters:
-        - f_res (float): The resonance frequency of the qubit.
-        - alpha (float): The anharmonicity of the qubit.
-        - g (float): The coupling strength between the qubit and the resonator.
-        - w_q (float): The frequency of the qubit.
-        - N (int): The number of photons in the resonator.
-        - Z_0 (float, optional): The characteristic impedance of the resonator. Default is 50 Ohms.
+        Args:
+            - f_res (float): The resonance frequency of the qubit.
+            - alpha (float): The anharmonicity of the qubit.
+            - g (float): The coupling strength between the qubit and the resonator.
+            - w_q (float): The frequency of the qubit.
+            - N (int): The number of photons in the resonator.
+            - Z_0 (float, optional): The characteristic impedance of the resonator. Default is 50 Ohms.
 
         Returns:
-        None
+            None
         """
         pass
 
@@ -122,18 +122,18 @@ class QubitHamiltonian(ABC):
         """
         Calculate the coupling strength (g) and anharmonicity (alpha) of a qubit.
 
-        Parameters:
-        - C (float): Capacitance of the qubit.
-        - C_c (float): Coupling capacitance.
-        - f_q (float): Frequency of the qubit.
-        - EJ (float): Josephson energy of the qubit.
-        - f_r (float): Resonator frequency.
-        - res_type (str): Type of resonator.
-        - Z0 (float, optional): Characteristic impedance of the transmission line. Default is 50 Ohms.
+        Args:
+            - C (float): Capacitance of the qubit.
+            - C_c (float): Coupling capacitance.
+            - f_q (float): Frequency of the qubit.
+            - EJ (float): Josephson energy of the qubit.
+            - f_r (float): Resonator frequency.
+            - res_type (str): Type of resonator.
+            - Z0 (float, optional): Characteristic impedance of the transmission line. Default is 50 Ohms.
 
         Returns:
-        - g (float): Coupling strength of the qubit.
-        - alpha (float): Anharmonicity of the qubit.
+            - g (float): Coupling strength of the qubit.
+            - alpha (float): Anharmonicity of the qubit.
         """
         pass
 
@@ -142,17 +142,17 @@ class QubitHamiltonian(ABC):
         """
         Calculate the alpha and frequency of a qubit.
 
-        Parameters:
-        - C (float): Capacitance of the qubit.
-        - C_c (float): Coupling capacitance.
-        - EJ (float): Josephson energy.
-        - f_r (float): Resonator frequency.
-        - res_type (str): Resonator type.
-        - Z0 (float, optional): Characteristic impedance. Default is 50.
+        Args:
+            - C (float): Capacitance of the qubit.
+            - C_c (float): Coupling capacitance.
+            - EJ (float): Josephson energy.
+            - f_r (float): Resonator frequency.
+            - res_type (str): Resonator type.
+            - Z0 (float, optional): Characteristic impedance. Default is 50.
 
         Returns:
-        - alpha (float): Qubit anharmonicity.
-        - freq (float): Qubit frequency.
+            - alpha (float): Qubit anharmonicity.
+            - freq (float): Qubit frequency.
         """
         pass
 
@@ -175,13 +175,13 @@ class QubitHamiltonian(ABC):
         """
         Calculate the coupling strength 'g' of a qubit from the capacitance matrix.
 
-        Parameters:
-        - C (numpy.ndarray): The capacitance matrix.
-        - C_c (float): The coupling capacitance.
-        - EJ (float): The Josephson energy.
-        - f_r (float): The resonant frequency.
-        - res_type (str): The type of resonator.
-        - Z0 (float, optional): The characteristic impedance. Default is 50 Ohms.
+        Args:
+            - C (numpy.ndarray): The capacitance matrix.
+            - C_c (float): The coupling capacitance.
+            - EJ (float): The Josephson energy.
+            - f_r (float): The resonant frequency.
+            - res_type (str): The type of resonator.
+            - Z0 (float, optional): The characteristic impedance. Default is 50 Ohms.
 
         Returns:
         - g (float): The coupling strength of the qubit.
