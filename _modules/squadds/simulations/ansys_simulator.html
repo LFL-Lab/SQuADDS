@@ -596,8 +596,26 @@ document.write(`
 <div class="viewcode-block" id="AnsysSimulator">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator">[docs]</a>
 <span class="k">class</span> <span class="nc">AnsysSimulator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    AnsysSimulator class for simulating devices using Ansys.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        analyzer: The analyzer object.</span>
+<span class="sd">        design_options: The design options.</span>
+<span class="sd">        lom_analysis_obj: The LOM analysis object.</span>
+<span class="sd">        epr_analysis_obj: The EPR analysis object.</span>
+<span class="sd">        design: The design planar object.</span>
+<span class="sd">        gui: The MetalGUI object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analyzer</span><span class="p">,</span> <span class="n">design_options</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the AnsysSimulator object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            analyzer: The analyzer object.</span>
+<span class="sd">            design_options: The design options.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">analyzer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">design_options</span> <span class="o">=</span> <span class="n">design_options</span>
 
@@ -612,12 +630,24 @@ document.write(`
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;selected system: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_warnings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>  <span class="c1"># Checks if the operating system is macOS</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;`AnsysSimulator` is not supported on MacOS since Ansys does not have a Mac App. Please use Windows or Linux for simulations.&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Displays a warning message if the operating system is macOS.</span>
+
+<span class="sd">            Raises:</span>
+<span class="sd">                UserWarning: If the operating system is macOS, a warning is raised indicating that `AnsysSimulator` is not supported on MacOS.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>  <span class="c1"># Checks if the operating system is macOS</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;`AnsysSimulator` is not supported on MacOS since Ansys does not have a Mac App. Please use Windows or Linux for simulations.&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AnsysSimulator.get_design_screenshot">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.get_design_screenshot">[docs]</a>
     <span class="k">def</span> <span class="nf">get_design_screenshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves a screenshot of the design.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">autoscale</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">()</span></div>
@@ -626,8 +656,19 @@ document.write(`
 <div class="viewcode-block" id="AnsysSimulator.simulate">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.simulate">[docs]</a>
     <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simulates the device based on the provided device dictionary.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            device_dict (dict): A dictionary containing the device design options and setup.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The simulation results.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="c1"># have a qubit_cavity object</span>
-            <span class="c1"># print(&quot;if&quot;)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
                 <span class="n">qubit_geoms</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">],</span>
                 <span class="n">cavity_geoms</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span>
@@ -639,19 +680,22 @@ document.write(`
             <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_whole_device</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">cross_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span><span class="o">.</span><span class="n">qubit_geoms</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span><span class="o">.</span><span class="n">cavity_geoms</span><span class="p">,</span> <span class="n">LOM_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">qubit_setup</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">cavity_setup</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span> <span class="c1"># have a non-qubit_cavity object</span>
-            <span class="c1"># print(&quot;else&quot;)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]</span>
             <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">gui</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="p">,</span> <span class="n">device_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span><span class="p">,</span> <span class="n">sim_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="n">return_df</span></div>
 
-        <span class="c1"># print(f&quot;geoms: {self.geom_dict}&quot;)</span>
-        <span class="c1"># print(f&quot;setup: {self.setup_dict}&quot;)</span>
 
 <div class="viewcode-block" id="AnsysSimulator.get_renderer_screenshot">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.get_renderer_screenshot">[docs]</a>
     <span class="k">def</span> <span class="nf">get_renderer_screenshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves a screenshot of the renderer.</span>
+
+<span class="sd">        If the EPR analysis object is not None, it saves a screenshot of the EPR analysis simulation.</span>
+<span class="sd">        If the LOM analysis object is not None, it saves a screenshot of the LOM analysis simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -661,6 +705,15 @@ document.write(`
 <div class="viewcode-block" id="AnsysSimulator.get_xmon_info">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.get_xmon_info">[docs]</a>
     <span class="k">def</span> <span class="nf">get_xmon_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xmon_dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves information about the Xmon qubit from the given xmon_dict.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            xmon_dict (dict): A dictionary containing simulation results and design options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A dictionary containing the qubit frequency in GHz and the anharmonicity in MHz.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># data = xmon_dict[&quot;sim_results&quot;]</span>
         <span class="n">cross2cpw</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">xmon_dict</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;cross_to_claw&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-15</span>
         <span class="n">cross2ground</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">xmon_dict</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;cross_to_ground&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-15</span>
@@ -674,6 +727,15 @@ document.write(`
 <div class="viewcode-block" id="AnsysSimulator.plot_device">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.plot_device">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the device based on the given device dictionary.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - device_dict (dict): A dictionary containing the device information.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">delete_all_components</span><span class="p">()</span>
         <span class="k">if</span> <span class="s2">&quot;g&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]:</span>
             <span class="n">qc</span> <span class="o">=</span> <span class="n">QubitCavity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;qubit_cavity&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">])</span>
