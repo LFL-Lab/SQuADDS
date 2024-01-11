@@ -595,56 +595,28 @@ document.write(`
                   
   <section id="Tutorial-3:-Contributing-to-SQuADDS">
 <h1>Tutorial 3: Contributing to SQuADDS<a class="headerlink" href="#Tutorial-3:-Contributing-to-SQuADDS" title="Link to this heading">#</a></h1>
-<p>In this tutorial, we will go over the basics of contributing to SQuADDS. We will cover the following topics:</p>
-<ol class="arabic simple" start="0">
+<p>In this tutorial, we will go over the basics of contributing data to the SQuADDS project. We will cover the following topics:</p>
+<ol class="arabic" start="0">
 <li><p>Contribution Information Setup</p></li>
 <li><p>Understanding the terminology and database structure</p></li>
-<li><p>Contributing to an existing database node</p></li>
-<li><p>Creating new database node</p></li>
-<li><p>Building on top of others works</p></li>
+<li><p>Contributing to an existing dataset configuration</p>
+<ul class="simple">
+<li><p>via HuggingFace</p></li>
+<li><p>via SQuADDS API</p></li>
+</ul>
+</li>
+<li><p>Creating new dataset configuration</p></li>
+<li><p class="rubric" id="building-on-top-of-others-works">Building on top of others works</p>
+</li>
 </ol>
-<hr class="docutils" />
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[86]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
 <span class="o">%</span><span class="k">autoreload</span> 2
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-The autoreload extension is already loaded. To reload it, use:
-  %reload_ext autoreload
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>../.
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Obtaining file:///Users/shanto/LFL/SQuADDS/SQuADDS
-  Preparing metadata (setup.py) ... done
-Installing collected packages: SQuADDS
-  Attempting uninstall: SQuADDS
-    Found existing installation: SQuADDS 0.1
-    Uninstalling SQuADDS-0.1:
-      Successfully uninstalled SQuADDS-0.1
-  Running setup.py develop for SQuADDS
-Successfully installed SQuADDS-0.1
-</pre></div></div>
 </div>
 <section id="Contribution-Information-Setup">
 <h2>Contribution Information Setup<a class="headerlink" href="#Contribution-Information-Setup" title="Link to this heading">#</a></h2>
@@ -653,95 +625,108 @@ Successfully installed SQuADDS-0.1
 PI_NAME = &quot;&quot;
 INSTITUTION = &quot;&quot;
 USER_NAME = &quot;&quot;
+CONTRIB_MISC = &quot;&quot;
 </pre></div>
 </div>
-<p>Or you can provide this information by executing the following cell.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">GROUP_NAME</span></code> is the name of your research group, <code class="docutils literal notranslate"><span class="pre">PI_NAME</span></code> is the name of your PI, <code class="docutils literal notranslate"><span class="pre">INSTITUTION</span></code> is the name of your institution, <code class="docutils literal notranslate"><span class="pre">USER_NAME</span></code> is your name, and <code class="docutils literal notranslate"><span class="pre">CONTRIB_MISC</span></code> is any other information you would like to provide about your contributions (e.g. bibTex citation, paper link, etc).</p>
+<p>Alternatively, you can provide this information by executing the following cell.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.database</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.database.utils</span> <span class="kn">import</span> <span class="o">*</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">create_contributor_info</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Contributor information updated in .env file (/Users/shanto/LFL/SQuADDS/SQuADDS/.env).
+</pre></div></div>
+</div>
 </section>
 <section id="Understanding-the-terminology-and-database-structure">
 <h2>Understanding the terminology and database structure<a class="headerlink" href="#Understanding-the-terminology-and-database-structure" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p>HuggingFace</p></li>
-<li><p>Datasets</p></li>
-<li><p>Configurations</p></li>
-<li><p>Structure of SQuADDS_DB</p></li>
-<li><p>Adding to SQuADDS_DB</p></li>
-</ul>
-</section>
-<section id="Where-we-left-of-in-Tutorial-1---Contributing-to-an-existing-configuration">
-<h2>Where we left of in Tutorial 1 - <em>Contributing to an existing configuration</em><a class="headerlink" href="#Where-we-left-of-in-Tutorial-1---Contributing-to-an-existing-configuration" title="Link to this heading">#</a></h2>
-<p>Format the result from Tutorial 1 to be compatible with SQuADDS.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
-<section id="How-to-contribute-to-an-existing-configuration:">
-<h3>How to contribute to an existing configuration:<a class="headerlink" href="#How-to-contribute-to-an-existing-configuration:" title="Link to this heading">#</a></h3>
-<ol class="arabic">
-<li><p><strong>Clone/Fork the Repository</strong>: If you have not already forked or cloned the repository, do so.</p></li>
-<li><p><strong>Create or Checkout a Branch</strong>: If adding new data, it might be best to do it on a new branch:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>add_to_configuration
-</pre></div>
-</div>
-</li>
-<li><p><strong>Modify the Configuration</strong>: Add or modify the data files as necessary for the configuration. Make sure to follow any guidelines provided by the dataset maintainers for the specific structure and format required.</p></li>
-<li><p><strong>Commit and Push Your Changes</strong>: Commit the new data and push it to your fork:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>.
-git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add new data to configuration Y&quot;</span>
-git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>add_to_configuration
-</pre></div>
-</div>
-</li>
-<li><p><strong>Pull Request</strong>: Create a pull request against the original repository.</p></li>
-</ol>
-<hr class="docutils" />
-<p>Show how to add this new data entry to the SQuADDS database by creating a PR.</p>
-<ol class="arabic simple">
-<li><p>Code to fork the repo and create a new branch.</p></li>
-<li><p>Code to add the new data to the chosen configuration.</p></li>
-<li><p>Code to commit and push the changes.</p></li>
-<li><p>Code to create a PR.</p></li>
-</ol>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
+<section id="HuggingFace">
+<h3>HuggingFace<a class="headerlink" href="#HuggingFace" title="Link to this heading">#</a></h3>
+<p><a class="reference external" href="https://huggingface.co/">HuggingFace</a> stands at the forefront of the AI revolution, offering a dynamic collaboration platform for the machine learning community. Renowned for hosting an array of open-source machine learning libraries and tools, Hugging Face Hub serves as a central repository where individuals can share, explore, and innovate with ML technologies. The platform is dedicated to fostering an environment of learning, collaboration, and ethical AI, bringing together a rapidly
+expanding community of ML engineers, scientists, and enthusiasts.</p>
+<p>In our pursuit to enhance the versatility and utility of SQuADDS for quantum hardware developers and machine learning researchers, we have chosen to host our database on the HuggingFace platform. This strategic decision leverages HuggingFace’s capability to support and facilitate research with machine learning models, aligning with methodologies outlined in various references. By making the SQuADDS database readily accessible on this platform, we aim to contribute to the development of
+cutting-edge Electronic Design Automation (EDA) tools. Our goal is to replicate the transformative impact witnessed in the semiconductor industry, now in the realm of superconducting quantum hardware.</p>
+<p>Key to our choice of HuggingFace is its <a class="reference external" href="https://huggingface.co/datasets">datasets</a> library, which provides a unified interface for accessing a wide range of datasets. This feature is integral to SQuADDS, offering a streamlined and cohesive interface to our database. The decentralized nature of HuggingFace datasets significantly enhances community-driven development and access, a functionality that can be challenging to implement with traditional data storage platforms. This aspect of
+HuggingFace aligns perfectly with our vision for SQuADDS, enabling us to foster a collaborative and open environment for innovation in quantum technology.</p>
 </section>
 </section>
-<section id="Contributing-a-New-Configuration">
-<h2>Contributing a New Configuration<a class="headerlink" href="#Contributing-a-New-Configuration" title="Link to this heading">#</a></h2>
-<p>We may find that we possess a dataset that is not currently included in SQuADDS. In this case, we can add a new configuration to SQuADDS.</p>
-<p>But before we do that, we need to make sure that the dataset is in a format that is compatible with SQuADDS. In order to do this, we need to refer back to the structure of SQuADDS.</p>
-<section id="Data-Processing:">
-<h3>Data Processing:<a class="headerlink" href="#Data-Processing:" title="Link to this heading">#</a></h3>
-<p>We want the data to be in a <code class="docutils literal notranslate"><span class="pre">json</span></code> format with <strong>AT LEAST</strong> to have the following fields. You can add as many more supplementary fields as you want.</p>
+<section id="Datasets-&amp;-Configurations">
+<h2>Datasets &amp; Configurations<a class="headerlink" href="#Datasets-&-Configurations" title="Link to this heading">#</a></h2>
+<p>As seen in <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html#Accessing-the-SQuADDS-Database-using-the-HuggingFace-API">Tutorial 1</a> we have organized the SQuADDS database into datasets and configurations. Let’s quickly review about these two concepts and how they are used in SQuADDS.</p>
+<p>Each configuration in the dataset is uniquely identified by their <code class="docutils literal notranslate"><span class="pre">config</span></code>. For the SQuADDS Database, the <code class="docutils literal notranslate"><span class="pre">config</span></code> string is created in the following format:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">component_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">component</span></code> is the name of the component, <code class="docutils literal notranslate"><span class="pre">component_name</span></code> is the name of the component (in Qiskit Metal), and <code class="docutils literal notranslate"><span class="pre">data_type</span></code> is the type of simulation data that has been contributed.</p>
+<p>This structured approach ensures that users can query specific parts of the dataset relevant to their work, such as a particular type of qubit design or simulation results. This API abstraction allows for more complex queries and operations on the data, facilitating a more efficient workflow for researchers and developers.</p>
+<p>Lets check what the <code class="docutils literal notranslate"><span class="pre">config</span></code> string looks like for our database:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">get_dataset_config_names</span>
+
+<span class="n">configs</span> <span class="o">=</span> <span class="n">get_dataset_config_names</span><span class="p">(</span><span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">configs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qubit-TransmonCross-cap_matrix&#39;, &#39;cavity_claw-RouteMeander-eigenmode&#39;, &#39;coupler-NCap-cap_matrix&#39;]
+</pre></div></div>
+</div>
+<p>You can now access the database using the <code class="docutils literal notranslate"><span class="pre">config</span></code> string. For example, if you want to access the <code class="docutils literal notranslate"><span class="pre">qubit-TransmonCross-cap_matrix</span></code> configuration, you can do so by executing the following cell:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">qubit_data</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span><span class="p">,</span> <span class="n">configs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">qubit_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+DatasetDict({
+    train: Dataset({
+        features: [&#39;notes&#39;, &#39;sim_results&#39;, &#39;contributor&#39;, &#39;design&#39;, &#39;sim_options&#39;],
+        num_rows: 1934
+    })
+})
+</pre></div></div>
+</div>
+<p>Please review <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html#Accessing-the-SQuADDS-Database-using-the-HuggingFace-API">Section “Using the SQuADDS API to access and anlyze the database” in Tutorial 1</a> where we introduce and explain how to use the SQuADDS API to access and analyze the database.</p>
+<p>Each contributed entry to SQuADDS must <strong>AT LEAST</strong> have the following fields. One can add as many more supplementary fields as one wants.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;design&quot;</span><span class="p">:{</span>
-<span class="w">        </span><span class="nt">&quot;design_options&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">desig</span><span class="kc">n</span><span class="err">_op</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;design_tool&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">desig</span><span class="kc">n</span><span class="err">_</span><span class="kc">t</span><span class="err">ool_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;design_options&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">desig</span><span class="kc">n</span><span class="err">_op</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">,</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;sim_options&quot;</span><span class="p">:{</span>
 <span class="w">        </span><span class="nt">&quot;setup&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">sim_se</span><span class="kc">tu</span><span class="err">p_op</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">,</span>
@@ -758,27 +743,134 @@ git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </
 <span class="w">        </span><span class="nt">&quot;PI&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">pi_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;institution&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">i</span><span class="kc">nst</span><span class="err">i</span><span class="kc">tut</span><span class="err">io</span><span class="kc">n</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;uploader&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">user_</span><span class="kc">na</span><span class="err">me</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;misc&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">co</span><span class="kc">ntr</span><span class="err">ib_misc</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;date_created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YYYY-MM-DD-HHMMSS&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 <p>If all the <code class="docutils literal notranslate"><span class="pre">sim_results</span></code> has the same units you can just use a <code class="docutils literal notranslate"><span class="pre">&quot;units&quot;:units</span></code> field instead of repeating the unit for each result.</p>
+<p><strong>Note:</strong> The <code class="docutils literal notranslate"><span class="pre">&quot;contributor&quot;</span></code> field is automatically added by the SQuADDS API when you upload your dataset. You do not need to add this field yourself.</p>
+<p>Lets look at the schema for the <code class="docutils literal notranslate"><span class="pre">qubit-TransmonCross-cap_matrix</span></code> configuration that used <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> as the design tool and <code class="docutils literal notranslate"><span class="pre">Ansys</span> <span class="pre">HFSS</span></code> as the simulation engine.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds</span> <span class="kn">import</span> <span class="n">SQuADDS_DB</span>
+
+<span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "abfbdb087f1c418daac31f538737925b", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_dataset_info</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "75b8df844fca493c96e0a9a687f35fb9", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3776a453cbb045789a5ae9f668b2fa86", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a5700e98f145427b8d6ec52cf33732e7", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+================================================================================
+Dataset Features:
+{&#39;contributor&#39;: {&#39;PI&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;date_created&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;group&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;institution&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;uploader&#39;: Value(dtype=&#39;string&#39;, id=None)},
+ &#39;design&#39;: {&#39;design_options&#39;: {...},
+            &#39;design_tool&#39;: Value(dtype=&#39;string&#39;, id=None)},
+ &#39;notes&#39;: {},
+ &#39;sim_options&#39;: {&#39;renderer_options&#39;: {...},
+                 &#39;setup&#39;: {...},
+                 &#39;simulator&#39;: Value(dtype=&#39;string&#39;, id=None)},
+ &#39;sim_results&#39;: {&#39;claw_to_claw&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;claw_to_ground&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;cross_to_claw&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;cross_to_cross&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;cross_to_ground&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;ground_to_ground&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;units&#39;: Value(dtype=&#39;string&#39;, id=None)}}
+
+Dataset Description:
+
+
+Dataset Citation:
+
+
+Dataset Homepage:
+
+
+Dataset License:
+
+
+Dataset Size in Bytes:
+9735651
+================================================================================
+</pre></div></div>
+</div>
+<hr class="docutils" />
 </section>
-<section id="Metadata:">
-<h3>Metadata:<a class="headerlink" href="#Metadata:" title="Link to this heading">#</a></h3>
-<p>The metadata for the configuration should include</p>
-<ul class="simple">
-<li><p>the name of the configuration</p></li>
-<li><p>a description of the configuration</p></li>
-<li><p>contributors to the configuration</p></li>
-<li><p>device design, design tool and name</p></li>
-<li><p>simulation setup and simulator name</p></li>
-<li><p>simulation code <code class="docutils literal notranslate"><span class="pre">Simulator</span></code></p></li>
-<li><p>simulation result parameters</p></li>
-<li><p>measured parameters</p></li>
-</ul>
-<p>Code to help generate portions of the metadata and guide the user to create custom <code class="docutils literal notranslate"><span class="pre">Simulator</span></code> (future release and tutorial)</p>
+<section id="Contributing-to-an-existing-configuration">
+<h2>Contributing to an existing configuration<a class="headerlink" href="#Contributing-to-an-existing-configuration" title="Link to this heading">#</a></h2>
+<p>Let’s revisit <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html#Simulate-the-Target-Design">Tutorial 2</a> where we simulated a novel <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> qubit design. We will now learn how to contribute this design to the SQuADDS database.</p>
+<section id="via-HuggingFace">
+<h3>via HuggingFace<a class="headerlink" href="#via-HuggingFace" title="Link to this heading">#</a></h3>
+<p>The high level steps for contributing to an existing configuration via HuggingFace are as follows:</p>
+<ol class="arabic">
+<li><p><strong>Clone/Fork the Repository</strong>: If you have not already forked or cloned the <a class="reference external" href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB">repository</a>, do so.</p></li>
+<li><p><strong>Create or Checkout a Branch</strong>: If adding new data, it might be best to do it on a new branch:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>branch_name
+</pre></div>
+</div>
+</li>
+<li><p><strong>Modify the Configuration</strong>: Add or modify the dataset configuration as necessary (following guidelines).</p></li>
+<li><p><strong>Commit and Push Your Changes</strong>: Commit the new data and push it to your fork:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;GOOD COMMIT MESSAGE&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>branch_name
+</pre></div>
+</div>
+</li>
+<li><p><strong>Pull Request</strong>: Create a pull request against the original <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> repository.</p></li>
+</ol>
+</section>
+<section id="via-SQuADDS-API">
+<h3>via SQuADDS API<a class="headerlink" href="#via-SQuADDS-API" title="Link to this heading">#</a></h3>
+<p>We have also provided a simple API for contributing to the SQuADDS database. The high level steps for contributing to an existing configuration via the SQuADDS API are as follows:</p>
+<ol class="arabic simple">
+<li><p><strong>Select the dataset configuration</strong>: Select the dataset configuration you would like to contribute to.</p></li>
+<li><p><strong>Validate your data</strong>: Validate your data against the dataset configuration.</p></li>
+<li><p><strong>Submit your data</strong>: Submit your data to the SQuADDS database.</p></li>
+</ol>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -788,41 +880,20 @@ git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </
 </div>
 </div>
 </section>
-<section id="How-to-contribute-a-new-configuration:">
-<h3>How to contribute a new configuration:<a class="headerlink" href="#How-to-contribute-a-new-configuration:" title="Link to this heading">#</a></h3>
-<ol class="arabic">
-<li><p><strong>Fork the Dataset Repository</strong>: On the Hugging Face Hub, fork the dataset repository you want to contribute to.</p></li>
-<li><p><strong>Clone Your Fork Locally</strong>: Clone the forked repository to your local machine using the following command:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://huggingface.co/datasets/YOUR_USERNAME/DATASET_NAME
-</pre></div>
-</div>
-</li>
-<li><p><strong>Create a New Branch</strong>: It’s a good practice to create a new branch for your configuration contribution:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>new_configuration
-</pre></div>
-</div>
-</li>
-<li><p><strong>Add Your Configuration</strong>: Depending on the dataset’s structure, this might involve adding new files or modifying existing ones. If the dataset uses the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library’s builder configurations, you will need to modify the Python script that defines the configurations.</p></li>
-<li><p><strong>Commit Your Changes</strong>: Commit the changes with a clear commit message:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>.
-git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add new configuration for circuit element X&quot;</span>
-</pre></div>
-</div>
-</li>
-<li><p><strong>Push to Your Fork</strong>: Push your new branch to your fork on the Hugging Face Hub:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>new_configuration
-</pre></div>
-</div>
-</li>
-<li><p><strong>Create a Pull Request</strong>: Go to the Hugging Face Hub, navigate to your fork, and create a pull request for your new branch. The pull request will be reviewed by the dataset maintainers.</p></li>
-</ol>
-<p>Show</p>
+</section>
+<section id="Contributing-a-New-Configuration">
+<h2>Contributing a New Configuration<a class="headerlink" href="#Contributing-a-New-Configuration" title="Link to this heading">#</a></h2>
+<p>We may find that we possess a dataset that is not currently included in SQuADDS. In this case, we can add a new configuration to SQuADDS.</p>
+<p>But before we do that, we need to make sure that the dataset is in a format that is compatible with the SQuADDS project and is also validated against measurement results. We will go over this process in this section.</p>
+<section id="Process-Overview">
+<h3>Process Overview<a class="headerlink" href="#Process-Overview" title="Link to this heading">#</a></h3>
+<p>The high level steps for contributing a new configuration are as follows:</p>
 <ol class="arabic simple">
-<li><p>Code to fork the repo and create a new branch.</p></li>
-<li><p>Code to add the new data to a new configuration.</p></li>
-<li><p>Code to add metadata to the configuration.</p></li>
-<li><p>Code to commit and push the changes.</p></li>
-<li><p>Code to create a PR.</p></li>
+<li><p><strong>Create a new configuration</strong>: Create a new configuration for your dataset.</p></li>
+<li><p><strong>Create the metadata for the configuration</strong>: Create the metadata for your configuration that contains information on the measured device design and paramaters.</p></li>
+<li><p><strong>Create the database schema</strong>: Create the database schema for your configuration.</p></li>
+<li><p><strong>Validate your data</strong>: Validate your data against the database schema.</p></li>
+<li><p><strong>Submit your data</strong>: Submit your data to the SQuADDS database.</p></li>
 </ol>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
@@ -836,16 +907,12 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 </section>
 <section id="Building-on-top-of-others-works">
 <h2>Building on top of others works<a class="headerlink" href="#Building-on-top-of-others-works" title="Link to this heading">#</a></h2>
-<p>We might have some data that can be appended to an existing dataset in SQuADDS. In this case, we can add to the existing configuration in <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> without pushing new entries to the original dataset.</p>
+<p>We might have some data that can be appended to an existing configuration in <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code>. In this case, we can add to the existing configuration without pushing new entries to the original dataset. Here are the steps to do so:</p>
 <ol class="arabic simple">
-<li><p>Code to fork the repo and create a new branch.</p></li>
-<li><p>Code to add the new data to the chosen configuration.</p>
-<ul class="simple">
-<li><p>handling contributions (appending code gives uploader name and institute only and notes)</p></li>
-</ul>
-</li>
-<li><p>Code to commit and push the changes.</p></li>
-<li><p>Code to create a PR.</p></li>
+<li><p><strong>Select the dataset configuration</strong>: Select the dataset configuration you would like to contribute to.</p></li>
+<li><p><strong>Gather your data</strong>: Gather your data that you would like to contribute to the dataset configuration.</p></li>
+<li><p><strong>Validate your data</strong>: Validate your data against the dataset configuration.</p></li>
+<li><p><strong>Submit your data</strong>: Submit your data to the SQuADDS database.</p></li>
 </ol>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
@@ -913,15 +980,18 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Contribution-Information-Setup">Contribution Information Setup</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Understanding-the-terminology-and-database-structure">Understanding the terminology and database structure</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Where-we-left-of-in-Tutorial-1---Contributing-to-an-existing-configuration">Where we left of in Tutorial 1 - <em>Contributing to an existing configuration</em></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#How-to-contribute-to-an-existing-configuration:">How to contribute to an existing configuration:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Understanding-the-terminology-and-database-structure">Understanding the terminology and database structure</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#HuggingFace">HuggingFace</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Datasets-&amp;-Configurations">Datasets &amp; Configurations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Contributing-to-an-existing-configuration">Contributing to an existing configuration</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#via-HuggingFace">via HuggingFace</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#via-SQuADDS-API">via SQuADDS API</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Contributing-a-New-Configuration">Contributing a New Configuration</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Data-Processing:">Data Processing:</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Metadata:">Metadata:</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#How-to-contribute-a-new-configuration:">How to contribute a new configuration:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Process-Overview">Process Overview</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Building-on-top-of-others-works">Building on top of others works</a></li>

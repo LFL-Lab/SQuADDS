@@ -582,14 +582,17 @@ document.write(`
                   
   <h1>Source code for squadds.database.utils</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Utilities for the database package.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">dotenv_values</span><span class="p">,</span> <span class="n">set_key</span>
+
 <span class="kn">from</span> <span class="nn">squadds.core.globals</span> <span class="kn">import</span> <span class="o">*</span>
 
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">hashlib</span>
-<span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">os</span>
 
 <div class="viewcode-block" id="copy_files_to_new_location">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.utils.copy_files_to_new_location">[docs]</a>
@@ -651,69 +654,38 @@ document.write(`
 <span class="sd">    Prompt the user for information and update the .env file.</span>
 
 <span class="sd">    This function prompts the user to enter information such as institution name, group name,</span>
-<span class="sd">    PI name, and user name. It then validates the input and updates the corresponding fields</span>
-<span class="sd">    in the .env file. If the fields already exist in the .env file, the function prompts the</span>
-<span class="sd">    user to confirm whether to overwrite the existing values.</span>
+<span class="sd">    PI name, user name, and an optional contrib_misc. It then validates the input and updates</span>
+<span class="sd">    the corresponding fields in the .env file. If the fields already exist in the .env file,</span>
+<span class="sd">    the function prompts the user to confirm whether to overwrite the existing values.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ValueError: If any of the input fields are empty.</span>
+<span class="sd">        ValueError: If any of the input fields are empty (except for contrib_misc).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Check if .env file exists</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="n">ENV_FILE_PATH</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
 
-    <span class="c1"># Read all lines from .env file</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">env_file</span><span class="p">:</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="n">env_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="c1"># Define the keys we want to update in the .env file</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GROUP_NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;PI_NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;INSTITUTION&quot;</span><span class="p">,</span> <span class="s2">&quot;USER_NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;CONTRIB_MISC&quot;</span><span class="p">]</span>
+    <span class="n">user_inputs</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="c1"># Convert lines to a dictionary</span>
-    <span class="n">existing_fields</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
-            <span class="n">existing_fields</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Load existing .env values</span>
+    <span class="n">existing_env</span> <span class="o">=</span> <span class="n">dotenv_values</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">)</span>
 
-    <span class="c1"># Prompt the user for information</span>
-    <span class="n">institution</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter institution name: &quot;</span><span class="p">)</span>
-    <span class="n">group_name</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter your group name: &quot;</span><span class="p">)</span>
-    <span class="n">pi_name</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter your PI name: &quot;</span><span class="p">)</span>
-    <span class="n">user_name</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter your name: &quot;</span><span class="p">)</span>
+    <span class="c1"># Prompt the user for each field and validate</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+        <span class="n">user_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Enter your </span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user_input</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;CONTRIB_MISC&quot;</span><span class="p">:</span>  <span class="c1"># contrib_misc is optional</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> cannot be empty.&quot;</span><span class="p">)</span>
+        <span class="n">user_inputs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_input</span>
 
-    <span class="c1"># Validate the input</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">group_name</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Group name cannot be empty&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">pi_name</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;PI name cannot be empty&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">institution</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Institution cannot be empty&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_name</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;User name cannot be empty&quot;</span><span class="p">)</span>
+        <span class="c1"># Check if key exists and ask for confirmation to overwrite</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">existing_env</span><span class="p">:</span>
+            <span class="n">overwrite</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> already exists. Do you want to overwrite it? (yes/no): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]:</span>
+                <span class="k">continue</span>  <span class="c1"># Skip updating this key</span>
 
-    <span class="c1"># Update or write field values in .env file</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">env_file</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
-                <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;GROUP_NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;PI_NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;INSTITUTION&quot;</span><span class="p">,</span> <span class="s2">&quot;USER_NAME&quot;</span><span class="p">]:</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
-                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">existing_fields</span> <span class="ow">and</span> <span class="n">existing_fields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                        <span class="n">overwrite</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> already exists with value: </span><span class="si">{</span><span class="n">existing_fields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">. Do you want to overwrite? (y/n): &quot;</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">overwrite</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                            <span class="n">env_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\&quot;\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> overwritten with value: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">env_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not overwritten. Existing value: </span><span class="si">{</span><span class="n">existing_fields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">env_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\&quot;\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> updated with value: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">env_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">env_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="c1"># Update or append the key-value pair</span>
+        <span class="n">set_key</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">user_inputs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Contributor information updated successfully!&quot;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Contributor information updated in .env file (</span><span class="si">{</span><span class="n">ENV_FILE_PATH</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span></div>
 
 </pre></div>
 
