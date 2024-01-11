@@ -32,11 +32,10 @@ Alternatively, you can install SQuADDS from source.
       cd SQuADDS
       pip install -e .
 
-
 FAQ
----
+===
 
-- **Getting `ModuleNotFoundError: No module named 'squadds'` after running `pip install SQuADDS`** in Jupyter Notebook
+Q: **Getting `ModuleNotFoundError: No module named 'squadds'` after running `pip install SQuADDS` in Jupyter Notebook. How can I fix this?**
+----------------------------------------------------------------------------------------------------------------------------------------
 
-- You may need to restart the kernel after installing `SQuADDS`
-
+A: You may need to restart the kernel after installing `SQuADDS`. To do this, go to the `Kernel` menu in Jupyter Notebook and select `Restart`.
