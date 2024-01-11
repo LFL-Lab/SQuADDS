@@ -52,19 +52,24 @@ html_theme_options = {
         "alt_text": "SQuADDS Logo",
         "image_light": "_static/images/squadds_logo_light_name.png",
         "image_dark": "_static/images/squadds_logo_dark_name.png",
-        "link": "."
+        "link": "https://lfl-lab.github.io/SQuADDS/"
     },
     "github_url": "https://github.com/LFL-Lab/SQuADDS",
     "icon_links": [
         {
-            "name": "LFL Lab",
-            "url": "https://dornsife.usc.edu/lfl/",
-            "icon": "fas fa-hand-peace",
-        },
-        {
             "name": "PyPI",
             "url": "https://pypi.org/project/SQuADDS/",
             "icon": "fab fa-python",
+        },
+        {
+            "name": "HuggingFace",
+            "url": "https://huggingface.co/datasets/SQuADDS/SQuADDS_DB",
+            "icon": "fas fa-face-smile",
+        },
+        {
+            "name": "LFL Lab",
+            "url": "https://dornsife.usc.edu/lfl/",
+            "icon": "fas fa-hand-peace",
         },
     ],
     "navigation_depth": 5,
