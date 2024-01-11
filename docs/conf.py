@@ -66,11 +66,11 @@ html_theme_options = {
             "url": "https://huggingface.co/datasets/SQuADDS/SQuADDS_DB",
             "icon": "fas fa-face-smile",
         },
-        {
-            "name": "LFL Lab",
-            "url": "https://dornsife.usc.edu/lfl/",
-            "icon": "fas fa-hand-peace",
-        },
+        # {
+            # "name": "LFL Lab",
+            # "url": "https://dornsife.usc.edu/lfl/",
+            # "icon": "fas fa-hand-peace",
+        # },
     ],
     "navigation_depth": 5,
     "show_nav_level": 3,
@@ -81,6 +81,7 @@ html_context = {
     "expandable_sidebar": True,
     "google_analytics_id": "G-R5QKJDWM2W", 
 }
+
 html_last_updated_fmt = "%Y/%m/%d"
 html_title = f"{project} v{release}"
 
