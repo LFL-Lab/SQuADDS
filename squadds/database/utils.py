@@ -1,12 +1,15 @@
 """Utilities for the database package."""
+import glob
+import hashlib
+import json
+import os
+import shutil
 from pathlib import Path
+
+from dotenv import dotenv_values, set_key
+
 from squadds.core.globals import *
 
-import json
-import hashlib
-import shutil
-import glob
-import os
 
 def copy_files_to_new_location(data_path, new_path):
     """
@@ -60,66 +63,35 @@ def create_contributor_info():
     Prompt the user for information and update the .env file.
 
     This function prompts the user to enter information such as institution name, group name,
-    PI name, and user name. It then validates the input and updates the corresponding fields
-    in the .env file. If the fields already exist in the .env file, the function prompts the
-    user to confirm whether to overwrite the existing values.
+    PI name, user name, and an optional contrib_misc. It then validates the input and updates
+    the corresponding fields in the .env file. If the fields already exist in the .env file,
+    the function prompts the user to confirm whether to overwrite the existing values.
 
     Raises:
-        ValueError: If any of the input fields are empty.
+        ValueError: If any of the input fields are empty (except for contrib_misc).
     """
-    # Check if .env file exists
-    if not Path(ENV_FILE_PATH).exists():
-        ENV_FILE_PATH.touch()
 
-    # Read all lines from .env file
-    with open(ENV_FILE_PATH, "r") as env_file:
-        lines = env_file.readlines()
+    # Define the keys we want to update in the .env file
+    keys = ["GROUP_NAME", "PI_NAME", "INSTITUTION", "USER_NAME", "CONTRIB_MISC"]
+    user_inputs = {}
 
-    # Convert lines to a dictionary
-    existing_fields = {}
-    for line in lines:
-        if "=" in line:
-            key, value = line.strip().split("=")
-            existing_fields[key.strip()] = value.strip().strip("\"")
+    # Load existing .env values
+    existing_env = dotenv_values(ENV_FILE_PATH)
 
-    # Prompt the user for information
-    institution = input("Enter institution name: ")
-    group_name = input("Enter your group name: ")
-    pi_name = input("Enter your PI name: ")
-    user_name = input("Enter your name: ")
+    # Prompt the user for each field and validate
+    for key in keys:
+        user_input = input(f"Enter your {key.replace('_', ' ').lower()}: ").strip()
+        if not user_input and key != "CONTRIB_MISC":  # contrib_misc is optional
+            raise ValueError(f"{key} cannot be empty.")
+        user_inputs[key] = user_input
 
-    # Validate the input
-    if not group_name:
-        raise ValueError("Group name cannot be empty")
-    if not pi_name:
-        raise ValueError("PI name cannot be empty")
-    if not institution:
-        raise ValueError("Institution cannot be empty")
-    if not user_name:
-        raise ValueError("User name cannot be empty")
+        # Check if key exists and ask for confirmation to overwrite
+        if key in existing_env:
+            overwrite = input(f"{key} already exists. Do you want to overwrite it? (yes/no): ").strip().lower()
+            if overwrite not in ["yes", "y"]:
+                continue  # Skip updating this key
 
-    # Update or write field values in .env file
-    with open(ENV_FILE_PATH, "w") as env_file:
-        for line in lines:
-            if "=" in line:
-                key, _ = line.strip().split("=")
-                key = key.strip()
-                if key in ["GROUP_NAME", "PI_NAME", "INSTITUTION", "USER_NAME"]:
-                    value = locals()[key.lower()]
-                    if key in existing_fields and existing_fields[key] != "":
-                        overwrite = input(f"{key} already exists with value: {existing_fields[key]}. Do you want to overwrite? (y/n): ")
-                        if overwrite.lower() == "y":
-                            env_file.write(f"{key} = \"{value}\"\n")
-                            print(f"{key} overwritten with value: {value}")
-                        else:
-                            env_file.write(line)
-                            print(f"{key} not overwritten. Existing value: {existing_fields[key]}")
-                    else:
-                        env_file.write(f"{key} = \"{value}\"\n")
-                        print(f"{key} updated with value: {value}")
-                else:
-                    env_file.write(line)
-            else:
-                env_file.write(line)
+        # Update or append the key-value pair
+        set_key(ENV_FILE_PATH, key, user_inputs[key])
 
-    print("Contributor information updated successfully!")
+    print(f"Contributor information updated in .env file ({ENV_FILE_PATH}).")

@@ -13,11 +13,16 @@
 # that they have been altered from the originals.
 
 import numpy as np
+<<<<<<< HEAD
 from qiskit_metal import draw, Dict
+=======
+from qiskit_metal import Dict, draw
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
 from qiskit_metal.qlibrary.core import BaseQubit
 
 
 class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
+<<<<<<< HEAD
     """The base `TransmonCross` class.
 
     Inherits `BaseQubit` class.
@@ -26,6 +31,12 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
     the "junction" on the south end, and up to 3 connectors on the remaining arms
     (claw or gap).
 
+=======
+    """The base `TransmonClaw` class.
+
+    Inherits `BaseQubit` class.
+
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
     'claw_width' and 'claw_gap' define the width/gap of the CPW line that
     makes up the connector. Note, DC SQUID currently represented by single
     inductance sheet
@@ -34,7 +45,11 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
     information.
 
     Sketch:
+<<<<<<< HEAD
         Below is a sketch of the qubit
+=======
+        Below is a sketch of the claw
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
         ::
 
                                         claw_length
@@ -44,6 +59,7 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
                         |  |________________
                         |_________
 
+<<<<<<< HEAD
 
     .. image::
         transmon_cross.png
@@ -51,6 +67,8 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
     .. meta::
         Transmon Cross
 
+=======
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
     BaseQubit Default Options:
         * connection_pads: Empty Dict -- The dictionary which contains all active connection lines for the qubit.
         * _default_connection_pads: empty Dict -- The default values for the (if any) connection lines of the qubit.
@@ -98,14 +116,32 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
     def make(self):
         """This is executed by the GUI/user to generate the qgeometry for the
         component."""
+<<<<<<< HEAD
         # self.make_pocket()
+=======
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
         self.make_connection_pads()
 
 ###################################TRANSMON#############################################################
 
     def make_pocket(self):
+<<<<<<< HEAD
         """Makes a basic Crossmon, 4 arm cross."""
 
+=======
+        """
+        Creates a pocket for the claw coupler.
+
+        This method uses the parsed values from the user options to determine the dimensions of the pocket.
+        The pocket is created based on the cross width, cross length, cross gap, and chip name.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
         # self.p allows us to directly access parsed values (string -> numbers) form the user option
         p = self.p
 
@@ -116,6 +152,7 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
         # access to chip name
         chip = p.chip
 
+<<<<<<< HEAD
         # Creates the cross and the etch equivalent.
         # cross_line = draw.shapely.ops.unary_union([
         #     draw.LineString([(0, cross_length), (0, -cross_length)]),
@@ -149,6 +186,8 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
         #                    width=cross_width,
         #                    chip=chip)
 
+=======
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
 
 ############################CONNECTORS##################################################################################################
 

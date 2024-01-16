@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import numpy as np
 from qiskit_metal import Dict
 from collections import OrderedDict
@@ -7,6 +8,21 @@ from qiskit_metal.qlibrary.core import QComponent
 from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
 
 class QubitCavity(QComponent):
+=======
+from collections import OrderedDict
+
+import numpy as np
+from qiskit_metal import Dict
+from qiskit_metal.qlibrary.core import QComponent, QRoute, QRoutePoint
+from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
+
+
+class QubitCavity(QComponent):
+    """
+    QubitCavity class represents a coupled qubit-cavity system.
+    It contains methods to create the qubit, cavity, coupler, and CPWs.
+    """
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
     
     default_options = Dict(
         chip = 'main',
@@ -77,6 +93,15 @@ class QubitCavity(QComponent):
         self.make_pins()
         
     def make_qubit(self):
+<<<<<<< HEAD
+=======
+        """
+        Creates a qubit based on the specified qubit options.
+
+        Returns:
+            None
+        """
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
         p = self.p
         # print(p.cavity_options['cpw_options'].total_length)
 
@@ -89,6 +114,7 @@ class QubitCavity(QComponent):
         # self.add_qgeometry('poly', self.qubit.qgeometry_dict('poly'), subtract = True, chip = p.chip)
 
     def make_cavity(self):
+<<<<<<< HEAD
         self.make_coupler()
         self.make_cpws()
         # p = self.p
@@ -118,6 +144,22 @@ class QubitCavity(QComponent):
     #     self.add_pin('prime_end', end_dict['points'], end_dict['width'], chip = p.chip)
 
     def make_coupler(self):
+=======
+        """
+        This method is used to create a cavity in the coupled system.
+        It calls the make_coupler() and make_cpws() methods to create the necessary components.
+        """
+        self.make_coupler()
+        self.make_cpws()
+
+    def make_coupler(self):
+        """
+        Creates a coupler based on the specified coupling type in the cavity options.
+
+        Returns:
+            None
+        """
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
         p = self.p
 
         temp_opts = Dict()
@@ -126,18 +168,37 @@ class QubitCavity(QComponent):
         #     temp_opts.update({k:p.cavity_options.coupler_options[k]})
 
         if(p.cavity_options['coupling_type'].upper() == "CLT"):
+<<<<<<< HEAD
             from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
+=======
+            from qiskit_metal.qlibrary.couplers.coupled_line_tee import \
+                CoupledLineTee
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
             self.coupler = CoupledLineTee(self.design, "{}_CLT_coupler".format(self.name), options=temp_opts)
         # elif(p.cavity_options['coupling_type'] == 'inductive'):
         #     from inductive_coupler import InductiveCoupler
         #     self.coupler = InductiveCoupler(self.design, "{}_ind_coupler".format(self.name), options=temp_opts)
         elif(p.cavity_options['coupling_type'].lower() == 'capn' or p.cavity_options['coupling_type'].lower() == 'ncap'):
+<<<<<<< HEAD
             from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import CapNInterdigitalTee
+=======
+            from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import \
+                CapNInterdigitalTee
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
             self.coupler = CapNInterdigitalTee(self.design, '{}_capn_coupler'.format(self.name), options=temp_opts)
         # self.add_qgeometry('path', self.coupler.qgeometry_dict('path'), chip = p.chip)
         # self.add_qgeometry('poly', self.coupler.qgeometry_dict('poly'), chip = p.chip)
 
     def make_cpws(self):
+<<<<<<< HEAD
+=======
+        """
+        Creates the CPWs (Coplanar Waveguides) for the coupled systems.
+
+        Returns:
+            None
+        """
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
         # print(f"COUPLER NAME: " + self.coupler.name)
         from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
 
@@ -228,6 +289,20 @@ class QubitCavity(QComponent):
 
         
     def make_pins(self):
+<<<<<<< HEAD
+=======
+        """
+        Adds pins to the coupled system.
+
+        Retrieves pin information from the coupler and adds the pins to the system.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+>>>>>>> b11f4b906c5c2305393ab171932660b166e32fb6
         start_dict = self.coupler.get_pin('prime_start')
         end_dict = self.coupler.get_pin('prime_end')
         self.add_pin('prime_start', start_dict['points'], start_dict['width'])
