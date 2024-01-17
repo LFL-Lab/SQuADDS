@@ -249,7 +249,7 @@ def create_claw(opts, cpw_length, design):
         TransmonClaw: The created TransmonClaw object.
     """
     opts["orientation"] = "-90"
-    opts["pos_x"] = "-1500um" if cpw_length > "2500um" else "-1000um"
+    opts["pos_x"] = "-1500um" if cpw_length > 2500 else "-1000um"
     claw = TransmonClaw(design, 'claw', options=opts)
     return claw
 

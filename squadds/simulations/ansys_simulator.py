@@ -37,6 +37,42 @@ class AnsysSimulator:
         self.lom_analysis_obj = None
         self.epr_analysis_obj = None
 
+        self.default_eigenmode_options = {
+            "setup": {
+                'basis_order': 1,
+                'max_delta_f': 0.05,
+                'max_passes': 30,
+                'min_converged': 1,
+                'min_converged_passes': 2,
+                'min_freq_ghz': 1,
+                'min_passes': 1,
+                'n_modes': 1,
+                'name': 'default_eigenmode_setup',
+                'pct_refinement': 30,
+                'reuse_selected_design': True,
+                'reuse_setup': True,
+                'vars': {'Cj': '0fF', 'Lj': '0nH'}
+            }
+        }
+        self.default_lom_options = {
+            "setup": {
+                'name': 'default_LOM_setup',
+                'reuse_selected_design': False,
+                'reuse_setup': False,
+                'freq_ghz': 5.0,
+                'save_fields': False,
+                'enabled': True,
+                'max_passes': 30,
+                'min_passes': 2,
+                'min_converged_passes': 1,
+                'percent_error': 0.1,
+                'percent_refinement': 30,
+                'auto_increase_solution_order': True,
+                'solution_order': 'High',
+                'solver_type': 'Iterative',
+            }
+        }
+
         self.design = metal.designs.design_planar.DesignPlanar()
         self.gui = metal.MetalGUI(self.design)
         self.design.overwrite_enabled = True
@@ -65,7 +101,7 @@ class AnsysSimulator:
         self.gui.autoscale()
         self.gui.screenshot()
 
-    def sweep(self, sweep_dict):
+    def sweep(self, sweep_dict, emode_setup=None, lom_setup=None):
         """
         Sweeps the device based on the provided sweep dictionary.
 
@@ -78,8 +114,19 @@ class AnsysSimulator:
         Raises:
             None
         """
-        
-        NCap_epr_sweep(self.design, sweep_dict)
+        if emode_setup == None:
+            emode_setup=self.default_eigenmode_options
+        if lom_setup == None:
+            lom_setup=self.default_lom_options
+
+        # run_sweep(self.design, sweep_dict, emode_setup, lom_setup)
+        # print(sweep_dict)
+        if "coupling_type" in sweep_dict and sweep_dict["coupling_type"].lower() == "ncap":
+            run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="ncap_sweep")
+        elif "coupling_type" in sweep_dict and sweep_dict["coupling_type"].lower() == "clt":
+            run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="clt_sweep")
+        else:
+            run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="xmon_sweep")
 
     def simulate(self, device_dict):
         """
@@ -95,6 +142,8 @@ class AnsysSimulator:
             None
         """
         if isinstance(self.analyzer.selected_system, list): # have a qubit_cavity object
+            # print("#"*50)
+            # print(device_dict)
             self.geom_dict = Dict(
                 qubit_geoms = device_dict["design_options_qubit"],
                 cavity_geoms = device_dict["design_options_cavity_claw"]
@@ -103,12 +152,12 @@ class AnsysSimulator:
                 qubit_setup = device_dict["setup_qubit"],
                 cavity_setup = device_dict["setup_cavity_claw"]
             )
-            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(design=self.design, cross_dict=self.geom_dict.qubit_geoms, cavity_dict=self.geom_dict.cavity_geoms, LOM_options=self.setup_dict.qubit_setup, eigenmode_options=self.setup_dict.cavity_setup)
+            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(design=self.design, device_dict=device_dict, LOM_options=self.setup_dict.qubit_setup, eigenmode_options=self.setup_dict.cavity_setup)
 
         else: # have a non-qubit_cavity object
             self.geom_dict = device_dict["design_options"]
             self.setup_dict = device_dict["setup"]
-            return_df, self.lom_analysis_obj = simulate_single_design(design=self.design, gui=self.gui, device_dict=self.geom_dict, sim_options=self.setup_dict)
+            return_df, self.lom_analysis_obj = simulate_single_design(design=self.design, device_dict=device_dict, sim_options=self.setup_dict)
         
         return return_df
 
@@ -154,7 +203,7 @@ class AnsysSimulator:
         None
         """
         self.design.delete_all_components()
-        if "g" in device_dict["sim_results"]:
+        if "g_MHz" in device_dict["sim_results"]:
             qc = QubitCavity(self.design, "qubit_cavity", options=device_dict["design"]["design_options"])
 
         self.gui.rebuild()
