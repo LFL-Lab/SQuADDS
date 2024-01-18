@@ -1,7 +1,4 @@
-import os
-import platform
 import pprint
-import shutil
 import sys
 import warnings
 
@@ -109,34 +106,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             data_types.append(config.split("-")[2])
         return data_types
 
-    def _delete_cache(self):
-        """
-        Deletes the cache directory for the specific dataset.
-        """
-        # Determine the root cache directory for 'datasets'
-        # Default cache directory is '~/.cache/huggingface/datasets' on Unix systems
-        # and 'C:\\Users\\<username>\\.cache\\huggingface\\datasets' on Windows
-        cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "huggingface", "datasets")
-        
-        # Adjust the path for Windows if necessary
-        if platform.system() == "Windows":
-            cache_dir = os.path.join(os.path.expanduser("~"), "AppData", "Local", "huggingface", "datasets")
-
-        # Define the specific dataset cache directory name
-        dataset_cache_dir_name = "SQuADDS___s_qu_adds_db"
-
-        # Path for the specific dataset cache
-        dataset_cache_dir = os.path.join(cache_dir, dataset_cache_dir_name)
-
-        # Check if the cache directory exists
-        if os.path.exists(dataset_cache_dir):
-            try:
-                # Delete the dataset cache directory
-                shutil.rmtree(dataset_cache_dir)
-            except OSError as e:
-                print(f"Error occurred while deleting cache: {e}")
-        else:
-            pass
         
     def supported_config_names(self):
         """
@@ -145,7 +114,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             A list of supported configuration names.
         """
-        self._delete_cache()
+        delete_HF_cache()
         configs = get_dataset_config_names(self.repo_name, download_mode='force_redownload')
         return configs
 

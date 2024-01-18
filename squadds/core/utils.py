@@ -1,5 +1,7 @@
 import getpass
 import os
+import platform
+import shutil
 import urllib.parse
 import webbrowser
 
@@ -9,6 +11,147 @@ from huggingface_hub import HfApi, HfFolder
 
 from squadds.core.globals import ENV_FILE_PATH
 
+
+def get_type(value):
+    if isinstance(value, dict):
+        return 'dict'
+    elif isinstance(value, list):
+        return 'list' if not value else get_type(value[0])
+    else:
+        return type(value).__name__.lower()
+
+# Recursive function to validate types
+def validate_types(data_part, schema_part):
+    for key, expected_type in schema_part.items():
+        if isinstance(expected_type, dict):
+            validate_types(data_part[key], expected_type)
+        else:
+            actual_type = get_type(data_part[key])
+            if actual_type != expected_type:
+                raise TypeError(f"Invalid type for {key}. Expected {expected_type}, got {actual_type}.")
+
+def get_config_schema(entry):
+    """
+    Generates the schema for the given entry with specific rules.
+    The 'sim_results' are fully expanded, while others are expanded to the first level.
+    """
+    def get_type(value):
+        # Return the type as a string representation
+        if isinstance(value, dict):
+            return 'dict'
+        elif isinstance(value, list):
+            # Check the type of the first item if the list is not empty
+            return 'list' if not value else get_type(value[0])
+        else:
+            return type(value).__name__.lower()
+
+    schema = {}
+    for key, value in entry.items():
+        if key == 'sim_results':
+            # Fully expand 'sim_results'
+            schema[key] = {k: get_type(v) for k, v in value.items()}
+        elif key in ['sim_options', 'design', 'notes'] and isinstance(value, dict):
+            # Expand to the first level for 'sim_options', 'design', and 'notes'
+            schema[key] = {k: get_type(v) for k, v in value.items()}
+        else:
+            schema[key] = get_type(value)
+    
+    return schema
+
+def get_schema(obj):
+    if isinstance(obj, dict):
+        return {k: 'dict' if isinstance(v, dict) else get_schema(v) for k, v in obj.items() if k != 'contributor'}
+    elif isinstance(obj, list):
+        # If the list contains dictionaries, just return 'dict', else get the type of the first element
+        return 'dict' if any(isinstance(elem, dict) for elem in obj) else type(obj[0]).__name__
+    else:
+        return type(obj).__name__
+
+def is_float(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+def compare_schemas(data_schema, expected_schema, path=''):
+
+    for key, data_type in data_schema.items():
+        # Check if the key exists in the expected schema
+        if key not in expected_schema:
+            raise ValueError(f"Unexpected key '{path}{key}' found in data schema.")
+
+        expected_type = expected_schema[key]
+        # print(f"Comparing '{path}{key}'...")
+        # print(f"Expected: {expected_type}, Got: {get_type(data_type)}\n")
+
+        # Compare types for nested dictionaries
+        if isinstance(expected_type, dict):
+            if not isinstance(data_type, dict):
+                raise ValueError(f"Type mismatch for '{path}{key}'. Expected a dict, Got: {get_type(data_type)}")
+            compare_schemas(data_type, expected_type, path + key + '.')
+        else:
+            # Compare types for simple fields
+            if get_type(data_type) != expected_type:
+                #! TODO: fix this:: if float is expected but got str then ignore
+                if expected_type == 'float' and get_type(data_type) == "str":
+                    continue
+                else:
+                    raise ValueError(f"Type mismatch for '{path}{key}'. Expected: {expected_type}, Got: {get_type(data_type)}")
+
+def convert_to_numeric(value):
+    if isinstance(value, str):
+        if value.isdigit():
+            return int(value)
+        elif is_float(value):
+            return float(value)
+    return value
+
+def get_entire_schema(obj):
+    """
+    Recursively traverses the given object and returns a schema representation.
+
+    Args:
+        obj: The object to generate the schema for.
+
+    Returns:
+        The schema representation of the object.
+    """
+    if isinstance(obj, dict):
+        return {k: get_entire_schema(v) for k, v in obj.items() if k != 'contributor'}
+    elif isinstance(obj, list):
+        return [get_entire_schema(o) for o in obj][0] if obj else []
+    else:
+        return type(obj).__name__
+
+def delete_HF_cache():
+    """
+    Deletes the cache directory for the specific dataset.
+    """
+    # Determine the root cache directory for 'datasets'
+    # Default cache directory is '~/.cache/huggingface/datasets' on Unix systems
+    # and 'C:\\Users\\<username>\\.cache\\huggingface\\datasets' on Windows
+    cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "huggingface", "datasets")
+    
+    # Adjust the path for Windows if necessary
+    if platform.system() == "Windows":
+        cache_dir = os.path.join(os.path.expanduser("~"), "AppData", "Local", "huggingface", "datasets")
+
+    # Define the specific dataset cache directory name
+    dataset_cache_dir_name = "SQuADDS___s_qu_adds_db"
+
+    # Path for the specific dataset cache
+    dataset_cache_dir = os.path.join(cache_dir, dataset_cache_dir_name)
+
+    # Check if the cache directory exists
+    if os.path.exists(dataset_cache_dir):
+        try:
+            # Delete the dataset cache directory
+            shutil.rmtree(dataset_cache_dir)
+        except OSError as e:
+            print(f"Error occurred while deleting cache: {e}")
+    else:
+        pass
 
 def get_sim_results_keys(dataframes):
     """
