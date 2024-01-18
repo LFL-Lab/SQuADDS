@@ -37,6 +37,42 @@ class AnsysSimulator:
         self.lom_analysis_obj = None
         self.epr_analysis_obj = None
 
+        self.default_eigenmode_options = {
+            "setup": {
+                'basis_order': 1,
+                'max_delta_f': 0.05,
+                'max_passes': 30,
+                'min_converged': 1,
+                'min_converged_passes': 2,
+                'min_freq_ghz': 1,
+                'min_passes': 1,
+                'n_modes': 1,
+                'name': 'default_eigenmode_setup',
+                'pct_refinement': 30,
+                'reuse_selected_design': True,
+                'reuse_setup': True,
+                'vars': {'Cj': '0fF', 'Lj': '0nH'}
+            }
+        }
+        self.default_lom_options = {
+            "setup": {
+                'name': 'default_LOM_setup',
+                'reuse_selected_design': False,
+                'reuse_setup': False,
+                'freq_ghz': 5.0,
+                'save_fields': False,
+                'enabled': True,
+                'max_passes': 30,
+                'min_passes': 2,
+                'min_converged_passes': 1,
+                'percent_error': 0.1,
+                'percent_refinement': 30,
+                'auto_increase_solution_order': True,
+                'solution_order': 'High',
+                'solver_type': 'Iterative',
+            }
+        }
+
         self.design = metal.designs.design_planar.DesignPlanar()
         self.gui = metal.MetalGUI(self.design)
         self.design.overwrite_enabled = True
@@ -64,6 +100,33 @@ class AnsysSimulator:
         self.gui.rebuild()
         self.gui.autoscale()
         self.gui.screenshot()
+
+    def sweep(self, sweep_dict, emode_setup=None, lom_setup=None):
+        """
+        Sweeps the device based on the provided sweep dictionary.
+
+        Args:
+            sweep_dict (dict): A dictionary containing the sweep options.
+
+        Returns:
+            pandas.DataFrame: The sweep results.
+
+        Raises:
+            None
+        """
+        if emode_setup == None:
+            emode_setup=self.default_eigenmode_options
+        if lom_setup == None:
+            lom_setup=self.default_lom_options
+
+        # run_sweep(self.design, sweep_dict, emode_setup, lom_setup)
+        # print(sweep_dict)
+        if "coupling_type" in sweep_dict and sweep_dict["coupling_type"].lower() == "ncap":
+            run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="ncap_sweep")
+        elif "coupling_type" in sweep_dict and sweep_dict["coupling_type"].lower() == "clt":
+            run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="clt_sweep")
+        else:
+            run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="xmon_sweep")
 
     def simulate(self, device_dict):
         """

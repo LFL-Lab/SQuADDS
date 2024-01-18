@@ -280,14 +280,18 @@ def create_cpw(opts, cplr, design):
     Returns:
         RouteMeander: The created coplanar waveguide (CPW).
     """
-    adj_distance = int("".join(filter(str.isdigit, cplr.options["coupling_length"]))) if int("".join(filter(str.isdigit, cplr.options["coupling_length"]))) > 150 else 0
-    jogs = OrderedDict()
-    jogs[0] = ["R90", f'{adj_distance/(1.5)}um']
+    adj_distance = 0
+    if "finger_count" not in cplr.options:
+        adj_distance = int("".join(filter(str.isdigit, cplr.options["coupling_length"]))) if int("".join(filter(str.isdigit, cplr.options["coupling_length"]))) > 150 else 0
+
+    # adj_distance = int("".join(filter(str.isdigit, cplr.options["coupling_length"]))) if int("".join(filter(str.isdigit, cplr.options["coupling_length"]))) > 150 else 0
+    # jogs = OrderedDict()
+    # jogs[0] = ["R90", f'{adj_distance/(1.5)}um']
     opts.update({"lead" : Dict(
                             start_straight = "100um",
                             end_straight = "50um",
                             
-                            start_jogged_extension = jogs
+                            # start_jogged_extension = jogs
                             )})
     opts.update({"pin_inputs" : Dict(start_pin = Dict(component = cplr.name,
                                                     pin = 'second_end'),
@@ -295,7 +299,7 @@ def create_cpw(opts, cplr, design):
                                                   pin = 'readout'))})
     opts.update({"meander" : Dict(
                                 spacing = "100um",
-                                asymmetry = f'{adj_distance/(3)}um' # need this to make CPW asymmetry half of the coupling length
+                                # asymmetry = f'{adj_distance/(3)}um' # need this to make CPW asymmetry half of the coupling length
                                 )})                                 # if not, sharp kinks occur in CPW :(
     cpw = RouteMeander(design, 'cpw', options = opts)
     return cpw
@@ -434,3 +438,13 @@ def find_g_a_fq(C_g, C_B, f_r, Lj, N):
     f_q = transmon.E01() # Linear GHz
     
     return g, a, f_q
+
+def find_kappa(f_rough, C_tg, C_tb):
+    Z0 = 50
+    w_rough = 2*np.pi*f_rough
+
+    C_res = np.pi/(2*w_rough*Z0)*1e15 + 114
+    print(C_res)
+    w_est = np.sqrt(C_res/(C_res + C_tg + C_tb)) * w_rough
+
+    return (1/2 * Z0 * (w_est**2) * (C_tb**2)/(C_res + C_tg + C_tb))*1e-15/(2*np.pi) * 1e-6
