@@ -19,6 +19,43 @@ from squadds.core.utils import (compare_schemas, delete_HF_cache,
 """
 
 class ExistingConfigData:
+    """
+    Represents an existing configuration data object.
+
+    Attributes:
+        config (str): The name of the configuration.
+        sim_results (dict): A dictionary containing simulation results.
+        design (dict): A dictionary containing design options and the design tool.
+        sim_options (dict): A dictionary containing simulation setup options.
+        units (set): A set containing the units used in the simulation results.
+        notes (dict): A dictionary containing additional notes.
+        ref_entry (dict): A dictionary containing the reference entry.
+        contributor (dict): A dictionary containing contributor information.
+        entry (dict): A dictionary containing the contribution data.
+        local_repo_path (str): The local repository path.
+        sweep_data (list): A list containing sweep data.
+
+    Methods:
+        _validate_config_name(): Validates the configuration name.
+        get_config_schema(): Retrieves the schema for the given configuration name.
+        show_config_schema(): Prints the schema for the given configuration name.
+        _supported_config_names(): Retrieves the supported configuration names.
+        show(): Prints the contribution data.
+        __set_contributor_info(): Sets the contributor information.
+        get_contributor_info(): Retrieves the contributor information.
+        add_sim_result(result_name, result_value, unit): Adds a simulation result.
+        add_sim_setup(sim_setup): Adds simulation setup options to the contribution.
+        add_design(design): Adds a design to the contribution.
+        add_design_v0(design): Adds a design to the contribution (version 0).
+        to_dict(): Converts the contribution data to a dictionary.
+        clear(): Clears the contribution data.
+        add_notes(notes): Adds notes to the contribution.
+        validate_structure(actual_structure): Validates the structure of the contributor object.
+        _validate_structure(): Validates the structure of the contributor object.
+        validate_types(data): Validates the types of the data.
+        _validate_types(): Validates the types of the data.
+        _validate_content_v0(): Validates the content of the contribution against the dataset schema.
+    """
     def __init__(self, config=""):
         self.__repo_name = "SQuADDS/SQuADDS_DB"
         self.config = config
@@ -37,9 +74,15 @@ class ExistingConfigData:
         self.sweep_data = []
 
     def _validate_config_name(self):
-        configs = self._supported_config_names()
-        if self.config not in configs:
-            raise ValueError(f"Invalid config name: {self.config}. Supported config names: {configs}")
+            """
+            Validates the config name against the supported config names.
+
+            Raises:
+                ValueError: If the config name is invalid.
+            """
+            configs = self._supported_config_names()
+            if self.config not in configs:
+                raise ValueError(f"Invalid config name: {self.config}. Supported config names: {configs}")
         
     def get_config_schema(self):
         """
@@ -82,6 +125,15 @@ class ExistingConfigData:
 
     # method that returns the contribution data in a dictionary format
     def show(self):
+        """
+        Print the contribution data in a pretty format.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         # pretty print the contribution data
         print(json.dumps(self.to_dict(), indent=4))
         
@@ -96,9 +148,26 @@ class ExistingConfigData:
         }
 
     def get_contributor_info(self):
+        """
+        Returns the contributor information.
+
+        Returns:
+            str: The contributor information.
+        """
         return self.contributor
 
     def add_sim_result(self, result_name, result_value, unit):
+        """
+        Add a simulation result to the contributor.
+
+        Args:
+            result_name (str): The name of the simulation result.
+            result_value (float): The value of the simulation result.
+            unit (str): The unit of measurement for the simulation result.
+
+        Returns:
+            None
+        """
         self.units.add(unit)  # Add unit to the set
         self.sim_results[result_name] = result_value
         self.sim_results[f"{result_name}_unit"] = unit  # Keep the individual unit keys for now
@@ -186,6 +255,12 @@ class ExistingConfigData:
         self.design.update(design)
     
     def to_dict(self):
+        """
+        Converts the Contributor object to a dictionary.
+
+        Returns:
+            dict: A dictionary representation of the Contributor object.
+        """
         # Check if all units are the same
         if len(self.units) == 1:
             common_unit = self.units.pop()  # Get the common unit
@@ -399,6 +474,12 @@ class ExistingConfigData:
         print("Content validation passed.")
 
     def validate(self):
+        """
+        Validates the contribution by performing various checks.
+
+        Raises:
+            Exception: If any validation check fails.
+        """
         # Perform all validation checks
         # if no errors then set isValidated to True
         if not self.is_validated:
@@ -414,6 +495,15 @@ class ExistingConfigData:
             print("This contribution has already been validated.")
 
     def validate_sweep(self):
+        """
+        Validates the sweep data by performing structure, type, and content validation on each entry.
+
+        Raises:
+            Exception: If the validation fails.
+
+        Returns:
+            None
+        """
         if not self.is_validated:
             try:
                 for entry in self.sweep_data:
@@ -432,12 +522,11 @@ class ExistingConfigData:
 
     @property
     def invalidate(self):
+        """
+        Invalidates the contributor by setting the isValidated flag to False.
+        """
         self.__isValidated = False
 
-    @property
-    def is_validated(self):
-        return self.__isValidated  
-        
     def update_repo(self, path_to_repo):
         """
         Updates the repository at the specified path.
@@ -612,22 +701,22 @@ class ExistingConfigData:
 
 
     def contribute(self, path_to_repo, is_sweep=False):
-            """
-            Contributes to the repository by updating the local repo, updating the database, and uploading to HF.
+        """
+        Contributes to the repository by updating the local repo, updating the database, and uploading to HF.
 
-            Args:
-                path_to_repo (str): The path to the repository.
-                is_sweep (bool): True if the contribution is a sweep, False otherwise.
+        Args:
+            path_to_repo (str): The path to the repository.
+            is_sweep (bool): True if the contribution is a sweep, False otherwise.
 
-            Returns:
-                None
-            """
-            if not self.is_validated:
-                raise ValueError("Data must be validated before contributing.")
-            self.update_repo(path_to_repo)
-            self.update_db(path_to_repo, is_sweep)
-            # self.upload_to_HF(path_to_repo)
-            print("Contribution ready for PR")
+        Returns:
+            None
+        """
+        if not self.is_validated:
+            raise ValueError("Data must be validated before contributing.")
+        self.update_repo(path_to_repo)
+        self.update_db(path_to_repo, is_sweep)
+        # self.upload_to_HF(path_to_repo)
+        print("Contribution ready for PR")
     
     def submit(self):
         """
