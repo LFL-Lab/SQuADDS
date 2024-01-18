@@ -1,15 +1,27 @@
 Release Notes
 =============
 
+Version 0.2.31 (2024-01-17)
+--------------------------
+
+* **Alpha Version 0.2.31**
+
+- Bug fix in contributor validation function
+
+
 Version 0.2.3 (2024-01-17)
 --------------------------
 
 * **Alpha Version 0.2.3**
 
 - Bug fixes in simulator engine
+
 - Added sweep functionality to simulator
+
 - Updated Tutorial 2 to reflect changes in simulator code
+
 - Added functionality for adding to existing configurations
+
 - Completed Tutorial 3
   
 

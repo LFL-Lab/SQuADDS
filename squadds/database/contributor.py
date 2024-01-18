@@ -699,6 +699,15 @@ class ExistingConfigData:
             
             print("Sweep data loaded successfully.")
 
+    @property
+    def is_validated(self):
+        """
+        Returns True if the contribution is validated, False otherwise.
+
+        Returns:
+            bool: True if the contribution is validated, False otherwise.
+        """
+        return self.__isValidated
 
     def contribute(self, path_to_repo, is_sweep=False):
         """
