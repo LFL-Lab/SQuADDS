@@ -394,12 +394,12 @@ def run_xmon_LOM(design, cross_dict, sim_options):
             "simulator": "Ansys HFSS"
         },
         "sim_results": {
-            "cross_to_ground": 0 if 'ground_main_plane' not in cap_df.loc[f'cross_{qname}'] else cap_df.loc[f'cross_{qname}']['ground_main_plane'],
-            "claw_to_ground": 0 if 'ground_main_plane' not in cap_df.loc[f'{cname}_connector_arm_{qname}'] else cap_df.loc[f'{cname}_connector_arm_{qname}']['ground_main_plane'],
-            "cross_to_claw": cap_df.loc[f'cross_{qname}'][f'{cname}_connector_arm_{qname}'],
-            "cross_to_cross": cap_df.loc[f'cross_{qname}'][f'cross_{qname}'],
-            "claw_to_claw": cap_df.loc[f'{cname}_connector_arm_{qname}'][f'{cname}_connector_arm_{qname}'],
-            "ground_to_ground": 0 if 'ground_main_plane' not in cap_df.loc[f'cross_{qname}'] else cap_df.loc['ground_main_plane']['ground_main_plane'],
+            "cross_to_ground": 0 if 'ground_main_plane' not in cap_df.loc[f'cross_{qname}'] else abs(cap_df.loc[f'cross_{qname}']['ground_main_plane']),
+            "claw_to_ground": 0 if 'ground_main_plane' not in cap_df.loc[f'{cname}_connector_arm_{qname}'] else abs(cap_df.loc[f'{cname}_connector_arm_{qname}']['ground_main_plane']),
+            "cross_to_claw": abs(cap_df.loc[f'cross_{qname}'][f'{cname}_connector_arm_{qname}']),
+            "cross_to_cross": abs(cap_df.loc[f'cross_{qname}'][f'cross_{qname}']),
+            "claw_to_claw": abs(cap_df.loc[f'{cname}_connector_arm_{qname}'][f'{cname}_connector_arm_{qname}']),
+            "ground_to_ground": 0 if 'ground_main_plane' not in cap_df.loc[f'cross_{qname}'] else abs(cap_df.loc['ground_main_plane']['ground_main_plane']),
             "units": "fF"
         },
     }
