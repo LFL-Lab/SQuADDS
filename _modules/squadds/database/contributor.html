@@ -604,6 +604,43 @@ document.write(`
 <div class="viewcode-block" id="ExistingConfigData">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData">[docs]</a>
 <span class="k">class</span> <span class="nc">ExistingConfigData</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an existing configuration data object.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        config (str): The name of the configuration.</span>
+<span class="sd">        sim_results (dict): A dictionary containing simulation results.</span>
+<span class="sd">        design (dict): A dictionary containing design options and the design tool.</span>
+<span class="sd">        sim_options (dict): A dictionary containing simulation setup options.</span>
+<span class="sd">        units (set): A set containing the units used in the simulation results.</span>
+<span class="sd">        notes (dict): A dictionary containing additional notes.</span>
+<span class="sd">        ref_entry (dict): A dictionary containing the reference entry.</span>
+<span class="sd">        contributor (dict): A dictionary containing contributor information.</span>
+<span class="sd">        entry (dict): A dictionary containing the contribution data.</span>
+<span class="sd">        local_repo_path (str): The local repository path.</span>
+<span class="sd">        sweep_data (list): A list containing sweep data.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        _validate_config_name(): Validates the configuration name.</span>
+<span class="sd">        get_config_schema(): Retrieves the schema for the given configuration name.</span>
+<span class="sd">        show_config_schema(): Prints the schema for the given configuration name.</span>
+<span class="sd">        _supported_config_names(): Retrieves the supported configuration names.</span>
+<span class="sd">        show(): Prints the contribution data.</span>
+<span class="sd">        __set_contributor_info(): Sets the contributor information.</span>
+<span class="sd">        get_contributor_info(): Retrieves the contributor information.</span>
+<span class="sd">        add_sim_result(result_name, result_value, unit): Adds a simulation result.</span>
+<span class="sd">        add_sim_setup(sim_setup): Adds simulation setup options to the contribution.</span>
+<span class="sd">        add_design(design): Adds a design to the contribution.</span>
+<span class="sd">        add_design_v0(design): Adds a design to the contribution (version 0).</span>
+<span class="sd">        to_dict(): Converts the contribution data to a dictionary.</span>
+<span class="sd">        clear(): Clears the contribution data.</span>
+<span class="sd">        add_notes(notes): Adds notes to the contribution.</span>
+<span class="sd">        validate_structure(actual_structure): Validates the structure of the contributor object.</span>
+<span class="sd">        _validate_structure(): Validates the structure of the contributor object.</span>
+<span class="sd">        validate_types(data): Validates the types of the data.</span>
+<span class="sd">        _validate_types(): Validates the types of the data.</span>
+<span class="sd">        _validate_content_v0(): Validates the content of the contribution against the dataset schema.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span> <span class="o">=</span> <span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
@@ -621,10 +658,19 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">local_repo_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span> <span class="o">=</span> <span class="p">[]</span>
 
+<div class="viewcode-block" id="ExistingConfigData._validate_config_name">
+<a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._validate_config_name">[docs]</a>
     <span class="k">def</span> <span class="nf">_validate_config_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_supported_config_names</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">configs</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid config name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">. Supported config names: </span><span class="si">{</span><span class="n">configs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Validates the config name against the supported config names.</span>
+
+<span class="sd">            Raises:</span>
+<span class="sd">                ValueError: If the config name is invalid.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_supported_config_names</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">configs</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid config name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">. Supported config names: </span><span class="si">{</span><span class="n">configs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
         
 <div class="viewcode-block" id="ExistingConfigData.get_config_schema">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.get_config_schema">[docs]</a>
@@ -660,6 +706,8 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="ExistingConfigData._supported_config_names">
+<a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._supported_config_names">[docs]</a>
     <span class="k">def</span> <span class="nf">_supported_config_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves the supported configuration names from the repository.</span>
@@ -669,12 +717,22 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">delete_HF_cache</span><span class="p">()</span>
         <span class="n">configs</span> <span class="o">=</span> <span class="n">get_dataset_config_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="p">,</span> <span class="n">download_mode</span><span class="o">=</span><span class="s1">&#39;force_redownload&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">configs</span>
+        <span class="k">return</span> <span class="n">configs</span></div>
+
 
     <span class="c1"># method that returns the contribution data in a dictionary format</span>
 <div class="viewcode-block" id="ExistingConfigData.show">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.show">[docs]</a>
     <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the contribution data in a pretty format.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># pretty print the contribution data</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span></div>
 
@@ -692,12 +750,29 @@ document.write(`
 <div class="viewcode-block" id="ExistingConfigData.get_contributor_info">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.get_contributor_info">[docs]</a>
     <span class="k">def</span> <span class="nf">get_contributor_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the contributor information.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The contributor information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span></div>
 
 
 <div class="viewcode-block" id="ExistingConfigData.add_sim_result">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.add_sim_result">[docs]</a>
     <span class="k">def</span> <span class="nf">add_sim_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_name</span><span class="p">,</span> <span class="n">result_value</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a simulation result to the contributor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            result_name (str): The name of the simulation result.</span>
+<span class="sd">            result_value (float): The value of the simulation result.</span>
+<span class="sd">            unit (str): The unit of measurement for the simulation result.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>  <span class="c1"># Add unit to the set</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">[</span><span class="n">result_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">result_name</span><span class="si">}</span><span class="s2">_unit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit</span>  <span class="c1"># Keep the individual unit keys for now</span></div>
@@ -797,6 +872,12 @@ document.write(`
 <div class="viewcode-block" id="ExistingConfigData.to_dict">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.to_dict">[docs]</a>
     <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts the Contributor object to a dictionary.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A dictionary representation of the Contributor object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Check if all units are the same</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">common_unit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  <span class="c1"># Get the common unit</span>
@@ -869,6 +950,8 @@ document.write(`
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Structure validated successfully....&quot;</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="ExistingConfigData._validate_structure">
+<a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._validate_structure">[docs]</a>
     <span class="k">def</span> <span class="nf">_validate_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the structure of the contributor object.</span>
@@ -887,7 +970,8 @@ document.write(`
                 <span class="k">for</span> <span class="n">sub_key</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">sub_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">actual_structure</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required sub-key &#39;</span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Structure validated successfully....&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Structure validated successfully....&quot;</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="ExistingConfigData.validate_types">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.validate_types">[docs]</a>
@@ -902,6 +986,8 @@ document.write(`
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Types validated successfully....&quot;</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="ExistingConfigData._validate_types">
+<a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._validate_types">[docs]</a>
     <span class="k">def</span> <span class="nf">_validate_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the types of the data using the schema defined in the config.</span>
@@ -909,8 +995,11 @@ document.write(`
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_config_schema</span><span class="p">()</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="n">validate_types</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Types validated successfully....&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Types validated successfully....&quot;</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="ExistingConfigData._validate_content_v0">
+<a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._validate_content_v0">[docs]</a>
     <span class="k">def</span> <span class="nf">_validate_content_v0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the content of the contribution against the dataset schema.</span>
@@ -931,7 +1020,8 @@ document.write(`
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected schema: </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">expected_schema</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">data_schema</span> <span class="o">!=</span> <span class="n">expected_schema</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Structure mismatch in &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&#39;. Expected: </span><span class="si">{</span><span class="n">expected_schema</span><span class="si">}</span><span class="s2">, Got: </span><span class="si">{</span><span class="n">data_schema</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Structure mismatch in &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&#39;. Expected: </span><span class="si">{</span><span class="n">expected_schema</span><span class="si">}</span><span class="s2">, Got: </span><span class="si">{</span><span class="n">data_schema</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="ExistingConfigData.validate_content">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.validate_content">[docs]</a>
@@ -1028,6 +1118,12 @@ document.write(`
 <div class="viewcode-block" id="ExistingConfigData.validate">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.validate">[docs]</a>
     <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validates the contribution by performing various checks.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: If any validation check fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Perform all validation checks</span>
         <span class="c1"># if no errors then set isValidated to True</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_validated</span><span class="p">:</span>
@@ -1046,6 +1142,15 @@ document.write(`
 <div class="viewcode-block" id="ExistingConfigData.validate_sweep">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.validate_sweep">[docs]</a>
     <span class="k">def</span> <span class="nf">validate_sweep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validates the sweep data by performing structure, type, and content validation on each entry.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: If the validation fails.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_validated</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">:</span>
@@ -1065,12 +1170,11 @@ document.write(`
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Invalidates the contributor by setting the isValidated flag to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__isValidated</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">is_validated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__isValidated</span>  
-        
 <div class="viewcode-block" id="ExistingConfigData.update_repo">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.update_repo">[docs]</a>
     <span class="k">def</span> <span class="nf">update_repo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">):</span>
@@ -1259,22 +1363,22 @@ document.write(`
 <div class="viewcode-block" id="ExistingConfigData.contribute">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.contribute">[docs]</a>
     <span class="k">def</span> <span class="nf">contribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">,</span> <span class="n">is_sweep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Contributes to the repository by updating the local repo, updating the database, and uploading to HF.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Contributes to the repository by updating the local repo, updating the database, and uploading to HF.</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                path_to_repo (str): The path to the repository.</span>
-<span class="sd">                is_sweep (bool): True if the contribution is a sweep, False otherwise.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            path_to_repo (str): The path to the repository.</span>
+<span class="sd">            is_sweep (bool): True if the contribution is a sweep, False otherwise.</span>
 
-<span class="sd">            Returns:</span>
-<span class="sd">                None</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_validated</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data must be validated before contributing.&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_repo</span><span class="p">(</span><span class="n">path_to_repo</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_db</span><span class="p">(</span><span class="n">path_to_repo</span><span class="p">,</span> <span class="n">is_sweep</span><span class="p">)</span>
-            <span class="c1"># self.upload_to_HF(path_to_repo)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Contribution ready for PR&quot;</span><span class="p">)</span></div>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_validated</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data must be validated before contributing.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_repo</span><span class="p">(</span><span class="n">path_to_repo</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_db</span><span class="p">(</span><span class="n">path_to_repo</span><span class="p">,</span> <span class="n">is_sweep</span><span class="p">)</span>
+        <span class="c1"># self.upload_to_HF(path_to_repo)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Contribution ready for PR&quot;</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="ExistingConfigData.submit">
