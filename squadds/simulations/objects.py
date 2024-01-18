@@ -71,11 +71,14 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options):
     cavity_dict = device_dict["design_options_cavity_claw"]
 
     design.delete_all_components()
-
+    # print(device_dict)
     if device_dict["coupler_type"] == "CLT":
         emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options)
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
         data = get_sim_results(emode_df = emode_df, lom_df = lom_df)
+
+    # elif device_dict["coupling_type"] == "NCap":
+
 
     device_dict_format = Dict(
         cavity_options = Dict(
@@ -99,6 +102,10 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options):
             setup = dict(
                 eigenmode_setup = eigenmode_options,
                 LOM_setup = LOM_options
+            ),
+            renderer_options = dict(
+                eigenmode_renderer_options = emode_obj.sim.renderer.options,
+                lom_renderer_options = lom_obj.sim.renderer.options
             ),
             simulator = "Ansys HFSS"
         ),
@@ -210,10 +217,15 @@ def run_eigenmode(design, geometry_dict, sim_options):
 
     epra, hfss = start_simulation(design, config)
     hfss.clean_active_design()
+    # setup = set_simulation_hyperparameters(epra, config)
     epra.sim.setup = Dict(sim_options["setup"])
     epra.sim.setup.name = "test_setup"
     epra.sim.renderer.options.max_mesh_length_port = '7um'
     setup = epra.sim.setup
+    # print(setup)
+    # print(type(setup))
+    # print(type(sim_options["setup"]))
+
     mesh_lengths = {}
     coupling_type = "CLT"
     if "finger_count" in geometry_dict["cplr_opts"]:
@@ -225,7 +237,8 @@ def run_eigenmode(design, geometry_dict, sim_options):
         mesh_lengths = {'mesh1': {"objects": [f"prime_cpw_{coupler.name}", f"second_cpw_{coupler.name}", f"trace_{cpw.name}", f"readout_connector_arm_{claw.name}"], "MaxLength": '7um'}}
     
     modeler = hfss.pinfo.design.modeler
-
+    
+    #add_ground_strip_and_mesh(modeler, coupler, mesh_lengths=mesh_lengths)
     print(mesh_lengths)
     mesh_objects(modeler, mesh_lengths)
     f_rough, Q, kappa = get_freq_Q_kappa(epra, hfss)
@@ -241,12 +254,15 @@ def run_eigenmode(design, geometry_dict, sim_options):
         "sim_options": {
             "sim_type": "epr",
             "setup": setup,
+            "renderer_options": epra.sim.renderer.options,
             "simulator": "Ansys HFSS"
         },
         "sim_results": {
             "cavity_frequency": f_rough,
+            "cavity_frequency_unit": "GHz",
             "Q": Q,
-            "kappa": kappa
+            "kappa": kappa,
+            "kappa_unit": "kHz"
         },
         "misc": data
     }
@@ -331,6 +347,10 @@ def run_xmon_LOM(design, cross_dict, sim_options):
     Returns:
         tuple: A tuple containing the simulation data and the LOManalysis object.
     """
+    # design = metal.designs.design_planar.DesignPlanar()
+    # gui = metal.MetalGUI(design)
+    # design.overwrite_enabled = True
+
     c1 = LOManalysis(design, "q3d")
 
     c1.sim.setup.reuse_selected_design = False
@@ -341,7 +361,7 @@ def run_xmon_LOM(design, cross_dict, sim_options):
     c1.sim.setup.percent_error = 0.1
     c1.sim.setup.name = 'sweep_setup'
 
-    c1.sim.setup = sim_options
+    c1.sim.setup = sim_options #["setup"]
 
     qname = 'xmon'
     cnames = cross_dict["connection_pads"].keys()
@@ -353,11 +373,14 @@ def run_xmon_LOM(design, cross_dict, sim_options):
     design.rebuild()
     selection = [qname]
     open_pins = ports_zip
-    print(q.options)
+    # print(q.options)
     c1.sim.renderer.clean_active_design()
     c1.sim.run(name = 'LOMv2.0', components=selection,
                open_terminations=open_pins)
     cap_df = c1.sim.capacitance_matrix
+
+    # print("#"*100)
+    # print(c1.sim.renderer.options)
 
     data = {
         "design": {
@@ -367,6 +390,7 @@ def run_xmon_LOM(design, cross_dict, sim_options):
         "sim_options": {
             "sim_type": "lom",
             "setup": c1.sim.setup,
+            "renderer_options": c1.sim.renderer.options,
             "simulator": "Ansys HFSS"
         },
         "sim_results": {
@@ -375,9 +399,11 @@ def run_xmon_LOM(design, cross_dict, sim_options):
             "cross_to_claw": cap_df.loc[f'cross_{qname}'][f'{cname}_connector_arm_{qname}'],
             "cross_to_cross": cap_df.loc[f'cross_{qname}'][f'cross_{qname}'],
             "claw_to_claw": cap_df.loc[f'{cname}_connector_arm_{qname}'][f'{cname}_connector_arm_{qname}'],
-            "ground_to_ground": 0 if 'ground_main_plane' not in cap_df.loc[f'cross_{qname}'] else cap_df.loc['ground_main_plane']['ground_main_plane']
+            "ground_to_ground": 0 if 'ground_main_plane' not in cap_df.loc[f'cross_{qname}'] else cap_df.loc['ground_main_plane']['ground_main_plane'],
+            "units": "fF"
         },
     }
+    # save_simulation_data_to_json(data, filename = f"qubitonly_num{i}_{comp_id}_v{version}")
     return data, c1
 
 def run_sweep(design, sweep_opts, emode_options, lom_options, filename="default_sweep"):
