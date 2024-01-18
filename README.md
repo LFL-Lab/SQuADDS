@@ -59,9 +59,7 @@ pip install -e .
 - [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html)
 - [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
 - [Tutorial 3: Contributing to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_to_SQuADDS.html)
-- [(COMING SOON) Tutorial 4: Adding your own Qubit Hamiltonian Calculator]()
-- [(COMING SOON) Tutorial 5: Creating your own Interpolater]()
-- [(COMING SOON) Tutorial 6: Creating your own Simulator]()
+- [(COMING SOON) Tutorial 4: Creating a new database schema for SQuADDS]()
 
 ## Citation
 
