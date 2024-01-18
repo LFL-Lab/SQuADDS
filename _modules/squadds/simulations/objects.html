@@ -640,7 +640,7 @@ document.write(`
 
 <div class="viewcode-block" id="simulate_whole_device">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.simulate_whole_device">[docs]</a>
-<span class="k">def</span> <span class="nf">simulate_whole_device</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cross_dict</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">simulate_whole_device</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulates the whole device by running eigenmode and LOM simulations.</span>
 
@@ -654,15 +654,23 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        tuple: A tuple containing the simulation results, LOM analysis object, and eigenmode analysis object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">design</span><span class="o">.</span><span class="n">delete_all_components</span><span class="p">()</span>
-    <span class="c1"># print(cavity_dict)</span>
-    <span class="n">emode_df</span><span class="p">,</span> <span class="n">epra</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">)</span>
-    <span class="n">lom_df</span><span class="p">,</span> <span class="n">loma</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cross_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">)</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">get_sim_results</span><span class="p">(</span><span class="n">emode_df</span> <span class="o">=</span> <span class="n">emode_df</span><span class="p">,</span> <span class="n">lom_df</span> <span class="o">=</span> <span class="n">lom_df</span><span class="p">)</span>
 
-    <span class="n">device_dict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+    <span class="n">cross_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">]</span>
+    <span class="n">cavity_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span>
+
+    <span class="n">design</span><span class="o">.</span><span class="n">delete_all_components</span><span class="p">()</span>
+    <span class="c1"># print(device_dict)</span>
+    <span class="k">if</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;CLT&quot;</span><span class="p">:</span>
+        <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">)</span>
+        <span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cross_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">get_sim_results</span><span class="p">(</span><span class="n">emode_df</span> <span class="o">=</span> <span class="n">emode_df</span><span class="p">,</span> <span class="n">lom_df</span> <span class="o">=</span> <span class="n">lom_df</span><span class="p">)</span>
+
+    <span class="c1"># elif device_dict[&quot;coupling_type&quot;] == &quot;NCap&quot;:</span>
+
+
+    <span class="n">device_dict_format</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
         <span class="n">cavity_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
-            <span class="n">coupling_type</span> <span class="o">=</span> <span class="s2">&quot;CLT&quot;</span><span class="p">,</span>
+            <span class="n">coupling_type</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">],</span>
             <span class="n">coupler_options</span> <span class="o">=</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">],</span>
             <span class="n">cpw_options</span> <span class="o">=</span> <span class="n">Dict</span> <span class="p">(</span>
                 <span class="n">left_options</span> <span class="o">=</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">],</span>
@@ -675,11 +683,7 @@ document.write(`
     <span class="n">design</span> <span class="o">=</span> <span class="n">metal</span><span class="o">.</span><span class="n">designs</span><span class="o">.</span><span class="n">design_planar</span><span class="o">.</span><span class="n">DesignPlanar</span><span class="p">()</span>
     <span class="n">gui</span> <span class="o">=</span> <span class="n">metal</span><span class="o">.</span><span class="n">MetalGUI</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
     <span class="n">design</span><span class="o">.</span><span class="n">overwrite_enabled</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">QC</span> <span class="o">=</span> <span class="n">create_qubitcavity</span><span class="p">(</span><span class="n">device_dict</span><span class="p">,</span> <span class="n">design</span><span class="p">)</span>
-
-    <span class="c1"># gui.rebuild()</span>
-    <span class="c1"># gui.autoscale()</span>
-    <span class="c1"># gui.screenshot()</span>
+    <span class="n">QC</span> <span class="o">=</span> <span class="n">create_qubitcavity</span><span class="p">(</span><span class="n">device_dict_format</span><span class="p">,</span> <span class="n">design</span><span class="p">)</span>
 
     <span class="n">return_df</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
         <span class="n">sim_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -687,20 +691,24 @@ document.write(`
                 <span class="n">eigenmode_setup</span> <span class="o">=</span> <span class="n">eigenmode_options</span><span class="p">,</span>
                 <span class="n">LOM_setup</span> <span class="o">=</span> <span class="n">LOM_options</span>
             <span class="p">),</span>
+            <span class="n">renderer_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">eigenmode_renderer_options</span> <span class="o">=</span> <span class="n">emode_obj</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
+                <span class="n">lom_renderer_options</span> <span class="o">=</span> <span class="n">lom_obj</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">options</span>
+            <span class="p">),</span>
             <span class="n">simulator</span> <span class="o">=</span> <span class="s2">&quot;Ansys HFSS&quot;</span>
         <span class="p">),</span>
         <span class="n">sim_results</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
         <span class="n">design</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">design_options</span> <span class="o">=</span> <span class="n">device_dict</span>
+            <span class="n">design_options</span> <span class="o">=</span> <span class="n">device_dict_format</span>
         <span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">return_df</span><span class="p">,</span> <span class="n">loma</span><span class="p">,</span> <span class="n">epra</span></div>
+    <span class="k">return</span> <span class="n">return_df</span><span class="p">,</span> <span class="n">lom_obj</span><span class="p">,</span> <span class="n">emode_obj</span></div>
 
 
 <div class="viewcode-block" id="simulate_single_design">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.simulate_single_design">[docs]</a>
-<span class="k">def</span> <span class="nf">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">gui</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">sim_options</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">sim_options</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulates a single design using the provided parameters.</span>
 
@@ -719,15 +727,11 @@ document.write(`
     <span class="n">emode_df</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">lom_df</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="s2">&quot;cpw_opts&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">emode_df</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">sim_options</span><span class="p">)</span>
+        <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">sim_options</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">sim_options</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;cross_length&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span> <span class="k">else</span> <span class="n">run_capn_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">sim_options</span><span class="p">)</span>
-    <span class="c1"># return get_sim_results(lom_df=lom_df, emode_df=emode_df)</span>
-    <span class="c1"># gui.rebuild()</span>
-    <span class="c1"># gui.autoscale()</span>
-    <span class="c1"># gui.screenshot()</span>
+        <span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">],</span> <span class="n">sim_options</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;cross_length&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">run_capn_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">sim_options</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">emode_df</span> <span class="k">if</span> <span class="n">emode_df</span> <span class="o">!=</span> <span class="p">{}</span> <span class="k">else</span> <span class="p">(</span><span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span><span class="p">)</span> <span class="k">if</span> <span class="n">emode_df</span> <span class="o">!=</span> <span class="p">{}</span> <span class="k">else</span> <span class="p">(</span><span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_sim_results">
@@ -819,10 +823,18 @@ document.write(`
     <span class="c1"># print(type(setup))</span>
     <span class="c1"># print(type(sim_options[&quot;setup&quot;]))</span>
 
-    <span class="n">render_simulation_with_ports</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">design_name</span><span class="p">,</span> <span class="n">setup</span><span class="o">.</span><span class="n">vars</span><span class="p">,</span> <span class="n">coupler</span><span class="p">)</span>
+    <span class="n">mesh_lengths</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">coupling_type</span> <span class="o">=</span> <span class="s2">&quot;CLT&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;finger_count&quot;</span> <span class="ow">in</span> <span class="n">geometry_dict</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">]:</span>
+        <span class="n">coupling_type</span> <span class="o">=</span> <span class="s2">&quot;NCap&quot;</span>
+        <span class="n">render_simulation_no_ports</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="p">[</span><span class="n">cpw</span><span class="p">,</span><span class="n">claw</span><span class="p">],</span> <span class="p">[(</span><span class="n">cpw</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">)],</span> <span class="n">config</span><span class="o">.</span><span class="n">design_name</span><span class="p">,</span> <span class="n">setup</span><span class="o">.</span><span class="n">vars</span><span class="p">)</span>
+        <span class="n">mesh_lengths</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mesh1&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;objects&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;trace_</span><span class="si">{</span><span class="n">cpw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;readout_connector_arm_</span><span class="si">{</span><span class="n">claw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span> <span class="s2">&quot;MaxLength&quot;</span><span class="p">:</span> <span class="s1">&#39;4um&#39;</span><span class="p">}}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">render_simulation_with_ports</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">design_name</span><span class="p">,</span> <span class="n">setup</span><span class="o">.</span><span class="n">vars</span><span class="p">,</span> <span class="n">coupler</span><span class="p">)</span>
+        <span class="n">mesh_lengths</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mesh1&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;objects&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;prime_cpw_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;second_cpw_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;trace_</span><span class="si">{</span><span class="n">cpw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;readout_connector_arm_</span><span class="si">{</span><span class="n">claw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span> <span class="s2">&quot;MaxLength&quot;</span><span class="p">:</span> <span class="s1">&#39;7um&#39;</span><span class="p">}}</span>
+    
     <span class="n">modeler</span> <span class="o">=</span> <span class="n">hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">modeler</span>
-
-    <span class="n">mesh_lengths</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mesh1&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;objects&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;prime_cpw_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;second_cpw_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;trace_</span><span class="si">{</span><span class="n">cpw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;readout_connector_arm_</span><span class="si">{</span><span class="n">claw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span> <span class="s2">&quot;MaxLength&quot;</span><span class="p">:</span> <span class="s1">&#39;7um&#39;</span><span class="p">}}</span>
+    
     <span class="c1">#add_ground_strip_and_mesh(modeler, coupler, mesh_lengths=mesh_lengths)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">mesh_lengths</span><span class="p">)</span>
     <span class="n">mesh_objects</span><span class="p">(</span><span class="n">modeler</span><span class="p">,</span> <span class="n">mesh_lengths</span><span class="p">)</span>
@@ -832,19 +844,22 @@ document.write(`
 
     <span class="n">data_df</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="s2">&quot;CLT&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="n">coupling_type</span><span class="p">,</span>
             <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="n">geometry_dict</span><span class="p">,</span>
             <span class="s2">&quot;design_tool&quot;</span><span class="p">:</span> <span class="s2">&quot;Qiskit Metal&quot;</span>
         <span class="p">},</span>
         <span class="s2">&quot;sim_options&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;sim_type&quot;</span><span class="p">:</span> <span class="s2">&quot;epr&quot;</span><span class="p">,</span>
             <span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="n">setup</span><span class="p">,</span>
+            <span class="s2">&quot;renderer_options&quot;</span><span class="p">:</span> <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
             <span class="s2">&quot;simulator&quot;</span><span class="p">:</span> <span class="s2">&quot;Ansys HFSS&quot;</span>
         <span class="p">},</span>
         <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;cavity_frequency&quot;</span><span class="p">:</span> <span class="n">f_rough</span><span class="p">,</span>
+            <span class="s2">&quot;cavity_frequency_unit&quot;</span><span class="p">:</span> <span class="s2">&quot;GHz&quot;</span><span class="p">,</span>
             <span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="n">Q</span><span class="p">,</span>
-            <span class="s2">&quot;kappa&quot;</span><span class="p">:</span> <span class="n">kappa</span>
+            <span class="s2">&quot;kappa&quot;</span><span class="p">:</span> <span class="n">kappa</span><span class="p">,</span>
+            <span class="s2">&quot;kappa_unit&quot;</span><span class="p">:</span> <span class="s2">&quot;kHz&quot;</span>
         <span class="p">},</span>
         <span class="s2">&quot;misc&quot;</span><span class="p">:</span> <span class="n">data</span>
     <span class="p">}</span>
@@ -956,18 +971,19 @@ document.write(`
     <span class="n">cname</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cnames</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="n">temp_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">qname</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cnames</span><span class="p">))</span>
-    <span class="n">ports_zip</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">temp_arr</span><span class="p">,</span> <span class="n">cnames</span><span class="p">)</span>
+    <span class="n">ports_zip</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">temp_arr</span><span class="p">,</span> <span class="n">cnames</span><span class="p">))</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">TransmonCross</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">qname</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">cross_dict</span><span class="p">)</span>
     <span class="n">design</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
     <span class="n">selection</span> <span class="o">=</span> <span class="p">[</span><span class="n">qname</span><span class="p">]</span>
     <span class="n">open_pins</span> <span class="o">=</span> <span class="n">ports_zip</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
+    <span class="c1"># print(q.options)</span>
     <span class="n">c1</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">clean_active_design</span><span class="p">()</span>
     <span class="n">c1</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;LOMv2.0&#39;</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span>
                <span class="n">open_terminations</span><span class="o">=</span><span class="n">open_pins</span><span class="p">)</span>
     <span class="n">cap_df</span> <span class="o">=</span> <span class="n">c1</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">capacitance_matrix</span>
 
-    <span class="c1"># print(cap_df)</span>
+    <span class="c1"># print(&quot;#&quot;*100)</span>
+    <span class="c1"># print(c1.sim.renderer.options)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -977,196 +993,46 @@ document.write(`
         <span class="s2">&quot;sim_options&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;sim_type&quot;</span><span class="p">:</span> <span class="s2">&quot;lom&quot;</span><span class="p">,</span>
             <span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="n">c1</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="p">,</span>
+            <span class="s2">&quot;renderer_options&quot;</span><span class="p">:</span> <span class="n">c1</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
             <span class="s2">&quot;simulator&quot;</span><span class="p">:</span> <span class="s2">&quot;Ansys HFSS&quot;</span>
         <span class="p">},</span>
         <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;cross_to_ground&quot;</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="s1">&#39;ground_main_plane&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;ground_main_plane&#39;</span><span class="p">],</span>
-            <span class="s2">&quot;claw_to_ground&quot;</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="s1">&#39;ground_main_plane&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s1">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s1">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;ground_main_plane&#39;</span><span class="p">],</span>
-            <span class="s2">&quot;cross_to_claw&quot;</span><span class="p">:</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s1">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span>
-            <span class="s2">&quot;cross_to_cross&quot;</span><span class="p">:</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span>
-            <span class="s2">&quot;claw_to_claw&quot;</span><span class="p">:</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s1">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s1">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span>
-            <span class="s2">&quot;ground_to_ground&quot;</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="s1">&#39;ground_main_plane&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;ground_main_plane&#39;</span><span class="p">][</span><span class="s1">&#39;ground_main_plane&#39;</span><span class="p">]</span>
+            <span class="s2">&quot;cross_to_ground&quot;</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="s1">&#39;ground_main_plane&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;ground_main_plane&#39;</span><span class="p">]),</span>
+            <span class="s2">&quot;claw_to_ground&quot;</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="s1">&#39;ground_main_plane&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s1">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s1">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;ground_main_plane&#39;</span><span class="p">]),</span>
+            <span class="s2">&quot;cross_to_claw&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s1">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]),</span>
+            <span class="s2">&quot;cross_to_cross&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]),</span>
+            <span class="s2">&quot;claw_to_claw&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s1">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s1">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]),</span>
+            <span class="s2">&quot;ground_to_ground&quot;</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="s1">&#39;ground_main_plane&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;ground_main_plane&#39;</span><span class="p">][</span><span class="s1">&#39;ground_main_plane&#39;</span><span class="p">]),</span>
+            <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;fF&quot;</span>
         <span class="p">},</span>
     <span class="p">}</span>
     <span class="c1"># save_simulation_data_to_json(data, filename = f&quot;qubitonly_num{i}_{comp_id}_v{version}&quot;)</span>
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">c1</span></div>
 
 
-<div class="viewcode-block" id="CLT_epr_sweep">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.CLT_epr_sweep">[docs]</a>
-<span class="k">def</span> <span class="nf">CLT_epr_sweep</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">sweep_opts</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>    
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Perform a parameter sweep for a CLT (Coupled-Line T-Junction) EPR (Electrically Parallel Resonator) simulation.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        design (str): The design name.</span>
-<span class="sd">        sweep_opts (dict): The sweep options.</span>
-<span class="sd">        filename (str): The filename to save the simulation data.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">extract_QSweep_parameters</span><span class="p">(</span><span class="n">sweep_opts</span><span class="p">):</span>
-        <span class="n">cpw_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;total_length&quot;</span><span class="p">])))</span>
-        <span class="n">claw</span> <span class="o">=</span> <span class="n">create_claw</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">],</span> <span class="n">cpw_length</span><span class="p">,</span> <span class="n">design</span><span class="p">)</span>
-        <span class="n">coupler</span> <span class="o">=</span> <span class="n">create_coupler</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">],</span> <span class="n">design</span><span class="p">)</span>
-        <span class="n">cpw</span> <span class="o">=</span> <span class="n">create_cpw</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">],</span> <span class="n">coupler</span><span class="p">,</span> <span class="n">design</span><span class="p">)</span>
-        <span class="c1"># gui.rebuild()</span>
-        <span class="c1"># gui.autoscale()</span>
-
-        <span class="n">config</span> <span class="o">=</span> <span class="n">SimulationConfig</span><span class="p">(</span><span class="n">min_converged_passes</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-
-        <span class="n">epra</span><span class="p">,</span> <span class="n">hfss</span> <span class="o">=</span> <span class="n">start_simulation</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-        <span class="n">setup</span> <span class="o">=</span> <span class="n">set_simulation_hyperparameters</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">max_mesh_length_port</span> <span class="o">=</span> <span class="s1">&#39;7um&#39;</span>
-
-        <span class="n">render_simulation_with_ports</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">design_name</span><span class="p">,</span> <span class="n">setup</span><span class="o">.</span><span class="n">vars</span><span class="p">,</span> <span class="n">coupler</span><span class="p">)</span>
-        <span class="n">modeler</span> <span class="o">=</span> <span class="n">hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">modeler</span>
-
-        <span class="n">mesh_lengths</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mesh1&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;objects&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;prime_cpw_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;second_cpw_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;trace_</span><span class="si">{</span><span class="n">cpw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;readout_connector_arm_</span><span class="si">{</span><span class="n">claw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span> <span class="s2">&quot;MaxLength&quot;</span><span class="p">:</span> <span class="s1">&#39;7um&#39;</span><span class="p">}}</span>
-        <span class="c1">#add_ground_strip_and_mesh(modeler, coupler, mesh_lengths=mesh_lengths)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">mesh_lengths</span><span class="p">)</span>
-        <span class="n">mesh_objects</span><span class="p">(</span><span class="n">modeler</span><span class="p">,</span> <span class="n">mesh_lengths</span><span class="p">)</span>
-        <span class="n">f_rough</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">kappa</span> <span class="o">=</span> <span class="n">get_freq_Q_kappa</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">hfss</span><span class="p">)</span>
-
-        <span class="n">data</span> <span class="o">=</span> <span class="n">epra</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
-
-        <span class="n">data_df</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;coupling_type&quot;</span><span class="p">:</span> <span class="s2">&quot;CLT&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;geometry_dict&quot;</span><span class="p">:</span> <span class="n">param</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;sim_options&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;sim_type&quot;</span><span class="p">:</span> <span class="s2">&quot;epr&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="n">setup</span><span class="p">,</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;cavity_frequency&quot;</span><span class="p">:</span> <span class="n">f_rough</span><span class="p">,</span>
-                <span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="n">Q</span><span class="p">,</span>
-                <span class="s2">&quot;kappa&quot;</span><span class="p">:</span> <span class="n">kappa</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;misc&quot;</span><span class="p">:</span> <span class="n">data</span>
-        <span class="p">}</span>
-        
-        <span class="c1"># filename = f&quot;CLT_cpw{cpw.options.total_length}_claw{claw.options.connection_pads.readout.claw_width}_clength{coupler.options.coupling_length}&quot;</span>
-        <span class="n">save_simulation_data_to_json</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="NCap_epr_sweep">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.NCap_epr_sweep">[docs]</a>
-<span class="k">def</span> <span class="nf">NCap_epr_sweep</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">sweep_opts</span><span class="p">):</span>    
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Perform a parameter sweep for NCap EPR simulations.</span>
+<div class="viewcode-block" id="run_sweep">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.run_sweep">[docs]</a>
+<span class="k">def</span> <span class="nf">run_sweep</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">sweep_opts</span><span class="p">,</span> <span class="n">emode_options</span><span class="p">,</span> <span class="n">lom_options</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;default_sweep&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Runs a parameter sweep for the specified design.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        design (Design): The design object.</span>
 <span class="sd">        sweep_opts (dict): The sweep options.</span>
+<span class="sd">        emode_options (dict): The eigenmode setup options.</span>
+<span class="sd">        lom_options (dict): The LOM setup options.</span>
+<span class="sd">        filename (str): The filename for the simulation results.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">extract_QSweep_parameters</span><span class="p">(</span><span class="n">sweep_opts</span><span class="p">):</span>
-        <span class="n">claw</span> <span class="o">=</span> <span class="n">create_claw</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">],</span> <span class="n">design</span><span class="p">)</span>
-        <span class="n">coupler</span> <span class="o">=</span> <span class="n">create_coupler</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">],</span> <span class="n">design</span><span class="p">)</span>
-        <span class="n">cpw</span> <span class="o">=</span> <span class="n">create_cpw</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">],</span> <span class="n">design</span><span class="p">)</span>
-        <span class="c1"># gui.rebuild()</span>
-        <span class="c1"># gui.autoscale()</span>
-        
-        <span class="n">config</span> <span class="o">=</span> <span class="n">SimulationConfig</span><span class="p">()</span>
-
-        <span class="n">epra</span><span class="p">,</span> <span class="n">hfss</span> <span class="o">=</span> <span class="n">start_simulation</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-        <span class="n">setup</span> <span class="o">=</span> <span class="n">set_simulation_hyperparameters</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-        
-        <span class="n">render_simulation_no_ports</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="p">[</span><span class="n">cpw</span><span class="p">,</span><span class="n">claw</span><span class="p">],</span> <span class="p">[(</span><span class="n">cpw</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">)],</span> <span class="n">config</span><span class="o">.</span><span class="n">design_name</span><span class="p">,</span> <span class="n">setup</span><span class="o">.</span><span class="n">vars</span><span class="p">)</span>
-        <span class="n">modeler</span> <span class="o">=</span> <span class="n">hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">modeler</span>
-
-        <span class="n">mesh_lengths</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mesh1&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;objects&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;trace_</span><span class="si">{</span><span class="n">cpw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;readout_connector_arm_</span><span class="si">{</span><span class="n">claw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span> <span class="s2">&quot;MaxLength&quot;</span><span class="p">:</span> <span class="s1">&#39;4um&#39;</span><span class="p">}}</span>
-        <span class="n">mesh_objects</span><span class="p">(</span><span class="n">modeler</span><span class="p">,</span>  <span class="n">mesh_lengths</span><span class="p">)</span>
-        <span class="n">f_rough</span> <span class="o">=</span> <span class="n">get_freq</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">hfss</span><span class="p">)</span>
-
-        <span class="n">data</span> <span class="o">=</span> <span class="n">epra</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
-
-        <span class="n">data_df</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;coupling_type&quot;</span><span class="p">:</span> <span class="s2">&quot;NCap&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;geometry_dict&quot;</span><span class="p">:</span> <span class="n">param</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;sim_options&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;sim_type&quot;</span><span class="p">:</span> <span class="s2">&quot;epr&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="n">setup</span><span class="p">,</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;cavity_frequency&quot;</span><span class="p">:</span> <span class="n">f_rough</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;misc&quot;</span><span class="p">:</span> <span class="n">data</span>
-        <span class="p">}</span>
-        
-        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;CLT_cpw</span><span class="si">{</span><span class="n">cpw</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">total_length</span><span class="si">}</span><span class="s2">_claw</span><span class="si">{</span><span class="n">claw</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">connection_pads</span><span class="o">.</span><span class="n">readout</span><span class="o">.</span><span class="n">claw_width</span><span class="si">}</span><span class="s2">_clength</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">coupling_length</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">save_simulation_data_to_json</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="NCap_LOM_sweep">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.NCap_LOM_sweep">[docs]</a>
-<span class="k">def</span> <span class="nf">NCap_LOM_sweep</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">sweep_opts</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Perform a sweep analysis for NCap LOManalysis.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        design (Design): The design object.</span>
-<span class="sd">        sweep_opts (dict): The sweep options.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">extract_QSweep_parameters</span><span class="p">(</span><span class="n">sweep_opts</span><span class="p">):</span>
-        <span class="c1"># claw = create_claw(param[&quot;claw_opts&quot;], design)</span>
-        <span class="n">coupler</span> <span class="o">=</span> <span class="n">create_coupler</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">design</span><span class="p">)</span>
-        <span class="c1"># coupler.options[&quot;&quot;]</span>
-        <span class="c1"># cpw = create_cpw(param[&quot;cpw_opts&quot;], design)</span>
-        <span class="c1"># gui.rebuild()</span>
-        <span class="c1"># gui.autoscale()</span>
-
-        <span class="n">loma</span> <span class="o">=</span> <span class="n">LOManalysis</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;q3d&quot;</span><span class="p">)</span>
-        <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">reuse_selected_design</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">reuse_setup</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1"># example: update single setting</span>
-        <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">max_passes</span> <span class="o">=</span> <span class="mi">30</span>
-        <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">min_converged_passes</span> <span class="o">=</span> <span class="mi">5</span>
-        <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">percent_error</span> <span class="o">=</span> <span class="mf">0.1</span>
-        <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">auto_increase_solution_order</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span>
-        <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">solution_order</span> <span class="o">=</span> <span class="s1">&#39;Medium&#39;</span>
-
-        <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;lom_setup&#39;</span>
-
-        <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;LOMv2.01&#39;</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
-        <span class="n">open_terminations</span><span class="o">=</span><span class="p">[(</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pin_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">pin_name</span> <span class="ow">in</span> <span class="n">coupler</span><span class="o">.</span><span class="n">pin_names</span><span class="p">])</span>
-        <span class="n">cap_df</span> <span class="o">=</span> <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">capacitance_matrix</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">loma</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
-        <span class="n">setup</span> <span class="o">=</span> <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span>
-
-        <span class="n">data_df</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;coupling_type&quot;</span><span class="p">:</span> <span class="s2">&quot;NCap&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;geometry_dict&quot;</span><span class="p">:</span> <span class="n">param</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;sim_options&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;sim_type&quot;</span><span class="p">:</span> <span class="s2">&quot;lom&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="n">setup</span><span class="p">,</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;C_top2top&quot;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cap_body_0_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-                <span class="s2">&quot;C_top2bottom&quot;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cap_body_0_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                <span class="s2">&quot;C_top2ground&quot;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cap_body_0_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
-                <span class="s2">&quot;C_bottom2bottom&quot;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cap_body_1_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                <span class="s2">&quot;C_bottom2ground&quot;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cap_body_1_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
-                <span class="s2">&quot;C_ground2ground&quot;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;ground_main_plane&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;misc&quot;</span><span class="p">:</span> <span class="n">data</span>
-        <span class="p">}</span>
-
-        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;NCap_LOM_fingerwidth</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">cap_width</span><span class="si">}</span><span class="s2">_fingercount</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">finger_count</span><span class="si">}</span><span class="s2">_fingerlength</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">finger_length</span><span class="si">}</span><span class="s2">_fingergap</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">cap_gap</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">save_simulation_data_to_json</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
+<span class="sd">        Saves each sweep iteration to a JSON file with the specified filename.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">extract_QSweep_parameters</span><span class="p">(</span><span class="n">sweep_opts</span><span class="p">[</span><span class="s2">&quot;geometry_dict&quot;</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="n">cpw_claw_df</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">emode_options</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;filename_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">%m%Y_%H.%M.%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">save_simulation_data_to_json</span><span class="p">(</span><span class="n">cpw_claw_df</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="start_simulation">
