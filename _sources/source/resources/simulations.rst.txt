@@ -38,6 +38,8 @@ Some learning resources we've found useful:
 
     - `Advanced Meshing Techniques (PDF) <http://www.ece.uprm.edu/~rafaelr/inel6068/HFSS/3570_Advanced_Meshing_Techniques.pdf>`_
 
+    - `Simulation Guides <https://github.com/McDermott-Group/Simulation-and-Design/tree/master/Simulation%20Guides>` _
+    
 - Ansys Scripting Resources:
     - `Ansys Scripting Forum <https://forum.ansys.com/categories/scripting>`_
 
