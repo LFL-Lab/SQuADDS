@@ -6,8 +6,6 @@ on:
       - master
     paths:
       - 'squadds/**'
-      - 'docs/**'
-      - 'tutorials/**'
   workflow_dispatch:
 
 jobs:
@@ -29,11 +27,13 @@ jobs:
       - name: Cache Python dependencies
         uses: actions/cache@v3
         with:
-          path: ~\AppData\Local\pip\Cache # Windows
-          path: ~/Library/Caches/pip # macOS
-          path: ~/.cache/pip # Linux/Unix
+          path: |
+            ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || '' }}
+            ${{ runner.os == 'macOS' && '~/Library/Caches/pip' || '' }}
+            ${{ runner.os == 'Linux' && '~/.cache/pip' || '' }}
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: ${{ runner.os }}-pip-
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install Dependencies
         run: |
@@ -47,4 +47,4 @@ jobs:
 
       - name: Run Tests
         run: |
-            python tests/imports_test.py
+          python tests/imports_test.py
