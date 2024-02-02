@@ -56,8 +56,14 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
+      - name: Set up environment file
+        run: |
+          echo "HUGGINGFACE_API_KEY=${{ secrets.HUGGINGFACE_API_KEY }}" > .env
+          shell: bash
+
       - name: Run Tests
         shell: bash -l {0}
         run: |
           conda activate qiskit-metal-env
           python tests/imports_test.py
+          python tests/mvp_test.py
