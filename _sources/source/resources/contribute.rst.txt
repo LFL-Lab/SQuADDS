@@ -16,7 +16,7 @@ If you have device designs with a **validated (against measured data) simulation
 Code Contributions
 ********************************
 
-If you would like to contribute to the SQuADDS codebase, please refer to the :ref:`_dev_notes` page.
+If you would like to contribute to the SQuADDS codebase, please refer to the :doc:`../developer/index` page.
 
 
 ********************************
