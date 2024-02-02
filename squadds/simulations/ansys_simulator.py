@@ -150,7 +150,7 @@ class AnsysSimulator:
                 qubit_setup = device_dict["setup_qubit"],
                 cavity_setup = device_dict["setup_cavity_claw"]
             )
-            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(design=self.design, cross_dict=self.geom_dict.qubit_geoms, cavity_dict=self.geom_dict.cavity_geoms, LOM_options=self.setup_dict.qubit_setup, eigenmode_options=self.setup_dict.cavity_setup)
+            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(design=self.design, device_dict=device_dict, LOM_options=self.setup_dict.qubit_setup, eigenmode_options=self.setup_dict.cavity_setup)
 
         else: # have a non-qubit_cavity object
             self.geom_dict = device_dict["design_options"]
