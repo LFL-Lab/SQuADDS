@@ -4,6 +4,11 @@
 
 # Features to add:
 
+- [ ] merge andre results and test code
+- [ ] dockerize and test standard env deployment
+- [ ] add deletion of cache as FAQ
+- [ ] fixing deletion of cache on windows
+- [ ] letting users add methods with computation and append to df for search
 - [ ] Contribution via HuggingFace Hub API
 - [ ] LLM based queries
 - [ ] Create automated tests for each version release workflow
