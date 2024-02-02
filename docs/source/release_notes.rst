@@ -48,7 +48,7 @@ Version 0.2.1 (2024-01-10)
 
 - Bug fixes:
 
-  - change "c" to "readout" in both code and database entries
+  - change `"c"` to `"readout"` in both code and database entries
 
 - Handled Warnings from pyaedt
 
