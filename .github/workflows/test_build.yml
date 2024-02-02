@@ -19,33 +19,38 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
+      - name: Download environment.yml from Qiskit-Metal repository
+        run: curl -O https://raw.githubusercontent.com/Qiskit/qiskit-metal/main/environment.yml
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
         with:
+          activate-environment: qiskit-metal-env
           python-version: ${{ matrix.python-version }}
+          auto-activate-base: false
 
-      - name: Cache Python dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || '' }}
-            ${{ runner.os == 'macOS' && '~/Library/Caches/pip' || '' }}
-            ${{ runner.os == 'Linux' && '~/.cache/pip' || '' }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install Dependencies
+      - name: Create and Activate Qiskit-Metal Conda environment
+        shell: bash -l {0}
         run: |
-          python -m pip install --upgrade pip
+          conda env create -n qiskit-metal-env -f environment.yml
+          echo "conda activate qiskit-metal-env" >> $BASH_ENV
+
+      - name: Install Qiskit-Metal
+        shell: bash -l {0}
+        run: |
+          python -m pip install --no-deps -e git+https://github.com/Qiskit/qiskit-metal.git#egg=qiskit-metal
+
+      - name: Install SQuADDS and its dependencies
+        shell: bash -l {0}
+        run: |
           python -m pip install --upgrade pip
           pip install datasets
           pip install pyEPR-quantum
           pip install pyaedt
           pip install -r requirements.txt
-          pip install qiskit-metal
           pip install -e .
 
       - name: Run Tests
+        shell: bash -l {0}
         run: |
           python tests/imports_test.py
