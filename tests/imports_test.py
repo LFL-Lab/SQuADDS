@@ -1,5 +1,6 @@
 import sys
 
+
 def test_import(module_name):
     try:
         __import__(module_name)
@@ -30,6 +31,8 @@ def main():
 
     for submodule in submodules:
         test_import(submodule)
+
+    print("Imports test passed")
 
 if __name__ == "__main__":
     main()
