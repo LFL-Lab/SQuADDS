@@ -25,9 +25,13 @@ jobs:
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: qiskit-metal-env
           python-version: ${{ matrix.python-version }}
           auto-activate-base: false
+
+      - name: Remove existing Conda environment if it exists
+        shell: bash -l {0}
+        run: |
+          conda remove --name qiskit-metal-env --all --yes || true
 
       - name: Create and Activate Qiskit-Metal Conda environment
         shell: bash -l {0}
