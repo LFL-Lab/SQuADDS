@@ -1,0 +1,3164 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Tutorial 1: Getting Started with SQuADDS &#8212; SQuADDS v0.2</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../../../../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../../../../../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../../../../../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="../../../../../../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/katex-math.css?v=91adb8b6" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../../../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../../../../../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../../../../../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+
+    <script src="../../../../../../../../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../../../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../../../../../../../../_static/documentation_options.js?v=10f1778b"></script>
+    <script src="../../../../../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../../../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../../../../../_static/scripts/qiskit-sphinx-theme.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../../../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../../../../../_static/katex.min.js?v=48ec3933"></script>
+    <script src="../../../../../../../../_static/auto-render.min.js?v=8b9f325c"></script>
+    <script src="../../../../../../../../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="2023/12/31"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+
+  <div class="bd-header-announcement container-fluid bd-header-announcement">
+    <div class="bd-header-announcement__content">🎉 Our <a href='https://arxiv.org/pdf/2312.13483.pdf'>paper</a> is out! </div>
+  </div>
+
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../../../../../../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">SQuADDS v0.2</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../../../../../index.html">
+                        Documentation Home
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../../../../../source/getting_started.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../../../../../source/tutorials/index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../../../../../source/developer/index.html">
+                        Developer Notes
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../../../../../source/apidocs/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../../../../../../source/release_notes.html">
+                        Release Logs
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-external" href="https://github.com/shanto268/SQuADDS">
+                        GitHub
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+                        Paper
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../../../../../../source/references/index.html">
+                        References
+                      </a>
+                    </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://dornsife.usc.edu/lfl/" title="LFL Lab" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fas fa-hand-peace fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">LFL Lab</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-python fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../../../../../index.html">
+                        Documentation Home
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../../../../../source/getting_started.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../../../../../source/tutorials/index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../../../../../source/developer/index.html">
+                        Developer Notes
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../../../../../source/apidocs/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
+                    More
+                </button>
+                <ul id="pst-nav-more-links-2" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../../../../../../source/release_notes.html">
+                        Release Logs
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-external" href="https://github.com/shanto268/SQuADDS">
+                        GitHub
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+                        Paper
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../../../../../../source/references/index.html">
+                        References
+                      </a>
+                    </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://dornsife.usc.edu/lfl/" title="LFL Lab" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fas fa-hand-peace fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">LFL Lab</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-python fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Tutorial 1:...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="Tutorial-1:-Getting-Started-with-SQuADDS">
+<h1>Tutorial 1: Getting Started with SQuADDS<a class="headerlink" href="#Tutorial-1:-Getting-Started-with-SQuADDS" title="Link to this heading">#</a></h1>
+<p>In this tutorial, we will walk you through some basic usage of SQuADDS. By the end of this tutorial, you will be able to:</p>
+<ul class="simple">
+<li><p>Have an HuggingFace account</p></li>
+<li><p>Access the SQuADDS Database</p></li>
+<li><p>Use the SQuADDS API to query for closest and “best-guess” interpolated device designs for your chosen Hamiltonian parameters</p></li>
+<li><p>Simulate the “best-guess” design using an EM solver tool</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<p>Since the SQuADDS Database is hosted on <a class="reference external" href="https://huggingface.co/">HuggingFace</a>, we will need to create an account and get an API key to access the database.</p>
+<section id="HuggingFace-🤗">
+<h2>HuggingFace 🤗<a class="headerlink" href="#HuggingFace-🤗" title="Link to this heading">#</a></h2>
+<p>HuggingFace is a company that provides a large number of NLP models and datasets. They also provide a platform to host your own models and datasets.</p>
+<section id="Creating-an-Account">
+<h3>Creating an Account<a class="headerlink" href="#Creating-an-Account" title="Link to this heading">#</a></h3>
+<p>Follow the instructions here - <a class="reference external" href="https://huggingface.co/join">HuggingFace: Sign Up</a> - to create an account.</p>
+<p>Once you have created an account, you can get your API key from the <a class="reference external" href="https://huggingface.co/settings/token">settings page</a>.</p>
+<p>Please update the <code class="docutils literal notranslate"><span class="pre">HUGGINGFACE_API_KEY</span></code> variable in the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file with your API key <strong>OR</strong> execute the following code to set the environment variable.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="n">set_huggingface_api_key</span>
+
+<span class="n">set_huggingface_api_key</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+API key already exists in .env file.
+</pre></div></div>
+</div>
+</section>
+<section id="Login">
+<h3>Login<a class="headerlink" href="#Login" title="Link to this heading">#</a></h3>
+<p>To login to your HuggingFace account, run the following command in your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>huggingface-cli<span class="w"> </span>login
+</pre></div>
+</div>
+<p>You will be prompted to enter your username and password. Once you have logged in, you can check your login status by running the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>huggingface-cli<span class="w"> </span>whoami
+</pre></div>
+</div>
+</section>
+<section id="Accessing-the-SQuADDS-Database-using-the-HuggingFace-API">
+<h3>Accessing the SQuADDS Database using the HuggingFace API<a class="headerlink" href="#Accessing-the-SQuADDS-Database-using-the-HuggingFace-API" title="Link to this heading">#</a></h3>
+<p>The SQuADDS Database is hosted on HuggingFace. You can access the database using the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library from HuggingFace.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">get_dataset_config_names</span>
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">configs</span> <span class="o">=</span> <span class="n">get_dataset_config_names</span><span class="p">(</span><span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>You can navigate the database using HuggingFace API. For example, you can access the qubit database using the following code:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_data</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span><span class="p">,</span> <span class="n">configs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">qubit_data</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+DatasetDict({
+    train: Dataset({
+        features: [&#39;sim_results&#39;, &#39;contributor&#39;, &#39;sim_options&#39;, &#39;notes&#39;, &#39;design&#39;],
+        num_rows: 1934
+    })
+})
+</pre></div></div>
+</div>
+<p>Each configuration in the dataset is uniquely identified by their <code class="docutils literal notranslate"><span class="pre">config</span></code>. For the SQuADDS Database, the <code class="docutils literal notranslate"><span class="pre">config</span></code> string is created in the following format:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">component_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">component</span></code> is the name of the component, <code class="docutils literal notranslate"><span class="pre">component_name</span></code> is the name of the component (in Qiskit Metal), and <code class="docutils literal notranslate"><span class="pre">data_type</span></code> is the type of simulation data that has been contributed.</p>
+<p>Lets check what the <code class="docutils literal notranslate"><span class="pre">config</span></code> string looks like for our database:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">component_names</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_types</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">configs</span><span class="p">:</span>
+    <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">component_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">data_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">component_names</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_types</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qubit&#39;, &#39;cavity_claw&#39;, &#39;coupler&#39;]
+[&#39;TransmonCross&#39;, &#39;RouteMeander&#39;, &#39;NCap&#39;]
+[&#39;cap_matrix&#39;, &#39;eigenmode&#39;, &#39;cap_matrix&#39;]
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Using-the-SQuADDS-API-to-access-and-anlyze-the-database">
+<h2>Using the SQuADDS API to access and anlyze the database<a class="headerlink" href="#Using-the-SQuADDS-API-to-access-and-anlyze-the-database" title="Link to this heading">#</a></h2>
+<p>While it is possible to directly access the SQuADDS Database using the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library, we have created a simple API to make it easier to query the database.</p>
+<p>The main object we use to access the database is the <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> class.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds</span> <span class="kn">import</span> <span class="n">SQuADDS_DB</span>
+
+<span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>You can get a summary of the datasets by running.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_datasets</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+╒═════════════╤══════════════════╤══════════════════╕
+│ Component   │ Component Name   │ Data Available   │
+╞═════════════╪══════════════════╪══════════════════╡
+│ qubit       │ TransmonCross    │ cap_matrix       │
+├─────────────┼──────────────────┼──────────────────┤
+│ cavity_claw │ RouteMeander     │ eigenmode        │
+├─────────────┼──────────────────┼──────────────────┤
+│ coupler     │ NCap             │ cap_matrix       │
+╘═════════════╧══════════════════╧══════════════════╛
+</pre></div></div>
+</div>
+<p>To check for the <code class="docutils literal notranslate"><span class="pre">config</span></code> names</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_configs</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qubit-TransmonCross-cap_matrix&#39;,
+ &#39;cavity_claw-RouteMeander-eigenmode&#39;,
+ &#39;coupler-NCap-cap_matrix&#39;]
+</pre></div></div>
+</div>
+<p>If you are interested to learn more about each configuration, you can do so by using the <code class="docutils literal notranslate"><span class="pre">get_dataset_info</span></code> method.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_dataset_info</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+================================================================================
+Dataset Features:
+{&#39;contributor&#39;: {&#39;PI&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;date_created&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;group&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;institution&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;uploader&#39;: Value(dtype=&#39;string&#39;, id=None)},
+ &#39;design&#39;: {&#39;design_options&#39;: {...},
+            &#39;design_tool&#39;: Value(dtype=&#39;string&#39;, id=None)},
+ &#39;notes&#39;: {},
+ &#39;sim_options&#39;: {&#39;renderer_options&#39;: {...},
+                 &#39;setup&#39;: {...},
+                 &#39;simulator&#39;: Value(dtype=&#39;string&#39;, id=None)},
+ &#39;sim_results&#39;: {&#39;claw_to_claw&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;claw_to_ground&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;cross_to_claw&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;cross_to_cross&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;cross_to_ground&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;ground_to_ground&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;units&#39;: Value(dtype=&#39;string&#39;, id=None)}}
+
+Dataset Description:
+
+
+Dataset Citation:
+
+
+Dataset Homepage:
+
+
+Dataset License:
+
+
+Dataset Size in Bytes:
+9700839
+================================================================================
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_dataset_info</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eigenmode&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+================================================================================
+Dataset Features:
+{&#39;contributor&#39;: {&#39;PI&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;date_created&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;group&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;institution&#39;: Value(dtype=&#39;string&#39;, id=None),
+                 &#39;uploader&#39;: Value(dtype=&#39;string&#39;, id=None)},
+ &#39;design&#39;: {&#39;coupler_type&#39;: Value(dtype=&#39;string&#39;, id=None),
+            &#39;design_options&#39;: {...},
+            &#39;design_tool&#39;: Value(dtype=&#39;string&#39;, id=None),
+            &#39;resonator_type&#39;: Value(dtype=&#39;string&#39;, id=None)},
+ &#39;notes&#39;: {},
+ &#39;sim_options&#39;: {&#39;setup&#39;: {...}, &#39;simulator&#39;: Value(dtype=&#39;string&#39;, id=None)},
+ &#39;sim_results&#39;: {&#39;cavity_frequency&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;kappa&#39;: Value(dtype=&#39;float64&#39;, id=None),
+                 &#39;units&#39;: Value(dtype=&#39;string&#39;, id=None)}}
+
+Dataset Description:
+
+
+Dataset Citation:
+
+
+Dataset Homepage:
+
+
+Dataset License:
+
+
+Dataset Size in Bytes:
+891279
+================================================================================
+</pre></div></div>
+</div>
+<p>You can get the entire dataset as a Pandas DataFrame by using the <code class="docutils literal notranslate"><span class="pre">get_dataset</span></code> method.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">see_dataset</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>claw_to_claw</th>
+      <th>claw_to_ground</th>
+      <th>cross_to_claw</th>
+      <th>cross_to_cross</th>
+      <th>cross_to_ground</th>
+      <th>ground_to_ground</th>
+      <th>units</th>
+      <th>PI</th>
+      <th>date_created</th>
+      <th>group</th>
+      <th>institution</th>
+      <th>uploader</th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
+      <th>design_options</th>
+      <th>design_tool</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>94.97421</td>
+      <td>90.86585</td>
+      <td>3.73363</td>
+      <td>158.40783</td>
+      <td>158.40783</td>
+      <td>311.25590</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>82.44280</td>
+      <td>79.19378</td>
+      <td>2.93820</td>
+      <td>188.15089</td>
+      <td>188.15089</td>
+      <td>333.52997</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-10-25-153123</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>83.76412</td>
+      <td>80.18130</td>
+      <td>3.16131</td>
+      <td>104.35340</td>
+      <td>104.35340</td>
+      <td>237.02548</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>103.37057</td>
+      <td>97.22405</td>
+      <td>5.77590</td>
+      <td>174.13928</td>
+      <td>174.13928</td>
+      <td>335.31609</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-10-25-153126</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>68.92854</td>
+      <td>65.68607</td>
+      <td>2.87375</td>
+      <td>120.03923</td>
+      <td>120.03923</td>
+      <td>240.34085</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>1929</th>
+      <td>106.43025</td>
+      <td>101.53197</td>
+      <td>4.45645</td>
+      <td>174.46380</td>
+      <td>174.46380</td>
+      <td>340.62919</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>1930</th>
+      <td>121.10943</td>
+      <td>112.62570</td>
+      <td>7.95178</td>
+      <td>187.43537</td>
+      <td>187.43537</td>
+      <td>367.34003</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142549</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>1931</th>
+      <td>144.56289</td>
+      <td>136.36810</td>
+      <td>7.65968</td>
+      <td>172.14561</td>
+      <td>172.14561</td>
+      <td>372.39970</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-10-25-153123</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>1932</th>
+      <td>68.76413</td>
+      <td>65.78116</td>
+      <td>2.48795</td>
+      <td>56.75230</td>
+      <td>56.75230</td>
+      <td>166.57383</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>1933</th>
+      <td>58.45749</td>
+      <td>55.50796</td>
+      <td>2.54396</td>
+      <td>62.01000</td>
+      <td>62.01000</td>
+      <td>162.42140</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142549</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+  </tbody>
+</table>
+<p>1934 rows × 17 columns</p>
+</div></div>
+</div>
+<p>If you want to learn about the who contributed the data, you can use the following methods:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_contributors_of</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+╒════════════╤════════════════════════╤═════════╤═══════════════╕
+│ uploader   │ PI                     │ group   │ institution   │
+╞════════════╪════════════════════════╪═════════╪═══════════════╡
+│ Andre Kuo  │ Eli Levenson-Falk, PhD │ LFL     │ USC           │
+╘════════════╧════════════════════════╧═════════╧═══════════════╛
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_all_contributors</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+╒════════════╤════════════════════════╤═════════╤═══════════════╤════════════════════════════════════╕
+│ uploader   │ PI                     │ group   │ institution   │ config                             │
+╞════════════╪════════════════════════╪═════════╪═══════════════╪════════════════════════════════════╡
+│ Andre Kuo  │ Eli Levenson-Falk, PhD │ LFL     │ USC           │ qubit-TransmonCross-cap_matrix     │
+├────────────┼────────────────────────┼─────────┼───────────────┼────────────────────────────────────┤
+│ Andre Kuo  │ Eli Levenson-Falk, PhD │ LFL     │ USC           │ cavity_claw-RouteMeander-eigenmode │
+├────────────┼────────────────────────┼─────────┼───────────────┼────────────────────────────────────┤
+│ Andre Kuo  │ Eli Levenson-Falk, PhD │ LFL     │ USC           │ coupler-NCap-cap_matrix            │
+╘════════════╧════════════════════════╧═════════╧═══════════════╧════════════════════════════════════╛
+</pre></div></div>
+</div>
+<p>As the SQuADDS_DB dataset updates, so will all the information we have queried automatically.</p>
+</section>
+<section id="Making-Systems-out-of-Circuit-QED-Elements">
+<h2>Making Systems out of Circuit QED Elements<a class="headerlink" href="#Making-Systems-out-of-Circuit-QED-Elements" title="Link to this heading">#</a></h2>
+<p>One of the main use cases of the SQuADDS project is to get the design space parameters for systems of our interest using our desired Hamiltonian parameters.</p>
+<p>Using the SQuADDS API, we can “build” a system by choosing the circuit QED components we want to use.</p>
+<p>The following subsections walks you through some examples.</p>
+<section id="Querying-for-the-a-target-qubit-design">
+<h3>Querying for the a target qubit design<a class="headerlink" href="#Querying-for-the-a-target-qubit-design" title="Link to this heading">#</a></h3>
+<p>Let’s say you know the Hamiltonian parameters of a qubit you want to use. You can use the SQuADDS API to query for the closest design to your target qubit.</p>
+<p>We first need to select our sytem of interest.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now, we need to specify to SQuADDS what type of <code class="docutils literal notranslate"><span class="pre">qubit</span></code> our system is. We can do this by using the <code class="docutils literal notranslate"><span class="pre">select_qubit</span></code> method.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We now create the system dataframe so that we can query for the design parameters we are interested in.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>claw_to_claw</th>
+      <th>claw_to_ground</th>
+      <th>cross_to_claw</th>
+      <th>cross_to_cross</th>
+      <th>cross_to_ground</th>
+      <th>ground_to_ground</th>
+      <th>units</th>
+      <th>PI</th>
+      <th>date_created</th>
+      <th>group</th>
+      <th>institution</th>
+      <th>uploader</th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
+      <th>design_options</th>
+      <th>design_tool</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>94.97421</td>
+      <td>90.86585</td>
+      <td>3.73363</td>
+      <td>158.40783</td>
+      <td>158.40783</td>
+      <td>311.25590</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>82.44280</td>
+      <td>79.19378</td>
+      <td>2.93820</td>
+      <td>188.15089</td>
+      <td>188.15089</td>
+      <td>333.52997</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-10-25-153123</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>83.76412</td>
+      <td>80.18130</td>
+      <td>3.16131</td>
+      <td>104.35340</td>
+      <td>104.35340</td>
+      <td>237.02548</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>103.37057</td>
+      <td>97.22405</td>
+      <td>5.77590</td>
+      <td>174.13928</td>
+      <td>174.13928</td>
+      <td>335.31609</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-10-25-153126</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>68.92854</td>
+      <td>65.68607</td>
+      <td>2.87375</td>
+      <td>120.03923</td>
+      <td>120.03923</td>
+      <td>240.34085</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>1929</th>
+      <td>106.43025</td>
+      <td>101.53197</td>
+      <td>4.45645</td>
+      <td>174.46380</td>
+      <td>174.46380</td>
+      <td>340.62919</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>1930</th>
+      <td>121.10943</td>
+      <td>112.62570</td>
+      <td>7.95178</td>
+      <td>187.43537</td>
+      <td>187.43537</td>
+      <td>367.34003</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142549</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>1931</th>
+      <td>144.56289</td>
+      <td>136.36810</td>
+      <td>7.65968</td>
+      <td>172.14561</td>
+      <td>172.14561</td>
+      <td>372.39970</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-10-25-153123</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>1932</th>
+      <td>68.76413</td>
+      <td>65.78116</td>
+      <td>2.48795</td>
+      <td>56.75230</td>
+      <td>56.75230</td>
+      <td>166.57383</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+    <tr>
+      <th>1933</th>
+      <td>58.45749</td>
+      <td>55.50796</td>
+      <td>2.54396</td>
+      <td>62.01000</td>
+      <td>62.01000</td>
+      <td>162.42140</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142549</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+    </tr>
+  </tbody>
+</table>
+<p>1934 rows × 17 columns</p>
+</div></div>
+</div>
+<p>Now that we have created our system dataframe, we can query for the closest design to our target qubit parameters. To do this we need to call the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds</span> <span class="kn">import</span> <span class="n">Analyzer</span>
+</pre></div>
+</div>
+</div>
+<p>We instatantaite the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object by passing in the <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> instance we created earlier.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We can now check for what type of Hamiltonian parameters are available for our chosen system</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">target_param_keys</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qubit_frequency_GHz&#39;, &#39;anharmonicity_MHz&#39;]
+</pre></div></div>
+</div>
+<p>Now, Let’s select a geometry which results in the closest qubit characteristics</p>
+<p>Call <code class="docutils literal notranslate"><span class="pre">Analyzer.find_closest</span></code></p>
+<p><strong>Documentation:</strong></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Finds the rows in the DataFrame with the closest matching characteristics
+to the given target parameters using a specified metric.
+
+Args:
+    target_params (dict): A dictionary containing the target values for columns in `self.df`.
+                          Keys are column names and values are the target values.
+    num_top (int): The number of closest matching rows to return.
+    metric (str, optional): The distance metric to use for finding the closest matches.
+                            Available options are specified in `self.__supported_metrics__`.
+                            Defaults to &#39;Euclidean&#39;.
+    display (bool, optional): Whether to display warnings and logs. Defaults to True.
+
+Returns:
+    pd.DataFrame: A DataFrame containing the rows with the closest matching characteristics,
+                  sorted by the distance metric.
+
+Raises:
+    ValueError: If the specified metric is not supported or `num_top` exceeds the DataFrame size.
+</pre></div>
+</div>
+<p>You are given the choice of the following metrics.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">__supported_metrics__</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;Euclidean&#39;, &#39;Manhattan&#39;, &#39;Chebyshev&#39;, &#39;Weighted Euclidean&#39;, &#39;Custom&#39;]
+</pre></div></div>
+</div>
+<p>Define your Hamiltonian parameters that you want to use for your qubit</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">200</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
+                                       <span class="n">num_top</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                       <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span>
+                                       <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+FutureWarning: Passing a dict as an indexer is deprecated and will raise in a future version. Use a list instead.
+ /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 242
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>claw_to_claw</th>
+      <th>claw_to_ground</th>
+      <th>cross_to_claw</th>
+      <th>cross_to_cross</th>
+      <th>cross_to_ground</th>
+      <th>ground_to_ground</th>
+      <th>units</th>
+      <th>PI</th>
+      <th>date_created</th>
+      <th>group</th>
+      <th>...</th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
+      <th>design_options</th>
+      <th>design_tool</th>
+      <th>EC</th>
+      <th>EJ</th>
+      <th>EJEC</th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>643</th>
+      <td>106.91739</td>
+      <td>101.13161</td>
+      <td>5.25204</td>
+      <td>102.49025</td>
+      <td>102.49025</td>
+      <td>255.94708</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+      <td>0.179783</td>
+      <td>12.278081</td>
+      <td>68.293902</td>
+      <td>4.013772</td>
+      <td>-201.551532</td>
+    </tr>
+    <tr>
+      <th>1862</th>
+      <td>80.01554</td>
+      <td>76.72741</td>
+      <td>2.89095</td>
+      <td>104.64079</td>
+      <td>104.64079</td>
+      <td>233.88902</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+      <td>0.180135</td>
+      <td>12.278081</td>
+      <td>68.160442</td>
+      <td>4.017505</td>
+      <td>-201.973598</td>
+    </tr>
+    <tr>
+      <th>1714</th>
+      <td>76.27207</td>
+      <td>73.26136</td>
+      <td>2.62986</td>
+      <td>104.89818</td>
+      <td>104.89818</td>
+      <td>230.69451</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+      <td>0.180141</td>
+      <td>12.278081</td>
+      <td>68.158097</td>
+      <td>4.017570</td>
+      <td>-201.981031</td>
+    </tr>
+  </tbody>
+</table>
+<p>3 rows × 22 columns</p>
+</div></div>
+</div>
+<p>Thats it! You have now found some designs for your qubit that are closest to your target Hamiltonian parameters.</p>
+<section id="Using-Custom-Metrics">
+<h4>Using Custom Metrics<a class="headerlink" href="#Using-Custom-Metrics" title="Link to this heading">#</a></h4>
+<p>To use a custom metric first define the function. For example, lets say we want the manhattan metric</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">manhattan_distance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">simulated</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">-</span> <span class="n">simulated</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">target</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">custom_metric_func</span> <span class="o">=</span> <span class="n">manhattan_distance</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
+                                            <span class="n">num_top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                            <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Custom&quot;</span><span class="p">,</span>
+                                            <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+FutureWarning: Passing a dict as an indexer is deprecated and will raise in a future version. Use a list instead.
+ /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 242
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>claw_to_claw</th>
+      <th>claw_to_ground</th>
+      <th>cross_to_claw</th>
+      <th>cross_to_cross</th>
+      <th>cross_to_ground</th>
+      <th>ground_to_ground</th>
+      <th>units</th>
+      <th>PI</th>
+      <th>date_created</th>
+      <th>group</th>
+      <th>...</th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
+      <th>design_options</th>
+      <th>design_tool</th>
+      <th>EC</th>
+      <th>EJ</th>
+      <th>EJEC</th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>643</th>
+      <td>106.91739</td>
+      <td>101.13161</td>
+      <td>5.25204</td>
+      <td>102.49025</td>
+      <td>102.49025</td>
+      <td>255.94708</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
+      <td>0.179783</td>
+      <td>12.278081</td>
+      <td>68.293902</td>
+      <td>4.013772</td>
+      <td>-201.551532</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 22 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best_options</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
+<span class="n">best_options</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;aedt_hfss_capacitance&#39;: 0,
+ &#39;aedt_hfss_inductance&#39;: 9.686e-09,
+ &#39;aedt_q3d_capacitance&#39;: 0,
+ &#39;aedt_q3d_inductance&#39;: 1e-08,
+ &#39;chip&#39;: &#39;main&#39;,
+ &#39;connection_pads&#39;: {&#39;c&#39;: {&#39;claw_cpw_length&#39;: &#39;40um&#39;,
+   &#39;claw_cpw_width&#39;: &#39;10um&#39;,
+   &#39;claw_gap&#39;: &#39;5.1um&#39;,
+   &#39;claw_length&#39;: &#39;190um&#39;,
+   &#39;claw_width&#39;: &#39;15um&#39;,
+   &#39;connector_location&#39;: &#39;90&#39;,
+   &#39;connector_type&#39;: &#39;0&#39;,
+   &#39;ground_spacing&#39;: &#39;10um&#39;}},
+ &#39;cross_gap&#39;: &#39;30um&#39;,
+ &#39;cross_length&#39;: &#39;210um&#39;,
+ &#39;cross_width&#39;: &#39;30um&#39;,
+ &#39;gds_cell_name&#39;: &#39;my_other_junction&#39;,
+ &#39;hfss_capacitance&#39;: 0,
+ &#39;hfss_inductance&#39;: 9.686e-09,
+ &#39;hfss_mesh_kw_jj&#39;: 7e-06,
+ &#39;hfss_resistance&#39;: 0,
+ &#39;layer&#39;: &#39;1&#39;,
+ &#39;orientation&#39;: &#39;-90&#39;,
+ &#39;pos_x&#39;: &#39;-1500um&#39;,
+ &#39;pos_y&#39;: &#39;1200um&#39;,
+ &#39;q3d_capacitance&#39;: 0,
+ &#39;q3d_inductance&#39;: &#39;10nH&#39;,
+ &#39;q3d_mesh_kw_jj&#39;: 7e-06,
+ &#39;q3d_resistance&#39;: 0}
+</pre></div></div>
+</div>
+<p>You can pass in the <code class="docutils literal notranslate"><span class="pre">design_options</span></code> from the closest design to the <code class="docutils literal notranslate"><span class="pre">options</span></code> argument of your selected qubit and render it in qiskit metal.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Qiskit Metal imports</span>
+<span class="kn">import</span> <span class="nn">qiskit_metal</span> <span class="k">as</span> <span class="nn">metal</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal</span> <span class="kn">import</span> <span class="n">designs</span><span class="p">,</span> <span class="n">draw</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal</span> <span class="kn">import</span> <span class="n">MetalGUI</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.designs.design_multiplanar</span> <span class="kn">import</span> <span class="n">MultiPlanar</span>
+
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.qubits.transmon_cross</span> <span class="kn">import</span> <span class="n">TransmonCross</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span> <span class="kn">import</span> <span class="n">CoupledLineTee</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.meandered</span> <span class="kn">import</span> <span class="n">RouteMeander</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.core</span> <span class="kn">import</span> <span class="n">QRoute</span><span class="p">,</span> <span class="n">QRoutePoint</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design</span> <span class="o">=</span> <span class="n">MultiPlanar</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="p">{},</span>
+                     <span class="n">overwrite_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">gui</span> <span class="o">=</span> <span class="n">MetalGUI</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+04:02PM 25s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  WARNING: Layer-backing can not be explicitly controlled on 10.14 when built against the 10.14 SDK
+
+04:02PM 25s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fc253e84b30; contentView=&lt;QNSView: 0x7fc253e843f0; QCocoaWindow(0x7fc253e842d0, window=QWidgetWindow(0x7fc253e83e10, name=&#34;MainWindowPlotWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
+
+04:02PM 25s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fc2510ddd50; contentView=&lt;QNSView: 0x7fc2510dd610; QCocoaWindow(0x7fc2510dd4f0, window=QWidgetWindow(0x7fc2510dd000, name=&#34;ElementsWindowWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
+
+04:02PM 25s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fc253a95ec0; contentView=&lt;QNSView: 0x7fc253a95740; QCocoaWindow(0x7fc253a95620, window=QWidgetWindow(0x7fc253a94e40, name=&#34;MainWindowWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
+
+04:02PM 25s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fc253b9a130; contentView=&lt;QNSView: 0x7fc253b999f0; QCocoaWindow(0x7fc253b998d0, window=QWidgetWindow(0x7fc253b99410, name=&#34;NetListWindowWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.qubits.transmon_cross</span> <span class="kn">import</span> <span class="n">TransmonCross</span>
+
+<span class="n">TransmonCross</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;transmon&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">best_options</span><span class="p">)</span>
+
+<span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">zoom_on_components</span><span class="p">([</span><span class="s1">&#39;transmon&#39;</span><span class="p">])</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s2">&quot;qubit_only.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
+ /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
+WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
+ /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../../../../../../../_images/_build_html__build_html_.doctrees_nbsphinx_source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_57_1.png" class="no-scaled-link" src="../../../../../../../../_images/_build_html__build_html_.doctrees_nbsphinx_source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_57_1.png" style="width: 500px;" />
+</div>
+</div>
+</section>
+</section>
+<section id="Querying-for-a-target-cavity-design">
+<h3>Querying for a target cavity design<a class="headerlink" href="#Querying-for-a-target-cavity-design" title="Link to this heading">#</a></h3>
+<p>The same workflow can be used to query for a target cavity design.</p>
+<p>While it is not necessary, it may be a good idea to <code class="docutils literal notranslate"><span class="pre">unselect_all()</span></code> before creating a new system.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">unselect_all</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Proceed with selecting the system of interest</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_coupler</span><span class="p">(</span><span class="s2">&quot;CLT&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>It’s always a good idea to check that the system you have selected is correct.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">show_selections</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Selected component:  cavity_claw
+Selected component name:  RouteMeander
+Selected data type:  eigenmode
+Selected system:  cavity_claw
+Selected coupler:  CLT
+</pre></div></div>
+</div>
+<p>Great! lets create the system dataframe and analyze it.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">target_param_keys</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;resonator_type&#39;, &#39;cavity_frequency_GHz&#39;, &#39;kappa_kHz&#39;]
+</pre></div></div>
+</div>
+<p>Select the Hamiltonian parameters you want to use for your cavity and search for the closest designs.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">6.9</span><span class="p">,</span>
+                <span class="s2">&quot;kappa_kHz&quot;</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span>
+                <span class="s2">&quot;resonator_type&quot;</span><span class="p">:</span><span class="s2">&quot;quarter&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
+                                       <span class="n">num_top</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                                       <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span>
+                                       <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:py.warnings:FutureWarning: Passing a dict as an indexer is deprecated and will raise in a future version. Use a list instead.
+ /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 242
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cavity_frequency_GHz</th>
+      <th>kappa_kHz</th>
+      <th>units</th>
+      <th>PI</th>
+      <th>date_created</th>
+      <th>group</th>
+      <th>institution</th>
+      <th>uploader</th>
+      <th>setup</th>
+      <th>simulator</th>
+      <th>coupler_type</th>
+      <th>design_options</th>
+      <th>design_tool</th>
+      <th>resonator_type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>190</th>
+      <td>6.371017</td>
+      <td>121.824395</td>
+      <td>Hz</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-11-30-214122</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+    </tr>
+    <tr>
+      <th>123</th>
+      <td>6.339319</td>
+      <td>121.639168</td>
+      <td>Hz</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-11-30-214122</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+    </tr>
+    <tr>
+      <th>94</th>
+      <td>6.664178</td>
+      <td>129.189282</td>
+      <td>Hz</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-11-30-214122</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+    </tr>
+    <tr>
+      <th>64</th>
+      <td>6.316474</td>
+      <td>122.186081</td>
+      <td>Hz</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-11-30-214122</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+    </tr>
+    <tr>
+      <th>172</th>
+      <td>6.288789</td>
+      <td>121.032113</td>
+      <td>Hz</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-11-30-214122</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Lets say we want to use the “Weighted Euclidean” metric to find the closest design to our target cavity parameters.</p>
+<section id="WeightedEuclidean-Metric">
+<h4>WeightedEuclidean Metric<a class="headerlink" href="#WeightedEuclidean-Metric" title="Link to this heading">#</a></h4>
+<p>You can do a weighted Euclidean metric instead.</p>
+<dl class="simple">
+<dt>:nbsphinx-math:<a href="#id1"><span class="problematic" id="id2">`</span></a>begin{equation*}</dt><dd><p>F({P_i},{p_i}) = sum_i w_ifrac{(P_i - p_i)^2}{P_i^2}</p>
+</dd>
+</dl>
+<p>end{equation*}`</p>
+<p>Here <span class="math">\(w_i\)</span> are weights which default to 1 if not user-defined.</p>
+<p>Note: The default metric for <code class="docutils literal notranslate"><span class="pre">find_closest</span></code> is <code class="docutils literal notranslate"><span class="pre">Euclidean</span></code> when not user-defined.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up the weights</span>
+<span class="n">analyzer</span><span class="o">.</span><span class="n">metric_weights</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cavity_frequency&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;kappa&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
+                                       <span class="n">num_top</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                       <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Weighted Euclidean&quot;</span><span class="p">,</span>
+                                       <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:py.warnings:FutureWarning: Passing a dict as an indexer is deprecated and will raise in a future version. Use a list instead.
+ /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 242
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cavity_frequency_GHz</th>
+      <th>kappa_kHz</th>
+      <th>units</th>
+      <th>PI</th>
+      <th>date_created</th>
+      <th>group</th>
+      <th>institution</th>
+      <th>uploader</th>
+      <th>setup</th>
+      <th>simulator</th>
+      <th>coupler_type</th>
+      <th>design_options</th>
+      <th>design_tool</th>
+      <th>resonator_type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>190</th>
+      <td>6.371017</td>
+      <td>121.824395</td>
+      <td>Hz</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-11-30-214122</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+    </tr>
+    <tr>
+      <th>123</th>
+      <td>6.339319</td>
+      <td>121.639168</td>
+      <td>Hz</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-11-30-214122</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+    </tr>
+    <tr>
+      <th>94</th>
+      <td>6.664178</td>
+      <td>129.189282</td>
+      <td>Hz</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-11-30-214122</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+</section>
+<section id="Querying-for-a-target-qubit-cavity-design">
+<h3>Querying for a target qubit-cavity design<a class="headerlink" href="#Querying-for-a-target-qubit-cavity-design" title="Link to this heading">#</a></h3>
+<p>Again, we follow the same procedure as before.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_coupler</span><span class="p">(</span><span class="s2">&quot;CLT&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">show_selections</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Selected qubit:  TransmonCross
+Selected cavity:  RouteMeander
+Selected coupler:  CLT
+Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">merged_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">merged_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>claw_to_claw</th>
+      <th>claw_to_ground</th>
+      <th>cross_to_claw</th>
+      <th>cross_to_cross</th>
+      <th>cross_to_ground</th>
+      <th>ground_to_ground</th>
+      <th>units_qubit</th>
+      <th>PI_qubit</th>
+      <th>date_created_qubit</th>
+      <th>group_qubit</th>
+      <th>...</th>
+      <th>group_cavity_claw</th>
+      <th>institution_cavity_claw</th>
+      <th>uploader_cavity_claw</th>
+      <th>setup_cavity_claw</th>
+      <th>simulator_cavity_claw</th>
+      <th>coupler_type</th>
+      <th>design_options_cavity_claw</th>
+      <th>design_tool_cavity_claw</th>
+      <th>resonator_type</th>
+      <th>design_options</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>94.97421</td>
+      <td>90.86585</td>
+      <td>3.73363</td>
+      <td>158.40783</td>
+      <td>158.40783</td>
+      <td>311.25590</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>94.97421</td>
+      <td>90.86585</td>
+      <td>3.73363</td>
+      <td>158.40783</td>
+      <td>158.40783</td>
+      <td>311.25590</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>94.97421</td>
+      <td>90.86585</td>
+      <td>3.73363</td>
+      <td>158.40783</td>
+      <td>158.40783</td>
+      <td>311.25590</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>94.97421</td>
+      <td>90.86585</td>
+      <td>3.73363</td>
+      <td>158.40783</td>
+      <td>158.40783</td>
+      <td>311.25590</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>94.97421</td>
+      <td>90.86585</td>
+      <td>3.73363</td>
+      <td>158.40783</td>
+      <td>158.40783</td>
+      <td>311.25590</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>11599</th>
+      <td>183.80802</td>
+      <td>168.04023</td>
+      <td>15.11184</td>
+      <td>214.45993</td>
+      <td>214.45993</td>
+      <td>454.60312</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+    <tr>
+      <th>11600</th>
+      <td>183.80802</td>
+      <td>168.04023</td>
+      <td>15.11184</td>
+      <td>214.45993</td>
+      <td>214.45993</td>
+      <td>454.60312</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+    <tr>
+      <th>11601</th>
+      <td>183.80802</td>
+      <td>168.04023</td>
+      <td>15.11184</td>
+      <td>214.45993</td>
+      <td>214.45993</td>
+      <td>454.60312</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+    <tr>
+      <th>11602</th>
+      <td>183.80802</td>
+      <td>168.04023</td>
+      <td>15.11184</td>
+      <td>214.45993</td>
+      <td>214.45993</td>
+      <td>454.60312</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+    <tr>
+      <th>11603</th>
+      <td>183.80802</td>
+      <td>168.04023</td>
+      <td>15.11184</td>
+      <td>214.45993</td>
+      <td>214.45993</td>
+      <td>454.60312</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+  </tbody>
+</table>
+<p>11604 rows × 32 columns</p>
+</div></div>
+</div>
+<p>Pass the <code class="docutils literal notranslate"><span class="pre">SQADDS_DB</span></code> instance to the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Always good to check whether the system you have selected is correct.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">selected_system</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qubit&#39;, &#39;cavity_claw&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qubit&#39;, &#39;cavity_claw&#39;]
+</pre></div></div>
+</div>
+<p>Define the <code class="docutils literal notranslate"><span class="pre">target_params</span></code> for your qubit-cavity system.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">6.2</span><span class="p">,</span>
+                <span class="s2">&quot;kappa_kHz&quot;</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span>
+                <span class="s2">&quot;resonator_type&quot;</span><span class="p">:</span><span class="s2">&quot;quarter&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">200</span><span class="p">,</span>
+                <span class="s2">&quot;g_MHz&quot;</span><span class="p">:</span> <span class="mi">70</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
+                                       <span class="n">num_top</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                       <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span>
+                                       <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:py.warnings:FutureWarning: Passing a dict as an indexer is deprecated and will raise in a future version. Use a list instead.
+ /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 242
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>claw_to_claw</th>
+      <th>claw_to_ground</th>
+      <th>cross_to_claw</th>
+      <th>cross_to_cross</th>
+      <th>cross_to_ground</th>
+      <th>ground_to_ground</th>
+      <th>units_qubit</th>
+      <th>PI_qubit</th>
+      <th>date_created_qubit</th>
+      <th>group_qubit</th>
+      <th>...</th>
+      <th>design_options_cavity_claw</th>
+      <th>design_tool_cavity_claw</th>
+      <th>resonator_type</th>
+      <th>design_options</th>
+      <th>EC</th>
+      <th>EJ</th>
+      <th>EJEC</th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>g_MHz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>9376</th>
+      <td>113.99245</td>
+      <td>107.65111</td>
+      <td>5.75841</td>
+      <td>112.70740</td>
+      <td>112.70740</td>
+      <td>274.49373</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+      <td>0.163509</td>
+      <td>12.278081</td>
+      <td>75.091150</td>
+      <td>3.836546</td>
+      <td>-182.146843</td>
+      <td>68.095121</td>
+    </tr>
+    <tr>
+      <th>1868</th>
+      <td>105.76081</td>
+      <td>99.80185</td>
+      <td>5.38260</td>
+      <td>100.41444</td>
+      <td>100.41444</td>
+      <td>251.82560</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-10-25-153123</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+      <td>0.183089</td>
+      <td>12.278081</td>
+      <td>67.060879</td>
+      <td>4.048670</td>
+      <td>-205.518797</td>
+      <td>70.226899</td>
+    </tr>
+    <tr>
+      <th>6526</th>
+      <td>109.80541</td>
+      <td>103.57639</td>
+      <td>5.68548</td>
+      <td>105.83609</td>
+      <td>105.83609</td>
+      <td>261.84982</td>
+      <td>nH</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-10-25-153123</td>
+      <td>LFL</td>
+      <td>...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+      <td>0.173690</td>
+      <td>12.278081</td>
+      <td>70.689450</td>
+      <td>3.948506</td>
+      <td>-194.262295</td>
+      <td>70.978895</td>
+    </tr>
+  </tbody>
+</table>
+<p>3 rows × 38 columns</p>
+</div></div>
+</div>
+<p>Awesome! we have some designs for our qubit-cavity system. To see where the closest design lies in the Hamiltonian parameter space, we can use the <code class="docutils literal notranslate"><span class="pre">closest_design_in_H_space</span></code> method.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">closest_design_in_H_space</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../../../../../../../_images/_build_html__build_html_.doctrees_nbsphinx_source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_93_0.svg" src="../../../../../../../../_images/_build_html__build_html_.doctrees_nbsphinx_source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_93_0.svg" /></div>
+</div>
+<section id="Interpolation-of-Best-Designs">
+<h4>Interpolation of Best Designs<a class="headerlink" href="#Interpolation-of-Best-Designs" title="Link to this heading">#</a></h4>
+<p>Even though the <code class="docutils literal notranslate"><span class="pre">closest_design</span></code> will become better as more validated pre-simulated points are added to the database, it is still a good idea to interpolate to get the best designs.</p>
+<p>We use the physics inspired interpolation algorithm described in our <a class="reference external" href="https://arxiv.org/pdf/2312.13483.pdf">paper</a> - <code class="docutils literal notranslate"><span class="pre">ScalingInterpolator</span></code> class to interpolate the best designs.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.interpolations.physics</span> <span class="kn">import</span> <span class="n">ScalingInterpolator</span>
+</pre></div>
+</div>
+</div>
+<p>We pass the <code class="docutils literal notranslate"><span class="pre">Analzyer</span></code> object and the <code class="docutils literal notranslate"><span class="pre">target_params</span></code> dict to the <code class="docutils literal notranslate"><span class="pre">ScalingInterpolator</span></code> class.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create an instance of ScalingInterpolator</span>
+<span class="n">interpolator</span> <span class="o">=</span> <span class="n">ScalingInterpolator</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">target_params</span><span class="p">)</span>
+
+<span class="n">design_df</span> <span class="o">=</span> <span class="n">interpolator</span><span class="o">.</span><span class="n">get_design</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:py.warnings:FutureWarning: Passing a dict as an indexer is deprecated and will raise in a future version. Use a list instead.
+ /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 242
+WARNING:py.warnings:FutureWarning: Passing a dict as an indexer is deprecated and will raise in a future version. Use a list instead.
+ /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 242
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+==================================================
+Kappa scaling: 0.9957270715288064
+g scaling: 1.0033220328956947
+alpha scaling: 1.0111571303804734
+==================================================
+</pre></div></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">design_df</span></code> contains the various <code class="docutils literal notranslate"><span class="pre">design_options</span></code> for the best designs and also the <code class="docutils literal notranslate"><span class="pre">sim_options</span></code> needed to simulate them.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>design_options_qubit</th>
+      <th>design_options_cavity_claw</th>
+      <th>sim_options_qubit</th>
+      <th>sim_options_cavity_claw</th>
+      <th>design_options</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>{'cavity_claw_options': {'coupling_type': 'CLT...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-intense-fg ansi-bold">The Kernel crashed while executing code in the the current cell or a previous cell. Please review the code in the cell(s) to identify a possible cause of the failure. Click &lt;a href=&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;&gt;here&lt;/a&gt; for more info. View Jupyter &lt;a href=&#39;command:jupyter.viewOutput&#39;&gt;log&lt;/a&gt; for further details.</span>
+</pre></div></div>
+</div>
+<p>Congrats for making it to the end of this tutorial! 🤗🎉 You have now learned how to use the SQuADDS API to query for closest and “best-guess” interpolated device designs for your chosen Hamiltonian parameters.</p>
+</section>
+</section>
+</section>
+<section id="Next-Steps...">
+<h2>Next Steps…<a class="headerlink" href="#Next-Steps..." title="Link to this heading">#</a></h2>
+<p>In the next <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/tutorials/Tutorial-2_Simulate_interpolated_designs.html">tutorial</a>, we will learn how to simulate the “best-guess” design using an EM solver tool and the <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> API.</p>
+</section>
+<section id="License">
+<h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
+<div class="license-section" style="width: 100%; padding: 10px 10px 10px 10px;"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2023.</p>
+</p><p><p>This code is licensed under the MIT License. You mayobtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#HuggingFace-🤗">HuggingFace 🤗</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Creating-an-Account">Creating an Account</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Login">Login</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Accessing-the-SQuADDS-Database-using-the-HuggingFace-API">Accessing the SQuADDS Database using the HuggingFace API</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Using-the-SQuADDS-API-to-access-and-anlyze-the-database">Using the SQuADDS API to access and anlyze the database</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Making-Systems-out-of-Circuit-QED-Elements">Making Systems out of Circuit QED Elements</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Querying-for-the-a-target-qubit-design">Querying for the a target qubit design</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Using-Custom-Metrics">Using Custom Metrics</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Querying-for-a-target-cavity-design">Querying for a target cavity design</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#WeightedEuclidean-Metric">WeightedEuclidean Metric</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Querying-for-a-target-qubit-cavity-design">Querying for a target qubit-cavity design</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Interpolation-of-Best-Designs">Interpolation of Best Designs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Next-Steps...">Next Steps…</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#License">License</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../../../../../../_sources/_build/html/_build/html/.doctrees/nbsphinx/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.ipynb.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../../../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../../../../../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

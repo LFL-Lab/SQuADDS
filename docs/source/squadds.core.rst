@@ -1,0 +1,61 @@
+squadds.core package
+====================
+
+Submodules
+----------
+
+squadds.core.analysis module
+----------------------------
+
+.. automodule:: squadds.core.analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+squadds.core.db module
+----------------------
+
+.. automodule:: squadds.core.db
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+squadds.core.design\_patterns module
+------------------------------------
+
+.. automodule:: squadds.core.design_patterns
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+squadds.core.globals module
+---------------------------
+
+.. automodule:: squadds.core.globals
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+squadds.core.metrics module
+---------------------------
+
+.. automodule:: squadds.core.metrics
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+squadds.core.utils module
+-------------------------
+
+.. automodule:: squadds.core.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: squadds.core
+   :members:
+   :undoc-members:
+   :show-inheritance:
