@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.2.32 (2024-02-02)
+--------------------------
+
+* **Alpha Version 0.2.32**
+
+- Bug fix in ansys_simulator code
+- Fixed hyperlinks
+
 Version 0.2.31 (2024-01-17)
 --------------------------
 
@@ -40,7 +48,7 @@ Version 0.2.1 (2024-01-10)
 
 - Bug fixes:
 
-  - change "c" to "readout" in both code and database entries
+  - change `"c"` to `"readout"` in both code and database entries
 
 - Handled Warnings from pyaedt
 

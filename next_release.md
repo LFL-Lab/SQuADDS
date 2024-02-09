@@ -4,9 +4,12 @@
 
 # Features to add:
 
+- [ ] handling fixed points/measured data on HuggingFace + SQuADDS
+- [ ] dockerize and test standard env deployment
+- [ ] fixing deletion of cache on windows
+- [ ] letting users add methods with computation and append to df for search
 - [ ] Contribution via HuggingFace Hub API
 - [ ] LLM based queries
-- [ ] Create automated tests for each version release workflow
 - [ ] Standardize the way we handle units for simulated results + impmelent necessary changes in backend
 - [ ] change backend calculators to be formula free (dependent on `scqubits` and `sqcircuits`) for analysis
 - [ ] Setting up of **Acceptance Server**
