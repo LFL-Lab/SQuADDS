@@ -5,7 +5,7 @@ SimulationConfig
 """
 
 from qiskit_metal.analyses.quantization import EPRanalysis, LOManalysis
-
+from datetime import datetime
 from .sweeper_helperfunctions import extract_QSweep_parameters
 from .utils import *
 
@@ -79,7 +79,6 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options):
 
     # elif device_dict["coupling_type"] == "NCap":
 
-
     device_dict_format = Dict(
         cavity_options = Dict(
             coupling_type = device_dict["coupler_type"],
@@ -93,7 +92,7 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options):
     )
 
     design = metal.designs.design_planar.DesignPlanar()
-    gui = metal.MetalGUI(design)
+    # gui = metal.MetalGUI(design)
     design.overwrite_enabled = True
     QC = create_qubitcavity(device_dict_format, design)
 
@@ -428,6 +427,31 @@ def run_sweep(design, sweep_opts, emode_options, lom_options, filename="default_
         filename = f"filename_{datetime.now().strftime('%d%m%Y_%H.%M.%S')}"
         save_simulation_data_to_json(cpw_claw_df, filename)
 
+def run_qubit_cavity_sweep(design, device_options, emode_setup=None, lom_setup=None, filename="default_sweep"):
+    """
+    Runs a parameter sweep for the specified design.
+    
+    Args:
+        design (Design): The design object.
+        sweep_opts (dict): The sweep options.
+        device_dict (dict): The device dictionary containing the design options and setup.
+        emode_setup (dict): The eigenmode setup options.
+        lom_setup (dict): The LOM setup options.
+        filename (str): The filename for the simulation results.
+        
+        Returns:"""
+    
+    simulated_params_list = [] 
+    for param in extract_QSweep_parameters(device_options):
+        # print(param)
+        # print(param['design_options_qubit'])
+        cpw_claw_qubit_df, _, _ = simulate_whole_device(design, param, emode_setup, lom_setup)
+        filename = f"filename_{datetime.now().strftime('%d%m%Y_%H.%M.%S')}"
+        simulated_params_list.append(cpw_claw_qubit_df)
+        save_simulation_data_to_json(cpw_claw_qubit_df, filename)
+
+    return simulated_params_list
+    
 def start_simulation(design, config):
     """
     Starts the simulation with the specified design and configuration.

@@ -1,3 +1,5 @@
+.. _dev_notes:
+
 Developer Notes
 ===============
 
@@ -33,3 +35,4 @@ Contributors
 | **Andre Kuo** (University of Southern California) - Code contributor 💻
 | **Clark Miyamoto** (New York University) - Code contributor 💻
 | **Madison Howard** (California Institute of Technology) - Bug Hunter 🐛
+| **Evangelos Vlachos** (University of Southern California) - Bug Hunter 🐛

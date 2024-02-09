@@ -74,7 +74,7 @@ class AnsysSimulator:
         }
 
         self.design = metal.designs.design_planar.DesignPlanar()
-        self.gui = metal.MetalGUI(self.design)
+        # self.gui = metal.MetalGUI(self.design)
         self.design.overwrite_enabled = True
         self._warnings()
 
@@ -128,6 +128,26 @@ class AnsysSimulator:
         else:
             run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="xmon_sweep")
 
+    def sweep_qubit_cavity(self,  device_dict, emode_setup=None, lom_setup=None):
+        """
+        Sweeps a single geometric parameter of the qubit and cavity system based on the provided sweep dictionary.
+        
+        Args:
+            device_dict (dict): A dictionary containing the device design options and setup.
+            emode_setup (dict): A dictionary containing the eigenmode setup options.
+            lom_setup (dict): A dictionary containing the LOM setup options.
+            
+        Returns:
+            results: The sweep results.
+        """
+
+        if emode_setup == None:
+            emode_setup=self.default_eigenmode_options
+        if lom_setup == None:
+            lom_setup=self.default_lom_options
+        
+        results = run_qubit_cavity_sweep(self.design, device_dict, emode_setup, lom_setup, filename="qubit_cavity_sweep")
+
     def simulate(self, device_dict):
         """
         Simulates the device based on the provided device dictionary.
@@ -150,7 +170,7 @@ class AnsysSimulator:
                 qubit_setup = device_dict["setup_qubit"],
                 cavity_setup = device_dict["setup_cavity_claw"]
             )
-            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(design=self.design, cross_dict=self.geom_dict.qubit_geoms, cavity_dict=self.geom_dict.cavity_geoms, LOM_options=self.setup_dict.qubit_setup, eigenmode_options=self.setup_dict.cavity_setup)
+            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(design=self.design, device_dict=device_dict, LOM_options=self.setup_dict.qubit_setup, eigenmode_options=self.setup_dict.cavity_setup)
 
         else: # have a non-qubit_cavity object
             self.geom_dict = device_dict["design_options"]

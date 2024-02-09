@@ -11,6 +11,7 @@ def extract_QSweep_parameters(parameters: dict) -> list[dict]:
     * list_of_combos (list of dicts) - same nested structure
         as your input. But you'll have each combination.
     '''
+    
     ext_parameters = extract_parameters(parameters)
     values = extract_values(parameters)
     combo = generate_combinations(values)
