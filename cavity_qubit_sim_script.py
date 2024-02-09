@@ -1,9 +1,7 @@
 from squadds.core.utils import set_huggingface_api_key
-
-set_huggingface_api_key()
-
-from datasets import get_dataset_config_names
-from datasets import load_dataset
+import sys
+sys.path.append(r'G:\Shared drives\CavityCooling\DARPA\Simulations\SQUADDS\SQuADDS')
+from datasets import get_dataset_config_names, load_dataset
 from squadds import SQuADDS_DB
 from squadds.interpolations.physics import ScalingInterpolator
 from squadds import Analyzer
@@ -11,6 +9,7 @@ from squadds import AnsysSimulator
 import numpy as np
 
 def main():
+    set_huggingface_api_key()
     db = SQuADDS_DB()
     configs = get_dataset_config_names("SQuADDS/SQuADDS_DB")
     db.select_system(['qubit','cavity_claw'])
