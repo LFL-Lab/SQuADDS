@@ -941,6 +941,33 @@ document.write(`
                           <span class="n">f_r</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;cavity_frequency_GHz&#39;</span><span class="p">],</span>
                           <span class="n">res_type</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;resonator_type&#39;</span><span class="p">],</span> 
                           <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TransmonCrossHamiltonian.chi">
+<a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.chi">[docs]</a>
+    <span class="k">def</span> <span class="nf">chi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">f_r</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the full cavity frequency shift between |0&gt; and |1&gt; states of a qubit using g, f_r, f_q, and alpha. It uses the result derived using 2nd-order pertubation theory (equation 9 in SquaDDs paper).</span>
+<span class="sd">        Args:</span>
+<span class="sd">            - EJ (float): Josephson energy of the transmon qubit.</span>
+<span class="sd">            - EC (float): Charging energy of the transmon qubit.</span>
+<span class="sd">            - g (float): The coupling strength between the qubit and the cavity.</span>
+<span class="sd">            - f_r (float): The resonant frequency of the cavity.</span>
+<span class="sd">            - f_q (float): The frequency spacing between the first two qubit levels.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            - chi (float): The full dispersive shift of the cavity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">omega_r</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f_r</span> <span class="o">*</span> <span class="mf">1e9</span>
+        <span class="n">transmon</span> <span class="o">=</span> <span class="n">Transmon</span><span class="p">(</span><span class="n">EJ</span><span class="o">=</span><span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="o">=</span><span class="n">EC</span><span class="p">,</span> <span class="n">ng</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncut</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">anharmonicity</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1E3</span>  <span class="c1"># MHz, linear or angular</span>
+        <span class="n">omega_q</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">E01</span><span class="p">()</span> <span class="c1"># is this in linear or angular frequency units</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">omega_r</span> <span class="o">-</span> <span class="n">omega_q</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">omega_r</span> <span class="o">+</span> <span class="n">omega_q</span>
+
+        <span class="n">chi</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">g</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">/</span><span class="p">(</span><span class="n">delta</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">))</span><span class="o">-</span> <span class="n">alpha</span><span class="o">/</span><span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">chi</span></div>
 </div>
 
 </pre></div>

@@ -579,6 +579,8 @@ document.write(`
 <span class="sd">========================================================================================================================</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
 <span class="kn">from</span> <span class="nn">qiskit_metal.analyses.quantization</span> <span class="kn">import</span> <span class="n">EPRanalysis</span><span class="p">,</span> <span class="n">LOManalysis</span>
 
 <span class="kn">from</span> <span class="nn">.sweeper_helperfunctions</span> <span class="kn">import</span> <span class="n">extract_QSweep_parameters</span>
@@ -632,7 +634,7 @@ document.write(`
 
 <div class="viewcode-block" id="simulate_whole_device">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.simulate_whole_device">[docs]</a>
-<span class="k">def</span> <span class="nf">simulate_whole_device</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">simulate_whole_device</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">,</span> <span class="n">open_gui</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulates the whole device by running eigenmode and LOM simulations.</span>
 
@@ -642,6 +644,7 @@ document.write(`
 <span class="sd">        cavity_dict (dict): Dictionary containing cavity options.</span>
 <span class="sd">        LOM_options (dict): Dictionary containing LOM setup options.</span>
 <span class="sd">        eigenmode_options (dict): Dictionary containing eigenmode setup options.</span>
+<span class="sd">        open_gui (bool, optional): If True, the Metal GUI is opened. Default is False.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        tuple: A tuple containing the simulation results, LOM analysis object, and eigenmode analysis object.</span>
@@ -673,7 +676,10 @@ document.write(`
     <span class="p">)</span>
 
     <span class="n">design</span> <span class="o">=</span> <span class="n">metal</span><span class="o">.</span><span class="n">designs</span><span class="o">.</span><span class="n">design_planar</span><span class="o">.</span><span class="n">DesignPlanar</span><span class="p">()</span>
-    <span class="n">gui</span> <span class="o">=</span> <span class="n">metal</span><span class="o">.</span><span class="n">MetalGUI</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">open_gui</span><span class="p">:</span>
+        <span class="n">gui</span> <span class="o">=</span> <span class="n">metal</span><span class="o">.</span><span class="n">MetalGUI</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
     <span class="n">design</span><span class="o">.</span><span class="n">overwrite_enabled</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">QC</span> <span class="o">=</span> <span class="n">create_qubitcavity</span><span class="p">(</span><span class="n">device_dict_format</span><span class="p">,</span> <span class="n">design</span><span class="p">)</span>
 
@@ -1025,6 +1031,34 @@ document.write(`
         <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;filename_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">%m%Y_%H.%M.%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">save_simulation_data_to_json</span><span class="p">(</span><span class="n">cpw_claw_df</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="run_qubit_cavity_sweep">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.run_qubit_cavity_sweep">[docs]</a>
+<span class="k">def</span> <span class="nf">run_qubit_cavity_sweep</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_options</span><span class="p">,</span> <span class="n">emode_setup</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lom_setup</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;default_sweep&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runs a parameter sweep for the specified design.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        design (Design): The design object.</span>
+<span class="sd">        sweep_opts (dict): The sweep options.</span>
+<span class="sd">        device_dict (dict): The device dictionary containing the design options and setup.</span>
+<span class="sd">        emode_setup (dict): The eigenmode setup options.</span>
+<span class="sd">        lom_setup (dict): The LOM setup options.</span>
+<span class="sd">        filename (str): The filename for the simulation results.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:&quot;&quot;&quot;</span>
+
+    <span class="n">simulated_params_list</span> <span class="o">=</span> <span class="p">[]</span> 
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">extract_QSweep_parameters</span><span class="p">(</span><span class="n">device_options</span><span class="p">):</span>
+        <span class="c1"># print(param)</span>
+        <span class="c1"># print(param[&#39;design_options_qubit&#39;])</span>
+        <span class="n">cpw_claw_qubit_df</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">simulate_whole_device</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">emode_setup</span><span class="p">,</span> <span class="n">lom_setup</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;filename_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">%m%Y_%H.%M.%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">simulated_params_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cpw_claw_qubit_df</span><span class="p">)</span>
+        <span class="n">save_simulation_data_to_json</span><span class="p">(</span><span class="n">cpw_claw_qubit_df</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">simulated_params_list</span></div>
 
 
 <div class="viewcode-block" id="start_simulation">

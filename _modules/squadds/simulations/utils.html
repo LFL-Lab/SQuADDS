@@ -762,12 +762,15 @@ document.write(`
 
     <span class="n">setMaterialProperties</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">)</span>
     <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">_analyze</span><span class="p">()</span>
-    <span class="c1"># epra.sim.plot_convergences()</span>
-    <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
-    <span class="c1"># epra.sim.plot_fields(&#39;main&#39;)</span>
-    <span class="c1"># epra.sim.save_screenshot()</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">epra</span><span class="o">.</span><span class="n">get_frequencies</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_convergences</span><span class="p">()</span>
+        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
+        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_fields</span><span class="p">(</span><span class="s1">&#39;main&#39;</span><span class="p">)</span>
+        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;couldn&#39;t generate plots.&quot;</span><span class="p">)</span>
 
+    <span class="n">f</span> <span class="o">=</span> <span class="n">epra</span><span class="o">.</span><span class="n">get_frequencies</span><span class="p">()</span>
     <span class="n">freq</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e9</span>
     <span class="n">Q</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">kappa</span> <span class="o">=</span> <span class="n">freq</span> <span class="o">/</span> <span class="n">Q</span>
