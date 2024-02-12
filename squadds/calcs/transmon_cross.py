@@ -326,3 +326,27 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
                           f_r=row['cavity_frequency_GHz'],
                           res_type=row['resonator_type'], 
                           Z0=50), axis=1)
+
+    def chi(self, EJ, EC, g, f_r):
+        """
+        Calculate the full cavity frequency shift between |0> and |1> states of a qubit using g, f_r, f_q, and alpha. It uses the result derived using 2nd-order pertubation theory (equation 9 in SquaDDs paper).
+        Args:
+            - EJ (float): Josephson energy of the transmon qubit.
+            - EC (float): Charging energy of the transmon qubit.
+            - g (float): The coupling strength between the qubit and the cavity.
+            - f_r (float): The resonant frequency of the cavity.
+            - f_q (float): The frequency spacing between the first two qubit levels.
+        
+        Returns:
+            - chi (float): The full dispersive shift of the cavity
+        """
+        omega_r = 2 * np.pi * f_r * 1e9
+        transmon = Transmon(EJ=EJ, EC=EC, ng=0, ncut=30)
+        alpha = transmon.anharmonicity() * 1E3  # MHz, linear or angular
+        omega_q = transmon.E01() # is this in linear or angular frequency units
+        delta = omega_r - omega_q
+        sigma = omega_r + omega_q
+
+        chi = 2 * g**2 * (alpha /(delta * (delta - alpha))- alpha/(sigma * (sigma + alpha)))
+
+        return chi

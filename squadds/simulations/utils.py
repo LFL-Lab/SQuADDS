@@ -164,12 +164,15 @@ def get_freq_Q_kappa(epra, test_hfss):
 
     setMaterialProperties(project_name, design_name, solutiontype="Eigenmode")
     epra.sim._analyze()
-    # epra.sim.plot_convergences()
-    epra.sim.save_screenshot()
-    # epra.sim.plot_fields('main')
-    # epra.sim.save_screenshot()
-    f = epra.get_frequencies()
+    try:
+        epra.sim.plot_convergences()
+        epra.sim.save_screenshot()
+        epra.sim.plot_fields('main')
+        epra.sim.save_screenshot()
+    except:
+        print("couldn't generate plots.")
 
+    f = epra.get_frequencies()
     freq = f.values[0][0] * 1e9
     Q = f.values[0][1]
     kappa = freq / Q
