@@ -107,6 +107,32 @@ def convert_to_numeric(value):
             return float(value)
     return value
 
+def convert_to_str(value:float, units: str):
+    """
+    Converts the given value to a string with the given units.
+
+    Args:
+        value (float): The value to be converted.
+        units (str): The units to be appended to the value.
+
+    Returns:
+        str: The value as a string with the units.
+    """
+    return f"{value} {units}"
+
+def convert_list_to_str(lst):
+    """
+    Converts the given list of floats to a string representation.
+
+    Args:
+        lst (list): The list of floats to be converted.
+
+    Returns:
+        str: The string representation of the list.
+    """
+    
+    return [convert_to_str(item) for item in lst]
+
 def get_entire_schema(obj):
     """
     Recursively traverses the given object and returns a schema representation.
