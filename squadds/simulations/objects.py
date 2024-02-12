@@ -443,8 +443,6 @@ def run_qubit_cavity_sweep(design, device_options, emode_setup=None, lom_setup=N
     
     simulated_params_list = [] 
     for param in extract_QSweep_parameters(device_options):
-        # print(param)
-        # print(param['design_options_qubit'])
         cpw_claw_qubit_df, _, _ = simulate_whole_device(design, param, emode_setup, lom_setup)
         filename = f"filename_{datetime.now().strftime('%d%m%Y_%H.%M.%S')}"
         simulated_params_list.append(cpw_claw_qubit_df)

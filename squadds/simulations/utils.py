@@ -448,3 +448,67 @@ def find_kappa(f_rough, C_tg, C_tb):
     w_est = np.sqrt(C_res/(C_res + C_tg + C_tb)) * w_rough
 
     return (1/2 * Z0 * (w_est**2) * (C_tb**2)/(C_res + C_tg + C_tb))*1e-15/(2*np.pi) * 1e-6
+
+def flatten_dict(dictionary, delimiter=','):
+    """
+    Function to flatten a nested dictionary structure
+    :param dictionary: A python dict()
+    :param delimiter:  The desired delimiter between 'keys'
+    :return: dict()
+    """
+
+    #
+    # Assign the actual dictionary to the one that will be manipulated
+    #
+    dictionary_ = dictionary
+
+    def unpack(parent_key, parent_value):
+        """
+        A function to unpack one level of nesting in a python dictionary
+        :param parent_key: The key in the parent dictionary being flattened
+        :param parent_value: The value of the parent key, value pair
+        :return: list(tuple(,))
+        """
+
+        #
+        # If the parent_value is a dict, unpack it
+        #
+        if isinstance(parent_value, dict):
+            return [
+                (parent_key + delimiter + key, value)
+                for key, value
+                in parent_value.items()
+            ]
+        #
+        # If the If the parent_value is a not dict leave it be
+        #
+        else:
+            return [
+                (parent_key, parent_value)
+            ]
+
+    #
+    # Keep unpacking the dictionary until all value's are not dictionary's
+    #
+    while True:
+        #
+        # Loop over the dictionary, unpacking one level. Then reduce the dimension one level
+        #
+        dictionary_ = dict(
+            ii
+            for i
+            in [unpack(key, value) for key, value in dictionary_.items()]
+            for ii
+            in i
+        )
+        #
+        # Break when there is no more unpacking to do
+        #
+        if all([
+            not isinstance(value, dict)
+            for value
+            in dictionary_.values()
+        ]):
+            break
+
+    return dictionary_
