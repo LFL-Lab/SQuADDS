@@ -8,6 +8,7 @@ from qiskit_metal.analyses.quantization import EPRanalysis, LOManalysis
 from datetime import datetime
 from .sweeper_helperfunctions import extract_QSweep_parameters
 from .utils import *
+from copy import copy
 
 
 class SimulationConfig:
@@ -66,22 +67,21 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options):
     Returns:
         tuple: A tuple containing the simulation results, LOM analysis object, and eigenmode analysis object.
     """
-
-    cross_dict = device_dict["design_options_qubit"]
-    cavity_dict = device_dict["design_options_cavity_claw"]
-
+    
     design.delete_all_components()
-    # print(device_dict)
-    if device_dict["coupler_type"] == "CLT":
-        emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options)
-        lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
-        data = get_sim_results(emode_df = emode_df, lom_df = lom_df)
+    
+    cavity_dict = device_dict["design_options_cavity_claw"]
+    
+    cross_dict = device_dict["design_options_qubit"]
+    emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options)
+    lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
+    data = get_sim_results(emode_df = emode_df, lom_df = lom_df)
 
     # elif device_dict["coupling_type"] == "NCap":
 
     device_dict_format = Dict(
         cavity_options = Dict(
-            coupling_type = device_dict["coupler_type"],
+            coupling_type = 'CLT',
             coupler_options = cavity_dict["cplr_opts"],
             cpw_options = Dict (
                 left_options = cavity_dict["cpw_opts"],
@@ -95,7 +95,7 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options):
     # gui = metal.MetalGUI(design)
     design.overwrite_enabled = True
     QC = create_qubitcavity(device_dict_format, design)
-
+    
     return_df = dict(
         sim_options = dict(
             setup = dict(
@@ -208,16 +208,16 @@ def run_eigenmode(design, geometry_dict, sim_options):
             }
             The EPRAnalysis object is returned for further analysis or post-processing.
     """
-    cpw_length = int("".join(filter(str.isdigit, geometry_dict["cpw_opts"]["total_length"])))
+
+    cpw_length = extract_number(geometry_dict["cpw_opts"]["total_length"])
     claw = create_claw(geometry_dict["claw_opts"], cpw_length, design)
     coupler = create_coupler(geometry_dict["cplr_opts"], design)
     cpw = create_cpw(geometry_dict["cpw_opts"], coupler, design)
     config = SimulationConfig(min_converged_passes=3)
-
     epra, hfss = start_simulation(design, config)
     hfss.clean_active_design()
     # setup = set_simulation_hyperparameters(epra, config)
-    epra.sim.setup = Dict(sim_options["setup"])
+    epra.sim.setup = Dict(sim_options)
     epra.sim.setup.name = "test_setup"
     epra.sim.renderer.options.max_mesh_length_port = '7um'
     setup = epra.sim.setup

@@ -250,9 +250,9 @@ def create_unified_design_options(row):
 
     device_dict = {
         "cavity_claw_options": {
-            "coupling_type": coupler_type,
+            "coupler_type": coupler_type,
             "coupler_options": cavity_dict.get("cplr_opts", {}),
-            "cpw_options": {
+            "cpw_opts": {
                 "left_options": cavity_dict.get("cpw_opts", {})
             }
         },
