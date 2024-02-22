@@ -361,6 +361,7 @@ class Analyzer:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
 
         # First subplot: kappa_kHz vs fres
+        # print(self.df)
         ax1.scatter(x=self.df['cavity_frequency_GHz'], y=self.df['kappa_kHz'], color=color_presim, marker=".", s=50, label="Pre-Simulated")
         ax1.scatter(x=self.target_params["cavity_frequency_GHz"], y=self.target_params["kappa_kHz"], color='red', s=100, marker='x', label='Target')
         closest_fres = self.closest_df_entry["cavity_frequency_GHz"]

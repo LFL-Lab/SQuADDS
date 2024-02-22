@@ -3,10 +3,9 @@
 This file contains utility functions for the simulation.
 ========================================================================================================================
 """
-import json
+import json,os,re
 from collections import OrderedDict
 from datetime import datetime
-
 import numpy as np
 import qiskit_metal as metal
 import scqubits as scq
@@ -26,7 +25,9 @@ from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
 from qiskit_metal.qlibrary.tlines.mixed_path import RouteMixed
 from qiskit_metal.qlibrary.tlines.straight_path import RouteStraight
 from qiskit_metal.toolbox_metal import math_and_overrides
-
+from matplotlib import pyplot as plt
+from pandas import DataFrame
+from prettytable import PrettyTable
 from squadds.components.claw_coupler import TransmonClaw
 from squadds.components.coupled_systems import QubitCavity
 
@@ -304,6 +305,33 @@ def create_cpw(opts, cplr, design):
     cpw = RouteMeander(design, 'cpw', options = opts)
     return cpw
 
+def make_table(title, data):
+    """
+    Create a table from a dictionary with a specified title.
+
+    Args:
+        title (str): The title of the table.
+        data (dict): The dictionary containing the data for the table.
+
+    Returns:
+        str: The formatted table as a string.
+    """
+    if title == 'qubit':
+        pars = ['cross_width','cross_length','cross_gap','claw_cpw_length','claw_cpw_width','claw_gap','claw_length','claw_width','ground_spacing']
+    elif title == 'cavity':
+        pars = ['total_length']
+    elif title == 'coupler':
+        pars = ['coupling_length','coupling_space']
+    elif title == 'purcell_filter':
+        pars = [ 'total_length','cap_gap_ground','finger_length','cap_width','cap_gap']
+    
+    table = PrettyTable()
+    table.title = title
+    table.field_names = ['param', 'value']
+    for key in pars:   
+        table.add_row([key,extract_value(dictionary=data,key=key)])
+    print(table)
+
 def save_simulation_data_to_json(data, filename):
     """
     Save simulation data to a JSON file.
@@ -462,30 +490,124 @@ def flatten_dict(dictionary, delimiter=','):
     #
     dictionary_ = dictionary
 
-    def unpack(parent_key, parent_value):
-        """
-        A function to unpack one level of nesting in a python dictionary
-        :param parent_key: The key in the parent dictionary being flattened
-        :param parent_value: The value of the parent key, value pair
-        :return: list(tuple(,))
-        """
+def find_chi(alpha, f_q, g, f_r):
+    """
+    Calculate the full cavity frequency shift between |0> and |1> states of a qubit using g, f_r, f_q, and alpha. It uses the result derived using 2nd-order pertubation theory (equation 9 in SquaDDs paper).
 
-        #
-        # If the parent_value is a dict, unpack it
-        #
-        if isinstance(parent_value, dict):
-            return [
-                (parent_key + delimiter + key, value)
-                for key, value
-                in parent_value.items()
-            ]
-        #
-        # If the If the parent_value is a not dict leave it be
-        #
-        else:
-            return [
-                (parent_key, parent_value)
-            ]
+    Args:
+        - alpha (float): Anharmonicity of the transmon qubit.
+        - f_q (float): Resonant frequency of the transmon qubit in linear units.
+        - g (float): The coupling strength between the qubit and the cavity.
+        - f_r (float): The resonant frequency of the cavity in linear units.
+    
+    Returns:
+        - (float): The full dispersive shift of the cavity
+    """
+    # print(f_q, f_r, g, alpha)
+    omega_q = 2 * np.pi * f_q * 1e9
+    omega_r = 2 * np.pi * f_r * 1e9
+    g *= 1e6 * 2 * np.pi
+    alpha *= 1e6 * 2 * np.pi
+    delta = omega_r - omega_q
+    sigma = omega_r + omega_q
+    
+    return 2 * g**2 * (alpha /(delta * (delta - alpha))- alpha/(sigma * (sigma + alpha))) * 1e-6
+
+def read_json_files(directory):
+    """
+    Read all JSON files from a specified directory.
+
+    Args:
+        directory (str): The directory path.
+
+    Returns:
+        list: A list of dictionaries, each containing the data from a JSON file.
+    """
+    json_files = [file for file in os.listdir(directory) if file.endswith('.json')]
+    data = []
+    for file in json_files:
+        file_path = os.path.join(directory, file)
+        with open(file_path, 'r') as json_file:
+            json_data = json.load(json_file)
+            data.append(json_data)
+    return data
+
+def extract_value(dictionary, key):
+    """
+    Extracts the value of a specified key from a given nested dictionary.
+
+    Args:
+        dictionary (dict): The nested dictionary.
+        key (str): The key to extract the value for.
+
+    Returns:
+        Any: The value of the specified key, or None if the key is not found.
+    """
+    # Check if the key is present in the dictionary
+    if key in dictionary:
+        return dictionary[key]
+    
+    # Iterate over the values in the dictionary
+    for value in dictionary.values():
+        # If the value is a dictionary, recursively call the function
+        if isinstance(value, dict):
+            result = extract_value(value, key)
+            # If the key is found in the nested dictionary, return the value
+            if result is not None:
+                return result
+    
+    # If the key is not found, return None
+    return None
+
+def convert_str_to_float(value):
+    """
+    COnvert value from str to float
+    
+    :param value: The value to convert
+    :return: The value as a float
+    """
+
+    return float(value[:-2])
+
+    import re
+
+def extract_number(string):
+    """
+    Remove non-digit characters from a string, except for decimal.
+
+    Args:
+        string (str): The input string.
+
+    Returns:
+        str: The string with non-digit characters removed, except for decimal.
+    """
+    return float(re.sub(r"[^\d.]", "", string))
+    
+
+def unpack(parent_key, parent_value, delimiter=','):
+    """
+    A function to unpack one level of nesting in a python dictionary
+    :param parent_key: The key in the parent dictionary being flattened
+    :param parent_value: The value of the parent key, value pair
+    :return: list(tuple(,))
+    """
+
+    #
+    # If the parent_value is a dict, unpack it
+    #
+    if isinstance(parent_value, dict):
+        return [
+            (parent_key + delimiter + key, value)
+            for key, value
+            in parent_value.items()
+        ]
+    #
+    # If the If the parent_value is a not dict leave it be
+    #
+    else:
+        return [
+            (parent_key, parent_value)
+        ]
 
     #
     # Keep unpacking the dictionary until all value's are not dictionary's
