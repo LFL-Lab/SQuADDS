@@ -1,5 +1,5 @@
 <center>
-  <img src="docs/_static/images/squadds_not_transparent.png" width="80%" alt="SQuADDS Logo" /> <!-- This will stretch the logo to the full container width -->
+  <img src="docs/_static/images/squadds_not_transparent.png" width="100%" alt="SQuADDS Logo" /> <!-- This will stretch the logo to the full container width -->
 </center>
 
 # ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow) Superconducting Qubit And Device Design and Simulation database
