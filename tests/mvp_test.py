@@ -1,10 +1,9 @@
 import matplotlib
 
-from squadds import Analyzer, SQuADDS_DB
-from squadds.interpolations.physics import ScalingInterpolator
-
 matplotlib.use('Agg')  # Set the backend to Agg
 
+from squadds import Analyzer, SQuADDS_DB
+from squadds.interpolations.physics import ScalingInterpolator
 
 try:
     db = SQuADDS_DB()
