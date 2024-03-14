@@ -246,3 +246,9 @@ class QubitCavity(QComponent):
         end_dict = self.coupler.get_pin('prime_end')
         self.add_pin('prime_start', start_dict['points'], start_dict['width'])
         self.add_pin('prime_end', end_dict['points'], end_dict['width'])
+
+    def show(self):
+        raise NotImplementedError("This method is not implemented in the base class.")
+
+    def to_gds(self, options):
+        raise NotImplementedError("This method is not implemented in the base class.")

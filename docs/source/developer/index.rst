@@ -35,4 +35,6 @@ Contributors
 | **Andre Kuo** (University of Southern California) - Code contributor 💻
 | **Clark Miyamoto** (New York University) - Code contributor 💻
 | **Madison Howard** (California Institute of Technology) - Bug Hunter 🐛
-| **Evangelos Vlachos** (University of Southern California) - Bug Hunter 🐛
+| **Evangelos Vlachos** (University of Southern California) - Code contributor 💻 and Bug Hunter 🐛
+| **Anne Whelan** (University of Southern California) - Documentation contributor 📄
+| **Jenny Huang** (University of Southern California) - Documentation contributor 📄

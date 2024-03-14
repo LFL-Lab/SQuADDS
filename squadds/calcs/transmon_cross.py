@@ -329,7 +329,7 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
 
     def chi(self, EJ, EC, g, f_r):
         """
-        Calculate the full cavity frequency shift between |0> and |1> states of a qubit using g, f_r, f_q, and alpha. It uses the result derived using 2nd-order pertubation theory (equation 9 in SquaDDs paper).
+        Calculate the full cavity frequency shift between |0> and |1> states of a qubit using g, f_r, f_q, and alpha. It uses the result derived using 2nd-order perturbation theory (equation 9 in SQuaDDS paper).
         Args:
             - EJ (float): Josephson energy of the transmon qubit.
             - EC (float): Charging energy of the transmon qubit.

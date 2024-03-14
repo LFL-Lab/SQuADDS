@@ -206,15 +206,6 @@ class QubitHamiltonian(ABC):
     @abstractmethod
     def chi(self):
         """
-        Calculate the full cavity frequency shift between |0> and |1> states of a qubit using g, f_r, f_q, and alpha. It uses the result derived using 2nd-order pertubation theory (equation 9 in SquaDDs paper).
-        Args:
-            - EJ (float): Josephson energy of the transmon qubit.
-            - EC (float): Charging energy of the transmon qubit.
-            - g (float): The coupling strength between the qubit and the cavity.
-            - f_r (float): The resonant frequency of the cavity.
-            - f_q (float): The frequency spacing between the first two qubit levels.
-        
-        Returns:
-            - chi (float): The full dispersive shift of the cavity
+        Calculate the chi parameter for the qubit.
         """
         pass

@@ -4,6 +4,8 @@
 
 # Features to add:
 
+- [ ] update simulator tutorial with Evangelos code (+ update tut 1 with chi feature from Evangelos)
+- [ ] refactor Simulator backend to be not spaghetti
 - [ ] handling fixed points/measured data on HuggingFace + SQuADDS
 - [ ] dockerize and test standard env deployment
 - [ ] fixing deletion of cache on windows

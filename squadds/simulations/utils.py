@@ -4,12 +4,17 @@ This file contains utility functions for the simulation.
 ========================================================================================================================
 """
 import json
+import os
+import re
 from collections import OrderedDict
 from datetime import datetime
 
 import numpy as np
 import qiskit_metal as metal
 import scqubits as scq
+from matplotlib import pyplot as plt
+from pandas import DataFrame
+from prettytable import PrettyTable
 from pyaedt import Hfss
 from qiskit_metal import Dict, MetalGUI, designs, draw
 from qiskit_metal.qlibrary.core import QComponent
@@ -171,7 +176,6 @@ def get_freq_Q_kappa(epra, test_hfss):
         epra.sim.save_screenshot()
     except:
         print("couldn't generate plots.")
-
     f = epra.get_frequencies()
     freq = f.values[0][0] * 1e9
     Q = f.values[0][1]
@@ -306,6 +310,33 @@ def create_cpw(opts, cplr, design):
                                 )})                                 # if not, sharp kinks occur in CPW :(
     cpw = RouteMeander(design, 'cpw', options = opts)
     return cpw
+
+def make_table(title, data):
+    """
+    Create a table from a dictionary with a specified title.
+
+    Args:
+        title (str): The title of the table.
+        data (dict): The dictionary containing the data for the table.
+
+    Returns:
+        str: The formatted table as a string.
+    """
+    if title == 'qubit':
+        pars = ['cross_width','cross_length','cross_gap','claw_cpw_length','claw_cpw_width','claw_gap','claw_length','claw_width','ground_spacing']
+    elif title == 'cavity':
+        pars = ['total_length']
+    elif title == 'coupler':
+        pars = ['coupling_length','coupling_space']
+    elif title == 'purcell_filter':
+        pars = [ 'total_length','cap_gap_ground','finger_length','cap_width','cap_gap']
+    
+    table = PrettyTable()
+    table.title = title
+    table.field_names = ['param', 'value']
+    for key in pars:   
+        table.add_row([key,extract_value(dictionary=data,key=key)])
+    print(table)
 
 def save_simulation_data_to_json(data, filename):
     """
@@ -451,3 +482,156 @@ def find_kappa(f_rough, C_tg, C_tb):
     w_est = np.sqrt(C_res/(C_res + C_tg + C_tb)) * w_rough
 
     return (1/2 * Z0 * (w_est**2) * (C_tb**2)/(C_res + C_tg + C_tb))*1e-15/(2*np.pi) * 1e-6
+
+
+def find_chi(alpha, f_q, g, f_r):
+    """
+    Calculate the full cavity frequency shift between |0> and |1> states of a qubit using g, f_r, f_q, and alpha. It uses the result derived using 2nd-order pertubation theory (equation 9 in SquaDDs paper).
+
+    Args:
+        - alpha (float): Anharmonicity of the transmon qubit.
+        - f_q (float): Resonant frequency of the transmon qubit in linear units.
+        - g (float): The coupling strength between the qubit and the cavity.
+        - f_r (float): The resonant frequency of the cavity in linear units.
+    
+    Returns:
+        - (float): The full dispersive shift of the cavity
+    """
+    # print(f_q, f_r, g, alpha)
+    omega_q = 2 * np.pi * f_q * 1e9
+    omega_r = 2 * np.pi * f_r * 1e9
+    g *= 1e6 * 2 * np.pi
+    alpha *= 1e6 * 2 * np.pi
+    delta = omega_r - omega_q
+    sigma = omega_r + omega_q
+    
+    return 2 * g**2 * (alpha /(delta * (delta - alpha))- alpha/(sigma * (sigma + alpha))) * 1e-6
+
+def read_json_files(directory):
+    """
+    Read all JSON files from a specified directory.
+
+    Args:
+        directory (str): The directory path.
+
+    Returns:
+        list: A list of dictionaries, each containing the data from a JSON file.
+    """
+    json_files = [file for file in os.listdir(directory) if file.endswith('.json')]
+    data = []
+    for file in json_files:
+        file_path = os.path.join(directory, file)
+        with open(file_path, 'r') as json_file:
+            json_data = json.load(json_file)
+            data.append(json_data)
+    return data
+
+def extract_value(dictionary, key):
+    """
+    Extracts the value of a specified key from a given nested dictionary.
+
+    Args:
+        dictionary (dict): The nested dictionary.
+        key (str): The key to extract the value for.
+
+    Returns:
+        Any: The value of the specified key, or None if the key is not found.
+    """
+    # Check if the key is present in the dictionary
+    if key in dictionary:
+        return dictionary[key]
+    
+    # Iterate over the values in the dictionary
+    for value in dictionary.values():
+        # If the value is a dictionary, recursively call the function
+        if isinstance(value, dict):
+            result = extract_value(value, key)
+            # If the key is found in the nested dictionary, return the value
+            if result is not None:
+                return result
+    
+    # If the key is not found, return None
+    return None
+
+def convert_str_to_float(value):
+    """
+    COnvert value from str to float
+    
+    :param value: The value to convert
+    :return: The value as a float
+    """
+
+    return float(value[:-2])
+
+    import re
+
+def extract_number(string):
+    """
+    Remove non-digit characters from a string, except for decimal.
+
+    Args:
+        string (str): The input string.
+
+    Returns:
+        str: The string with non-digit characters removed, except for decimal.
+    """
+    return float(re.sub(r"[^\d.]", "", string))
+    
+
+def unpack(parent_key, parent_value, delimiter=','):
+    """
+    A function to unpack one level of nesting in a python dictionary
+    :param parent_key: The key in the parent dictionary being flattened
+    :param parent_value: The value of the parent key, value pair
+    :return: list(tuple(,))
+    """
+
+    #
+    # If the parent_value is a dict, unpack it
+    #
+    if isinstance(parent_value, dict):
+        return [
+            (parent_key + delimiter + key, value)
+            for key, value
+            in parent_value.items()
+        ]
+    #
+    # If the If the parent_value is a not dict leave it be
+    #
+    else:
+        return [
+            (parent_key, parent_value)
+        ]
+
+def flatten_dict(dictionary_, delimiter=','):
+    """
+    A function to flatten a nested dictionary
+    :param dictionary_: The dictionary to be flattened
+    :return: dict
+    """
+
+    #
+    # Keep unpacking the dictionary until all value's are not dictionary's
+    #
+    while True:
+        #
+        # Loop over the dictionary, unpacking one level. Then reduce the dimension one level
+        #
+        dictionary_ = dict(
+            ii
+            for i
+            in [unpack(key, value, delimiter) for key, value in dictionary_.items()]
+            for ii
+            in i
+        )
+        #
+        # Break when there is no more unpacking to do
+        #
+        if all([
+            not isinstance(value, dict)
+            for value
+            in dictionary_.values()
+        ]):
+            break
+
+    return dictionary_

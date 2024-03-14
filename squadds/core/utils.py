@@ -22,6 +22,19 @@ def get_type(value):
 
 # Recursive function to validate types
 def validate_types(data_part, schema_part):
+    """
+    Recursively validates the types of data_part against the expected types defined in schema_part.
+
+    Args:
+        data_part (dict): The data to be validated.
+        schema_part (dict): The schema defining the expected types.
+
+    Raises:
+        TypeError: If the type of any key in data_part does not match the expected type in schema_part.
+
+    Returns:
+        None
+    """
     for key, expected_type in schema_part.items():
         if isinstance(expected_type, dict):
             validate_types(data_part[key], expected_type)
@@ -59,6 +72,21 @@ def get_config_schema(entry):
     return schema
 
 def get_schema(obj):
+    """
+    Returns the schema of the given object.
+
+    Args:
+        obj: The object for which the schema needs to be determined.
+
+    Returns:
+        The schema of the object. If the object is a dictionary, the schema will be a dictionary
+        with the same keys as the original dictionary, where the values represent the schema of
+        the corresponding values in the original dictionary. If the object is a list, the schema
+        will be either 'dict' if the list contains dictionaries, or the type name of the first
+        element in the list. For any other type of object, the schema will be the type name of
+        the object.
+
+    """
     if isinstance(obj, dict):
         return {k: 'dict' if isinstance(v, dict) else get_schema(v) for k, v in obj.items() if k != 'contributor'}
     elif isinstance(obj, list):
@@ -75,15 +103,25 @@ def is_float(value):
         return False
 
 def compare_schemas(data_schema, expected_schema, path=''):
+    """
+    Compare two schemas and raise an error if there are any mismatches.
 
+    Args:
+        data_schema (dict): The data schema to compare.
+        expected_schema (dict): The expected schema to compare against.
+        path (str, optional): The current path in the schema. Used for error messages. Defaults to ''.
+
+    Raises:
+        ValueError: If there is a key in the data schema that is not present in the expected schema.
+        ValueError: If there is a type mismatch between the data schema and the expected schema.
+
+    """
     for key, data_type in data_schema.items():
         # Check if the key exists in the expected schema
         if key not in expected_schema:
             raise ValueError(f"Unexpected key '{path}{key}' found in data schema.")
 
         expected_type = expected_schema[key]
-        # print(f"Comparing '{path}{key}'...")
-        # print(f"Expected: {expected_type}, Got: {get_type(data_type)}\n")
 
         # Compare types for nested dictionaries
         if isinstance(expected_type, dict):
@@ -100,12 +138,43 @@ def compare_schemas(data_schema, expected_schema, path=''):
                     raise ValueError(f"Type mismatch for '{path}{key}'. Expected: {expected_type}, Got: {get_type(data_type)}")
 
 def convert_to_numeric(value):
+    """
+    Converts a value to a numeric type if possible.
+
+    Args:
+        value: The value to be converted.
+
+    Returns:
+        The converted value if it can be converted to int or float, otherwise returns the original value.
+    """
     if isinstance(value, str):
         if value.isdigit():
             return int(value)
         elif is_float(value):
             return float(value)
     return value
+
+def convert_to_str(value:float, units: str):
+    """
+    Converts the given value to a string with the given units.
+    Args:
+        value (float): The value to be converted.
+        units (str): The units to be appended to the value.
+    Returns:
+        str: The value as a string with the units.
+    """
+    return f"{value} {units}"
+
+def convert_list_to_str(lst):
+    """
+    Converts the given list of floats to a string representation.
+    Args:
+        lst (list): The list of floats to be converted.
+    Returns:
+        str: The string representation of the list.
+    """
+
+    return [convert_to_str(item) for item in lst]
 
 def get_entire_schema(obj):
     """
@@ -224,9 +293,9 @@ def create_unified_design_options(row):
 
     device_dict = {
         "cavity_claw_options": {
-            "coupling_type": coupler_type,
+            "coupler_type": coupler_type,
             "coupler_options": cavity_dict.get("cplr_opts", {}),
-            "cpw_options": {
+            "cpw_opts": {
                 "left_options": cavity_dict.get("cpw_opts", {})
             }
         },
