@@ -1,5 +1,10 @@
+import matplotlib
+
 from squadds import Analyzer, SQuADDS_DB
 from squadds.interpolations.physics import ScalingInterpolator
+
+matplotlib.use('Agg')  # Set the backend to Agg
+
 
 try:
     db = SQuADDS_DB()
@@ -41,5 +46,7 @@ try:
 
     print(design_df)
 
+except Exception as e:
+    print(f"An error occurred: {str(e)}")
 except Exception as e:
     print(f"An error occurred: {str(e)}")
