@@ -59,6 +59,8 @@
     <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Release Notes" href="../release_notes.html" />
+    <link rel="prev" title="Simulation Lessons" href="simulations.html" />
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
 <script>
@@ -212,6 +214,13 @@
                     </li>
                 
 
+                    <li class="nav-item current active">
+                      <a class="nav-link dropdown-item nav-internal" href="#">
+                        Workflows
+                      </a>
+                    </li>
+                
+
                     <li class="nav-item">
                       <a class="nav-link dropdown-item nav-internal" href="../release_notes.html">
                         Release Logs
@@ -358,9 +367,7 @@ document.write(`
       
       
       
-        
-      
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -416,6 +423,13 @@ document.write(`
                     <li class="nav-item">
                       <a class="nav-link dropdown-item nav-internal" href="simulations.html">
                         Simulation Notes
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link dropdown-item nav-internal" href="#">
+                        Workflows
                       </a>
                     </li>
                 
@@ -522,6 +536,15 @@ document.write(`
     
   </div>
   
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
   </div>
@@ -575,7 +598,33 @@ document.write(`
 <h1>SQuADDS Workflows<a class="headerlink" href="#squadds-workflows" title="Link to this heading">#</a></h1>
 <section id="from-hamiltonian-to-gds-file-aps-march-meeting-talk">
 <h2>From Hamiltonian to GDS File: APS March Meeting Talk<a class="headerlink" href="#from-hamiltonian-to-gds-file-aps-march-meeting-talk" title="Link to this heading">#</a></h2>
+<p>This talk given by Sadman Ahmed Shanto at the <a class="reference external" href="https://meetings.aps.org/Meeting/MAR24/Session/A47.8">APS March Meeting 2024 - Session A47.8</a> introduces the SQuADDS project and goes over an example workflow from Hamiltonian to GDS file.</p>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/0bBYAHgYPzc" title="SQuADDS" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></section>
+<section id="squadds-basics-by-anne-and-jenny">
+<h2>SQuADDS Basics by Anne and Jenny<a class="headerlink" href="#squadds-basics-by-anne-and-jenny" title="Link to this heading">#</a></h2>
+<p>The SQuADDS database provides information on datasets of different components and the data available regarding the components. You may query data for specific components using the name of the component and its data type, and the SQuADDS database returns various results of simulated designs of the component.</p>
+<p><strong>Creation of a System of Interest</strong></p>
+<p>The SQuADDS API provides a useful method to query the system for desired components, create your new system, and search for the closest designs to your desired Hamiltonian parameters.</p>
+<p><strong>Initial Creation of a System:</strong></p>
+<p>First, you must access the SQuADDS database by creating a database object.</p>
+<p><strong>Selection of Components:</strong></p>
+<p>You can select the system using the <code class="docutils literal notranslate"><span class="pre">select_system()</span></code> function, providing the desired components by their names.</p>
+<p>For a qubit and cavity claw configuration, you can call a single <code class="docutils literal notranslate"><span class="pre">select_system()</span></code> method, with the names <code class="docutils literal notranslate"><span class="pre">“qubit”</span></code> and <code class="docutils literal notranslate"><span class="pre">“cavity_claw”</span></code> as an array.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>You can select specific types of these components such as <code class="docutils literal notranslate"><span class="pre">select_qubit(“TransmonCross”)</span></code> and <code class="docutils literal notranslate"><span class="pre">elect_cavity_claw(“RouteMeander”)</span></code> with the name of the specific component as a parameter.</p>
+<p><strong>Merging Components Together to Create a System:</strong></p>
+<p>In order to check if the system is valid, you can use the <code class="docutils literal notranslate"><span class="pre">show_selections()</span></code> function, which returns the values that were selected from the SQuADDS database. To combine the components, you can call <code class="docutils literal notranslate"><span class="pre">create_system_df()</span></code>.</p>
+<p><strong>Querying for Designs:</strong></p>
+<p>You can pass the SQuADDS database object you have created from selecting the different components as a parameter of the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object and create a new analyzer object. The <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object contains a function, <code class="docutils literal notranslate"><span class="pre">.find_closest()</span></code>, that allows you to query for designs to your system, by inserting your target parameters. Target parameters are defined by the Hamiltonian parameters of the system which includes qubit frequency, cavity frequency, kappa, resonance type, anharmonicity and coupling strength.</p>
+<p>After calling the <code class="docutils literal notranslate"><span class="pre">.find_closest()</span></code> function on your analyzer object with your desired input parameters, the SQuADDS API will search for simulated designs for your desired system and Hamiltonian parameters.</p>
+<p>Another useful function from the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object is the <code class="docutils literal notranslate"><span class="pre">.closest_design_in_H_space()</span></code> method, which produces a graph visualization displaying where the closest design lies in the Hamiltonian parameter space in relation to the locations of all pre-simulated designs and the target design.</p>
+<p><strong>Interpolation of Designs:</strong></p>
+<p>The SQuADDS API includes an interpolation object called <code class="docutils literal notranslate"><span class="pre">ScalingInterpolator</span></code> to allow you to interpolate your designs. <code class="docutils literal notranslate"><span class="pre">ScalingInterpolator</span></code> uses a physics based interpolation algorithm using your target parameters and the analyzer to interpolate the most optimal design.</p>
+<p>You can create a <code class="docutils literal notranslate"><span class="pre">ScalingInterpolator</span></code> object by passing in your target parameters and your analyzer object. To interpolate the designs, you can call the function <code class="docutils literal notranslate"><span class="pre">.get_design()</span></code> to produce.</p>
+</section>
 </section>
 
 
@@ -588,6 +637,24 @@ document.write(`
                 <footer class="prev-next-footer">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="simulations.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Simulation Lessons</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../release_notes.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Release Notes</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
                 </footer>
               
@@ -607,6 +674,7 @@ document.write(`
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-hamiltonian-to-gds-file-aps-march-meeting-talk">From Hamiltonian to GDS File: APS March Meeting Talk</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds-basics-by-anne-and-jenny">SQuADDS Basics by Anne and Jenny</a></li>
 </ul>
   </nav></div>
 
