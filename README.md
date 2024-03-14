@@ -1,22 +1,5 @@
-<!-- README.md -->
 <center>
-
-<!-- Light theme image -->
-<img src="docs/_static/images/squadds_logo_light_name.png" width="80%" alt="SQuADDS Logo" style="display: none;" />
-<!-- Dark theme image -->
-<img src="docs/_static/images/squadds_logo_dark_name.png" width="80%" alt="SQuADDS Logo" style="display: none;" />
-
-<script>
-  // Detect user's preference
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    // If preference is dark, display the dark theme image and hide the light theme image
-    document.querySelectorAll('img[alt="SQuADDS Logo"]')[1].style.display = '';
-  } else {
-    // Otherwise, display the light theme image and hide the dark theme image
-    document.querySelectorAll('img[alt="SQuADDS Logo"]')[0].style.display = '';
-  }
-</script>
-
+  <img src="docs/_static/images/squadds_not_transparent.png" width="80%" alt="SQuADDS Logo" /> <!-- This will stretch the logo to the full container width -->
 </center>
 
 # ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow) Superconducting Qubit And Device Design and Simulation database
