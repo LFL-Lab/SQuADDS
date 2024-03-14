@@ -26,32 +26,33 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 
 ## Setup
 
-Install using pip:
+**Install using pip:**
 
 ```bash
 pip install SQuADDS
 ```
 
-Install from source:
+**Install from source:**
 
-### Installation
-
-1. Clone the repository.
+1. Clone Repository:
+   Navigate to your chosen directory and clone the repository.
 
 ```bash
+cd <REPO-PATH>
 git clone https://github.com/LFL-Lab/SQuADDS.git
 ```
 
-2. Install the required packages.
+2. Install Dependencies:
+   Activate a clean conda environment (with qiskit-metal) and install dependencies.
 
 ```bash
-pip install -r requirements.txt
-```
-
-3. Run the setup script locally
-
-```bash
+conda activate <YOUR-ENV>
+cd SQuADDS
+pip install datasets
+pip install pyEPR-quantum
+pip install pyaedt
 pip install -e .
+pip install -r requirements.txt
 ```
 
 ## Tutorials
