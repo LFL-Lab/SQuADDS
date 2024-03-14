@@ -602,6 +602,19 @@ document.write(`
 <div class="viewcode-block" id="validate_types">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.validate_types">[docs]</a>
 <span class="k">def</span> <span class="nf">validate_types</span><span class="p">(</span><span class="n">data_part</span><span class="p">,</span> <span class="n">schema_part</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recursively validates the types of data_part against the expected types defined in schema_part.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_part (dict): The data to be validated.</span>
+<span class="sd">        schema_part (dict): The schema defining the expected types.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If the type of any key in data_part does not match the expected type in schema_part.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">expected_type</span> <span class="ow">in</span> <span class="n">schema_part</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expected_type</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">validate_types</span><span class="p">(</span><span class="n">data_part</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">expected_type</span><span class="p">)</span>
@@ -645,6 +658,21 @@ document.write(`
 <div class="viewcode-block" id="get_schema">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.get_schema">[docs]</a>
 <span class="k">def</span> <span class="nf">get_schema</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the schema of the given object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj: The object for which the schema needs to be determined.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The schema of the object. If the object is a dictionary, the schema will be a dictionary</span>
+<span class="sd">        with the same keys as the original dictionary, where the values represent the schema of</span>
+<span class="sd">        the corresponding values in the original dictionary. If the object is a list, the schema</span>
+<span class="sd">        will be either &#39;dict&#39; if the list contains dictionaries, or the type name of the first</span>
+<span class="sd">        element in the list. For any other type of object, the schema will be the type name of</span>
+<span class="sd">        the object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="s1">&#39;dict&#39;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">get_schema</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;contributor&#39;</span><span class="p">}</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -667,15 +695,25 @@ document.write(`
 <div class="viewcode-block" id="compare_schemas">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.compare_schemas">[docs]</a>
 <span class="k">def</span> <span class="nf">compare_schemas</span><span class="p">(</span><span class="n">data_schema</span><span class="p">,</span> <span class="n">expected_schema</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compare two schemas and raise an error if there are any mismatches.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        data_schema (dict): The data schema to compare.</span>
+<span class="sd">        expected_schema (dict): The expected schema to compare against.</span>
+<span class="sd">        path (str, optional): The current path in the schema. Used for error messages. Defaults to &#39;&#39;.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If there is a key in the data schema that is not present in the expected schema.</span>
+<span class="sd">        ValueError: If there is a type mismatch between the data schema and the expected schema.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="n">data_schema</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># Check if the key exists in the expected schema</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">expected_schema</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected key &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; found in data schema.&quot;</span><span class="p">)</span>
 
         <span class="n">expected_type</span> <span class="o">=</span> <span class="n">expected_schema</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="c1"># print(f&quot;Comparing &#39;{path}{key}&#39;...&quot;)</span>
-        <span class="c1"># print(f&quot;Expected: {expected_type}, Got: {get_type(data_type)}\n&quot;)</span>
 
         <span class="c1"># Compare types for nested dictionaries</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expected_type</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -695,12 +733,49 @@ document.write(`
 <div class="viewcode-block" id="convert_to_numeric">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.convert_to_numeric">[docs]</a>
 <span class="k">def</span> <span class="nf">convert_to_numeric</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a value to a numeric type if possible.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The value to be converted.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The converted value if it can be converted to int or float, otherwise returns the original value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
             <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">is_float</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="convert_to_str">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.convert_to_str">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts the given value to a string with the given units.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        value (float): The value to be converted.</span>
+<span class="sd">        units (str): The units to be appended to the value.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The value as a string with the units.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="convert_list_to_str">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.convert_list_to_str">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_list_to_str</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts the given list of floats to a string representation.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        lst (list): The list of floats to be converted.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The string representation of the list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">convert_to_str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="get_entire_schema">
@@ -834,9 +909,9 @@ document.write(`
 
     <span class="n">device_dict</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;coupling_type&quot;</span><span class="p">:</span> <span class="n">coupler_type</span><span class="p">,</span>
+            <span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="n">coupler_type</span><span class="p">,</span>
             <span class="s2">&quot;coupler_options&quot;</span><span class="p">:</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">,</span> <span class="p">{}),</span>
-            <span class="s2">&quot;cpw_options&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;cpw_opts&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;left_options&quot;</span><span class="p">:</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">,</span> <span class="p">{})</span>
             <span class="p">}</span>
         <span class="p">},</span>
