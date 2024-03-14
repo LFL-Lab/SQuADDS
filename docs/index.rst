@@ -23,6 +23,7 @@ SQuADDS is an open-source platform aimed at speeding up the design loop in the c
    Contributions <source/resources/contribute>
    Developer Notes <source/developer/index>
    Simulation Notes <source/resources/simulations>
+   Workflows <source/resources/concepts>
    Release Logs<source/release_notes>
    References<source/references/index>
    GitHub <https://github.com/lfl-lab/SQuADDS>
