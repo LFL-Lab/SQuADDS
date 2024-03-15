@@ -8,7 +8,7 @@ from pathlib import Path
 
 from dotenv import dotenv_values, set_key
 
-from squadds.core.globals import *
+from squadds.core.globals import ENV_FILE_PATH
 
 
 def copy_files_to_new_location(data_path, new_path):

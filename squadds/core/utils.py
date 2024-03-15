@@ -12,6 +12,27 @@ from huggingface_hub import HfApi, HfFolder
 from squadds.core.globals import ENV_FILE_PATH
 
 
+def set_github_token():
+    """
+    Sets the GitHub token by appending it to the .env file.
+    If the token already exists in the .env file, it does not add it again.
+    If the GitHub token is not found, it raises a ValueError.
+    """
+    # Check if token already exists
+    if os.path.exists(ENV_FILE_PATH):
+        with open(ENV_FILE_PATH, 'r') as file:
+            existing_keys = file.read()
+            if 'GITHUB_TOKEN=' in existing_keys:
+                print('Token already exists in .env file.')
+                return
+    
+    # Ask for the new token
+    token = getpass.getpass("Enter your GitHub PAT token (with at least repo scope): ")
+    # Append the new token to the .env file
+    with open(ENV_FILE_PATH, 'a') as file:
+        file.write(f'\nGITHUB_TOKEN={token}\n')
+        print('Token added to .env file.')
+
 def get_type(value):
     if isinstance(value, dict):
         return 'dict'

@@ -48,12 +48,13 @@ git clone https://github.com/LFL-Lab/SQuADDS.git
 ```bash
 conda activate <YOUR-ENV>
 cd SQuADDS
-pip install datasets
-pip install pyEPR-quantum
-pip install pyaedt
-pip install -e .
 pip install -r requirements.txt
+pip install -e .
 ```
+
+**Install on a fresh Mac/Linux system:**
+
+Read more on [install_guide](docs/installation/unix_install.md))
 
 ## Tutorials
 
