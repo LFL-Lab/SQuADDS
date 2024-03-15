@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.2.33 (2024-03-14)
+--------------------------
+
+* **Alpha Version 0.2.33**
+
+- Bug fixes in ansys_simulator code for whole device `sweep` functionality
+- Added multiple helper/utility methods for ansys simulations 
+- Methods added to clulate chi, full dispersive shift of the cavity
+- Updated `requirements.txt` and documentation
+- Added method to set `GITHUB_TOKEN`
+
 Version 0.2.32 (2024-02-02)
 --------------------------
 
