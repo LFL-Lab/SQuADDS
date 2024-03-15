@@ -669,7 +669,6 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 </div>
 <section id="faq-s">
 <h3>FAQ’s<a class="headerlink" href="#faq-s" title="Link to this heading">#</a></h3>
-<p>Frequently asked questions.</p>
 <section id="installation-issues">
 <h4>Installation Issues<a class="headerlink" href="#installation-issues" title="Link to this heading">#</a></h4>
 <p><strong>Q: Getting**``ModuleNotFoundError: No module named ‘squadds’``**after running `pip install SQuADDS` in Jupyter Notebook. How can I fix this?</strong></p>
@@ -683,21 +682,53 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <section id="env-file">
 <h4><code class="docutils literal notranslate"><span class="pre">.env</span></code> File<a class="headerlink" href="#env-file" title="Link to this heading">#</a></h4>
 <p>Q: <strong>Why is the ``.env`` file needed?</strong></p>
-<p><strong>A:</strong> The <code class="docutils literal notranslate"><span class="pre">.env</span></code> file is needed for making contributions the SQuADDS Database.</p>
+<p><strong>A:</strong> The <code class="docutils literal notranslate"><span class="pre">.env</span></code> file is needed for making contributions to the SQuADDS Database.</p>
 <p>Q: <strong>What info should the ``.env`` file contain?</strong></p>
 <p><strong>A:</strong> The <code class="docutils literal notranslate"><span class="pre">.env</span></code> file should have the following fields defined.</p>
-<p>You can set these fields via the SQuADDS API</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">GROUP_NAME</span><span class="o">=</span>
+<span class="nv">PI_NAME</span><span class="o">=</span>
+<span class="nv">INSTITUTION</span><span class="o">=</span>
+<span class="nv">USER_NAME</span><span class="o">=</span>
+<span class="nv">CONTRIB_MISC</span><span class="o">=</span>
+<span class="nv">HUGGINGFACE_API_KEY</span><span class="o">=</span>
+<span class="nv">GITHUB_TOKEN</span><span class="o">=</span>
 </pre></div>
 </div>
-<p>from squadds.core.utils import set_huggingface_api_key, set_github_token
-from squadds.database.utils import create_contributor_info</p>
-<p>create_contributor_info()
-set_huggingface_api_key()
-set_github_token()</p>
+<p>You can set these fields via the SQuADDS API.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="n">set_huggingface_api_key</span><span class="p">,</span> <span class="n">set_github_token</span>
+<span class="kn">from</span> <span class="nn">squadds.database.utils</span> <span class="kn">import</span> <span class="n">create_contributor_info</span>
+
+<span class="n">create_contributor_info</span><span class="p">()</span>
+<span class="n">set_huggingface_api_key</span><span class="p">()</span>
+<span class="n">set_github_token</span><span class="p">()</span>
+</pre></div>
+</div>
 <p>Q: <strong>Where is the ``.env`` file created or should be placed for it to function properly?</strong></p>
 <p><strong>A:</strong> The <code class="docutils literal notranslate"><span class="pre">.env</span></code> file should be automatically created at the right place within the root directory of the <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> package. If the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file is not automatically created upon installation, you will need to manually create it at this specific location for <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> to function properly.</p>
 <p>To determine the installation root of <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code>, and subsequently place or find the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file, use the following approach:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">squadds</span>
+
+<span class="c1"># Locate the root of the SQuADDS installation</span>
+<span class="n">squadds_root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">squadds</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
+
+<span class="c1"># installed via pip</span>
+<span class="k">if</span> <span class="s2">&quot;site-packages&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">squadds_root</span><span class="p">):</span>
+   <span class="n">squadds_root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">squadds</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+<span class="k">else</span><span class="p">:</span> <span class="c1"># not pypi installed</span>
+   <span class="k">pass</span>
+
+<span class="c1"># Path to the expected .env file location</span>
+<span class="n">env_file_path</span> <span class="o">=</span> <span class="n">squadds_root</span> <span class="o">/</span> <span class="s1">&#39;.env&#39;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">env_file_path</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">env_file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+   <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found .env file at: </span><span class="si">{</span><span class="n">env_file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+   <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;.env file not found at the expected location.&quot;</span><span class="p">)</span>
+   <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;To function properly, create a .env file at: </span><span class="si">{</span><span class="n">squadds_root</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 </section>
 </section>

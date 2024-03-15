@@ -87,8 +87,6 @@ You can use the GitHub version of SQuADDS as well by changing Step 4 to
 FAQ's
 ********************************
 
-Frequently asked questions.
-
 --------------------
 Installation Issues
 --------------------
@@ -110,15 +108,17 @@ Q: **If there are errors upon instantiating the **``SQuADDS_DB``**class, what sh
 ``.env`` File 
 -------------
 
+
 Q: **Why is the ``.env`` file needed?**
 
-**A:** The ``.env`` file is needed for making contributions the SQuADDS Database.
+**A:** The ``.env`` file is needed for making contributions to the SQuADDS Database.
 
 Q: **What info should the ``.env`` file contain?**
 
 **A:** The ``.env`` file should have the following fields defined.
 
 .. code-block:: bash
+
    GROUP_NAME=
    PI_NAME=
    INSTITUTION=
@@ -127,15 +127,16 @@ Q: **What info should the ``.env`` file contain?**
    HUGGINGFACE_API_KEY=
    GITHUB_TOKEN=
 
-You can set these fields via the SQuADDS API
+You can set these fields via the SQuADDS API.
 
 .. code-block:: python
-from squadds.core.utils import set_huggingface_api_key, set_github_token
-from squadds.database.utils import create_contributor_info
 
-create_contributor_info()
-set_huggingface_api_key()
-set_github_token()
+   from squadds.core.utils import set_huggingface_api_key, set_github_token
+   from squadds.database.utils import create_contributor_info
+
+   create_contributor_info()
+   set_huggingface_api_key()
+   set_github_token()
 
 Q: **Where is the ``.env`` file created or should be placed for it to function properly?**
 
@@ -144,6 +145,7 @@ Q: **Where is the ``.env`` file created or should be placed for it to function p
 To determine the installation root of ``SQuADDS``, and subsequently place or find the ``.env`` file, use the following approach:
 
 .. code-block:: python
+
    from pathlib import Path
    import squadds
 
@@ -165,3 +167,4 @@ To determine the installation root of ``SQuADDS``, and subsequently place or fin
    else:
       print(".env file not found at the expected location.")
       print(f"To function properly, create a .env file at: {squadds_root}")
+
