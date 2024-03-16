@@ -126,7 +126,6 @@ def simulate_single_design(design, device_dict, sim_options):
 
     Args:
         design (Design): The design object representing the design.
-        gui (GUI): The GUI object for displaying simulation results.
         device_dict (dict): A dictionary containing device options.
         sim_options (dict): A dictionary containing simulation options.
 
