@@ -143,14 +143,14 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return
         if component not in self.supported_components():
             print("Component not supported. Available components are:")
-            print(self.supported_components())
+            print(self.supported_components()+["CLT"]) #TODO: handle dynamically
             return
         else:
             component_names = []
             for config in self.configs:
                 if component in config:
                     component_names.append(config.split("-")[1])
-            return component_names
+            return component_names+["CLT"]
         
     def view_component_names(self, component=None):
         """
@@ -626,12 +626,15 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             df = self.get_dataset(data_type=self.selected_data_type, component=self.selected_component, component_name=self.selected_component_name)
             # if coupler is selected, filter by coupler
             if self.selected_coupler is not None:
-                df = filter_df_by_conditions(df, {"coupler": self.selected_coupler}) 
+                df = filter_df_by_conditions(df, {"coupler_type": self.selected_coupler}) 
             self.selected_df = df
-        elif isinstance(self.selected_system, list):
+        elif isinstance(self.selected_system, list): #! TODO: need to implement logic to handle more complex systems
             # get the qubit and cavity dfs
             qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit) #TODO: handle dynamically
             cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity) #TODO: handle dynamically
+            # if coupler is selected, filter by coupler
+            if self.selected_coupler is not None:
+                cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler}) 
             df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap']) #TODO: handle with user awareness
             self.selected_df = df
         else:
