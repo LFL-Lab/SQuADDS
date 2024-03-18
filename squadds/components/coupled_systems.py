@@ -14,13 +14,13 @@ class QubitCavity(QComponent):
     
     default_options = Dict(
         chip = 'main',
-        cavity_options = Dict(
-            coupling_type = 'CLT',
+        cavity_claw_options = Dict(
+            coupler_type = 'CLT',
             coupler_options = Dict(
                 orientation = '180',
                 coupling_length = '200um'
             ),
-            cpw_options = Dict(
+            cpw_opts = Dict(
                 total_length = '4000um',
                 # fillet = "49.9um"
                 left_options = Dict(
@@ -88,12 +88,12 @@ class QubitCavity(QComponent):
             None
         """
         p = self.p
-        # print(p.cavity_options['cpw_options'].total_length)
+        # print(p.cavity_claw_options['cpw_opts'].total_length)
 
         qubit_opts = Dict()
         self.copier(qubit_opts, p.qubit_options)
         qubit_opts["pos_y"] = 0
-        qubit_opts["pos_x"] = "-1500um" if p.cavity_options['cpw_options'].total_length > 2.500 else "-1000um"
+        qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options['cpw_opts'].total_length > 2.500 else "-1000um"
         # print(qubit_opts)
         self.qubit = TransmonCross(self.design, "{}_xmon".format(self.name), options = qubit_opts)
         # self.add_qgeometry('poly', self.qubit.qgeometry_dict('poly'), subtract = True, chip = p.chip)
@@ -116,18 +116,18 @@ class QubitCavity(QComponent):
         p = self.p
 
         temp_opts = Dict()
-        self.copier(temp_opts, p.cavity_options['coupler_options'])
+        self.copier(temp_opts, p.cavity_claw_options['coupler_options'])
         # for k in p.coupler_options:
-        #     temp_opts.update({k:p.cavity_options.coupler_options[k]})
+        #     temp_opts.update({k:p.cavity_claw_options.coupler_options[k]})
 
-        if(p.cavity_options['coupling_type'].upper() == "CLT"):
+        if(p.cavity_claw_options['coupler_type'].upper() == "CLT"):
             from qiskit_metal.qlibrary.couplers.coupled_line_tee import \
                 CoupledLineTee
             self.coupler = CoupledLineTee(self.design, "{}_CLT_coupler".format(self.name), options=temp_opts)
-        # elif(p.cavity_options['coupling_type'] == 'inductive'):
+        # elif(p.cavity_claw_options['coupler_type'] == 'inductive'):
         #     from inductive_coupler import InductiveCoupler
         #     self.coupler = InductiveCoupler(self.design, "{}_ind_coupler".format(self.name), options=temp_opts)
-        elif(p.cavity_options['coupling_type'].lower() == 'capn' or p.cavity_options['coupling_type'].lower() == 'ncap'):
+        elif(p.cavity_claw_options['coupler_type'].lower() == 'capn' or p.cavity_claw_options['coupler_type'].lower() == 'ncap'):
             from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import \
                 CapNInterdigitalTee
             self.coupler = CapNInterdigitalTee(self.design, '{}_capn_coupler'.format(self.name), options=temp_opts)
@@ -145,10 +145,10 @@ class QubitCavity(QComponent):
         from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
 
         p = self.p
-        p.cpw_options = p.cavity_options['cpw_options']
+        p.cpw_opts = p.cavity_claw_options['cpw_opts']
         
         left_opts = Dict()
-        left_opts.update({'total_length': (p.cpw_options.total_length if p.cavity_options['coupling_type'] == 'capacitive' else p.cpw_options.total_length/2) })
+        left_opts.update({'total_length': (p.cpw_opts.total_length if p.cavity_claw_options['coupler_type'] == 'capacitive' else p.cpw_opts.total_length/2) })
         left_opts.update({'pin_inputs':Dict(
                                             start_pin = Dict(
                                                 component = '',
@@ -159,7 +159,7 @@ class QubitCavity(QComponent):
                                                 pin = ''
                                             )
                                             )})
-        self.copier(left_opts, p.cpw_options.left_options)
+        self.copier(left_opts, p.cpw_opts.left_options)
 
         # if left_opts["lead"]["start_straight"] == None:
         #     left_opts["lead"]["start_straight"] = 0 
@@ -170,7 +170,10 @@ class QubitCavity(QComponent):
         # if left_opts["lead"]["end_jogged_extension"] == None:
         #     left_opts["lead"]["end_jogged_extension"] = 0 
         # print(self.coupler.options["coupling_length"])
-        adj_distance = self.coupler.options["coupling_length"] if self.coupler.options["coupling_length"] > 0.150 else 0
+        if p.cavity_claw_options["coupler_type"].lower() == "clt" and self.coupler.options["coupling_length"] > 0.150:
+            adj_distance = self.coupler.options["coupling_length"]
+        else:
+            adj_distance = 0
         jogs = OrderedDict()
         jogs[0] = ["R90", f'{adj_distance/(1.5)}um']
         left_opts.update({"lead" : Dict(
@@ -195,7 +198,7 @@ class QubitCavity(QComponent):
         left_opts['pin_inputs']['end_pin'].update({'component':self.coupler.name})
         left_opts['pin_inputs']['end_pin'].update({'pin':'second_end'})
 
-        # print(p.cpw_options.left_options)
+        # print(p.cpw_opts.left_options)
 
 
         # print(left_opts)
@@ -204,9 +207,9 @@ class QubitCavity(QComponent):
         # self.add_qgeometry('path', self.LeftMeander.qgeometry_dict('path'), chip = p.chip)
         # self.add_qgeometry('poly', self.LeftMeander.qgeometry_dict('poly'), chip = p.chip)
 
-        if(p.cavity_options['coupling_type'] == 'inductive'):
+        if(p.cavity_claw_options['coupler_type'] == 'inductive'):
             right_opts = Dict()
-            right_opts.update({'total_length':p.cpw_options.total_length/2})
+            right_opts.update({'total_length':p.cpw_opts.total_length/2})
             right_opts.update({'pin_inputs':Dict(
                                                 start_pin = Dict(
                                                     component = '',
@@ -217,13 +220,13 @@ class QubitCavity(QComponent):
                                                     pin = ''
                                                 )
                                                 )})
-            right_opts['pin_inputs']['end_pin'].update({'component':p.cpw_options.pin_inputs.end_pin.component})
-            right_opts['pin_inputs']['end_pin'].update({'pin':p.cpw_options.pin_inputs.end_pin.pin})
+            right_opts['pin_inputs']['end_pin'].update({'component':p.cpw_opts.pin_inputs.end_pin.component})
+            right_opts['pin_inputs']['end_pin'].update({'pin':p.cpw_opts.pin_inputs.end_pin.pin})
 
             right_opts['pin_inputs']['start_pin'].update({'component':self.coupler.name})
             right_opts['pin_inputs']['start_pin'].update({'pin':'second_start'})
 
-            self.copier(right_opts, p.cpw_options.right_options)
+            self.copier(right_opts, p.cpw_opts.right_options)
 
             self.RightMeander = RouteMeander(self.design, "{}_right_cpw".format(self.name), options = right_opts)
             self.add_qgeometry('path', self.RightMeander.qgeometry_dict('path'), chip = p.chip)
@@ -247,8 +250,8 @@ class QubitCavity(QComponent):
         self.add_pin('prime_start', start_dict['points'], start_dict['width'])
         self.add_pin('prime_end', end_dict['points'], end_dict['width'])
 
-    def show(self):
+    def show(self, include_wirebond=False):
         raise NotImplementedError("This method is not implemented in the base class.")
 
-    def to_gds(self, options):
+    def to_gds(self, options, include_wirebond=False):
         raise NotImplementedError("This method is not implemented in the base class.")
