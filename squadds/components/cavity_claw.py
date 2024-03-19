@@ -5,8 +5,10 @@ from qiskit_metal import Dict
 from qiskit_metal.qlibrary.core import QComponent, QRoute, QRoutePoint
 from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
 
+from squadds.components.claw_coupler import TransmonClaw
 
-class QubitCavity(QComponent):
+
+class CavityClaw(QComponent):
     """
     QubitCavity class represents a coupled qubit-cavity system.
     It contains methods to create the qubit, cavity, coupler, and CPWs.
@@ -45,7 +47,7 @@ class QubitCavity(QComponent):
         )
     )
     
-    component_metadata = Dict(short_name='qubitcavity')
+    component_metadata = Dict(short_name='cavityclaw')
     """Component metadata"""
 
     """Default options"""
@@ -77,7 +79,7 @@ class QubitCavity(QComponent):
         self.copier(qubit_opts, p.qubit_options)
         qubit_opts["pos_y"] = 0
         qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options['cpw_opts'].total_length > 2.500 else "-1000um"
-        self.qubit = TransmonCross(self.design, "{}_xmon".format(self.name), options = qubit_opts)
+        self.qubit = TransmonClaw(self.design, "{}_xmon".format(self.name), options = qubit_opts)
 
     def make_cavity(self):
         """
@@ -207,7 +209,8 @@ class QubitCavity(QComponent):
         self.add_pin('prime_end', end_dict['points'], end_dict['width'])
 
     def make_wirebond_pads(self):
-        from qiskit_metal.qlibrary.terminations.launchpad_wb import LaunchpadWirebond
+        from qiskit_metal.qlibrary.terminations.launchpad_wb import \
+            LaunchpadWirebond
         from qiskit_metal.qlibrary.tlines.straight_path import RouteStraight
         p = self.p
         print(self.coupler.options)        
@@ -238,27 +241,9 @@ class QubitCavity(QComponent):
     def show(self, gui, include_wirebond_pads=False):
         if include_wirebond_pads:
             self.make_wirebond_pads()
-        else:
-            if "feedline" in self.design.components:
-                self.design.delete_component("wb_top")
-                self.design.delete_component("wb_bottom")
-                self.design.delete_component("feedline")
-
         gui.rebuild()
         gui.autoscale()
         gui.screenshot()
 
-    def to_gds(self, filename, include_wirebond_pads=False):
-        if include_wirebond_pads:
-            self.make_wirebond_pads()
-        else:
-            if "feedline" in self.design.components:
-                self.design.delete_component("wb_top")
-                self.design.delete_component("wb_bottom")
-                self.design.delete_component("feedline")
-                
-        a_gds = self.design.renderers.gds
-        a_gds.options['cheese']['view_in_file']['main'][1]=False
-        a_gds.options['no_cheese']['view_in_file']['main'][1] = False
-
-        a_gds.export_to_gds(f'{filename}.gds')
+    def to_gds(self, options, include_wirebond_pads=False):
+        raise NotImplementedError("This method is not implemented in the base class.")
