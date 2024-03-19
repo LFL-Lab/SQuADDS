@@ -308,8 +308,9 @@ def create_unified_design_options(row):
     cavity_dict = convert_numpy(row["design_options_cavity_claw"])
     try:
         coupler_type = row["coupler_type"]
-    except:
-        coupler_type = "CLT"
+    except Exception as e:
+        print(e)
+    
     qubit_dict = convert_numpy(row["design_options_qubit"])
 
     device_dict = {

@@ -7,6 +7,7 @@ from datasets import get_dataset_config_names, load_dataset
 from tabulate import tabulate
 
 from squadds.core.design_patterns import SingletonMeta
+from squadds.core.processing import update_ncap_parameters
 from squadds.core.utils import *
 
 #* HANDLE WARNING MESSAGES
@@ -635,6 +636,13 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             # if coupler is selected, filter by coupler
             if self.selected_coupler is not None:
                 cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler}) 
+            # update the cavity_df if selected_coupler is NCap
+            if self.selected_coupler == "NCap":
+                ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler) #TODO: handle dynamically
+                merger_terms = ['prime_width', 'prime_gap', 'second_width', 'second_gap'] 
+                ncap_sim_cols = ['bottom_to_bottom', 'bottom_to_ground', 'ground_to_ground',
+                          'top_to_bottom', 'top_to_ground', 'top_to_top', "units"]
+                cavity_df = update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols)
             df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap']) #TODO: handle with user awareness
             self.selected_df = df
         else:
@@ -668,6 +676,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         merged_df.drop(columns=merger_terms, inplace=True)
 
         # Combining the qubit and cavity design options into one
+        # TODO: test for NCap case + update as needed
         merged_df['design_options'] = merged_df.apply(create_unified_design_options, axis=1)
 
         return merged_df
