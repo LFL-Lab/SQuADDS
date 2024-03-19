@@ -676,7 +676,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         merged_df.drop(columns=merger_terms, inplace=True)
 
         # Combining the qubit and cavity design options into one
-        # TODO: test for NCap case + update as needed
         merged_df['design_options'] = merged_df.apply(create_unified_design_options, axis=1)
 
         return merged_df

@@ -306,10 +306,7 @@ def create_unified_design_options(row):
         dict: The unified design options dictionary.
     """
     cavity_dict = convert_numpy(row["design_options_cavity_claw"])
-    try:
-        coupler_type = row["coupler_type"]
-    except Exception as e:
-        print(e)
+    coupler_type = row["coupler_type"]
     
     qubit_dict = convert_numpy(row["design_options_qubit"])
 
