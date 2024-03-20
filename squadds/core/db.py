@@ -5,9 +5,10 @@ import warnings
 import pandas as pd
 from datasets import get_dataset_config_names, load_dataset
 from tabulate import tabulate
+from tqdm import tqdm
 
 from squadds.core.design_patterns import SingletonMeta
-from squadds.core.processing import update_ncap_parameters
+from squadds.core.processing import *
 from squadds.core.utils import *
 
 #* HANDLE WARNING MESSAGES
@@ -600,9 +601,13 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print(f"An error occurred while loading the dataset: {e}")
             return
 
-    def create_system_df(self):
+    def create_system_df(self, parallelize=False, num_cpu=None):
         """
         Creates and returns a DataFrame based on the selected system.
+
+        Args:
+            parallelize (bool): Whether to use multiprocessing to speed up the merging. Defaults to False.
+            num_cpu (int): The number of CPU cores to use for multiprocessing. If not specified, the function will use the maximum number of available cores.
 
         If the selected system is a single component, it retrieves the dataset based on the selected data type, component, and component name.
         If a coupler is selected, the DataFrame is filtered by the coupler.
@@ -628,6 +633,20 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             # if coupler is selected, filter by coupler
             if self.selected_coupler is not None:
                 df = filter_df_by_conditions(df, {"coupler_type": self.selected_coupler}) 
+            if self.selected_coupler == "NCap":
+                # get the cavity_df and keep only the NCap parameters
+                cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity) #TODO: handle dynamically
+                cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler}) 
+
+                # get the ncap_df 
+                ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler) #TODO: handle dynamically
+                
+                # update the cavity_df with updated values based on the ncap_df sim results
+                merger_terms = ['prime_width', 'prime_gap', 'second_width', 'second_gap'] 
+                ncap_sim_cols = ['bottom_to_bottom', 'bottom_to_ground', 'ground_to_ground',
+                          'top_to_bottom', 'top_to_ground', 'top_to_top']
+                df = update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols)
+                
             self.selected_df = df
         elif isinstance(self.selected_system, list): #! TODO: need to implement logic to handle more complex systems
             # get the qubit and cavity dfs
@@ -641,15 +660,16 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                 ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler) #TODO: handle dynamically
                 merger_terms = ['prime_width', 'prime_gap', 'second_width', 'second_gap'] 
                 ncap_sim_cols = ['bottom_to_bottom', 'bottom_to_ground', 'ground_to_ground',
-                          'top_to_bottom', 'top_to_ground', 'top_to_top', "units"]
+                          'top_to_bottom', 'top_to_ground', 'top_to_top']
                 cavity_df = update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols)
-            df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap']) #TODO: handle with user awareness
+
+            df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap'], parallelize=parallelize, num_cpu=num_cpu) #TODO: handle with user awareness
             self.selected_df = df
         else:
             raise UserWarning("Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`")
         return df
 
-    def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None):
+    def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None, parallelize=False, num_cpu=None):
         """
         Creates a merged DataFrame by merging the qubit and cavity DataFrames based on the specified merger terms.
 
@@ -657,6 +677,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             qubit_df (pandas.DataFrame): The DataFrame containing qubit data.
             cavity_df (pandas.DataFrame): The DataFrame containing cavity data.
             merger_terms (list): A list of column names to be used for merging the DataFrames. Defaults to None.
+            parallelize (bool): Whether to use multiprocessing to speed up the merging. Defaults to False.
+            num_cpu (int): The number of CPU cores to use for multiprocessing. If not specified, the function will use the maximum number of available cores.
 
         Returns:
             pandas.DataFrame: The merged DataFrame.
@@ -665,17 +687,20 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             None
         """
         for merger_term in merger_terms:
-            # process the dfs to make them ready for merger
-            qubit_df[merger_term] = qubit_df['design_options'].apply(lambda x: x['connection_pads']['readout'][merger_term])
-            cavity_df[merger_term] = cavity_df['design_options'].apply(lambda x: x['claw_opts']['connection_pads']['readout'][merger_term])
+            qubit_df[merger_term] = qubit_df['design_options'].map(lambda x: x['connection_pads']['readout'].get(merger_term))
+            cavity_df[merger_term] = cavity_df['design_options'].map(lambda x: x['claw_opts']['connection_pads']['readout'].get(merger_term))
 
-        # Merging the data frames based on merger terms
-        merged_df = pd.merge(qubit_df, cavity_df, on=merger_terms, how="inner", suffixes=('_qubit', '_cavity_claw'))
+        if parallelize:
+            n_cores = cpu_count() if num_cpu is None else num_cpu
+            qubit_df_splits = np.array_split(qubit_df, n_cores)
 
-        # Dropping the merger terms
-        merged_df.drop(columns=merger_terms, inplace=True)
+            with Pool(n_cores) as pool:
+                merged_df_parts = list(tqdm(pool.starmap(merge_dfs, [(split, cavity_df, merger_terms) for split in qubit_df_splits]), total=n_cores))
 
-        # Combining the qubit and cavity design options into one
+            merged_df = pd.concat(merged_df_parts).reset_index(drop=True)
+        else:
+            merged_df = merge_dfs(qubit_df, cavity_df, merger_terms)
+
         merged_df['design_options'] = merged_df.apply(create_unified_design_options, axis=1)
 
         return merged_df
