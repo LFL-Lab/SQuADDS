@@ -75,7 +75,11 @@ class ScalingInterpolator(Interpolator):
 
         closest_kappa = closest_cavity_cpw_design['kappa_kHz'].values[0]
         closest_f_cavity = closest_cavity_cpw_design['cavity_frequency_GHz'].values[0]
-        closest_coupler_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length'])
+
+        try:
+            closest_coupler_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length'])
+        except:
+            closest_coupler_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['finger_length'])
 
         # Scale resonator and coupling element dimensions
         updated_resonator_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]["cpw_opts"]['total_length']) * (closest_cavity_cpw_design['cavity_frequency_GHz'] / f_res_target).values[0]
@@ -86,9 +90,15 @@ class ScalingInterpolator(Interpolator):
         print(f"g scaling: {g_scaling.values[0]}")
         print(f"alpha scaling: {alpha_scaling.values[0]}")
         print("="*50)
-        updated_coupling_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length']) * kappa_scaling
-        # round updated_coupling_length to nearest integer
-        updated_coupling_length = round(updated_coupling_length)
+
+        try:
+            updated_coupling_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length']) * kappa_scaling
+            # round updated_coupling_length to nearest integer
+            updated_coupling_length = round(updated_coupling_length)
+        except:
+            updated_coupling_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['finger_length']) * kappa_scaling
+            # round updated_coupling_length to nearest integer
+            updated_coupling_length = round(updated_coupling_length)
 
         """
         print("="*50)
@@ -120,8 +130,11 @@ class ScalingInterpolator(Interpolator):
 
         cavity_design_options = closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]
         cavity_design_options["cpw_opts"]['total_length'] = f"{updated_resonator_length}um"
-        cavity_design_options['cplr_opts']['coupling_length'] = f"{updated_coupling_length}um"
-
+        
+        try:
+            cavity_design_options['cplr_opts']['coupling_length'] = f"{updated_coupling_length}um"
+        except:
+            cavity_design_options['cplr_opts']['finger_length'] = f"{updated_coupling_length}um"
 
 
         interpolated_designs_df = pd.DataFrame({

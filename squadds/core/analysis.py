@@ -152,6 +152,8 @@ class Analyzer:
             self.df = self.df.rename(columns={"cavity_frequency": "cavity_frequency_GHz", "kappa": "kappa_kHz"})
             self.df["cavity_frequency_GHz"] = self.df["cavity_frequency_GHz"] * 1e-9
             self.df["kappa_kHz"] = self.df["kappa_kHz"] * 1e-3
+            # drop the units column in place
+            self.df.drop(columns=["units"], inplace=True)
         else:
             pass
     
