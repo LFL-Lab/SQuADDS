@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.2.34 (2024-05-31)
+--------------------------
+
+* **Alpha Version 0.2.34**
+
+**Breaking Changes**
+
+**New Features**
+
+**Improvements**
+
+---
+
 Version 0.2.33 (2024-03-14)
 --------------------------
 
