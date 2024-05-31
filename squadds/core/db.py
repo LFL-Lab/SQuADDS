@@ -53,10 +53,12 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             selected_qubit (str): The selected qubit.
             selected_cavity (str): The selected cavity.
             selected_coupler (str): The selected coupler.
+            selected_resonator_type (str): The selected resonator type.
             selected_system (str): The selected system.
             selected_df (str): The selected dataframe.
             target_param_keys (str): The target parameter keys.
             units (str): The units.
+            _internal_call (bool): Flag to track internal calls.
         """
         self.repo_name = "SQuADDS/SQuADDS_DB"
         self.configs = self.supported_config_names()
@@ -67,10 +69,12 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.selected_qubit = None
         self.selected_cavity = None
         self.selected_coupler = None
+        self.selected_resonator_type = None
         self.selected_system = None
         self.selected_df = None
         self.target_param_keys = None
         self.units = None
+        self._internal_call = False  # Flag to track internal calls
 
     def supported_components(self):
         """
@@ -457,6 +461,26 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             self.view_component_names("cavity")
             return
         
+    def select_resonator_type(self, resonator_type):
+        """
+        Select the coupler based on the resonator type.
+
+        Args:
+            resonator_type (str): The type of resonator, e.g., "quarter" or "half".
+        """
+        resonator_to_coupler = {
+            "quarter": "CLT",
+            "half": "NCap"
+        }
+
+        if resonator_type not in resonator_to_coupler:
+            raise ValueError(f"Invalid resonator type: {resonator_type}. Must be one of {list(resonator_to_coupler.keys())}.")
+
+        self._internal_call = True  # Set the flag to indicate an internal call
+        self.select_coupler(resonator_to_coupler[resonator_type])
+        self.selected_resonator_type = resonator_type
+        self._internal_call = False  # Reset the flag after the call
+
     def select_coupler(self, coupler=None):
         """
         Selects a coupler for the database.
@@ -467,6 +491,13 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             None
         """
+        if not self._internal_call:
+            print("WARNING:DeprecationWarning: select_coupler() is deprecated and will be removed in a future release. Use select_resonator_type() instead.")
+            warnings.warn(
+                "select_coupler() is deprecated and will be removed in a future release. Use select_resonator_type() instead.",
+                DeprecationWarning
+            )
+        # E
         #! TODO: fix this method to work on CapNInterdigitalTee coupler sims
         self.selected_coupler = coupler
         #self.selected_component_name = coupler
@@ -721,6 +752,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.selected_cavity = None
         self.selected_coupler = None
         self.selected_system = None
+        self.selected_resonator_type = None
 
     def show_selections(self):
         """
@@ -732,7 +764,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         if isinstance(self.selected_system, list): #TODO: handle dynamically
             print("Selected qubit: ", self.selected_qubit)
             print("Selected cavity: ", self.selected_cavity)
-            print("Selected coupler: ", self.selected_coupler)
+            print("Selected coupler to feedline: ", self.selected_coupler)
+            if self.selected_resonator_type is not None:
+                print("Selected resonator type: ", self.selected_resonator_type)
             print("Selected system: ", self.selected_system)
         elif isinstance(self.selected_system, str):
             print("Selected component: ", self.selected_component)
@@ -740,6 +774,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print("Selected data type: ", self.selected_data_type)
             print("Selected system: ", self.selected_system)
             print("Selected coupler: ", self.selected_coupler)
+            if self.selected_resonator_type is not None:
+                print("Selected resonator type: ", self.selected_resonator_type)
 
     def _set_target_param_keys(self, df):
         """
