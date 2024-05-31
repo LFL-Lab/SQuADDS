@@ -4,7 +4,7 @@ from pyEPR.calcs import Convert
 from squadds import Analyzer
 from squadds.core.utils import *
 from squadds.interpolations.interpolator import Interpolator
-
+import pprint
 
 def string_to_float(string):
     """
@@ -100,14 +100,11 @@ class ScalingInterpolator(Interpolator):
             # round updated_coupling_length to nearest integer
             updated_coupling_length = round(updated_coupling_length)
 
-        """
-        print("="*50)
-        print(f"Updated resonator length: {updated_resonator_length}")
-        print(f"Updated coupling length: {updated_coupling_length}")
-        print(f"Updated cross length: {updated_cross_length}")
-        print(f"Updated claw length: {updated_claw_length}")
-        print("="*50)
-        """
+        # print(f"Updated resonator length: {updated_resonator_length}")
+        # print(f"Updated coupling length: {updated_coupling_length}")
+        # print(f"Updated cross length: {updated_cross_length}")
+        # print(f"Updated claw length: {updated_claw_length}")
+        # print("="*50)
 
         # Reset the analyzer's DataFrame
         self.analyzer.df = merged_df
@@ -137,7 +134,11 @@ class ScalingInterpolator(Interpolator):
             cavity_design_options['cplr_opts']['finger_length'] = f"{updated_coupling_length}um"
 
 
+        pprint.pprint(qubit_design_options)
+        print("\n")
+        pprint.pprint(cavity_design_options)
         interpolated_designs_df = pd.DataFrame({
+            "coupler_type": self.analyzer.selected_coupler,
             "design_options_qubit": [qubit_design_options],
             "design_options_cavity_claw": [cavity_design_options],
             "sim_options_qubit": [closest_qubit_claw_design["setup_qubit"].iloc[0]],

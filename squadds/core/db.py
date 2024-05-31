@@ -467,7 +467,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             None
         """
-        #! TODO: fix this method to work on NCap coupler sims
+        #! TODO: fix this method to work on CapNInterdigitalTee coupler sims
         self.selected_coupler = coupler
         #self.selected_component_name = coupler
         #self.selected_data_type = "cap_matrix" # TODO: handle dynamically
@@ -626,47 +626,52 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             pandas.DataFrame: The created DataFrame based on the selected system.
         """
         if self.selected_system is None:
-            print("Selected system is not defined.")
-            return
-        elif isinstance(self.selected_system, str):
-            df = self.get_dataset(data_type=self.selected_data_type, component=self.selected_component, component_name=self.selected_component_name)
-            # if coupler is selected, filter by coupler
-            if self.selected_coupler is not None:
-                df = filter_df_by_conditions(df, {"coupler_type": self.selected_coupler}) 
-            if self.selected_coupler == "NCap":
-                # get the cavity_df and keep only the NCap parameters
-                cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity) #TODO: handle dynamically
-                cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler}) 
-
-                # get the ncap_df 
-                ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler) #TODO: handle dynamically
-                
-                # update the cavity_df with updated values based on the ncap_df sim results
-                merger_terms = ['prime_width', 'prime_gap', 'second_width', 'second_gap'] 
-                ncap_sim_cols = ['bottom_to_bottom', 'bottom_to_ground', 'ground_to_ground',
-                          'top_to_bottom', 'top_to_ground', 'top_to_top']
-                df = update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols)
-                
-            self.selected_df = df
-        elif isinstance(self.selected_system, list): #! TODO: need to implement logic to handle more complex systems
-            # get the qubit and cavity dfs
-            qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit) #TODO: handle dynamically
-            cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity) #TODO: handle dynamically
-            # if coupler is selected, filter by coupler
-            if self.selected_coupler is not None:
-                cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler}) 
-            # update the cavity_df if selected_coupler is NCap
-            if self.selected_coupler == "NCap":
-                ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler) #TODO: handle dynamically
-                merger_terms = ['prime_width', 'prime_gap', 'second_width', 'second_gap'] 
-                ncap_sim_cols = ['bottom_to_bottom', 'bottom_to_ground', 'ground_to_ground',
-                          'top_to_bottom', 'top_to_ground', 'top_to_top']
-                cavity_df = update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols)
-
-            df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap'], parallelize=parallelize, num_cpu=num_cpu) #TODO: handle with user awareness
-            self.selected_df = df
+            raise UserWarning("Selected system is not defined.")
+        
+        if isinstance(self.selected_system, str):
+            df = self._create_single_component_df()
+        elif isinstance(self.selected_system, list):
+            df = self._create_multi_component_df(parallelize, num_cpu)
         else:
             raise UserWarning("Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`")
+
+        self.selected_df = df
+        return df
+
+    def _create_single_component_df(self):
+        """Creates a DataFrame for a single component system."""
+        df = self.get_dataset(data_type=self.selected_data_type, component=self.selected_component, component_name=self.selected_component_name)
+
+        if self.selected_coupler:
+            df = filter_df_by_conditions(df, {"coupler_type": self.selected_coupler})
+            if self.selected_coupler == "CapNInterdigitalTee":
+                df = self._update_cap_interdigital_tee_parameters(df)
+
+        return df
+
+    def _create_multi_component_df(self, parallelize, num_cpu):
+        """Creates a DataFrame for a multi-component system."""
+        qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit)
+        cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity)
+
+        if self.selected_coupler:
+            cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler})
+            if self.selected_coupler == "CapNInterdigitalTee":
+                cavity_df = self._update_cap_interdigital_tee_parameters(cavity_df)
+
+        df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap'], parallelize=parallelize, num_cpu=num_cpu)
+        return df
+
+    def _update_cap_interdigital_tee_parameters(self, df):
+        """Updates parameters for CapNInterdigitalTee coupler."""
+        cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity)
+        cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler})
+        
+        ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler)
+        merger_terms = ['prime_width', 'prime_gap', 'second_width', 'second_gap']
+        ncap_sim_cols = ['bottom_to_bottom', 'bottom_to_ground', 'ground_to_ground', 'top_to_bottom', 'top_to_ground', 'top_to_top']
+        
+        df = update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols)
         return df
 
     def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None, parallelize=False, num_cpu=None):

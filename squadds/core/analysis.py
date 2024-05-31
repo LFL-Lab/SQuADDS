@@ -49,12 +49,9 @@ class Analyzer:
     __supported_metrics__ = ['Euclidean', 'Manhattan', 'Chebyshev', 'Weighted Euclidean' , 'Custom']
     __supported_estimation_methods__ = ['Interpolation']
 
-    def __init__(self, db):
+    def __init__(self):
         """
         Initializes an instance of the Analysis class.
-
-        Parameters:
-            - db: The database object.
 
         Attributes:
             - db: The database object.
@@ -79,9 +76,14 @@ class Analyzer:
             - target_params: The target parameters.
             - H_param_keys: The H parameter keys.
         """
+        from squadds.core.db import \
+            SQuADDS_DB  # Local import to avoid circular dependency
 
-        self.db = db
+        self.db = SQuADDS_DB()  # Always fetches the singleton instance
+        self.db_needs_reload = False  # Flag to track if reload is needed
+        self._initialize_attributes()
 
+    def _initialize_attributes(self):
         self.selected_component_name = self.db.selected_component_name
         self.selected_component = self.db.selected_component
         self.selected_data_type = self.db.selected_data_type
@@ -104,6 +106,37 @@ class Analyzer:
         self.target_params = None
         
         self.H_param_keys = self._get_H_param_keys()
+        self.mark_db_for_reload()
+
+    def mark_db_for_reload(self):
+        """
+        Mark the db as needing a reload.
+        """
+        self.db_needs_reload = True
+
+    def check_reload(func):
+        """
+        Decorator to check if reload_db() needs to be called before executing the method.
+        """
+        def wrapper(self, *args, **kwargs):
+            if self.db_needs_reload:
+                import warnings
+                warnings.warn(
+                    "`SQuADDS_DB` has been updated. Please call `reload_db()` on the Analyzer object.",
+                    UserWarning
+                )
+            return func(self, *args, **kwargs)
+        return wrapper   
+
+    def reload_db(self):
+        """
+        Reload the Analyzer with the current singleton SQuADDS_DB object.
+        """
+        from squadds.core.db import \
+            SQuADDS_DB  # Local import to avoid circular dependency
+        self.db = SQuADDS_DB()  # Fetches the latest singleton instance
+        self._initialize_attributes()
+        self.db_needs_reload = False  # Reset the flag
         
     def _add_target_params_columns(self):
         """
@@ -153,7 +186,10 @@ class Analyzer:
             self.df["cavity_frequency_GHz"] = self.df["cavity_frequency_GHz"] * 1e-9
             self.df["kappa_kHz"] = self.df["kappa_kHz"] * 1e-3
             # drop the units column in place
-            self.df.drop(columns=["units"], inplace=True)
+            try:
+                self.df.drop(columns=["units"], inplace=True)
+            except Exception as e:
+                pass
         else:
             pass
     
@@ -181,6 +217,7 @@ class Analyzer:
             raise ValueError("Invalid system.")
         return self.H_param_keys
 
+    @check_reload
     def target_param_keys(self):
         """
         Returns:
@@ -240,6 +277,7 @@ class Analyzer:
         return outside_bounds
 
 
+    @check_reload
     def find_closest(self,
                          target_params: dict,
                          num_top: int,
@@ -315,6 +353,7 @@ class Analyzer:
 
         return closest_df
 
+    @check_reload
     def get_interpolated_design(self,
                      target_params: dict,
                      metric: str = 'Euclidean',
@@ -324,6 +363,7 @@ class Analyzer:
         raise NotImplementedError
     
 
+    @check_reload
     def get_design(self, df):
         """
         Extracts the design parameters from the dataframe and returns a dict.
@@ -340,6 +380,7 @@ class Analyzer:
         raise NotImplementedError
 
 
+    @check_reload
     def closest_design_in_H_space(self):
         """
         Plots a scatter plot of the closest design in the H-space.

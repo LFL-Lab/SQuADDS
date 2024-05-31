@@ -78,7 +78,7 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
     lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
     data = get_sim_results(emode_df = emode_df, lom_df = lom_df)
 
-    # elif device_dict["coupling_type"] == "NCap":
+    # elif device_dict["coupling_type"] == "CapNInterdigitalTee":
 
     device_dict_format = Dict(
         cavity_options = Dict(
@@ -231,7 +231,7 @@ def run_eigenmode(design, geometry_dict, sim_options):
     mesh_lengths = {}
     coupling_type = "CLT"
     if "finger_count" in geometry_dict["cplr_opts"]:
-        coupling_type = "NCap"
+        coupling_type = "CapNInterdigitalTee"
         render_simulation_no_ports(epra, [cpw,claw], [(cpw.name, "start")], config.design_name, setup.vars)
         mesh_lengths = {'mesh1': {"objects": [f"trace_{cpw.name}", f"readout_connector_arm_{claw.name}"], "MaxLength": '4um'}}
     else:
@@ -315,7 +315,7 @@ def run_capn_LOM(design, param, sim_options):
 
     data_df = {
         "design": {
-            "coupler_type": "NCap",
+            "coupler_type": "CapNInterdigitalTee",
             "design_options": param,
             "design_tool": "Qiskit Metal"
         },

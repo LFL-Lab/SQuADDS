@@ -9,7 +9,7 @@ def merge_dfs(qubit_df_split, cavity_df, merger_terms):
 
 def update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols):
     """
-    Updates the kappa and frequency of the cavity based on the results of the NCap simulations.
+    Updates the kappa and frequency of the cavity based on the results of the CapNInterdigitalTee simulations.
     """
     for term in merger_terms:
         cavity_df[f'temp_{term}'] = cavity_df['design_options'].map(lambda x: x['cplr_opts'].get(term))

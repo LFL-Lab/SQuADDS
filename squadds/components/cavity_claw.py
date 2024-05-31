@@ -105,7 +105,7 @@ class CavityClaw(QComponent):
             from qiskit_metal.qlibrary.couplers.coupled_line_tee import \
                 CoupledLineTee
             self.coupler = CoupledLineTee(self.design, "{}_CLT_coupler".format(self.name), options=temp_opts)
-        elif(p.cavity_claw_options['coupler_type'].lower() == 'capn' or p.cavity_claw_options['coupler_type'].lower() == 'ncap'):
+        elif(p.cavity_claw_options['coupler_type'].lower() == 'capn' or p.cavity_claw_options['coupler_type'].lower() == 'ncap' or p.cavity_claw_options['coupler_type'].lower() == 'capninterdigitaltee'):
             from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import \
                 CapNInterdigitalTee
             self.coupler = CapNInterdigitalTee(self.design, '{}_capn_coupler'.format(self.name), options=temp_opts)
