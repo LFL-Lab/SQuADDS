@@ -23,7 +23,7 @@ The SQuADDS API provides a useful method to query the system for desired compone
 
 **Initial Creation of a System:** 
 
-First, you must access the SQuADDS database by creating a database object. 
+First, you must access the SQuADDS database by creating a database object - `db = SQuADDS_DB()`. 
 
 **Selection of Components:**
 
@@ -37,7 +37,7 @@ Example:
 
     db.select_system(["qubit", "cavity_claw"])
 
-You can select specific types of these components such as ``select_qubit(“TransmonCross”)`` and ``elect_cavity_claw(“RouteMeander”)`` with the name of the specific component as a parameter. 
+You can select specific types of these components such as ``select_qubit(“TransmonCross”)`` and ``select_cavity_claw(“RouteMeander”)`` with the name of the specific component as a parameter. 
 
 **Merging Components Together to Create a System:** 
 

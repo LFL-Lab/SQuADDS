@@ -1,0 +1,884 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Installation of Palace on HPC systems &#8212; SQuADDS v0.2.33</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/katex-math.css?v=91adb8b6" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../../_static/documentation_options.js?v=73d7b0fc"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/qiskit-sphinx-theme.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/katex.min.js?v=be8ff15f"></script>
+    <script src="../../_static/auto-render.min.js?v=ad136472"></script>
+    <script src="../../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">🎉 Our <a href='https://arxiv.org/pdf/2312.13483.pdf'>paper</a> is out! </div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+   
+
+<a class="navbar-brand logo" href="https://lfl-lab.github.io/SQuADDS/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
+    <script>document.write(`<img src="../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+            <li class="nav-item dropdown pst-header-nav-item">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class="nav-item ">
+  <a class="nav-link dropdown-item nav-internal" href="simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link dropdown-item nav-internal" href="concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link dropdown-item nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link dropdown-item nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link dropdown-item nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link dropdown-item nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link dropdown-item nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-python fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class="nav-item pst-header-nav-item">
+  <a class="nav-link nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-python fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Installation...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="installation-of-palace-on-hpc-systems">
+<span id="installation-palace"></span><h1>Installation of Palace on HPC systems<a class="headerlink" href="#installation-of-palace-on-hpc-systems" title="Link to this heading">#</a></h1>
+<p>Follow instructions to install Palace on Linux/HPC systems from the official palace site: <a class="reference external" href="https://awslabs.github.io/palace/stable/install/">https://awslabs.github.io/palace/stable/install/</a></p>
+<p><a class="github reference external" href="https://github.com/sqdlab/SQDMetal/blob/main/SQDMetal/PALACE/HPC_documentation.md">sqdlab/SQDMetal</a> is also a good resource for installation on HPC systems.</p>
+</section>
+<section id="installation-of-palace-on-mac-os">
+<h1>Installation of Palace on Mac OS<a class="headerlink" href="#installation-of-palace-on-mac-os" title="Link to this heading">#</a></h1>
+<p>Installing Palace on macOS involves using Homebrew to manage dependencies and compiling the software using CMake.</p>
+<p>Follow these steps to ensure a smooth installation process. It was tested to work on macOS Darwin 22.3.0 (Apple M1 Pro chip).</p>
+<ol class="arabic">
+<li><p><strong>Install Dependencies</strong></p>
+<p>Use Homebrew to install the required dependencies for Palace. Run the following commands in your terminal:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
+<span class="pre">brew</span> <span class="pre">update</span>
+<span class="pre">brew</span> <span class="pre">install</span> <span class="pre">cmake</span> <span class="pre">git</span> <span class="pre">open-mpi</span> <span class="pre">libuv</span> <span class="pre">lapack</span> <span class="pre">openblas</span> <span class="pre">llvm</span> <span class="pre">gcc&#64;12</span>
+<span class="pre">`</span></code></p>
+</li>
+<li><p><strong>Set Up Environment Variables</strong></p>
+<p>To use Clang provided by LLVM instead of the default macOS Clang, and to set up other necessary paths, add the following to your <cite>~/.zshrc</cite> or <cite>~/.bashrc</cite> file:</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>sh
+export PATH=/opt/homebrew/opt/llvm/bin:/opt/homebrew/bin:$PATH
+export LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
+export LD_LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
+export OPENBLASROOT=/opt/homebrew/opt/openblas</p>
+<p>export CC=/opt/homebrew/opt/llvm/bin/clang
+export CXX=/opt/homebrew/opt/llvm/bin/clang++
+export FC=gfortran
+<a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<p>Then, source the updated configuration:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
+<span class="pre">source</span> <span class="pre">~/.zshrc</span>&#160; <span class="pre">#</span> <span class="pre">or</span> <span class="pre">source</span> <span class="pre">~/.bashrc</span>
+<span class="pre">`</span></code></p>
+</li>
+<li><p><strong>Clone the Palace Repository</strong></p>
+<p>Clone the Palace repository from GitHub to your local machine:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
+<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">--recurse-submodules</span> <span class="pre">https://github.com/awslabs/palace.git</span>
+<span class="pre">cd</span> <span class="pre">palace</span>
+<span class="pre">`</span></code></p>
+</li>
+<li><p><strong>Set Up the Build Environment</strong></p>
+<p>Create a build directory and navigate to it:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
+<span class="pre">mkdir</span> <span class="pre">build</span>
+<span class="pre">cd</span> <span class="pre">build</span>
+<span class="pre">`</span></code></p>
+</li>
+<li><p><strong>Configure the Build</strong></p>
+<p>Use CMake to configure the build environment, specifying the paths to the BLAS and LAPACK libraries:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
+<span class="pre">cmake</span> <span class="pre">..</span> <span class="pre">-DCMAKE_BUILD_TYPE=Release</span> <span class="pre">-DBLAS_LIBRARIES=/opt/homebrew/opt/openblas/lib/libopenblas.dylib</span> <span class="pre">-DLAPACK_LIBRARIES=/opt/homebrew/opt/lapack/lib/liblapack.dylib</span>
+<span class="pre">`</span></code></p>
+</li>
+<li><p><strong>Build Palace</strong></p>
+<p>Compile the Palace software using the make command:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
+<span class="pre">make</span> <span class="pre">-j$(sysctl</span> <span class="pre">-n</span> <span class="pre">hw.ncpu)</span>
+<span class="pre">`</span></code></p>
+</li>
+<li><p><strong>Update Your Path</strong></p>
+<p>Add the Palace executable to your PATH by adding the following line to your <cite>~/.zshrc</cite> or <cite>~/.bashrc</cite> file:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
+<span class="pre">export</span> <span class="pre">PATH=&quot;/path/to/palace/build/bin:$PATH&quot;</span>
+<span class="pre">`</span></code></p>
+<p>Replace <cite>/path/to/palace/build/bin</cite> with the actual path to the <cite>bin</cite> directory in your Palace build directory.</p>
+</li>
+<li><p><strong>Verify the Installation</strong></p>
+<p>To verify that Palace is installed correctly, open a new terminal session and run:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
+<span class="pre">palace</span>
+<span class="pre">`</span></code></p>
+</li>
+</ol>
+<p>If the command runs without errors, your installation is successful.</p>
+</section>
+<section id="installation-of-palace-on-linux-pcs">
+<h1>Installation of Palace on Linux PCs<a class="headerlink" href="#installation-of-palace-on-linux-pcs" title="Link to this heading">#</a></h1>
+<p>Installing Palace on Linux PCs can be somewhat challenging due to its reliance on high-performance libraries that depend on specific CPU instruction sets. The version of OpenMPI included in Ubuntu’s standard repositories is not compatible with Palace, necessitating the use of Spack to install a compatible version of OpenMPI.</p>
+<p>These scripts were tested on a fresh Ubuntu 22.04 installation as of 11/22/2023.</p>
+<p>Follow these steps for installation:</p>
+<ol class="arabic">
+<li><p>Run the following script to install the required dependencies:</p>
+<blockquote>
+<div><p><a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a>sh
+#!/bin/bash</p>
+<p># Update and upgrade packages
+sudo apt-get update
+sudo apt-get upgrade</p>
+<p># Install utilities
+sudo apt-get install gmsh paraview</p>
+<p># Install Spack prerequisites
+sudo apt-get install build-essential ca-certificates coreutils curl environment-modules gfortran git gpg lsb-release python3 python3-distutils python3-venv unzip zip</p>
+<p># Install Palace prerequisites
+sudo apt-get install pkg-config build-essential cmake python3 mpi-default-dev
+<a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
+</div></blockquote>
+</li>
+<li><p>Run the following script to install Spack, set up MPI, and build Palace:</p>
+<blockquote>
+<div><p><a href="#id17"><span class="problematic" id="id18">``</span></a><a href="#id19"><span class="problematic" id="id20">`</span></a>sh
+#!/bin/bash</p>
+<p># This script will:
+# 1. Install Spack in the current directory
+# 2. Install MPI via Spack
+# 3. Set the system MPI to Spack’s MPI
+# 4. Clone the Palace repository
+# 5. Build Palace</p>
+<p>spack_repo=”<a class="github reference external" href="https://github.com/spack/spack.git">spack/spack.git</a>”
+palace_repo=”<a class="github reference external" href="https://github.com/awslabs/palace.git">awslabs/palace.git</a>”</p>
+<p># Install Spack
+echo ‘Installing Spack to:’
+echo $spack_install_dir
+git clone -c feature.manyFiles=true $spack_repo
+. spack/share/spack/setup-env.sh</p>
+<p># Install MPI
+echo ‘Installing MPI’
+spack install mpi</p>
+<p>mpi_info=($(spack find -p mpi))
+mpi_dir=${mpi_info[-1]}
+mpi_bin_dir=”$mpi_dir/bin”</p>
+<p># Set up paths
+echo ‘MPI bin directory:’
+echo $mpi_bin_dir
+echo -n ‘export PATH=”’ &gt; setup_palace_env.sh
+echo -n $mpi_bin_dir &gt;&gt; setup_palace_env.sh
+echo ‘:$PATH”’ &gt;&gt; setup_palace_env.sh
+source setup_palace_env.sh</p>
+<p># Install Palace
+echo ‘Installing Palace to:’
+echo $palace_install_dir
+git clone –recurse-submodules $palace_repo
+cd palace
+mkdir build
+cd build
+cmake ..
+make -j
+<a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p>
+</div></blockquote>
+</li>
+</ol>
+<p>After running these scripts, you should be able to launch Palace by running:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
+<span class="pre">$</span> <span class="pre">palace</span>
+<span class="pre">`</span></code></p>
+<p>If no errors are encountered, your installation is likely successful.</p>
+</section>
+<section id="installation-of-palace-on-windows-systems">
+<h1>Installation of Palace on Windows Systems<a class="headerlink" href="#installation-of-palace-on-windows-systems" title="Link to this heading">#</a></h1>
+<p>Palace is not officially supported on Windows. However, it is possible to compile Palace on Windows using Visual Studio. The following is a guide to compile Palace on Windows inspired by <a class="reference external" href="https://welsim.com/">https://welsim.com/</a>.</p>
+<section id="compilation-method">
+<h2>Compilation Method<a class="headerlink" href="#compilation-method" title="Link to this heading">#</a></h2>
+<p>Palace provides the Superbuild compilation method with CMake, which automatically downloads all required libraries and compiles them completely. It compiles effortlessly on Linux. However, on Windows, many core libraries such as <code class="docutils literal notranslate"><span class="pre">PETSc,</span> <span class="pre">SLEPc,</span> <span class="pre">libCEED,</span> <span class="pre">MUMPS</span></code>, and others require manual compilation. Therefore, the Superbuild mode provided officially cannot compile as smoothly on Windows. Users need to apply the manual method of establishing Visual Studio projects to complete the building.</p>
+</section>
+<section id="system-and-dependency-libraries">
+<h2>System and Dependency Libraries<a class="headerlink" href="#system-and-dependency-libraries" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Operating System</strong>: Windows 10, 64-bit</p></li>
+<li><p><strong>Compiler</strong>: Visual Studio 2022 Community, C++17. Intel Fortran Compiler 2022.</p></li>
+<li><p><strong>Palace Version</strong>: 0.11.2</p></li>
+</ul>
+<p><strong>Dependency Libraries</strong>:</p>
+<ul class="simple">
+<li><p><strong>Intel MKL</strong>: A popular linear algebra solver, using oneAPI 2022.2.0, consistent with the version of Fortran compiler.</p></li>
+<li><p><strong>METIS</strong>: A mesh partitioning tool for parallel computing, version 5.3.</p></li>
+<li><p><strong>Hypre</strong>: A computational library, version 2.52.</p></li>
+<li><p><strong>nlhmann/json</strong>: Modern C++-based JSON read-write package.</p></li>
+<li><p><strong>{fmt}</strong>: Formatting tool for input-output streams in C/C++.</p></li>
+<li><p><strong>Eigen</strong>: A well-known C++ numerical computing package, has no need for compilation; supports direct header file invocation.</p></li>
+<li><p><strong>libCEED</strong>: A linear algebra computation management terminal that supports parallel computing on various CPUs, GPUs, and clusters.</p></li>
+<li><p><strong>SuperLU_DIST</strong>: The parallel version of SuperLU, a sparse direct linear algebra solver library.</p></li>
+<li><p><strong>STRUMPACK</strong>: An open-source software library for large-scale sparse matrix computing.</p></li>
+<li><p><strong>MUMPS</strong>: An open-source software library from France for solving large-scale sparse linear systems.</p></li>
+<li><p><strong>SLEPc</strong>: A complex number linear algebra solver for eigenvalue problems, based on PETSc.</p></li>
+<li><p><strong>ARPACK-NG</strong>: A complex number linear algebra solver for eigenvalue problems, programmed using Fortran 77 language.</p></li>
+<li><p><strong>GSLIB</strong>: An interpolation solver for high-order spectral elements, optional.</p></li>
+</ul>
+<p>Among these, at least one of the three optional linear solvers <code class="docutils literal notranslate"><span class="pre">SuperLU_DIST,</span> <span class="pre">STRUMPACK,</span> <span class="pre">MUMPS</span></code> must be present. This article uses <code class="docutils literal notranslate"><span class="pre">MUMPS</span></code>. Additionally, out of the two complex solvers, <code class="docutils literal notranslate"><span class="pre">SLEPc</span></code> and <code class="docutils literal notranslate"><span class="pre">ARPACK</span></code>, at least one is required. Without them, eigenvalue-related computing cannot be performed. This article uses <code class="docutils literal notranslate"><span class="pre">ARPACK</span></code>.</p>
+</section>
+<section id="visual-studio-projects">
+<h2>Visual Studio Projects<a class="headerlink" href="#visual-studio-projects" title="Link to this heading">#</a></h2>
+<p>Establish two projects, namely the static library project <code class="docutils literal notranslate"><span class="pre">libpalace</span></code>, and the executable file project <code class="docutils literal notranslate"><span class="pre">palace</span></code>. <code class="docutils literal notranslate"><span class="pre">libpalace</span></code> contains all header and source files. <code class="docutils literal notranslate"><span class="pre">palace</span></code> is the final generated executable file, containing only a <code class="docutils literal notranslate"><span class="pre">main.cpp</span></code> file. This is shown in the figure.</p>
+<p><strong>Project libpalace</strong></p>
+<p>Set the external header file directories.</p>
+<p>Add preprocessor macros:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CEED_SKIP_VISIBILITY</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PALACE_WITH_ARPACK</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_CRT_SECURE_NO_WARNINGS</span></code></p></li>
+</ul>
+<p><strong>Project palace</strong></p>
+<p>The method to add external header files and preprocessor macros is essentially the same as <code class="docutils literal notranslate"><span class="pre">libpalace</span></code>, so it will not be repeated here. Compiling the executable program requires linking all dependent libraries. The added linked libraries are as follows,</p>
+<p>After building, place all dependent dynamic libraries (<code class="docutils literal notranslate"><span class="pre">*.dll</span></code> files) together with the <code class="docutils literal notranslate"><span class="pre">palace.exe</span></code> to run Palace. Test the executable program by running it on the Windows console.</p>
+<p>We have open-sourced the building files for Palace, shared at <a class="github reference external" href="https://github.com/WelSimLLC/palace">WelSimLLC/palace</a>, and provided the compiled <code class="docutils literal notranslate"><span class="pre">palace.exe</span></code> executable file for users to use directly.</p>
+<p>You may need to <code class="docutils literal notranslate"><span class="pre">C:\Program</span> <span class="pre">Files\Microsoft</span> <span class="pre">Visual</span> <span class="pre">Studio\{Year}\{Licence}\VC\Redist\MSVC\v{version}\vc_redist.x64.exe</span></code> to run the executable program and restart the program.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Installation of Palace on HPC systems</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-of-palace-on-mac-os">Installation of Palace on Mac OS</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-of-palace-on-linux-pcs">Installation of Palace on Linux PCs</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-of-palace-on-windows-systems">Installation of Palace on Windows Systems</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compilation-method">Compilation Method</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#system-and-dependency-libraries">System and Dependency Libraries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visual-studio-projects">Visual Studio Projects</a></li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/source/resources/palace.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

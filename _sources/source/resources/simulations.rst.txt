@@ -3,6 +3,16 @@ Simulation Lessons
 
 This is a guide to the simulation methodologies we have found to be useful in our project. 
 
+Palace Simulations
+-------------------
+
+- **Installation Guide:** :doc:`palace`.
+
+.. note::
+   
+   Section Under Construction 🛠️
+
+
 ANSYS Simulations
 -----------------
 
@@ -51,6 +61,7 @@ Some learning resources we've found useful:
 
 - Ansys Parallel Jobs:
     - `Using ANSYS RSM <https://www.hpc.iastate.edu/guides/using-ansys-rsm>`_
+
 
 
 Get Involved
