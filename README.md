@@ -78,12 +78,7 @@ If you use SQuADDS in your research, please cite the following paper:
 
 ## Contributing
 
-Contributions are welcome! If you have improvements or additions to the database, please follow these steps:
-
-- Fork the repository.
-- Create a new branch for your feature.
-- Add your contributions.
-- Submit a pull request with a clear description of your changes.
+We welcome contributions from the community! Please see our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get started.
 
 ## License
 
