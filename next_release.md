@@ -4,11 +4,13 @@
 
 # Features to add:
 
-- [ ] integrate lambda/2 resonators
+- [x] integrate lambda/2 resonators
+- [x] SQDMetal + Palace workflow
+- [x] update tut 1 with chi feature from Evangelos
+- [x] NCap Cavities + Coupled Systems analysis features added + update Tutorial 1 (and Simulator)
+- [ ] server side code of creating cached `merged_df` upon PR acceptance to HuggingFace + autoupdate of the dataset
 - [ ] change backend calculators to be formula free (dependent on `scqubits` and `sqcircuits`) for analysis
-- [ ] SQDMetal + Palace workflow
 - [ ] demo arbitrary circuit + exact Hamiltonian to `design`
-- [ ] update tut 1 with chi feature from Evangelos
 - [ ] handling fixed points/measured data on HuggingFace + SQuADDS
 - [ ] fixing deletion of cache on windows
 - [ ] letting users add methods with computation and append to df for search
@@ -16,7 +18,6 @@
 - [ ] LLM based queries
 - [ ] Standardize the way we handle units for simulated results + impmelent necessary changes in backend
 - [ ] Setting up of **Acceptance Server**
-- [ ] NCap Cavities + Coupled Systems analysis features added + update Tutorial 1 (and Simulator)
 - [ ] H parameter vs Device parameter analysis modules
 
 ---
@@ -32,5 +33,6 @@
 
 - [ ] More data points to existing configurations
 - [ ] Metadata for each configuration
+- [ ] Change all `NCap` to `CapNInterdigital`
 
 ---
