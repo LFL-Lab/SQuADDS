@@ -18,6 +18,7 @@ Contribution Items
 
 | **Implementation of Next Release** - If you would like to help in implementing the next version of SQuADDS, please look at what is being worked on for the `next release <https://github.com/shanto268/SQuADDS?tab=readme-ov-file#next-release>`_
 
+Please see our `Contributing Guidelines <https://github.com/LFL-Lab/SQuADDS/CONTRIBUTING.md>`_ for more information on how to get started.
 
 .. note::
 

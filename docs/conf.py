@@ -1,6 +1,8 @@
 import os
 import sys
 
+from recommonmark.parser import CommonMarkParser
+
 # Set the path to the root of the project
 sys.path.insert(0, os.path.abspath('../..'))
 
@@ -18,6 +20,7 @@ exclude_patterns = [
     "setup.py",
     "README.md",
     "imports_test.py",
+    "CONTRIBUTING.md",
 ]
 
 extensions = [
@@ -37,6 +40,16 @@ extensions = [
     "reno.sphinxext",
     'recommonmark', # Add this for Markdown support
 ]
+
+# Add source suffix and parser configuration
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
+
+source_parsers = {
+    '.md': CommonMarkParser,
+}
 
 # Templates path
 templates_path = ['_templates']
@@ -113,9 +126,6 @@ rst_prolog = f"""
 
 # Enable nitpicky mode to warn about broken references
 nitpicky = True
-
-# Exclude some files from being included in the output
-exclude_patterns = ['README.md', 'imports_test.py', 'setup.py']
 
 # Ensure that MathJax knows to look for LaTeX delimiters
 mathjax_config = {
