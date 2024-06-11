@@ -18,73 +18,73 @@ Follow these steps to ensure a smooth installation process. It was tested to wor
 
    Use Homebrew to install the required dependencies for Palace. Run the following commands in your terminal:
 
-   ```sh
-   brew update
-   brew install cmake git open-mpi libuv lapack openblas llvm gcc@12
-   ```
+   .. code-block:: sh
+
+      brew update
+      brew install cmake git open-mpi libuv lapack openblas llvm gcc@12
 
 2. **Set Up Environment Variables**
 
    To use Clang provided by LLVM instead of the default macOS Clang, and to set up other necessary paths, add the following to your `~/.zshrc` or `~/.bashrc` file:
 
-   ```sh
-   export PATH=/opt/homebrew/opt/llvm/bin:/opt/homebrew/bin:$PATH
-   export LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
-   export LD_LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
-   export OPENBLASROOT=/opt/homebrew/opt/openblas
+   .. code-block:: sh
 
-   export CC=/opt/homebrew/opt/llvm/bin/clang
-   export CXX=/opt/homebrew/opt/llvm/bin/clang++
-   export FC=gfortran
-   ```
+      export PATH=/opt/homebrew/opt/llvm/bin:/opt/homebrew/bin:$PATH
+      export LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
+      export LD_LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
+      export OPENBLASROOT=/opt/homebrew/opt/openblas
+
+      export CC=/opt/homebrew/opt/llvm/bin/clang
+      export CXX=/opt/homebrew/opt/llvm/bin/clang++
+      export FC=gfortran
 
    Then, source the updated configuration:
 
-   ```sh
-   source ~/.zshrc  # or source ~/.bashrc
-   ```
+   .. code-block:: sh
+
+      source ~/.zshrc  # or source ~/.bashrc
 
 3. **Clone the Palace Repository**
 
    Clone the Palace repository from GitHub to your local machine:
 
-   ```sh
-   git clone --recurse-submodules https://github.com/awslabs/palace.git
-   cd palace
-   ```
+   .. code-block:: sh
+
+      git clone --recurse-submodules https://github.com/awslabs/palace.git
+      cd palace
 
 4. **Set Up the Build Environment**
 
    Create a build directory and navigate to it:
 
-   ```sh
-   mkdir build
-   cd build
-   ```
+   .. code-block:: sh
+
+      mkdir build
+      cd build
 
 5. **Configure the Build**
 
    Use CMake to configure the build environment, specifying the paths to the BLAS and LAPACK libraries:
 
-   ```sh
-   cmake .. -DCMAKE_BUILD_TYPE=Release -DBLAS_LIBRARIES=/opt/homebrew/opt/openblas/lib/libopenblas.dylib -DLAPACK_LIBRARIES=/opt/homebrew/opt/lapack/lib/liblapack.dylib
-   ```
+   .. code-block:: sh
+
+      cmake .. -DCMAKE_BUILD_TYPE=Release -DBLAS_LIBRARIES=/opt/homebrew/opt/openblas/lib/libopenblas.dylib -DLAPACK_LIBRARIES=/opt/homebrew/opt/lapack/lib/liblapack.dylib
 
 6. **Build Palace**
 
    Compile the Palace software using the make command:
 
-   ```sh
-   make -j$(sysctl -n hw.ncpu)
-   ```
+   .. code-block:: sh
+
+      make -j$(sysctl -n hw.ncpu)
 
 7. **Update Your Path**
 
    Add the Palace executable to your PATH by adding the following line to your `~/.zshrc` or `~/.bashrc` file:
 
-   ```sh
-   export PATH="/path/to/palace/build/bin:$PATH"
-   ```
+   .. code-block:: sh
+
+      export PATH="/path/to/palace/build/bin:$PATH"
 
    Replace `/path/to/palace/build/bin` with the actual path to the `bin` directory in your Palace build directory.
 
@@ -92,9 +92,12 @@ Follow these steps to ensure a smooth installation process. It was tested to wor
 
    To verify that Palace is installed correctly, open a new terminal session and run:
 
-   ```sh
-   palace
-   ```
+   .. code-block:: sh
+
+      palace
+
+If the command runs without errors, your installation is successful.
+
 
 If the command runs without errors, your installation is successful.
 
@@ -109,7 +112,8 @@ Follow these steps for installation:
 
 1. Run the following script to install the required dependencies:
 
-    ```sh
+.. code-block:: sh
+
     #!/bin/bash
 
     # Update and upgrade packages
@@ -124,11 +128,11 @@ Follow these steps for installation:
 
     # Install Palace prerequisites
     sudo apt-get install pkg-config build-essential cmake python3 mpi-default-dev
-    ```
 
 2. Run the following script to install Spack, set up MPI, and build Palace:
 
-    ```sh
+.. code-block:: sh
+
     #!/bin/bash
 
     # This script will:
@@ -176,9 +180,9 @@ Follow these steps for installation:
 
 After running these scripts, you should be able to launch Palace by running:
 
-```sh
-$ palace
-```
+.. code-block:: sh
+   
+   $ palace
 
 If no errors are encountered, your installation is likely successful. 
 

@@ -590,67 +590,69 @@ document.write(`
 <ol class="arabic">
 <li><p><strong>Install Dependencies</strong></p>
 <p>Use Homebrew to install the required dependencies for Palace. Run the following commands in your terminal:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
-<span class="pre">brew</span> <span class="pre">update</span>
-<span class="pre">brew</span> <span class="pre">install</span> <span class="pre">cmake</span> <span class="pre">git</span> <span class="pre">open-mpi</span> <span class="pre">libuv</span> <span class="pre">lapack</span> <span class="pre">openblas</span> <span class="pre">llvm</span> <span class="pre">gcc&#64;12</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>update
+brew<span class="w"> </span>install<span class="w"> </span>cmake<span class="w"> </span>git<span class="w"> </span>open-mpi<span class="w"> </span>libuv<span class="w"> </span>lapack<span class="w"> </span>openblas<span class="w"> </span>llvm<span class="w"> </span>gcc@12
+</pre></div>
+</div>
 </li>
 <li><p><strong>Set Up Environment Variables</strong></p>
 <p>To use Clang provided by LLVM instead of the default macOS Clang, and to set up other necessary paths, add the following to your <cite>~/.zshrc</cite> or <cite>~/.bashrc</cite> file:</p>
-<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>sh
-export PATH=/opt/homebrew/opt/llvm/bin:/opt/homebrew/bin:$PATH
-export LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
-export LD_LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
-export OPENBLASROOT=/opt/homebrew/opt/openblas</p>
-<p>export CC=/opt/homebrew/opt/llvm/bin/clang
-export CXX=/opt/homebrew/opt/llvm/bin/clang++
-export FC=gfortran
-<a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/opt/homebrew/opt/llvm/bin:/opt/homebrew/bin:<span class="nv">$PATH</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">LIBRARY_PATH</span><span class="o">=</span>/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
+<span class="nb">export</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span>/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
+<span class="nb">export</span><span class="w"> </span><span class="nv">OPENBLASROOT</span><span class="o">=</span>/opt/homebrew/opt/openblas
+
+<span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span>/opt/homebrew/opt/llvm/bin/clang
+<span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>/opt/homebrew/opt/llvm/bin/clang++
+<span class="nb">export</span><span class="w"> </span><span class="nv">FC</span><span class="o">=</span>gfortran
+</pre></div>
+</div>
 <p>Then, source the updated configuration:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
-<span class="pre">source</span> <span class="pre">~/.zshrc</span>&#160; <span class="pre">#</span> <span class="pre">or</span> <span class="pre">source</span> <span class="pre">~/.bashrc</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/.zshrc<span class="w">  </span><span class="c1"># or source ~/.bashrc</span>
+</pre></div>
+</div>
 </li>
 <li><p><strong>Clone the Palace Repository</strong></p>
 <p>Clone the Palace repository from GitHub to your local machine:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
-<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">--recurse-submodules</span> <span class="pre">https://github.com/awslabs/palace.git</span>
-<span class="pre">cd</span> <span class="pre">palace</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/awslabs/palace.git
+<span class="nb">cd</span><span class="w"> </span>palace
+</pre></div>
+</div>
 </li>
 <li><p><strong>Set Up the Build Environment</strong></p>
 <p>Create a build directory and navigate to it:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
-<span class="pre">mkdir</span> <span class="pre">build</span>
-<span class="pre">cd</span> <span class="pre">build</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+</pre></div>
+</div>
 </li>
 <li><p><strong>Configure the Build</strong></p>
 <p>Use CMake to configure the build environment, specifying the paths to the BLAS and LAPACK libraries:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
-<span class="pre">cmake</span> <span class="pre">..</span> <span class="pre">-DCMAKE_BUILD_TYPE=Release</span> <span class="pre">-DBLAS_LIBRARIES=/opt/homebrew/opt/openblas/lib/libopenblas.dylib</span> <span class="pre">-DLAPACK_LIBRARIES=/opt/homebrew/opt/lapack/lib/liblapack.dylib</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>..<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release<span class="w"> </span>-DBLAS_LIBRARIES<span class="o">=</span>/opt/homebrew/opt/openblas/lib/libopenblas.dylib<span class="w"> </span>-DLAPACK_LIBRARIES<span class="o">=</span>/opt/homebrew/opt/lapack/lib/liblapack.dylib
+</pre></div>
+</div>
 </li>
 <li><p><strong>Build Palace</strong></p>
 <p>Compile the Palace software using the make command:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
-<span class="pre">make</span> <span class="pre">-j$(sysctl</span> <span class="pre">-n</span> <span class="pre">hw.ncpu)</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-j<span class="k">$(</span>sysctl<span class="w"> </span>-n<span class="w"> </span>hw.ncpu<span class="k">)</span>
+</pre></div>
+</div>
 </li>
 <li><p><strong>Update Your Path</strong></p>
 <p>Add the Palace executable to your PATH by adding the following line to your <cite>~/.zshrc</cite> or <cite>~/.bashrc</cite> file:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
-<span class="pre">export</span> <span class="pre">PATH=&quot;/path/to/palace/build/bin:$PATH&quot;</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;/path/to/palace/build/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
 <p>Replace <cite>/path/to/palace/build/bin</cite> with the actual path to the <cite>bin</cite> directory in your Palace build directory.</p>
 </li>
 <li><p><strong>Verify the Installation</strong></p>
 <p>To verify that Palace is installed correctly, open a new terminal session and run:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
-<span class="pre">palace</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>palace
+</pre></div>
+</div>
 </li>
 </ol>
+<p>If the command runs without errors, your installation is successful.</p>
 <p>If the command runs without errors, your installation is successful.</p>
 </section>
 <section id="installation-of-palace-on-linux-pcs">
@@ -658,70 +660,78 @@ export FC=gfortran
 <p>Installing Palace on Linux PCs can be somewhat challenging due to its reliance on high-performance libraries that depend on specific CPU instruction sets. The version of OpenMPI included in Ubuntu’s standard repositories is not compatible with Palace, necessitating the use of Spack to install a compatible version of OpenMPI.</p>
 <p>These scripts were tested on a fresh Ubuntu 22.04 installation as of 11/22/2023.</p>
 <p>Follow these steps for installation:</p>
-<ol class="arabic">
-<li><p>Run the following script to install the required dependencies:</p>
-<blockquote>
-<div><p><a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a>sh
-#!/bin/bash</p>
-<p># Update and upgrade packages
-sudo apt-get update
-sudo apt-get upgrade</p>
-<p># Install utilities
-sudo apt-get install gmsh paraview</p>
-<p># Install Spack prerequisites
-sudo apt-get install build-essential ca-certificates coreutils curl environment-modules gfortran git gpg lsb-release python3 python3-distutils python3-venv unzip zip</p>
-<p># Install Palace prerequisites
-sudo apt-get install pkg-config build-essential cmake python3 mpi-default-dev
-<a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
-</div></blockquote>
-</li>
-<li><p>Run the following script to install Spack, set up MPI, and build Palace:</p>
-<blockquote>
-<div><p><a href="#id17"><span class="problematic" id="id18">``</span></a><a href="#id19"><span class="problematic" id="id20">`</span></a>sh
-#!/bin/bash</p>
-<p># This script will:
-# 1. Install Spack in the current directory
-# 2. Install MPI via Spack
-# 3. Set the system MPI to Spack’s MPI
-# 4. Clone the Palace repository
-# 5. Build Palace</p>
-<p>spack_repo=”<a class="github reference external" href="https://github.com/spack/spack.git">spack/spack.git</a>”
-palace_repo=”<a class="github reference external" href="https://github.com/awslabs/palace.git">awslabs/palace.git</a>”</p>
-<p># Install Spack
-echo ‘Installing Spack to:’
-echo $spack_install_dir
-git clone -c feature.manyFiles=true $spack_repo
-. spack/share/spack/setup-env.sh</p>
-<p># Install MPI
-echo ‘Installing MPI’
-spack install mpi</p>
-<p>mpi_info=($(spack find -p mpi))
-mpi_dir=${mpi_info[-1]}
-mpi_bin_dir=”$mpi_dir/bin”</p>
-<p># Set up paths
-echo ‘MPI bin directory:’
-echo $mpi_bin_dir
-echo -n ‘export PATH=”’ &gt; setup_palace_env.sh
-echo -n $mpi_bin_dir &gt;&gt; setup_palace_env.sh
-echo ‘:$PATH”’ &gt;&gt; setup_palace_env.sh
-source setup_palace_env.sh</p>
-<p># Install Palace
-echo ‘Installing Palace to:’
-echo $palace_install_dir
-git clone –recurse-submodules $palace_repo
-cd palace
-mkdir build
-cd build
-cmake ..
-make -j
-<a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p>
-</div></blockquote>
-</li>
+<ol class="arabic simple">
+<li><p>Run the following script to install the required dependencies:</p></li>
 </ol>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="c1"># Update and upgrade packages</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>upgrade
+
+<span class="c1"># Install utilities</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>gmsh<span class="w"> </span>paraview
+
+<span class="c1"># Install Spack prerequisites</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>build-essential<span class="w"> </span>ca-certificates<span class="w"> </span>coreutils<span class="w"> </span>curl<span class="w"> </span>environment-modules<span class="w"> </span>gfortran<span class="w"> </span>git<span class="w"> </span>gpg<span class="w"> </span>lsb-release<span class="w"> </span>python3<span class="w"> </span>python3-distutils<span class="w"> </span>python3-venv<span class="w"> </span>unzip<span class="w"> </span>zip
+
+<span class="c1"># Install Palace prerequisites</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>pkg-config<span class="w"> </span>build-essential<span class="w"> </span>cmake<span class="w"> </span>python3<span class="w"> </span>mpi-default-dev
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Run the following script to install Spack, set up MPI, and build Palace:</p></li>
+</ol>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="c1"># This script will:</span>
+<span class="c1"># 1. Install Spack in the current directory</span>
+<span class="c1"># 2. Install MPI via Spack</span>
+<span class="c1"># 3. Set the system MPI to Spack&#39;s MPI</span>
+<span class="c1"># 4. Clone the Palace repository</span>
+<span class="c1"># 5. Build Palace</span>
+
+<span class="nv">spack_repo</span><span class="o">=</span><span class="s2">&quot;https://github.com/spack/spack.git&quot;</span>
+<span class="nv">palace_repo</span><span class="o">=</span><span class="s2">&quot;https://github.com/awslabs/palace.git&quot;</span>
+
+<span class="c1"># Install Spack</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;Installing Spack to:&#39;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$spack_install_dir</span>
+git<span class="w"> </span>clone<span class="w"> </span>-c<span class="w"> </span>feature.manyFiles<span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="nv">$spack_repo</span>
+.<span class="w"> </span>spack/share/spack/setup-env.sh
+
+<span class="c1"># Install MPI</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;Installing MPI&#39;</span>
+spack<span class="w"> </span>install<span class="w"> </span>mpi
+
+<span class="nv">mpi_info</span><span class="o">=(</span><span class="k">$(</span>spack<span class="w"> </span>find<span class="w"> </span>-p<span class="w"> </span>mpi<span class="k">)</span><span class="o">)</span>
+<span class="nv">mpi_dir</span><span class="o">=</span><span class="si">${</span><span class="nv">mpi_info</span><span class="p">[-1]</span><span class="si">}</span>
+<span class="nv">mpi_bin_dir</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$mpi_dir</span><span class="s2">/bin&quot;</span>
+
+<span class="c1"># Set up paths</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;MPI bin directory:&#39;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$mpi_bin_dir</span>
+<span class="nb">echo</span><span class="w"> </span>-n<span class="w"> </span><span class="s1">&#39;export PATH=&quot;&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>setup_palace_env.sh
+<span class="nb">echo</span><span class="w"> </span>-n<span class="w"> </span><span class="nv">$mpi_bin_dir</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>setup_palace_env.sh
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>setup_palace_env.sh
+<span class="nb">source</span><span class="w"> </span>setup_palace_env.sh
+
+<span class="c1"># Install Palace</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;Installing Palace to:&#39;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$palace_install_dir</span>
+git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span><span class="nv">$palace_repo</span>
+<span class="nb">cd</span><span class="w"> </span>palace
+mkdir<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..
+make<span class="w"> </span>-j
+<span class="sb">```</span>
+</pre></div>
+</div>
 <p>After running these scripts, you should be able to launch Palace by running:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
-<span class="pre">$</span> <span class="pre">palace</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>palace
+</pre></div>
+</div>
 <p>If no errors are encountered, your installation is likely successful.</p>
 </section>
 <section id="installation-of-palace-on-windows-systems">
