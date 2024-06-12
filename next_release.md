@@ -4,7 +4,12 @@
 
 # Features to add:
 
-- [ ] integrate lambda/2 resonators
+- [x] integrate lambda/2 resonators
+- [ ] Integrate SQDMetal in SQuADDS
+- [x] SQDMetal + Palace workflow
+- [x] update tut 1 with chi feature from Evangelos
+- [x] NCap Cavities + Coupled Systems analysis features added + update Tutorial 1 (and Simulator)
+- [ ] server side code of creating cached `merged_df` upon PR acceptance to HuggingFace + autoupdate of the dataset
 - [ ] change backend calculators to be formula free (dependent on `scqubits` and `sqcircuits`) for analysis
 - [ ] SQDMetal + Palace workflow
 - [ ] demo arbitrary circuit + exact Hamiltonian to `design`
