@@ -271,7 +271,10 @@ class Analyzer:
         self._add_target_params_columns()
 
         # Log if parameters outside of library
-        filtered_df = self.df[self.target_params]  # Filter DataFrame based on H_param_keys
+        target_new = list(self.target_params.keys())
+        filtered_df = self.df[target_new]  
+        
+        # Filter DataFrame based on H_param_keys
         self._outside_bounds(df=filtered_df, params=target_params, display=display)
 
         # Set strategy dynamically based on the metric parameter
