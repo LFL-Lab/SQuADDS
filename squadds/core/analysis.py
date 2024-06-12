@@ -271,8 +271,8 @@ class Analyzer:
         self._add_target_params_columns()
 
         # Log if parameters outside of library
-        target_new = list(self.target_params.keys())
-        filtered_df = self.df[target_new]  
+        target_params_list = list(self.target_params.keys())
+        filtered_df = self.df[target_params_list]  
         
         # Filter DataFrame based on H_param_keys
         self._outside_bounds(df=filtered_df, params=target_params, display=display)
