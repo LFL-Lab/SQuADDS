@@ -33,9 +33,11 @@ Contributors
 ------------
 
 | **Eli Levenson-Falk** (University of Southern California) - Eternal Guidance Provider 🙏🏽
-| **Andre Kuo** (University of Southern California) - Code contributor 💻
+| **Andre Kuo** (University of Southern California) - Code 💻 + Data contributor 📀
 | **Clark Miyamoto** (New York University) - Code contributor 💻
 | **Madison Howard** (California Institute of Technology) - Bug Hunter 🐛
 | **Evangelos Vlachos** (University of Southern California) - Code contributor 💻 and Bug Hunter 🐛
 | **Anne Whelan** (University of Southern California) - Documentation contributor 📄
 | **Jenny Huang** (University of Southern California) - Documentation contributor 📄
+| **Connie Miao** (Stanford University) - Data Contributor 📀
+| **Elizabeth Kunz** (University of Southern California) - Code contributor 💻

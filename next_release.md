@@ -5,6 +5,7 @@
 # Features to add:
 
 - [x] integrate lambda/2 resonators
+- [ ] Integrate SQDMetal in SQuADDS
 - [x] SQDMetal + Palace workflow
 - [x] update tut 1 with chi feature from Evangelos
 - [x] NCap Cavities + Coupled Systems analysis features added + update Tutorial 1 (and Simulator)
