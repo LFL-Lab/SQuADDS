@@ -14,13 +14,12 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 
 ## Table of Contents
 
-- [Installation](#installation)
+- [Installation](#setup)
 - [Tutorials](#tutorials)
 - [Citation](#citation)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
-- [Next Release:](#next-release)
 
 ---
 
@@ -78,7 +77,9 @@ If you use SQuADDS in your research, please cite the following paper:
 
 ## Contributing
 
-We welcome contributions from the community! Please see our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get started.
+We welcome contributions from the community! Here is our [work wish list](wish_list.md).
+
+Please see our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get started and absolutely feel free to reach out to us if you have any questions.
 
 ## License
 
@@ -87,11 +88,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc.edu).
-
----
-
-## Next Release:
-
-### [Version 0.3 Features](next_release.md):
 
 ---
