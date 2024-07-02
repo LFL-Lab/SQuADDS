@@ -92,6 +92,8 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 
 ## Future Release:
 
-### [work wish list](wish_list.md):
+Here is our [work wish list](wish_list.md).
+
+Please feel free to contact us if you are interested in contributing to any of these efforts.
 
 ---
