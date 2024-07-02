@@ -90,8 +90,8 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 
 ---
 
-## Next Release:
+## Future Release:
 
-### [Version 0.3 Features](next_release.md):
+### [work wish list](wish_list.md):
 
 ---
