@@ -25,6 +25,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 - a system to "metalize" any .gds/.dxf file (i.e. from the CAD file generate the corresponding Qiskit Metal file)
 - add support to handle designs generated via other tools (explicitly not qiskit metal e.g. [KQCircuits](https://github.com/iqm-finland/KQCircuits), [DXFWriter](https://github.com/SchusterLab/maskLib), [gdsfactory](https://github.com/gdsfactory/gplugins), [pyhfss](https://github.com/QW-QubitDesign/pyHFSS), [phidl](https://github.com/amccaugh/phidl))
 - API (modules/methods) to easily allow for adding more data columns to existing simulation entries in the database (e.g. someone with a lot of compute may want to rerun all the geometries in our database and add the participation ratio of various interfaces to the database -> lets make it easy for them?)
+- refactor code to implement faster way with lower memory usage for handling dataframe operations?
 
 ## Contribution:
 
@@ -45,6 +46,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 ## Workflows:
 
 - Addition of any other workflow that adds to/helps developers contribute
+- an automated build check with comprehensive unit tests
 
 ## Feature Requests:
 
@@ -57,6 +59,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 ## Boring but Necessary:
 
 - **Check for breaking changes in the latest version of dependencies and update the package accordingly**
+- create unit tests for each feature/file
 - create proper train/test/splits and changing `SQuADDS_DB()` to always return all data
 - Standardize the way we handle units for simulated results + impmelent necessary changes in backend
 - More tutorials on how to use the package + various applications of the package

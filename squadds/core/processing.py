@@ -15,6 +15,10 @@ def update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols):
         cavity_df[f'temp_{term}'] = cavity_df['design_options'].map(lambda x: x['cplr_opts'].get(term))
         ncap_df[f'temp_{term}'] = ncap_df['design_options'].map(lambda x: x.get(term))
     
+    # Add index columns to cavity_df and ncap_df
+    cavity_df = cavity_df.reset_index().rename(columns={'index': 'index_cc'})
+    ncap_df = ncap_df.reset_index().rename(columns={'index': 'index_ncap'})
+
     # Perform the merge on the specific common terms
     merged_df = pd.merge(cavity_df, ncap_df, 
                          left_on=[f'temp_{term}' for term in merger_terms], 
@@ -28,20 +32,23 @@ def update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols):
 
     # Update the cavity_df with the ncap parameters
     def update_cpw_cplr_opts(row):
-        ncap_opts = ncap_df.iloc[0]["design_options"]
+        ncap_opts = row["design_options_ncap"]
         cpw_cplr_opts = row["design_options_cavity_claw"]["cplr_opts"]
         common_terms = set(ncap_opts.keys()) & set(cpw_cplr_opts.keys())
+        updated_cplr_opts = cpw_cplr_opts.copy()  # Make a copy to update
         for term in common_terms:
-            cpw_cplr_opts[term] = ncap_opts[term]
-        return cpw_cplr_opts
+            updated_cplr_opts[term] = ncap_opts[term]
+        return updated_cplr_opts
 
-    merged_df["design_options_cavity_claw"]["cplr_opts"] = merged_df.apply(update_cpw_cplr_opts, axis=1)
+    merged_df["design_options_cavity_claw"] = merged_df.apply(
+        lambda row: {**row["design_options_cavity_claw"], "cplr_opts": update_cpw_cplr_opts(row)}, axis=1)
 
     # Remove the temporary columns
     merged_df = merged_df.drop(columns=[f'temp_{term}' for term in merger_terms])
     
-    # Remove all the columns with "_ncap" suffix
-    merged_df = merged_df.drop(columns=[col for col in merged_df.columns if col.endswith("_ncap")])
+    # Remove all the columns with "_ncap" suffix except 'index_ncap'
+    columns_to_drop = [col for col in merged_df.columns if col.endswith("_ncap") and col != 'index_ncap']
+    merged_df = merged_df.drop(columns=columns_to_drop)
 
     # Remove all the columns with ncap_sim_cols
     merged_df = merged_df.drop(columns=ncap_sim_cols)
@@ -50,6 +57,7 @@ def update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols):
     merged_df = merged_df.rename(columns={col: col.replace("_cavity_claw", "") for col in merged_df.columns})
 
     return merged_df
+
 
 def update_cavity_frequency_and_kappa(merged_df, Z0=50):
     """

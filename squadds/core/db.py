@@ -685,20 +685,30 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit)
         cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity)
 
-        if self.selected_coupler:
+        if self.selected_coupler == "CLT":
             cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler})
-            if self.selected_coupler == "CapNInterdigitalTee":
-                cavity_df = self._update_cap_interdigital_tee_parameters(cavity_df)
+        if self.selected_coupler == "CapNInterdigitalTee":
+            """
+            # for creating the half-wave cavity_claw df
 
-        df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap'], parallelize=parallelize, num_cpu=num_cpu)
+            cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": "NCap"})
+            cavity_df = self._update_cap_interdigital_tee_parameters(cavity_df)
+            """
+
+            """
+            #!TODO: read the cavity_df from HF and return it
+            """
+            raise NotImplementedError("Creating the half-wave cavity_claw df is not yet implemented.")
+
+        # merger_terms = ['claw_width', 'claw_length', 'claw_gap']
+        merger_terms = ['claw_length'] # 07/2024 -> claw_length is the only parameter that is common between qubit and cavity
+
+        df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=merger_terms, parallelize=parallelize, num_cpu=num_cpu)
         return df
 
-    def _update_cap_interdigital_tee_parameters(self, df):
+    def _update_cap_interdigital_tee_parameters(self, cavity_df):
         """Updates parameters for CapNInterdigitalTee coupler."""
-        cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity)
-        cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler})
-        
-        ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler)
+        ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name="NCap")
         merger_terms = ['prime_width', 'prime_gap', 'second_width', 'second_gap']
         ncap_sim_cols = ['bottom_to_bottom', 'bottom_to_ground', 'ground_to_ground', 'top_to_bottom', 'top_to_ground', 'top_to_top']
         
@@ -725,6 +735,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         for merger_term in merger_terms:
             qubit_df[merger_term] = qubit_df['design_options'].map(lambda x: x['connection_pads']['readout'].get(merger_term))
             cavity_df[merger_term] = cavity_df['design_options'].map(lambda x: x['claw_opts']['connection_pads']['readout'].get(merger_term))
+
+        # Add index column to qubit_df
+        qubit_df = qubit_df.reset_index().rename(columns={'index': 'index_qc'})
 
         if parallelize:
             n_cores = cpu_count() if num_cpu is None else num_cpu
