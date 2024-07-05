@@ -1,6 +1,36 @@
 Release Notes
 =============
 
+Version 0.2.36 (2024-07-06)
+--------------------------
+
+* **Alpha Version 0.2.36**
+
+**Breaking Changes**
+
+- support for `NCap` and `CapNInterdigitalTee` strings everywhere in HuggingFace and the codebase (**`Ncap` will be dropped in the future**)
+- `select_coupler` would no longer be supported. Use `select_resonator_type` instead
+-  `Analyzer` object no longer requires `SQuADDS_DB()` in its constructor
+
+**New Features**
+
+- Added the option to create lambda/2 resonators
+- Interpolation support for lambda/2 resonators
+
+**Improvements**
+
+- Added `chi` as a query parameter
+- Better and more intuitive API 
+- "hot reload" of `Analyzer` object
+- Updated documentation and tutorials
+- Added `release-drafter` for automated release notes
+
+**Bug Fixes**
+
+- Fixed bugs in Simulation Code (simulation of CapNInterdigitalTee and half feature-half_wave_cavity)
+
+---
+
 Version 0.2.35 (2024-07-04)
 --------------------------
 
