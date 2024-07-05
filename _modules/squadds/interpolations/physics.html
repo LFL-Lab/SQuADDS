@@ -666,29 +666,26 @@ document.write(`
 
         <span class="n">closest_kappa</span> <span class="o">=</span> <span class="n">closest_cavity_cpw_design</span><span class="p">[</span><span class="s1">&#39;kappa_kHz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">closest_f_cavity</span> <span class="o">=</span> <span class="n">closest_cavity_cpw_design</span><span class="p">[</span><span class="s1">&#39;cavity_frequency_GHz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="n">closest_coupler_length</span> <span class="o">=</span> <span class="n">string_to_float</span><span class="p">(</span><span class="n">closest_cavity_cpw_design</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cplr_opts&#39;</span><span class="p">][</span><span class="s1">&#39;coupling_length&#39;</span><span class="p">])</span>
 
         <span class="c1"># Scale resonator and coupling element dimensions</span>
         <span class="n">updated_resonator_length</span> <span class="o">=</span> <span class="n">string_to_float</span><span class="p">(</span><span class="n">closest_cavity_cpw_design</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">][</span><span class="s1">&#39;total_length&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">closest_cavity_cpw_design</span><span class="p">[</span><span class="s1">&#39;cavity_frequency_GHz&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">f_res_target</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
+        <span class="n">res_scaling</span> <span class="o">=</span> <span class="n">closest_f_cavity</span> <span class="o">/</span> <span class="n">f_res_target</span>
         <span class="n">kappa_scaling</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kappa_target</span> <span class="o">/</span> <span class="n">closest_kappa</span><span class="p">)</span>
+
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">50</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Kappa scaling: </span><span class="si">{</span><span class="n">kappa_scaling</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;g scaling: </span><span class="si">{</span><span class="n">g_scaling</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alpha scaling: </span><span class="si">{</span><span class="n">alpha_scaling</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;resonator scaling: </span><span class="si">{</span><span class="n">res_scaling</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">50</span><span class="p">)</span>
+
         <span class="n">updated_coupling_length</span> <span class="o">=</span> <span class="n">string_to_float</span><span class="p">(</span><span class="n">closest_cavity_cpw_design</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cplr_opts&#39;</span><span class="p">][</span><span class="s1">&#39;coupling_length&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">kappa_scaling</span>
         <span class="c1"># round updated_coupling_length to nearest integer</span>
         <span class="n">updated_coupling_length</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">updated_coupling_length</span><span class="p">)</span>
 
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        print(&quot;=&quot;*50)</span>
-<span class="sd">        print(f&quot;Updated resonator length: {updated_resonator_length}&quot;)</span>
-<span class="sd">        print(f&quot;Updated coupling length: {updated_coupling_length}&quot;)</span>
-<span class="sd">        print(f&quot;Updated cross length: {updated_cross_length}&quot;)</span>
-<span class="sd">        print(f&quot;Updated claw length: {updated_claw_length}&quot;)</span>
-<span class="sd">        print(&quot;=&quot;*50)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Reset the analyzer&#39;s DataFrame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">merged_df</span>
@@ -709,17 +706,23 @@ document.write(`
         <span class="n">qubit_design_options</span><span class="p">[</span><span class="s1">&#39;hfss_inductance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">required_Lj</span><span class="o">*</span><span class="mf">1e-9</span>
         <span class="n">qubit_design_options</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s1">&#39;Lj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">required_Lj</span><span class="si">}</span><span class="s2">nH&quot;</span>
 
+        <span class="c1"># setting the `claw_cpw_*` params to zero</span>
+        <span class="n">qubit_design_options</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+        <span class="n">qubit_design_options</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+
         <span class="n">cavity_design_options</span> <span class="o">=</span> <span class="n">closest_cavity_cpw_design</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">cavity_design_options</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">][</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">updated_resonator_length</span><span class="si">}</span><span class="s2">um&quot;</span>
         <span class="n">cavity_design_options</span><span class="p">[</span><span class="s1">&#39;cplr_opts&#39;</span><span class="p">][</span><span class="s1">&#39;coupling_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">updated_coupling_length</span><span class="si">}</span><span class="s2">um&quot;</span>
 
-
+        <span class="c1"># update the claw of the cavity based on the one from the qubit</span>
+        <span class="n">cavity_design_options</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">qubit_design_options</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">]</span>
 
         <span class="n">interpolated_designs_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">,</span>
             <span class="s2">&quot;design_options_qubit&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qubit_design_options</span><span class="p">],</span>
             <span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">cavity_design_options</span><span class="p">],</span>
-            <span class="s2">&quot;sim_options_qubit&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">closest_qubit_claw_design</span><span class="p">[</span><span class="s2">&quot;setup_qubit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
-            <span class="s2">&quot;sim_options_cavity_claw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">closest_cavity_cpw_design</span><span class="p">[</span><span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="s2">&quot;setup_qubit&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">closest_qubit_claw_design</span><span class="p">[</span><span class="s2">&quot;setup_qubit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">closest_cavity_cpw_design</span><span class="p">[</span><span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
         <span class="p">})</span>
 
         <span class="n">device_design_options</span> <span class="o">=</span> <span class="n">create_unified_design_options</span><span class="p">(</span><span class="n">interpolated_designs_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>

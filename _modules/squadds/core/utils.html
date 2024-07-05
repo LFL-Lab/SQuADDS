@@ -596,6 +596,20 @@ document.write(`
 <span class="kn">from</span> <span class="nn">squadds.core.globals</span> <span class="kn">import</span> <span class="n">ENV_FILE_PATH</span>
 
 
+<div class="viewcode-block" id="save_intermediate_df">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.save_intermediate_df">[docs]</a>
+<span class="k">def</span> <span class="nf">save_intermediate_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">file_idx</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save the intermediate DataFrame to disk in Parquet format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): The DataFrame to save.</span>
+<span class="sd">        filename (str): The base name of the file to save the DataFrame to.</span>
+<span class="sd">        file_idx (int): The index of the file chunk.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">file_idx</span><span class="si">}</span><span class="s2">.parquet&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="set_github_token">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.set_github_token">[docs]</a>
 <span class="k">def</span> <span class="nf">set_github_token</span><span class="p">():</span>
@@ -611,7 +625,7 @@ document.write(`
             <span class="k">if</span> <span class="s1">&#39;GITHUB_TOKEN=&#39;</span> <span class="ow">in</span> <span class="n">existing_keys</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Token already exists in .env file.&#39;</span><span class="p">)</span>
                 <span class="k">return</span>
-    
+
     <span class="c1"># Ask for the new token</span>
     <span class="n">token</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="s2">&quot;Enter your GitHub PAT token (with at least repo scope): &quot;</span><span class="p">)</span>
     <span class="c1"># Append the new token to the .env file</span>
@@ -684,7 +698,7 @@ document.write(`
             <span class="n">schema</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">get_type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">schema</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-    
+
     <span class="k">return</span> <span class="n">schema</span></div>
 
 
@@ -841,7 +855,7 @@ document.write(`
     <span class="c1"># Default cache directory is &#39;~/.cache/huggingface/datasets&#39; on Unix systems</span>
     <span class="c1"># and &#39;C:\\Users\\&lt;username&gt;\\.cache\\huggingface\\datasets&#39; on Windows</span>
     <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">),</span> <span class="s2">&quot;.cache&quot;</span><span class="p">,</span> <span class="s2">&quot;huggingface&quot;</span><span class="p">,</span> <span class="s2">&quot;datasets&quot;</span><span class="p">)</span>
-    
+
     <span class="c1"># Adjust the path for Windows if necessary</span>
     <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span><span class="p">:</span>
         <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">),</span> <span class="s2">&quot;AppData&quot;</span><span class="p">,</span> <span class="s2">&quot;Local&quot;</span><span class="p">,</span> <span class="s2">&quot;huggingface&quot;</span><span class="p">,</span> <span class="s2">&quot;datasets&quot;</span><span class="p">)</span>
@@ -934,11 +948,18 @@ document.write(`
 <span class="sd">        dict: The unified design options dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">cavity_dict</span> <span class="o">=</span> <span class="n">convert_numpy</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">])</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="n">coupler_type</span> <span class="o">=</span> <span class="s2">&quot;CLT&quot;</span>
+    <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span>
+
     <span class="n">qubit_dict</span> <span class="o">=</span> <span class="n">convert_numpy</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">])</span>
+
+    <span class="c1"># setting the `claw_cpw_*` params to zero</span>
+    <span class="n">qubit_dict</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">qubit_dict</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">cavity_dict</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">cavity_dict</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+
+    <span class="c1"># replacing the ground spacing of the cavity by that of the qubit</span>
+    <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">qubit_dict</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">]</span>
 
     <span class="n">device_dict</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1015,7 +1036,7 @@ document.write(`
     <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">conditions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="p">[</span><span class="n">filtered_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">]</span>
-    
+
     <span class="c1"># Check if the filtered DataFrame is empty</span>
     <span class="k">if</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No rows match the given conditions. Returning the original DataFrame.&quot;</span><span class="p">)</span>
@@ -1039,7 +1060,7 @@ document.write(`
             <span class="k">if</span> <span class="s1">&#39;HUGGINGFACE_API_KEY=&#39;</span> <span class="ow">in</span> <span class="n">existing_keys</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;API key already exists in .env file.&#39;</span><span class="p">)</span>
                 <span class="k">return</span>
-    
+
     <span class="c1"># Ask for the new API key</span>
     <span class="n">api_key</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="s2">&quot;Enter your Hugging Face API key: &quot;</span><span class="p">)</span>
     <span class="c1"># Append the new API key to the .env file</span>
