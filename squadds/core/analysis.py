@@ -49,7 +49,7 @@ class Analyzer:
     __supported_metrics__ = ['Euclidean', 'Manhattan', 'Chebyshev', 'Weighted Euclidean' , 'Custom']
     __supported_estimation_methods__ = ['Interpolation']
 
-    def __init__(self):
+    def __init__(self, db=None):
         """
         Initializes an instance of the Analysis class.
 
@@ -76,11 +76,9 @@ class Analyzer:
             - target_params: The target parameters.
             - H_param_keys: The H parameter keys.
         """
-        from squadds.core.db import \
-            SQuADDS_DB  # Local import to avoid circular dependency
-
-        self.db = SQuADDS_DB()  # Always fetches the singleton instance
-        self._initialize_attributes()
+        from squadds.core.db import SQuADDS_DB
+        self.db = db if db is not None else SQuADDS_DB()
+        self.reload_db()
 
     def _initialize_attributes(self):
         self.selected_component_name = self.db.selected_component_name
@@ -115,9 +113,6 @@ class Analyzer:
         """
         Reload the Analyzer with the current singleton SQuADDS_DB object.
         """
-        from squadds.core.db import \
-            SQuADDS_DB  # Local import to avoid circular dependency
-        self.db = SQuADDS_DB()  # Fetches the latest singleton instance
         self._initialize_attributes()
         
     def _add_target_params_columns(self):

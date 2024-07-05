@@ -24,6 +24,7 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         import scqubits as scq
         super().__init__(analysis)
+        self.analyzer = analysis
         scq.set_units("GHz")
         
     def plot_data(self, data_frame):
@@ -323,7 +324,7 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         self.add_qubit_H_params()
         #pprint.pprint(self.df.head())
         #pprint.pprint(self.df.columns)
-        if self.selected_resonator_type == "half":
+        if self.analyzer.selected_resonator_type == "half":
             self.df['g_MHz'] = self.df.apply(lambda row: self.g_from_cap_matrix(C=row['cross_to_ground'], 
                             C_c=row['cross_to_claw'], 
                             EJ=row['EJ'],
