@@ -1,13 +1,63 @@
 """
-!TODO: add methods to compute g for half wave cavity in the super fast manner from dev_merged_df_ncap.ipynb notebook
+#!TODO: Generalize the half-wave cavity method usage
 """
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import psutil
+from joblib import Parallel, delayed
+from numba import jit, prange
 from pyEPR.calcs import Convert
-from scipy.constants import e, h, hbar
+from scipy.constants import Planck, e, h, hbar, pi
 from scqubits.core.transmon import Transmon
 
 from squadds.calcs.qubit import QubitHamiltonian
+
+"""
+========================================================
+Constants
+========================================================
+"""
+# constants
+ϕ0 = hbar / (2 * e)   # Flux quantum (Weber)
+
+"""
+========================================================
+Numba decorated methods
+========================================================
+"""
+
+@jit(nopython=True)
+def Ec_from_Cs(Cs):
+    """
+    Calculate the charging energy (Ec) in GHz from the capacitance (Cs) in fF.
+    """
+    Cs_SI = Cs * 1e-15
+    Ec_Joules = (e ** 2) / (2 * Cs_SI)
+    Ec_Hz = Ec_Joules / Planck
+    Ec_GHz = Ec_Hz * 1e-9
+    return Ec_GHz
+
+@jit(nopython=True)
+def EC_numba(cross_to_claw, cross_to_ground):
+    C_eff_fF = np.abs(cross_to_ground) + np.abs(cross_to_claw)
+    EC = Ec_from_Cs(C_eff_fF)
+    return EC
+
+@jit(nopython=True, parallel=True)
+def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+    C = np.abs(C)
+    C_c = np.abs(C_c)
+    C_q = C_c + C # fF
+
+    omega_r = 2 * np.pi * f_r * 1e9
+
+    EC = Ec_from_Cs(C_q)
+
+    res_type_factor = 2 if res_type == "half" else 4 if res_type == "quarter" else 1
+
+    g = (np.abs(C_c) / C_q) * omega_r * np.sqrt(res_type_factor * Z0 * e ** 2 / (hbar * np.pi)) * (EJ / (8 * EC)) ** (1 / 4)
+    return (g * 1E-6) / (2 * np.pi)  # MHz
 
 
 class TransmonCrossHamiltonian(QubitHamiltonian):
@@ -24,9 +74,9 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         import scqubits as scq
         super().__init__(analysis)
-        self.analyzer = analysis
+        self.selected_resonator_type = analysis.selected_resonator_type
         scq.set_units("GHz")
-        
+
     def plot_data(self, data_frame):
         """
         Plot the data from the given DataFrame.
@@ -298,17 +348,40 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         Returns:
             None
         """
-
-        EJ_target = self.EJ(self.target_params["qubit_frequency_GHz"], self.target_params["anharmonicity_MHz"]*1e-3)
-
+        EJ_target = self.EJ(self.target_params["qubit_frequency_GHz"], self.target_params["anharmonicity_MHz"] * 1e-3)
         self.df["EC"] = self.df.apply(lambda row: self.EC(row["cross_to_claw"], row["cross_to_ground"]), axis=1)
-
         self.df['EJ'] = EJ_target
-        # self.df["EJEC"] = self.df.apply(lambda row: row["EJ"] / row["EC"], axis=1)
         self.df['qubit_frequency_GHz'], self.df['anharmonicity_MHz'] = zip(*self.df.apply(lambda row: self.E01_and_anharmonicity(row['EJ'], row['EC']), axis=1))
 
+    def add_qubit_H_params_chunk(self, df):
+        """
+        Add qubit Hamiltonian parameters to the DataFrame chunk.
 
-    def add_cavity_coupled_H_params(self):
+        This method calculates and adds the qubit Hamiltonian parameters, such as EC, EJ, and EJEC,
+
+        Args:
+            - df: The DataFrame chunk to which the parameters will be added.
+
+        Returns:
+            - df: The DataFrame chunk with the added parameters
+        """
+        EJ_target = self.EJ(self.target_params["qubit_frequency_GHz"], self.target_params["anharmonicity_MHz"] * 1e-3)
+        EJ_target = np.float32(EJ_target)  # Ensure memory-efficient data type
+
+        cross_to_claw_values = df["cross_to_claw"].values
+        cross_to_ground_values = df["cross_to_ground"].values
+        EC_values = np.array([EC_numba(claw, ground) for claw, ground in zip(cross_to_claw_values, cross_to_ground_values)], dtype=np.float32)
+
+        df["EC"] = EC_values
+        df['EJ'] = EJ_target
+        df['qubit_frequency_GHz'], df['anharmonicity_MHz'] = np.vectorize(self.E01_and_anharmonicity)(df['EJ'].values, df['EC'].values)
+        df['qubit_frequency_GHz'] = df['qubit_frequency_GHz'].astype(np.float32)
+        df['anharmonicity_MHz'] = df['anharmonicity_MHz'].astype(np.float32)
+
+        return df
+
+
+    def add_cavity_coupled_H_params(self, num_chunks="auto",Z_0=50):
         """
         Add cavity-coupled Hamiltonian parameters to the dataframe.
 
@@ -316,29 +389,79 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         based on the capacitance matrix, transmon parameters, cavity frequency, resonator type, and characteristic impedance.
 
         Args:
-            None
+            - num_chunks: The number of chunks to split the DataFrame into for parallel processing. Default is "auto" which sets the number of chunks to the number of logical CPUs.
+            - Z_0: The characteristic impedance of the transmission line. Default is 50 ohms.
 
         Returns:
             None
         """
-        self.add_qubit_H_params()
-        #pprint.pprint(self.df.head())
-        #pprint.pprint(self.df.columns)
-        if self.analyzer.selected_resonator_type == "half":
-            self.df['g_MHz'] = self.df.apply(lambda row: self.g_from_cap_matrix(C=row['cross_to_ground'], 
-                            C_c=row['cross_to_claw'], 
-                            EJ=row['EJ'],
-                            f_r=row['cavity_frequency_GHz'],
-                            res_type="half", 
-                            Z0=50), axis=1)
+        if self.selected_resonator_type == "half":
+            if num_chunks == "auto":
+                num_chunks = psutil.cpu_count(logical=True)
+            elif num_chunks > psutil.cpu_count(logical=True):
+                raise ValueError(f"num_chunks must be less than or equal to {psutil.cpu_count(logical=True)}")
+            else:
+                num_chunks = 2
+                raise UserWarning("`num_chunk`s must be an integer greater than 0. Defaulting to 2.")
+            print(f"Using {num_chunks} chunks for parallel processing")
+            self.df = self.parallel_process_dataframe(self.df, num_chunks)
         else:
+            self.add_qubit_H_params()
             self.df['g_MHz'] = self.df.apply(lambda row: self.g_from_cap_matrix(C=row['cross_to_ground'], 
                             C_c=row['cross_to_claw'], 
                             EJ=row['EJ'],
                             f_r=row['cavity_frequency_GHz'],
                             res_type=row['resonator_type'], 
                             Z0=50), axis=1)
-            
+
+    def add_cavity_coupled_H_params_chunk(self, chunk, Z_0=50):
+        """
+        Add cavity-coupled Hamiltonian parameters to the DataFrame chunk.
+
+        This method calculates the coupling strength 'g_MHz' between the transmon qubit and the cavity,
+
+        Args:
+            - chunk: The DataFrame chunk to which the parameters will be added.
+            - Z_0: The characteristic impedance of the transmission line. Default is 50 ohms.
+
+        Returns:
+            - chunk: The DataFrame chunk with the added parameters.
+        """
+        chunk = self.add_qubit_H_params_chunk(chunk)
+
+        cross_to_ground_values = chunk['cross_to_ground'].values
+        cross_to_claw_values = chunk['cross_to_claw'].values
+        EJ_values = chunk['EJ'].values
+        cavity_frequency_values = chunk['cavity_frequency_GHz'].values
+
+        g_values = np.array([g_from_cap_matrix_numba(ground, claw, ej, freq, 'half', Z_0)
+                            for ground, claw, ej, freq in zip(cross_to_ground_values, cross_to_claw_values, EJ_values, cavity_frequency_values)], dtype=np.float32)
+
+        chunk['g_MHz'] = g_values
+
+        return chunk
+
+    def parallel_process_dataframe(self, df, num_chunks, Z_0 = 50):
+        """
+        Process the DataFrame in parallel.
+
+        This method splits the DataFrame into chunks and processes each chunk in parallel.
+
+        Args:
+            - df: The DataFrame to be processed.
+            - num_chunks: The number of chunks to split the DataFrame into.
+            - Z_0: The characteristic impedance of the transmission line. Default is 50
+
+        Returns:
+            - df: The DataFrame with the added parameters.
+
+        """
+        chunks = np.array_split(df, num_chunks)
+
+        with Parallel(n_jobs=num_chunks) as parallel:
+            results = parallel(delayed(self.add_cavity_coupled_H_params_chunk)(chunk, Z_0) for chunk in chunks)
+
+        return pd.concat(results)
 
     def chi(self, EJ, EC, g, f_r):
         """
@@ -349,10 +472,11 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
             - g (float): The coupling strength between the qubit and the cavity.
             - f_r (float): The resonant frequency of the cavity.
             - f_q (float): The frequency spacing between the first two qubit levels.
-        
+
         Returns:
             - chi (float): The full dispersive shift of the cavity
         """
+        #!TODO: Speed up this calculation using numba
         omega_r = 2 * np.pi * f_r * 1e9
         transmon = Transmon(EJ=EJ, EC=EC, ng=0, ncut=30)
         alpha = transmon.anharmonicity() * 1E3  # MHz, linear or angular

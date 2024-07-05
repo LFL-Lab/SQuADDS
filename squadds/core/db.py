@@ -711,9 +711,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         if not all(cavity_df["coupler_type"] == "NCap"):
             raise ValueError("All entries in the 'coupler_type' column of the cavity_df must be 'NCap'.")
        
-       # update the kappa and cavity_frequency values 
+        # update the kappa and cavity_frequency values 
         cavity_df = self._update_cap_interdigital_tee_parameters(cavity_df)
-        
+
         return cavity_df
 
     def generate_qubit_half_wave_cavity_df(self, parallelize=False, num_cpu=None, save_data=False):

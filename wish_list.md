@@ -22,6 +22,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 ## Core:
 
 - **speed up half-wave cavity operations + decreate memory usage** (e.g. speed up both one time cost methods such as generating the dataset + local operations done at the edge)
+- handle cases where user does not **wish** specify a resonator_type
 - Better system design for both SQuADDS package and SQuADDS_DB?
 - a system to "metalize" any .gds/.dxf file (i.e. from the CAD file generate the corresponding Qiskit Metal file)
 - add support to handle designs generated via other tools (explicitly not qiskit metal e.g. [KQCircuits](https://github.com/iqm-finland/KQCircuits), [DXFWriter](https://github.com/SchusterLab/maskLib), [gdsfactory](https://github.com/gdsfactory/gplugins), [pyhfss](https://github.com/QW-QubitDesign/pyHFSS), [phidl](https://github.com/amccaugh/phidl))
@@ -65,6 +66,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 - create proper train/test/splits and changing `SQuADDS_DB()` to always return all data
 - Standardize the way we handle units for simulated results + impmelent necessary changes in backend
 - More tutorials on how to use the package + various applications of the package
+- Check to see if precision of design parameters are being handled correctly + fix as needed
 - Change all `NCap` to `CapNInterdigital`
 
 ## Fancy/For Fun:

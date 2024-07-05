@@ -1,3 +1,5 @@
+import time
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -96,6 +98,7 @@ class Analyzer:
         self.coupler_df = self.db.coupler_df
         self.closest_df_entry = None
         self.closest_design = None
+        self.closest_df = None
         self.presimmed_closest_cpw_design = None
         self.presimmed_closest_qubit_design = None
         self.presimmed_closest_coupler_design = None
@@ -139,7 +142,10 @@ class Analyzer:
         elif (self.selected_system == ["qubit","cavity_claw"]) or (self.selected_system == ["cavity_claw","qubit"]):
             self._fix_cavity_claw_df()
             qubit_H = TransmonCrossHamiltonian(self)
+            start = time.time()
             qubit_H.add_cavity_coupled_H_params()
+            end = time.time()
+            print(f"Time taken to add the coupled H params: {end-start}")
             self.df = qubit_H.df 
         else:
             raise ValueError("Invalid system.")
@@ -284,8 +290,8 @@ class Analyzer:
         if self.selected_resonator_type == "half":
             # remove the "resonator_type" key from self.target_params
             self.target_params.pop("resonator_type")
-        else: # for literally all other cases except for half-wave cavity
-            self._add_target_params_columns()
+
+        self._add_target_params_columns()
             
         target_params_list = list(self.target_params.keys())
         filtered_df = self.df[target_params_list]  
@@ -318,15 +324,15 @@ class Analyzer:
 
         # Sort distances and get the closest ones
         sorted_indices = distances.nsmallest(num_top).index
-        closest_df = self.df.loc[sorted_indices]
+        self.closest_df = self.df.loc[sorted_indices]
 
         # set the closest design found flag
         self.closest_design_found = True
 
         if self.selected_resonator_type == "quarter":
             # store the best design 
-            self.closest_df_entry = closest_df.iloc[0]
-            self.closest_design = closest_df.iloc[0]["design_options"]
+            self.closest_df_entry = self.closest_df.iloc[0]
+            self.closest_design = self.closest_df.iloc[0]["design_options"]
 
             if len(self.selected_system) == 2: #! TODO: make this more general
                 self.presimmed_closest_cpw_design = self.closest_df_entry["design_options_cavity_claw"]
@@ -334,14 +340,14 @@ class Analyzer:
 
         elif self.selected_resonator_type == "half":
             # retrieve the best designs
-            self.closest_cavity = self.cavity_df.iloc[closest_df.index_cc]
-            self.closest_qubit = self.qubit_df.iloc[closest_df.index_qc]
-            self.closest_coupler = self.coupler_df.iloc[closest_df.index_cplr]
+            self.closest_cavity = self.cavity_df.iloc[self.closest_df.index_cc]
+            self.closest_qubit = self.qubit_df.iloc[self.closest_df.index_qc]
+            self.closest_coupler = self.coupler_df.iloc[self.closest_df.index_cplr]
             """
             !TODO: generate and return `closest_df` for half-wave cavity in the same style as quarter-wave cavity
             """
 
-        return closest_df
+        return self.closest_df
 
     def get_interpolated_design(self,
                      target_params: dict,
