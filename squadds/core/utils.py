@@ -12,6 +12,17 @@ from huggingface_hub import HfApi, HfFolder
 from squadds.core.globals import ENV_FILE_PATH
 
 
+def save_intermediate_df(df, filename, file_idx):
+    """
+    Save the intermediate DataFrame to disk in Parquet format.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to save.
+        filename (str): The base name of the file to save the DataFrame to.
+        file_idx (int): The index of the file chunk.
+    """
+    df.to_parquet(f"{filename}_{file_idx}.parquet", index=False)
+
 def set_github_token():
     """
     Sets the GitHub token by appending it to the .env file.
@@ -25,7 +36,7 @@ def set_github_token():
             if 'GITHUB_TOKEN=' in existing_keys:
                 print('Token already exists in .env file.')
                 return
-    
+
     # Ask for the new token
     token = getpass.getpass("Enter your GitHub PAT token (with at least repo scope): ")
     # Append the new token to the .env file
@@ -89,7 +100,7 @@ def get_config_schema(entry):
             schema[key] = {k: get_type(v) for k, v in value.items()}
         else:
             schema[key] = get_type(value)
-    
+
     return schema
 
 def get_schema(obj):
@@ -222,7 +233,7 @@ def delete_HF_cache():
     # Default cache directory is '~/.cache/huggingface/datasets' on Unix systems
     # and 'C:\\Users\\<username>\\.cache\\huggingface\\datasets' on Windows
     cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "huggingface", "datasets")
-    
+
     # Adjust the path for Windows if necessary
     if platform.system() == "Windows":
         cache_dir = os.path.join(os.path.expanduser("~"), "AppData", "Local", "huggingface", "datasets")
@@ -307,8 +318,17 @@ def create_unified_design_options(row):
     """
     cavity_dict = convert_numpy(row["design_options_cavity_claw"])
     coupler_type = row["coupler_type"]
-    
+
     qubit_dict = convert_numpy(row["design_options_qubit"])
+
+    # setting the `claw_cpw_*` params to zero
+    qubit_dict['connection_pads']['readout']['claw_cpw_width'] = "0um"
+    qubit_dict['connection_pads']['readout']['claw_cpw_length'] = "0um"
+    cavity_dict['claw_opts']['connection_pads']['readout']['claw_cpw_width'] = "0um"
+    cavity_dict['claw_opts']['connection_pads']['readout']['claw_cpw_length'] = "0um"
+
+    # replacing the ground spacing of the cavity by that of the qubit
+    cavity_dict["claw_opts"]['connection_pads']["readout"]["ground_spacing"] = qubit_dict['connection_pads']['readout']['ground_spacing']
 
     device_dict = {
         "cavity_claw_options": {
@@ -379,7 +399,7 @@ def filter_df_by_conditions(df, conditions):
     for column, value in conditions.items():
         if column in filtered_df.columns:
             filtered_df = filtered_df[filtered_df[column] == value]
-    
+
     # Check if the filtered DataFrame is empty
     if filtered_df.empty:
         print("Warning: No rows match the given conditions. Returning the original DataFrame.")
@@ -400,7 +420,7 @@ def set_huggingface_api_key():
             if 'HUGGINGFACE_API_KEY=' in existing_keys:
                 print('API key already exists in .env file.')
                 return
-    
+
     # Ask for the new API key
     api_key = getpass.getpass("Enter your Hugging Face API key: ")
     # Append the new API key to the .env file

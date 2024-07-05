@@ -1,10 +1,12 @@
+import pprint
+
 import pandas as pd
 from pyEPR.calcs import Convert
 
 from squadds import Analyzer
 from squadds.core.utils import *
 from squadds.interpolations.interpolator import Interpolator
-import pprint
+
 
 def string_to_float(string):
     """
@@ -76,35 +78,25 @@ class ScalingInterpolator(Interpolator):
         closest_kappa = closest_cavity_cpw_design['kappa_kHz'].values[0]
         closest_f_cavity = closest_cavity_cpw_design['cavity_frequency_GHz'].values[0]
 
-        try:
-            closest_coupler_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length'])
-        except:
-            closest_coupler_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['finger_length'])
+        closest_coupler_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length'])
 
         # Scale resonator and coupling element dimensions
         updated_resonator_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]["cpw_opts"]['total_length']) * (closest_cavity_cpw_design['cavity_frequency_GHz'] / f_res_target).values[0]
 
+        res_scaling = closest_f_cavity / f_res_target
         kappa_scaling = np.sqrt(kappa_target / closest_kappa)
+
         print("="*50)
         print(f"Kappa scaling: {kappa_scaling}")
         print(f"g scaling: {g_scaling.values[0]}")
         print(f"alpha scaling: {alpha_scaling.values[0]}")
+        print(f"resonator scaling: {res_scaling}")
         print("="*50)
 
-        try:
-            updated_coupling_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length']) * kappa_scaling
-            # round updated_coupling_length to nearest integer
-            updated_coupling_length = round(updated_coupling_length)
-        except:
-            updated_coupling_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['finger_length']) * kappa_scaling
-            # round updated_coupling_length to nearest integer
-            updated_coupling_length = round(updated_coupling_length)
+        updated_coupling_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length']) * kappa_scaling
+        # round updated_coupling_length to nearest integer
+        updated_coupling_length = round(updated_coupling_length)
 
-        # print(f"Updated resonator length: {updated_resonator_length}")
-        # print(f"Updated coupling length: {updated_coupling_length}")
-        # print(f"Updated cross length: {updated_cross_length}")
-        # print(f"Updated claw length: {updated_claw_length}")
-        # print("="*50)
 
         # Reset the analyzer's DataFrame
         self.analyzer.df = merged_df
@@ -125,24 +117,23 @@ class ScalingInterpolator(Interpolator):
         qubit_design_options['hfss_inductance'] = required_Lj*1e-9
         qubit_design_options["connection_pads"]["readout"]['Lj'] = f"{required_Lj}nH"
 
+        # setting the `claw_cpw_*` params to zero
+        qubit_design_options["connection_pads"]['readout']['claw_cpw_length'] = "0um"
+        qubit_design_options["connection_pads"]['readout']['claw_cpw_width'] = "0um"
+
         cavity_design_options = closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]
         cavity_design_options["cpw_opts"]['total_length'] = f"{updated_resonator_length}um"
-        
-        try:
-            cavity_design_options['cplr_opts']['coupling_length'] = f"{updated_coupling_length}um"
-        except:
-            cavity_design_options['cplr_opts']['finger_length'] = f"{updated_coupling_length}um"
+        cavity_design_options['cplr_opts']['coupling_length'] = f"{updated_coupling_length}um"
 
+        # update the claw of the cavity based on the one from the qubit
+        cavity_design_options["claw_opts"]["connection_pads"] = qubit_design_options["connection_pads"]
 
-        pprint.pprint(qubit_design_options)
-        print("\n")
-        pprint.pprint(cavity_design_options)
         interpolated_designs_df = pd.DataFrame({
             "coupler_type": self.analyzer.selected_coupler,
             "design_options_qubit": [qubit_design_options],
             "design_options_cavity_claw": [cavity_design_options],
-            "sim_options_qubit": [closest_qubit_claw_design["setup_qubit"].iloc[0]],
-            "sim_options_cavity_claw": [closest_cavity_cpw_design["setup_cavity_claw"].iloc[0]],
+            "setup_qubit": [closest_qubit_claw_design["setup_qubit"].iloc[0]],
+            "setup_cavity_claw": [closest_cavity_cpw_design["setup_cavity_claw"].iloc[0]],
         })
 
         device_design_options = create_unified_design_options(interpolated_designs_df.iloc[0])
