@@ -116,6 +116,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         delete_HF_cache()
         configs = get_dataset_config_names(self.repo_name, download_mode='force_redownload')
+        # if there are not two "-" in the config name, remove it (since it does conform to the simulation naming convention)
+        configs = [config for config in configs if len(config.split("-")) == 3]
         return configs
 
     def get_configs(self):
