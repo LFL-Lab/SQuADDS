@@ -60,7 +60,8 @@ Read more on [install_guide](docs/installation/unix_install.md))
 - [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html)
 - [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
 - [Tutorial 3: Contributing to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_to_SQuADDS.html)
-- [(COMING SOON) Tutorial 4: Creating a new database schema for SQuADDS]()
+- [Tutorial 4: Creating a new dataset for SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-4_Creating_a_new_dataset.html)
+- [(COMING SOON) More tutorials]()
 
 ## Citation
 

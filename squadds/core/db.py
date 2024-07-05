@@ -1,3 +1,6 @@
+"""
+!TODO: add FULL support for half-wave cavity
+"""
 import pprint
 import sys
 import warnings
@@ -72,6 +75,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.selected_resonator_type = None
         self.selected_system = None
         self.selected_df = None
+        self.qubit_df = None
+        self.cavity_df = None
+        self.coupler_df = None
         self.target_param_keys = None
         self.units = None
         self._internal_call = False  # Flag to track internal calls
@@ -122,6 +128,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         delete_HF_cache()
         configs = get_dataset_config_names(self.repo_name, download_mode='force_redownload')
+        # if there are not two "-" in the config name, remove it
+        configs = [config for config in configs if len(config.split("-")) == 3]
         return configs
 
     def get_configs(self):
@@ -687,7 +695,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
         if self.selected_coupler == "CLT":
             cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler})
-        if self.selected_coupler == "CapNInterdigitalTee":
+        if self.selected_coupler == "NCap":
             """
             # for creating the half-wave cavity_claw df
 
@@ -696,13 +704,17 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             """
 
             """
-            #!TODO: read the cavity_df from HF and return it
+            #!TODO: read the precomputed cavity_df from HF and set that as cavity_df 
             """
+            self.coupler_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler)
             raise NotImplementedError("Creating the half-wave cavity_claw df is not yet implemented.")
 
         # merger_terms = ['claw_width', 'claw_length', 'claw_gap']
         merger_terms = ['claw_length'] # 07/2024 -> claw_length is the only parameter that is common between qubit and cavity
 
+        self.qubit_df = qubit_df
+        self.cavity_df = cavity_df
+                
         df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=merger_terms, parallelize=parallelize, num_cpu=num_cpu)
         return df
 

@@ -21,6 +21,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Core:
 
+- **speed up half-wave cavity operations + decreate memory usage** 
 - Better system design for both SQuADDS package and SQuADDS_DB?
 - a system to "metalize" any .gds/.dxf file (i.e. from the CAD file generate the corresponding Qiskit Metal file)
 - add support to handle designs generated via other tools (explicitly not qiskit metal e.g. [KQCircuits](https://github.com/iqm-finland/KQCircuits), [DXFWriter](https://github.com/SchusterLab/maskLib), [gdsfactory](https://github.com/gdsfactory/gplugins), [pyhfss](https://github.com/QW-QubitDesign/pyHFSS), [phidl](https://github.com/amccaugh/phidl))

@@ -17,7 +17,7 @@ def update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols):
     
     # Add index columns to cavity_df and ncap_df
     cavity_df = cavity_df.reset_index().rename(columns={'index': 'index_cc'})
-    ncap_df = ncap_df.reset_index().rename(columns={'index': 'index_ncap'})
+    ncap_df = ncap_df.reset_index().rename(columns={'index': 'index_cplr'})
 
     # Perform the merge on the specific common terms
     merged_df = pd.merge(cavity_df, ncap_df, 
@@ -46,8 +46,8 @@ def update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols):
     # Remove the temporary columns
     merged_df = merged_df.drop(columns=[f'temp_{term}' for term in merger_terms])
     
-    # Remove all the columns with "_ncap" suffix except 'index_ncap'
-    columns_to_drop = [col for col in merged_df.columns if col.endswith("_ncap") and col != 'index_ncap']
+    # Remove all the columns with "_ncap" suffix except 'index_cplr'
+    columns_to_drop = [col for col in merged_df.columns if col.endswith("_ncap") and col != 'index_cplr']
     merged_df = merged_df.drop(columns=columns_to_drop)
 
     # Remove all the columns with ncap_sim_cols

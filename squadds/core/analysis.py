@@ -80,7 +80,6 @@ class Analyzer:
             SQuADDS_DB  # Local import to avoid circular dependency
 
         self.db = SQuADDS_DB()  # Always fetches the singleton instance
-        self.db_needs_reload = False  # Flag to track if reload is needed
         self._initialize_attributes()
 
     def _initialize_attributes(self):
@@ -90,15 +89,20 @@ class Analyzer:
         self.selected_confg = self.db.selected_confg
         self.selected_qubit = self.db.selected_qubit
         self.selected_cavity = self.db.selected_cavity
+        self.selected_resonator_type = self.db.selected_resonator_type
         self.selected_coupler = self.db.selected_coupler
         self.selected_system = self.db.selected_system
         self.df = self.db.selected_df
+        self.qubit_df = self.db.qubit_df
+        self.cavity_df = self.db.cavity_df
+        self.coupler_df = self.db.coupler_df
         self.closest_df_entry = None
         self.closest_design = None
         self.presimmed_closest_cpw_design = None
         self.presimmed_closest_qubit_design = None
         self.presimmed_closest_coupler_design = None
         self.interpolated_design = None
+        self.closest_design_found = False
 
         self.metric_strategy = None  # Will be set dynamically
         self.custom_metric_func = None
@@ -106,27 +110,6 @@ class Analyzer:
         self.target_params = None
         
         self.H_param_keys = self._get_H_param_keys()
-        self.mark_db_for_reload()
-
-    def mark_db_for_reload(self):
-        """
-        Mark the db as needing a reload.
-        """
-        self.db_needs_reload = True
-
-    def check_reload(func):
-        """
-        Decorator to check if reload_db() needs to be called before executing the method.
-        """
-        def wrapper(self, *args, **kwargs):
-            if self.db_needs_reload:
-                import warnings
-                warnings.warn(
-                    "`SQuADDS_DB` has been updated. Please call `reload_db()` on the Analyzer object.",
-                    UserWarning
-                )
-            return func(self, *args, **kwargs)
-        return wrapper   
 
     def reload_db(self):
         """
@@ -136,7 +119,6 @@ class Analyzer:
             SQuADDS_DB  # Local import to avoid circular dependency
         self.db = SQuADDS_DB()  # Fetches the latest singleton instance
         self._initialize_attributes()
-        self.db_needs_reload = False  # Reset the flag
         
     def _add_target_params_columns(self):
         """
@@ -217,7 +199,6 @@ class Analyzer:
             raise ValueError("Invalid system.")
         return self.H_param_keys
 
-    @check_reload
     def target_param_keys(self):
         """
         Returns:
@@ -277,7 +258,6 @@ class Analyzer:
         return outside_bounds
 
 
-    @check_reload
     def find_closest(self,
                          target_params: dict,
                          num_top: int,
@@ -303,15 +283,17 @@ class Analyzer:
         # Check for supported metric
         if metric not in self.__supported_metrics__:
             raise ValueError(f'`metric` must be one of the following: {self.__supported_metrics__}')
-        # Check for improper size of library
-        if (num_top > len(self.df)):
-            raise ValueError('`num_top` cannot be bigger than size of read-in library.')
 
         self.target_params = target_params
-        self._add_target_params_columns()
 
-        # Log if parameters outside of library
-        filtered_df = self.df[self.target_params]  # Filter DataFrame based on H_param_keys
+        if self.selected_resonator_type == "half":
+            # remove the "resonator_type" key from self.target_params
+            self.target_params.pop("resonator_type")
+        else: # for literally all other cases except for half-wave cavity
+            self._add_target_params_columns()
+            
+        target_params_list = list(self.target_params.keys())
+        filtered_df = self.df[target_params_list]  
         self._outside_bounds(df=filtered_df, params=target_params, display=display)
 
         # Set strategy dynamically based on the metric parameter
@@ -343,17 +325,29 @@ class Analyzer:
         sorted_indices = distances.nsmallest(num_top).index
         closest_df = self.df.loc[sorted_indices]
 
-        # store the best design 
-        self.closest_df_entry = closest_df.iloc[0]
-        self.closest_design = closest_df.iloc[0]["design_options"]
+        # set the closest design found flag
+        self.closest_design_found = True
 
-        if len(self.selected_system) == 2: #! TODO: make this more general
-            self.presimmed_closest_cpw_design = self.closest_df_entry["design_options_cavity_claw"]
-            self.presimmed_closest_qubit_design = self.closest_df_entry["design_options_qubit"]
+        if self.selected_resonator_type == "quarter":
+            # store the best design 
+            self.closest_df_entry = closest_df.iloc[0]
+            self.closest_design = closest_df.iloc[0]["design_options"]
+
+            if len(self.selected_system) == 2: #! TODO: make this more general
+                self.presimmed_closest_cpw_design = self.closest_df_entry["design_options_cavity_claw"]
+                self.presimmed_closest_qubit_design = self.closest_df_entry["design_options_qubit"]
+
+        elif self.selected_resonator_type == "half":
+            # retrieve the best designs
+            self.closest_cavity = self.cavity_df.iloc[closest_df.index_cc]
+            self.closest_qubit = self.qubit_df.iloc[closest_df.index_qc]
+            self.closest_coupler = self.coupler_df.iloc[closest_df.index_cplr]
+            """
+            !TODO: generate and return `closest_df` for half-wave cavity in the same style as quarter-wave cavity
+            """
 
         return closest_df
 
-    @check_reload
     def get_interpolated_design(self,
                      target_params: dict,
                      metric: str = 'Euclidean',
@@ -363,7 +357,6 @@ class Analyzer:
         raise NotImplementedError
     
 
-    @check_reload
     def get_design(self, df):
         """
         Extracts the design parameters from the dataframe and returns a dict.
@@ -380,7 +373,6 @@ class Analyzer:
         raise NotImplementedError
 
 
-    @check_reload
     def closest_design_in_H_space(self):
         """
         Plots a scatter plot of the closest design in the H-space.

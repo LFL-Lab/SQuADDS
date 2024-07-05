@@ -1,3 +1,6 @@
+"""
+!TODO: add methods to compute g for half wave cavity in the super fast manner from dev_merged_df_ncap.ipynb notebook
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 from pyEPR.calcs import Convert
@@ -300,7 +303,7 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         self.df["EC"] = self.df.apply(lambda row: self.EC(row["cross_to_claw"], row["cross_to_ground"]), axis=1)
 
         self.df['EJ'] = EJ_target
-        self.df["EJEC"] = self.df.apply(lambda row: row["EJ"] / row["EC"], axis=1)
+        # self.df["EJEC"] = self.df.apply(lambda row: row["EJ"] / row["EC"], axis=1)
         self.df['qubit_frequency_GHz'], self.df['anharmonicity_MHz'] = zip(*self.df.apply(lambda row: self.E01_and_anharmonicity(row['EJ'], row['EC']), axis=1))
 
 
@@ -320,12 +323,21 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         self.add_qubit_H_params()
         #pprint.pprint(self.df.head())
         #pprint.pprint(self.df.columns)
-        self.df['g_MHz'] = self.df.apply(lambda row: self.g_from_cap_matrix(C=row['cross_to_ground'], 
-                          C_c=row['cross_to_claw'], 
-                          EJ=row['EJ'],
-                          f_r=row['cavity_frequency_GHz'],
-                          res_type=row['resonator_type'], 
-                          Z0=50), axis=1)
+        if self.selected_resonator_type == "half":
+            self.df['g_MHz'] = self.df.apply(lambda row: self.g_from_cap_matrix(C=row['cross_to_ground'], 
+                            C_c=row['cross_to_claw'], 
+                            EJ=row['EJ'],
+                            f_r=row['cavity_frequency_GHz'],
+                            res_type="half", 
+                            Z0=50), axis=1)
+        else:
+            self.df['g_MHz'] = self.df.apply(lambda row: self.g_from_cap_matrix(C=row['cross_to_ground'], 
+                            C_c=row['cross_to_claw'], 
+                            EJ=row['EJ'],
+                            f_r=row['cavity_frequency_GHz'],
+                            res_type=row['resonator_type'], 
+                            Z0=50), axis=1)
+            
 
     def chi(self, EJ, EC, g, f_r):
         """
