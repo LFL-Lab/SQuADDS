@@ -79,7 +79,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         components = []
         for config in self.configs:
-            components.append(config.split("-")[0])
+            try:
+                components.append(config.split("-")[0])
+            except:
+                pass
         return components
     
     def supported_component_names(self):
@@ -91,7 +94,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         component_names = []
         for config in self.configs:
-            component_names.append(config.split("-")[1])
+            try:
+                component_names.append(config.split("-")[1])
+            except:
+                pass
         return component_names
     
     def supported_data_types(self):
@@ -103,7 +109,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         data_types = []
         for config in self.configs:
-            data_types.append(config.split("-")[2])
+            try:
+                data_types.append(config.split("-")[2])
+            except:
+                pass
         return data_types
 
         
@@ -117,7 +126,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         delete_HF_cache()
         configs = get_dataset_config_names(self.repo_name, download_mode='force_redownload')
         # if there are not two "-" in the config name, remove it (since it does conform to the simulation naming convention)
-        configs = [config for config in configs if len(config.split("-")) == 3]
+        configs = [config for config in configs if config.count('-') == 2]
         return configs
 
     def get_configs(self):
