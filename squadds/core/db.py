@@ -1,6 +1,7 @@
 """
 !TODO: add FULL support for half-wave cavity
 """
+import os
 import pprint
 import sys
 import warnings
@@ -696,6 +697,84 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                 df = self._update_cap_interdigital_tee_parameters(df)
 
         return df
+
+    def generate_updated_half_wave_cavity_df(self, parallelize=False, num_cpu=None):
+        """
+        !TODO: speed this up!
+        """
+        cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity)
+
+        assert self.selected_coupler in ["NCap", "CapNInterdigitalTee"], "Selected coupler must be either 'NCap' or 'CapNInterdigitalTee'."
+
+        cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": "NCap"})
+
+        if not all(cavity_df["coupler_type"] == "NCap"):
+            raise ValueError("All entries in the 'coupler_type' column of the cavity_df must be 'NCap'.")
+       
+       # update the kappa and cavity_frequency values 
+       # sample 20 entries from the cavity_df
+        cavity_df = cavity_df.sample(10)
+        cavity_df = self._update_cap_interdigital_tee_parameters(cavity_df)
+        
+        return cavity_df
+
+    def generate_qubit_half_wave_cavity_df(self, parallelize=False, num_cpu=None, save_data=False):
+        """
+        Generates a DataFrame that combines the qubit and half-wave cavity data.
+
+        Args:
+            parallelize (bool, optional): Flag indicating whether to parallelize the computation. Defaults to False.
+            num_cpu (int, optional): Number of CPUs to use for parallelization. Defaults to None.
+            save_data (bool, optional): Flag indicating whether to save the generated data. Defaults to False.
+
+        Returns:
+            pandas.DataFrame: The generated DataFrame.
+
+        Raises:
+            None
+
+        Notes:
+            - This method generates a DataFrame by combining the qubit and half-wave cavity data.
+            - The qubit and cavity data are obtained from the `get_dataset` and `generate_updated_half_wave_cavity_df` methods, respectively.
+            - The generated DataFrame is optimized to reduce memory usage using various optimization techniques.
+            - If `save_data` is True, the generated DataFrames are saved in the "data" directory.
+
+        TODO:
+            - Speed up the generation process.
+        """
+        print("Generating half-wave-cavity DataFrame...")
+        qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit)
+        cavity_df = self.generate_updated_half_wave_cavity_df(parallelize=parallelize, num_cpu=num_cpu)
+
+        self.qubit_df = qubit_df
+        self.cavity_df = cavity_df
+
+        # merger_terms = ['claw_width', 'claw_length', 'claw_gap']
+        merger_terms = ['claw_length'] # 07/2024 -> claw_length is the only parameter that is common between qubit and cavity
+
+        print("Creating qubit-half-wave-cavity DataFrame...")
+        df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=merger_terms, parallelize=parallelize, num_cpu=num_cpu)
+        
+        # process the df to reduce the memory usage
+        print("Optimizing the DataFrame...")
+        opt_df = process_design_options(df)
+        initial_mem = compute_memory_usage(df)
+        opt_df = optimize_dataframe(opt_df)
+        opt_df = delete_object_columns(opt_df)
+        opt_df = delete_categorical_columns(opt_df)
+        final_mem = compute_memory_usage(opt_df)
+        print(f"Memory usage reduced by {100*(initial_mem - final_mem)/initial_mem:.2f}%")
+
+        if save_data:
+
+            # create a data directory if it does not exist using os.makedirs
+            if not os.path.exists("data"):
+                os.makedirs("data")
+                cavity_df.to_parquet("data/half-wave-cavity_df.parquet")
+                df.to_parquet("data/qubit_half-wave-cavity_df_uncompressed.parquet")
+                opt_df.to_parquet("data/qubit_half-wave-cavity_df.parquet")
+
+        return opt_df
 
     def _create_multi_component_df(self, parallelize, num_cpu):
         """Creates a DataFrame for a multi-component system."""
