@@ -712,8 +712,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             raise ValueError("All entries in the 'coupler_type' column of the cavity_df must be 'NCap'.")
        
        # update the kappa and cavity_frequency values 
-       # sample 20 entries from the cavity_df
-        cavity_df = cavity_df.sample(10)
         cavity_df = self._update_cap_interdigital_tee_parameters(cavity_df)
         
         return cavity_df
