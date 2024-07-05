@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.2.35 (2024-07-04)
+--------------------------
+
+* **Alpha Version 0.2.35**
+
+**Bug Fixes**
+
+- Bug in accessing simulation data from HuggingFace has been patched
+
+**Documentation**
+
+- Added `FAQ <https://lfl-lab.github.io/SQuADDS/source/getting_started.html#accessing-the-database>`_ for issue with accessing HF data on SQuADDS releases < 0.2.35
+
 Version 0.2.34 (2024-07-04)
 --------------------------
 
@@ -14,7 +27,7 @@ Version 0.2.34 (2024-07-04)
 
 **Documentation**
 
-- Added tutorial4 files
+- Added tutorial3p5 files
 - Added README.md, wish_list.md, and docs/source/developer/index.rst from feature-half_wave_cavity (latest)
 
 ---
