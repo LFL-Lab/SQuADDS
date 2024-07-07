@@ -7,6 +7,7 @@ import sys
 import warnings
 
 import pandas as pd
+import requests
 from datasets import get_dataset_config_names, load_dataset
 from tabulate import tabulate
 from tqdm import tqdm
@@ -82,6 +83,57 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.target_param_keys = None
         self.units = None
         self._internal_call = False  # Flag to track internal calls
+        self.hwc_fname = "half-wave-cavity_df.parquet"
+        self.merged_df_hwc_fname = "qubit_half-wave-cavity_df.parquet"
+
+    def check_login(self):
+        """
+        Checks if the user is logged in to Hugging Face.
+        """
+        token = HfFolder.get_token()
+        if not token:
+            print("You are not logged in. Please login to Hugging Face.")
+            login()  # This will prompt the user to login
+
+    def get_existing_files(self):
+        """
+        Retrieves the list of existing files in the repository.
+        
+        Returns:
+            list: A list of existing file names in the repository.
+        """
+        api = HfApi()
+        repo_info = api.dataset_info(repo_id=self.repo_name)
+        existing_files = [file.rfilename for file in repo_info.siblings]
+        return existing_files
+
+    def upload_dataset(self, file_paths, repo_file_names, overwrite=False):
+        """
+        Uploads a dataset to the repository.
+        
+        Args:
+            file_paths (list): A list of file paths to upload.
+            repo_file_names (list): A list of file names to use in the repository.
+            overwrite (bool): Whether to overwrite an existing dataset. Defaults to False. 
+        """
+        self.check_login()
+        api = HfApi()
+        existing_files = self.get_existing_files()
+
+        for file_path, repo_file_name in zip(file_paths, repo_file_names):
+            if repo_file_name in existing_files and not overwrite:
+                print(f"File {repo_file_name} already exists in the repository. Skipping upload.")
+                continue
+            try:
+                api.upload_file(
+                    path_or_fileobj=file_path,
+                    path_in_repo=repo_file_name,
+                    repo_id=self.repo_name,
+                    repo_type="dataset",
+                )
+                print(f"Uploaded {repo_file_name} to {self.repo_name}.")
+            except Exception as e:
+                print(f"Failed to upload {repo_file_name}: {e}")
 
     def supported_components(self):
         """
@@ -782,18 +834,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         if self.selected_coupler == "CLT":
             cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler})
         if self.selected_coupler == "NCap":
-            """
-            # for creating the half-wave cavity_claw df
-
-            cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": "NCap"})
-            cavity_df = self._update_cap_interdigital_tee_parameters(cavity_df)
-            """
-
-            """
-            #!TODO: read the precomputed cavity_df from HF and set that as cavity_df 
-            """
             self.coupler_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler)
-            raise NotImplementedError("Creating the half-wave cavity_claw df is not yet implemented.")
+            df = self.read_parquet_file(self.merged_df_hwc_fname)
+            return df
 
         # merger_terms = ['claw_width', 'claw_length', 'claw_gap']
         merger_terms = ['claw_length'] # 07/2024 -> claw_length is the only parameter that is common between qubit and cavity
@@ -958,3 +1001,32 @@ class SQuADDS_DB(metaclass=SingletonMeta):
     
     def show_selected_system(self):
         raise NotImplementedError("Waiting on Andre's code")
+
+    def find_parquet_files(self):
+        """
+        Searches for `parquet` files in the repository and returns their paths/filenames.
+        
+        Returns:
+            list: A list of paths/filenames of `parquet` files in the repository.
+        """
+        existing_files = self.get_existing_files()
+        parquet_files = [file for file in existing_files if file.endswith('.parquet')]
+        return parquet_files
+
+    def read_parquet_file(self, file_name):
+        """
+        Takes in the filename and returns the object to be read as a pandas dataframe.
+        
+        Args:
+            file_name (str): The name of the parquet file to read.
+            
+        Returns:
+            pandas.DataFrame: The dataframe read from the parquet file.
+        """
+        base_url = f"https://huggingface.co/datasets/{self.repo_name}/resolve/main/{file_name}"
+        response = requests.get(base_url)
+        with open(file_name, 'wb') as f:
+            f.write(response.content)
+        df = pd.read_parquet(file_name)
+        os.remove(file_name)  # Cleanup the downloaded file
+        return df
