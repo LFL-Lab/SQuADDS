@@ -125,7 +125,7 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
 
     return return_df, lom_obj, emode_obj
 
-def simulate_single_design(design, device_dict, emode_options, lom_options, coupler_type):
+def simulate_single_design(design, device_dict, emode_options={}, lom_options={}, coupler_type="CLT"):
     """
     Simulates a single design using the provided parameters.
 
@@ -147,11 +147,14 @@ def simulate_single_design(design, device_dict, emode_options, lom_options, coup
     lom_df = {}
     return_df = {}
 
+    emode_obj = None
+    lom_obj = None
+
     if "cpw_opts" in device_dict.keys():
         emode_df, emode_obj = run_eigenmode(design, device_dict, emode_options)
         if coupler_type.lower() == "ncap":
             # emode_df, emode_obj = run_eigenmode(design, device_dict, sim_options)
-            ncap_lom_df, ncap_lom_obj = run_capn_LOM(design, device_dict["cplr_opts"], lom_options)
+            ncap_lom_df, lom_obj = run_capn_LOM(design, device_dict["cplr_opts"], lom_options)
             f_est, kappa_est = find_kappa(emode_df["sim_results"]["cavity_frequency"], ncap_lom_df["sim_results"]["C_top2ground"], ncap_lom_df["sim_results"]["C_top2bottom"])
             # emode_df["sim_results"]["cavity_frequency"] = f_est
             # emode_df["sim_results"]["kappa"] = kappa_est
@@ -164,9 +167,9 @@ def simulate_single_design(design, device_dict, emode_options, lom_options, coup
         return_df["final_sim_results"].update({"kappa_unit": "kHz"})
     else:
         lom_df, lom_obj = run_xmon_LOM(design, device_dict["design_options"], lom_options) if "cross_length" in device_dict["design_options"] else run_capn_LOM(design, device_dict, lom_options)
-        return_df["lom_df"] = lom_df
+        return_df = lom_df
 
-    return return_df
+    return return_df, emode_obj, lom_obj
 
 def get_sim_results(emode_df = {}, lom_df = {}, ncap_lom_df = {}):
     """
@@ -456,7 +459,7 @@ def run_sweep(design, sweep_opts, emode_options, lom_options, filename="default_
     '''
     for param in extract_QSweep_parameters(sweep_opts["geometry_dict"]):
         print(param)
-        return_df = simulate_single_design(design, param, emode_options, lom_options, sweep_opts["coupler_type"])
+        return_df, _, __ = simulate_single_design(design, param, emode_options, lom_options, sweep_opts["coupler_type"])
         filename = f"filename_{datetime.now().strftime('%d%m%Y_%H.%M.%S')}"
         save_simulation_data_to_json(return_df, filename)
 
