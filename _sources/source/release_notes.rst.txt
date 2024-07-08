@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.2.36 (2024-07-08)
+--------------------------
+
+* **Alpha Version 0.2.36**
+
+**Bug Fixes**
+
+- Various bugs in Ansys simulations (ones using CapNInterdigitated capacitors) have been patched
+
+
 Version 0.2.35 (2024-07-04)
 --------------------------
 
