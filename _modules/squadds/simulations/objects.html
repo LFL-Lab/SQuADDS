@@ -717,7 +717,7 @@ document.write(`
 
 <div class="viewcode-block" id="simulate_single_design">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.simulate_single_design">[docs]</a>
-<span class="k">def</span> <span class="nf">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_options</span><span class="p">,</span> <span class="n">lom_options</span><span class="p">,</span> <span class="n">coupler_type</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_options</span><span class="o">=</span><span class="p">{},</span> <span class="n">lom_options</span><span class="o">=</span><span class="p">{},</span> <span class="n">coupler_type</span><span class="o">=</span><span class="s2">&quot;CLT&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulates a single design using the provided parameters.</span>
 
@@ -739,11 +739,14 @@ document.write(`
     <span class="n">lom_df</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">return_df</span> <span class="o">=</span> <span class="p">{}</span>
 
+    <span class="n">emode_obj</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">lom_obj</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="k">if</span> <span class="s2">&quot;cpw_opts&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_options</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">coupler_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;ncap&quot;</span><span class="p">:</span>
             <span class="c1"># emode_df, emode_obj = run_eigenmode(design, device_dict, sim_options)</span>
-            <span class="n">ncap_lom_df</span><span class="p">,</span> <span class="n">ncap_lom_obj</span> <span class="o">=</span> <span class="n">run_capn_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">],</span> <span class="n">lom_options</span><span class="p">)</span>
+            <span class="n">ncap_lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_capn_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">],</span> <span class="n">lom_options</span><span class="p">)</span>
             <span class="n">f_est</span><span class="p">,</span> <span class="n">kappa_est</span> <span class="o">=</span> <span class="n">find_kappa</span><span class="p">(</span><span class="n">emode_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;cavity_frequency&quot;</span><span class="p">],</span> <span class="n">ncap_lom_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;C_top2ground&quot;</span><span class="p">],</span> <span class="n">ncap_lom_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;C_top2bottom&quot;</span><span class="p">])</span>
             <span class="c1"># emode_df[&quot;sim_results&quot;][&quot;cavity_frequency&quot;] = f_est</span>
             <span class="c1"># emode_df[&quot;sim_results&quot;][&quot;kappa&quot;] = kappa_est</span>
@@ -756,9 +759,9 @@ document.write(`
         <span class="n">return_df</span><span class="p">[</span><span class="s2">&quot;final_sim_results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;kappa_unit&quot;</span><span class="p">:</span> <span class="s2">&quot;kHz&quot;</span><span class="p">})</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">],</span> <span class="n">lom_options</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;cross_length&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">run_capn_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">lom_options</span><span class="p">)</span>
-        <span class="n">return_df</span><span class="p">[</span><span class="s2">&quot;lom_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lom_df</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="n">lom_df</span>
 
-    <span class="k">return</span> <span class="n">return_df</span></div>
+    <span class="k">return</span> <span class="n">return_df</span><span class="p">,</span> <span class="n">emode_obj</span><span class="p">,</span> <span class="n">lom_obj</span></div>
 
 
 <div class="viewcode-block" id="get_sim_results">
@@ -1063,7 +1066,7 @@ document.write(`
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">extract_QSweep_parameters</span><span class="p">(</span><span class="n">sweep_opts</span><span class="p">[</span><span class="s2">&quot;geometry_dict&quot;</span><span class="p">]):</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
-        <span class="n">return_df</span> <span class="o">=</span> <span class="n">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">emode_options</span><span class="p">,</span> <span class="n">lom_options</span><span class="p">,</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">])</span>
+        <span class="n">return_df</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">__</span> <span class="o">=</span> <span class="n">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">emode_options</span><span class="p">,</span> <span class="n">lom_options</span><span class="p">,</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">])</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;filename_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">%m%Y_%H.%M.%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">save_simulation_data_to_json</span><span class="p">(</span><span class="n">return_df</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
 
