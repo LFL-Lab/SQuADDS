@@ -27,15 +27,15 @@ Please see our `Contributing Guidelines <https://github.com/LFL-Lab/SQuADDS/blob
 Developers
 ----------
 
-| `Sadman Ahmed Shanto <https://www.sadmanahmedshanto.com>`_ (University of Southern California) - Project Lead 🙏🏽
-| Andre Kuo (University of Southern California)
+| `Sadman Ahmed Shanto <https://www.sadmanahmedshanto.com>`_ (University of Southern California) - Project Lead 🤖
+| `Andre Kuo <https://www.linkedin.com/in/andrekuo>`_ (University of Southern California)
 | `Elizabeth Kunz <https://www.linkedin.com/in/elizabeth-kunz-644848207/>`_ (University of Southern California)
 
 
 Contributors
 ------------
 
-| **Eli Levenson-Falk, PhD** (University of Southern California) - Eternal Guidance Provider 🙏🏽
+| **Eli Levenson-Falk, PhD** (University of Southern California) - Eternal Guidance Provider (Principle Investigator) 🙏🏽
 | **Clark Miyamoto** (New York University) - Code contributor 💻
 | **Madison Howard** (California Institute of Technology) - Bug Hunter 🐛
 | **Malida Hecht** (University of Southern California) - Data contributor 📀

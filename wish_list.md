@@ -22,6 +22,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 ## Core:
 
 - **speed up half-wave cavity operations + decreate memory usage** (e.g. speed up both one time cost methods such as generating the dataset + local operations done at the edge)
+- **stupid simple API for users to contribute experimental data to SQuADDS_DB**
 - handle cases where user does not **wish** specify a resonator_type
 - Better system design for both SQuADDS package and SQuADDS_DB?
 - a system to "metalize" any .gds/.dxf file (i.e. from the CAD file generate the corresponding Qiskit Metal file)
