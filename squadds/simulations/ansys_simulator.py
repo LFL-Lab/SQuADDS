@@ -23,15 +23,13 @@ class AnsysSimulator:
         gui: The MetalGUI object.
     """
 
-    def __init__(self, analyzer, design_options, **kwargs):
+    def __init__(self, analyzer, design_options):
         """
         Initialize the AnsysSimulator object.
 
         Args:
             analyzer: The analyzer object.
             design_options: The design options.
-        Optional arguments:
-            open_gui (bool): If True, a MetalGUI instance is created and assigned to self.gui. Default is False.
         """
         self.analyzer = analyzer
         self.design_options = design_options
@@ -76,8 +74,7 @@ class AnsysSimulator:
         }
 
         self.design = metal.designs.design_planar.DesignPlanar()
-        if kwargs.get("open_gui", False):
-            self.gui = metal.MetalGUI(self.design)
+        self.gui = metal.MetalGUI(self.design)
         self.design.overwrite_enabled = True
         self._warnings()
 
@@ -100,7 +97,6 @@ class AnsysSimulator:
         Returns:
             None
         """
-        self.gui = metal.MetalGUI(self.design)
         self.gui.rebuild()
         self.gui.autoscale()
         self.gui.screenshot()
@@ -125,9 +121,10 @@ class AnsysSimulator:
 
         # run_sweep(self.design, sweep_dict, emode_setup, lom_setup)
         # print(sweep_dict)
-        if "coupler_type" in sweep_dict and sweep_dict["coupler_type"].lower() == "ncap":
+        if "coupling_type" in sweep_dict and sweep_dict["coupling_type"].lower() == "ncap":
+            # print("debugigng")
             run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="ncap_sweep")
-        elif "coupler_type" in sweep_dict and sweep_dict["coupler_type"].lower() == "clt":
+        elif "coupling_type" in sweep_dict and sweep_dict["coupling_type"].lower() == "clt":
             run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="clt_sweep")
         else:
             run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="xmon_sweep")
@@ -145,6 +142,7 @@ class AnsysSimulator:
         Raises:
             None
         """
+        # print("HELLO")
         return_df = {}
         if isinstance(self.analyzer.selected_system, list): # have a qubit_cavity object
             self.geom_dict = Dict(
@@ -160,9 +158,9 @@ class AnsysSimulator:
         else: # have a non-qubit_cavity object
             self.geom_dict = device_dict["design_options"]
             self.setup_dict = device_dict["setup"]
-            return_df = simulate_single_design(design=self.design, device_dict=device_dict, sim_options=self.setup_dict)
+            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_single_design(design=self.design, device_dict=device_dict, lom_options=self.setup_dict)
         
-        # return return_df
+        return return_df
 
     def get_renderer_screenshot(self):
         """
@@ -205,7 +203,6 @@ class AnsysSimulator:
         Returns:
         None
         """
-        self.gui = metal.MetalGUI(self.design)
         self.design.delete_all_components()
         if "g" in device_dict["sim_results"]:
             qc = QubitCavity(self.design, "qubit_cavity", options=device_dict["design"]["design_options"])
@@ -213,23 +210,3 @@ class AnsysSimulator:
         self.gui.rebuild()
         self.gui.autoscale()
         self.gui.screenshot()
-
-    def sweep_qubit_cavity(self,  device_dict, emode_setup=None, lom_setup=None):
-        """
-        Sweeps a single geometric parameter of the qubit and cavity system based on the provided sweep dictionary.
-        
-        Args:
-            device_dict (dict): A dictionary containing the device design options and setup.
-            emode_setup (dict): A dictionary containing the eigenmode setup options.
-            lom_setup (dict): A dictionary containing the LOM setup options.
-            
-        Returns:
-            results: The sweep results.
-        """
-
-        if emode_setup == None:
-            emode_setup=self.default_eigenmode_options
-        if lom_setup == None:
-            lom_setup=self.default_lom_options
-
-        results = run_qubit_cavity_sweep(self.design, device_dict, emode_setup, lom_setup, filename="qubit_cavity_sweep")

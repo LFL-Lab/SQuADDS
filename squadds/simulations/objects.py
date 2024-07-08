@@ -4,8 +4,6 @@ SimulationConfig
 ========================================================================================================================
 """
 
-from datetime import datetime
-
 from qiskit_metal.analyses.quantization import EPRanalysis, LOManalysis
 
 from .sweeper_helperfunctions import extract_QSweep_parameters
@@ -54,7 +52,7 @@ class SimulationConfig:
         self.Lj = Lj
         self.Cj = Cj
 
-def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, open_gui=False):
+def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options):
     """
     Simulates the whole device by running eigenmode and LOM simulations.
 
@@ -64,16 +62,16 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
         cavity_dict (dict): Dictionary containing cavity options.
         LOM_options (dict): Dictionary containing LOM setup options.
         eigenmode_options (dict): Dictionary containing eigenmode setup options.
-        open_gui (bool, optional): If True, the Metal GUI is opened. Default is False.
 
     Returns:
         tuple: A tuple containing the simulation results, LOM analysis object, and eigenmode analysis object.
     """
-    
+
     cross_dict = device_dict["design_options_qubit"]
     cavity_dict = device_dict["design_options_cavity_claw"]
-    
+
     design.delete_all_components()
+    print(device_dict["coupler_type"])
     if device_dict["coupler_type"].upper() == "CLT":
         emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options)
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
@@ -85,11 +83,12 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
         data = get_sim_results(emode_df = emode_df, lom_df = lom_df, ncap_lom_df=ncap_lom_df)
 
+
     device_dict_format = Dict(
         cavity_options = Dict(
-            coupler_type = device_dict["coupler_type"],
+            coupling_type = device_dict["coupler_type"],
             coupler_options = cavity_dict["cplr_opts"],
-            cpw_opts = Dict (
+            cpw_options = Dict (
                 left_options = cavity_dict["cpw_opts"],
             )
             
@@ -98,13 +97,10 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
     )
 
     design = metal.designs.design_planar.DesignPlanar()
-    if open_gui:
-        gui = metal.MetalGUI(design)
-    else:
-        pass
+    gui = metal.MetalGUI(design)
     design.overwrite_enabled = True
     QC = create_qubitcavity(device_dict_format, design)
-    
+
     return_df = dict(
         sim_options = dict(
             setup = dict(
@@ -125,16 +121,14 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
 
     return return_df, lom_obj, emode_obj
 
-def simulate_single_design(design, device_dict, emode_options, lom_options, coupler_type):
+def simulate_single_design(design, device_dict, emode_options={}, lom_options={}, coupling_type="CLT"):
     """
     Simulates a single design using the provided parameters.
 
     Args:
         design (Design): The design object representing the design.
+        gui (GUI): The GUI object for displaying simulation results.
         device_dict (dict): A dictionary containing device options.
-        emode_options (dict): A dictionary containing the eigenmode simulation options.
-        lom_options (dict): A dictionary containing the LOM simulation options.
-        coupler_type (str): The type of coupler to be used.
         sim_options (dict): A dictionary containing simulation options.
 
     Returns:
@@ -146,12 +140,13 @@ def simulate_single_design(design, device_dict, emode_options, lom_options, coup
     emode_df = {}
     lom_df = {}
     return_df = {}
-
+    emode_obj = None
+    lom_obj = None
     if "cpw_opts" in device_dict.keys():
         emode_df, emode_obj = run_eigenmode(design, device_dict, emode_options)
-        if coupler_type.lower() == "ncap":
+        if coupling_type.lower() == "ncap":
             # emode_df, emode_obj = run_eigenmode(design, device_dict, sim_options)
-            ncap_lom_df, ncap_lom_obj = run_capn_LOM(design, device_dict["cplr_opts"], lom_options)
+            ncap_lom_df, lom_obj = run_capn_LOM(design, device_dict["cplr_opts"], lom_options)
             f_est, kappa_est = find_kappa(emode_df["sim_results"]["cavity_frequency"], ncap_lom_df["sim_results"]["C_top2ground"], ncap_lom_df["sim_results"]["C_top2bottom"])
             # emode_df["sim_results"]["cavity_frequency"] = f_est
             # emode_df["sim_results"]["kappa"] = kappa_est
@@ -162,11 +157,15 @@ def simulate_single_design(design, device_dict, emode_options, lom_options, coup
         return_df["final_sim_results"]["kappa"] = kappa_est
         return_df["final_sim_results"].update({"cavity_frequency_unit": "GHz"})
         return_df["final_sim_results"].update({"kappa_unit": "kHz"})
+        # print(coupling_type)
     else:
-        lom_df, lom_obj = run_xmon_LOM(design, device_dict["design_options"], lom_options) if "cross_length" in device_dict["design_options"] else run_capn_LOM(design, device_dict, lom_options)
-        return_df["lom_df"] = lom_df
+        lom_df, lom_obj = run_xmon_LOM(design, device_dict["design_options"], lom_options) if "cross_length" in device_dict["design_options"] else run_capn_LOM(design, device_dict, sim_options)
+        return_df = lom_df
 
-    return return_df
+    # print(return_df)
+
+    # return (emode_df, emode_obj) if emode_df != {} else (lom_df, lom_obj)
+    return return_df, emode_obj, lom_obj
 
 def get_sim_results(emode_df = {}, lom_df = {}, ncap_lom_df = {}):
     """
@@ -175,7 +174,6 @@ def get_sim_results(emode_df = {}, lom_df = {}, ncap_lom_df = {}):
     Args:
         emode_df (dict): Dataframe containing eigenmode simulation results.
         lom_df (dict): Dataframe containing lumped element model simulation results.
-        ncap_lom_df (dict): Dataframe containing lumped element model simulation results for NCap coupler.
 
     Returns:
         dict: A dictionary containing the calculated simulation results.
@@ -241,7 +239,6 @@ def run_eigenmode(design, geometry_dict, sim_options):
             }
             The EPRAnalysis object is returned for further analysis or post-processing.
     """
-
     cpw_length = int("".join(filter(str.isdigit, geometry_dict["cpw_opts"]["total_length"])))
     claw = create_claw(geometry_dict["claw_opts"], cpw_length, design)
     coupler = create_coupler(geometry_dict["cplr_opts"], design)
@@ -260,9 +257,9 @@ def run_eigenmode(design, geometry_dict, sim_options):
     # print(type(sim_options["setup"]))
 
     mesh_lengths = {}
-    coupler_type = "CLT"
+    coupling_type = "CLT"
     if "finger_count" in geometry_dict["cplr_opts"]:
-        coupler_type = "NCap"
+        coupling_type = "NCap"
         render_simulation_no_ports(epra, [cpw,claw], [(cpw.name, "start")], config.design_name, setup.vars)
         mesh_lengths = {'mesh1': {"objects": [f"trace_{cpw.name}", f"readout_connector_arm_{claw.name}"], "MaxLength": '4um'}}
     else:
@@ -280,7 +277,7 @@ def run_eigenmode(design, geometry_dict, sim_options):
 
     data_df = {
         "design": {
-            "coupler_type": coupler_type,
+            "coupler_type": coupling_type,
             "design_options": geometry_dict,
             "design_tool": "Qiskit Metal"
         },
@@ -390,7 +387,7 @@ def run_xmon_LOM(design, cross_dict, sim_options):
     c1.sim.setup.reuse_setup = False
 
     c1.sim.setup.max_passes = 50
-    c1.sim.setup.min_converged_passes = 2
+    c1.sim.setup.min_converged_passes = 1
     c1.sim.setup.percent_error = 0.1
     c1.sim.setup.name = 'sweep_setup'
 
@@ -456,33 +453,11 @@ def run_sweep(design, sweep_opts, emode_options, lom_options, filename="default_
     '''
     for param in extract_QSweep_parameters(sweep_opts["geometry_dict"]):
         print(param)
-        return_df = simulate_single_design(design, param, emode_options, lom_options, sweep_opts["coupler_type"])
+        return_df, _, __ = simulate_single_design(design, param, emode_options, lom_options, sweep_opts["coupling_type"])
+        from datetime import datetime
         filename = f"filename_{datetime.now().strftime('%d%m%Y_%H.%M.%S')}"
         save_simulation_data_to_json(return_df, filename)
 
-def run_qubit_cavity_sweep(design, device_options, emode_setup=None, lom_setup=None, filename="default_sweep"):
-    """
-    Runs a parameter sweep for the specified design.
-    
-    Args:
-        design (Design): The design object.
-        sweep_opts (dict): The sweep options.
-        device_dict (dict): The device dictionary containing the design options and setup.
-        emode_setup (dict): The eigenmode setup options.
-        lom_setup (dict): The LOM setup options.
-        filename (str): The filename for the simulation results.
-        
-        Returns:"""
-    
-    simulated_params_list = [] 
-    for param in extract_QSweep_parameters(device_options):
-        cpw_claw_qubit_df, _, _ = simulate_whole_device(design, param, emode_setup, lom_setup)
-        filename = f"filename_{datetime.now().strftime('%d%m%Y_%H.%M.%S')}"
-        simulated_params_list.append(cpw_claw_qubit_df)
-        save_simulation_data_to_json(cpw_claw_qubit_df, filename)
-
-    return simulated_params_list
-    
 def start_simulation(design, config):
     """
     Starts the simulation with the specified design and configuration.
