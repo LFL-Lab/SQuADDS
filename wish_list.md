@@ -21,11 +21,14 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Core:
 
-- **speed up half-wave cavity operations + decreate memory usage** 
+- **speed up half-wave cavity operations + decreate memory usage** (e.g. speed up both one time cost methods such as generating the dataset + local operations done at the edge)
+- **stupid simple API for users to contribute experimental data to SQuADDS_DB**
+- handle cases where user does not **wish** specify a resonator_type
 - Better system design for both SQuADDS package and SQuADDS_DB?
 - a system to "metalize" any .gds/.dxf file (i.e. from the CAD file generate the corresponding Qiskit Metal file)
 - add support to handle designs generated via other tools (explicitly not qiskit metal e.g. [KQCircuits](https://github.com/iqm-finland/KQCircuits), [DXFWriter](https://github.com/SchusterLab/maskLib), [gdsfactory](https://github.com/gdsfactory/gplugins), [pyhfss](https://github.com/QW-QubitDesign/pyHFSS), [phidl](https://github.com/amccaugh/phidl))
 - API (modules/methods) to easily allow for adding more data columns to existing simulation entries in the database (e.g. someone with a lot of compute may want to rerun all the geometries in our database and add the participation ratio of various interfaces to the database -> lets make it easy for them?)
+- changing datasets to `SQLite` or some other format to handle larger-than-memory datasets as we scale?
 - refactor code to implement faster way with lower memory usage for handling dataframe operations?
 
 ## Contribution:
@@ -64,6 +67,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 - create proper train/test/splits and changing `SQuADDS_DB()` to always return all data
 - Standardize the way we handle units for simulated results + impmelent necessary changes in backend
 - More tutorials on how to use the package + various applications of the package
+- Check to see if precision of design parameters are being handled correctly + fix as needed
 - Change all `NCap` to `CapNInterdigital`
 
 ## Fancy/For Fun:
