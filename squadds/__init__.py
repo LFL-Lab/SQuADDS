@@ -1,6 +1,6 @@
 import os
 
-__version__ = '0.2.35'
+__version__ = '0.2.36'
 __license__ = "MIT License"
 __copyright__ = 'Sadman Ahmed Shanto, Eli Levenson-Falk 2023'
 __author__ = 'Sadman Ahmed Shanto, Eli Levenson-Falk'
