@@ -831,13 +831,14 @@ None</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.simulations.objects.get_sim_results">
-<span class="sig-prename descclassname"><span class="pre">squadds.simulations.objects.</span></span><span class="sig-name descname"><span class="pre">get_sim_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">emode_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lom_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/objects.html#get_sim_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.objects.get_sim_results" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">squadds.simulations.objects.</span></span><span class="sig-name descname"><span class="pre">get_sim_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">emode_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lom_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncap_lom_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/objects.html#get_sim_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.objects.get_sim_results" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves simulation results from the provided dataframes and calculates additional parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>emode_df</strong> (<em>dict</em>) – Dataframe containing eigenmode simulation results.</p></li>
 <li><p><strong>lom_df</strong> (<em>dict</em>) – Dataframe containing lumped element model simulation results.</p></li>
+<li><p><strong>ncap_lom_df</strong> (<em>dict</em>) – Dataframe containing lumped element model simulation results for NCap coupler.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1041,13 +1042,16 @@ Saves each sweep iteration to a JSON file with the specified filename.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.simulations.objects.simulate_single_design">
-<span class="sig-prename descclassname"><span class="pre">squadds.simulations.objects.</span></span><span class="sig-name descname"><span class="pre">simulate_single_design</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/objects.html#simulate_single_design"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.objects.simulate_single_design" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">squadds.simulations.objects.</span></span><span class="sig-name descname"><span class="pre">simulate_single_design</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emode_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lom_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupler_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/objects.html#simulate_single_design"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.objects.simulate_single_design" title="Link to this definition">#</a></dt>
 <dd><p>Simulates a single design using the provided parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>design</strong> (<em>Design</em>) – The design object representing the design.</p></li>
 <li><p><strong>device_dict</strong> (<em>dict</em>) – A dictionary containing device options.</p></li>
+<li><p><strong>emode_options</strong> (<em>dict</em>) – A dictionary containing the eigenmode simulation options.</p></li>
+<li><p><strong>lom_options</strong> (<em>dict</em>) – A dictionary containing the LOM simulation options.</p></li>
+<li><p><strong>coupler_type</strong> (<em>str</em>) – The type of coupler to be used.</p></li>
 <li><p><strong>sim_options</strong> (<em>dict</em>) – A dictionary containing simulation options.</p></li>
 </ul>
 </dd>
@@ -1515,7 +1519,23 @@ of the elements in the input lists.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.simulations.utils.find_kappa">
 <span class="sig-prename descclassname"><span class="pre">squadds.simulations.utils.</span></span><span class="sig-name descname"><span class="pre">find_kappa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_rough</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_tg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_tb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/utils.html#find_kappa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.utils.find_kappa" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Calculate the cavity linewidth (kappa) using the rough frequency and capacitances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f_rough</strong> (<em>float</em>) – The rough frequency of the cavity in GHz.</p></li>
+<li><p><strong>C_tg</strong> (<em>float</em>) – The total capacitance of the ground in Farads.</p></li>
+<li><p><strong>C_tb</strong> (<em>float</em>) – The total capacitance of the bias in Farads.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cavity linewidth (kappa) in kHz.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.simulations.utils.flatten_dict">
