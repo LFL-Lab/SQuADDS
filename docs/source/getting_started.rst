@@ -82,7 +82,6 @@ You can use the GitHub version of SQuADDS as well by changing Step 4 to
    pip install -r requirements.txt
    pip install -e .
 
-
 ********************************
 FAQ's
 ********************************
@@ -91,8 +90,7 @@ FAQ's
 Installation Issues
 --------------------
 
-**Q: Getting**``ModuleNotFoundError: No module named 'squadds'``**after running `pip install SQuADDS` in Jupyter Notebook. How can I fix this?**
-
+**Q: Getting** ``ModuleNotFoundError: No module named 'squadds'`` **after running** `pip install SQuADDS` **in Jupyter Notebook. How can I fix this?**
 
 **A:** You may need to restart the kernel after installing `SQuADDS`. To do this, go to the `Kernel` menu in Jupyter Notebook and select `Restart`.
 
@@ -100,20 +98,23 @@ Installation Issues
 Accessing the Database
 -----------------------
 
-Q: **If there are errors upon instantiating the **``SQuADDS_DB``**class, what should I do?**
+**Q: I am getting the error** ``KeyError: "Column contributor not in the dataset. Current columns in the dataset: ['image', 'measured_results', 'contrib_info', 'design_code', 'notes', 'sim_results', 'paper_link']"`` **for various** `SQuADDS_DB()` **methods (e.g.** `SQuADDS_DB().view_all_contributors()`**). Everything was working fine just the other day.**
 
-**A:** If you encounter errors upon instantiating the ``SQuADDS_DB`` class, chances are there is an issue with caching. To fix this, please delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
+**A:** This error is due to new datasets (configs) added to ``SQuADDS/SQuADDS_DB`` dataset on 07/04/2024 (🇺🇸 🦅 🎆). To fix this issue please upgrade ``squadds`` to its latest version (or any version greater than or equal to 0.2.35).
+
+**Q: If there are errors upon instantiating the** `SQuADDS_DB` **class, what should I do?**
+
+**A:** If you encounter errors upon instantiating the `SQuADDS_DB` class, chances are there is an issue with caching. To fix this, please delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
 
 -------------
 ``.env`` File 
 -------------
 
-
-Q: **Why is the ``.env`` file needed?**
+**Q: Why is the** ``.env`` **file needed?**
 
 **A:** The ``.env`` file is needed for making contributions to the SQuADDS Database.
 
-Q: **What info should the ``.env`` file contain?**
+**Q: What info should the** ``.env`` **file contain?**
 
 **A:** The ``.env`` file should have the following fields defined.
 
@@ -138,11 +139,12 @@ You can set these fields via the SQuADDS API.
    set_huggingface_api_key()
    set_github_token()
 
-Q: **Where is the ``.env`` file created or should be placed for it to function properly?**
+**Q: Where is the** ``.env`` **file created or should be placed for it to function properly?**
 
 **A:** The ``.env`` file should be automatically created at the right place within the root directory of the ``SQuADDS`` package. If the ``.env`` file is not automatically created upon installation, you will need to manually create it at this specific location for ``SQuADDS`` to function properly.
 
 To determine the installation root of ``SQuADDS``, and subsequently place or find the ``.env`` file, use the following approach:
+
 
 .. code-block:: python
 

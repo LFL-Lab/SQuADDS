@@ -27,15 +27,25 @@ Please see our `Contributing Guidelines <https://github.com/LFL-Lab/SQuADDS/blob
 Developers
 ----------
 
-| `Sadman Ahmed Shanto <https://www.sadmanahmedshanto.com>`_ (University of Southern California)
+| `Sadman Ahmed Shanto <https://www.sadmanahmedshanto.com>`_ (University of Southern California) - Project Lead 🤖
+| `Andre Kuo <https://www.linkedin.com/in/andrekuo>`_ (University of Southern California)
+| `Elizabeth Kunz <https://www.linkedin.com/in/elizabeth-kunz-644848207/>`_ (University of Southern California)
+
 
 Contributors
 ------------
 
-| **Eli Levenson-Falk** (University of Southern California) - Eternal Guidance Provider 🙏🏽
-| **Andre Kuo** (University of Southern California) - Code contributor 💻
+| **Eli Levenson-Falk, PhD** (University of Southern California) - Eternal Guidance Provider (Principle Investigator) 🙏🏽
 | **Clark Miyamoto** (New York University) - Code contributor 💻
 | **Madison Howard** (California Institute of Technology) - Bug Hunter 🐛
+| **Malida Hecht** (University of Southern California) - Data contributor 📀
 | **Evangelos Vlachos** (University of Southern California) - Code contributor 💻 and Bug Hunter 🐛
-| **Anne Whelan** (University of Southern California) - Documentation contributor 📄
-| **Jenny Huang** (University of Southern California) - Documentation contributor 📄
+| **Anne Whelan** (US Navy) - Documentation contributor 📄
+| **Jenny Huang** (Columbia University) - Documentation contributor 📄
+| **Connie Miao** (Stanford University) - Data Contributor 📀
+| **Daria Kowsari, PhD** (University of Southern California) - Data contributor 📀
+| **Vivek Maurya** (University of Southern California) - Data contributor 📀
+| **Haimeng Zhang, PhD** (IBM) - Data contributor 📀
+| **Ethan Zheng** (University of Southern California) - Data scrubber 🧼
+| **Sara Sussman, PhD** (Fermilab) - Bug Hunter 🐛
+| **Adhish Chakravorty** (University of Southern California) - Bug Hunter 🐛

@@ -14,13 +14,12 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 
 ## Table of Contents
 
-- [Installation](#installation)
+- [Installation](#setup)
 - [Tutorials](#tutorials)
 - [Citation](#citation)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
-- [Next Release:](#next-release)
 
 ---
 
@@ -61,7 +60,8 @@ Read more on [install_guide](docs/installation/unix_install.md))
 - [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html)
 - [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
 - [Tutorial 3: Contributing to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_to_SQuADDS.html)
-- [(COMING SOON) Tutorial 4: Creating a new database schema for SQuADDS]()
+- [Tutorial 3p5: Creating a new dataset for SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3p5_Creating_a_new_dataset.html)
+- [(COMING SOON) More tutorials]()
 
 ## Citation
 
@@ -78,7 +78,9 @@ If you use SQuADDS in your research, please cite the following paper:
 
 ## Contributing
 
-We welcome contributions from the community! Please see our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get started.
+We welcome contributions from the community! Here is our [work wish list](wish_list.md).
+
+Please see our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get started and absolutely feel free to reach out to us if you have any questions.
 
 ## License
 
@@ -87,11 +89,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc.edu).
-
----
-
-## Next Release:
-
-### [Version 0.3 Features](next_release.md):
 
 ---

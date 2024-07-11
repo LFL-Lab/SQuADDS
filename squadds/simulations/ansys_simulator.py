@@ -125,9 +125,9 @@ class AnsysSimulator:
 
         # run_sweep(self.design, sweep_dict, emode_setup, lom_setup)
         # print(sweep_dict)
-        if "coupling_type" in sweep_dict and sweep_dict["coupling_type"].lower() == "ncap":
+        if "coupler_type" in sweep_dict and sweep_dict["coupler_type"].lower() == "ncap":
             run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="ncap_sweep")
-        elif "coupling_type" in sweep_dict and sweep_dict["coupling_type"].lower() == "clt":
+        elif "coupler_type" in sweep_dict and sweep_dict["coupler_type"].lower() == "clt":
             run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="clt_sweep")
         else:
             run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="xmon_sweep")
@@ -145,21 +145,22 @@ class AnsysSimulator:
         Raises:
             None
         """
+        return_df = {}
         if isinstance(self.analyzer.selected_system, list): # have a qubit_cavity object
             self.geom_dict = Dict(
                 qubit_geoms = device_dict["design_options_qubit"],
                 cavity_geoms = device_dict["design_options_cavity_claw"]
             )
             self.setup_dict = Dict(
-                qubit_setup = device_dict["sim_options_qubit"],
-                cavity_setup = device_dict["sim_options_cavity_claw"]
+                qubit_setup = device_dict["setup_qubit"],
+                cavity_setup = device_dict["setup_cavity_claw"]
             )
             return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(design=self.design, device_dict=device_dict, LOM_options=self.setup_dict.qubit_setup, eigenmode_options=self.setup_dict.cavity_setup)
 
         else: # have a non-qubit_cavity object
             self.geom_dict = device_dict["design_options"]
             self.setup_dict = device_dict["setup"]
-            return_df, self.lom_analysis_obj = simulate_single_design(design=self.design, device_dict=device_dict, sim_options=self.setup_dict)
+            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_single_design(design=self.design, device_dict=device_dict, lom_options=self.setup_dict)
         
         return return_df
 

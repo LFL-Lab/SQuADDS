@@ -369,8 +369,8 @@ class Analyzer:
         closest_fres = self.closest_df_entry["cavity_frequency_GHz"]
         closest_kappa_kHz = self.closest_df_entry["kappa_kHz"]
         ax1.scatter(closest_fres, closest_kappa_kHz, color=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
-        ax1.set_xlabel(r'$f_{res}$ (Hz)', fontweight='bold', fontsize=24)
-        ax1.set_ylabel(r'$\kappa / 2 \pi$ (Hz)', fontweight='bold', fontsize=24)
+        ax1.set_xlabel(r'$f_{res}$ (GHz)', fontweight='bold', fontsize=24)
+        ax1.set_ylabel(r'$\kappa / 2 \pi$ (kHz)', fontweight='bold', fontsize=24)
         ax1.tick_params(axis='both', which='major', labelsize=20)
         legend1 = ax1.legend(loc='upper left', fontsize=16)
         for text in legend1.get_texts():

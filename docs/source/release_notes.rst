@@ -1,34 +1,44 @@
 Release Notes
 =============
 
-Version 0.2.34 (2024-05-31)
+Version 0.2.36 (2024-07-08)
+--------------------------
+
+* **Alpha Version 0.2.36**
+
+**Bug Fixes**
+
+- Various bugs in Ansys simulations (ones using CapNInterdigitated capacitors) have been patched
+
+
+Version 0.2.35 (2024-07-04)
+--------------------------
+
+* **Alpha Version 0.2.35**
+
+**Bug Fixes**
+
+- Bug in accessing simulation data from HuggingFace has been patched
+
+**Documentation**
+
+- Added `FAQ <https://lfl-lab.github.io/SQuADDS/source/getting_started.html#accessing-the-database>`_ for issue with accessing HF data on SQuADDS releases < 0.2.35
+
+Version 0.2.34 (2024-07-04)
 --------------------------
 
 * **Alpha Version 0.2.34**
 
-**Breaking Changes**
-
-- `NCap` changed to `CapNInterdigitalTee` everywhere in HuggingFace and the codebase
-- `select_coupler` would no longer be supported. Use `select_resonator_type` instead
--  `Analyzer` object no longer requires `SQuADDS_DB()` in its constructor
-
-**New Features**
-
-- Added the option to create lambda/2 resonators
-- Interpolation support for lambda/2 resonators
-
-**Improvements**
-
-- Added `chi` as a query parameter
-- Better and more intuitive API 
-- "hot reload" of `Analyzer` object
-- Updated documentation and tutorials
-- Added `release-drafter` for automated release notes
-
 **Bug Fixes**
 
-- Fixed major bug in Simulation Code <ANDRE>
-- various...
+- Addressed API to only show sim data configs
+- Fixed a bug in AnsysSimulator for setup_dict for qubit-cavity systems
+- Fixed bugs for geometries extracted from interpolator (and utils.py)
+
+**Documentation**
+
+- Added tutorial3p5 files
+- Added README.md, wish_list.md, and docs/source/developer/index.rst from feature-half_wave_cavity (latest)
 
 ---
 
