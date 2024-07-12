@@ -5,6 +5,7 @@ import warnings
 import pandas as pd
 from datasets import get_dataset_config_names, load_dataset
 from tabulate import tabulate
+import requests
 
 from squadds.core.design_patterns import SingletonMeta
 from squadds.core.utils import *
@@ -69,6 +70,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.selected_df = None
         self.target_param_keys = None
         self.units = None
+        self.measured_device_database = None
+        print("SQuADDS_DB initialized with new changes")
+
 
     def supported_components(self):
         """
@@ -196,15 +200,26 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         components = self.supported_components()
         component_names = self.supported_component_names()
         data_types = self.supported_data_types()
-
-        # Create a list of rows for the table
-        table = [components, component_names, data_types]
+         # Create a list of component URLs for each component name
+        component_urls = [f"https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/{name}.png" for name in component_names]
+        
+        # Validate each URL and create a list of component images
+        component_images = []
+        
+        for url in component_urls:
+            r = requests.get(url)
+            if r.status_code is 404:
+                component_images.append("This component does not yet have a reference image.")
+            else:
+                component_images.append(url)
+            # Create a list of rows for the table
+            table = [components, component_names, data_types, component_images]
 
         # Transpose the table (convert columns to rows)
         table = list(map(list, zip(*table)))
 
         # Print the table with headers
-        print(tabulate(table, headers=["Component", "Component Name", "Data Available"],tablefmt="fancy_grid"))
+        print(tabulate(table, headers=["Component", "Component Name", "Data Available", "Component Image"],tablefmt="fancy_grid"))
 
     def get_dataset_info(self, component=None, component_name=None, data_type=None):
         """
@@ -331,6 +346,91 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         config = component + "-" + component_name + "-" + data_type
         self.view_contributors_of_config(config)
+
+
+
+    
+    def view_simulation_results(self, device_name):
+        """
+        View the simulation results of a specific device specified with a device name.
+
+        Args:
+           device_name (str): the name of the experimentally validated device within the database.
+
+        Returns:
+            dict: a dict of sim results.
+        """       
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+        configs_contrib_info = dataset["contrib_info"]
+        simulation_info = dataset["sim_results"]
+            
+        for contrib_info, sim_results in zip(configs_contrib_info, simulation_info):
+                if contrib_info['name'] == device_name:
+                    return {sim_results}
+            
+    
+        return {}
+
+    def view_reference_device_of(self, component=None, component_name=None, data_type=None):
+        """
+        View the reference/source experimental device that was used to validate a specific simulation configuration.  
+        
+        Args:
+            component (str): The component of interest.
+            component_name (str): The name of the component.
+            data_type (str): The type of data.
+
+        Returns: 
+            str: the name of the experimentally validated reference device.
+        
+        """
+        config = f"{component}-{component_name}-{data_type}"
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+        configs_contrib_info = dataset["contrib_info"]
+        simulation_info = dataset["sim_results"]
+        
+        for contrib_info, sim_results in zip(configs_contrib_info, simulation_info):
+            if config in sim_results:
+                return contrib_info['name']
+        
+            else:
+                return "The reference device could not be retrieved."
+            
+        return None
+    
+    
+
+
+  
+    def view_reference_devices(self):
+        """
+        View all unique reference (experimental) devices and their relevant information.
+
+        This method iterates through the configurations and extracts the chip's name within the SQuADDS DB, group, and who the chip was measured by. 
+        It also finds the simulation results for the device.It checks if the combination of simulation results uploader, PI, group, and institution
+        is already in the list of unique contributors. If not, it adds the relevant information to the list. 
+        Finally, it prints the list of unique devices in a tabular format.
+
+        """
+
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+        configs_contrib_info = dataset["contrib_info"]
+        unique_contributors_info = []
+
+        for contrib_info in configs_contrib_info:
+
+            relevant_info = {key: contrib_info[key] for key in ['name', 'group', 'measured_by']}
+ 
+            device_name = contrib_info['name']
+            relevant_info['simulations']= self.view_simulation_results(device_name)
+            if relevant_info not in unique_contributors_info:
+                unique_contributors_info.append(relevant_info)
+
+        print(tabulate(unique_contributors_info, headers='keys', tablefmt="fancy_grid"))
+
+
+
+
 
     def select_components(self, component_dict=None):
         """
@@ -630,6 +730,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             pandas.DataFrame: The created DataFrame based on the selected system.
         """
+
+        
         if self.selected_system is None:
             print("Selected system is not defined.")
             return
@@ -637,7 +739,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             df = self.get_dataset(data_type=self.selected_data_type, component=self.selected_component, component_name=self.selected_component_name)
             # if coupler is selected, filter by coupler
             if self.selected_coupler is not None:
-                df = filter_df_by_conditions(df, {"coupler_type": self.selected_coupler}) 
+                df = filter_df_by_conditions(df, {"coupler_type": self.selected_coupler})
+            df['source_device'] = self.view_reference_device_of(component=self.selected_component, component_name=self.selected_component_name, data_type=self.selected_data_type)
             self.selected_df = df
         elif isinstance(self.selected_system, list): #! TODO: need to implement logic to handle more complex systems
             # get the qubit and cavity dfs
@@ -647,7 +750,11 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             if self.selected_coupler is not None:
                 cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler}) 
             df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap']) #TODO: handle with user awareness
+            sim_config = f"cavity_claw-{self.selected_component_name}-{self.selected_data_type}" #UNTESTED
+            print(sim_config)
+            df['source_device'] = self.view_reference_device_of(component='cavity_claw', component_name=self.selected_component_name, data_type=self.selected_data_type)
             self.selected_df = df
+            
         else:
             raise UserWarning("Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`")
         return df
