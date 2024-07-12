@@ -5,7 +5,6 @@ import warnings
 import pandas as pd
 from datasets import get_dataset_config_names, load_dataset
 from tabulate import tabulate
-import requests
 
 from squadds.core.design_patterns import SingletonMeta
 from squadds.core.utils import *
@@ -71,7 +70,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.target_param_keys = None
         self.units = None
         self.measured_device_database = None
-        print("SQuADDS_DB initialized with new changes")
 
 
     def supported_components(self):
