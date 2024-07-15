@@ -198,19 +198,13 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         components = self.supported_components()
         component_names = self.supported_component_names()
         data_types = self.supported_data_types()
-         # Create a list of component URLs for each component name
         component_urls = [f"https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/{name}.png" for name in component_names]
         
-        # Validate each URL and create a list of component images
         component_images = []
         
         for url in component_urls:
-            r = requests.get(url)
-            if r.status_code is 404:
-                component_images.append("This component does not yet have a reference image.")
-            else:
                 component_images.append(url)
-            # Create a list of rows for the table
+    
             table = [components, component_names, data_types, component_images]
 
         # Transpose the table (convert columns to rows)
