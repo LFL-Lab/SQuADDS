@@ -732,7 +732,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             # if coupler is selected, filter by coupler
             if self.selected_coupler is not None:
                 df = filter_df_by_conditions(df, {"coupler_type": self.selected_coupler})
-            df['source_device'] = self.view_reference_device_of(component=self.selected_component, component_name=self.selected_component_name, data_type=self.selected_data_type)
             self.selected_df = df
         elif isinstance(self.selected_system, list): #! TODO: need to implement logic to handle more complex systems
             # get the qubit and cavity dfs
@@ -742,8 +741,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             if self.selected_coupler is not None:
                 cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler}) 
             df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap']) #TODO: handle with user awareness
-            sim_config = f"cavity_claw-{self.selected_component_name}-{self.selected_data_type}" 
-            df['source_device'] = self.view_reference_device_of(component='cavity_claw', component_name=self.selected_component_name, data_type=self.selected_data_type)
             self.selected_df = df
             
         else:
