@@ -90,30 +90,30 @@ FAQ's
 Installation Issues
 --------------------
 
-**Q: Getting** ``ModuleNotFoundError: No module named 'squadds'`` **after running** `pip install SQuADDS` **in Jupyter Notebook. How can I fix this?**
+**Q: Getting** ``ModuleNotFoundError: No module named 'squadds'`` **after running** ``pip install SQuADDS`` **in Jupyter Notebook. How can I fix this?**
 
-**A:** You may need to restart the kernel after installing `SQuADDS`. To do this, go to the `Kernel` menu in Jupyter Notebook and select `Restart`.
+**A:** You may need to restart the kernel after installing ``SQuADDS``. To do this, go to the ``Kernel`` menu in Jupyter Notebook and select ``Restart``.
 
 -----------------------
 Accessing the Database
 -----------------------
 
-**Q: I am getting the error** ``Generating train split: 0 examples [00:00, ? examples/s] An error occurred while loading the dataset: An error occurred while generating the dataset`` **for various** `SQuADDS_DB()` **methods (e.g.** `SQuADDS_DB().create_system_df()`**). 
+**Q: I am getting the error** ``Generating train split: 0 examples [00:00, ? examples/s] An error occurred while loading the dataset: An error occurred while generating the dataset`` **for various** ``SQuADDS_DB()`` **methods (e.g.** ``SQuADDS_DB().create_system_df()``**). 
  
- **A:** This is an error we have seen only happening on Windows systems for `datasets` library version `2.20.0`. Downgrading to any versions between 2.17.0 and 2.19.2 should fix the issue. To downgrade, run the following command:
+**A:** This is an error we have seen only happening on Windows systems for ``datasets`` library version ``2.20.0``. Downgrading to any versions between ``2.17.0`` and ``2.19.2`` should fix the issue. To downgrade, run the following command:
 
 .. code-block:: bash
 
    pip install datasets==2.19.2
 
 
-**Q: I am getting the error** ``KeyError: "Column contributor not in the dataset. Current columns in the dataset: ['image', 'measured_results', 'contrib_info', 'design_code', 'notes', 'sim_results', 'paper_link']"`` **for various** `SQuADDS_DB()` **methods (e.g.** `SQuADDS_DB().view_all_contributors()`**). Everything was working fine just the other day.**
+**Q: I am getting the error** ``KeyError: "Column contributor not in the dataset. Current columns in the dataset: ['image', 'measured_results', 'contrib_info', 'design_code', 'notes', 'sim_results', 'paper_link']"`` **for various** ``SQuADDS_DB()`` **methods (e.g.** ``SQuADDS_DB().view_all_contributors()`` **). Everything was working fine just the other day.**
 
-**A:** This error is due to new datasets (configs) added to ``SQuADDS/SQuADDS_DB`` dataset on 07/04/2024 (🇺🇸 🦅 🎆). To fix this issue please upgrade ``squadds`` to its latest version (or any version greater than or equal to 0.2.35).
+**A:** This error is due to new datasets (configs) added to ``SQuADDS/SQuADDS_DB`` dataset on 07/04/2024 (🇺🇸 🦅 🎆). To fix this issue please upgrade ``squadds`` to its latest version (or any version greater than or equal to ``0.2.35``).
 
-**Q: If there are errors upon instantiating the** `SQuADDS_DB` **class, what should I do?**
+**Q: If there are errors upon instantiating the** ``SQuADDS_DB`` **class, what should I do?**
 
-**A:** If you encounter errors upon instantiating the `SQuADDS_DB` class, chances are there is an issue with caching. To fix this, please delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
+**A:** If you encounter errors upon instantiating the ``SQuADDS_DB`` class, chances are there is an issue with caching. To fix this, please delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
 
 -------------
 ``.env`` File 
