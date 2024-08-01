@@ -85,6 +85,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self._internal_call = False  # Flag to track internal calls
         self.hwc_fname = "half-wave-cavity_df.parquet"
         self.merged_df_hwc_fname = "qubit_half-wave-cavity_df.parquet"
+        #self.merger_terms = ['claw_width', 'claw_length', 'claw_gap']
+        self.claw_merger_terms = ['claw_length'] # 07/2024 -> claw_length is the only parameter that is common between qubit and cavity
+        self.ncap_merger_terms = ['prime_width', 'prime_gap', 'second_width', 'second_gap']
 
     def check_login(self):
         """
@@ -565,7 +568,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print("WARNING:DeprecationWarning: select_coupler() is deprecated and will be removed in a future release. Use select_resonator_type() instead.")
             warnings.warn(
                 "select_coupler() is deprecated and will be removed in a future release. Use select_resonator_type() instead.",
-                DeprecationWarning
+                PendingDeprecationWarning
             )
         # E
         #! TODO: fix this method to work on CapNInterdigitalTee coupler sims
@@ -799,11 +802,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.qubit_df = qubit_df
         self.cavity_df = cavity_df
 
-        # merger_terms = ['claw_width', 'claw_length', 'claw_gap']
-        merger_terms = ['claw_length'] # 07/2024 -> claw_length is the only parameter that is common between qubit and cavity
-
         print("Creating qubit-half-wave-cavity DataFrame...")
-        df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=merger_terms, parallelize=parallelize, num_cpu=num_cpu)
+        df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=self.claw_merger_terms, parallelize=parallelize, num_cpu=num_cpu)
         
         # process the df to reduce the memory usage
         print("Optimizing the DataFrame...")
@@ -838,22 +838,18 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             df = self.read_parquet_file(self.merged_df_hwc_fname)
             return df
 
-        # merger_terms = ['claw_width', 'claw_length', 'claw_gap']
-        merger_terms = ['claw_length'] # 07/2024 -> claw_length is the only parameter that is common between qubit and cavity
-
         self.qubit_df = qubit_df
         self.cavity_df = cavity_df
                 
-        df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=merger_terms, parallelize=parallelize, num_cpu=num_cpu)
+        df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=self.claw_merger_terms, parallelize=parallelize, num_cpu=num_cpu)
         return df
 
     def _update_cap_interdigital_tee_parameters(self, cavity_df):
         """Updates parameters for CapNInterdigitalTee coupler."""
         ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name="NCap")
-        merger_terms = ['prime_width', 'prime_gap', 'second_width', 'second_gap']
         ncap_sim_cols = ['bottom_to_bottom', 'bottom_to_ground', 'ground_to_ground', 'top_to_bottom', 'top_to_ground', 'top_to_top']
         
-        df = update_ncap_parameters(cavity_df, ncap_df, merger_terms, ncap_sim_cols)
+        df = update_ncap_parameters(cavity_df, ncap_df, self.ncap_merger_terms, ncap_sim_cols)
         return df
 
     def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None, parallelize=False, num_cpu=None):

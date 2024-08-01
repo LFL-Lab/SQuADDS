@@ -1,3 +1,4 @@
+import warnings
 from collections import OrderedDict
 
 import numpy as np
@@ -249,6 +250,11 @@ class QubitCavity(QComponent):
         gui.rebuild()
         gui.autoscale()
         gui.screenshot()
+
+        warnings.warn(
+            "There may be \"kinks\" in the CPW. This is due to the ``asymmetry`` parameter in the CPW options. To remove the kinks, change the ``asymmetry`` parameter until the CPW is smooth.\nAlternatively, you may consider playing with the ``start_jogged_extension`` options",
+            ResourceWarning
+        )
 
     def to_gds(self, filename, include_wirebond_pads=False):
         if include_wirebond_pads:

@@ -1,11 +1,19 @@
+import multiprocessing
 import time
 
+import datashader as ds
+import datashader.transfer_functions as tf
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import pandas as pd
+import psutil
 import seaborn as sns
+from matplotlib.patches import Patch
 
 from squadds.calcs.transmon_cross import TransmonCrossHamiltonian
 from squadds.core.metrics import *
+from squadds.core.processing import merge_dfs
+from squadds.core.utils import create_unified_design_options
 
 """
 =====================================================================================
@@ -26,6 +34,7 @@ def scale_value(value, ratio):
     """
     scaled_value = str(float(value.replace('um', '')) * ratio) + 'um'
     return scaled_value
+
 
 """
 =====================================================================================
@@ -145,7 +154,7 @@ class Analyzer:
             start = time.time()
             qubit_H.add_cavity_coupled_H_params()
             end = time.time()
-            print(f"Time taken to add the coupled H params: {end-start}")
+            print(f"Time taken to add the coupled H params: {end-start} seconds")
             self.df = qubit_H.df 
         else:
             raise ValueError("Invalid system.")
@@ -258,12 +267,48 @@ class Analyzer:
 
         return outside_bounds
 
+    def get_complete_df(self,
+                         target_params: dict,
+                         metric: str = 'Euclidean',
+                         display: bool = True):
+        """
+        Returns the complete DataFrame (design + Hamiltonian parameters) sourced using the target parameters.
+
+        Args:
+            - target_params (dict): A dictionary containing the target parameters.
+            - metric (str, optional): The distance metric to use for calculating distances. Defaults to 'Euclidean'.
+            - display (bool, optional): Whether to display warnings for parameters outside of the library bounds. Defaults to True.
+
+        Returns:
+            - complete_df (DataFrame): A DataFrame containing all designs and Hamiltonian parameters.
+
+        Raises:
+            - ValueError: If the specified metric is not supported or if num_top is bigger than the size of the library.
+            - ValueError: If the metric is invalid.
+        """
+        ### Checks
+        # Check for supported metric
+        if metric not in self.__supported_metrics__:
+            raise ValueError(f'`metric` must be one of the following: {self.__supported_metrics__}')
+
+        self.target_params = target_params
+
+        if self.selected_resonator_type == "half":
+            # remove the "resonator_type" key from self.target_params
+            self.target_params.pop("resonator_type")
+
+        self._add_target_params_columns()
+            
+        return self.df
 
     def find_closest(self,
                          target_params: dict,
                          num_top: int,
                          metric: str = 'Euclidean',
-                         display: bool = True):
+                         display: bool = True,
+                         parallel: bool = False,
+                         num_cpu: str ="auto",
+                         skip_df_gen: bool = False):
         """
         Find the closest designs in the library based on the target parameters.
 
@@ -272,6 +317,9 @@ class Analyzer:
             - num_top (int): The number of closest designs to retrieve.
             - metric (str, optional): The distance metric to use for calculating distances. Defaults to 'Euclidean'.
             - display (bool, optional): Whether to display warnings for parameters outside of the library bounds. Defaults to True.
+            - parallell (bool, optional): Whether to run metric calculation in a parallelized way
+            - num_cpu (str/int, optional): The number of CPUs to run a job over
+            - skip_df_gen (bool, optional): Whether to generate the df or run from memory
 
         Returns:
             - closest_df (DataFrame): A DataFrame containing the closest designs.
@@ -291,7 +339,10 @@ class Analyzer:
             # remove the "resonator_type" key from self.target_params
             self.target_params.pop("resonator_type")
 
-        self._add_target_params_columns()
+        if not skip_df_gen:
+            self._add_target_params_columns()
+        else:
+            print("`skip_df_gen` flag set to True. Using `df` from memory. Please set this to False if `target_parameters` have changed.")
             
         target_params_list = list(self.target_params.keys())
         filtered_df = self.df[target_params_list]  
@@ -319,11 +370,31 @@ class Analyzer:
             if isinstance(value, str):
                 filtered_df = filtered_df[filtered_df[param] == value]
 
+
+        # if the filtered_df is empty, raise a User input error
+        if filtered_df.empty:
+            raise ValueError(f"No geometries found with the specified parameters:\n{target_params}\nPlease double-check your targets (especially ``resonator_type``) and try again.")
+
         # Calculate distances
-        distances = filtered_df.apply(lambda row: self.metric_strategy.calculate(target_params, row), axis=1)
+        if not parallel:
+            distances = filtered_df.apply(lambda row: self.metric_strategy.calculate(target_params, row), axis=1)
+            sorted_indices = distances.nsmallest(num_top).index
+        else:
+            if num_cpu == "auto":
+                num_cpu = psutil.cpu_count(logical=True)
+            elif int(num_cpu) > psutil.cpu_count(logical=True):
+                raise ValueError(f"num_cpu must be less than or equal to {psutil.cpu_count(logical=True)}")
+            else:
+                num_cpu = 2
+                raise UserWarning("`num_chunk`s must be an integer greater than 0. Defaulting to 2.")
+
+            print(f"Using {num_cpu} CPUs for parallel processing")
+
+            pool = multiprocessing.Pool(processes=num_cpu)  # adjust the number of processes based on your CPU count
+            distances = pool.map(self.compute_metric_distances, filtered_df.values)
+            sorted_indices = pd.Series(distances).nsmallest(num_top).index
 
         # Sort distances and get the closest ones
-        sorted_indices = distances.nsmallest(num_top).index
         self.closest_df = self.df.loc[sorted_indices]
 
         # set the closest design found flag
@@ -346,8 +417,13 @@ class Analyzer:
             """
             !TODO: generate and return `closest_df` for half-wave cavity in the same style as quarter-wave cavity
             """
+            self.closest_df = merge_dfs(self.closest_qubit, self.closest_cavity, self.db.claw_merger_terms)
+            self.closest_df['design_options'] = self.closest_df.apply(create_unified_design_options, axis=1)
 
         return self.closest_df
+
+    def compute_metric_distances(self, row):
+        return self.metric_strategy.calculate(self.target_params, row)
 
     def get_interpolated_design(self,
                      target_params: dict,
@@ -375,8 +451,7 @@ class Analyzer:
 
 
     def closest_design_in_H_space(self):
-        """
-        Plots a scatter plot of the closest design in the H-space.
+        """Plots a scatter plot of the closest design in the H-space.
 
         This method creates a scatter plot with two subplots. The first subplot shows the relationship between 'cavity_frequency_GHz' and 'kappa_kHz', while the second subplot shows the relationship between 'anharmonicity_MHz' and 'g_MHz'. The scatter plot includes pre-simulated data, target data, and the closest design entry from the database.
 
@@ -396,28 +471,82 @@ class Analyzer:
         # Create the figure with two subplots
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
 
-        # First subplot: kappa_kHz vs fres
-        ax1.scatter(x=self.df['cavity_frequency_GHz'], y=self.df['kappa_kHz'], color=color_presim, marker=".", s=50, label="Pre-Simulated")
-        ax1.scatter(x=self.target_params["cavity_frequency_GHz"], y=self.target_params["kappa_kHz"], color='red', s=100, marker='x', label='Target')
-        closest_fres = self.closest_df_entry["cavity_frequency_GHz"]
-        closest_kappa_kHz = self.closest_df_entry["kappa_kHz"]
-        ax1.scatter(closest_fres, closest_kappa_kHz, color=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
-        ax1.set_xlabel(r'$f_{res}$ (Hz)', fontweight='bold', fontsize=24)
-        ax1.set_ylabel(r'$\kappa / 2 \pi$ (Hz)', fontweight='bold', fontsize=24)
-        ax1.tick_params(axis='both', which='major', labelsize=20)
+        if self.selected_resonator_type == "quarter":
+
+            # First subplot: kappa_kHz vs fres
+            ax1.scatter(x=self.df['cavity_frequency_GHz'], y=self.df['kappa_kHz'], color=color_presim, marker=".", s=50, label="Pre-Simulated")
+            ax1.scatter(x=self.target_params["cavity_frequency_GHz"], y=self.target_params["kappa_kHz"], color='red', s=100, marker='x', label='Target')
+            closest_fres = self.closest_df_entry["cavity_frequency_GHz"]
+            closest_kappa_kHz = self.closest_df_entry["kappa_kHz"]
+            ax1.scatter(closest_fres, closest_kappa_kHz, color=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
+            ax1.set_xlabel(r'$f_{res}$ (Hz)', fontweight='bold', fontsize=24)
+            ax1.set_ylabel(r'$\kappa / 2 \pi$ (Hz)', fontweight='bold', fontsize=24)
+            ax1.tick_params(axis='both', which='major', labelsize=20)
+
+            # Second subplot: g vs alpha
+            ax2.scatter(x=self.df['anharmonicity_MHz'], y=self.df['g_MHz'], color=color_presim, marker=".", s=50, label="Pre-Simulated")
+            ax2.scatter(x=self.target_params["anharmonicity_MHz"], y=self.target_params["g_MHz"], color='red', s=100, marker='x', label='Target')
+            closest_alpha = [self.closest_df_entry["anharmonicity_MHz"]]
+            closest_g = [self.closest_df_entry["g_MHz"]]
+            ax2.scatter(closest_alpha, closest_g, color=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
+            ax2.set_xlabel(r'$\alpha / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
+            ax2.set_ylabel(r'$g / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
+            ax2.tick_params(axis='both', which='major', labelsize=20)
+
+        elif self.selected_resonator_type == "half":
+            # set up canvas objects
+            x1_range = (self.df['cavity_frequency_GHz'].min(), self.df['cavity_frequency_GHz'].max())
+            y1_range = (self.df['kappa_kHz'].min(), self.df['kappa_kHz'].max())
+
+            x2_range = (self.df['anharmonicity_MHz'].min(), self.df['anharmonicity_MHz'].max())
+            y2_range = (self.df['g_MHz'].min(), self.df['g_MHz'].max())
+            
+            canvas1 = ds.Canvas(plot_width=800, plot_height=600, x_range=x1_range, y_range=y1_range)
+            canvas2 = ds.Canvas(plot_width=800, plot_height=600, x_range=x2_range, y_range=y2_range)
+            agg1 = canvas1.points(self.df, 'cavity_frequency_GHz', 'kappa_kHz')
+            agg2 = canvas2.points(self.df, 'anharmonicity_MHz', 'g_MHz')
+
+            # Create the image using a list of colors from the 'Blues' colormap
+            cmap = cm.get_cmap('Blues')
+            colors = [cmap(i) for i in range(cmap.N)]
+            hex_colors = [f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}" for r, g, b, _ in colors]
+            img1 = tf.shade(agg1, cmap=hex_colors)
+            img2 = tf.shade(agg2, cmap=hex_colors)
+
+            # Plot the first subplot
+            ax1.imshow(img1.to_pil(), aspect='auto', extent=[*x1_range, *y1_range])
+            ax1.set_xlabel(r'$f_{res}$ (GHz)', fontweight='bold', fontsize=24)
+            ax1.set_ylabel(r'$\kappa / 2 \pi$ (Hz)', fontweight='bold', fontsize=24)
+            ax1.tick_params(axis='both', which='major', labelsize=20)
+
+            # !TODO: add legend
+            pre_simulated_patch = Patch(facecolor=color_presim, edgecolor='none', label='Pre-Simulated')
+
+            # Plot the second subplot
+            ax2.imshow(img2.to_pil(), aspect='auto', extent=[*x2_range, *y2_range])
+            ax2.set_xlabel(r'$\alpha / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
+            ax2.set_ylabel(r'$g / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
+            ax2.tick_params(axis='both', which='major', labelsize=20)
+            
+            # Plot the target points
+            ax1.plot(self.target_params["cavity_frequency_GHz"], self.target_params["kappa_kHz"]*1e3, 'ro', label='Target')
+            ax2.plot(self.target_params["anharmonicity_MHz"], self.target_params["g_MHz"], 'ro', label='Target')
+            
+            # !TODO: get rid off this try block
+            try:
+                # Plot the closest design point
+                ax1.plot(self.closest_df_entry["cavity_frequency_GHz"], self.closest_df_entry["kappa_kHz"], 'bs', alpha=0.7, label='Closest')
+                ax2.plot(self.closest_df_entry["anharmonicity_MHz"], self.closest_df_entry["g_MHz"], 'bs', alpha=0.7, label='Closest')
+            except:
+                pass
+            
+        else:
+            raise ValueError(f"Your chosen resonator type - {self.selected_resonator_type} - is not supported. Please use \"quarter\" or \"half\"")
+
         legend1 = ax1.legend(loc='upper left', fontsize=16)
         for text in legend1.get_texts():
             text.set_fontweight('bold')
 
-        # Second subplot: g vs alpha
-        ax2.scatter(x=self.df['anharmonicity_MHz'], y=self.df['g_MHz'], color=color_presim, marker=".", s=50, label="Pre-Simulated")
-        ax2.scatter(x=self.target_params["anharmonicity_MHz"], y=self.target_params["g_MHz"], color='red', s=100, marker='x', label='Target')
-        closest_alpha = [self.closest_df_entry["anharmonicity_MHz"]]
-        closest_g = [self.closest_df_entry["g_MHz"]]
-        ax2.scatter(closest_alpha, closest_g, color=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
-        ax2.set_xlabel(r'$\alpha / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
-        ax2.set_ylabel(r'$g / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
-        ax2.tick_params(axis='both', which='major', labelsize=20)
         legend2 = ax2.legend(loc='lower left', fontsize=16)
         for text in legend2.get_texts():
             text.set_fontweight('bold')

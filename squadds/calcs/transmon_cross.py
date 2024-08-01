@@ -46,6 +46,9 @@ def EC_numba(cross_to_claw, cross_to_ground):
 
 @jit(nopython=True, parallel=True)
 def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+    """
+    !TODO: resolve the error : \"The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.\" for this method
+    """
     C = np.abs(C)
     C_c = np.abs(C_c)
     C_q = C_c + C # fF
