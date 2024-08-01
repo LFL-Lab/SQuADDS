@@ -1,0 +1,1627 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>squadds.core.db &#8212; SQuADDS v0.2.36</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/katex-math.css?v=91adb8b6" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../../../_static/documentation_options.js?v=2bde2e42"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/qiskit-sphinx-theme.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../_static/katex.min.js?v=be8ff15f"></script>
+    <script src="../../../_static/auto-render.min.js?v=ad136472"></script>
+    <script src="../../../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/squadds/core/db';</script>
+    <link rel="icon" href="../../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">🎉 Our <a href='https://arxiv.org/pdf/2312.13483.pdf'>paper</a> is out! </div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+     
+  
+
+<a class="navbar-brand logo" href="https://lfl-lab.github.io/SQuADDS/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
+    <script>document.write(`<img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/getting_started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/apidocs/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../source/resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../source/resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../source/release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../source/references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/getting_started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/apidocs/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">squadds.core.db</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for squadds.core.db</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">get_dataset_config_names</span><span class="p">,</span> <span class="n">load_dataset</span>
+<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+
+<span class="kn">from</span> <span class="nn">squadds.core.design_patterns</span> <span class="kn">import</span> <span class="n">SingletonMeta</span>
+<span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1">#* HANDLE WARNING MESSAGES</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>  <span class="c1"># Checks if the operating system is macOS</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;pyaedt&quot;</span><span class="p">)</span> <span class="c1"># ANSYS is not a mac product</span>
+
+<div class="viewcode-block" id="SQuADDS_DB">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB">[docs]</a>
+<span class="k">class</span> <span class="nc">SQuADDS_DB</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">SingletonMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class representing the SQuADDS database.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        supported_components(): Get a list of supported components.</span>
+<span class="sd">        supported_component_names(): Get a list of supported component names.</span>
+<span class="sd">        supported_data_types(): Get a list of supported data types.</span>
+<span class="sd">        _delete_cache(): Delete the dataset cache directory.</span>
+<span class="sd">        supported_config_names(): Get a list of supported configuration names.</span>
+<span class="sd">        get_configs(): Print the supported configuration names.</span>
+<span class="sd">        get_component_names(component): Get a list of component names for a given component.</span>
+<span class="sd">        view_component_names(component): Print the component names for a given component.</span>
+<span class="sd">        view_datasets(): Print a table of available datasets.</span>
+<span class="sd">        get_dataset_info(component, component_name, data_type): Print information about a specific dataset.</span>
+<span class="sd">        view_all_contributors(): Print a table of all contributors.</span>
+<span class="sd">        view_contributors_of_config(config): Print a table of contributors for a specific configuration.</span>
+<span class="sd">        view_contributors_of(component, component_name, data_type): Print a table of contributors for a specific component, component name, and data type.</span>
+<span class="sd">        select_components(component_dict): Select a configuration based on a component dictionary or string.</span>
+<span class="sd">        select_system(components): Select a system based on a list of components or a single component.</span>
+<span class="sd">        select_qubit(qubit): Select a qubit.</span>
+<span class="sd">        select_cavity_claw(cavity): Select a cavity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the SQuADDS_DB class.</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            repo_name (str): The name of the repository.</span>
+<span class="sd">            configs (list): List of supported configuration names.</span>
+<span class="sd">            selected_component_name (str): The name of the selected component.</span>
+<span class="sd">            selected_component (str): The selected component.</span>
+<span class="sd">            selected_data_type (str): The selected data type.</span>
+<span class="sd">            selected_confg (str): The selected configuration.</span>
+<span class="sd">            selected_qubit (str): The selected qubit.</span>
+<span class="sd">            selected_cavity (str): The selected cavity.</span>
+<span class="sd">            selected_coupler (str): The selected coupler.</span>
+<span class="sd">            selected_system (str): The selected system.</span>
+<span class="sd">            selected_df (str): The selected dataframe.</span>
+<span class="sd">            target_param_keys (str): The target parameter keys.</span>
+<span class="sd">            units (str): The units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span> <span class="o">=</span> <span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_config_names</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_confg</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measured_device_database</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.supported_components">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.supported_components">[docs]</a>
+    <span class="k">def</span> <span class="nf">supported_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of supported components based on the configurations.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of supported components.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">components</span></div>
+
+    
+<div class="viewcode-block" id="SQuADDS_DB.supported_component_names">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.supported_component_names">[docs]</a>
+    <span class="k">def</span> <span class="nf">supported_component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of supported component names extracted from the configs.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of supported component names.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">component_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">component_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">component_names</span></div>
+
+    
+<div class="viewcode-block" id="SQuADDS_DB.supported_data_types">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.supported_data_types">[docs]</a>
+    <span class="k">def</span> <span class="nf">supported_data_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of supported data types.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of supported data types.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_types</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">data_types</span></div>
+
+
+        
+<div class="viewcode-block" id="SQuADDS_DB.supported_config_names">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.supported_config_names">[docs]</a>
+    <span class="k">def</span> <span class="nf">supported_config_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves the supported configuration names from the repository.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of supported configuration names.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">delete_HF_cache</span><span class="p">()</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="n">get_dataset_config_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="n">download_mode</span><span class="o">=</span><span class="s1">&#39;force_redownload&#39;</span><span class="p">)</span>
+        <span class="c1"># if there are not two &quot;-&quot; in the config name, remove it (since it does conform to the simulation naming convention)</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="p">[</span><span class="n">config</span> <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">configs</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">configs</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.get_configs">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_configs">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_configs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the configurations stored in the database.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of configuration names.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># pretty print the config names</span>
+        <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.get_component_names">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_component_names">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the names of the components associated with a specific component.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            component (str): The specific component to retrieve names for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of component names associated with the specified component.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please specify a component&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Component not supported. Available components are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">()</span><span class="o">+</span><span class="p">[</span><span class="s2">&quot;CLT&quot;</span><span class="p">])</span> <span class="c1">#TODO: handle dynamically</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">component_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                    <span class="n">component_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">component_names</span><span class="o">+</span><span class="p">[</span><span class="s2">&quot;CLT&quot;</span><span class="p">]</span></div>
+
+        
+<div class="viewcode-block" id="SQuADDS_DB.view_component_names">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_component_names">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints the names of the components available in the database.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            component (str): The specific component to view names for. If None, all component names will be printed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please specify a component&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Component not supported. Available components are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">()</span><span class="o">+</span><span class="p">[</span><span class="s2">&quot;CLT&quot;</span><span class="p">])</span> <span class="c1">#TODO: handle dynamically</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">component_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                    <span class="n">component_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">component_names</span><span class="o">+</span><span class="p">[</span><span class="s2">&quot;CLT&quot;</span><span class="p">])</span> <span class="c1">#TODO: handle dynamically</span></div>
+
+
+
+<div class="viewcode-block" id="SQuADDS_DB.view_datasets">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_datasets">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View the datasets available in the database.</span>
+
+<span class="sd">        This method retrieves the supported components, component names, and data types</span>
+<span class="sd">        from the database and displays them in a tabular format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">()</span>
+        <span class="n">component_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">()</span>
+        <span class="n">data_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_data_types</span><span class="p">()</span>
+        <span class="n">component_urls</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.png&quot;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">component_names</span><span class="p">]</span>
+        
+        <span class="n">component_images</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">component_urls</span><span class="p">:</span>
+            <span class="n">component_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="p">[</span><span class="n">components</span><span class="p">,</span> <span class="n">component_names</span><span class="p">,</span> <span class="n">data_types</span><span class="p">,</span> <span class="n">component_images</span><span class="p">]</span>
+
+        <span class="c1"># Transpose the table (convert columns to rows)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">table</span><span class="p">)))</span>
+
+        <span class="c1"># Print the table with headers</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Component&quot;</span><span class="p">,</span> <span class="s2">&quot;Component Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Data Available&quot;</span><span class="p">,</span> <span class="s2">&quot;Component Image&quot;</span><span class="p">],</span><span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.get_dataset_info">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_dataset_info">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_dataset_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves and prints information about a dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            component (str): The component of the dataset.</span>
+<span class="sd">            component_name (str): The name of the component.</span>
+<span class="sd">            data_type (str): The type of data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># do checks</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please specify a component&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">component_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please specify a component type&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">data_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please specify a data type&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Component not supported. Available components are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">())</span>
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="n">component_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Component name not supported. Available component names are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">())</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">data_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_data_types</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data type not supported. Available data types are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_data_types</span><span class="p">())</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># print the table of the dataset configs</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">component</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">component_name</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">data_type</span>
+        
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+        <span class="c1"># describe the dataset and print in table format</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dataset Features:&quot;</span><span class="p">)</span>
+        <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">features</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dataset Description:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dataset Citation:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">citation</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dataset Homepage:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">homepage</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dataset License:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">license</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dataset Size in Bytes:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">size_in_bytes</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="SQuADDS_DB.view_all_contributors">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_all_contributors">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_all_contributors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View all unique contributors and their relevant information.</span>
+
+<span class="sd">        This method iterates through the configurations and extracts the relevant information</span>
+<span class="sd">        of each contributor. It checks if the combination of uploader, PI, group, and institution</span>
+<span class="sd">        is already in the list of unique contributors. If not, it adds the relevant information</span>
+<span class="sd">        to the list. Finally, it prints the list of unique contributors in a tabular format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Placeholder for the full contributor info</span>
+        <span class="n">unique_contributors_info</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+            <span class="n">configs_contrib_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contributor&quot;</span><span class="p">]</span>
+            
+            <span class="k">for</span> <span class="n">contrib_info</span> <span class="ow">in</span> <span class="n">configs_contrib_info</span><span class="p">:</span>
+                <span class="c1"># Extracting the relevant information</span>
+                <span class="n">relevant_info</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">contrib_info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;uploader&#39;</span><span class="p">,</span> <span class="s1">&#39;PI&#39;</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;institution&#39;</span><span class="p">]}</span>
+                <span class="n">relevant_info</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span>  <span class="c1"># Add the config to the relevant info</span>
+
+                <span class="c1"># Check if this combination of info is already in the list</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">existing_info</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">config</span> <span class="ow">and</span>
+                            <span class="n">existing_info</span><span class="p">[</span><span class="s1">&#39;uploader&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">relevant_info</span><span class="p">[</span><span class="s1">&#39;uploader&#39;</span><span class="p">]</span> <span class="ow">and</span>
+                            <span class="n">existing_info</span><span class="p">[</span><span class="s1">&#39;PI&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">relevant_info</span><span class="p">[</span><span class="s1">&#39;PI&#39;</span><span class="p">]</span> <span class="ow">and</span>
+                            <span class="n">existing_info</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">relevant_info</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span> <span class="ow">and</span>
+                            <span class="n">existing_info</span><span class="p">[</span><span class="s1">&#39;institution&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">relevant_info</span><span class="p">[</span><span class="s1">&#39;institution&#39;</span><span class="p">]</span>
+                            <span class="k">for</span> <span class="n">existing_info</span> <span class="ow">in</span> <span class="n">unique_contributors_info</span><span class="p">):</span>
+                    <span class="n">unique_contributors_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">relevant_info</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">unique_contributors_info</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.view_contributors_of_config">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_contributors_of_config">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_contributors_of_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View the contributors of a specific configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config (str): The name of the configuration.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+        <span class="n">configs_contrib_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contributor&quot;</span><span class="p">]</span>
+        <span class="n">unique_contributors_info</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">contrib_info</span> <span class="ow">in</span> <span class="n">configs_contrib_info</span><span class="p">:</span>
+            <span class="c1"># Extracting the relevant information</span>
+            <span class="n">relevant_info</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">contrib_info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;uploader&#39;</span><span class="p">,</span> <span class="s1">&#39;PI&#39;</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;institution&#39;</span><span class="p">]}</span>
+            <span class="k">if</span> <span class="n">relevant_info</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_contributors_info</span><span class="p">:</span>
+                <span class="n">unique_contributors_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">relevant_info</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">unique_contributors_info</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s1">&#39;keys&#39;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.view_contributors_of">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_contributors_of">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_contributors_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View contributors of a specific component, component name, and data type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            component (str): The component of interest.</span>
+<span class="sd">            component_name (str): The name of the component.</span>
+<span class="sd">            data_type (str): The type of data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">component</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">component_name</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">data_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view_contributors_of_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+
+
+    
+<div class="viewcode-block" id="SQuADDS_DB.view_simulation_results">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_simulation_results">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_simulation_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View the simulation results of a specific device specified with a device name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           device_name (str): the name of the experimentally validated device within the database.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: a dict of sim results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>       
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="s1">&#39;measured_device_database&#39;</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+        <span class="n">configs_contrib_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contrib_info&quot;</span><span class="p">]</span>
+        <span class="n">simulation_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
+            
+        <span class="k">for</span> <span class="n">contrib_info</span><span class="p">,</span> <span class="n">sim_results</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">configs_contrib_info</span><span class="p">,</span> <span class="n">simulation_info</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">contrib_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">device_name</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">{</span><span class="n">sim_results</span><span class="p">}</span>
+            
+    
+        <span class="k">return</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.view_reference_device_of">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_reference_device_of">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_reference_device_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View the reference/source experimental device that was used to validate a specific simulation configuration.  </span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            component (str): The component of interest.</span>
+<span class="sd">            component_name (str): The name of the component.</span>
+<span class="sd">            data_type (str): The type of data.</span>
+
+<span class="sd">        Returns: </span>
+<span class="sd">            str: the name of the experimentally validated reference device.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">component_name</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="s1">&#39;measured_device_database&#39;</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+        <span class="n">configs_contrib_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contrib_info&quot;</span><span class="p">]</span>
+        <span class="n">simulation_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">contrib_info</span><span class="p">,</span> <span class="n">sim_results</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">configs_contrib_info</span><span class="p">,</span> <span class="n">simulation_info</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">sim_results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">contrib_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;The reference device could not be retrieved.&quot;</span>
+            
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+    
+    
+
+
+  
+<div class="viewcode-block" id="SQuADDS_DB.view_reference_devices">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_reference_devices">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_reference_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View all unique reference (experimental) devices and their relevant information.</span>
+
+<span class="sd">        This method iterates through the configurations and extracts the chip&#39;s name within the SQuADDS DB, group, and who the chip was measured by. </span>
+<span class="sd">        It also finds the simulation results for the device.It checks if the combination of simulation results uploader, PI, group, and institution</span>
+<span class="sd">        is already in the list of unique contributors. If not, it adds the relevant information to the list. </span>
+<span class="sd">        Finally, it prints the list of unique devices in a tabular format.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="s1">&#39;measured_device_database&#39;</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+        <span class="n">configs_contrib_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contrib_info&quot;</span><span class="p">]</span>
+        <span class="n">unique_contributors_info</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">contrib_info</span> <span class="ow">in</span> <span class="n">configs_contrib_info</span><span class="p">:</span>
+
+            <span class="n">relevant_info</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">contrib_info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;measured_by&#39;</span><span class="p">]}</span>
+ 
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">contrib_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">relevant_info</span><span class="p">[</span><span class="s1">&#39;simulations&#39;</span><span class="p">]</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_simulation_results</span><span class="p">(</span><span class="n">device_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">relevant_info</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_contributors_info</span><span class="p">:</span>
+                <span class="n">unique_contributors_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">relevant_info</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">unique_contributors_info</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s1">&#39;keys&#39;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">))</span></div>
+
+
+
+
+
+
+<div class="viewcode-block" id="SQuADDS_DB.select_components">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_components">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects components based on the provided component dictionary or string.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            component_dict (dict or str): A dictionary containing the component details</span>
+<span class="sd">                (component, component_name, data_type) or a string representing the component.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if dict or string</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">component_dict</span><span class="p">[</span><span class="s2">&quot;component&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">component_dict</span><span class="p">[</span><span class="s2">&quot;component_name&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">component_dict</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component_dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">component_dict</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected config: &quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="SQuADDS_DB.select_system">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_system">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects the system and component(s) to be used.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            components (list or str): The component(s) to be selected. If a list is provided,</span>
+<span class="sd">                each component will be checked against the supported components. If a string</span>
+<span class="sd">                is provided, it will be checked against the supported components.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validation and checks</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">component</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">():</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Component `</span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">` not supported. Available components are:&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">())</span>
+                    <span class="k">return</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">=</span> <span class="n">components</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">components</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Component `</span><span class="si">{</span><span class="n">components</span><span class="si">}</span><span class="s2">` not supported. Available components are:&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">())</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">=</span> <span class="n">components</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span> <span class="o">=</span> <span class="n">components</span></div>
+
+    
+<div class="viewcode-block" id="SQuADDS_DB.select_qubit">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_qubit">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects a qubit and sets the necessary attributes for the selected qubit.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            qubit (str): The name of the qubit to be selected.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UserWarning: If the selected system is not specified or does not contain a qubit.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check whether selected_component is qubit</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="s2">&quot;qubit&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;qubit&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span> <span class="o">=</span> <span class="n">qubit</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span> <span class="o">=</span> <span class="n">qubit</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span> <span class="o">=</span> <span class="s2">&quot;cap_matrix&quot;</span> <span class="c1"># TODO: handle dynamically</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;Selected system is either not specified or does not contain a qubit! Please check `self.selected_system`&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># check if qubit is supported</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Qubit `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span><span class="si">}</span><span class="s2">` not supported. Available qubits are:&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view_component_names</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">)</span>
+            <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.select_cavity_claw">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_cavity_claw">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_cavity_claw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cavity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects a cavity claw component.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cavity (str): The name of the cavity to select.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UserWarning: If the selected system is not specified or does not contain a cavity.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check whether selected_component is cavity</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="s2">&quot;cavity_claw&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;cavity_claw&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span> <span class="o">=</span> <span class="n">cavity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span> <span class="o">=</span> <span class="n">cavity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span> <span class="o">=</span> <span class="s2">&quot;eigenmode&quot;</span> <span class="c1"># TODO: handle dynamically</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># check if cavity is supported</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cavity `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span><span class="si">}</span><span class="s2">` not supported. Available cavities are:&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view_component_names</span><span class="p">(</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">)</span>
+            <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.select_cavity">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_cavity">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_cavity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cavity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects a cavity and sets the necessary attributes for further operations.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            cavity (str): The name of the cavity to be selected.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UserWarning: If the selected system is either not specified or does not contain a cavity.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check whether selected_component is cavity</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="s2">&quot;cavity&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;cavity&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span> <span class="o">=</span> <span class="n">cavity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span> <span class="o">=</span> <span class="n">cavity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span> <span class="o">=</span> <span class="s2">&quot;eigenmode&quot;</span> <span class="c1"># TODO: handle dynamically</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># check if cavity is supported</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cavity `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span><span class="si">}</span><span class="s2">` not supported. Available cavities are:&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view_component_names</span><span class="p">(</span><span class="s2">&quot;cavity&quot;</span><span class="p">)</span>
+            <span class="k">return</span></div>
+
+        
+<div class="viewcode-block" id="SQuADDS_DB.select_coupler">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_coupler">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_coupler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coupler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects a coupler for the database.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            coupler (str, optional): The name of the coupler to select. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#! TODO: fix this method to work on NCap coupler sims</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="o">=</span> <span class="n">coupler</span>
+        <span class="c1">#self.selected_component_name = coupler</span>
+        <span class="c1">#self.selected_data_type = &quot;cap_matrix&quot; # TODO: handle dynamically</span>
+        
+        <span class="c1"># check if coupler is supported</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">()</span><span class="o">+</span><span class="p">[</span><span class="s2">&quot;CLT&quot;</span><span class="p">]:</span> <span class="c1"># TODO: handle dynamically</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coupler `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="si">}</span><span class="s2">` not supported. Available couplers are:&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view_component_names</span><span class="p">(</span><span class="s2">&quot;coupler&quot;</span><span class="p">)</span>
+            <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.see_dataset">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.see_dataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">see_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View a dataset based on the provided data type, component, and component name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_type (str): The type of data to view.</span>
+<span class="sd">            component (str): The component to use. If not provided, the selected system will be used.</span>
+<span class="sd">            component_name (str): The name of the component. If not provided, the selected component name will be used.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The flattened dataset.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If both system and component name are not defined.</span>
+<span class="sd">            ValueError: If data type is not specified.</span>
+<span class="sd">            ValueError: If the component is not supported.</span>
+<span class="sd">            ValueError: If the component name is not supported.</span>
+<span class="sd">            ValueError: If the data type is not supported.</span>
+<span class="sd">            Exception: If an error occurs while loading the dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Use the instance attributes if the user does not provide them</span>
+        <span class="n">component</span> <span class="o">=</span> <span class="n">component</span> <span class="k">if</span> <span class="n">component</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span>
+        <span class="n">component_name</span> <span class="o">=</span> <span class="n">component_name</span> <span class="k">if</span> <span class="n">component_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span>
+        
+        <span class="c1"># Check if system and component_name are still None</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">component_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Both system and component name must be defined.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="n">data_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please specify a data type.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Check if the component is supported</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Component not supported. Available components are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">())</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Check if the component name is supported</span>
+        <span class="k">if</span> <span class="n">component_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Component name not supported. Available component names are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">())</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Check if the data type is supported</span>
+        <span class="k">if</span> <span class="n">data_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_data_types</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data type not supported. Available data types are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_data_types</span><span class="p">())</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Construct the configuration string based on the provided or default values</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">component_name</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">flatten_df_second_level</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred while loading the dataset: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span></div>
+
+
+
+<div class="viewcode-block" id="SQuADDS_DB.get_dataset">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_dataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a dataset based on the specified data type, component, and component name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_type (str): The type of data to retrieve.</span>
+<span class="sd">            component (str): The component to retrieve the data from.</span>
+<span class="sd">            component_name (str): The name of the component to retrieve the data from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The retrieved dataset.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the system and component name are not defined.</span>
+<span class="sd">            ValueError: If the data type is not specified.</span>
+<span class="sd">            ValueError: If the component is not supported.</span>
+<span class="sd">            ValueError: If the component name is not supported.</span>
+<span class="sd">            ValueError: If the data type is not supported.</span>
+<span class="sd">            Exception: If an error occurs while loading the dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Use the instance attributes if the user does not provide them</span>
+        <span class="n">component</span> <span class="o">=</span> <span class="n">component</span> <span class="k">if</span> <span class="n">component</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span>
+        <span class="n">component_name</span> <span class="o">=</span> <span class="n">component_name</span> <span class="k">if</span> <span class="n">component_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span>
+        
+        <span class="c1"># Check if system and component_name are still None</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">component_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Both system and component name must be defined.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="n">data_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please specify a data type.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Check if the component is supported</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Component not supported. Available components are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_components</span><span class="p">())</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Check if the component name is supported</span>
+        <span class="k">if</span> <span class="n">component_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Component name not supported. Available component names are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_component_names</span><span class="p">())</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Check if the data type is supported</span>
+        <span class="k">if</span> <span class="n">data_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_data_types</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data type not supported. Available data types are:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_data_types</span><span class="p">())</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Construct the configuration string based on the provided or default values</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">component_name</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_target_param_keys</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">flatten_df_second_level</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred while loading the dataset: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.create_system_df">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.create_system_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_system_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates and returns a DataFrame based on the selected system.</span>
+
+<span class="sd">        If the selected system is a single component, it retrieves the dataset based on the selected data type, component, and component name.</span>
+<span class="sd">        If a coupler is selected, the DataFrame is filtered by the coupler.</span>
+<span class="sd">        The resulting DataFrame is stored in the `selected_df` attribute.</span>
+
+<span class="sd">        If the selected system is a list of components (qubit and cavity), it retrieves the qubit and cavity DataFrames.</span>
+<span class="sd">        The qubit DataFrame is obtained based on the selected qubit component name and data type &quot;cap_matrix&quot;.</span>
+<span class="sd">        The cavity DataFrame is obtained based on the selected cavity component name and data type &quot;eigenmode&quot;.</span>
+<span class="sd">        The qubit and cavity DataFrames are merged into a single DataFrame using the merger terms [&#39;claw_width&#39;, &#39;claw_length&#39;, &#39;claw_gap&#39;].</span>
+<span class="sd">        The resulting DataFrame is stored in the `selected_df` attribute.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UserWarning: If the selected system is either not specified or does not contain a cavity.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The created DataFrame based on the selected system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected system is not defined.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span><span class="p">)</span>
+            <span class="c1"># if coupler is selected, filter by coupler</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">filter_df_by_conditions</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_df</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="c1">#! TODO: need to implement logic to handle more complex systems</span>
+            <span class="c1"># get the qubit and cavity dfs</span>
+            <span class="n">qubit_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span><span class="p">)</span> <span class="c1">#TODO: handle dynamically</span>
+            <span class="n">cavity_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eigenmode&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span><span class="p">)</span> <span class="c1">#TODO: handle dynamically</span>
+            <span class="c1"># if coupler is selected, filter by coupler</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">cavity_df</span> <span class="o">=</span> <span class="n">filter_df_by_conditions</span><span class="p">(</span><span class="n">cavity_df</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">})</span> 
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_qubit_cavity_df</span><span class="p">(</span><span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;claw_width&#39;</span><span class="p">,</span> <span class="s1">&#39;claw_length&#39;</span><span class="p">,</span> <span class="s1">&#39;claw_gap&#39;</span><span class="p">])</span> <span class="c1">#TODO: handle with user awareness</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_df</span> <span class="o">=</span> <span class="n">df</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.create_qubit_cavity_df">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.create_qubit_cavity_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_qubit_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a merged DataFrame by merging the qubit and cavity DataFrames based on the specified merger terms.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            qubit_df (pandas.DataFrame): The DataFrame containing qubit data.</span>
+<span class="sd">            cavity_df (pandas.DataFrame): The DataFrame containing cavity data.</span>
+<span class="sd">            merger_terms (list): A list of column names to be used for merging the DataFrames. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The merged DataFrame.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">merger_term</span> <span class="ow">in</span> <span class="n">merger_terms</span><span class="p">:</span>
+            <span class="c1"># process the dfs to make them ready for merger</span>
+            <span class="n">qubit_df</span><span class="p">[</span><span class="n">merger_term</span><span class="p">]</span> <span class="o">=</span> <span class="n">qubit_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="n">merger_term</span><span class="p">])</span>
+            <span class="n">cavity_df</span><span class="p">[</span><span class="n">merger_term</span><span class="p">]</span> <span class="o">=</span> <span class="n">cavity_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="n">merger_term</span><span class="p">])</span>
+
+        <span class="c1"># Merging the data frames based on merger terms</span>
+        <span class="n">merged_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">merger_terms</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;_qubit&#39;</span><span class="p">,</span> <span class="s1">&#39;_cavity_claw&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Dropping the merger terms</span>
+        <span class="n">merged_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">merger_terms</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Combining the qubit and cavity design options into one</span>
+        <span class="n">merged_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">create_unified_design_options</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">merged_df</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.unselect_all">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.unselect_all">[docs]</a>
+    <span class="k">def</span> <span class="nf">unselect_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clears the selected component, data type, qubit, cavity, coupler, and system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.show_selections">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.show_selections">[docs]</a>
+    <span class="k">def</span> <span class="nf">show_selections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints the selected system, component, and data type.</span>
+
+<span class="sd">        If the selected system is a list, it prints the selected qubit, cavity, coupler, and system.</span>
+<span class="sd">        If the selected system is a string, it prints the selected component, component name, data type, system, and coupler.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="c1">#TODO: handle dynamically</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected qubit: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected cavity: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected coupler: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected system: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected component: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected component name: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected data type: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected system: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected coupler: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_set_target_param_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the target parameter keys based on the provided DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pandas.DataFrame): The DataFrame containing simulation results.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UserWarning: If no selected system DataFrame is created or if target_param_keys is not None or a list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># ensure selected_df is not None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;No selected system df is created. Please check `self.selected_df`&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># check if self.target_param_keys is None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span> <span class="o">=</span> <span class="n">get_sim_results_keys</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="c1">#check if target_param_keys is type list and system has more than one element</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span> <span class="o">+=</span> <span class="n">get_sim_results_keys</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="c1">#check if target_param_keys is type list and system has only one element</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span> <span class="o">=</span> <span class="n">get_sim_results_keys</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;target_param_keys is not None or a list. Please check `self.target_param_keys`&quot;</span><span class="p">)</span>
+
+            <span class="c1"># update the attribute to remove any elements that start with &quot;unit&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;unit&quot;</span><span class="p">)]</span>
+    
+    <span class="k">def</span> <span class="nf">_get_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="c1"># TODO: needs implementation </span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SQuADDS_DB.unselect">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.unselect">[docs]</a>
+    <span class="k">def</span> <span class="nf">unselect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unselects the specified parameter.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        param (str): The parameter to unselect. Valid options are:</span>
+<span class="sd">            - &quot;component&quot;</span>
+<span class="sd">            - &quot;component_name&quot;</span>
+<span class="sd">            - &quot;data_type&quot;</span>
+<span class="sd">            - &quot;qubit&quot;</span>
+<span class="sd">            - &quot;cavity_claw&quot;</span>
+<span class="sd">            - &quot;coupler&quot;</span>
+<span class="sd">            - &quot;system&quot;</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="s2">&quot;component&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s2">&quot;component_name&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s2">&quot;data_type&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s2">&quot;qubit&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s2">&quot;cavity_claw&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s2">&quot;coupler&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s2">&quot;system&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please specify a valid parameter to unselect.&quot;</span><span class="p">)</span>
+            <span class="k">return</span></div>
+
+    
+<div class="viewcode-block" id="SQuADDS_DB.show_selected_system">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.show_selected_system">[docs]</a>
+    <span class="k">def</span> <span class="nf">show_selected_system</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Waiting on Andre&#39;s code&quot;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
