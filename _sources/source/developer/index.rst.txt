@@ -46,6 +46,6 @@ Contributors
 | **Daria Kowsari, PhD** (University of Southern California) - Data contributor 📀
 | **Vivek Maurya** (University of Southern California) - Data contributor 📀
 | **Haimeng Zhang, PhD** (IBM) - Data contributor 📀
-| **Ethan Zheng** (University of Southern California) - Data scrubber 🧼
+| **Ethan Zheng** (University of Southern California) - Data contributor 📀
 | **Sara Sussman, PhD** (Fermilab) - Bug Hunter 🐛
 | **Adhish Chakravorty** (University of Southern California) - Bug Hunter 🐛
