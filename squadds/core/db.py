@@ -203,8 +203,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         component_images = []
         
         for url in component_urls:
-                component_images.append(url)
-    
+            component_images.append(url)
             table = [components, component_names, data_types, component_images]
 
         # Transpose the table (convert columns to rows)
