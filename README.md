@@ -19,6 +19,7 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 - [Citation](#citation)
 - [Contributing](#contributing)
 - [License](#license)
+- [FAQs](#faqs)
 - [Contact](#contact)
 
 ---
@@ -85,6 +86,10 @@ Please see our [Contributing Guidelines](CONTRIBUTING.md) for more information o
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## FAQs
+
+Check out our [FAQs](https://lfl-lab.github.io/SQuADDS/source/getting_started.html#faq-s) for common questions and answers.
 
 ## Contact
 

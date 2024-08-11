@@ -272,7 +272,7 @@ def create_coupler(opts, design):
         The created coupler object.
     """
     opts["orientation"] = "-90"
-    cplr = CapNInterdigitalTee(design, 'cplr', options = opts) if "finger_count" in opts.keys() else CoupledLineTee(design, 'cplr', options = opts)
+    cplr = CapNInterdigitalTee(design, 'cplr', options = opts) if opts["finger_count"] is not None else CoupledLineTee(design, 'cplr', options = opts)
     return cplr
 
 def create_cpw(opts, cplr, design):
@@ -474,14 +474,24 @@ def find_g_a_fq(C_g, C_B, f_r, Lj, N):
     return g, a, f_q
 
 def find_kappa(f_rough, C_tg, C_tb):
+    """
+    Calculate the cavity linewidth (kappa) using the rough frequency and capacitances.
+    
+    Args:
+        f_rough (float): The rough frequency of the cavity in GHz.
+        C_tg (float): The total capacitance of the ground in Farads.
+        C_tb (float): The total capacitance of the bias in Farads.
+    Returns:
+        float: The cavity linewidth (kappa) in kHz.
+    """
     Z0 = 50
     w_rough = 2*np.pi*f_rough
 
-    C_res = np.pi/(2*w_rough*Z0)*1e15 + 114
+    C_res = np.pi/(2*w_rough*Z0)*1e15
     print(C_res)
     w_est = np.sqrt(C_res/(C_res + C_tg + C_tb)) * w_rough
 
-    return (1/2 * Z0 * (w_est**2) * (C_tb**2)/(C_res + C_tg + C_tb))*1e-15/(2*np.pi) * 1e-6
+    return (1/2 * Z0 * (w_est**2) * (C_tb**2)/(C_res + C_tg + C_tb))*1e-15/(2*np.pi) * 1e-3
 
 
 def find_chi(alpha, f_q, g, f_r):

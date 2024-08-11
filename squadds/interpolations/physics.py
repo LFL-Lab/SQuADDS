@@ -1,5 +1,3 @@
-import pprint
-
 import pandas as pd
 from pyEPR.calcs import Convert
 

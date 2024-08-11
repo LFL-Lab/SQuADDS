@@ -64,6 +64,9 @@ class Analyzer:
         """
         Initializes an instance of the Analysis class.
 
+        Parameters:
+            - db: The database object.
+
         Attributes:
             - db: The database object.
             - selected_component_name: The name of the selected component.
@@ -479,8 +482,8 @@ class Analyzer:
             closest_fres = self.closest_df_entry["cavity_frequency_GHz"]
             closest_kappa_kHz = self.closest_df_entry["kappa_kHz"]
             ax1.scatter(closest_fres, closest_kappa_kHz, color=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
-            ax1.set_xlabel(r'$f_{res}$ (Hz)', fontweight='bold', fontsize=24)
-            ax1.set_ylabel(r'$\kappa / 2 \pi$ (Hz)', fontweight='bold', fontsize=24)
+            ax1.set_xlabel(r'$f_{res}$ (GHz)', fontweight='bold', fontsize=24)
+            ax1.set_ylabel(r'$\kappa / 2 \pi$ (kHz)', fontweight='bold', fontsize=24)
             ax1.tick_params(axis='both', which='major', labelsize=20)
 
             # Second subplot: g vs alpha
