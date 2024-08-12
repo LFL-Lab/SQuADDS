@@ -13,7 +13,7 @@ from matplotlib.patches import Patch
 
 from squadds.calcs.transmon_cross import TransmonCrossHamiltonian
 from squadds.core.metrics import *
-from squadds.core.processing import merge_dfs
+from squadds.core.processing import merge_dfs, unify_columns
 from squadds.core.utils import create_unified_design_options
 
 """
@@ -437,7 +437,7 @@ class Analyzer:
             merged_df['_temp_key'] = 1
 
             # Perform the cross join
-            self.closest_df = pd.merge(self.closest_df, merged_df, on='_temp_key').drop('_temp_key', axis=1)
+            self.closest_df = pd.merge(self.closest_df, merged_df, on='_temp_key', how="inner", suffixes=('_closest', '_merged')).drop('_temp_key', axis=1)
 
             # Create the unified design options column
             self.closest_df['design_options'] = self.closest_df.apply(create_unified_design_options, axis=1)
@@ -577,7 +577,7 @@ class Analyzer:
             ax2.plot(self.target_params["anharmonicity_MHz"], self.target_params["g_MHz"], 'ro', label='Target')
             
             # Plot the closest design point
-            ax1.plot(self.closest_df_entry["cavity_frequency_GHz"], self.closest_df_entry["kappa"], 'rs', alpha=1, label='Closest')
+            ax1.plot(self.closest_df_entry["cavity_frequency_GHz"], self.closest_df_entry["kappa"], 'bs', alpha=1, label='Closest')
             ax2.plot(self.closest_df_entry["anharmonicity_MHz"], self.closest_df_entry["g_MHz"], 'bs', alpha=0.7, label='Closest')
         else:
             raise ValueError(f"Your chosen resonator type - {self.selected_resonator_type} - is not supported. Please use \"quarter\" or \"half\"")

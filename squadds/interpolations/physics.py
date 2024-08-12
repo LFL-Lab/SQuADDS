@@ -36,12 +36,18 @@ class ScalingInterpolator(Interpolator):
         alpha_target = self.target_params['anharmonicity_MHz']
         f_res_target = self.target_params['cavity_frequency_GHz']
         kappa_target = self.target_params['kappa_kHz']
-        res_type = self.target_params['resonator_type']
+        try:
+            res_type = self.target_params['resonator_type']
+        except:
+            res_type = self.analyzer.selected_resonator_type
 
         self.df = self.analyzer.df
         
         # Find the closest qubit-claw design
-        closest_qubit_claw_design = self.analyzer.find_closest({"qubit_frequency_GHz": f_q_target,'anharmonicity_MHz': alpha_target, 'g_MHz': g_target}, num_top=1)
+        if self.analyzer.selected_resonator_type == 'half':
+            closest_qubit_claw_design = self.analyzer.find_closest({"qubit_frequency_GHz": f_q_target,'anharmonicity_MHz': alpha_target, 'g_MHz': g_target},parallel=True, num_cpu="auto", num_top=1)
+        else:
+            closest_qubit_claw_design = self.analyzer.find_closest({"qubit_frequency_GHz": f_q_target,'anharmonicity_MHz': alpha_target, 'g_MHz': g_target}, num_top=1)
 
         # Scale values
         alpha_scaling = closest_qubit_claw_design['anharmonicity_MHz'] / alpha_target
@@ -53,11 +59,18 @@ class ScalingInterpolator(Interpolator):
 
         # Scaling logic for cavity-coupler designs
         # Filter DataFrame based on qubit coupling claw capacitance
-        cross_to_claw_cap_chosen = closest_qubit_claw_design['cross_to_claw'].iloc[0]
+        try:
+            cross_to_claw_cap_chosen = closest_qubit_claw_design['cross_to_claw'].iloc[0]
+        except:
+            cross_to_claw_cap_chosen = closest_qubit_claw_design['cross_to_claw_closest'].iloc[0]
         
         threshold = 0.3  # 30% threshold
-        filtered_df = self.df[(self.df['cross_to_claw'] >= (1 - threshold) * cross_to_claw_cap_chosen) &
-                                   (self.df['cross_to_claw'] <= (1 + threshold) * cross_to_claw_cap_chosen)]
+        try:
+            filtered_df = self.df[(self.df['cross_to_claw'] >= (1 - threshold) * cross_to_claw_cap_chosen) &
+                                    (self.df['cross_to_claw'] <= (1 + threshold) * cross_to_claw_cap_chosen)]
+        except:
+            filtered_df = self.df[(self.df['cross_to_claw_closest'] >= (1 - threshold) * cross_to_claw_cap_chosen) &
+                                    (self.df['cross_to_claw_closest'] <= (1 + threshold) * cross_to_claw_cap_chosen)]
 
         # Find the closest cavity-coupler design
         merged_df = self.analyzer.df.copy()
@@ -71,12 +84,18 @@ class ScalingInterpolator(Interpolator):
 
         target_params_cavity = {'cavity_frequency_GHz': f_res_target, 'kappa_kHz': kappa_target, 'resonator_type': res_type}
 
-        closest_cavity_cpw_design = self.analyzer.find_closest(target_params_cavity, num_top=1)
+        if self.analyzer.selected_resonator_type == 'half':
+            closest_cavity_cpw_design = self.analyzer.find_closest(target_params_cavity,parallel=True, num_cpu="auto", num_top=1)
+        else:
+            closest_cavity_cpw_design = self.analyzer.find_closest(target_params_cavity, num_top=1)
 
         closest_kappa = closest_cavity_cpw_design['kappa_kHz'].values[0]
         closest_f_cavity = closest_cavity_cpw_design['cavity_frequency_GHz'].values[0]
 
-        closest_coupler_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length'])
+        if self.analyzer.selected_resonator_type == 'half':
+            closest_coupler_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['finger_length'])
+        else:
+            closest_coupler_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length'])
 
         # Scale resonator and coupling element dimensions
         updated_resonator_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]["cpw_opts"]['total_length']) * (closest_cavity_cpw_design['cavity_frequency_GHz'] / f_res_target).values[0]
@@ -91,7 +110,7 @@ class ScalingInterpolator(Interpolator):
         print(f"resonator scaling: {res_scaling}")
         print("="*50)
 
-        updated_coupling_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]['cplr_opts']['coupling_length']) * kappa_scaling
+        updated_coupling_length = closest_coupler_length * kappa_scaling
         # round updated_coupling_length to nearest integer
         updated_coupling_length = round(updated_coupling_length)
 
@@ -121,7 +140,11 @@ class ScalingInterpolator(Interpolator):
 
         cavity_design_options = closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]
         cavity_design_options["cpw_opts"]['total_length'] = f"{updated_resonator_length}um"
-        cavity_design_options['cplr_opts']['coupling_length'] = f"{updated_coupling_length}um"
+
+        if self.analyzer.selected_resonator_type == 'half':
+            cavity_design_options['cplr_opts']['finger_length'] = f"{updated_coupling_length}um"
+        else:
+            cavity_design_options['cplr_opts']['coupling_length'] = f"{updated_coupling_length}um"
 
         # update the claw of the cavity based on the one from the qubit
         cavity_design_options["claw_opts"]["connection_pads"] = qubit_design_options["connection_pads"]

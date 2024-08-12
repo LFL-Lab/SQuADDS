@@ -4,6 +4,38 @@ import numpy as np
 import pandas as pd
 
 
+def unify_columns(df):
+    # Find all columns with _x and _y suffixes
+    x_columns = [col for col in df.columns if col.endswith('_x')]
+    y_columns = [col for col in df.columns if col.endswith('_y')]
+    
+    # Create a mapping of columns without suffixes to pairs of _x and _y columns
+    columns_to_unify = {col[:-2]: (col, col[:-2] + '_y') for col in x_columns if col[:-2] + '_y' in y_columns}
+
+    print("Columns identified for unification:")
+    print(columns_to_unify)
+    
+    for col, (x_col, y_col) in columns_to_unify.items():
+        print(f"Processing columns: {x_col} and {y_col}")
+        
+        if df[x_col].equals(df[y_col]):
+            # If the columns are the same, keep only one and rename it to remove the suffix
+            df[col] = df[x_col]
+            print(f"Columns {x_col} and {y_col} are identical. Keeping {col} and dropping both suffixes.")
+        else:
+            # If the columns are different, keep both
+            df[col + '_x'] = df[x_col]
+            df[col + '_y'] = df[y_col]
+            print(f"Columns {x_col} and {y_col} differ. Keeping both.")
+        
+        # Drop the original _x and _y columns
+        df.drop([x_col, y_col], axis=1, inplace=True)
+        print(f"Dropped columns: {x_col} and {y_col}")
+    
+    print("Final columns after unification:")
+    print(df.columns)
+    return df
+
 def merge_dfs(qubit_df_split, cavity_df, merger_terms):
     return pd.merge(qubit_df_split, cavity_df, on=merger_terms, how="inner", suffixes=('_qubit', '_cavity_claw'))
 
