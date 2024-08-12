@@ -347,12 +347,14 @@ class Analyzer:
 
         if self.selected_resonator_type == "half":
             # remove the "resonator_type" key from self.target_params
-            self.target_params.pop("resonator_type")
-
+            try:
+                self.target_params.pop("resonator_type")
+            except:
+                pass
         if (skip_df_gen) or (not self.params_computed):
             self._add_target_params_columns()
         else:
-            print("Either `skip_df_gen` flag is set to True or all target params have been precomputed at an earlier step. Using `df` from memory. Please set this to False if `target_parameters` have changed.")
+            print("Either `skip_df_gen` flag is set to True or all target params have been precomputed at an earlier step. Using `df` from memory.\nPlease set this to False if `target_parameters` have changed.")
             
         target_params_list = list(self.target_params.keys())
         filtered_df = self.df[target_params_list]  
@@ -427,8 +429,19 @@ class Analyzer:
             for merger_term in self.db.claw_merger_terms:
                 self.closest_qubit[merger_term] = self.closest_qubit['design_options'].map(lambda x: x['connection_pads']['readout'].get(merger_term))
 
-            self.closest_df = merge_dfs(self.closest_qubit, self.closest_cavity, self.db.claw_merger_terms)
+            # Create a unified design options column
+            merged_df = merge_dfs(self.closest_qubit, self.closest_cavity, self.db.claw_merger_terms)
+            
+            # Add a temporary key column for cross join
+            self.closest_df['_temp_key'] = 1
+            merged_df['_temp_key'] = 1
+
+            # Perform the cross join
+            self.closest_df = pd.merge(self.closest_df, merged_df, on='_temp_key').drop('_temp_key', axis=1)
+
+            # Create the unified design options column
             self.closest_df['design_options'] = self.closest_df.apply(create_unified_design_options, axis=1)
+            self.closest_df_entry = self.closest_df.iloc[0]
 
         return self.closest_df
 
@@ -560,17 +573,12 @@ class Analyzer:
             ax2.tick_params(axis='both', which='major', labelsize=20)
             
             # Plot the target points
-            ax1.plot(self.target_params["cavity_frequency_GHz"], self.target_params["kappa_kHz"]*1e3, 'ro', label='Target')
+            ax1.plot(self.target_params["cavity_frequency_GHz"], self.target_params["kappa_kHz"]*1e3, 'rx', label='Target')
             ax2.plot(self.target_params["anharmonicity_MHz"], self.target_params["g_MHz"], 'ro', label='Target')
             
-            # !TODO: get rid off this try block
-            try:
-                # Plot the closest design point
-                ax1.plot(self.closest_df_entry["cavity_frequency_GHz"], self.closest_df_entry["kappa_kHz"], 'bs', alpha=0.7, label='Closest')
-                ax2.plot(self.closest_df_entry["anharmonicity_MHz"], self.closest_df_entry["g_MHz"], 'bs', alpha=0.7, label='Closest')
-            except:
-                pass
-            
+            # Plot the closest design point
+            ax1.plot(self.closest_df_entry["cavity_frequency_GHz"], self.closest_df_entry["kappa"], 'rs', alpha=1, label='Closest')
+            ax2.plot(self.closest_df_entry["anharmonicity_MHz"], self.closest_df_entry["g_MHz"], 'bs', alpha=0.7, label='Closest')
         else:
             raise ValueError(f"Your chosen resonator type - {self.selected_resonator_type} - is not supported. Please use \"quarter\" or \"half\"")
 
