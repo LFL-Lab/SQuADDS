@@ -5,6 +5,7 @@ import datashader as ds
 import datashader.transfer_functions as tf
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import psutil
 import seaborn as sns
@@ -116,6 +117,7 @@ class Analyzer:
         self.presimmed_closest_coupler_design = None
         self.interpolated_design = None
         self.closest_design_found = False
+        self.params_computed = False
 
         self.metric_strategy = None  # Will be set dynamically
         self.custom_metric_func = None
@@ -142,6 +144,8 @@ class Analyzer:
         Raises:
             a ValueError if the selected system is invalid.
         """
+        self.params_computed = True
+
         #! TODO: make this more general and read the param keys from the database
         if self.selected_system == "qubit":
             qubit_H = TransmonCrossHamiltonian(self)
@@ -300,7 +304,10 @@ class Analyzer:
             # remove the "resonator_type" key from self.target_params
             self.target_params.pop("resonator_type")
 
-        self._add_target_params_columns()
+        if not self.params_computed:
+            self._add_target_params_columns()
+        else:
+            print("Target parameters have already been computed.")
             
         return self.df
 
@@ -342,10 +349,10 @@ class Analyzer:
             # remove the "resonator_type" key from self.target_params
             self.target_params.pop("resonator_type")
 
-        if not skip_df_gen:
+        if (skip_df_gen) or (not self.params_computed):
             self._add_target_params_columns()
         else:
-            print("`skip_df_gen` flag set to True. Using `df` from memory. Please set this to False if `target_parameters` have changed.")
+            print("Either `skip_df_gen` flag is set to True or all target params have been precomputed at an earlier step. Using `df` from memory. Please set this to False if `target_parameters` have changed.")
             
         target_params_list = list(self.target_params.keys())
         filtered_df = self.df[target_params_list]  
@@ -393,8 +400,7 @@ class Analyzer:
 
             print(f"Using {num_cpu} CPUs for parallel processing")
 
-            pool = multiprocessing.Pool(processes=num_cpu)  # adjust the number of processes based on your CPU count
-            distances = pool.map(self.compute_metric_distances, filtered_df.values)
+            distances = self.metric_strategy.calculate_in_parallel(target_params, filtered_df, num_jobs=num_cpu)
             sorted_indices = pd.Series(distances).nsmallest(num_top).index
 
         # Sort distances and get the closest ones
@@ -414,16 +420,38 @@ class Analyzer:
 
         elif self.selected_resonator_type == "half":
             # retrieve the best designs
-            self.closest_cavity = self.cavity_df.iloc[self.closest_df.index_cc]
             self.closest_qubit = self.qubit_df.iloc[self.closest_df.index_qc]
             self.closest_coupler = self.coupler_df.iloc[self.closest_df.index_cplr]
-            """
-            !TODO: generate and return `closest_df` for half-wave cavity in the same style as quarter-wave cavity
-            """
+            self.closest_cavity = self.get_closest_cavity()
+
+            for merger_term in self.db.claw_merger_terms:
+                self.closest_qubit[merger_term] = self.closest_qubit['design_options'].map(lambda x: x['connection_pads']['readout'].get(merger_term))
+
             self.closest_df = merge_dfs(self.closest_qubit, self.closest_cavity, self.db.claw_merger_terms)
             self.closest_df['design_options'] = self.closest_df.apply(create_unified_design_options, axis=1)
 
         return self.closest_df
+
+    def get_closest_cavity(self):
+        """
+        Returns the closest cavity design.
+
+        Returns:
+            pd.Series: The closest cavity design.
+        """
+        # Extract the values you're looking for
+        closest_index_cc = self.closest_df.index_cc.values[0]
+        closest_index_cplr = self.closest_df.index_cplr.values[0]
+
+        # Use np.where for fast boolean indexing
+        mask = np.where(
+            (self.cavity_df['index_cc'].values == closest_index_cc) & 
+            (self.cavity_df['index_cplr'].values == closest_index_cplr)
+        )[0]
+
+        # Get the index from the DataFrame
+        index = self.cavity_df.index[mask]
+        return self.cavity_df.loc[index]
 
     def compute_metric_distances(self, row):
         return self.metric_strategy.calculate(self.target_params, row)

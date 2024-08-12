@@ -918,15 +918,16 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit)
         cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity)
 
+        self.qubit_df = qubit_df
+
         if self.selected_coupler == "CLT":
             cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler})
+            self.cavity_df = cavity_df
         if self.selected_coupler == "NCap":
             self.coupler_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler)
+            self.cavity_df = self.read_parquet_file(self.hwc_fname)
             df = self.read_parquet_file(self.merged_df_hwc_fname)
             return df
-
-        self.qubit_df = qubit_df
-        self.cavity_df = cavity_df
                 
         df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=self.claw_merger_terms, parallelize=parallelize, num_cpu=num_cpu)
         return df
