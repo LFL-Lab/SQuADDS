@@ -353,6 +353,8 @@ class Analyzer:
                 pass
         if (skip_df_gen) or (not self.params_computed):
             self._add_target_params_columns()
+        elif self.selected_resonator_type == "quarter":
+            pass
         else:
             print("Either `skip_df_gen` flag is set to True or all target params have been precomputed at an earlier step. Using `df` from memory.\nPlease set this to False if `target_parameters` have changed.")
             

@@ -1,6 +1,7 @@
 """
 !TODO: add FULL support for half-wave cavity
 """
+import json
 import os
 import pprint
 import sys
@@ -424,9 +425,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             
         for contrib_info, sim_results in zip(configs_contrib_info, simulation_info):
                 if contrib_info['name'] == device_name:
-                    return {sim_results}
-            
-    
+                    return sim_results
         return {}
 
     def view_reference_device_of(self, component=None, component_name=None, data_type=None):
@@ -446,14 +445,27 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
         configs_contrib_info = dataset["contrib_info"]
         simulation_info = dataset["sim_results"]
+        design_codes = dataset["design_code"]
+        paper_links = dataset["paper_link"]
+        images = dataset["image"]
         
-        for contrib_info, sim_results in zip(configs_contrib_info, simulation_info):
+        for contrib_info, sim_results, design_code, paper_link, image in zip(configs_contrib_info, simulation_info, design_codes, paper_links, images):
             if config in sim_results:
+                # Combine the information into one dictionary
+                combined_info = {
+                    "Design Code": json.dumps(design_code, indent=2),
+                    "Paper Link": json.dumps(paper_link, indent=2),
+                    "Image": json.dumps(image, indent=2)
+                }
+                combined_info.update(contrib_info)
+                
+                # Pretty print the combined info as a table
+                print(tabulate(combined_info.items(), headers=["Key", "Value"], tablefmt="grid"))
                 return contrib_info['name']
-        
+            
             else:
                 return "The reference device could not be retrieved."
-            
+        
         return None
     
     
