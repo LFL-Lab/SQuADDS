@@ -609,7 +609,7 @@ document.write(`
 <li><p>Simulate the “best-guess” design using an EM solver tool</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
@@ -652,7 +652,7 @@ document.write(`
 <h3>Accessing the SQuADDS Database using the HuggingFace API<a class="headerlink" href="#Accessing-the-SQuADDS-Database-using-the-HuggingFace-API" title="Link to this heading">#</a></h3>
 <p>The SQuADDS Database is hosted on HuggingFace. You can access the database using the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library from HuggingFace.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">get_dataset_config_names</span>
@@ -664,20 +664,34 @@ document.write(`
 </div>
 <p>You can navigate the database using HuggingFace API. For example, you can access the qubit database using the following code:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_data</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span><span class="p">,</span> <span class="n">configs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_data</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+DatasetDict({
+    train: Dataset({
+        features: [&#39;sim_options&#39;, &#39;design&#39;, &#39;sim_results&#39;, &#39;contributor&#39;, &#39;notes&#39;],
+        num_rows: 1934
+    })
+})
+</pre></div></div>
 </div>
 <p>Each configuration in the dataset is uniquely identified by their <code class="docutils literal notranslate"><span class="pre">config</span></code>. For the SQuADDS Database, the <code class="docutils literal notranslate"><span class="pre">config</span></code> string is created in the following format:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">component_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -685,8 +699,8 @@ document.write(`
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">component</span></code> is the name of the component, <code class="docutils literal notranslate"><span class="pre">component_name</span></code> is the name of the component (in Qiskit Metal), and <code class="docutils literal notranslate"><span class="pre">data_type</span></code> is the type of simulation data that has been contributed.</p>
 <p>Lets check what the <code class="docutils literal notranslate"><span class="pre">config</span></code> string looks like for our database:</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
@@ -707,6 +721,16 @@ document.write(`
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qubit&#39;, &#39;cavity_claw&#39;, &#39;coupler&#39;, &#39;coupler&#39;, &#39;measured_device_database&#39;]
+[&#39;TransmonCross&#39;, &#39;RouteMeander&#39;, &#39;NCap&#39;, &#39;CapNInterdigitalTee&#39;]
+[&#39;cap_matrix&#39;, &#39;eigenmode&#39;, &#39;cap_matrix&#39;, &#39;cap_matrix&#39;]
+</pre></div></div>
+</div>
 <p>The reason we added the <code class="docutils literal notranslate"><span class="pre">try</span> <span class="pre">except</span></code> block is because we have more datasets as well in the database that don’t conform the simulation data format</p>
 </section>
 </section>
@@ -715,7 +739,7 @@ document.write(`
 <p>While it is possible to directly access the SQuADDS Database using the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library, we have created a simple API to make it easier to query the database.</p>
 <p>The main object we use to access the database is the <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> class.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds</span> <span class="kn">import</span> <span class="n">SQuADDS_DB</span>
@@ -728,11 +752,11 @@ document.write(`
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "203b674da2ba4c089efdb3f311180588", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d0d8aec34c6c43f998fb3b58e8a590e2", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <p>You can get a summary of the datasets by running.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_datasets</span><span class="p">()</span>
@@ -749,9 +773,36 @@ document.write(`
 ╞═════════════╪═════════════════════╪══════════════════╪════════════════════════════════════════════════════════════════════════════════════════════╡
 │ qubit       │ TransmonCross       │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/TransmonCross.png       │
 ├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ qubit       │ TransmonCross       │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/TransmonCross.png       │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ cavity_claw │ RouteMeander        │ eigenmode        │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/RouteMeander.png        │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
 │ cavity_claw │ RouteMeander        │ eigenmode        │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/RouteMeander.png        │
 ├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
 │ coupler     │ NCap                │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/NCap.png                │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ coupler     │ NCap                │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/NCap.png                │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ coupler     │ CapNInterdigitalTee │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/CapNInterdigitalTee.png │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ coupler     │ CapNInterdigitalTee │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/CapNInterdigitalTee.png │
+╘═════════════╧═════════════════════╧══════════════════╧════════════════════════════════════════════════════════════════════════════════════════════╛
+╒═════════════╤═════════════════════╤══════════════════╤════════════════════════════════════════════════════════════════════════════════════════════╕
+│ Component   │ Component Name      │ Data Available   │ Component Image                                                                            │
+╞═════════════╪═════════════════════╪══════════════════╪════════════════════════════════════════════════════════════════════════════════════════════╡
+│ qubit       │ TransmonCross       │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/TransmonCross.png       │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ qubit       │ TransmonCross       │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/TransmonCross.png       │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ cavity_claw │ RouteMeander        │ eigenmode        │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/RouteMeander.png        │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ cavity_claw │ RouteMeander        │ eigenmode        │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/RouteMeander.png        │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ coupler     │ NCap                │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/NCap.png                │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ coupler     │ NCap                │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/NCap.png                │
+├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
+│ coupler     │ CapNInterdigitalTee │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/CapNInterdigitalTee.png │
 ├─────────────┼─────────────────────┼──────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┤
 │ coupler     │ CapNInterdigitalTee │ cap_matrix       │ https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/CapNInterdigitalTee.png │
 ╘═════════════╧═════════════════════╧══════════════════╧════════════════════════════════════════════════════════════════════════════════════════════╛
@@ -759,7 +810,7 @@ document.write(`
 </div>
 <p>To check for the <code class="docutils literal notranslate"><span class="pre">config</span></code> names</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_configs</span><span class="p">()</span>
@@ -780,18 +831,12 @@ document.write(`
 <p><strong>NOTE: ``’coupler-NCap-cap_matrix’`` and ``’’coupler-CapNInterdigitalTee-cap_matrix’`` are the same datasets. We will support them both since future releases will deprecate the term ``NCap`` and replace it with ``CapNInterdigitalTee``.</strong></p>
 <p>If you are interested to learn more about each configuration, you can do so by using the <code class="docutils literal notranslate"><span class="pre">get_dataset_info</span></code> method.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_dataset_info</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "da91427dca394145960d2cc92764724c", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -837,18 +882,12 @@ Dataset Size in Bytes:
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_dataset_info</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eigenmode&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b0c91045645243a18929da9db27783a0", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -894,7 +933,7 @@ Dataset Size in Bytes:
 </div>
 <p>You can get the entire dataset as a Pandas DataFrame by using the <code class="docutils literal notranslate"><span class="pre">get_dataset</span></code> method.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">see_dataset</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
@@ -902,7 +941,7 @@ Dataset Size in Bytes:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -924,6 +963,11 @@ Dataset Size in Bytes:
   <thead>
     <tr style="text-align: right;">
       <th></th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
+      <th>design_options</th>
+      <th>design_tool</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
@@ -931,21 +975,21 @@ Dataset Size in Bytes:
       <th>cross_to_ground</th>
       <th>ground_to_ground</th>
       <th>units</th>
-      <th>design_options</th>
-      <th>design_tool</th>
       <th>PI</th>
       <th>date_created</th>
       <th>group</th>
       <th>institution</th>
       <th>uploader</th>
-      <th>renderer_options</th>
-      <th>setup</th>
-      <th>simulator</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
@@ -953,19 +997,19 @@ Dataset Size in Bytes:
       <td>158.40783</td>
       <td>311.25590</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>82.44280</td>
       <td>79.19378</td>
       <td>2.93820</td>
@@ -973,19 +1017,19 @@ Dataset Size in Bytes:
       <td>188.15089</td>
       <td>333.52997</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-10-25-153123</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>2</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>83.76412</td>
       <td>80.18130</td>
       <td>3.16131</td>
@@ -993,19 +1037,19 @@ Dataset Size in Bytes:
       <td>104.35340</td>
       <td>237.02548</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>3</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>103.37057</td>
       <td>97.22405</td>
       <td>5.77590</td>
@@ -1013,19 +1057,19 @@ Dataset Size in Bytes:
       <td>174.13928</td>
       <td>335.31609</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-10-25-153126</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>4</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>68.92854</td>
       <td>65.68607</td>
       <td>2.87375</td>
@@ -1033,16 +1077,11 @@ Dataset Size in Bytes:
       <td>120.03923</td>
       <td>240.34085</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1066,6 +1105,11 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1929</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>106.43025</td>
       <td>101.53197</td>
       <td>4.45645</td>
@@ -1073,19 +1117,19 @@ Dataset Size in Bytes:
       <td>174.46380</td>
       <td>340.62919</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1930</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>121.10943</td>
       <td>112.62570</td>
       <td>7.95178</td>
@@ -1093,19 +1137,19 @@ Dataset Size in Bytes:
       <td>187.43537</td>
       <td>367.34003</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142549</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1931</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>144.56289</td>
       <td>136.36810</td>
       <td>7.65968</td>
@@ -1113,19 +1157,19 @@ Dataset Size in Bytes:
       <td>172.14561</td>
       <td>372.39970</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-10-25-153123</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1932</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>68.76413</td>
       <td>65.78116</td>
       <td>2.48795</td>
@@ -1133,19 +1177,19 @@ Dataset Size in Bytes:
       <td>56.75230</td>
       <td>166.57383</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1933</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>58.45749</td>
       <td>55.50796</td>
       <td>2.54396</td>
@@ -1153,16 +1197,11 @@ Dataset Size in Bytes:
       <td>62.01000</td>
       <td>162.42140</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142549</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
   </tbody>
 </table>
@@ -1171,12 +1210,18 @@ Dataset Size in Bytes:
 </div>
 <p>You can also learn more about the measured device that generated this dataset:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_reference_device_of</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "5a76ccc1c04f413d9431b956b860169f", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
@@ -1209,7 +1254,7 @@ Dataset Size in Bytes:
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1219,7 +1264,7 @@ Dataset Size in Bytes:
 </div>
 <p>If you want to learn about the who contributed the data, you can use the following methods:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_contributors_of</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
@@ -1240,7 +1285,7 @@ Dataset Size in Bytes:
 </div>
 <p>To see the list of all the contributors, you can use the following method:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_all_contributors</span><span class="p">()</span>
@@ -1251,19 +1296,7 @@ Dataset Size in Bytes:
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ee49a04ad8f14167bb82813ff067125f", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9aea8b1017f447fe8d1935603ed8407a", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "79f1dc65a3d84b3788d84147036767c0", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3954c59cc0b44d71afa5e2cc0fdd9c0b", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -1299,7 +1332,7 @@ Dataset Size in Bytes:
 <p>Let’s say you know the Hamiltonian parameters of a qubit you want to use. You can use the SQuADDS API to query for the closest design to your target qubit.</p>
 <p>We first need to select our sytem of interest.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">)</span>
@@ -1308,7 +1341,7 @@ Dataset Size in Bytes:
 </div>
 <p>Now, we need to specify to SQuADDS what type of <code class="docutils literal notranslate"><span class="pre">qubit</span></code> our system is. We can do this by using the <code class="docutils literal notranslate"><span class="pre">select_qubit</span></code> method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
@@ -1317,7 +1350,7 @@ Dataset Size in Bytes:
 </div>
 <p>We now create the system dataframe so that we can query for the design parameters we are interested in.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
@@ -1326,7 +1359,7 @@ Dataset Size in Bytes:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1348,6 +1381,11 @@ Dataset Size in Bytes:
   <thead>
     <tr style="text-align: right;">
       <th></th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
+      <th>design_options</th>
+      <th>design_tool</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
@@ -1355,21 +1393,21 @@ Dataset Size in Bytes:
       <th>cross_to_ground</th>
       <th>ground_to_ground</th>
       <th>units</th>
-      <th>design_options</th>
-      <th>design_tool</th>
       <th>PI</th>
       <th>date_created</th>
       <th>group</th>
       <th>institution</th>
       <th>uploader</th>
-      <th>renderer_options</th>
-      <th>setup</th>
-      <th>simulator</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
@@ -1377,19 +1415,19 @@ Dataset Size in Bytes:
       <td>158.40783</td>
       <td>311.25590</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>82.44280</td>
       <td>79.19378</td>
       <td>2.93820</td>
@@ -1397,19 +1435,19 @@ Dataset Size in Bytes:
       <td>188.15089</td>
       <td>333.52997</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-10-25-153123</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>2</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>83.76412</td>
       <td>80.18130</td>
       <td>3.16131</td>
@@ -1417,19 +1455,19 @@ Dataset Size in Bytes:
       <td>104.35340</td>
       <td>237.02548</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>3</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>103.37057</td>
       <td>97.22405</td>
       <td>5.77590</td>
@@ -1437,19 +1475,19 @@ Dataset Size in Bytes:
       <td>174.13928</td>
       <td>335.31609</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-10-25-153126</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>4</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>68.92854</td>
       <td>65.68607</td>
       <td>2.87375</td>
@@ -1457,16 +1495,11 @@ Dataset Size in Bytes:
       <td>120.03923</td>
       <td>240.34085</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1490,6 +1523,11 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1929</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>106.43025</td>
       <td>101.53197</td>
       <td>4.45645</td>
@@ -1497,19 +1535,19 @@ Dataset Size in Bytes:
       <td>174.46380</td>
       <td>340.62919</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1930</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>121.10943</td>
       <td>112.62570</td>
       <td>7.95178</td>
@@ -1517,19 +1555,19 @@ Dataset Size in Bytes:
       <td>187.43537</td>
       <td>367.34003</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142549</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1931</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>144.56289</td>
       <td>136.36810</td>
       <td>7.65968</td>
@@ -1537,19 +1575,19 @@ Dataset Size in Bytes:
       <td>172.14561</td>
       <td>372.39970</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-10-25-153123</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1932</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>68.76413</td>
       <td>65.78116</td>
       <td>2.48795</td>
@@ -1557,19 +1595,19 @@ Dataset Size in Bytes:
       <td>56.75230</td>
       <td>166.57383</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1933</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>58.45749</td>
       <td>55.50796</td>
       <td>2.54396</td>
@@ -1577,16 +1615,11 @@ Dataset Size in Bytes:
       <td>62.01000</td>
       <td>162.42140</td>
       <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-09-20-142549</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
     </tr>
   </tbody>
 </table>
@@ -1595,7 +1628,7 @@ Dataset Size in Bytes:
 </div>
 <p>Now that we have created our system dataframe, we can query for the closest design to our target qubit parameters. To do this we need to call the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds</span> <span class="kn">import</span> <span class="n">Analyzer</span>
@@ -1604,7 +1637,7 @@ Dataset Size in Bytes:
 </div>
 <p>We instatantaite the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object by passing in the <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> instance we created earlier.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
@@ -1613,7 +1646,7 @@ Dataset Size in Bytes:
 </div>
 <p>We can now check for what type of Hamiltonian parameters are available for our chosen system</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">target_param_keys</span><span class="p">()</span>
@@ -1621,7 +1654,7 @@ Dataset Size in Bytes:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1654,7 +1687,7 @@ Raises:
 </div>
 <p>You are given the choice of the following metrics.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">__supported_metrics__</span>
@@ -1662,7 +1695,7 @@ Raises:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1672,7 +1705,7 @@ Raises:
 </div>
 <p>Define your Hamiltonian parameters that you want to use for your qubit</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">200</span><span class="p">}</span>
@@ -1680,7 +1713,7 @@ Raises:
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
@@ -1692,7 +1725,7 @@ Raises:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1714,23 +1747,23 @@ Raises:
   <thead>
     <tr style="text-align: right;">
       <th></th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
+      <th>design_options</th>
+      <th>design_tool</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
       <th>cross_to_cross</th>
       <th>cross_to_ground</th>
-      <th>ground_to_ground</th>
-      <th>units</th>
-      <th>design_options</th>
-      <th>design_tool</th>
-      <th>PI</th>
       <th>...</th>
+      <th>units</th>
+      <th>PI</th>
+      <th>date_created</th>
       <th>group</th>
       <th>institution</th>
       <th>uploader</th>
-      <th>renderer_options</th>
-      <th>setup</th>
-      <th>simulator</th>
       <th>EC</th>
       <th>EJ</th>
       <th>qubit_frequency_GHz</th>
@@ -1740,23 +1773,23 @@ Raises:
   <tbody>
     <tr>
       <th>643</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>106.91739</td>
       <td>101.13161</td>
       <td>5.25204</td>
       <td>102.49025</td>
       <td>102.49025</td>
-      <td>255.94708</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
-      <td>Eli Levenson-Falk, PhD</td>
       <td>...</td>
+      <td>fF</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>0.179783</td>
       <td>12.278081</td>
       <td>4.013772</td>
@@ -1764,23 +1797,23 @@ Raises:
     </tr>
     <tr>
       <th>1862</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>80.01554</td>
       <td>76.72741</td>
       <td>2.89095</td>
       <td>104.64079</td>
       <td>104.64079</td>
-      <td>233.88902</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
-      <td>Eli Levenson-Falk, PhD</td>
       <td>...</td>
+      <td>fF</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>0.180135</td>
       <td>12.278081</td>
       <td>4.017505</td>
@@ -1788,23 +1821,23 @@ Raises:
     </tr>
     <tr>
       <th>1714</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>76.27207</td>
       <td>73.26136</td>
       <td>2.62986</td>
       <td>104.89818</td>
       <td>104.89818</td>
-      <td>230.69451</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
-      <td>Eli Levenson-Falk, PhD</td>
       <td>...</td>
+      <td>fF</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>0.180141</td>
       <td>12.278081</td>
       <td>4.017570</td>
@@ -1820,7 +1853,7 @@ Raises:
 <h4>Using Custom Metrics<a class="headerlink" href="#Using-Custom-Metrics" title="Link to this heading">#</a></h4>
 <p>To use a custom metric first define the function. For example, lets say we want the manhattan metric</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">manhattan_distance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">simulated</span><span class="p">):</span>
@@ -1829,7 +1862,7 @@ Raises:
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">custom_metric_func</span> <span class="o">=</span> <span class="n">manhattan_distance</span>
@@ -1837,7 +1870,7 @@ Raises:
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
@@ -1857,7 +1890,7 @@ Please set this to False if `target_parameters` have changed.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1879,23 +1912,23 @@ Please set this to False if `target_parameters` have changed.
   <thead>
     <tr style="text-align: right;">
       <th></th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
+      <th>design_options</th>
+      <th>design_tool</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
       <th>cross_to_cross</th>
       <th>cross_to_ground</th>
-      <th>ground_to_ground</th>
-      <th>units</th>
-      <th>design_options</th>
-      <th>design_tool</th>
-      <th>PI</th>
       <th>...</th>
+      <th>units</th>
+      <th>PI</th>
+      <th>date_created</th>
       <th>group</th>
       <th>institution</th>
       <th>uploader</th>
-      <th>renderer_options</th>
-      <th>setup</th>
-      <th>simulator</th>
       <th>EC</th>
       <th>EJ</th>
       <th>qubit_frequency_GHz</th>
@@ -1905,23 +1938,23 @@ Please set this to False if `target_parameters` have changed.
   <tbody>
     <tr>
       <th>643</th>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>106.91739</td>
       <td>101.13161</td>
       <td>5.25204</td>
       <td>102.49025</td>
       <td>102.49025</td>
-      <td>255.94708</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
-      <td>Eli Levenson-Falk, PhD</td>
       <td>...</td>
+      <td>fF</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142547</td>
       <td>LFL</td>
       <td>USC</td>
       <td>Andre Kuo</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>0.179783</td>
       <td>12.278081</td>
       <td>4.013772</td>
@@ -1933,7 +1966,7 @@ Please set this to False if `target_parameters` have changed.
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best_options</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
@@ -1942,7 +1975,7 @@ Please set this to False if `target_parameters` have changed.
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1980,7 +2013,7 @@ Please set this to False if `target_parameters` have changed.
 </div>
 <p>You can pass in the <code class="docutils literal notranslate"><span class="pre">design_options</span></code> from the closest design to the <code class="docutils literal notranslate"><span class="pre">options</span></code> argument of your selected qubit and render it in qiskit metal.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Qiskit Metal imports</span>
@@ -1997,7 +2030,7 @@ Please set this to False if `target_parameters` have changed.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design</span> <span class="o">=</span> <span class="n">MultiPlanar</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="p">{},</span>
@@ -2011,20 +2044,12 @@ Please set this to False if `target_parameters` have changed.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-02:59PM 22s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  WARNING: Layer-backing can not be explicitly controlled on 10.14 when built against the 10.14 SDK
-
-02:59PM 23s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fca801f87a0; contentView=&lt;QNSView: 0x7fca801f8060; QCocoaWindow(0x7fca801f7f40, window=QWidgetWindow(0x7fca801f7aa0, name=&#34;MainWindowPlotWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
-
-02:59PM 23s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fca807dfcb0; contentView=&lt;QNSView: 0x7fca807df570; QCocoaWindow(0x7fca807df450, window=QWidgetWindow(0x7fca807defb0, name=&#34;ElementsWindowWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
-
-02:59PM 23s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fca804127c0; contentView=&lt;QNSView: 0x7fca80412040; QCocoaWindow(0x7fca80411f20, window=QWidgetWindow(0x7fca80411a60, name=&#34;MainWindowWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
-
-02:59PM 23s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fca80c14c80; contentView=&lt;QNSView: 0x7fca80c14540; QCocoaWindow(0x7fca80c14420, window=QWidgetWindow(0x7fca80c13f80, name=&#34;NetListWindowWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
+10:06PM 07s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  WARNING: Populating font family aliases took 414 ms. Replace uses of missing font family &#34;Courier&#34; with one that exists to avoid this cost.
 
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.qubits.transmon_cross</span> <span class="kn">import</span> <span class="n">TransmonCross</span>
@@ -2037,22 +2062,11 @@ Please set this to False if `target_parameters` have changed.
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_61_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_61_1.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_61_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_61_0.png" style="width: 500px;" />
 </div>
 </div>
 </section>
@@ -2062,7 +2076,7 @@ WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated
 <p>The same workflow can be used to query for a target cavity design.</p>
 <p>While it is not necessary, it may be a good idea to <code class="docutils literal notranslate"><span class="pre">unselect_all()</span></code> before creating a new system.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">unselect_all</span><span class="p">()</span>
@@ -2071,7 +2085,7 @@ WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated
 </div>
 <p>Proceed with selecting the system of interest</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">)</span>
@@ -2079,7 +2093,7 @@ WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
@@ -2087,7 +2101,7 @@ WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
@@ -2096,7 +2110,7 @@ WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated
 </div>
 <p>It’s always a good idea to check that the system you have selected is correct.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[69]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">show_selections</span><span class="p">()</span>
@@ -2118,7 +2132,7 @@ Selected resonator type:  quarter
 </div>
 <p>Great! lets create the system dataframe and analyze it.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[70]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
@@ -2126,7 +2140,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[71]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
@@ -2134,7 +2148,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[72]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">target_param_keys</span><span class="p">()</span>
@@ -2142,7 +2156,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[72]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -2152,7 +2166,7 @@ Selected resonator type:  quarter
 </div>
 <p>Select the Hamiltonian parameters you want to use for your cavity and search for the closest designs.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[73]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">6.9</span><span class="p">,</span>
@@ -2162,7 +2176,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[74]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
@@ -2174,7 +2188,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[74]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2196,113 +2210,113 @@ Selected resonator type:  quarter
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>cavity_frequency_GHz</th>
-      <th>kappa_kHz</th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
       <th>coupler_type</th>
       <th>design_options</th>
       <th>design_tool</th>
       <th>resonator_type</th>
+      <th>cavity_frequency_GHz</th>
+      <th>kappa_kHz</th>
       <th>PI</th>
       <th>date_created</th>
       <th>group</th>
       <th>institution</th>
       <th>misc</th>
       <th>uploader</th>
-      <th>renderer_options</th>
-      <th>setup</th>
-      <th>simulator</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>1191</th>
-      <td>6.948003</td>
-      <td>122.218952</td>
+      <td>None</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
       <td>CLT</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
       <td>quarter</td>
+      <td>6.948003</td>
+      <td>122.218952</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-24-230000</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1192</th>
-      <td>6.915761</td>
-      <td>125.765213</td>
+      <td>None</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
       <td>CLT</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
       <td>quarter</td>
+      <td>6.915761</td>
+      <td>125.765213</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-24-230000</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1189</th>
-      <td>7.013518</td>
-      <td>127.327511</td>
+      <td>None</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
       <td>CLT</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
       <td>quarter</td>
+      <td>7.013518</td>
+      <td>127.327511</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-24-230000</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>190</th>
-      <td>6.371017</td>
-      <td>121.824395</td>
+      <td>None</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
       <td>CLT</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
       <td>quarter</td>
+      <td>6.371017</td>
+      <td>121.824395</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-11-30-214122</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Andre Kuo</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1190</th>
-      <td>6.980933</td>
-      <td>129.751169</td>
+      <td>None</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
       <td>CLT</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
       <td>quarter</td>
+      <td>6.980933</td>
+      <td>129.751169</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-24-230000</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
     </tr>
   </tbody>
 </table>
@@ -2317,7 +2331,7 @@ Selected resonator type:  quarter
 <p>Here ( w_i ) are weights which default to 1 if not user-defined.</p>
 <p>Note: The default metric for <code class="docutils literal notranslate"><span class="pre">find_closest</span></code> is <code class="docutils literal notranslate"><span class="pre">Euclidean</span></code> when not user-defined.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[75]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up the weights</span>
@@ -2326,7 +2340,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[77]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
@@ -2338,7 +2352,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[77]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2360,77 +2374,77 @@ Selected resonator type:  quarter
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>cavity_frequency_GHz</th>
-      <th>kappa_kHz</th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
       <th>coupler_type</th>
       <th>design_options</th>
       <th>design_tool</th>
       <th>resonator_type</th>
+      <th>cavity_frequency_GHz</th>
+      <th>kappa_kHz</th>
       <th>PI</th>
       <th>date_created</th>
       <th>group</th>
       <th>institution</th>
       <th>misc</th>
       <th>uploader</th>
-      <th>renderer_options</th>
-      <th>setup</th>
-      <th>simulator</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>1191</th>
-      <td>6.948003</td>
-      <td>122.218952</td>
+      <td>None</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
       <td>CLT</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
       <td>quarter</td>
+      <td>6.948003</td>
+      <td>122.218952</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-24-230000</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1192</th>
-      <td>6.915761</td>
-      <td>125.765213</td>
+      <td>None</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
       <td>CLT</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
       <td>quarter</td>
+      <td>6.915761</td>
+      <td>125.765213</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-24-230000</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
     </tr>
     <tr>
       <th>1189</th>
-      <td>7.013518</td>
-      <td>127.327511</td>
+      <td>None</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
       <td>CLT</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
       <td>quarter</td>
+      <td>7.013518</td>
+      <td>127.327511</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-24-230000</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
     </tr>
   </tbody>
 </table>
@@ -2442,7 +2456,7 @@ Selected resonator type:  quarter
 <h3>Querying for a target qubit-cavity design<a class="headerlink" href="#Querying-for-a-target-qubit-cavity-design" title="Link to this heading">#</a></h3>
 <p>Again, we follow the same procedure as before.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[78]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
@@ -2450,7 +2464,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[79]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
@@ -2460,7 +2474,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[80]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">show_selections</span><span class="p">()</span>
@@ -2480,7 +2494,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[81]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">merged_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
@@ -2488,7 +2502,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[82]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">merged_df</span>
@@ -2496,7 +2510,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[82]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2519,25 +2533,25 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
     <tr style="text-align: right;">
       <th></th>
       <th>index_qc</th>
+      <th>renderer_options_qubit</th>
+      <th>setup_qubit</th>
+      <th>simulator_qubit</th>
+      <th>design_options_qubit</th>
+      <th>design_tool_qubit</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
       <th>cross_to_cross</th>
-      <th>cross_to_ground</th>
-      <th>ground_to_ground</th>
-      <th>units_qubit</th>
-      <th>design_options_qubit</th>
-      <th>design_tool_qubit</th>
       <th>...</th>
+      <th>cavity_frequency</th>
+      <th>kappa</th>
+      <th>units_cavity_claw</th>
       <th>PI_cavity_claw</th>
       <th>date_created_cavity_claw</th>
       <th>group_cavity_claw</th>
       <th>institution_cavity_claw</th>
       <th>misc</th>
       <th>uploader_cavity_claw</th>
-      <th>renderer_options_cavity_claw</th>
-      <th>setup_cavity_claw</th>
-      <th>simulator_cavity_claw</th>
       <th>design_options</th>
     </tr>
   </thead>
@@ -2545,121 +2559,121 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
     <tr>
       <th>0</th>
       <td>0</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
       <td>158.40783</td>
-      <td>158.40783</td>
-      <td>311.25590</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
+      <td>8.963333e+09</td>
+      <td>282985.474218</td>
+      <td>Hz</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-12-09-204334</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Andre Kuo</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
       <td>158.40783</td>
-      <td>158.40783</td>
-      <td>311.25590</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
+      <td>6.911806e+09</td>
+      <td>689394.209468</td>
+      <td>Hz</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-12-06-224829</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Andre Kuo</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
     <tr>
       <th>2</th>
       <td>0</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
       <td>158.40783</td>
-      <td>158.40783</td>
-      <td>311.25590</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
+      <td>8.968642e+09</td>
+      <td>205609.615066</td>
+      <td>Hz</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-12-04-124953</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Andre Kuo</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
     <tr>
       <th>3</th>
       <td>0</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
       <td>158.40783</td>
-      <td>158.40783</td>
-      <td>311.25590</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
+      <td>6.767688e+09</td>
+      <td>36337.102863</td>
+      <td>Hz</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-12-08-173545</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Andre Kuo</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
     <tr>
       <th>4</th>
       <td>0</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
       <td>158.40783</td>
-      <td>158.40783</td>
-      <td>311.25590</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
+      <td>6.576639e+09</td>
+      <td>136678.807988</td>
+      <td>Hz</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2023-11-30-214122</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Andre Kuo</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
     <tr>
@@ -2689,121 +2703,121 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
     <tr>
       <th>22191</th>
       <td>1642</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>183.80802</td>
       <td>168.04023</td>
       <td>15.11184</td>
       <td>214.45993</td>
-      <td>214.45993</td>
-      <td>454.60312</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
+      <td>8.030208e+09</td>
+      <td>41577.971450</td>
+      <td>Hz</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-01-25-214631</td>
       <td>LFL</td>
       <td>USC</td>
       <td></td>
       <td>Andre Kuo</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
     <tr>
       <th>22192</th>
       <td>1642</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>183.80802</td>
       <td>168.04023</td>
       <td>15.11184</td>
       <td>214.45993</td>
-      <td>214.45993</td>
-      <td>454.60312</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
+      <td>6.521693e+09</td>
+      <td>288834.456292</td>
+      <td>Hz</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-12-141659</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
     <tr>
       <th>22193</th>
       <td>1642</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>183.80802</td>
       <td>168.04023</td>
       <td>15.11184</td>
       <td>214.45993</td>
-      <td>214.45993</td>
-      <td>454.60312</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
+      <td>4.964068e+09</td>
+      <td>197665.517056</td>
+      <td>Hz</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-24-230000</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
     <tr>
       <th>22194</th>
       <td>1642</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>183.80802</td>
       <td>168.04023</td>
       <td>15.11184</td>
       <td>214.45993</td>
-      <td>214.45993</td>
-      <td>454.60312</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
+      <td>6.980933e+09</td>
+      <td>129751.168552</td>
+      <td>Hz</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-24-230000</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
     <tr>
       <th>22195</th>
       <td>1642</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>183.80802</td>
       <td>168.04023</td>
       <td>15.11184</td>
       <td>214.45993</td>
-      <td>214.45993</td>
-      <td>454.60312</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
+      <td>7.415826e+09</td>
+      <td>46696.417529</td>
+      <td>Hz</td>
       <td>Eli Levenson-Falk, PhD</td>
       <td>2024-07-29-154147</td>
       <td>LFL</td>
       <td>USC</td>
       <td>None</td>
       <td>Ethan Zheng</td>
-      <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
   </tbody>
@@ -2813,7 +2827,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Pass the <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> instance to the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[83]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
@@ -2822,7 +2836,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Always good to check whether the system you have selected is correct.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[84]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">selected_system</span>
@@ -2830,7 +2844,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[84]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -2839,7 +2853,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[85]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span>
@@ -2847,7 +2861,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[85]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -2857,7 +2871,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Define the <code class="docutils literal notranslate"><span class="pre">target_params</span></code> for your qubit-cavity system.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[86]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -2871,7 +2885,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[87]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
@@ -2887,11 +2901,11 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Time taken to add the coupled H params: 4.1825947761535645 seconds
+Time taken to add the coupled H params: 3.927670955657959 seconds
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[87]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2914,20 +2928,20 @@ Time taken to add the coupled H params: 4.1825947761535645 seconds
     <tr style="text-align: right;">
       <th></th>
       <th>index_qc</th>
+      <th>renderer_options_qubit</th>
+      <th>setup_qubit</th>
+      <th>simulator_qubit</th>
+      <th>design_options_qubit</th>
+      <th>design_tool_qubit</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
       <th>cross_to_cross</th>
-      <th>cross_to_ground</th>
-      <th>ground_to_ground</th>
-      <th>units_qubit</th>
-      <th>design_options_qubit</th>
-      <th>design_tool_qubit</th>
       <th>...</th>
+      <th>group_cavity_claw</th>
+      <th>institution_cavity_claw</th>
+      <th>misc</th>
       <th>uploader_cavity_claw</th>
-      <th>renderer_options_cavity_claw</th>
-      <th>setup_cavity_claw</th>
-      <th>simulator_cavity_claw</th>
       <th>design_options</th>
       <th>EC</th>
       <th>EJ</th>
@@ -2940,20 +2954,20 @@ Time taken to add the coupled H params: 4.1825947761535645 seconds
     <tr>
       <th>17659</th>
       <td>1441</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>113.99245</td>
       <td>107.65111</td>
       <td>5.75841</td>
       <td>112.70740</td>
-      <td>112.70740</td>
-      <td>274.49373</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
-      <td>Andre Kuo</td>
+      <td>LFL</td>
+      <td>USC</td>
       <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
+      <td>Andre Kuo</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
       <td>0.163509</td>
       <td>12.278081</td>
@@ -2964,20 +2978,20 @@ Time taken to add the coupled H params: 4.1825947761535645 seconds
     <tr>
       <th>3022</th>
       <td>812</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>105.76081</td>
       <td>99.80185</td>
       <td>5.38260</td>
       <td>100.41444</td>
-      <td>100.41444</td>
-      <td>251.82560</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
-      <td>Andre Kuo</td>
+      <td>LFL</td>
+      <td>USC</td>
       <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
+      <td>Andre Kuo</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
       <td>0.183089</td>
       <td>12.278081</td>
@@ -2988,20 +3002,20 @@ Time taken to add the coupled H params: 4.1825947761535645 seconds
     <tr>
       <th>12116</th>
       <td>1180</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>qiskit-metal</td>
       <td>109.80541</td>
       <td>103.57639</td>
       <td>5.68548</td>
       <td>105.83609</td>
-      <td>105.83609</td>
-      <td>261.84982</td>
-      <td>fF</td>
-      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
-      <td>qiskit-metal</td>
       <td>...</td>
-      <td>Andre Kuo</td>
+      <td>LFL</td>
+      <td>USC</td>
       <td>None</td>
-      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
-      <td>Ansys HFSS</td>
+      <td>Andre Kuo</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
       <td>0.173690</td>
       <td>12.278081</td>
@@ -3016,7 +3030,7 @@ Time taken to add the coupled H params: 4.1825947761535645 seconds
 </div>
 <p>Awesome! we have some designs for our qubit-cavity system. To see where the closest design lies in the Hamiltonian parameter space, we can use the <code class="docutils literal notranslate"><span class="pre">closest_design_in_H_space</span></code> method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[88]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
@@ -3024,7 +3038,7 @@ Time taken to add the coupled H params: 4.1825947761535645 seconds
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[89]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">closest_design_in_H_space</span><span class="p">()</span>
@@ -3041,7 +3055,7 @@ Time taken to add the coupled H params: 4.1825947761535645 seconds
 <p>Similarly, we can query for the best-guess design for our qubit-cavity system with a half-wave resonator.</p>
 <p>Lets start by selecting the system of interest and creating the system dataframe.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[90]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">unselect_all</span><span class="p">()</span>
@@ -3072,7 +3086,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Or we can just update the <code class="docutils literal notranslate"><span class="pre">analyzer</span></code> object with the new system info using the following method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[91]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">reload_db</span><span class="p">()</span>
@@ -3081,7 +3095,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Doing a sanity check to see if the system we have selected is correct.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[92]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">show_selections</span><span class="p">()</span>
@@ -3102,7 +3116,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Great! Now lets query for the best-guess design for our system.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[93]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -3130,126 +3144,116 @@ Using 10 chunks for parallel processing
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:datasets:PyTorch version 1.13.0 available.
-INFO:datasets:PyTorch version 1.13.0 available.
-INFO:datasets:PyTorch version 1.13.0 available.
-INFO:datasets:PyTorch version 1.13.0 available.
-INFO:datasets:PyTorch version 1.13.0 available.
-INFO:datasets:PyTorch version 1.13.0 available.
-INFO:datasets:PyTorch version 1.13.0 available.
-INFO:datasets:PyTorch version 1.13.0 available.
-INFO:datasets:PyTorch version 1.13.0 available.
-INFO:datasets:PyTorch version 1.13.0 available.
-WARNING:py.warnings:NumbaPerformanceWarning:
+WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
+</span><span class="ansi-bold">
+File &#34;../../../../miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+<span class="ansi-bold">@jit(nopython=True, parallel=True)
+</span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+</span><span class="ansi-bold">^</span>
 
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:
-@jit(nopython=True, parallel=True)
-def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
-^
-
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning:
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
+WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
+</span><span class="ansi-bold">
+File &#34;../../../../miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+<span class="ansi-bold">@jit(nopython=True, parallel=True)
+</span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+</span><span class="ansi-bold">^</span>
 
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:
-@jit(nopython=True, parallel=True)
-def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
-^
-
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning:
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
+WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
+</span><span class="ansi-bold">
+File &#34;../../../../miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+<span class="ansi-bold">@jit(nopython=True, parallel=True)
+</span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+</span><span class="ansi-bold">^</span>
 
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:
-@jit(nopython=True, parallel=True)
-def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
-^
-
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning:
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
+WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
+</span><span class="ansi-bold">
+File &#34;../../../../miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+<span class="ansi-bold">@jit(nopython=True, parallel=True)
+</span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+</span><span class="ansi-bold">^</span>
 
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:
-@jit(nopython=True, parallel=True)
-def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
-^
-
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning:
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
+WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
+</span><span class="ansi-bold">
+File &#34;../../../../miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+<span class="ansi-bold">@jit(nopython=True, parallel=True)
+</span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+</span><span class="ansi-bold">^</span>
 
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:
-@jit(nopython=True, parallel=True)
-def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
-^
-
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning:
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
+WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
+</span><span class="ansi-bold">
+File &#34;../../../../miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+<span class="ansi-bold">@jit(nopython=True, parallel=True)
+</span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+</span><span class="ansi-bold">^</span>
 
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:
-@jit(nopython=True, parallel=True)
-def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
-^
-
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning:
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
+WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
+</span><span class="ansi-bold">
+File &#34;../../../../miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+<span class="ansi-bold">@jit(nopython=True, parallel=True)
+</span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+</span><span class="ansi-bold">^</span>
 
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:
-@jit(nopython=True, parallel=True)
-def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
-^
-
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning:
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
+WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
+</span><span class="ansi-bold">
+File &#34;../../../../miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+<span class="ansi-bold">@jit(nopython=True, parallel=True)
+</span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+</span><span class="ansi-bold">^</span>
 
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:
-@jit(nopython=True, parallel=True)
-def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
-^
-
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning:
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
+WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
+</span><span class="ansi-bold">
+File &#34;../../../../miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+<span class="ansi-bold">@jit(nopython=True, parallel=True)
+</span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+</span><span class="ansi-bold">^</span>
 
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:
-@jit(nopython=True, parallel=True)
-def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
-^
-
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning:
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
+WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
+</span><span class="ansi-bold">
+File &#34;../../../../miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+<span class="ansi-bold">@jit(nopython=True, parallel=True)
+</span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
+</span><span class="ansi-bold">^</span>
 
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:
-@jit(nopython=True, parallel=True)
-def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
-^
-
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/numba/core/typed_passes.py: 336
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -3257,7 +3261,7 @@ def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Time taken to add the coupled H params: 444.31523609161377 seconds
+Time taken to add the coupled H params: 448.0265998840332 seconds
 Using 10 CPUs for parallel processing
 </pre></div></div>
 </div>
@@ -3271,12 +3275,12 @@ A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
- /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 432
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/core/analysis.py: 432
 </pre></div></div>
 </div>
 <p><strong>Note:</strong> We had used the flags - <code class="docutils literal notranslate"><span class="pre">parallel=True</span></code> and <code class="docutils literal notranslate"><span class="pre">num_cpu=&quot;auto&quot;</span></code> to speed up the process since we have very fine coverage in this dataset.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[94]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[60]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
@@ -3284,7 +3288,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[95]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">closest_design_in_H_space</span><span class="p">()</span>
@@ -3303,7 +3307,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 <p>Even though the <code class="docutils literal notranslate"><span class="pre">closest_design</span></code> will become better as more validated pre-simulated points are added to the database, it is still a good idea to interpolate to get the best designs.</p>
 <p>We use the physics inspired interpolation algorithm described in our <a class="reference external" href="https://arxiv.org/pdf/2312.13483.pdf">paper</a> - <code class="docutils literal notranslate"><span class="pre">ScalingInterpolator</span></code> class to interpolate the best designs.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[96]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.interpolations.physics</span> <span class="kn">import</span> <span class="n">ScalingInterpolator</span>
@@ -3312,7 +3316,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 <p>We pass the <code class="docutils literal notranslate"><span class="pre">Analzyer</span></code> object and the <code class="docutils literal notranslate"><span class="pre">target_params</span></code> dict to the <code class="docutils literal notranslate"><span class="pre">ScalingInterpolator</span></code> class.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[97]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create an instance of ScalingInterpolator</span>
@@ -3342,7 +3346,7 @@ A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
- /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 432
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/core/analysis.py: 432
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -3365,7 +3369,7 @@ A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
- /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 432
+ /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/squadds/core/analysis.py: 432
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -3378,12 +3382,13 @@ Kappa scaling: 0.9974902538805511
 g scaling: 1.000220775604248
 alpha scaling: 1.0098679065704346
 resonator scaling: 0.9813371948573901
+resonator scaling: 0.9813371948573901
 ==================================================
 </pre></div></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">design_df</span></code> contains the various <code class="docutils literal notranslate"><span class="pre">design_options</span></code> for the best designs and also the <code class="docutils literal notranslate"><span class="pre">sim_options</span></code> needed to simulate them.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[98]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design_df</span>
@@ -3391,7 +3396,7 @@ resonator scaling: 0.9813371948573901
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[98]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -3437,7 +3442,7 @@ resonator scaling: 0.9813371948573901
 </div>
 <p>Let’s use this interpolated deisgn to generate a <code class="docutils literal notranslate"><span class="pre">.gds</span></code> file.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[101]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.components.coupled_systems</span> <span class="kn">import</span> <span class="n">QubitCavity</span>
@@ -3456,72 +3461,15 @@ resonator scaling: 0.9813371948573901
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-03:30PM 13s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fc8c13b1e00; contentView=&lt;QNSView: 0x7fc8c13b16c0; QCocoaWindow(0x7fc8c13b15a0, window=QWidgetWindow(0x7fc8c13b1130, name=&#34;MainWindowPlotWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
-
-03:30PM 13s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fca82444b80; contentView=&lt;QNSView: 0x7fca82444440; QCocoaWindow(0x7fca82444320, window=QWidgetWindow(0x7fca82443e30, name=&#34;ElementsWindowWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
-
-03:30PM 13s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fc8c13902b0; contentView=&lt;QNSView: 0x7fc8c138fb30; QCocoaWindow(0x7fc8c138fa10, window=QWidgetWindow(0x7fc8c138f580, name=&#34;MainWindowWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
-
-03:30PM 13s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  CRITICAL: &lt;QNSWindow: 0x7fc8c13e9fd0; contentView=&lt;QNSView: 0x7fc8c13e9890; QCocoaWindow(0x7fc8c13e9770, window=QWidgetWindow(0x7fc8c13e92b0, name=&#34;NetListWindowWindow&#34;))&gt;&gt; has active key-value observers (KVO)! These will stop working now that the window is recreated, and will result in exceptions when the observers are removed. Break in QCocoaWindow::recreateWindowIfNeeded to debug.
-
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated and will no longer work in Shapely 2.0. Convert the &#39;.coords&#39; to a numpy array instead.
- /Users/shanto/miniconda3/envs/qiskit_metal/lib/python3.10/site-packages/pandas/core/dtypes/cast.py: 127
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_117_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_117_1.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_117_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_117_0.png" style="width: 500px;" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[100]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qc_ncap</span><span class="o">.</span><span class="n">to_gds</span><span class="p">(</span><span class="s2">&quot;qubit_cavity&quot;</span><span class="p">)</span>
@@ -3533,7 +3481,7 @@ WARNING:py.warnings:ShapelyDeprecationWarning: The array interface is deprecated
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-03:27PM 22s WARNING [_import_junction_gds_file]: Not able to find file:&#34;../resources/Fake_Junctions.GDS&#34;.  Not used to replace junction. Checked directory:&#34;/Users/shanto/LFL/SQuADDS/SQuADDS/resources&#34;.
+10:16PM 03s WARNING [_import_junction_gds_file]: Not able to find file:&#34;../resources/Fake_Junctions.GDS&#34;.  Not used to replace junction. Checked directory:&#34;/Users/shanto/LFL/SQuADDS/SQuADDS/resources&#34;.
 </pre></div></div>
 </div>
 <p>Congrats for making it to the end of this tutorial! 🤗🎉 You have now learned how to use the SQuADDS API to query for closest and “best-guess” interpolated device designs for your chosen Hamiltonian parameters.</p>
