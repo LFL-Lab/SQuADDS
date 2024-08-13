@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.2.4 (2024-08-12)
+--------------------------
+
+* **Alpha Version 0.2.4**
+
+**New Features**
+
+- Added support for half-wave cavity resonators
+
+---
+
 Version 0.2.36 (2024-07-06)
 --------------------------
 
