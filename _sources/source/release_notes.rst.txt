@@ -1,10 +1,10 @@
 Release Notes
 =============
 
-Version 0.2.4 (2024-08-12)
+Version 0.3.0 (2024-08-12)
 --------------------------
 
-* **Alpha Version 0.2.4**
+* **Alpha Version 0.3.0**
 
 **New Features**
 
