@@ -17,13 +17,10 @@ class QubitCavity(QComponent):
         chip = 'main',
         cavity_claw_options = Dict(
             coupler_type = 'CLT',
-        cavity_claw_options = Dict(
-            coupler_type = 'CLT',
             coupler_options = Dict(
                 orientation = '180',
                 coupling_length = '200um'
             ),
-            cpw_opts = Dict(
             cpw_opts = Dict(
                 total_length = '4000um',
                 left_options = Dict(
@@ -42,7 +39,6 @@ class QubitCavity(QComponent):
             )
         ),
         qubit_options = Dict(
-            connection_pads=Dict(),
             connection_pads=Dict(),
             claw_cpw_length = '50um',
             orientation = '180',
@@ -87,7 +83,6 @@ class QubitCavity(QComponent):
         self.copier(qubit_opts, p.qubit_options)
         qubit_opts["pos_y"] = 0
         qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options['cpw_opts'].total_length > 2.500 else "-1000um"
-        qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options['cpw_opts'].total_length > 2.500 else "-1000um"
         self.qubit = TransmonCross(self.design, "{}_xmon".format(self.name), options = qubit_opts)
 
     def make_cavity(self):
@@ -109,9 +104,7 @@ class QubitCavity(QComponent):
 
         temp_opts = Dict()
         self.copier(temp_opts, p.cavity_claw_options['coupler_options'])
-        self.copier(temp_opts, p.cavity_claw_options['coupler_options'])
 
-        if(p.cavity_claw_options['coupler_type'].upper() == "CLT"):
         if(p.cavity_claw_options['coupler_type'].upper() == "CLT"):
             from qiskit_metal.qlibrary.couplers.coupled_line_tee import \
                 CoupledLineTee
@@ -136,7 +129,6 @@ class QubitCavity(QComponent):
         
         left_opts = Dict()
         left_opts.update({'total_length': (p.cpw_opts.total_length if p.cavity_claw_options['coupler_type'] == 'capacitive' else p.cpw_opts.total_length/2) })
-        left_opts.update({'total_length': (p.cpw_opts.total_length if p.cavity_claw_options['coupler_type'] == 'capacitive' else p.cpw_opts.total_length/2) })
         left_opts.update({'pin_inputs':Dict(
                                             start_pin = Dict(
                                                 component = '',
@@ -147,12 +139,6 @@ class QubitCavity(QComponent):
                                                 pin = ''
                                             )
                                             )})
-        self.copier(left_opts, p.cpw_opts.left_options)
-
-        if p.cavity_claw_options["coupler_type"].lower() == "clt" and self.coupler.options["coupling_length"] > 0.150:
-            adj_distance = self.coupler.options["coupling_length"]
-        else:
-            adj_distance = 0
         self.copier(left_opts, p.cpw_opts.left_options)
 
         if p.cavity_claw_options["coupler_type"].lower() == "clt" and self.coupler.options["coupling_length"] > 0.150:
@@ -186,9 +172,7 @@ class QubitCavity(QComponent):
         self.LeftMeander = RouteMeander(self.design, "{}_left_cpw".format(self.name), options = left_opts)
 
         if(p.cavity_claw_options['coupler_type'] == 'inductive'):
-        if(p.cavity_claw_options['coupler_type'] == 'inductive'):
             right_opts = Dict()
-            right_opts.update({'total_length':p.cpw_opts.total_length/2})
             right_opts.update({'total_length':p.cpw_opts.total_length/2})
             right_opts.update({'pin_inputs':Dict(
                                                 start_pin = Dict(
@@ -202,13 +186,10 @@ class QubitCavity(QComponent):
                                                 )})
             right_opts['pin_inputs']['end_pin'].update({'component':p.cpw_opts.pin_inputs.end_pin.component})
             right_opts['pin_inputs']['end_pin'].update({'pin':p.cpw_opts.pin_inputs.end_pin.pin})
-            right_opts['pin_inputs']['end_pin'].update({'component':p.cpw_opts.pin_inputs.end_pin.component})
-            right_opts['pin_inputs']['end_pin'].update({'pin':p.cpw_opts.pin_inputs.end_pin.pin})
 
             right_opts['pin_inputs']['start_pin'].update({'component':self.coupler.name})
             right_opts['pin_inputs']['start_pin'].update({'pin':'second_start'})
 
-            self.copier(right_opts, p.cpw_opts.right_options)
             self.copier(right_opts, p.cpw_opts.right_options)
 
             self.RightMeander = RouteMeander(self.design, "{}_right_cpw".format(self.name), options = right_opts)

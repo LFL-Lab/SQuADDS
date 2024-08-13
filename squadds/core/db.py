@@ -10,6 +10,7 @@ import warnings
 import pandas as pd
 import requests
 from datasets import get_dataset_config_names, load_dataset
+from huggingface_hub import login
 from tabulate import tabulate
 from tqdm import tqdm
 
