@@ -11,9 +11,20 @@ on:
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
-      - uses: release-drafter/release-drafter@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Run Release Drafter
+        uses: release-drafter/release-drafter@v6
         with:
           config-name: release-drafter.yml
         env:

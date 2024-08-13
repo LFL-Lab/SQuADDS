@@ -109,7 +109,6 @@ class ScalingInterpolator(Interpolator):
         print(f"g scaling: {g_scaling.values[0]}")
         print(f"alpha scaling: {alpha_scaling.values[0]}")
         print(f"resonator scaling: {res_scaling}")
-        print(f"resonator scaling: {res_scaling}")
         print("="*50)
 
         updated_coupling_length = closest_coupler_length * kappa_scaling
