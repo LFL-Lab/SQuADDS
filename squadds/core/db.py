@@ -153,6 +153,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                 components.append(config.split("-")[0])
             except:
                 pass
+            try:
+                components.append(config.split("-")[0])
+            except:
+                pass
         return components
     
     def supported_component_names(self):
@@ -164,6 +168,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         component_names = []
         for config in self.configs:
+            try:
+                component_names.append(config.split("-")[1])
+            except:
+                pass
             try:
                 component_names.append(config.split("-")[1])
             except:
@@ -183,6 +191,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                 data_types.append(config.split("-")[2])
             except:
                 pass
+            try:
+                data_types.append(config.split("-")[2])
+            except:
+                pass
         return data_types
 
         
@@ -195,6 +207,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         delete_HF_cache()
         configs = get_dataset_config_names(self.repo_name, download_mode='force_redownload')
+        # if there are not two "-" in the config name, remove it (since it does conform to the simulation naming convention)
+        configs = [config for config in configs if config.count('-') == 2]
         # if there are not two "-" in the config name, remove it (since it does conform to the simulation naming convention)
         configs = [config for config in configs if config.count('-') == 2]
         return configs
@@ -273,11 +287,19 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         for url in component_urls:
             component_images.append(url)
             table = [components, component_names, data_types, component_images]
+        component_urls = [f"https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/{name}.png" for name in component_names]
+        
+        component_images = []
+        
+        for url in component_urls:
+            component_images.append(url)
+            table = [components, component_names, data_types, component_images]
 
         # Transpose the table (convert columns to rows)
         table = list(map(list, zip(*table)))
 
         # Print the table with headers
+        print(tabulate(table, headers=["Component", "Component Name", "Data Available", "Component Image"],tablefmt="fancy_grid"))
         print(tabulate(table, headers=["Component", "Component Name", "Data Available", "Component Image"],tablefmt="fancy_grid"))
 
     def get_dataset_info(self, component=None, component_name=None, data_type=None):
@@ -828,6 +850,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             pandas.DataFrame: The created DataFrame based on the selected system.
         """
+
+        
         if self.selected_system is None:
             raise UserWarning("Selected system is not defined.")
         

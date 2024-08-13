@@ -101,12 +101,14 @@ class ScalingInterpolator(Interpolator):
         updated_resonator_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]["cpw_opts"]['total_length']) * (closest_cavity_cpw_design['cavity_frequency_GHz'] / f_res_target).values[0]
 
         res_scaling = closest_f_cavity / f_res_target
+        res_scaling = closest_f_cavity / f_res_target
         kappa_scaling = np.sqrt(kappa_target / closest_kappa)
 
         print("="*50)
         print(f"Kappa scaling: {kappa_scaling}")
         print(f"g scaling: {g_scaling.values[0]}")
         print(f"alpha scaling: {alpha_scaling.values[0]}")
+        print(f"resonator scaling: {res_scaling}")
         print(f"resonator scaling: {res_scaling}")
         print("="*50)
 

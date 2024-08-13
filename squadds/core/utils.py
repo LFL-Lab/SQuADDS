@@ -330,6 +330,15 @@ def create_unified_design_options(row):
     # replacing the ground spacing of the cavity by that of the qubit
     cavity_dict["claw_opts"]['connection_pads']["readout"]["ground_spacing"] = qubit_dict['connection_pads']['readout']['ground_spacing']
 
+    # setting the `claw_cpw_*` params to zero
+    qubit_dict['connection_pads']['readout']['claw_cpw_width'] = "0um"
+    qubit_dict['connection_pads']['readout']['claw_cpw_length'] = "0um"
+    cavity_dict['claw_opts']['connection_pads']['readout']['claw_cpw_width'] = "0um"
+    cavity_dict['claw_opts']['connection_pads']['readout']['claw_cpw_length'] = "0um"
+
+    # replacing the ground spacing of the cavity by that of the qubit
+    cavity_dict["claw_opts"]['connection_pads']["readout"]["ground_spacing"] = qubit_dict['connection_pads']['readout']['ground_spacing']
+
     device_dict = {
         "cavity_claw_options": {
             "coupler_type": coupler_type,
@@ -399,6 +408,7 @@ def filter_df_by_conditions(df, conditions):
     for column, value in conditions.items():
         if column in filtered_df.columns:
             filtered_df = filtered_df[filtered_df[column] == value]
+
 
     # Check if the filtered DataFrame is empty
     if filtered_df.empty:
