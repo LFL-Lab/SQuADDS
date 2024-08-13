@@ -330,6 +330,15 @@ def create_unified_design_options(row):
     # replacing the ground spacing of the cavity by that of the qubit
     cavity_dict["claw_opts"]['connection_pads']["readout"]["ground_spacing"] = qubit_dict['connection_pads']['readout']['ground_spacing']
 
+    # setting the `claw_cpw_*` params to zero
+    qubit_dict['connection_pads']['readout']['claw_cpw_width'] = "0um"
+    qubit_dict['connection_pads']['readout']['claw_cpw_length'] = "0um"
+    cavity_dict['claw_opts']['connection_pads']['readout']['claw_cpw_width'] = "0um"
+    cavity_dict['claw_opts']['connection_pads']['readout']['claw_cpw_length'] = "0um"
+
+    # replacing the ground spacing of the cavity by that of the qubit
+    cavity_dict["claw_opts"]['connection_pads']["readout"]["ground_spacing"] = qubit_dict['connection_pads']['readout']['ground_spacing']
+
     device_dict = {
         "cavity_claw_options": {
             "coupler_type": coupler_type,
@@ -399,6 +408,7 @@ def filter_df_by_conditions(df, conditions):
     for column, value in conditions.items():
         if column in filtered_df.columns:
             filtered_df = filtered_df[filtered_df[column] == value]
+
 
     # Check if the filtered DataFrame is empty
     if filtered_df.empty:
@@ -479,3 +489,233 @@ def send_email_via_client(dataset_name, institute, pi_name, date, dataset_link):
 
     mailto_link = create_mailto_link(recipients, subject, body)
     webbrowser.open(mailto_link)
+
+def compute_memory_usage(df):
+    """
+    Compute the memory usage of the given DataFrame.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to compute the memory usage for.
+
+    Returns:
+        float: The memory usage of the DataFrame in megabytes.
+    """
+    mem = df.memory_usage(deep=True).sum() / 1024 ** 2
+    print(f"Memory usage: {mem} MB")
+    return mem
+
+def print_column_types(df):
+    """
+    Prints out the columns in the DataFrame that have floats, integers, objects, datetimes, and strings.
+
+    Parameters:
+    - df: DataFrame to analyze.
+    """
+    float_cols = df.select_dtypes(include=['float']).columns.tolist()
+    int_cols = df.select_dtypes(include=['int']).columns.tolist()
+    object_cols = df.select_dtypes(include=['object']).columns.tolist()
+    datetime_cols = df.select_dtypes(include=['datetime']).columns.tolist()
+    string_cols = df.select_dtypes(include=['string']).columns.tolist()
+    
+    print("Columns with float types:", float_cols)
+    print("Columns with int types:", int_cols)
+    print("Columns with object types:", object_cols)
+    print("Columns with datetime types:", datetime_cols)
+    print("Columns with string types:", string_cols)
+
+def can_be_categorical(column):
+    """
+    Check if all elements in the column are hashable.
+    """
+    try:
+        hashable = all(isinstance(item, (str, int, float, tuple)) or item is None for item in column)
+        if hashable:
+            pd.Categorical(column)
+            return True
+        else:
+            return False
+    except TypeError:
+        return False
+
+def optimize_dataframe(df):
+    """
+    Optimize the memory usage of a pandas DataFrame by downcasting data types.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame to be optimized.
+
+    Returns:
+    - df_optimized (pandas.DataFrame): The optimized DataFrame.
+
+    """
+    df_optimized = df.copy()
+    
+    # Calculate initial memory usage
+    initial_memory_usage = df_optimized.memory_usage(deep=True).sum() / (1024**2)
+    
+    # Memory usage before optimization
+    memory_before_floats = df_optimized.memory_usage(deep=True).sum() / (1024**2)
+    
+    # Optimize float columns
+    for col in df_optimized.select_dtypes(include=['float']):
+        df_optimized[col] = df_optimized[col].astype('float32')
+    
+    # Memory usage after optimizing floats
+    memory_after_floats = df_optimized.memory_usage(deep=True).sum() / (1024**2)
+    
+    # Optimize integer columns
+    for col in df_optimized.select_dtypes(include=['int']):
+        df_optimized[col] = pd.to_numeric(df_optimized[col], downcast='unsigned')
+    
+    # Memory usage after optimizing integers
+    memory_after_ints = df_optimized.memory_usage(deep=True).sum() / (1024**2)
+    
+    # Memory usage before optimizing object columns
+    memory_before_objects = df_optimized.memory_usage(deep=True).sum() / (1024**2)
+    
+    # Optimize object columns
+    for col in df_optimized.select_dtypes(include=['object']):
+        if can_be_categorical(df_optimized[col]):
+            df_optimized[col] = df_optimized[col].astype('category')
+    
+    # Memory usage after optimizing object columns
+    memory_after_objects = df_optimized.memory_usage(deep=True).sum() / (1024**2)
+    
+    # Calculate memory savings and percentages
+    float_savings = memory_before_floats - memory_after_floats
+    int_savings = memory_after_floats - memory_after_ints
+    object_savings = memory_before_objects - memory_after_objects
+    total_memory_usage = df_optimized.memory_usage(deep=True).sum() / (1024**2)
+    total_savings = initial_memory_usage - total_memory_usage
+    percentage_saved = (total_savings / initial_memory_usage) * 100
+
+    float_savings_percentage = (float_savings / initial_memory_usage) * 100
+    int_savings_percentage = (int_savings / initial_memory_usage) * 100
+    object_savings_percentage = (object_savings / initial_memory_usage) * 100
+
+    print(f"Initial memory usage: {initial_memory_usage:.2f} MB")
+    print(f"Memory usage after optimizing floats: {memory_after_floats:.2f} MB")
+    print(f"Memory usage after optimizing integers: {memory_after_ints:.2f} MB")
+    print(f"Memory usage after optimizing objects: {memory_after_objects:.2f} MB")
+    print(f"Total memory usage after optimization: {total_memory_usage:.2f} MB")
+    print(f"Memory saved by float optimization: {float_savings:.2f} MB ({float_savings_percentage:.2f}%)")
+    print(f"Memory saved by integer optimization: {int_savings:.2f} MB ({int_savings_percentage:.2f}%)")
+    print(f"Memory saved by object optimization: {object_savings:.2f} MB ({object_savings_percentage:.2f}%)")
+    print(f"Total memory saved: {total_savings:.2f} MB")
+    print(f"Memory efficiency: {percentage_saved:.2f}%")
+    
+    return df_optimized
+
+
+def process_design_options(merged_df):
+    """
+    Processes the 'design_options' column in merged_df, appends new columns, converts values, and drops 'design_options'.
+    
+    Parameters:
+    - merged_df: DataFrame containing the 'design_options' column.
+    
+    Returns:
+    - merged_df: Modified DataFrame with new columns added and 'design_options' dropped.
+    """
+    def convert_value(value):
+        if value is None:
+            return value
+        if isinstance(value, str) and value.endswith("um"):
+            return np.float16(value[:-2])
+        return np.int16(value)
+    
+    design_options = merged_df["design_options"]
+
+    merged_df["finger_count"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["finger_count"]))
+    merged_df["finger_length"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["finger_length"]))
+    merged_df["cap_gap"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["cap_gap"]))
+    merged_df["cap_width"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["cap_width"]))
+    merged_df["total_length"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["cpw_opts"]["left_options"]["total_length"]))
+    merged_df["meander_spacing"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["cpw_opts"]["left_options"]["meander"]["spacing"]))
+    merged_df["meander_asymmetry"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["cpw_opts"]["left_options"]["meander"]["asymmetry"]))
+    merged_df["claw_length"] = design_options.apply(lambda x: convert_value(x["qubit_options"]["connection_pads"]["readout"]["claw_length"]))
+    merged_df["claw_width"] = design_options.apply(lambda x: convert_value(x["qubit_options"]["connection_pads"]["readout"]["claw_width"]))
+    merged_df["ground_spacing"] = design_options.apply(lambda x: convert_value(x["qubit_options"]["connection_pads"]["readout"]["ground_spacing"]))
+    merged_df["cross_length"] = design_options.apply(lambda x: convert_value(x["qubit_options"]["cross_length"]))
+
+    # Drop the 'design_options' column
+    merged_df.drop(columns=["design_options"], inplace=True)
+    
+    return merged_df
+
+def print_column_types(df):
+    """
+    Prints out the data type of each column in the DataFrame.
+
+    Parameters:
+    - df: DataFrame to analyze.
+    """
+    column_types = df.dtypes
+    for col, dtype in column_types.items():
+        print(f"Column: {col}, Data Type: {dtype}")
+
+def delete_object_columns(df):
+    """
+    Deletes all columns of type 'object' from the DataFrame.
+
+    Parameters:
+    - df: DataFrame to process.
+
+    Returns:
+    - df: DataFrame with 'object' columns removed.
+    """
+    # Select columns that are of type 'object'
+    object_columns = df.select_dtypes(include=['object']).columns
+
+    # Drop the selected columns
+    df = df.drop(columns=object_columns)
+    
+    return df
+
+
+def columns_memory_usage(df):
+    """
+    Calculates the memory usage of each column and returns a DataFrame showing each column's memory usage and percentage of total memory usage.
+
+    Parameters:
+    - df: DataFrame to process.
+
+    Returns:
+    - mem_usage_df: DataFrame with columns 'Column', 'Memory Usage (MB)', and 'Percentage of Total Memory Usage'.
+    """
+    # Calculate the memory usage for each column
+    mem_usage = df.memory_usage(deep=True) / (1024 ** 2)  # Convert to MB
+    
+    # Calculate total memory usage
+    total_mem_usage = mem_usage.sum()
+    
+    # Create a DataFrame with memory usage and percentage of total memory usage
+    mem_usage_df = pd.DataFrame({
+        'Column': mem_usage.index,
+        'Memory Usage (MB)': mem_usage.values,
+        'Percentage of Total Memory Usage': (mem_usage.values / total_mem_usage) * 100
+    })
+    
+    # Sort the DataFrame by memory usage in descending order
+    mem_usage_df = mem_usage_df.sort_values(by='Memory Usage (MB)', ascending=False).reset_index(drop=True)
+    
+    return mem_usage_df
+
+# drop all categorical columns
+def delete_categorical_columns(df):
+    """
+    Deletes all columns of type 'category' from the DataFrame.
+
+    Parameters:
+    - df: DataFrame to process.
+
+    Returns:
+    - df: DataFrame with 'category' columns removed.
+    """
+    # Select columns that are of type 'category'
+    category_columns = df.select_dtypes(include=['category']).columns
+
+    # Drop the selected columns
+    df = df.drop(columns=category_columns)
+    
+    return df

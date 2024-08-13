@@ -90,9 +90,9 @@ FAQ's
 Installation Issues
 --------------------
 
-**Q: Getting** ``ModuleNotFoundError: No module named 'squadds'`` **after running** ``pip install SQuADDS`` **in Jupyter Notebook. How can I fix this?**
+**Q: Getting** ``ModuleNotFoundError: No module named 'squadds'`` **after running** `pip install SQuADDS` **in Jupyter Notebook. How can I fix this?**
 
-**A:** You may need to restart the kernel after installing ``SQuADDS``. To do this, go to the ``Kernel`` menu in Jupyter Notebook and select ``Restart``.
+**A:** You may need to restart the kernel after installing `SQuADDS`. To do this, go to the `Kernel` menu in Jupyter Notebook and select `Restart`.
 
 -----------------------
 Accessing the Database
@@ -113,7 +113,7 @@ Accessing the Database
 
 **Q: If there are errors upon instantiating the** ``SQuADDS_DB`` **class, what should I do?**
 
-**A:** If you encounter errors upon instantiating the ``SQuADDS_DB`` class, chances are there is an issue with caching. To fix this, please delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
+**A:** If you encounter errors upon instantiating the `SQuADDS_DB` class, chances are there is an issue with caching. To fix this, please delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
 
 -------------
 ``.env`` File 

@@ -18,7 +18,7 @@ try:
     db.select_system(["qubit","cavity_claw"])
     db.select_qubit("TransmonCross")
     db.select_cavity_claw("RouteMeander")
-    db.select_coupler("CLT")
+    db.select_resonator_type("quarter")
     db.show_selections()
     merged_df = db.create_system_df()
     print(merged_df)
@@ -34,7 +34,7 @@ try:
                     "g_MHz": 70}
 
     results = analyzer.find_closest(target_params=target_params,
-                                           num_top=3,
+                                           num_top=1,
                                            metric="Euclidean",
                                            display=True)
     print(results)
@@ -45,7 +45,5 @@ try:
 
     print(design_df)
 
-except Exception as e:
-    print(f"An error occurred: {str(e)}")
 except Exception as e:
     print(f"An error occurred: {str(e)}")
