@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.core.db &#8212; SQuADDS v0.2.36</title>
+    <title>squadds.core.db &#8212; SQuADDS v0.2.4</title>
   
   
   
@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/katex-math.css?v=91adb8b6" />
   
@@ -43,7 +43,7 @@
 
     <script src="../../../_static/jquery.js?v=5d32c60e"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../../../_static/documentation_options.js?v=2bde2e42"></script>
+    <script src="../../../_static/documentation_options.js?v=6ffd866b"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -582,15 +582,24 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for squadds.core.db</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pprint</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">!TODO: add FULL support for half-wave cavity</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">get_dataset_config_names</span><span class="p">,</span> <span class="n">load_dataset</span>
+<span class="kn">from</span> <span class="nn">huggingface_hub</span> <span class="kn">import</span> <span class="n">login</span>
 <span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">squadds.core.design_patterns</span> <span class="kn">import</span> <span class="n">SingletonMeta</span>
+<span class="kn">from</span> <span class="nn">squadds.core.processing</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="c1">#* HANDLE WARNING MESSAGES</span>
@@ -637,10 +646,12 @@ document.write(`
 <span class="sd">            selected_qubit (str): The selected qubit.</span>
 <span class="sd">            selected_cavity (str): The selected cavity.</span>
 <span class="sd">            selected_coupler (str): The selected coupler.</span>
+<span class="sd">            selected_resonator_type (str): The selected resonator type.</span>
 <span class="sd">            selected_system (str): The selected system.</span>
 <span class="sd">            selected_df (str): The selected dataframe.</span>
 <span class="sd">            target_param_keys (str): The target parameter keys.</span>
 <span class="sd">            units (str): The units.</span>
+<span class="sd">            _internal_call (bool): Flag to track internal calls.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span> <span class="o">=</span> <span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_config_names</span><span class="p">()</span>
@@ -651,11 +662,78 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qubit_df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cavity_df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coupler_df</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">measured_device_database</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_internal_call</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Flag to track internal calls</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hwc_fname</span> <span class="o">=</span> <span class="s2">&quot;half-wave-cavity_df.parquet&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">merged_df_hwc_fname</span> <span class="o">=</span> <span class="s2">&quot;qubit_half-wave-cavity_df.parquet&quot;</span>
+        <span class="c1">#self.merger_terms = [&#39;claw_width&#39;, &#39;claw_length&#39;, &#39;claw_gap&#39;]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">claw_merger_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;claw_length&#39;</span><span class="p">]</span> <span class="c1"># 07/2024 -&gt; claw_length is the only parameter that is common between qubit and cavity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncap_merger_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;prime_width&#39;</span><span class="p">,</span> <span class="s1">&#39;prime_gap&#39;</span><span class="p">,</span> <span class="s1">&#39;second_width&#39;</span><span class="p">,</span> <span class="s1">&#39;second_gap&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SQuADDS_DB.check_login">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.check_login">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the user is logged in to Hugging Face.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">HfFolder</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You are not logged in. Please login to Hugging Face.&quot;</span><span class="p">)</span>
+            <span class="n">login</span><span class="p">()</span>  <span class="c1"># This will prompt the user to login</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.get_existing_files">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_existing_files">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_existing_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves the list of existing files in the repository.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of existing file names in the repository.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">api</span> <span class="o">=</span> <span class="n">HfApi</span><span class="p">()</span>
+        <span class="n">repo_info</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">dataset_info</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">)</span>
+        <span class="n">existing_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span><span class="o">.</span><span class="n">rfilename</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">repo_info</span><span class="o">.</span><span class="n">siblings</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">existing_files</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.upload_dataset">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.upload_dataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">upload_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_paths</span><span class="p">,</span> <span class="n">repo_file_names</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uploads a dataset to the repository.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            file_paths (list): A list of file paths to upload.</span>
+<span class="sd">            repo_file_names (list): A list of file names to use in the repository.</span>
+<span class="sd">            overwrite (bool): Whether to overwrite an existing dataset. Defaults to False. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_login</span><span class="p">()</span>
+        <span class="n">api</span> <span class="o">=</span> <span class="n">HfApi</span><span class="p">()</span>
+        <span class="n">existing_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_existing_files</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">repo_file_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">file_paths</span><span class="p">,</span> <span class="n">repo_file_names</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">repo_file_name</span> <span class="ow">in</span> <span class="n">existing_files</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">repo_file_name</span><span class="si">}</span><span class="s2"> already exists in the repository. Skipping upload.&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">api</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span>
+                    <span class="n">path_or_fileobj</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
+                    <span class="n">path_in_repo</span><span class="o">=</span><span class="n">repo_file_name</span><span class="p">,</span>
+                    <span class="n">repo_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span>
+                    <span class="n">repo_type</span><span class="o">=</span><span class="s2">&quot;dataset&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Uploaded </span><span class="si">{</span><span class="n">repo_file_name</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to upload </span><span class="si">{</span><span class="n">repo_file_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SQuADDS_DB.supported_components">
@@ -669,6 +747,10 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">except</span><span class="p">:</span>
@@ -691,6 +773,10 @@ document.write(`
                 <span class="n">component_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">component_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
         <span class="k">return</span> <span class="n">component_names</span></div>
 
     
@@ -705,6 +791,10 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_types</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">data_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
             <span class="k">except</span><span class="p">:</span>
@@ -724,6 +814,8 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">delete_HF_cache</span><span class="p">()</span>
         <span class="n">configs</span> <span class="o">=</span> <span class="n">get_dataset_config_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="n">download_mode</span><span class="o">=</span><span class="s1">&#39;force_redownload&#39;</span><span class="p">)</span>
+        <span class="c1"># if there are not two &quot;-&quot; in the config name, remove it (since it does conform to the simulation naming convention)</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="p">[</span><span class="n">config</span> <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">configs</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">]</span>
         <span class="c1"># if there are not two &quot;-&quot; in the config name, remove it (since it does conform to the simulation naming convention)</span>
         <span class="n">configs</span> <span class="o">=</span> <span class="p">[</span><span class="n">config</span> <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">configs</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">configs</span></div>
@@ -814,11 +906,19 @@ document.write(`
         <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">component_urls</span><span class="p">:</span>
             <span class="n">component_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
             <span class="n">table</span> <span class="o">=</span> <span class="p">[</span><span class="n">components</span><span class="p">,</span> <span class="n">component_names</span><span class="p">,</span> <span class="n">data_types</span><span class="p">,</span> <span class="n">component_images</span><span class="p">]</span>
+        <span class="n">component_urls</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.png&quot;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">component_names</span><span class="p">]</span>
+        
+        <span class="n">component_images</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">component_urls</span><span class="p">:</span>
+            <span class="n">component_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="p">[</span><span class="n">components</span><span class="p">,</span> <span class="n">component_names</span><span class="p">,</span> <span class="n">data_types</span><span class="p">,</span> <span class="n">component_images</span><span class="p">]</span>
 
         <span class="c1"># Transpose the table (convert columns to rows)</span>
         <span class="n">table</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">table</span><span class="p">)))</span>
 
         <span class="c1"># Print the table with headers</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Component&quot;</span><span class="p">,</span> <span class="s2">&quot;Component Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Data Available&quot;</span><span class="p">,</span> <span class="s2">&quot;Component Image&quot;</span><span class="p">],</span><span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Component&quot;</span><span class="p">,</span> <span class="s2">&quot;Component Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Data Available&quot;</span><span class="p">,</span> <span class="s2">&quot;Component Image&quot;</span><span class="p">],</span><span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">))</span></div>
 
 
@@ -981,9 +1081,7 @@ document.write(`
             
         <span class="k">for</span> <span class="n">contrib_info</span><span class="p">,</span> <span class="n">sim_results</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">configs_contrib_info</span><span class="p">,</span> <span class="n">simulation_info</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">contrib_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">device_name</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="p">{</span><span class="n">sim_results</span><span class="p">}</span>
-            
-    
+                    <span class="k">return</span> <span class="n">sim_results</span>
         <span class="k">return</span> <span class="p">{}</span></div>
 
 
@@ -1006,14 +1104,27 @@ document.write(`
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="s1">&#39;measured_device_database&#39;</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
         <span class="n">configs_contrib_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contrib_info&quot;</span><span class="p">]</span>
         <span class="n">simulation_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
+        <span class="n">design_codes</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;design_code&quot;</span><span class="p">]</span>
+        <span class="n">paper_links</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;paper_link&quot;</span><span class="p">]</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
         
-        <span class="k">for</span> <span class="n">contrib_info</span><span class="p">,</span> <span class="n">sim_results</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">configs_contrib_info</span><span class="p">,</span> <span class="n">simulation_info</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contrib_info</span><span class="p">,</span> <span class="n">sim_results</span><span class="p">,</span> <span class="n">design_code</span><span class="p">,</span> <span class="n">paper_link</span><span class="p">,</span> <span class="n">image</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">configs_contrib_info</span><span class="p">,</span> <span class="n">simulation_info</span><span class="p">,</span> <span class="n">design_codes</span><span class="p">,</span> <span class="n">paper_links</span><span class="p">,</span> <span class="n">images</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">sim_results</span><span class="p">:</span>
+                <span class="c1"># Combine the information into one dictionary</span>
+                <span class="n">combined_info</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;Design Code&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">design_code</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                    <span class="s2">&quot;Paper Link&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">paper_link</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                    <span class="s2">&quot;Image&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="p">}</span>
+                <span class="n">combined_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">contrib_info</span><span class="p">)</span>
+                
+                <span class="c1"># Pretty print the combined info as a table</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">combined_info</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">],</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;grid&quot;</span><span class="p">))</span>
                 <span class="k">return</span> <span class="n">contrib_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
-        
+            
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="s2">&quot;The reference device could not be retrieved.&quot;</span>
-            
+        
         <span class="k">return</span> <span class="kc">None</span></div>
 
     
@@ -1048,9 +1159,6 @@ document.write(`
                 <span class="n">unique_contributors_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">relevant_info</span><span class="p">)</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">unique_contributors_info</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s1">&#39;keys&#39;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">))</span></div>
-
-
-
 
 
 
@@ -1203,6 +1311,29 @@ document.write(`
             <span class="k">return</span></div>
 
         
+<div class="viewcode-block" id="SQuADDS_DB.select_resonator_type">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_resonator_type">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_resonator_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resonator_type</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Select the coupler based on the resonator type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resonator_type (str): The type of resonator, e.g., &quot;quarter&quot; or &quot;half&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resonator_to_coupler</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;quarter&quot;</span><span class="p">:</span> <span class="s2">&quot;CLT&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;half&quot;</span><span class="p">:</span> <span class="s2">&quot;NCap&quot;</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">resonator_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">resonator_to_coupler</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid resonator type: </span><span class="si">{</span><span class="n">resonator_type</span><span class="si">}</span><span class="s2">. Must be one of </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">resonator_to_coupler</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_internal_call</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Set the flag to indicate an internal call</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">select_coupler</span><span class="p">(</span><span class="n">resonator_to_coupler</span><span class="p">[</span><span class="n">resonator_type</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="o">=</span> <span class="n">resonator_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_internal_call</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Reset the flag after the call</span></div>
+
+
 <div class="viewcode-block" id="SQuADDS_DB.select_coupler">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_coupler">[docs]</a>
     <span class="k">def</span> <span class="nf">select_coupler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coupler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1215,7 +1346,14 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1">#! TODO: fix this method to work on NCap coupler sims</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_call</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING:DeprecationWarning: select_coupler() is deprecated and will be removed in a future release. Use select_resonator_type() instead.&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;select_coupler() is deprecated and will be removed in a future release. Use select_resonator_type() instead.&quot;</span><span class="p">,</span>
+                <span class="ne">PendingDeprecationWarning</span>
+            <span class="p">)</span>
+        <span class="c1"># E</span>
+        <span class="c1">#! TODO: fix this method to work on CapNInterdigitalTee coupler sims</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="o">=</span> <span class="n">coupler</span>
         <span class="c1">#self.selected_component_name = coupler</span>
         <span class="c1">#self.selected_data_type = &quot;cap_matrix&quot; # TODO: handle dynamically</span>
@@ -1358,9 +1496,13 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.create_system_df">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.create_system_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_system_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_system_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates and returns a DataFrame based on the selected system.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parallelize (bool): Whether to use multiprocessing to speed up the merging. Defaults to False.</span>
+<span class="sd">            num_cpu (int): The number of CPU cores to use for multiprocessing. If not specified, the function will use the maximum number of available cores.</span>
 
 <span class="sd">        If the selected system is a single component, it retrieves the dataset based on the selected data type, component, and component name.</span>
 <span class="sd">        If a coupler is selected, the DataFrame is filtered by the coupler.</span>
@@ -1381,32 +1523,139 @@ document.write(`
 
         
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected system is not defined.&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span><span class="p">)</span>
-            <span class="c1"># if coupler is selected, filter by coupler</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="n">filter_df_by_conditions</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">})</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selected_df</span> <span class="o">=</span> <span class="n">df</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="c1">#! TODO: need to implement logic to handle more complex systems</span>
-            <span class="c1"># get the qubit and cavity dfs</span>
-            <span class="n">qubit_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span><span class="p">)</span> <span class="c1">#TODO: handle dynamically</span>
-            <span class="n">cavity_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eigenmode&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span><span class="p">)</span> <span class="c1">#TODO: handle dynamically</span>
-            <span class="c1"># if coupler is selected, filter by coupler</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">cavity_df</span> <span class="o">=</span> <span class="n">filter_df_by_conditions</span><span class="p">(</span><span class="n">cavity_df</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">})</span> 
-            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_qubit_cavity_df</span><span class="p">(</span><span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;claw_width&#39;</span><span class="p">,</span> <span class="s1">&#39;claw_length&#39;</span><span class="p">,</span> <span class="s1">&#39;claw_gap&#39;</span><span class="p">])</span> <span class="c1">#TODO: handle with user awareness</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selected_df</span> <span class="o">=</span> <span class="n">df</span>
-            
+            <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;Selected system is not defined.&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_single_component_df</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_multi_component_df</span><span class="p">(</span><span class="n">parallelize</span><span class="p">,</span> <span class="n">num_cpu</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_df</span> <span class="o">=</span> <span class="n">df</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
 
+    <span class="k">def</span> <span class="nf">_create_single_component_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a DataFrame for a single component system.&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">filter_df_by_conditions</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">})</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="o">==</span> <span class="s2">&quot;CapNInterdigitalTee&quot;</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_cap_interdigital_tee_parameters</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span>
+
+<div class="viewcode-block" id="SQuADDS_DB.generate_updated_half_wave_cavity_df">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.generate_updated_half_wave_cavity_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_updated_half_wave_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        !TODO: speed this up!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cavity_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eigenmode&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NCap&quot;</span><span class="p">,</span> <span class="s2">&quot;CapNInterdigitalTee&quot;</span><span class="p">],</span> <span class="s2">&quot;Selected coupler must be either &#39;NCap&#39; or &#39;CapNInterdigitalTee&#39;.&quot;</span>
+
+        <span class="n">cavity_df</span> <span class="o">=</span> <span class="n">filter_df_by_conditions</span><span class="p">(</span><span class="n">cavity_df</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="s2">&quot;NCap&quot;</span><span class="p">})</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">cavity_df</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;NCap&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All entries in the &#39;coupler_type&#39; column of the cavity_df must be &#39;NCap&#39;.&quot;</span><span class="p">)</span>
+       
+        <span class="c1"># update the kappa and cavity_frequency values </span>
+        <span class="n">cavity_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_cap_interdigital_tee_parameters</span><span class="p">(</span><span class="n">cavity_df</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">cavity_df</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.generate_qubit_half_wave_cavity_df">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.generate_qubit_half_wave_cavity_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_qubit_half_wave_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a DataFrame that combines the qubit and half-wave cavity data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parallelize (bool, optional): Flag indicating whether to parallelize the computation. Defaults to False.</span>
+<span class="sd">            num_cpu (int, optional): Number of CPUs to use for parallelization. Defaults to None.</span>
+<span class="sd">            save_data (bool, optional): Flag indicating whether to save the generated data. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The generated DataFrame.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            - This method generates a DataFrame by combining the qubit and half-wave cavity data.</span>
+<span class="sd">            - The qubit and cavity data are obtained from the `get_dataset` and `generate_updated_half_wave_cavity_df` methods, respectively.</span>
+<span class="sd">            - The generated DataFrame is optimized to reduce memory usage using various optimization techniques.</span>
+<span class="sd">            - If `save_data` is True, the generated DataFrames are saved in the &quot;data&quot; directory.</span>
+
+<span class="sd">        TODO:</span>
+<span class="sd">            - Speed up the generation process.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating half-wave-cavity DataFrame...&quot;</span><span class="p">)</span>
+        <span class="n">qubit_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span><span class="p">)</span>
+        <span class="n">cavity_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_updated_half_wave_cavity_df</span><span class="p">(</span><span class="n">parallelize</span><span class="o">=</span><span class="n">parallelize</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="n">num_cpu</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qubit_df</span> <span class="o">=</span> <span class="n">qubit_df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cavity_df</span> <span class="o">=</span> <span class="n">cavity_df</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating qubit-half-wave-cavity DataFrame...&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_qubit_cavity_df</span><span class="p">(</span><span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">claw_merger_terms</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="n">parallelize</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="n">num_cpu</span><span class="p">)</span>
+        
+        <span class="c1"># process the df to reduce the memory usage</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Optimizing the DataFrame...&quot;</span><span class="p">)</span>
+        <span class="n">opt_df</span> <span class="o">=</span> <span class="n">process_design_options</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">initial_mem</span> <span class="o">=</span> <span class="n">compute_memory_usage</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">opt_df</span> <span class="o">=</span> <span class="n">optimize_dataframe</span><span class="p">(</span><span class="n">opt_df</span><span class="p">)</span>
+        <span class="n">opt_df</span> <span class="o">=</span> <span class="n">delete_object_columns</span><span class="p">(</span><span class="n">opt_df</span><span class="p">)</span>
+        <span class="n">opt_df</span> <span class="o">=</span> <span class="n">delete_categorical_columns</span><span class="p">(</span><span class="n">opt_df</span><span class="p">)</span>
+        <span class="n">final_mem</span> <span class="o">=</span> <span class="n">compute_memory_usage</span><span class="p">(</span><span class="n">opt_df</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Memory usage reduced by </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">initial_mem</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">final_mem</span><span class="p">)</span><span class="o">/</span><span class="n">initial_mem</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">save_data</span><span class="p">:</span>
+
+            <span class="c1"># create a data directory if it does not exist using os.makedirs</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+                <span class="n">cavity_df</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s2">&quot;data/half-wave-cavity_df.parquet&quot;</span><span class="p">)</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s2">&quot;data/qubit_half-wave-cavity_df_uncompressed.parquet&quot;</span><span class="p">)</span>
+                <span class="n">opt_df</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s2">&quot;data/qubit_half-wave-cavity_df.parquet&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt_df</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_create_multi_component_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="p">,</span> <span class="n">num_cpu</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a DataFrame for a multi-component system.&quot;&quot;&quot;</span>
+        <span class="n">qubit_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span><span class="p">)</span>
+        <span class="n">cavity_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eigenmode&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qubit_df</span> <span class="o">=</span> <span class="n">qubit_df</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="o">==</span> <span class="s2">&quot;CLT&quot;</span><span class="p">:</span>
+            <span class="n">cavity_df</span> <span class="o">=</span> <span class="n">filter_df_by_conditions</span><span class="p">(</span><span class="n">cavity_df</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cavity_df</span> <span class="o">=</span> <span class="n">cavity_df</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="o">==</span> <span class="s2">&quot;NCap&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coupler_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;coupler&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cavity_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_parquet_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hwc_fname</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_parquet_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">merged_df_hwc_fname</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">df</span>
+                
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_qubit_cavity_df</span><span class="p">(</span><span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">claw_merger_terms</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="n">parallelize</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="n">num_cpu</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+
+    <span class="k">def</span> <span class="nf">_update_cap_interdigital_tee_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates parameters for CapNInterdigitalTee coupler.&quot;&quot;&quot;</span>
+        <span class="n">ncap_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;coupler&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;NCap&quot;</span><span class="p">)</span>
+        <span class="n">ncap_sim_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bottom_to_bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom_to_ground&#39;</span><span class="p">,</span> <span class="s1">&#39;ground_to_ground&#39;</span><span class="p">,</span> <span class="s1">&#39;top_to_bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;top_to_ground&#39;</span><span class="p">,</span> <span class="s1">&#39;top_to_top&#39;</span><span class="p">]</span>
+        
+        <span class="n">df</span> <span class="o">=</span> <span class="n">update_ncap_parameters</span><span class="p">(</span><span class="n">cavity_df</span><span class="p">,</span> <span class="n">ncap_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncap_merger_terms</span><span class="p">,</span> <span class="n">ncap_sim_cols</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+
 <div class="viewcode-block" id="SQuADDS_DB.create_qubit_cavity_df">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.create_qubit_cavity_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_qubit_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_qubit_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a merged DataFrame by merging the qubit and cavity DataFrames based on the specified merger terms.</span>
 
@@ -1414,6 +1663,8 @@ document.write(`
 <span class="sd">            qubit_df (pandas.DataFrame): The DataFrame containing qubit data.</span>
 <span class="sd">            cavity_df (pandas.DataFrame): The DataFrame containing cavity data.</span>
 <span class="sd">            merger_terms (list): A list of column names to be used for merging the DataFrames. Defaults to None.</span>
+<span class="sd">            parallelize (bool): Whether to use multiprocessing to speed up the merging. Defaults to False.</span>
+<span class="sd">            num_cpu (int): The number of CPU cores to use for multiprocessing. If not specified, the function will use the maximum number of available cores.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            pandas.DataFrame: The merged DataFrame.</span>
@@ -1422,17 +1673,23 @@ document.write(`
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">merger_term</span> <span class="ow">in</span> <span class="n">merger_terms</span><span class="p">:</span>
-            <span class="c1"># process the dfs to make them ready for merger</span>
-            <span class="n">qubit_df</span><span class="p">[</span><span class="n">merger_term</span><span class="p">]</span> <span class="o">=</span> <span class="n">qubit_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="n">merger_term</span><span class="p">])</span>
-            <span class="n">cavity_df</span><span class="p">[</span><span class="n">merger_term</span><span class="p">]</span> <span class="o">=</span> <span class="n">cavity_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="n">merger_term</span><span class="p">])</span>
+            <span class="n">qubit_df</span><span class="p">[</span><span class="n">merger_term</span><span class="p">]</span> <span class="o">=</span> <span class="n">qubit_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">merger_term</span><span class="p">))</span>
+            <span class="n">cavity_df</span><span class="p">[</span><span class="n">merger_term</span><span class="p">]</span> <span class="o">=</span> <span class="n">cavity_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">merger_term</span><span class="p">))</span>
 
-        <span class="c1"># Merging the data frames based on merger terms</span>
-        <span class="n">merged_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">merger_terms</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;_qubit&#39;</span><span class="p">,</span> <span class="s1">&#39;_cavity_claw&#39;</span><span class="p">))</span>
+        <span class="c1"># Add index column to qubit_df</span>
+        <span class="n">qubit_df</span> <span class="o">=</span> <span class="n">qubit_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;index_qc&#39;</span><span class="p">})</span>
 
-        <span class="c1"># Dropping the merger terms</span>
-        <span class="n">merged_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">merger_terms</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parallelize</span><span class="p">:</span>
+            <span class="n">n_cores</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span> <span class="k">if</span> <span class="n">num_cpu</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">num_cpu</span>
+            <span class="n">qubit_df_splits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">qubit_df</span><span class="p">,</span> <span class="n">n_cores</span><span class="p">)</span>
 
-        <span class="c1"># Combining the qubit and cavity design options into one</span>
+            <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">n_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+                <span class="n">merged_df_parts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">merge_dfs</span><span class="p">,</span> <span class="p">[(</span><span class="n">split</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="p">)</span> <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">qubit_df_splits</span><span class="p">]),</span> <span class="n">total</span><span class="o">=</span><span class="n">n_cores</span><span class="p">))</span>
+
+            <span class="n">merged_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">merged_df_parts</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">merged_df</span> <span class="o">=</span> <span class="n">merge_dfs</span><span class="p">(</span><span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="p">)</span>
+
         <span class="n">merged_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">create_unified_design_options</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">merged_df</span></div>
@@ -1450,7 +1707,8 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="SQuADDS_DB.show_selections">
@@ -1465,14 +1723,18 @@ document.write(`
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="c1">#TODO: handle dynamically</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected qubit: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected cavity: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected coupler: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected coupler to feedline: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected resonator type: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected system: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected component: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected component name: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected data type: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected system: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected coupler: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">)</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected coupler: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_coupler</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected resonator type: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span><span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="nf">_set_target_param_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
@@ -1550,6 +1812,41 @@ document.write(`
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.show_selected_system">[docs]</a>
     <span class="k">def</span> <span class="nf">show_selected_system</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Waiting on Andre&#39;s code&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.find_parquet_files">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.find_parquet_files">[docs]</a>
+    <span class="k">def</span> <span class="nf">find_parquet_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Searches for `parquet` files in the repository and returns their paths/filenames.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of paths/filenames of `parquet` files in the repository.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">existing_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_existing_files</span><span class="p">()</span>
+        <span class="n">parquet_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">existing_files</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.parquet&#39;</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">parquet_files</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.read_parquet_file">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.read_parquet_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_parquet_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes in the filename and returns the object to be read as a pandas dataframe.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            file_name (str): The name of the parquet file to read.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The dataframe read from the parquet file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://huggingface.co/datasets/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="si">}</span><span class="s2">/resolve/main/</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base_url</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>  <span class="c1"># Cleanup the downloaded file</span>
+        <span class="k">return</span> <span class="n">df</span></div>
 </div>
 
 </pre></div>
