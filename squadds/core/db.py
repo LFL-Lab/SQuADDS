@@ -391,6 +391,67 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
         print(tabulate(unique_contributors_info, headers="keys", tablefmt="fancy_grid"))
 
+    def get_measured_devices(self):
+        """
+        Retrieve all measured devices with their corresponding design codes, paper links, images, foundries, and fabrication recipes.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the name, design code, paper link, image, foundry, and fabrication recipe for each device.
+        """
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+
+        all_devices_info = []
+
+        for entry in zip(dataset["contrib_info"], dataset["design_code"], dataset["paper_link"], 
+                        dataset["image"], dataset["foundry"], dataset["fabrication_recipe"]):
+            contrib_info, design_code, paper_link, image, foundry, recipe = entry
+
+            device_info = {
+                "Name": contrib_info.get('name', 'N/A'),
+                "Design Code": design_code,
+                "Paper Link": paper_link,
+                "Image": image,
+                "Foundry": foundry,
+                "Fabrication Recipe": recipe
+            }
+            all_devices_info.append(device_info)
+
+        # Convert the list of dictionaries to a DataFrame
+        df = pd.DataFrame(all_devices_info)
+        
+        return df
+
+    def view_measured_devices(self):
+        """
+        View all measured devices with their corresponding design codes, paper links, images, foundries, and fabrication recipes.
+
+        This method retrieves and displays the relevant information for each device in the dataset in a well-formatted table.
+        """
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+
+        all_devices_info = []
+
+        for entry in zip(dataset["contrib_info"], dataset["design_code"], dataset["paper_link"], 
+                        dataset["image"], dataset["foundry"], dataset["fabrication_recipe"]):
+            contrib_info, design_code, paper_link, image, foundry, recipe = entry
+
+            device_info = {
+                "Name": contrib_info.get('name', 'N/A'),
+                "Design Code": design_code,
+                "Paper Link": paper_link,
+                "Image": image,
+                "Foundry": foundry,
+                "Fabrication Recipe": recipe
+            }
+            all_devices_info.append(device_info)
+
+        # Prepare the data for tabular display
+        headers = ["Name", "Design Code", "Paper Link", "Image", "Foundry", "Fabrication Recipe"]
+        rows = [[device_info[header] for header in headers] for device_info in all_devices_info]
+
+        # Print the table with tabulate
+        print(tabulate(rows, headers=headers, tablefmt="fancy_grid", stralign="left", numalign="left"))
+
     def view_contributors_of_config(self, config):
         """
         View the contributors of a specific configuration.
