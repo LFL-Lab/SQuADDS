@@ -918,7 +918,6 @@ document.write(`
         <span class="n">table</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">table</span><span class="p">)))</span>
 
         <span class="c1"># Print the table with headers</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Component&quot;</span><span class="p">,</span> <span class="s2">&quot;Component Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Data Available&quot;</span><span class="p">,</span> <span class="s2">&quot;Component Image&quot;</span><span class="p">],</span><span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Component&quot;</span><span class="p">,</span> <span class="s2">&quot;Component Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Data Available&quot;</span><span class="p">,</span> <span class="s2">&quot;Component Image&quot;</span><span class="p">],</span><span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">))</span></div>
 
 
@@ -1060,9 +1059,6 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">view_contributors_of_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
 
 
-
-
-    
 <div class="viewcode-block" id="SQuADDS_DB.view_simulation_results">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_simulation_results">[docs]</a>
     <span class="k">def</span> <span class="nf">view_simulation_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_name</span><span class="p">):</span>
@@ -1097,39 +1093,56 @@ document.write(`
 <span class="sd">            data_type (str): The type of data.</span>
 
 <span class="sd">        Returns: </span>
-<span class="sd">            str: the name of the experimentally validated reference device.</span>
-<span class="sd">        </span>
+<span class="sd">            str: the name of the experimentally validated reference device, or an error message if not found.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">component</span> <span class="ow">and</span> <span class="n">component_name</span> <span class="ow">and</span> <span class="n">data_type</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;Component, component_name, and data_type must all be provided.&quot;</span>
+
         <span class="n">config</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">component_name</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="s1">&#39;measured_device_database&#39;</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
-        <span class="n">configs_contrib_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contrib_info&quot;</span><span class="p">]</span>
-        <span class="n">simulation_info</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
-        <span class="n">design_codes</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;design_code&quot;</span><span class="p">]</span>
-        <span class="n">paper_links</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;paper_link&quot;</span><span class="p">]</span>
-        <span class="n">images</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
         
-        <span class="k">for</span> <span class="n">contrib_info</span><span class="p">,</span> <span class="n">sim_results</span><span class="p">,</span> <span class="n">design_code</span><span class="p">,</span> <span class="n">paper_link</span><span class="p">,</span> <span class="n">image</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">configs_contrib_info</span><span class="p">,</span> <span class="n">simulation_info</span><span class="p">,</span> <span class="n">design_codes</span><span class="p">,</span> <span class="n">paper_links</span><span class="p">,</span> <span class="n">images</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contrib_info&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;design_code&quot;</span><span class="p">],</span> 
+                        <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;paper_link&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;foundry&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;fabrication_recipe&quot;</span><span class="p">]):</span>
+            <span class="n">contrib_info</span><span class="p">,</span> <span class="n">sim_results</span><span class="p">,</span> <span class="n">design_code</span><span class="p">,</span> <span class="n">paper_link</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">foundry</span><span class="p">,</span> <span class="n">recipe</span> <span class="o">=</span> <span class="n">entry</span>
+            
             <span class="k">if</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">sim_results</span><span class="p">:</span>
-                <span class="c1"># Combine the information into one dictionary</span>
                 <span class="n">combined_info</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;Design Code&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">design_code</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
-                    <span class="s2">&quot;Paper Link&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">paper_link</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
-                    <span class="s2">&quot;Image&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="s2">&quot;Design Code&quot;</span><span class="p">:</span> <span class="n">design_code</span><span class="p">,</span>
+                    <span class="s2">&quot;Paper Link&quot;</span><span class="p">:</span> <span class="n">paper_link</span><span class="p">,</span>
+                    <span class="s2">&quot;Image&quot;</span><span class="p">:</span> <span class="n">image</span><span class="p">,</span>
+                    <span class="s2">&quot;Foundry&quot;</span><span class="p">:</span> <span class="n">foundry</span><span class="p">,</span>
+                    <span class="s2">&quot;Fabrication Recipe&quot;</span><span class="p">:</span> <span class="n">recipe</span>
                 <span class="p">}</span>
                 <span class="n">combined_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">contrib_info</span><span class="p">)</span>
                 
-                <span class="c1"># Pretty print the combined info as a table</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">combined_info</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">],</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;grid&quot;</span><span class="p">))</span>
                 <span class="k">return</span> <span class="n">contrib_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
-            
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="s2">&quot;The reference device could not be retrieved.&quot;</span>
+
+        <span class="k">return</span> <span class="s2">&quot;The reference device could not be retrieved.&quot;</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.get_recipe_of">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_recipe_of">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_recipe_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the foundry and fabrication recipe information for a specified device.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            device_name (str): The name of the device to retrieve information for.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A dictionary containing foundry and fabrication recipe information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="s1">&#39;measured_device_database&#39;</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
         
-        <span class="k">return</span> <span class="kc">None</span></div>
-
-    
-    
-
+        <span class="k">for</span> <span class="n">contrib_info</span><span class="p">,</span> <span class="n">foundry</span><span class="p">,</span> <span class="n">recipe</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contrib_info&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;foundry&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;fabrication_recipe&quot;</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">contrib_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">device_name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;Foundry&quot;</span><span class="p">:</span> <span class="n">foundry</span><span class="p">,</span>
+                    <span class="s2">&quot;Fabrication Recipe&quot;</span><span class="p">:</span> <span class="n">recipe</span>
+                <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;Error&quot;</span><span class="p">:</span> <span class="s2">&quot;Device not found in the dataset.&quot;</span><span class="p">}</span></div>
 
   
 <div class="viewcode-block" id="SQuADDS_DB.view_reference_devices">
