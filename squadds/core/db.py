@@ -301,7 +301,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
         # Print the table with headers
         print(tabulate(table, headers=["Component", "Component Name", "Data Available", "Component Image"],tablefmt="fancy_grid"))
-        print(tabulate(table, headers=["Component", "Component Name", "Data Available", "Component Image"],tablefmt="fancy_grid"))
 
     def get_dataset_info(self, component=None, component_name=None, data_type=None):
         """
@@ -429,9 +428,6 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         config = component + "-" + component_name + "-" + data_type
         self.view_contributors_of_config(config)
 
-
-
-    
     def view_simulation_results(self, device_name):
         """
         View the simulation results of a specific device specified with a device name.
@@ -461,39 +457,53 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             data_type (str): The type of data.
 
         Returns: 
-            str: the name of the experimentally validated reference device.
-        
+            str: the name of the experimentally validated reference device, or an error message if not found.
         """
+        if not (component and component_name and data_type):
+            return "Component, component_name, and data_type must all be provided."
+
         config = f"{component}-{component_name}-{data_type}"
         dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
-        configs_contrib_info = dataset["contrib_info"]
-        simulation_info = dataset["sim_results"]
-        design_codes = dataset["design_code"]
-        paper_links = dataset["paper_link"]
-        images = dataset["image"]
         
-        for contrib_info, sim_results, design_code, paper_link, image in zip(configs_contrib_info, simulation_info, design_codes, paper_links, images):
+        for entry in zip(dataset["contrib_info"], dataset["sim_results"], dataset["design_code"], 
+                        dataset["paper_link"], dataset["image"], dataset["foundry"], dataset["fabrication_recipe"]):
+            contrib_info, sim_results, design_code, paper_link, image, foundry, recipe = entry
+            
             if config in sim_results:
-                # Combine the information into one dictionary
                 combined_info = {
-                    "Design Code": json.dumps(design_code, indent=2),
-                    "Paper Link": json.dumps(paper_link, indent=2),
-                    "Image": json.dumps(image, indent=2)
+                    "Design Code": design_code,
+                    "Paper Link": paper_link,
+                    "Image": image,
+                    "Foundry": foundry,
+                    "Fabrication Recipe": recipe
                 }
                 combined_info.update(contrib_info)
                 
-                # Pretty print the combined info as a table
                 print(tabulate(combined_info.items(), headers=["Key", "Value"], tablefmt="grid"))
                 return contrib_info['name']
-            
-            else:
-                return "The reference device could not be retrieved."
+
+        return "The reference device could not be retrieved."
+
+    def get_recipe_of(self, device_name):
+        """
+        Retrieve the foundry and fabrication recipe information for a specified device.
         
-        return None
-    
-    
-
-
+        Args:
+            device_name (str): The name of the device to retrieve information for.
+        
+        Returns:
+            dict: A dictionary containing foundry and fabrication recipe information.
+        """
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+        
+        for contrib_info, foundry, recipe in zip(dataset["contrib_info"], dataset["foundry"], dataset["fabrication_recipe"]):
+            if contrib_info['name'] == device_name:
+                return {
+                    "Foundry": foundry,
+                    "Fabrication Recipe": recipe
+                }
+        
+        return {"Error": "Device not found in the dataset."}
   
     def view_reference_devices(self):
         """
