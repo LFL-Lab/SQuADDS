@@ -1016,6 +1016,73 @@ document.write(`
         <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">unique_contributors_info</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">))</span></div>
 
 
+<div class="viewcode-block" id="SQuADDS_DB.get_measured_devices">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_measured_devices">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_measured_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve all measured devices with their corresponding design codes, paper links, images, foundries, and fabrication recipes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: A DataFrame containing the name, design code, paper link, image, foundry, and fabrication recipe for each device.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="s1">&#39;measured_device_database&#39;</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+
+        <span class="n">all_devices_info</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contrib_info&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;design_code&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;paper_link&quot;</span><span class="p">],</span> 
+                        <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;foundry&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;fabrication_recipe&quot;</span><span class="p">]):</span>
+            <span class="n">contrib_info</span><span class="p">,</span> <span class="n">design_code</span><span class="p">,</span> <span class="n">paper_link</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">foundry</span><span class="p">,</span> <span class="n">recipe</span> <span class="o">=</span> <span class="n">entry</span>
+
+            <span class="n">device_info</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Name&quot;</span><span class="p">:</span> <span class="n">contrib_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;N/A&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;Design Code&quot;</span><span class="p">:</span> <span class="n">design_code</span><span class="p">,</span>
+                <span class="s2">&quot;Paper Link&quot;</span><span class="p">:</span> <span class="n">paper_link</span><span class="p">,</span>
+                <span class="s2">&quot;Image&quot;</span><span class="p">:</span> <span class="n">image</span><span class="p">,</span>
+                <span class="s2">&quot;Foundry&quot;</span><span class="p">:</span> <span class="n">foundry</span><span class="p">,</span>
+                <span class="s2">&quot;Fabrication Recipe&quot;</span><span class="p">:</span> <span class="n">recipe</span>
+            <span class="p">}</span>
+            <span class="n">all_devices_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">device_info</span><span class="p">)</span>
+
+        <span class="c1"># Convert the list of dictionaries to a DataFrame</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">all_devices_info</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.view_measured_devices">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_measured_devices">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_measured_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View all measured devices with their corresponding design codes, paper links, images, foundries, and fabrication recipes.</span>
+
+<span class="sd">        This method retrieves and displays the relevant information for each device in the dataset in a well-formatted table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_name</span><span class="p">,</span> <span class="s1">&#39;measured_device_database&#39;</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+
+        <span class="n">all_devices_info</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contrib_info&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;design_code&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;paper_link&quot;</span><span class="p">],</span> 
+                        <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;foundry&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;fabrication_recipe&quot;</span><span class="p">]):</span>
+            <span class="n">contrib_info</span><span class="p">,</span> <span class="n">design_code</span><span class="p">,</span> <span class="n">paper_link</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">foundry</span><span class="p">,</span> <span class="n">recipe</span> <span class="o">=</span> <span class="n">entry</span>
+
+            <span class="n">device_info</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Name&quot;</span><span class="p">:</span> <span class="n">contrib_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;N/A&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;Design Code&quot;</span><span class="p">:</span> <span class="n">design_code</span><span class="p">,</span>
+                <span class="s2">&quot;Paper Link&quot;</span><span class="p">:</span> <span class="n">paper_link</span><span class="p">,</span>
+                <span class="s2">&quot;Image&quot;</span><span class="p">:</span> <span class="n">image</span><span class="p">,</span>
+                <span class="s2">&quot;Foundry&quot;</span><span class="p">:</span> <span class="n">foundry</span><span class="p">,</span>
+                <span class="s2">&quot;Fabrication Recipe&quot;</span><span class="p">:</span> <span class="n">recipe</span>
+            <span class="p">}</span>
+            <span class="n">all_devices_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">device_info</span><span class="p">)</span>
+
+        <span class="c1"># Prepare the data for tabular display</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Design Code&quot;</span><span class="p">,</span> <span class="s2">&quot;Paper Link&quot;</span><span class="p">,</span> <span class="s2">&quot;Image&quot;</span><span class="p">,</span> <span class="s2">&quot;Foundry&quot;</span><span class="p">,</span> <span class="s2">&quot;Fabrication Recipe&quot;</span><span class="p">]</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[[</span><span class="n">device_info</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">]</span> <span class="k">for</span> <span class="n">device_info</span> <span class="ow">in</span> <span class="n">all_devices_info</span><span class="p">]</span>
+
+        <span class="c1"># Print the table with tabulate</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;fancy_grid&quot;</span><span class="p">,</span> <span class="n">stralign</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">numalign</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="SQuADDS_DB.view_contributors_of_config">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_contributors_of_config">[docs]</a>
     <span class="k">def</span> <span class="nf">view_contributors_of_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
