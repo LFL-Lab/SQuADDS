@@ -5,7 +5,7 @@ Getting Started with SQuADDS
    :alt: Setup
 
 Installation
-------------
+============
 
 SQuADDS can be installed using pip in an environment with qiskit-metal pre-installed.
 
@@ -82,22 +82,20 @@ You can use the GitHub version of SQuADDS as well by changing Step 4 to
    pip install -r requirements.txt
    pip install -e .
 
-FAQ's
------
+FAQs
+====
 
---------------------
 Installation Issues
---------------------
+-------------------
 
 **Q: Getting** ``ModuleNotFoundError: No module named 'squadds'`` **after running** `pip install SQuADDS` **in Jupyter Notebook. How can I fix this?**
 
 **A:** You may need to restart the kernel after installing `SQuADDS`. To do this, go to the `Kernel` menu in Jupyter Notebook and select `Restart`.
 
------------------------
 Accessing the Database
 -----------------------
 
-**Q: I am getting the error** ``Generating train split: 0 examples [00:00, ? examples/s] An error occurred while loading the dataset: An error occurred while generating the dataset`` **for various** ``SQuADDS_DB()`` **methods (e.g.** ``SQuADDS_DB().create_system_df()``**). 
+**Q: I am getting the error** ``Generating train split: 0 examples [00:00, ? examples/s] An error occurred while loading the dataset: An error occurred while generating the dataset`` **for various** ``SQuADDS_DB()`` **methods (e.g.** ``SQuADDS_DB().create_system_df()``**).**
  
 **A:** This is an error we have seen only happening on Windows systems for ``datasets`` library version ``2.20.0``. Downgrading to any versions between ``2.17.0`` and ``2.19.2`` should fix the issue. To downgrade, run the following command:
 
@@ -114,7 +112,6 @@ Accessing the Database
 
 **A:** If you encounter errors upon instantiating the `SQuADDS_DB` class, chances are there is an issue with caching. To fix this, please delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
 
--------------
 ``.env`` File 
 -------------
 
@@ -177,4 +174,3 @@ To determine the installation root of ``SQuADDS``, and subsequently place or fin
    else:
       print(".env file not found at the expected location.")
       print(f"To function properly, create a .env file at: {squadds_root}")
-
