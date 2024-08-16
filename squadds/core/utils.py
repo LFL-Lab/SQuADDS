@@ -1,6 +1,7 @@
 import getpass
 import os
 import platform
+import re
 import shutil
 import urllib.parse
 import webbrowser
@@ -8,8 +9,50 @@ import webbrowser
 import numpy as np
 import pandas as pd
 from huggingface_hub import HfApi, HfFolder
+from tabulate import tabulate
 
 from squadds.core.globals import ENV_FILE_PATH
+
+
+def view_contributors_from_rst(rst_file_path):
+    """
+    Extract and print relevant contributor information from the index.rst file.
+
+    Args:
+        rst_file_path (str): The path to the `index.rst` file.
+
+    Returns:
+        None
+    """
+
+    contributors_data = []
+
+    with open(rst_file_path, 'r') as file:
+        content = file.read()
+
+        # Find the Contributors section
+        contributors_match = re.search(r'Contributors\s+-{3,}\s+(.*?)(\n\n|$)', content, re.S)
+        if contributors_match:
+            contributors_section = contributors_match.group(1).strip()
+
+            # Extract individual contributor entries
+            contributor_entries = contributors_section.split("\n| ")
+
+            for entry in contributor_entries:
+                if entry.strip():
+                    # Extract name, institution, and contribution
+                    match = re.match(r'\*\*(.*?)\*\* \((.*?)\) - (.*)', entry.strip())
+                    if match:
+                        name = match.group(1)
+                        institution = match.group(2)
+                        contribution = match.group(3)
+                        contributors_data.append([name, institution, contribution])
+
+    if contributors_data:
+        headers = ["Name", "Institution", "Contribution"]
+        print(tabulate(contributors_data, headers=headers, tablefmt="grid"))
+    else:
+        print("No contributors found in the RST file.")
 
 
 def save_intermediate_df(df, filename, file_idx):

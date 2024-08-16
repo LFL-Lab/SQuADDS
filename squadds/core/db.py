@@ -300,7 +300,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         table = list(map(list, zip(*table)))
 
         # Print the table with headers
-        print(tabulate(table, headers=["Component", "Component Name", "Data Available", "Component Image"],tablefmt="fancy_grid"))
+        print(tabulate(table, headers=["Component", "Component Name", "Data Available", "Component Image"],tablefmt="grid"))
 
     def get_dataset_info(self, component=None, component_name=None, data_type=None):
         """
@@ -361,35 +361,51 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         
     def view_all_contributors(self):
         """
-        View all unique contributors and their relevant information.
+        View all unique contributors and their relevant information from simulation configurations.
 
-        This method iterates through the configurations and extracts the relevant information
+        This method iterates through the simulation configurations and extracts the relevant information
         of each contributor. It checks if the combination of uploader, PI, group, and institution
         is already in the list of unique contributors. If not, it adds the relevant information
-        to the list. Finally, it prints the list of unique contributors in a tabular format.
+        to the list. Finally, it prints the list of unique contributors in a tabular format with a banner.
+        """
+        view_contributors_from_rst('../docs/source/developer/index.rst')
+
+    def view_all_simulation_contributors(self):
+        """
+        View all unique simulation contributors and their relevant information.
         """
         # Placeholder for the full contributor info
         unique_contributors_info = []
 
+        banner = "=" * 80
+        title = "SIMULATION DATA CONTRIBUTORS"
+        print(f"\n{banner}\n{title.center(80)}\n{banner}\n")
+
         for config in self.configs:
             dataset = load_dataset(self.repo_name, config)["train"]
             configs_contrib_info = dataset["contributor"]
-            
+
             for contrib_info in configs_contrib_info:
                 # Extracting the relevant information
-                relevant_info = {key: contrib_info[key] for key in ['uploader', 'PI', 'group', 'institution']}
-                relevant_info['config'] = config  # Add the config to the relevant info
+                relevant_info = {
+                    "Uploader": contrib_info.get('uploader', 'N/A'),
+                    "PI": contrib_info.get('PI', 'N/A'),
+                    "Group": contrib_info.get('group', 'N/A'),
+                    "Institution": contrib_info.get('institution', 'N/A'),
+                    "Config": config  # Add the config to the relevant info
+                }
 
                 # Check if this combination of info is already in the list
-                if not any(existing_info['config'] == config and
-                            existing_info['uploader'] == relevant_info['uploader'] and
-                            existing_info['PI'] == relevant_info['PI'] and
-                            existing_info['group'] == relevant_info['group'] and
-                            existing_info['institution'] == relevant_info['institution']
-                            for existing_info in unique_contributors_info):
+                if not any(existing_info['Config'] == config and
+                        existing_info['Uploader'] == relevant_info['Uploader'] and
+                        existing_info['PI'] == relevant_info['PI'] and
+                        existing_info['Group'] == relevant_info['Group'] and
+                        existing_info['Institution'] == relevant_info['Institution']
+                        for existing_info in unique_contributors_info):
                     unique_contributors_info.append(relevant_info)
 
-        print(tabulate(unique_contributors_info, headers="keys", tablefmt="fancy_grid"))
+        print(tabulate(unique_contributors_info, headers="keys", tablefmt="grid"))
+        print(f"\n{banner}\n")  # End with a banner
 
     def get_measured_devices(self):
         """
@@ -450,7 +466,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         rows = [[device_info[header] for header in headers] for device_info in all_devices_info]
 
         # Print the table with tabulate
-        print(tabulate(rows, headers=headers, tablefmt="fancy_grid", stralign="left", numalign="left"))
+        print(tabulate(rows, headers=headers, tablefmt="grid", stralign="left", numalign="left"))
 
     def view_contributors_of_config(self, config):
         """
@@ -472,9 +488,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             if relevant_info not in unique_contributors_info:
                 unique_contributors_info.append(relevant_info)
         
-        print(tabulate(unique_contributors_info, headers='keys', tablefmt="fancy_grid"))
+        print(tabulate(unique_contributors_info, headers='keys', tablefmt="grid"))
 
-    def view_contributors_of(self, component=None, component_name=None, data_type=None):
+    def view_contributors_of(self, component=None, component_name=None, data_type=None, measured_device_name=None):
         """
         View contributors of a specific component, component name, and data type.
 
@@ -482,12 +498,26 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             component (str): The component of interest.
             component_name (str): The name of the component.
             data_type (str): The type of data.
+            measured_device_name (str): The name of the measured device.
 
         Returns:
             None
         """
         config = component + "-" + component_name + "-" + data_type
-        self.view_contributors_of_config(config)
+        try:
+            print("="*80)
+            print(f"\t\t\tMeasured Device Contributor(s):")
+            print("="*80)
+            self.view_device_contributors_of(component, component_name, data_type)
+        except:
+            pass
+        try:
+            print("="*80)
+            print(f"\t\t\tSimulation Data Contributor(s):")
+            print("="*80)
+            self.view_contributors_of_config(config)
+        except:
+            pass
 
     def view_simulation_results(self, device_name):
         """
@@ -508,7 +538,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                     return sim_results
         return {}
 
-    def view_reference_device_of(self, component=None, component_name=None, data_type=None):
+    def get_device_contributors_of(self, component=None, component_name=None, data_type=None):
         """
         View the reference/source experimental device that was used to validate a specific simulation configuration.  
         
@@ -518,7 +548,79 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             data_type (str): The type of data.
 
         Returns: 
-            str: the name of the experimentally validated reference device, or an error message if not found.
+            dict: The relevant contributor information.
+        """
+        if not (component and component_name and data_type):
+            return "Component, component_name, and data_type must all be provided."
+
+        config = f"{component}-{component_name}-{data_type}"
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+        
+        for entry in zip(dataset["contrib_info"], dataset["sim_results"]):
+            contrib_info, sim_results = entry
+            
+            if config in sim_results:
+                relevant_info = {
+                    "Foundry": contrib_info.get("foundry", "N/A"),
+                    "PI": contrib_info.get("PI", "N/A"),
+                    "Group": contrib_info.get("group", "N/A"),
+                    "Institution": contrib_info.get("institution", "N/A"),
+                    "Measured By": ", ".join(contrib_info.get("measured_by", [])),
+                    "Reference Device Name": contrib_info.get("name", "N/A"),
+                    "Uploader": contrib_info.get("uploader", "N/A")
+                }
+                
+                print(tabulate(relevant_info.items(), tablefmt="grid"))
+                return relevant_info
+
+        return None
+
+    def view_device_contributors_of(self, component=None, component_name=None, data_type=None):
+        """
+        View the reference/source experimental device that was used to validate a specific simulation configuration.  
+        
+        Args:
+            component (str): The component of interest.
+            component_name (str): The name of the component.
+            data_type (str): The type of data.
+
+        Returns: 
+            str: The name of the experimentally validated reference device, or an error message if not found.
+        """
+        if not (component and component_name and data_type):
+            return "Component, component_name, and data_type must all be provided."
+
+        config = f"{component}-{component_name}-{data_type}"
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+        
+        for entry in zip(dataset["contrib_info"], dataset["sim_results"]):
+            contrib_info, sim_results = entry
+            
+            if config in sim_results:
+                relevant_info = {
+                    "Foundry": contrib_info.get("foundry", "N/A"),
+                    "PI": contrib_info.get("PI", "N/A"),
+                    "Group": contrib_info.get("group", "N/A"),
+                    "Institution": contrib_info.get("institution", "N/A"),
+                    "Measured By": ", ".join(contrib_info.get("measured_by", [])),
+                    "Reference Device Name": contrib_info.get("name", "N/A"),
+                    "Uploader": contrib_info.get("uploader", "N/A")
+                }
+                
+                print(tabulate(relevant_info.items(), tablefmt="grid"))
+
+        return "The reference device could not be retrieved."
+
+
+    def view_reference_device_of(self, component=None, component_name=None, data_type=None):
+        """
+        View the reference/source experimental device that was used to validate a specific simulation configuration.  
+        
+        Args:
+            component (str): The component of interest.
+            component_name (str): The name of the component.
+            data_type (str): The type of data.
+
         """
         if not (component and component_name and data_type):
             return "Component, component_name, and data_type must all be provided."
@@ -540,12 +642,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                 }
                 combined_info.update(contrib_info)
                 
-                print(tabulate(combined_info.items(), headers=["Key", "Value"], tablefmt="grid"))
-                return contrib_info['name']
+                print(tabulate(combined_info.items(), tablefmt="grid"))
 
-        return "The reference device could not be retrieved."
 
-    def get_recipe_of(self, device_name):
+    def view_recipe_of(self, device_name):
         """
         Retrieve the foundry and fabrication recipe information for a specified device.
         
@@ -557,14 +657,18 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
         
-        for contrib_info, foundry, recipe in zip(dataset["contrib_info"], dataset["foundry"], dataset["fabrication_recipe"]):
+        for contrib_info, foundry, recipe, github_url in zip(dataset["contrib_info"], dataset["foundry"], dataset["fabrication_recipe"], dataset["design_code"],):
             if contrib_info['name'] == device_name:
-                return {
-                    "Foundry": foundry,
-                    "Fabrication Recipe": recipe
-                }
+                # append tree/main/Fabrication to the github_url
+                github_url = f"{github_url}/tree/main/Fabrication"
+                # Prepare the data for tabulation
+                data = [["Foundry", foundry], ["Fabublox Link", recipe], ["Fabrication Recipe Links", github_url]]
+                
+                # Print the data in a tabulated format
+                print(tabulate(data, tablefmt="grid"))
+                return
         
-        return {"Error": "Device not found in the dataset."}
+        print("Error: Device not found in the dataset.")
   
     def view_reference_devices(self):
         """
@@ -590,7 +694,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             if relevant_info not in unique_contributors_info:
                 unique_contributors_info.append(relevant_info)
 
-        print(tabulate(unique_contributors_info, headers='keys', tablefmt="fancy_grid"))
+        print(tabulate(unique_contributors_info, headers='keys', tablefmt="grid"))
 
 
     def select_components(self, component_dict=None):

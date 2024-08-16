@@ -113,6 +113,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Contribution:
 
+- Use local llms/free secure LLM to create/update the measured_device dataset using the github repo
 - Use HuggingFace Hub API for handling contributions to the database in a more streamlined/automated way (e.g. create clone, branch, PR, etc)
 - Implement and Deploy an Acceptance Server for handling contributions to the database (i.e. calculates simulation and measured value discrepancies, automatically simulates some representative data points for reliability, notifies maintainers for approval, etc) [**Not Needed in the immediate future at all**]
 - Automated Integration of CAD files along with their measured Hamiltonian parameters [**Not Needed in the immediate future at all**]
