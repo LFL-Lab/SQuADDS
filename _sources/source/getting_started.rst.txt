@@ -82,9 +82,8 @@ You can use the GitHub version of SQuADDS as well by changing Step 4 to
    pip install -r requirements.txt
    pip install -e .
 
-********************************
 FAQ's
-********************************
+-----
 
 --------------------
 Installation Issues
