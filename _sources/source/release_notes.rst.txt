@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.3.1 (2024-08-16)
+--------------------------
+
+* **Alpha Version 0.3.1**
+
+**New Features**
+
+- Added added methods for showing better contributions and measured device information (includes fabublox recipes)
+- Updated tutorials (1,3 and 3p5)
+
+---
+
 Version 0.3.0 (2024-08-12)
 --------------------------
 
