@@ -1,3 +1,4 @@
+import os
 import re
 
 import requests
@@ -123,5 +124,5 @@ def update_readme(readme_path, rst_file_path):
 # Example usage:
 # Assuming your README.md is located in the root of your project and the index.rst file is in the `docs` directory
 readme_path = "README.md"
-rst_file_path = "../docs/source/developer/index.rst"
+rst_file_path = os.path.join(os.getcwd(), 'docs/source/developer/index.rst')
 update_readme(readme_path, rst_file_path)
