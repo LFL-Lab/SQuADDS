@@ -136,7 +136,6 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 ## Feature Requests:
 
 - add/show pictures of QComponents in `SQuADDS_DB`
-- script to autoupdate a contributor thank-you list on both the github repo, docsite, and HuggingFace dataset
 - letting users add methods with computation and append to `merged_df` for search in `Analyzer` module
 - allowing users to pass on a circuit from SQCircuits and SQuADDS to provide them a first guess physical layout in Qiskit Metal (helpful resources: [sqcircuits](https://github.com/stanfordLINQS/SQcircuit/), [circuit_interpret_1](https://github.com/mahmut-aksakalli/circuit_recognizer), [circuit_interpret_2](https://github.com/aaanthonyyy/CircuitNet))
 - incorporate [SCILLA](https://github.com/aspuru-guzik-group/scilla?tab=readme-ov-file) and/or its applications?

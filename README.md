@@ -21,6 +21,8 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 - [License](#license)
 - [FAQs](#faqs)
 - [Contact](#contact)
+- [Contributors](#contributors)
+- [Developers](#developers)
 
 ---
 
@@ -95,4 +97,6 @@ Check out our [FAQs](https://lfl-lab.github.io/SQuADDS/source/getting_started.ht
 
 For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc.edu).
 
----
+## Contributors
+
+## Developers
