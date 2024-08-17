@@ -1,8 +1,10 @@
-from abc import ABC, abstractmethod
-import pandas as pd
-import numpy as np
-from numpy import linalg as LA
 import logging
+from abc import ABC, abstractmethod
+
+import numpy as np
+import pandas as pd
+from joblib import Parallel, delayed
+from numpy import linalg as LA
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,6 +23,31 @@ class MetricStrategy(ABC):
             float: Calculated distance.
         """
         raise NotImplementedError("This method should be overridden by subclass")
+
+    def calculate_in_parallel(self, target_params: dict, df: pd.DataFrame, num_jobs: int = 4) -> pd.Series:
+        """Calculate distances in parallel.
+
+        Args:
+            target_params (dict): Dictionary of target parameters.
+            df (pd.DataFrame): The DataFrame containing rows to calculate distances for.
+            num_jobs (int): Number of jobs for parallel processing.
+
+        Returns:
+            pd.Series: Series of calculated distances.
+        """
+        chunk_size = int(np.ceil(len(df) / num_jobs))
+        chunks = [df.iloc[i:i + chunk_size] for i in range(0, len(df), chunk_size)]
+
+        distances = Parallel(n_jobs=num_jobs)(
+            delayed(self._calculate_chunk)(target_params, chunk) for chunk in chunks
+        )
+
+        return pd.concat(distances)
+
+    def _calculate_chunk(self, target_params: dict, chunk: pd.DataFrame) -> pd.Series:
+        """Helper method to calculate distances for a chunk of DataFrame rows."""
+        return chunk.apply(lambda row: self.calculate(target_params, row), axis=1)
+
 
 class EuclideanMetric(MetricStrategy):
     """Implements the specific Euclidean metric strategy as per your definition."""

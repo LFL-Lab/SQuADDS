@@ -1,3 +1,4 @@
+import warnings
 from collections import OrderedDict
 
 import numpy as np
@@ -63,6 +64,11 @@ class QubitCavity(QComponent):
         self.make_qubit()
         self.make_cavity()
         self.make_pins()
+        warnings.warn(
+            "There may be \"kinks\" in the CPW. This is due to the ``asymmetry`` parameter in the CPW options. To remove the kinks, change the ``asymmetry`` parameter until the CPW is smooth.\nAlternatively, you may consider playing with the ``start_jogged_extension`` options",
+            ResourceWarning
+        )
+        # print("There may be \"kinks\" in the CPW. This is due to the ``asymmetry`` parameter in the CPW options. To remove the kinks, change the ``asymmetry`` parameter until the CPW is smooth.\nAlternatively, you may consider playing with the ``start_jogged_extension`` options")
         
     def make_qubit(self):
         """
@@ -103,7 +109,8 @@ class QubitCavity(QComponent):
             from qiskit_metal.qlibrary.couplers.coupled_line_tee import \
                 CoupledLineTee
             self.coupler = CoupledLineTee(self.design, "{}_CLT_coupler".format(self.name), options=temp_opts)
-        elif(p.cavity_claw_options['coupler_type'].lower() == 'capn' or p.cavity_claw_options['coupler_type'].lower() == 'ncap'):
+        elif(p.cavity_claw_options['coupler_type'].lower() == 'capn' or p.cavity_claw_options['coupler_type'].lower() == 'ncap' or p.cavity_claw_options['coupler_type'].lower() == 'capninterdigitaltee'):
+
             from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import \
                 CapNInterdigitalTee
             self.coupler = CapNInterdigitalTee(self.design, '{}_capn_coupler'.format(self.name), options=temp_opts)
@@ -248,6 +255,7 @@ class QubitCavity(QComponent):
         gui.rebuild()
         gui.autoscale()
         gui.screenshot()
+
 
     def to_gds(self, filename, include_wirebond_pads=False):
         if include_wirebond_pads:

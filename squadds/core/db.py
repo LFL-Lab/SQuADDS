@@ -1,12 +1,21 @@
+"""
+!TODO: add FULL support for half-wave cavity
+"""
+import json
+import os
 import pprint
 import sys
 import warnings
 
 import pandas as pd
+import requests
 from datasets import get_dataset_config_names, load_dataset
+from huggingface_hub import login
 from tabulate import tabulate
+from tqdm import tqdm
 
 from squadds.core.design_patterns import SingletonMeta
+from squadds.core.processing import *
 from squadds.core.utils import *
 
 #* HANDLE WARNING MESSAGES
@@ -51,10 +60,12 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             selected_qubit (str): The selected qubit.
             selected_cavity (str): The selected cavity.
             selected_coupler (str): The selected coupler.
+            selected_resonator_type (str): The selected resonator type.
             selected_system (str): The selected system.
             selected_df (str): The selected dataframe.
             target_param_keys (str): The target parameter keys.
             units (str): The units.
+            _internal_call (bool): Flag to track internal calls.
         """
         self.repo_name = "SQuADDS/SQuADDS_DB"
         self.configs = self.supported_config_names()
@@ -65,12 +76,70 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.selected_qubit = None
         self.selected_cavity = None
         self.selected_coupler = None
+        self.selected_resonator_type = None
         self.selected_system = None
         self.selected_df = None
+        self.qubit_df = None
+        self.cavity_df = None
+        self.coupler_df = None
         self.target_param_keys = None
         self.units = None
         self.measured_device_database = None
+        self._internal_call = False  # Flag to track internal calls
+        self.hwc_fname = "half-wave-cavity_df.parquet"
+        self.merged_df_hwc_fname = "qubit_half-wave-cavity_df.parquet"
+        #self.merger_terms = ['claw_width', 'claw_length', 'claw_gap']
+        self.claw_merger_terms = ['claw_length'] # 07/2024 -> claw_length is the only parameter that is common between qubit and cavity
+        self.ncap_merger_terms = ['prime_width', 'prime_gap', 'second_width', 'second_gap']
 
+    def check_login(self):
+        """
+        Checks if the user is logged in to Hugging Face.
+        """
+        token = HfFolder.get_token()
+        if not token:
+            print("You are not logged in. Please login to Hugging Face.")
+            login()  # This will prompt the user to login
+
+    def get_existing_files(self):
+        """
+        Retrieves the list of existing files in the repository.
+        
+        Returns:
+            list: A list of existing file names in the repository.
+        """
+        api = HfApi()
+        repo_info = api.dataset_info(repo_id=self.repo_name)
+        existing_files = [file.rfilename for file in repo_info.siblings]
+        return existing_files
+
+    def upload_dataset(self, file_paths, repo_file_names, overwrite=False):
+        """
+        Uploads a dataset to the repository.
+        
+        Args:
+            file_paths (list): A list of file paths to upload.
+            repo_file_names (list): A list of file names to use in the repository.
+            overwrite (bool): Whether to overwrite an existing dataset. Defaults to False. 
+        """
+        self.check_login()
+        api = HfApi()
+        existing_files = self.get_existing_files()
+
+        for file_path, repo_file_name in zip(file_paths, repo_file_names):
+            if repo_file_name in existing_files and not overwrite:
+                print(f"File {repo_file_name} already exists in the repository. Skipping upload.")
+                continue
+            try:
+                api.upload_file(
+                    path_or_fileobj=file_path,
+                    path_in_repo=repo_file_name,
+                    repo_id=self.repo_name,
+                    repo_type="dataset",
+                )
+                print(f"Uploaded {repo_file_name} to {self.repo_name}.")
+            except Exception as e:
+                print(f"Failed to upload {repo_file_name}: {e}")
 
     def supported_components(self):
         """
@@ -81,6 +150,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         components = []
         for config in self.configs:
+            try:
+                components.append(config.split("-")[0])
+            except:
+                pass
             try:
                 components.append(config.split("-")[0])
             except:
@@ -100,6 +173,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                 component_names.append(config.split("-")[1])
             except:
                 pass
+            try:
+                component_names.append(config.split("-")[1])
+            except:
+                pass
         return component_names
     
     def supported_data_types(self):
@@ -111,6 +188,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         data_types = []
         for config in self.configs:
+            try:
+                data_types.append(config.split("-")[2])
+            except:
+                pass
             try:
                 data_types.append(config.split("-")[2])
             except:
@@ -127,6 +208,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         delete_HF_cache()
         configs = get_dataset_config_names(self.repo_name, download_mode='force_redownload')
+        # if there are not two "-" in the config name, remove it (since it does conform to the simulation naming convention)
+        configs = [config for config in configs if config.count('-') == 2]
         # if there are not two "-" in the config name, remove it (since it does conform to the simulation naming convention)
         configs = [config for config in configs if config.count('-') == 2]
         return configs
@@ -205,12 +288,19 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         for url in component_urls:
             component_images.append(url)
             table = [components, component_names, data_types, component_images]
+        component_urls = [f"https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/{name}.png" for name in component_names]
+        
+        component_images = []
+        
+        for url in component_urls:
+            component_images.append(url)
+            table = [components, component_names, data_types, component_images]
 
         # Transpose the table (convert columns to rows)
         table = list(map(list, zip(*table)))
 
         # Print the table with headers
-        print(tabulate(table, headers=["Component", "Component Name", "Data Available", "Component Image"],tablefmt="fancy_grid"))
+        print(tabulate(table, headers=["Component", "Component Name", "Data Available", "Component Image"],tablefmt="grid"))
 
     def get_dataset_info(self, component=None, component_name=None, data_type=None):
         """
@@ -271,35 +361,112 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         
     def view_all_contributors(self):
         """
-        View all unique contributors and their relevant information.
+        View all unique contributors and their relevant information from simulation configurations.
 
-        This method iterates through the configurations and extracts the relevant information
+        This method iterates through the simulation configurations and extracts the relevant information
         of each contributor. It checks if the combination of uploader, PI, group, and institution
         is already in the list of unique contributors. If not, it adds the relevant information
-        to the list. Finally, it prints the list of unique contributors in a tabular format.
+        to the list. Finally, it prints the list of unique contributors in a tabular format with a banner.
+        """
+        view_contributors_from_rst('../docs/source/developer/index.rst')
+
+    def view_all_simulation_contributors(self):
+        """
+        View all unique simulation contributors and their relevant information.
         """
         # Placeholder for the full contributor info
         unique_contributors_info = []
 
+        banner = "=" * 80
+        title = "SIMULATION DATA CONTRIBUTORS"
+        print(f"\n{banner}\n{title.center(80)}\n{banner}\n")
+
         for config in self.configs:
             dataset = load_dataset(self.repo_name, config)["train"]
             configs_contrib_info = dataset["contributor"]
-            
+
             for contrib_info in configs_contrib_info:
                 # Extracting the relevant information
-                relevant_info = {key: contrib_info[key] for key in ['uploader', 'PI', 'group', 'institution']}
-                relevant_info['config'] = config  # Add the config to the relevant info
+                relevant_info = {
+                    "Uploader": contrib_info.get('uploader', 'N/A'),
+                    "PI": contrib_info.get('PI', 'N/A'),
+                    "Group": contrib_info.get('group', 'N/A'),
+                    "Institution": contrib_info.get('institution', 'N/A'),
+                    "Config": config  # Add the config to the relevant info
+                }
 
                 # Check if this combination of info is already in the list
-                if not any(existing_info['config'] == config and
-                            existing_info['uploader'] == relevant_info['uploader'] and
-                            existing_info['PI'] == relevant_info['PI'] and
-                            existing_info['group'] == relevant_info['group'] and
-                            existing_info['institution'] == relevant_info['institution']
-                            for existing_info in unique_contributors_info):
+                if not any(existing_info['Config'] == config and
+                        existing_info['Uploader'] == relevant_info['Uploader'] and
+                        existing_info['PI'] == relevant_info['PI'] and
+                        existing_info['Group'] == relevant_info['Group'] and
+                        existing_info['Institution'] == relevant_info['Institution']
+                        for existing_info in unique_contributors_info):
                     unique_contributors_info.append(relevant_info)
 
-        print(tabulate(unique_contributors_info, headers="keys", tablefmt="fancy_grid"))
+        print(tabulate(unique_contributors_info, headers="keys", tablefmt="grid"))
+        print(f"\n{banner}\n")  # End with a banner
+
+    def get_measured_devices(self):
+        """
+        Retrieve all measured devices with their corresponding design codes, paper links, images, foundries, and fabrication recipes.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the name, design code, paper link, image, foundry, and fabrication recipe for each device.
+        """
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+
+        all_devices_info = []
+
+        for entry in zip(dataset["contrib_info"], dataset["design_code"], dataset["paper_link"], 
+                        dataset["image"], dataset["foundry"], dataset["fabrication_recipe"]):
+            contrib_info, design_code, paper_link, image, foundry, recipe = entry
+
+            device_info = {
+                "Name": contrib_info.get('name', 'N/A'),
+                "Design Code": design_code,
+                "Paper Link": paper_link,
+                "Image": image,
+                "Foundry": foundry,
+                "Fabrication Recipe": recipe
+            }
+            all_devices_info.append(device_info)
+
+        # Convert the list of dictionaries to a DataFrame
+        df = pd.DataFrame(all_devices_info)
+        
+        return df
+
+    def view_measured_devices(self):
+        """
+        View all measured devices with their corresponding design codes, paper links, images, foundries, and fabrication recipes.
+
+        This method retrieves and displays the relevant information for each device in the dataset in a well-formatted table.
+        """
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+
+        all_devices_info = []
+
+        for entry in zip(dataset["contrib_info"], dataset["design_code"], dataset["paper_link"], 
+                        dataset["image"], dataset["foundry"], dataset["fabrication_recipe"]):
+            contrib_info, design_code, paper_link, image, foundry, recipe = entry
+
+            device_info = {
+                "Name": contrib_info.get('name', 'N/A'),
+                "Design Code": design_code,
+                "Paper Link": paper_link,
+                "Image": image,
+                "Foundry": foundry,
+                "Fabrication Recipe": recipe
+            }
+            all_devices_info.append(device_info)
+
+        # Prepare the data for tabular display
+        headers = ["Name", "Design Code", "Paper Link", "Image", "Foundry", "Fabrication Recipe"]
+        rows = [[device_info[header] for header in headers] for device_info in all_devices_info]
+
+        # Print the table with tabulate
+        print(tabulate(rows, headers=headers, tablefmt="grid", stralign="left", numalign="left"))
 
     def view_contributors_of_config(self, config):
         """
@@ -321,9 +488,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             if relevant_info not in unique_contributors_info:
                 unique_contributors_info.append(relevant_info)
         
-        print(tabulate(unique_contributors_info, headers='keys', tablefmt="fancy_grid"))
+        print(tabulate(unique_contributors_info, headers='keys', tablefmt="grid"))
 
-    def view_contributors_of(self, component=None, component_name=None, data_type=None):
+    def view_contributors_of(self, component=None, component_name=None, data_type=None, measured_device_name=None):
         """
         View contributors of a specific component, component name, and data type.
 
@@ -331,16 +498,27 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             component (str): The component of interest.
             component_name (str): The name of the component.
             data_type (str): The type of data.
+            measured_device_name (str): The name of the measured device.
 
         Returns:
             None
         """
         config = component + "-" + component_name + "-" + data_type
-        self.view_contributors_of_config(config)
+        try:
+            print("="*80)
+            print(f"\t\t\tMeasured Device Contributor(s):")
+            print("="*80)
+            self.view_device_contributors_of(component, component_name, data_type)
+        except:
+            pass
+        try:
+            print("="*80)
+            print(f"\t\t\tSimulation Data Contributor(s):")
+            print("="*80)
+            self.view_contributors_of_config(config)
+        except:
+            pass
 
-
-
-    
     def view_simulation_results(self, device_name):
         """
         View the simulation results of a specific device specified with a device name.
@@ -357,10 +535,82 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             
         for contrib_info, sim_results in zip(configs_contrib_info, simulation_info):
                 if contrib_info['name'] == device_name:
-                    return {sim_results}
-            
-    
+                    return sim_results
         return {}
+
+    def get_device_contributors_of(self, component=None, component_name=None, data_type=None):
+        """
+        View the reference/source experimental device that was used to validate a specific simulation configuration.  
+        
+        Args:
+            component (str): The component of interest.
+            component_name (str): The name of the component.
+            data_type (str): The type of data.
+
+        Returns: 
+            dict: The relevant contributor information.
+        """
+        if not (component and component_name and data_type):
+            return "Component, component_name, and data_type must all be provided."
+
+        config = f"{component}-{component_name}-{data_type}"
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+        
+        for entry in zip(dataset["contrib_info"], dataset["sim_results"]):
+            contrib_info, sim_results = entry
+            
+            if config in sim_results:
+                relevant_info = {
+                    "Foundry": contrib_info.get("foundry", "N/A"),
+                    "PI": contrib_info.get("PI", "N/A"),
+                    "Group": contrib_info.get("group", "N/A"),
+                    "Institution": contrib_info.get("institution", "N/A"),
+                    "Measured By": ", ".join(contrib_info.get("measured_by", [])),
+                    "Reference Device Name": contrib_info.get("name", "N/A"),
+                    "Uploader": contrib_info.get("uploader", "N/A")
+                }
+                
+                print(tabulate(relevant_info.items(), tablefmt="grid"))
+                return relevant_info
+
+        return None
+
+    def view_device_contributors_of(self, component=None, component_name=None, data_type=None):
+        """
+        View the reference/source experimental device that was used to validate a specific simulation configuration.  
+        
+        Args:
+            component (str): The component of interest.
+            component_name (str): The name of the component.
+            data_type (str): The type of data.
+
+        Returns: 
+            str: The name of the experimentally validated reference device, or an error message if not found.
+        """
+        if not (component and component_name and data_type):
+            return "Component, component_name, and data_type must all be provided."
+
+        config = f"{component}-{component_name}-{data_type}"
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+        
+        for entry in zip(dataset["contrib_info"], dataset["sim_results"]):
+            contrib_info, sim_results = entry
+            
+            if config in sim_results:
+                relevant_info = {
+                    "Foundry": contrib_info.get("foundry", "N/A"),
+                    "PI": contrib_info.get("PI", "N/A"),
+                    "Group": contrib_info.get("group", "N/A"),
+                    "Institution": contrib_info.get("institution", "N/A"),
+                    "Measured By": ", ".join(contrib_info.get("measured_by", [])),
+                    "Reference Device Name": contrib_info.get("name", "N/A"),
+                    "Uploader": contrib_info.get("uploader", "N/A")
+                }
+                
+                print(tabulate(relevant_info.items(), tablefmt="grid"))
+
+        return "The reference device could not be retrieved."
+
 
     def view_reference_device_of(self, component=None, component_name=None, data_type=None):
         """
@@ -371,27 +621,54 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             component_name (str): The name of the component.
             data_type (str): The type of data.
 
-        Returns: 
-            str: the name of the experimentally validated reference device.
-        
         """
+        if not (component and component_name and data_type):
+            return "Component, component_name, and data_type must all be provided."
+
         config = f"{component}-{component_name}-{data_type}"
         dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
-        configs_contrib_info = dataset["contrib_info"]
-        simulation_info = dataset["sim_results"]
         
-        for contrib_info, sim_results in zip(configs_contrib_info, simulation_info):
-            if config in sim_results:
-                return contrib_info['name']
-        
-            else:
-                return "The reference device could not be retrieved."
+        for entry in zip(dataset["contrib_info"], dataset["sim_results"], dataset["design_code"], 
+                        dataset["paper_link"], dataset["image"], dataset["foundry"], dataset["fabrication_recipe"]):
+            contrib_info, sim_results, design_code, paper_link, image, foundry, recipe = entry
             
-        return None
-    
-    
+            if config in sim_results:
+                combined_info = {
+                    "Design Code": design_code,
+                    "Paper Link": paper_link,
+                    "Image": image,
+                    "Foundry": foundry,
+                    "Fabrication Recipe": recipe
+                }
+                combined_info.update(contrib_info)
+                
+                print(tabulate(combined_info.items(), tablefmt="grid"))
 
 
+    def view_recipe_of(self, device_name):
+        """
+        Retrieve the foundry and fabrication recipe information for a specified device.
+        
+        Args:
+            device_name (str): The name of the device to retrieve information for.
+        
+        Returns:
+            dict: A dictionary containing foundry and fabrication recipe information.
+        """
+        dataset = load_dataset(self.repo_name, 'measured_device_database')["train"]
+        
+        for contrib_info, foundry, recipe, github_url in zip(dataset["contrib_info"], dataset["foundry"], dataset["fabrication_recipe"], dataset["design_code"],):
+            if contrib_info['name'] == device_name:
+                # append tree/main/Fabrication to the github_url
+                github_url = f"{github_url}/tree/main/Fabrication"
+                # Prepare the data for tabulation
+                data = [["Foundry", foundry], ["Fabublox Link", recipe], ["Fabrication Recipe Links", github_url]]
+                
+                # Print the data in a tabulated format
+                print(tabulate(data, tablefmt="grid"))
+                return
+        
+        print("Error: Device not found in the dataset.")
   
     def view_reference_devices(self):
         """
@@ -417,10 +694,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             if relevant_info not in unique_contributors_info:
                 unique_contributors_info.append(relevant_info)
 
-        print(tabulate(unique_contributors_info, headers='keys', tablefmt="fancy_grid"))
-
-
-
+        print(tabulate(unique_contributors_info, headers='keys', tablefmt="grid"))
 
 
     def select_components(self, component_dict=None):
@@ -557,6 +831,26 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             self.view_component_names("cavity")
             return
         
+    def select_resonator_type(self, resonator_type):
+        """
+        Select the coupler based on the resonator type.
+
+        Args:
+            resonator_type (str): The type of resonator, e.g., "quarter" or "half".
+        """
+        resonator_to_coupler = {
+            "quarter": "CLT",
+            "half": "NCap"
+        }
+
+        if resonator_type not in resonator_to_coupler:
+            raise ValueError(f"Invalid resonator type: {resonator_type}. Must be one of {list(resonator_to_coupler.keys())}.")
+
+        self._internal_call = True  # Set the flag to indicate an internal call
+        self.select_coupler(resonator_to_coupler[resonator_type])
+        self.selected_resonator_type = resonator_type
+        self._internal_call = False  # Reset the flag after the call
+
     def select_coupler(self, coupler=None):
         """
         Selects a coupler for the database.
@@ -567,7 +861,14 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             None
         """
-        #! TODO: fix this method to work on NCap coupler sims
+        if not self._internal_call:
+            print("WARNING:DeprecationWarning: select_coupler() is deprecated and will be removed in a future release. Use select_resonator_type() instead.")
+            warnings.warn(
+                "select_coupler() is deprecated and will be removed in a future release. Use select_resonator_type() instead.",
+                PendingDeprecationWarning
+            )
+        # E
+        #! TODO: fix this method to work on CapNInterdigitalTee coupler sims
         self.selected_coupler = coupler
         #self.selected_component_name = coupler
         #self.selected_data_type = "cap_matrix" # TODO: handle dynamically
@@ -701,9 +1002,13 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print(f"An error occurred while loading the dataset: {e}")
             return
 
-    def create_system_df(self):
+    def create_system_df(self, parallelize=False, num_cpu=None):
         """
         Creates and returns a DataFrame based on the selected system.
+
+        Args:
+            parallelize (bool): Whether to use multiprocessing to speed up the merging. Defaults to False.
+            num_cpu (int): The number of CPU cores to use for multiprocessing. If not specified, the function will use the maximum number of available cores.
 
         If the selected system is a single component, it retrieves the dataset based on the selected data type, component, and component name.
         If a coupler is selected, the DataFrame is filtered by the coupler.
@@ -724,29 +1029,130 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
         
         if self.selected_system is None:
-            print("Selected system is not defined.")
-            return
-        elif isinstance(self.selected_system, str):
-            df = self.get_dataset(data_type=self.selected_data_type, component=self.selected_component, component_name=self.selected_component_name)
-            # if coupler is selected, filter by coupler
-            if self.selected_coupler is not None:
-                df = filter_df_by_conditions(df, {"coupler_type": self.selected_coupler})
-            self.selected_df = df
-        elif isinstance(self.selected_system, list): #! TODO: need to implement logic to handle more complex systems
-            # get the qubit and cavity dfs
-            qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit) #TODO: handle dynamically
-            cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity) #TODO: handle dynamically
-            # if coupler is selected, filter by coupler
-            if self.selected_coupler is not None:
-                cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler}) 
-            df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=['claw_width', 'claw_length', 'claw_gap']) #TODO: handle with user awareness
-            self.selected_df = df
-            
+            raise UserWarning("Selected system is not defined.")
+        
+        if isinstance(self.selected_system, str):
+            df = self._create_single_component_df()
+        elif isinstance(self.selected_system, list):
+            df = self._create_multi_component_df(parallelize, num_cpu)
         else:
             raise UserWarning("Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`")
+
+        self.selected_df = df
         return df
 
-    def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None):
+    def _create_single_component_df(self):
+        """Creates a DataFrame for a single component system."""
+        df = self.get_dataset(data_type=self.selected_data_type, component=self.selected_component, component_name=self.selected_component_name)
+
+        if self.selected_coupler:
+            df = filter_df_by_conditions(df, {"coupler_type": self.selected_coupler})
+            if self.selected_coupler == "CapNInterdigitalTee":
+                df = self._update_cap_interdigital_tee_parameters(df)
+
+        return df
+
+    def generate_updated_half_wave_cavity_df(self, parallelize=False, num_cpu=None):
+        """
+        !TODO: speed this up!
+        """
+        cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity)
+
+        assert self.selected_coupler in ["NCap", "CapNInterdigitalTee"], "Selected coupler must be either 'NCap' or 'CapNInterdigitalTee'."
+
+        cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": "NCap"})
+
+        if not all(cavity_df["coupler_type"] == "NCap"):
+            raise ValueError("All entries in the 'coupler_type' column of the cavity_df must be 'NCap'.")
+       
+        # update the kappa and cavity_frequency values 
+        cavity_df = self._update_cap_interdigital_tee_parameters(cavity_df)
+        
+        return cavity_df
+
+    def generate_qubit_half_wave_cavity_df(self, parallelize=False, num_cpu=None, save_data=False):
+        """
+        Generates a DataFrame that combines the qubit and half-wave cavity data.
+
+        Args:
+            parallelize (bool, optional): Flag indicating whether to parallelize the computation. Defaults to False.
+            num_cpu (int, optional): Number of CPUs to use for parallelization. Defaults to None.
+            save_data (bool, optional): Flag indicating whether to save the generated data. Defaults to False.
+
+        Returns:
+            pandas.DataFrame: The generated DataFrame.
+
+        Raises:
+            None
+
+        Notes:
+            - This method generates a DataFrame by combining the qubit and half-wave cavity data.
+            - The qubit and cavity data are obtained from the `get_dataset` and `generate_updated_half_wave_cavity_df` methods, respectively.
+            - The generated DataFrame is optimized to reduce memory usage using various optimization techniques.
+            - If `save_data` is True, the generated DataFrames are saved in the "data" directory.
+
+        TODO:
+            - Speed up the generation process.
+        """
+        print("Generating half-wave-cavity DataFrame...")
+        qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit)
+        cavity_df = self.generate_updated_half_wave_cavity_df(parallelize=parallelize, num_cpu=num_cpu)
+
+        self.qubit_df = qubit_df
+        self.cavity_df = cavity_df
+
+        print("Creating qubit-half-wave-cavity DataFrame...")
+        df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=self.claw_merger_terms, parallelize=parallelize, num_cpu=num_cpu)
+        
+        # process the df to reduce the memory usage
+        print("Optimizing the DataFrame...")
+        opt_df = process_design_options(df)
+        initial_mem = compute_memory_usage(df)
+        opt_df = optimize_dataframe(opt_df)
+        opt_df = delete_object_columns(opt_df)
+        opt_df = delete_categorical_columns(opt_df)
+        final_mem = compute_memory_usage(opt_df)
+        print(f"Memory usage reduced by {100*(initial_mem - final_mem)/initial_mem:.2f}%")
+
+        if save_data:
+
+            # create a data directory if it does not exist using os.makedirs
+            if not os.path.exists("data"):
+                os.makedirs("data")
+                cavity_df.to_parquet("data/half-wave-cavity_df.parquet")
+                df.to_parquet("data/qubit_half-wave-cavity_df_uncompressed.parquet")
+                opt_df.to_parquet("data/qubit_half-wave-cavity_df.parquet")
+
+        return opt_df
+
+    def _create_multi_component_df(self, parallelize, num_cpu):
+        """Creates a DataFrame for a multi-component system."""
+        qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit)
+        cavity_df = self.get_dataset(data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity)
+
+        self.qubit_df = qubit_df
+
+        if self.selected_coupler == "CLT":
+            cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": self.selected_coupler})
+            self.cavity_df = cavity_df
+        if self.selected_coupler == "NCap":
+            self.coupler_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name=self.selected_coupler)
+            self.cavity_df = self.read_parquet_file(self.hwc_fname)
+            df = self.read_parquet_file(self.merged_df_hwc_fname)
+            return df
+                
+        df = self.create_qubit_cavity_df(qubit_df, cavity_df, merger_terms=self.claw_merger_terms, parallelize=parallelize, num_cpu=num_cpu)
+        return df
+
+    def _update_cap_interdigital_tee_parameters(self, cavity_df):
+        """Updates parameters for CapNInterdigitalTee coupler."""
+        ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name="NCap")
+        ncap_sim_cols = ['bottom_to_bottom', 'bottom_to_ground', 'ground_to_ground', 'top_to_bottom', 'top_to_ground', 'top_to_top']
+        
+        df = update_ncap_parameters(cavity_df, ncap_df, self.ncap_merger_terms, ncap_sim_cols)
+        return df
+
+    def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None, parallelize=False, num_cpu=None):
         """
         Creates a merged DataFrame by merging the qubit and cavity DataFrames based on the specified merger terms.
 
@@ -754,6 +1160,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             qubit_df (pandas.DataFrame): The DataFrame containing qubit data.
             cavity_df (pandas.DataFrame): The DataFrame containing cavity data.
             merger_terms (list): A list of column names to be used for merging the DataFrames. Defaults to None.
+            parallelize (bool): Whether to use multiprocessing to speed up the merging. Defaults to False.
+            num_cpu (int): The number of CPU cores to use for multiprocessing. If not specified, the function will use the maximum number of available cores.
 
         Returns:
             pandas.DataFrame: The merged DataFrame.
@@ -762,17 +1170,23 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             None
         """
         for merger_term in merger_terms:
-            # process the dfs to make them ready for merger
-            qubit_df[merger_term] = qubit_df['design_options'].apply(lambda x: x['connection_pads']['readout'][merger_term])
-            cavity_df[merger_term] = cavity_df['design_options'].apply(lambda x: x['claw_opts']['connection_pads']['readout'][merger_term])
+            qubit_df[merger_term] = qubit_df['design_options'].map(lambda x: x['connection_pads']['readout'].get(merger_term))
+            cavity_df[merger_term] = cavity_df['design_options'].map(lambda x: x['claw_opts']['connection_pads']['readout'].get(merger_term))
 
-        # Merging the data frames based on merger terms
-        merged_df = pd.merge(qubit_df, cavity_df, on=merger_terms, how="inner", suffixes=('_qubit', '_cavity_claw'))
+        # Add index column to qubit_df
+        qubit_df = qubit_df.reset_index().rename(columns={'index': 'index_qc'})
 
-        # Dropping the merger terms
-        merged_df.drop(columns=merger_terms, inplace=True)
+        if parallelize:
+            n_cores = cpu_count() if num_cpu is None else num_cpu
+            qubit_df_splits = np.array_split(qubit_df, n_cores)
 
-        # Combining the qubit and cavity design options into one
+            with Pool(n_cores) as pool:
+                merged_df_parts = list(tqdm(pool.starmap(merge_dfs, [(split, cavity_df, merger_terms) for split in qubit_df_splits]), total=n_cores))
+
+            merged_df = pd.concat(merged_df_parts).reset_index(drop=True)
+        else:
+            merged_df = merge_dfs(qubit_df, cavity_df, merger_terms)
+
         merged_df['design_options'] = merged_df.apply(create_unified_design_options, axis=1)
 
         return merged_df
@@ -788,6 +1202,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         self.selected_cavity = None
         self.selected_coupler = None
         self.selected_system = None
+        self.selected_resonator_type = None
 
     def show_selections(self):
         """
@@ -799,7 +1214,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         if isinstance(self.selected_system, list): #TODO: handle dynamically
             print("Selected qubit: ", self.selected_qubit)
             print("Selected cavity: ", self.selected_cavity)
-            print("Selected coupler: ", self.selected_coupler)
+            print("Selected coupler to feedline: ", self.selected_coupler)
+            if self.selected_resonator_type is not None:
+                print("Selected resonator type: ", self.selected_resonator_type)
             print("Selected system: ", self.selected_system)
         elif isinstance(self.selected_system, str):
             print("Selected component: ", self.selected_component)
@@ -807,6 +1224,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print("Selected data type: ", self.selected_data_type)
             print("Selected system: ", self.selected_system)
             print("Selected coupler: ", self.selected_coupler)
+            if self.selected_resonator_type is not None:
+                print("Selected resonator type: ", self.selected_resonator_type)
 
     def _set_target_param_keys(self, df):
         """
@@ -878,3 +1297,32 @@ class SQuADDS_DB(metaclass=SingletonMeta):
     
     def show_selected_system(self):
         raise NotImplementedError("Waiting on Andre's code")
+
+    def find_parquet_files(self):
+        """
+        Searches for `parquet` files in the repository and returns their paths/filenames.
+        
+        Returns:
+            list: A list of paths/filenames of `parquet` files in the repository.
+        """
+        existing_files = self.get_existing_files()
+        parquet_files = [file for file in existing_files if file.endswith('.parquet')]
+        return parquet_files
+
+    def read_parquet_file(self, file_name):
+        """
+        Takes in the filename and returns the object to be read as a pandas dataframe.
+        
+        Args:
+            file_name (str): The name of the parquet file to read.
+            
+        Returns:
+            pandas.DataFrame: The dataframe read from the parquet file.
+        """
+        base_url = f"https://huggingface.co/datasets/{self.repo_name}/resolve/main/{file_name}"
+        response = requests.get(base_url)
+        with open(file_name, 'wb') as f:
+            f.write(response.content)
+        df = pd.read_parquet(file_name)
+        os.remove(file_name)  # Cleanup the downloaded file
+        return df

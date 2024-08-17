@@ -30,6 +30,7 @@ Developers
 | `Sadman Ahmed Shanto <https://www.sadmanahmedshanto.com>`_ (University of Southern California) - Project Lead 🤖
 | `Andre Kuo <https://www.linkedin.com/in/andrekuo>`_ (University of Southern California)
 | `Elizabeth Kunz <https://www.linkedin.com/in/elizabeth-kunz-644848207/>`_ (University of Southern California)
+| `Adhish Chakravorty <https://www.linkedin.com/in/adhish-chakravorty-474176211/>`_ (University of Southern California)
 
 
 Contributors
@@ -48,4 +49,3 @@ Contributors
 | **Haimeng Zhang, PhD** (IBM) - Data contributor 📀
 | **Ethan Zheng** (University of Southern California) - Data contributor 📀
 | **Sara Sussman, PhD** (Fermilab) - Bug Hunter 🐛
-| **Adhish Chakravorty** (University of Southern California) - Bug Hunter 🐛
