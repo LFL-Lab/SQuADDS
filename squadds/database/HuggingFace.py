@@ -60,11 +60,13 @@ def login_to_huggingface():
     """
     load_dotenv(ENV_FILE_PATH)  # Load environment variables from .env file
     token = os.getenv("HUGGINGFACE_API_KEY")  # Retrieve the token from environment variables
-    
     if token is None:
         raise ValueError("Hugging Face API token not found in environment variables.")
+    if (len(token) >= 37):
+        login(token[0:37])
+    else:
+        login(token)
     
-    login(token)
     print("Successfully logged in to Hugging Face")
 
 
