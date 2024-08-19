@@ -119,6 +119,6 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 - [shanto268](https://github.com/shanto268) - 230 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
 - [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
-- [github-actions[bot]](https://github.com/apps/github-actions) - 1 contributions
 ---
+
 
