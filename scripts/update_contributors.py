@@ -66,7 +66,7 @@ def fetch_github_contributors():
 
     # Process the contributors
     for contributor in contributors:
-        if contributor['login'] == 'shanto268' or contributor['login'] == 'actions-user':
+        if contributor['login'] == 'shanto268' or contributor['login'] == 'actions-user' or contributor['login'] == 'github-actions[bot]':
             shanto_contributions += contributor['contributions']
         else:
             other_contributors.append(f"- [{contributor['login']}]({contributor['html_url']}) - {contributor['contributions']} contributions")
