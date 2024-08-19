@@ -221,7 +221,7 @@ class QubitCavity(QComponent):
         print(self.coupler.options)        
         options = Dict(
             orientation = -90,
-            pos_y = (float)(self.coupler.options.pos_y[:-2]) + 0.75,
+            pos_y = (float)(self.coupler.options.pos_y[:-2]) + 2.75,
             trace_width = p.cavity_claw_options.cpw_opts.left_options.trace_width,
             trace_gap = p.cavity_claw_options.cpw_opts.left_options.trace_gap
         )
@@ -229,7 +229,7 @@ class QubitCavity(QComponent):
 
         options = Dict(
             orientation = 90,
-            pos_y = (float)(self.coupler.options.pos_y[:-2]) - 0.75,
+            pos_y = (float)(self.coupler.options.pos_y[:-2]) - 2.75,
             trace_width = p.cavity_claw_options.cpw_opts.left_options.trace_width,
             trace_gap = p.cavity_claw_options.cpw_opts.left_options.trace_gap
         )
