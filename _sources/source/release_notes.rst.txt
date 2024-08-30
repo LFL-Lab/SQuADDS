@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.3.2 (2024-08-30)
+--------------------------
+
+* **Alpha Version 0.3.2**
+
+**New Features**
+
+- Patched a bug in simulation of some half-wave cavity resonator systems
+
+---
+
 Version 0.3.1 (2024-08-16)
 --------------------------
 
