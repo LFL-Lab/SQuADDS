@@ -31,7 +31,7 @@ Developers
 | `Andre Kuo <https://www.linkedin.com/in/andrekuo>`_ (University of Southern California)
 | `Elizabeth Kunz <https://www.linkedin.com/in/elizabeth-kunz-644848207/>`_ (University of Southern California)
 | `Adhish Chakravorty <https://www.linkedin.com/in/adhish-chakravorty-474176211/>`_ (University of Southern California)
-
+| `Evangelos Vlachos <https://www.linkedin.com/in/evangelos-vlachos93>`_ (University of Southern California)
 
 Contributors
 ------------
@@ -40,12 +40,11 @@ Contributors
 | **Clark Miyamoto** (New York University) - Code contributor 💻
 | **Madison Howard** (California Institute of Technology) - Bug Hunter 🐛
 | **Malida Hecht** (University of Southern California) - Data contributor 📀
-| **Evangelos Vlachos** (University of Southern California) - Code contributor 💻 and Bug Hunter 🐛
 | **Anne Whelan** (US Navy) - Documentation contributor 📄
 | **Jenny Huang** (Columbia University) - Documentation contributor 📄
 | **Connie Miao** (Stanford University) - Data Contributor 📀
 | **Daria Kowsari, PhD** (University of Southern California) - Data contributor 📀
 | **Vivek Maurya** (University of Southern California) - Data contributor 📀
 | **Haimeng Zhang, PhD** (IBM) - Data contributor 📀
-| **Ethan Zheng** (University of Southern California) - Data contributor 📀
+| **Ethan Zheng** (University of Southern California) - Data contributor 📀 and Bug Hunter 🐛
 | **Sara Sussman, PhD** (Fermilab) - Bug Hunter 🐛
