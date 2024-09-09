@@ -15,13 +15,27 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
+
+      - name: Generate Commit List
+        id: generate_commits
+        run: |
+          # Get the latest tag (if exists) or default to initial commit
+          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "")
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+
+          # Get the list of commits since the last tag
+          git log $LATEST_TAG..HEAD --pretty=format:"- %s [%h](https://github.com/$GITHUB_REPOSITORY/commit/%H)" > commits.txt
+          echo "commits=$(cat commits.txt)" >> $GITHUB_ENV
 
       - name: Run Release Drafter
         uses: release-drafter/release-drafter@v6
@@ -29,3 +43,11 @@ jobs:
           config-name: release-drafter.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMITS: ${{ env.commits }}
+
+      - name: Inject Commits into Release Draft
+        if: always()
+        run: |
+          # Replace $COMMITS with the actual commit log
+          sed -i "s/\$COMMITS/$COMMITS/" .github/release-drafter.yml
+          cat .github/release-drafter.yml

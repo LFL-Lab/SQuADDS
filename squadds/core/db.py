@@ -428,7 +428,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                 "Paper Link": paper_link,
                 "Image": image,
                 "Foundry": foundry,
-                "Fabrication Recipe": recipe
+                # "Fabrication Recipe": recipe
             }
             all_devices_info.append(device_info)
 

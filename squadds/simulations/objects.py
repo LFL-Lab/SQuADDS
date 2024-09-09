@@ -254,7 +254,8 @@ def run_eigenmode(design, geometry_dict, sim_options):
     epra, hfss = start_simulation(design, config)
     hfss.clean_active_design()
     # setup = set_simulation_hyperparameters(epra, config)
-    epra.sim.setup = Dict(sim_options["setup"])
+    # ["setup"]
+    epra.sim.setup = Dict(sim_options)
     epra.sim.setup.name = "test_setup"
     epra.sim.renderer.options.max_mesh_length_port = '7um'
     setup = epra.sim.setup
@@ -264,7 +265,8 @@ def run_eigenmode(design, geometry_dict, sim_options):
 
     mesh_lengths = {}
     coupler_type = "CLT"
-    if "finger_count" in geometry_dict["cplr_opts"]:
+    # "finger_count" in geometry_dict["cplr_opts"]
+    if geometry_dict['cprl_opts'].get('finger_count') is not None :
         coupler_type = "NCap"
         render_simulation_no_ports(epra, [cpw,claw], [(cpw.name, "start")], config.design_name, setup.vars)
         mesh_lengths = {'mesh1': {"objects": [f"trace_{cpw.name}", f"readout_connector_arm_{claw.name}"], "MaxLength": '4um'}}

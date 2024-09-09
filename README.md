@@ -2,8 +2,7 @@
   <img src="docs/_static/images/squadds_not_transparent.png" width="100%" alt="SQuADDS Logo" /> <!-- This will stretch the logo to the full container width -->
 </center>
 
-# ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) Superconducting Qubit And Device Design and Simulation database
-
+# Superconducting Qubit And Device Design and Simulation database ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) ![Pepy Total Downlods](https://img.shields.io/pepy/dt/squadds) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow)
 > :warning: **This project is an alpha release and currently under active development. Some features and documentation may be incomplete. Please update to the latest release.**
 
 The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Project is an open-source resource aimed at advancing research in superconducting quantum device designs. It provides a robust workflow for generating and simulating superconducting quantum device designs, facilitating the accurate prediction of Hamiltonian parameters across a wide range of design geometries.
@@ -21,6 +20,8 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 - [License](#license)
 - [FAQs](#faqs)
 - [Contact](#contact)
+- [Contributors](#contributors)
+- [Developers](#developers)
 
 ---
 
@@ -95,4 +96,29 @@ Check out our [FAQs](https://lfl-lab.github.io/SQuADDS/source/getting_started.ht
 
 For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc.edu).
 
+## Contributors
+
+
+| Name               | Institution                        | Contribution                        |
+|:-------------------|:-----------------------------------|:------------------------------------|
+| Clark Miyamoto     | New York University                | Code contributor 💻                  |
+| Madison Howard     | California Institute of Technology | Bug Hunter 🐛                        |
+| Malida Hecht       | University of Southern California  | Data contributor 📀                  |
+| Anne Whelan        | US Navy                            | Documentation contributor 📄         |
+| Jenny Huang        | Columbia University                | Documentation contributor 📄         |
+| Connie Miao        | Stanford University                | Data Contributor 📀                  |
+| Daria Kowsari, PhD | University of Southern California  | Data contributor 📀                  |
+| Vivek Maurya       | University of Southern California  | Data contributor 📀                  |
+| Haimeng Zhang, PhD | IBM                                | Data contributor 📀                  |
+| Ethan Zheng        | University of Southern California  | Data contributor 📀 and Bug Hunter 🐛 |
+| Sara Sussman, PhD  | Fermilab                           | Bug Hunter 🐛                        |
+
+## Developers
+- [shanto268](https://github.com/shanto268) - 237 contributions
+- [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
+- [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
+- [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
 ---
+
+
+
