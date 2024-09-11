@@ -70,12 +70,19 @@ Read more on [install_guide](docs/installation/unix_install.md))
 If you use SQuADDS in your research, please cite the following paper:
 
 ```bibtex
-    @article{SQuADDS,
-        title={SQuADDS: A validated design database and simulation workflow for superconducting qubit design},
-        author={Sadman Ahmed Shanto, Andre Kuo, Clark Miyamoto, Haimeng Zhang, Vivek Maurya, Evangelos Vlachos, Malida Hecht, Chung Wa Shum and Eli Levenson-Falk},
-        journal={arXiv preprint arXiv: https://arxiv.org/pdf/2312.13483.pdf},
-        year={2023}
-    }
+@article{Shanto2024squaddsvalidated,
+  doi = {10.22331/q-2024-09-09-1465},
+  url = {https://doi.org/10.22331/q-2024-09-09-1465},
+  title = {{SQ}u{ADDS}: {A} validated design database and simulation workflow for superconducting qubit design},
+  author = {Shanto, Sadman and Kuo, Andre and Miyamoto, Clark and Zhang, Haimeng and Maurya, Vivek and Vlachos, Evangelos and Hecht, Malida and Shum, Chung Wa and Levenson-Falk, Eli},
+  journal = {{Quantum}},
+  issn = {2521-327X},
+  publisher = {{Verein zur F{\"{o}}rderung des Open Access Publizierens in den Quantenwissenschaften}},
+  volume = {8},
+  pages = {1465},
+  month = sep,
+  year = {2024}
+}
 ```
 
 ## Contributing
