@@ -90,7 +90,7 @@ html_theme_options = {
     "collapse_navigation": True,
 }
 html_context = {
-    "theme_announcement": "🎉 Our <a href='https://arxiv.org/pdf/2312.13483.pdf'>paper</a> is out! ",
+    "theme_announcement": "🎉 Our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a> is out! ",
     "expandable_sidebar": True,
     "google_analytics_id": "G-R5QKJDWM2W", 
 }
