@@ -266,7 +266,7 @@ def run_eigenmode(design, geometry_dict, sim_options):
     mesh_lengths = {}
     coupler_type = "CLT"
     # "finger_count" in geometry_dict["cplr_opts"]
-    if geometry_dict['cprl_opts'].get('finger_count') is not None :
+    if geometry_dict['cplr_opts'].get('finger_count') is not None :
         coupler_type = "NCap"
         render_simulation_no_ports(epra, [cpw,claw], [(cpw.name, "start")], config.design_name, setup.vars)
         mesh_lengths = {'mesh1': {"objects": [f"trace_{cpw.name}", f"readout_connector_arm_{claw.name}"], "MaxLength": '4um'}}

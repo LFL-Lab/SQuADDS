@@ -142,6 +142,9 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Boring but Necessary:
 
+- fix interpolated designs sim run
+- add meander smoothing support
+- checking for claw dims on H space plot
 - **Check for breaking changes in the latest version of dependencies and update the package accordingly**
 - create unit tests for each feature/file
 - create proper train/test/splits and changing `SQuADDS_DB()` to always return all data

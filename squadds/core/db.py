@@ -11,12 +11,11 @@ import pandas as pd
 import requests
 from datasets import get_dataset_config_names, load_dataset
 from huggingface_hub import login
-from tabulate import tabulate
-from tqdm import tqdm
-
 from squadds.core.design_patterns import SingletonMeta
 from squadds.core.processing import *
 from squadds.core.utils import *
+from tabulate import tabulate
+from tqdm import tqdm
 
 #* HANDLE WARNING MESSAGES
 if sys.platform == "darwin":  # Checks if the operating system is macOS
@@ -298,6 +297,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
         # Transpose the table (convert columns to rows)
         table = list(map(list, zip(*table)))
+
+        # Remove duplicate entries in table
+        table = [list(x) for x in set(tuple(x) for x in table)]
 
         # Print the table with headers
         print(tabulate(table, headers=["Component", "Component Name", "Data Available", "Component Image"],tablefmt="grid"))
