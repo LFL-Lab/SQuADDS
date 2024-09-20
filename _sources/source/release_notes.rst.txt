@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.3.3 (2024-09-20)
+--------------------------
+
+* **Alpha Version 0.3.3**
+
+**New Features**
+
+- Patched some bugs in simulation and contribution info query
+
+---
+
 Version 0.3.2 (2024-08-30)
 --------------------------
 
