@@ -63,7 +63,7 @@ class QubitCavity(QComponent):
         self.make_qubit()
         self.make_cavity()
         self.make_pins()
-        print("There may be \"kinks\" in the CPW. This is due to the ``asymmetry`` parameter in the CPW options. To remove the kinks, change the ``asymmetry`` parameter until the CPW is smooth.\nAlternatively, you may consider playing with the ``start_jogged_extension`` options")
+        print("There may be \"kinks\" in the CPW. This may be due to the ``asymmetry`` parameter in the CPW options. To remove the kinks, change the ``asymmetry`` parameter until the CPW is smooth.\nAlternatively, you can increase the y-value of the CLT (CoupledLineTee) component by 20-50um until smooth.")
         
     def make_qubit(self):
         """
