@@ -63,8 +63,9 @@ class QubitCavity(QComponent):
         self.make_qubit()
         self.make_cavity()
         self.make_pins()
-        print("There may be \"kinks\" in the CPW. This is due to the ``asymmetry`` parameter in the CPW options. To remove the kinks, change the ``asymmetry`` parameter until the CPW is smooth.\nAlternatively, you may consider playing with the ``start_jogged_extension`` options")
-        
+        print("There may be \"kinks\" in the CPW (a known issue from `qiskit-metal`). To remove the kinks, you can either:\n1. Adjust the `asymmetry` parameter.\n2. Modify the `start_jogged_extension` or `end_jogged_extension`.\n3. Change the `down_length` of the CoupledLineTee (CLT) component.\n4. Change the y-value of the CLT component by 20-50um until smooth.\nExperiment with these parameters to optimize the design.")
+
+
     def make_qubit(self):
         """
         Creates a qubit based on the specified qubit options.
@@ -213,7 +214,6 @@ class QubitCavity(QComponent):
             LaunchpadWirebond
         from qiskit_metal.qlibrary.tlines.straight_path import RouteStraight
         p = self.p
-        print(self.coupler.options)        
         options = Dict(
             orientation = -90,
             pos_y = (float)(self.coupler.options.pos_y[:-2]) + 2.75,
