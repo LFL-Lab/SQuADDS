@@ -651,9 +651,10 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">make_qubit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_cavity</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_pins</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;There may be </span><span class="se">\&quot;</span><span class="s2">kinks</span><span class="se">\&quot;</span><span class="s2"> in the CPW. This is due to the ``asymmetry`` parameter in the CPW options. To remove the kinks, change the ``asymmetry`` parameter until the CPW is smooth.</span><span class="se">\n</span><span class="s2">Alternatively, you may consider playing with the ``start_jogged_extension`` options&quot;</span><span class="p">)</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;There may be </span><span class="se">\&quot;</span><span class="s2">kinks</span><span class="se">\&quot;</span><span class="s2"> in the CPW (a known issue from `qiskit-metal`). To remove the kinks, you can either:</span><span class="se">\n</span><span class="s2">1. Adjust the `asymmetry` parameter.</span><span class="se">\n</span><span class="s2">2. Modify the `start_jogged_extension` or `end_jogged_extension`.</span><span class="se">\n</span><span class="s2">3. Change the `down_length` of the CoupledLineTee (CLT) component.</span><span class="se">\n</span><span class="s2">4. Change the y-value of the CLT component by 20-50um until smooth.</span><span class="se">\n</span><span class="s2">Experiment with these parameters to optimize the design.&quot;</span><span class="p">)</span></div>
 
-        
+
+
 <div class="viewcode-block" id="QubitCavity.make_qubit">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.coupled_systems.QubitCavity.make_qubit">[docs]</a>
     <span class="k">def</span> <span class="nf">make_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -819,7 +820,6 @@ document.write(`
             <span class="n">LaunchpadWirebond</span>
         <span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.straight_path</span> <span class="kn">import</span> <span class="n">RouteStraight</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coupler</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>        
         <span class="n">options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
             <span class="n">orientation</span> <span class="o">=</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span>
             <span class="n">pos_y</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">coupler</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">pos_y</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="mf">2.75</span><span class="p">,</span>
