@@ -6,8 +6,8 @@ Tutorials
 
    Tutorial-1_Getting_Started_with_SQuADDS.ipynb
    Tutorial-2_Simulate_interpolated_designs.ipynb
-   Tutorial-3_Contributing_to_SQuADDS.ipynb
-   Tutorial_4_Contributing_Experimental_Data_to_SQuADDS.ipynb
+   Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.ipynb
+   Tutorial_4_Contributing_Measured_Data_to_SQuADDS.ipynb
 
 .. note::
    
