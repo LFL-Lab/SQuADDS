@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.core.db &#8212; SQuADDS v0.3.3</title>
+    <title>squadds.core.db &#8212; SQuADDS v0.3.4</title>
   
   
   
@@ -41,7 +41,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=d5a15cff"></script>
+    <script src="../../../_static/documentation_options.js?v=1e28cc32"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -592,11 +592,12 @@ document.write(`
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">get_dataset_config_names</span><span class="p">,</span> <span class="n">load_dataset</span>
 <span class="kn">from</span> <span class="nn">huggingface_hub</span> <span class="kn">import</span> <span class="n">login</span>
+<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
 <span class="kn">from</span> <span class="nn">squadds.core.design_patterns</span> <span class="kn">import</span> <span class="n">SingletonMeta</span>
 <span class="kn">from</span> <span class="nn">squadds.core.processing</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="c1">#* HANDLE WARNING MESSAGES</span>
 <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>  <span class="c1"># Checks if the operating system is macOS</span>
@@ -1048,8 +1049,8 @@ document.write(`
         <span class="n">all_devices_info</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;contrib_info&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;design_code&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;paper_link&quot;</span><span class="p">],</span> 
-                        <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;foundry&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;fabrication_recipe&quot;</span><span class="p">]):</span>
-            <span class="n">contrib_info</span><span class="p">,</span> <span class="n">design_code</span><span class="p">,</span> <span class="n">paper_link</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">foundry</span><span class="p">,</span> <span class="n">recipe</span> <span class="o">=</span> <span class="n">entry</span>
+                        <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;foundry&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;fabrication_recipe&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;substrate&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;materials&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;junction_style&quot;</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;junction_material&quot;</span><span class="p">]):</span>
+            <span class="n">contrib_info</span><span class="p">,</span> <span class="n">design_code</span><span class="p">,</span> <span class="n">paper_link</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">foundry</span><span class="p">,</span> <span class="n">recipe</span><span class="p">,</span> <span class="n">substrate</span><span class="p">,</span> <span class="n">materials</span><span class="p">,</span> <span class="n">junction_style</span><span class="p">,</span> <span class="n">junction_materials</span> <span class="o">=</span> <span class="n">entry</span>
 
             <span class="n">device_info</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;Name&quot;</span><span class="p">:</span> <span class="n">contrib_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;N/A&#39;</span><span class="p">),</span>
@@ -1057,6 +1058,10 @@ document.write(`
                 <span class="s2">&quot;Paper Link&quot;</span><span class="p">:</span> <span class="n">paper_link</span><span class="p">,</span>
                 <span class="s2">&quot;Image&quot;</span><span class="p">:</span> <span class="n">image</span><span class="p">,</span>
                 <span class="s2">&quot;Foundry&quot;</span><span class="p">:</span> <span class="n">foundry</span><span class="p">,</span>
+                <span class="s2">&quot;Substrate&quot;</span><span class="p">:</span> <span class="n">substrate</span><span class="p">,</span>
+                <span class="s2">&quot;Materials&quot;</span><span class="p">:</span> <span class="n">materials</span><span class="p">,</span>
+                <span class="s2">&quot;Junction Style&quot;</span><span class="p">:</span> <span class="n">junction_style</span><span class="p">,</span>
+                <span class="s2">&quot;Junction Materials&quot;</span><span class="p">:</span> <span class="n">junction_materials</span><span class="p">,</span>
                 <span class="c1"># &quot;Fabrication Recipe&quot;: recipe</span>
             <span class="p">}</span>
             <span class="n">all_devices_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">device_info</span><span class="p">)</span>

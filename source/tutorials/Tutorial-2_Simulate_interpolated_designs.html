@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Tutorial 2: Simulating Interpolated Designs &#8212; SQuADDS v0.3.3</title>
+    <title>Tutorial 2: Simulating Interpolated Designs &#8212; SQuADDS v0.3.4</title>
   
   
   
@@ -42,7 +42,7 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../_static/documentation_options.js?v=d5a15cff"></script>
+    <script src="../../_static/documentation_options.js?v=1e28cc32"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -538,7 +538,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-1_Getting_Started_with_SQuADDS.html">Tutorial 1: Getting Started with SQuADDS</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial 2: Simulating Interpolated Designs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-3_Contributing_to_SQuADDS.html">Tutorial 3: Contributing to SQuADDS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Tutorial-3p5_Creating_a_new_dataset.html">Tutorial 3.5 : Contributing Experimentally-Validated Devices to the SQuADDS Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial_4_Contributing_Experimental_Data_to_SQuADDS.html">Tutorial 4: Contributing Experimentally-Validated Devices to the SQuADDS Database</a></li>
 </ul>
 </div>
 </nav></div>
@@ -619,7 +619,7 @@ document.write(`
 <span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
 <span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
 <span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
-<span class="n">db</span><span class="o">.</span><span class="n">select_coupler</span><span class="p">(</span><span class="s2">&quot;NCap&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
 <span class="n">db</span><span class="o">.</span><span class="n">show_selections</span><span class="p">()</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
 <span class="c1"># df</span>
@@ -900,7 +900,7 @@ document.write(`
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
 <span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
 <span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
-<span class="n">db</span><span class="o">.</span><span class="n">select_coupler</span><span class="p">(</span><span class="s2">&quot;CLT&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
 <span class="n">merged_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
 <span class="n">merged_df</span>
 </pre></div>
@@ -927,7 +927,7 @@ document.write(`
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
 
 <span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
-                                       <span class="n">num_top</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                       <span class="n">num_top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                        <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span>
                                        <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">results</span>

@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.3.4 (2024-09-27)
+--------------------------
+
+* **Alpha Version 0.3.4**
+
+**New Features**
+
+- Fixed unicode error in local builds on Windows
+- Added measured device data API
+- Added more data columns to experimental device
+
+
+---
+
 Version 0.3.3 (2024-09-20)
 --------------------------
 
