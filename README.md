@@ -106,25 +106,25 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 
 ## Contributors
 
-| Name               | Institution                        | Contribution                          |
-| :----------------- | :--------------------------------- | :------------------------------------ |
-| Clark Miyamoto     | New York University                | Code contributor 💻                   |
-| Madison Howard     | California Institute of Technology | Bug Hunter 🐛                         |
-| Malida Hecht       | University of Southern California  | Data contributor 📀                   |
-| Anne Whelan        | US Navy                            | Documentation contributor 📄          |
-| Jenny Huang        | Columbia University                | Documentation contributor 📄          |
-| Connie Miao        | Stanford University                | Data Contributor 📀                   |
-| Daria Kowsari, PhD | University of Southern California  | Data contributor 📀                   |
-| Vivek Maurya       | University of Southern California  | Data contributor 📀                   |
-| Haimeng Zhang, PhD | IBM                                | Data contributor 📀                   |
-| Ethan Zheng        | University of Southern California  | Data contributor 📀 and Bug Hunter 🐛 |
-| Sara Sussman, PhD  | Fermilab                           | Bug Hunter 🐛                         |
+
+| Name               | Institution                        | Contribution                     |
+|:-------------------|:-----------------------------------|:---------------------------------|
+| Clark Miyamoto     | New York University                | Code contributor                 |
+| Madison Howard     | California Institute of Technology | Bug Hunter                       |
+| Malida Hecht       | University of Southern California  | Data contributor                 |
+| Anne Whelan        | US Navy                            | Documentation contributor        |
+| Jenny Huang        | Columbia University                | Documentation contributor        |
+| Connie Miao        | Stanford University                | Data Contributor                 |
+| Daria Kowsari, PhD | University of Southern California  | Data contributor                 |
+| Vivek Maurya       | University of Southern California  | Data contributor                 |
+| Haimeng Zhang, PhD | IBM                                | Data contributor                 |
+| Ethan Zheng        | University of Southern California  | Data contributor  and Bug Hunter |
+| Sara Sussman, PhD  | Fermilab                           | Bug Hunter                       |
 
 ## Developers
-
-- [shanto268](https://github.com/shanto268) - 237 contributions
+- [shanto268](https://github.com/shanto268) - 245 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
 - [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
-
 ---
+
