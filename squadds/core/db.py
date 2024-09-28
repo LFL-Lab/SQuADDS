@@ -11,11 +11,12 @@ import pandas as pd
 import requests
 from datasets import get_dataset_config_names, load_dataset
 from huggingface_hub import login
+from tabulate import tabulate
+from tqdm import tqdm
+
 from squadds.core.design_patterns import SingletonMeta
 from squadds.core.processing import *
 from squadds.core.utils import *
-from tabulate import tabulate
-from tqdm import tqdm
 
 #* HANDLE WARNING MESSAGES
 if sys.platform == "darwin":  # Checks if the operating system is macOS
@@ -421,8 +422,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         all_devices_info = []
 
         for entry in zip(dataset["contrib_info"], dataset["design_code"], dataset["paper_link"], 
-                        dataset["image"], dataset["foundry"], dataset["fabrication_recipe"]):
-            contrib_info, design_code, paper_link, image, foundry, recipe = entry
+                        dataset["image"], dataset["foundry"], dataset["fabrication_recipe"], dataset["substrate"], dataset["materials"], dataset["junction_style"], dataset["junction_material"]):
+            contrib_info, design_code, paper_link, image, foundry, recipe, substrate, materials, junction_style, junction_materials = entry
 
             device_info = {
                 "Name": contrib_info.get('name', 'N/A'),
@@ -430,6 +431,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
                 "Paper Link": paper_link,
                 "Image": image,
                 "Foundry": foundry,
+                "Substrate": substrate,
+                "Materials": materials,
+                "Junction Style": junction_style,
+                "Junction Materials": junction_materials,
                 # "Fabrication Recipe": recipe
             }
             all_devices_info.append(device_info)

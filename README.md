@@ -3,6 +3,7 @@
 </center>
 
 # Superconducting Qubit And Device Design and Simulation database ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) ![Pepy Total Downlods](https://img.shields.io/pepy/dt/squadds) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow)
+
 > :warning: **This project is an alpha release and currently under active development. Some features and documentation may be incomplete. Please update to the latest release.**
 
 The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Project is an open-source resource aimed at advancing research in superconducting quantum device designs. It provides a robust workflow for generating and simulating superconducting quantum device designs, facilitating the accurate prediction of Hamiltonian parameters across a wide range of design geometries.
@@ -62,7 +63,7 @@ Read more on [install_guide](docs/installation/unix_install.md))
 - [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html)
 - [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
 - [Tutorial 3: Contributing to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_to_SQuADDS.html)
-- [Tutorial 3p5: Creating a new dataset for SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3p5_Creating_a_new_dataset.html)
+- [Tutorial 4: Contributing Experimentally-Validated Devices to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial_4_Contributing_Experimental_Data_to_SQuADDS.html)
 - [(COMING SOON) More tutorials]()
 
 ## Citation
@@ -105,27 +106,25 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 
 ## Contributors
 
-
-| Name               | Institution                        | Contribution                        |
-|:-------------------|:-----------------------------------|:------------------------------------|
-| Clark Miyamoto     | New York University                | Code contributor 💻                  |
-| Madison Howard     | California Institute of Technology | Bug Hunter 🐛                        |
-| Malida Hecht       | University of Southern California  | Data contributor 📀                  |
-| Anne Whelan        | US Navy                            | Documentation contributor 📄         |
-| Jenny Huang        | Columbia University                | Documentation contributor 📄         |
-| Connie Miao        | Stanford University                | Data Contributor 📀                  |
-| Daria Kowsari, PhD | University of Southern California  | Data contributor 📀                  |
-| Vivek Maurya       | University of Southern California  | Data contributor 📀                  |
-| Haimeng Zhang, PhD | IBM                                | Data contributor 📀                  |
+| Name               | Institution                        | Contribution                          |
+| :----------------- | :--------------------------------- | :------------------------------------ |
+| Clark Miyamoto     | New York University                | Code contributor 💻                   |
+| Madison Howard     | California Institute of Technology | Bug Hunter 🐛                         |
+| Malida Hecht       | University of Southern California  | Data contributor 📀                   |
+| Anne Whelan        | US Navy                            | Documentation contributor 📄          |
+| Jenny Huang        | Columbia University                | Documentation contributor 📄          |
+| Connie Miao        | Stanford University                | Data Contributor 📀                   |
+| Daria Kowsari, PhD | University of Southern California  | Data contributor 📀                   |
+| Vivek Maurya       | University of Southern California  | Data contributor 📀                   |
+| Haimeng Zhang, PhD | IBM                                | Data contributor 📀                   |
 | Ethan Zheng        | University of Southern California  | Data contributor 📀 and Bug Hunter 🐛 |
-| Sara Sussman, PhD  | Fermilab                           | Bug Hunter 🐛                        |
+| Sara Sussman, PhD  | Fermilab                           | Bug Hunter 🐛                         |
 
 ## Developers
+
 - [shanto268](https://github.com/shanto268) - 237 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
 - [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
+
 ---
-
-
-
