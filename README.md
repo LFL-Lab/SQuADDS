@@ -8,9 +8,11 @@
 
 The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Project is an open-source resource aimed at advancing research in superconducting quantum device designs. It provides a robust workflow for generating and simulating superconducting quantum device designs, facilitating the accurate prediction of Hamiltonian parameters across a wide range of design geometries.
 
-**Paper Link:** [SQuADDS: A Database for Superconducting Quantum Device Design and Simulation](https://arxiv.org/pdf/2312.13483.pdf)
+**Paper Link:** [SQuADDS: A Database for Superconducting Quantum Device Design and Simulation](https://quantum-journal.org/papers/q-2024-09-09-1465/)
 
-**Website Link:** [SQuADDS](https://lfl-lab.github.io/SQuADDS/)
+**Docsite Link:** [https://lfl-lab.github.io/SQuADDS/](https://lfl-lab.github.io/SQuADDS/)
+
+**Hugging Face Link:** [https://huggingface.co/datasets/SQuADDS/SQuADDS_DB](https://huggingface.co/datasets/SQuADDS/SQuADDS_DB)
 
 ## Table of Contents
 
