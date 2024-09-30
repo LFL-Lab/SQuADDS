@@ -4,27 +4,38 @@ Getting Started with SQuADDS
 .. image:: https://img.shields.io/badge/-Setup-blue
    :alt: Setup
 
+This guide helps you get started with **SQuADDS**, a database for superconducting qubit and device design and simulation.
+
 Installation
 ============
 
-SQuADDS can be installed using pip in an environment with qiskit-metal pre-installed.
+There are multiple ways to install SQuADDS. Choose the method that best suits your environment.
+
+.. contents::
+   :local:
+
+Install using pip
+-----------------
+
+SQuADDS can be installed using pip in an environment with `qiskit-metal` pre-installed.
 
 .. code-block:: bash
 
    pip install SQuADDS
 
+Install from GitHub
+-------------------
+
 Alternatively, you can install SQuADDS from source.
 
-1. **Clone Repository**: 
-   Navigate to your chosen directory and clone the repository.
+1. **Clone Repository**: Navigate to your chosen directory and clone the repository.
 
    .. code-block:: bash
 
       cd <REPO-PATH>
       git clone https://github.com/LFL-Lab/SQuADDS.git
 
-2. **Install Dependencies**: 
-   Activate a clean conda environment (with qiskit-metal) and install dependencies.
+2. **Install Dependencies**: Activate a clean conda environment (with qiskit-metal) and install dependencies.
 
    .. code-block:: bash
 
@@ -33,11 +44,15 @@ Alternatively, you can install SQuADDS from source.
       pip install -r requirements.txt
       pip install -e . 
 
-.. admonition:: Questions?
+Install using Docker
+--------------------
 
-   Please reach out to `shanto@usc.edu <mailto:shanto@usc.edu>`__
+You can use our Docker image to run SQuADDS. The Docker image is available `here <https://github.com/LFL-Lab/SQuADDS/pkgs/container/squadds_env>`__. Instructions on how to use the Docker image can be found `here <https://github.com/LFL-Lab/SQuADDS?tab=readme-ov-file#run-using-docker>`__
 
-For installing SQuADDS (from PyPi) on a completely fresh environment on a UNIX machine. Execute the following shell script.
+Fresh Environment Installation
+-------------------------------
+
+For installing SQuADDS (from PyPi) on a completely fresh environment on a UNIX machine, you can use the following shell script.
 
 .. code-block:: bash
 
@@ -69,7 +84,7 @@ For installing SQuADDS (from PyPi) on a completely fresh environment on a UNIX m
    echo "Installing SQuADDS from pypi"
    pip install SQuADDS
 
-You can use the GitHub version of SQuADDS as well by changing Step 4 to
+You can also use the GitHub version of SQuADDS by changing Step 4 to:
 
 .. code-block:: bash
 
@@ -81,6 +96,38 @@ You can use the GitHub version of SQuADDS as well by changing Step 4 to
    python -m pip install --upgrade pip
    pip install -r requirements.txt
    pip install -e .
+
+.. admonition:: Questions?
+
+   Please reach out to `shanto@usc.edu <mailto:shanto@usc.edu>`__ if you face any installation issues.
+
+FAQs
+====
+
+We have compiled answers to common questions and issues. If you can't find what you're looking for, feel free to reach out.
+
+Installation Issues
+-------------------
+
+**Q: Getting** ``ModuleNotFoundError: No module named 'squadds'`` **after running** `pip install SQuADDS` **in Jupyter Notebook. How can I fix this?**
+
+**A:** You may need to restart the kernel after installing `SQuADDS`. To do this, go to the `Kernel` menu in Jupyter Notebook and select `Restart`.
+
+Database Access Issues
+----------------------
+
+**Q: I am getting the error** ``Generating train split: 0 examples [00:00, ? examples/s] An error occurred while loading the dataset: An error occurred while generating the dataset`` **for various** ``SQuADDS_DB()`` **methods.**
+
+**A:** This error occurs on Windows systems for `datasets` library version `2.20.0`. Downgrading to any versions between `2.17.0` and `2.19.2` should fix the issue.
+
+.. code-block:: bash
+
+   pip install datasets==2.19.2
+
+**Q: I am getting the error** ``KeyError: "Column contributor not in the dataset. Current columns in the dataset...`` **after using `view_all_contributors()`.**
+
+**A:** This is likely due to a dataset update. Upgrade `squadds` to version `>= 0.2.35`.
+
 
 FAQs
 ====
@@ -95,7 +142,7 @@ Installation Issues
 Accessing the Database
 -----------------------
 
-**Q: I am getting the error** ``Generating train split: 0 examples [00:00, ? examples/s] An error occurred while loading the dataset: An error occurred while generating the dataset`` **for various** ``SQuADDS_DB()`` **methods (e.g.** ``SQuADDS_DB().create_system_df()``**).**
+**Q: I am getting the error** ``Generating train split: 0 examples [00:00, ? examples/s] An error occurred while loading the dataset: An error occurred while generating the dataset`` **for various** ``SQuADDS_DB()`` **methods (e.g.** ``SQuADDS_DB().create_system_df()`` **).**
  
 **A:** This is an error we have seen only happening on Windows systems for ``datasets`` library version ``2.20.0``. Downgrading to any versions between ``2.17.0`` and ``2.19.2`` should fix the issue. To downgrade, run the following command:
 

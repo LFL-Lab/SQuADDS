@@ -1,8 +1,8 @@
 <center>
-  <img src="docs/_static/images/squadds_not_transparent.png" width="100%" alt="SQuADDS Logo" /> <!-- This will stretch the logo to the full container width -->
+  <img src="docs/_static/images/squadds_not_transparent.png" width="100%" alt="SQuADDS Logo" />
 </center>
 
-# Superconducting Qubit And Device Design and Simulation database ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) ![Pepy Total Downlods](https://img.shields.io/pepy/dt/squadds) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow)
+# Superconducting Qubit And Device Design and Simulation Database ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) ![Pepy Total Downloads](https://img.shields.io/pepy/dt/squadds) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow)
 
 > :warning: **This project is an alpha release and currently under active development. Some features and documentation may be incomplete. Please update to the latest release.**
 
@@ -15,7 +15,10 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 ## Table of Contents
 
 - [Citation](#citation)
-- [Installation](#setup)
+- [Installation](#installation)
+  - [Install using pip](#install-using-pip)
+  - [Install from GitHub](#install-from-source)
+  - [Run using Docker](#run-using-docker)
 - [Tutorials](#tutorials)
 - [Contributing](#contributing)
 - [License](#license)
@@ -48,7 +51,7 @@ If you use SQuADDS in your research, please cite the following paper:
 
 ---
 
-## Setup
+## Installation:
 
 ### Install using pip:
 
@@ -76,11 +79,15 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-## Install on a fresh Mac/Linux system:
+#### Install on a fresh Mac/Linux system:
 
-Read more on [install_guide](docs/installation/unix_install.md)
+Read more on [here](docs/installation/unix_install.md)
 
-## Run using Docker:
+### Run using Docker:
+
+<details>
+<summary>Click to expand/hide Docker instructions</summary>
+<br>
 
 We provide a pre-built Docker image that contains all dependencies, including `Qiskit-Metal` and the latest `SQuADDS` release.
 
@@ -122,9 +129,13 @@ conda activate squadds-env
 
 Once the environment is active, you can run **SQuADDS** by executing your Python scripts or starting an interactive Python session.
 
+</details>
+
 ---
 
 ## Tutorials
+
+The following tutorials are available to help you get started with `SQuADDS`:
 
 - [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html)
 - [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
@@ -132,23 +143,33 @@ Once the environment is active, you can run **SQuADDS** by executing your Python
 - [Tutorial 4: Contributing Measured Devices' Data to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html)
 - [(COMING SOON) More tutorials]()
 
+---
+
 ## Contributing
 
 We welcome contributions from the community! Here is our [work wish list](wish_list.md).
 
 Please see our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get started and absolutely feel free to reach out to us if you have any questions.
 
+---
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
 
 ## FAQs
 
 Check out our [FAQs](https://lfl-lab.github.io/SQuADDS/source/getting_started.html#faq-s) for common questions and answers.
 
+---
+
 ## Contact
 
 For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc.edu).
+
+---
 
 ## Contributors
 
@@ -166,11 +187,11 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 | Ethan Zheng        | University of Southern California  | Data contributor and Bug Hunter |
 | Sara Sussman, PhD  | Fermilab                           | Bug Hunter                      |
 
+---
+
 ## Developers
 
 - [shanto268](https://github.com/shanto268) - 245 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
 - [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
-
----
