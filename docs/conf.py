@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # Project information
 project = 'SQuADDS'
-copyright = '2023, Sadman Ahmed Shanto & Eli Levenson-Falk'
+copyright = '2024, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
 release = "0.3.4"
 
@@ -93,6 +93,7 @@ html_context = {
     "theme_announcement": "🎉 Our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a> is out! ",
     "expandable_sidebar": True,
     "google_analytics_id": "G-R5QKJDWM2W", 
+    "footer": "_footer.html",  # Add this line to reference your custom footer
 }
 
 html_last_updated_fmt = "%Y/%m/%d"
@@ -138,5 +139,5 @@ mathjax_config = {
 
 html_meta = {
     "description": "SQuADDS: A Python package for design and simulation of superconducting quantum devices",
-    "keywords": "qiskit, qiskit-metal, qubit, Transmon, design, ansys, hfss, KLayout, superconducting, quantum, computing, SQuADDS, IBM, CPW, Hamiltonian",
+    "keywords": "qiskit, qiskit-metal, qubit, Transmon, design, ansys, hfss, KLayout, superconducting, quantum, computing, SQuADDS, IBM, CPW, Hamiltonian, Sadman Ahmed Shanto, Eli Levenson-Falk, LFL Lab, USC Physics, USC, University of Southern California",
 }
