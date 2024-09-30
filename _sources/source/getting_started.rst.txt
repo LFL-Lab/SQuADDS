@@ -113,32 +113,6 @@ Installation Issues
 
 **A:** You may need to restart the kernel after installing `SQuADDS`. To do this, go to the `Kernel` menu in Jupyter Notebook and select `Restart`.
 
-Database Access Issues
-----------------------
-
-**Q: I am getting the error** ``Generating train split: 0 examples [00:00, ? examples/s] An error occurred while loading the dataset: An error occurred while generating the dataset`` **for various** ``SQuADDS_DB()`` **methods.**
-
-**A:** This error occurs on Windows systems for `datasets` library version `2.20.0`. Downgrading to any versions between `2.17.0` and `2.19.2` should fix the issue.
-
-.. code-block:: bash
-
-   pip install datasets==2.19.2
-
-**Q: I am getting the error** ``KeyError: "Column contributor not in the dataset. Current columns in the dataset...`` **after using `view_all_contributors()`.**
-
-**A:** This is likely due to a dataset update. Upgrade `squadds` to version `>= 0.2.35`.
-
-
-FAQs
-====
-
-Installation Issues
--------------------
-
-**Q: Getting** ``ModuleNotFoundError: No module named 'squadds'`` **after running** `pip install SQuADDS` **in Jupyter Notebook. How can I fix this?**
-
-**A:** You may need to restart the kernel after installing `SQuADDS`. To do this, go to the `Kernel` menu in Jupyter Notebook and select `Restart`.
-
 Accessing the Database
 -----------------------
 
