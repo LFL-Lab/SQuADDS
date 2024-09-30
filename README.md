@@ -14,9 +14,9 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 
 ## Table of Contents
 
+- [Citation](#citation)
 - [Installation](#setup)
 - [Tutorials](#tutorials)
-- [Citation](#citation)
 - [Contributing](#contributing)
 - [License](#license)
 - [FAQs](#faqs)
@@ -25,46 +25,6 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 - [Developers](#developers)
 
 ---
-
-## Setup
-
-**Install using pip:**
-
-```bash
-pip install SQuADDS
-```
-
-**Install from source:**
-
-1. Clone Repository:
-   Navigate to your chosen directory and clone the repository.
-
-```bash
-cd <REPO-PATH>
-git clone https://github.com/LFL-Lab/SQuADDS.git
-```
-
-2. Install Dependencies:
-   Activate a clean conda environment (with qiskit-metal) and install dependencies.
-
-```bash
-conda activate <YOUR-ENV>
-cd SQuADDS
-pip install -r requirements.txt
-pip install -e .
-```
-
-**Install on a fresh Mac/Linux system:**
-
-Read more on [install_guide](docs/installation/unix_install.md))
-
-## Tutorials
-
-- [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html)
-- [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
-- [Tutorial 3: Contributing Experimentally-Validated Simulation Data to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html)
-- [Tutorial 4: Contributing Measured Devices' Data to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html)
-- [(COMING SOON) More tutorials]()
 
 ## Citation
 
@@ -86,6 +46,92 @@ If you use SQuADDS in your research, please cite the following paper:
 }
 ```
 
+---
+
+## Setup
+
+### Install using pip:
+
+```bash
+pip install SQuADDS
+```
+
+### Install from source:
+
+1. Clone Repository:
+   Navigate to your chosen directory and clone the repository.
+
+```bash
+cd <REPO-PATH>
+git clone https://github.com/LFL-Lab/SQuADDS.git
+```
+
+2. Install Dependencies:
+   Activate a clean conda environment (with qiskit-metal) and install dependencies.
+
+```bash
+conda activate <YOUR-ENV>
+cd SQuADDS
+pip install -r requirements.txt
+pip install -e .
+```
+
+## Install on a fresh Mac/Linux system:
+
+Read more on [install_guide](docs/installation/unix_install.md)
+
+## Run using Docker:
+
+We provide a pre-built Docker image that contains all dependencies, including `Qiskit-Metal` and the latest `SQuADDS` release.
+
+#### Pull the Latest Docker Image
+
+You can pull the latest image of **SQuADDS** from GitHub Packages:
+
+```bash
+docker pull ghcr.io/lfl-lab/squadds_env:latest
+```
+
+If you'd like to pull a specific version (support begins from `v0.3.4` onwards), use the following command:
+
+```bash
+docker pull ghcr.io/lfl-lab/squadds_env:v0.3.4
+```
+
+You can find all available versions and tags for the **squadds_env** Docker image on [LFL-Lab Packages](https://github.com/LFL-Lab?tab=packages&repo_name=SQuADDS).
+
+#### Run the Docker Container
+
+After pulling the image, you can run the container using:
+
+```bash
+docker run -it ghcr.io/lfl-lab/squadds_env:latest /bin/bash
+```
+
+This will give you access to a bash shell inside the container.
+
+#### Activate the Conda Environment
+
+Inside the container, activate the `squadds-env` environment:
+
+```bash
+conda activate squadds-env
+```
+
+#### Run SQuADDS
+
+Once the environment is active, you can run **SQuADDS** by executing your Python scripts or starting an interactive Python session.
+
+---
+
+## Tutorials
+
+- [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html)
+- [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
+- [Tutorial 3: Contributing Experimentally-Validated Simulation Data to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html)
+- [Tutorial 4: Contributing Measured Devices' Data to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html)
+- [(COMING SOON) More tutorials]()
+
 ## Contributing
 
 We welcome contributions from the community! Here is our [work wish list](wish_list.md).
@@ -106,25 +152,25 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 
 ## Contributors
 
-
-| Name               | Institution                        | Contribution                     |
-|:-------------------|:-----------------------------------|:---------------------------------|
-| Clark Miyamoto     | New York University                | Code contributor                 |
-| Madison Howard     | California Institute of Technology | Bug Hunter                       |
-| Malida Hecht       | University of Southern California  | Data contributor                 |
-| Anne Whelan        | US Navy                            | Documentation contributor        |
-| Jenny Huang        | Columbia University                | Documentation contributor        |
-| Connie Miao        | Stanford University                | Data Contributor                 |
-| Daria Kowsari, PhD | University of Southern California  | Data contributor                 |
-| Vivek Maurya       | University of Southern California  | Data contributor                 |
-| Haimeng Zhang, PhD | IBM                                | Data contributor                 |
-| Ethan Zheng        | University of Southern California  | Data contributor  and Bug Hunter |
-| Sara Sussman, PhD  | Fermilab                           | Bug Hunter                       |
+| Name               | Institution                        | Contribution                    |
+| :----------------- | :--------------------------------- | :------------------------------ |
+| Clark Miyamoto     | New York University                | Code contributor                |
+| Madison Howard     | California Institute of Technology | Bug Hunter                      |
+| Malida Hecht       | University of Southern California  | Data contributor                |
+| Anne Whelan        | US Navy                            | Documentation contributor       |
+| Jenny Huang        | Columbia University                | Documentation contributor       |
+| Connie Miao        | Stanford University                | Data Contributor                |
+| Daria Kowsari, PhD | University of Southern California  | Data contributor                |
+| Vivek Maurya       | University of Southern California  | Data contributor                |
+| Haimeng Zhang, PhD | IBM                                | Data contributor                |
+| Ethan Zheng        | University of Southern California  | Data contributor and Bug Hunter |
+| Sara Sussman, PhD  | Fermilab                           | Bug Hunter                      |
 
 ## Developers
+
 - [shanto268](https://github.com/shanto268) - 245 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
 - [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
----
 
+---
