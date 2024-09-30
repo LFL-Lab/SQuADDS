@@ -371,7 +371,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         is already in the list of unique contributors. If not, it adds the relevant information
         to the list. Finally, it prints the list of unique contributors in a tabular format with a banner.
         """
-        view_contributors_from_rst('../docs/source/developer/index.rst')
+        try:
+            view_contributors_from_rst('../docs/source/developer/index.rst')
+        except:
+            print("Contributors not found in the documentation - missing index.rst file in the docs/source/developer directory.")
 
     def view_all_simulation_contributors(self):
         """
