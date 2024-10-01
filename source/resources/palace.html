@@ -586,73 +586,141 @@ document.write(`
 <h1>Installation of Palace on Mac OS<a class="headerlink" href="#installation-of-palace-on-mac-os" title="Link to this heading">#</a></h1>
 <p>Installing Palace on macOS involves using Homebrew to manage dependencies and compiling the software using CMake.</p>
 <p>Follow these steps to ensure a smooth installation process. It was tested to work on macOS Darwin 22.3.0 (Apple M1 Pro chip).</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">#</a></h2>
+<ul>
+<li><p><strong>Homebrew</strong>: A package manager for macOS. If not installed, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/bin/bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh<span class="k">)</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Xcode Command Line Tools</strong>: Required for development tools. Install by running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>xcode-select<span class="w"> </span>--install
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="installation-steps">
+<h2>Installation Steps<a class="headerlink" href="#installation-steps" title="Link to this heading">#</a></h2>
 <ol class="arabic">
-<li><p><strong>Install Dependencies</strong></p>
-<p>Use Homebrew to install the required dependencies for Palace. Run the following commands in your terminal:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>update
-brew<span class="w"> </span>install<span class="w"> </span>cmake<span class="w"> </span>git<span class="w"> </span>open-mpi<span class="w"> </span>libuv<span class="w"> </span>lapack<span class="w"> </span>openblas<span class="w"> </span>llvm<span class="w"> </span>gcc@12
+<li><p><strong>Update Homebrew</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>update
 </pre></div>
 </div>
 </li>
-<li><p><strong>Set Up Environment Variables</strong></p>
-<p>To use Clang provided by LLVM instead of the default macOS Clang, and to set up other necessary paths, add the following to your <cite>~/.zshrc</cite> or <cite>~/.bashrc</cite> file:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/opt/homebrew/opt/llvm/bin:/opt/homebrew/bin:<span class="nv">$PATH</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">LIBRARY_PATH</span><span class="o">=</span>/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
-<span class="nb">export</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span>/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
-<span class="nb">export</span><span class="w"> </span><span class="nv">OPENBLASROOT</span><span class="o">=</span>/opt/homebrew/opt/openblas
-
-<span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span>/opt/homebrew/opt/llvm/bin/clang
-<span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>/opt/homebrew/opt/llvm/bin/clang++
-<span class="nb">export</span><span class="w"> </span><span class="nv">FC</span><span class="o">=</span>gfortran
+<li><p><strong>Install Dependencies</strong>:</p>
+<p>Install necessary packages using Homebrew:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>install<span class="w"> </span>cmake<span class="w"> </span>gcc<span class="w"> </span>open-mpi<span class="w"> </span>openblas<span class="w"> </span>git
 </pre></div>
 </div>
-<p>Then, source the updated configuration:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/.zshrc<span class="w">  </span><span class="c1"># or source ~/.bashrc</span>
+<ul class="simple">
+<li><p><strong>cmake</strong>: For configuring the build process.</p></li>
+<li><p><strong>gcc</strong>: Provides the Fortran compiler <cite>gfortran</cite>.</p></li>
+<li><p><strong>open-mpi</strong>: MPI distribution for parallel computations.</p></li>
+<li><p><strong>openblas</strong>: Provides BLAS and LAPACK libraries.</p></li>
+<li><p><strong>git</strong>: For cloning the Palace repository.</p></li>
+</ul>
+</li>
+<li><p><strong>Set Environment Variables</strong>:</p>
+<p>Ensure CMake can find OpenBLAS:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CMAKE_PREFIX_PATH</span><span class="o">=</span><span class="k">$(</span>brew<span class="w"> </span>--prefix<span class="w"> </span>openblas<span class="k">)</span>
 </pre></div>
 </div>
 </li>
-<li><p><strong>Clone the Palace Repository</strong></p>
-<p>Clone the Palace repository from GitHub to your local machine:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/awslabs/palace.git
+<li><p><strong>Clone the Palace Repository</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/awslabs/palace.git
 <span class="nb">cd</span><span class="w"> </span>palace
 </pre></div>
 </div>
 </li>
-<li><p><strong>Set Up the Build Environment</strong></p>
-<p>Create a build directory and navigate to it:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build
-<span class="nb">cd</span><span class="w"> </span>build
+<li><p><strong>Create a Build Directory</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
 </pre></div>
 </div>
 </li>
-<li><p><strong>Configure the Build</strong></p>
-<p>Use CMake to configure the build environment, specifying the paths to the BLAS and LAPACK libraries:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>..<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release<span class="w"> </span>-DBLAS_LIBRARIES<span class="o">=</span>/opt/homebrew/opt/openblas/lib/libopenblas.dylib<span class="w"> </span>-DLAPACK_LIBRARIES<span class="o">=</span>/opt/homebrew/opt/lapack/lib/liblapack.dylib
+<li><p><strong>Configure the Build with CMake</strong>:</p>
+<p>Run CMake with appropriate compilers and options:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>-DCMAKE_C_COMPILER<span class="o">=</span>clang<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-DCMAKE_CXX_COMPILER<span class="o">=</span>clang++<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-DCMAKE_Fortran_COMPILER<span class="o">=</span><span class="k">$(</span>brew<span class="w"> </span>--prefix<span class="w"> </span>gcc<span class="k">)</span>/bin/gfortran<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-DCMAKE_PREFIX_PATH<span class="o">=</span><span class="nv">$CMAKE_PREFIX_PATH</span><span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>..
 </pre></div>
 </div>
+<ul class="simple">
+<li><p><strong>CMAKE_C_COMPILER</strong> and <strong>CMAKE_CXX_COMPILER</strong>: Use default Clang compilers.</p></li>
+<li><p><strong>CMAKE_Fortran_COMPILER</strong>: Use <cite>gfortran</cite> from Homebrew GCC.</p></li>
+<li><p><strong>CMAKE_PREFIX_PATH</strong>: Helps CMake locate OpenBLAS.</p></li>
+</ul>
 </li>
-<li><p><strong>Build Palace</strong></p>
-<p>Compile the Palace software using the make command:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-j<span class="k">$(</span>sysctl<span class="w"> </span>-n<span class="w"> </span>hw.ncpu<span class="k">)</span>
+<li><p><strong>Build Palace</strong>:</p>
+<p>Compile the software using:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-j<span class="w"> </span><span class="k">$(</span>sysctl<span class="w"> </span>-n<span class="w"> </span>hw.ncpu<span class="k">)</span>
 </pre></div>
 </div>
+<p>This utilizes all available CPU cores for faster compilation.</p>
 </li>
-<li><p><strong>Update Your Path</strong></p>
-<p>Add the Palace executable to your PATH by adding the following line to your <cite>~/.zshrc</cite> or <cite>~/.bashrc</cite> file:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;/path/to/palace/build/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<li><p><strong>Verify the Installation</strong>:</p>
+<p>After building, the Palace executable is in the <cite>bin/</cite> directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>bin/
 </pre></div>
 </div>
-<p>Replace <cite>/path/to/palace/build/bin</cite> with the actual path to the <cite>bin</cite> directory in your Palace build directory.</p>
+<p>You should see an executable named <cite>palace</cite>.</p>
 </li>
-<li><p><strong>Verify the Installation</strong></p>
-<p>To verify that Palace is installed correctly, open a new terminal session and run:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>palace
+<li><p><strong>Run an Example</strong>:</p>
+<p>Test the installation by running an example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>../examples/cpw
+../../build/bin/palace<span class="w"> </span>cpw_wave_uniform.json
 </pre></div>
 </div>
+<p>This runs the capacitor example using the Palace executable.</p>
 </li>
 </ol>
-<p>If the command runs without errors, your installation is successful.</p>
-<p>If the command runs without errors, your installation is successful.</p>
+</section>
+<section id="optional-steps">
+<h2>Optional Steps<a class="headerlink" href="#optional-steps" title="Link to this heading">#</a></h2>
+<ul>
+<li><p><strong>Install Palace System-wide</strong>:</p>
+<p>To install Palace to a specific directory (e.g., <cite>/usr/local</cite>), reconfigure with <cite>CMAKE_INSTALL_PREFIX</cite>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>-DCMAKE_INSTALL_PREFIX<span class="o">=</span>/usr/local<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-DCMAKE_C_COMPILER<span class="o">=</span>clang<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-DCMAKE_CXX_COMPILER<span class="o">=</span>clang++<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-DCMAKE_Fortran_COMPILER<span class="o">=</span><span class="k">$(</span>brew<span class="w"> </span>--prefix<span class="w"> </span>gcc<span class="k">)</span>/bin/gfortran<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-DCMAKE_PREFIX_PATH<span class="o">=</span><span class="nv">$CMAKE_PREFIX_PATH</span><span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>..
+
+make<span class="w"> </span>-j<span class="w"> </span><span class="k">$(</span>sysctl<span class="w"> </span>-n<span class="w"> </span>hw.ncpu<span class="k">)</span>
+sudo<span class="w"> </span>make<span class="w"> </span>install
+</pre></div>
+</div>
+<p>This installs the Palace executable to <cite>/usr/local/bin</cite>.</p>
+</li>
+</ul>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Fortran Compiler</strong>: <cite>gfortran</cite> is required for building some dependencies and is provided by Homebrew GCC.</p></li>
+<li><p><strong>MPI Support</strong>: OpenMPI provides the necessary MPI support for parallel computations.</p></li>
+<li><p><strong>BLAS and LAPACK</strong>: OpenBLAS supplies these libraries, essential for numerical computations.</p></li>
+<li><p><strong>Xcode Command Line Tools</strong>: Needed for Clang compilers and development tools.</p></li>
+</ul>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h2>
+<ul>
+<li><p><strong>CMake Cannot Find OpenBLAS</strong>:</p>
+<p>Ensure <cite>CMAKE_PREFIX_PATH</cite> is set correctly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CMAKE_PREFIX_PATH</span><span class="o">=</span><span class="k">$(</span>brew<span class="w"> </span>--prefix<span class="w"> </span>openblas<span class="k">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>MPI Errors</strong>:</p>
+<p>Confirm that OpenMPI is properly installed and in your PATH.</p>
+</li>
+</ul>
+</section>
 </section>
 <section id="installation-of-palace-on-linux-pcs">
 <h1>Installation of Palace on Linux PCs<a class="headerlink" href="#installation-of-palace-on-linux-pcs" title="Link to this heading">#</a></h1>
@@ -813,7 +881,14 @@ make<span class="w"> </span>-j
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Installation of Palace on HPC systems</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-of-palace-on-mac-os">Installation of Palace on Mac OS</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-of-palace-on-mac-os">Installation of Palace on Mac OS</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-steps">Installation Steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optional-steps">Optional Steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-of-palace-on-linux-pcs">Installation of Palace on Linux PCs</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-of-palace-on-windows-systems">Installation of Palace on Windows Systems</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compilation-method">Compilation Method</a></li>
