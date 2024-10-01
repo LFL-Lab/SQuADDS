@@ -121,7 +121,7 @@ Installation Steps
       cd ../examples/cpw
       ../../build/bin/palace cpw_wave_uniform.json
 
-   This runs the capacitor example using the Palace executable.
+   This runs the `cpw_wave_uniform` example using the Palace executable.
 
 Optional Steps
 --------------
@@ -178,7 +178,8 @@ Installing Palace on Linux PCs can be somewhat challenging due to its reliance o
 
 These scripts were tested on a fresh Ubuntu 22.04 installation as of 11/22/2023.
 
-Follow these steps for installation:
+Installation Steps
+------------------
 
 1. Run the following script to install the required dependencies:
 
@@ -246,7 +247,6 @@ Follow these steps for installation:
     cd build
     cmake ..
     make -j
-    ```
 
 After running these scripts, you should be able to launch Palace by running:
 
