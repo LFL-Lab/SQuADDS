@@ -180,10 +180,11 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 |:-------------------|:-----------------------------------|:---------------------------------|
 | Clark Miyamoto     | New York University                | Code contributor                 |
 | Madison Howard     | California Institute of Technology | Bug Hunter                       |
-| Malida Hecht       | University of Southern California  | Data contributor                 |
+| Kaveh Pezeshki     | Stanford University                | Documentation contributor        |
 | Anne Whelan        | US Navy                            | Documentation contributor        |
 | Jenny Huang        | Columbia University                | Documentation contributor        |
 | Connie Miao        | Stanford University                | Data Contributor                 |
+| Malida Hecht       | University of Southern California  | Data contributor                 |
 | Daria Kowsari, PhD | University of Southern California  | Data contributor                 |
 | Vivek Maurya       | University of Southern California  | Data contributor                 |
 | Haimeng Zhang, PhD | IBM                                | Data contributor                 |
@@ -191,9 +192,10 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 | Sara Sussman, PhD  | Fermilab                           | Bug Hunter                       |
 
 ## Developers
-- [shanto268](https://github.com/shanto268) - 255 contributions
+- [shanto268](https://github.com/shanto268) - 257 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
 - [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
 ---
+
 
