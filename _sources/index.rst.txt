@@ -53,17 +53,19 @@ Hi there! If you use SQuADDS in your research, please support its continued deve
      year = {2024}
    }
 
+
 Quick Links
 ===========
 
-- **[Getting Started Guide](source/getting_started)**: Learn how to set up and start using SQuADDS.
-- **[Tutorials](source/tutorials/index)**: Step-by-step guides for common workflows and use cases.
-- **[API Reference](source/apidocs/index)**: Explore the full API documentation for SQuADDS.
-- **[Contributing](source/resources/contribute)**: Get involved and contribute to the development of SQuADDS.
-- **[Developer Notes](source/developer/index)**: Insights and guidelines for developers.
-- **[Simulation Notes](source/resources/simulations)**: Detailed documentation of our simulations.
-- **[Release Logs](source/release_notes)**: Track updates and new releases.
-- **[Workflows](source/resources/concepts)**: Overview of key workflows within SQuADDS.
+- `Getting Started Guide <https://lfl-lab.github.io/SQuADDS/source/getting_started.html>`_: Learn how to set up and start using SQuADDS.
+- `Tutorials <https://lfl-lab.github.io/SQuADDS/source/tutorials/index.html>`_: Step-by-step guides for common workflows and use cases.
+- `API Reference <https://lfl-lab.github.io/SQuADDS/source/apidocs/index.html>`_: Explore the full API documentation for SQuADDS.
+- `Contributing <https://lfl-lab.github.io/SQuADDS/source/resources/contribute.html>`_: Get involved and contribute to the development of SQuADDS.
+- `Developer Notes <https://lfl-lab.github.io/SQuADDS/source/developer/index.html>`_: Insights and guidelines for developers.
+- `Simulation Notes <https://lfl-lab.github.io/SQuADDS/source/resources/simulations.html>`_: Detailed documentation of our simulations.
+- `Release Logs <https://lfl-lab.github.io/SQuADDS/source/release_notes.html>`_: Track updates and new releases.
+- `Workflows <https://lfl-lab.github.io/SQuADDS/source/resources/concepts.html>`_: Overview of key workflows within SQuADDS.
+
 
 
 Further Information
