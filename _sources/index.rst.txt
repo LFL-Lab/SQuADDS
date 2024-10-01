@@ -17,9 +17,9 @@ SQuADDS is an open-source platform aimed at speeding up the design loop in the c
 .. toctree::
    :hidden:
 
-   Getting Started <source/getting_started>
+   Installation <source/getting_started>
    Tutorials <source/tutorials/index>
-   API Reference <source/apidocs/index>
+   Documentation <source/apidocs/index>
    Contributions <source/resources/contribute>
    Developer Notes <source/developer/index>
    Simulation Notes <source/resources/simulations>
@@ -53,10 +53,22 @@ Hi there! If you use SQuADDS in your research, please support its continued deve
      year = {2024}
    }
 
+Quick Links
+===========
 
-Indices and tables
-==================
+- **[Getting Started Guide](source/getting_started)**: Learn how to set up and start using SQuADDS.
+- **[Tutorials](source/tutorials/index)**: Step-by-step guides for common workflows and use cases.
+- **[API Reference](source/apidocs/index)**: Explore the full API documentation for SQuADDS.
+- **[Contributing](source/resources/contribute)**: Get involved and contribute to the development of SQuADDS.
+- **[Developer Notes](source/developer/index)**: Insights and guidelines for developers.
+- **[Simulation Notes](source/resources/simulations)**: Detailed documentation of our simulations.
+- **[Release Logs](source/release_notes)**: Track updates and new releases.
+- **[Workflows](source/resources/concepts)**: Overview of key workflows within SQuADDS.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
+Further Information
+--------------------
+
+- **General Index**: :ref:`genindex`
+- **Module Index**: :ref:`modindex`
+- **Search**: :ref:`search`
