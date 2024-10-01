@@ -11,8 +11,6 @@ Installation
 
 There are multiple ways to install SQuADDS. Choose the method that best suits your environment.
 
-.. contents::
-   :local:
 
 Install using pip
 -----------------
