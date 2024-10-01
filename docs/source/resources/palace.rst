@@ -10,96 +10,163 @@ https://github.com/sqdlab/SQDMetal/blob/main/SQDMetal/PALACE/HPC_documentation.m
 Installation of Palace on Mac OS
 ================================
 
-Installing Palace on macOS involves using Homebrew to manage dependencies and compiling the software using CMake. 
+Installing Palace on macOS involves using Homebrew to manage dependencies and compiling the software using CMake.
 
 Follow these steps to ensure a smooth installation process. It was tested to work on macOS Darwin 22.3.0 (Apple M1 Pro chip).
 
-1. **Install Dependencies**
+Prerequisites
+-------------
 
-   Use Homebrew to install the required dependencies for Palace. Run the following commands in your terminal:
+- **Homebrew**: A package manager for macOS. If not installed, run:
 
-   .. code-block:: sh
+  .. code-block:: bash
+
+     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+- **Xcode Command Line Tools**: Required for development tools. Install by running:
+
+  .. code-block:: bash
+
+     xcode-select --install
+
+Installation Steps
+------------------
+
+1. **Update Homebrew**:
+
+   .. code-block:: bash
 
       brew update
-      brew install cmake git open-mpi libuv lapack openblas llvm gcc@12
 
-2. **Set Up Environment Variables**
+2. **Install Dependencies**:
 
-   To use Clang provided by LLVM instead of the default macOS Clang, and to set up other necessary paths, add the following to your `~/.zshrc` or `~/.bashrc` file:
+   Install necessary packages using Homebrew:
 
-   .. code-block:: sh
+   .. code-block:: bash
 
-      export PATH=/opt/homebrew/opt/llvm/bin:/opt/homebrew/bin:$PATH
-      export LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
-      export LD_LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/llvm/lib
-      export OPENBLASROOT=/opt/homebrew/opt/openblas
+      brew install cmake gcc open-mpi openblas git
 
-      export CC=/opt/homebrew/opt/llvm/bin/clang
-      export CXX=/opt/homebrew/opt/llvm/bin/clang++
-      export FC=gfortran
+   - **cmake**: For configuring the build process.
+   - **gcc**: Provides the Fortran compiler `gfortran`.
+   - **open-mpi**: MPI distribution for parallel computations.
+   - **openblas**: Provides BLAS and LAPACK libraries.
+   - **git**: For cloning the Palace repository.
 
-   Then, source the updated configuration:
+3. **Set Environment Variables**:
 
-   .. code-block:: sh
+   Ensure CMake can find OpenBLAS:
 
-      source ~/.zshrc  # or source ~/.bashrc
+   .. code-block:: bash
 
-3. **Clone the Palace Repository**
+      export CMAKE_PREFIX_PATH=$(brew --prefix openblas)
 
-   Clone the Palace repository from GitHub to your local machine:
+4. **Clone the Palace Repository**:
 
-   .. code-block:: sh
+   .. code-block:: bash
 
-      git clone --recurse-submodules https://github.com/awslabs/palace.git
+      git clone https://github.com/awslabs/palace.git
       cd palace
 
-4. **Set Up the Build Environment**
+5. **Create a Build Directory**:
 
-   Create a build directory and navigate to it:
+   .. code-block:: bash
 
-   .. code-block:: sh
+      mkdir build && cd build
 
-      mkdir build
-      cd build
+6. **Configure the Build with CMake**:
 
-5. **Configure the Build**
+   Run CMake with appropriate compilers and options:
 
-   Use CMake to configure the build environment, specifying the paths to the BLAS and LAPACK libraries:
+   .. code-block:: bash
 
-   .. code-block:: sh
+      cmake -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_Fortran_COMPILER=$(brew --prefix gcc)/bin/gfortran \
+            -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH \
+            ..
 
-      cmake .. -DCMAKE_BUILD_TYPE=Release -DBLAS_LIBRARIES=/opt/homebrew/opt/openblas/lib/libopenblas.dylib -DLAPACK_LIBRARIES=/opt/homebrew/opt/lapack/lib/liblapack.dylib
+   - **CMAKE_C_COMPILER** and **CMAKE_CXX_COMPILER**: Use default Clang compilers.
+   - **CMAKE_Fortran_COMPILER**: Use `gfortran` from Homebrew GCC.
+   - **CMAKE_PREFIX_PATH**: Helps CMake locate OpenBLAS.
 
-6. **Build Palace**
+7. **Build Palace**:
 
-   Compile the Palace software using the make command:
+   Compile the software using:
 
-   .. code-block:: sh
+   .. code-block:: bash
 
-      make -j$(sysctl -n hw.ncpu)
+      make -j $(sysctl -n hw.ncpu)
 
-7. **Update Your Path**
+   This utilizes all available CPU cores for faster compilation.
 
-   Add the Palace executable to your PATH by adding the following line to your `~/.zshrc` or `~/.bashrc` file:
+8. **Verify the Installation**:
 
-   .. code-block:: sh
+   After building, the Palace executable is in the `bin/` directory:
 
-      export PATH="/path/to/palace/build/bin:$PATH"
+   .. code-block:: bash
 
-   Replace `/path/to/palace/build/bin` with the actual path to the `bin` directory in your Palace build directory.
+      ls bin/
 
-8. **Verify the Installation**
+   You should see an executable named `palace`.
 
-   To verify that Palace is installed correctly, open a new terminal session and run:
+9. **Run an Example**:
 
-   .. code-block:: sh
+   Test the installation by running an example:
 
-      palace
+   .. code-block:: bash
 
-If the command runs without errors, your installation is successful.
+      cd ../examples/cpw
+      ../../build/bin/palace cpw_wave_uniform.json
 
+   This runs the capacitor example using the Palace executable.
 
-If the command runs without errors, your installation is successful.
+Optional Steps
+--------------
+
+- **Install Palace System-wide**:
+
+  To install Palace to a specific directory (e.g., `/usr/local`), reconfigure with `CMAKE_INSTALL_PREFIX`:
+
+  .. code-block:: bash
+
+     cmake -DCMAKE_INSTALL_PREFIX=/usr/local \
+           -DCMAKE_C_COMPILER=clang \
+           -DCMAKE_CXX_COMPILER=clang++ \
+           -DCMAKE_Fortran_COMPILER=$(brew --prefix gcc)/bin/gfortran \
+           -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH \
+           ..
+
+     make -j $(sysctl -n hw.ncpu)
+     sudo make install
+
+  This installs the Palace executable to `/usr/local/bin`.
+
+Notes
+-----
+
+- **Fortran Compiler**: `gfortran` is required for building some dependencies and is provided by Homebrew GCC.
+
+- **MPI Support**: OpenMPI provides the necessary MPI support for parallel computations.
+
+- **BLAS and LAPACK**: OpenBLAS supplies these libraries, essential for numerical computations.
+
+- **Xcode Command Line Tools**: Needed for Clang compilers and development tools.
+
+Troubleshooting
+---------------
+
+- **CMake Cannot Find OpenBLAS**:
+
+  Ensure `CMAKE_PREFIX_PATH` is set correctly:
+
+  .. code-block:: bash
+
+     export CMAKE_PREFIX_PATH=$(brew --prefix openblas)
+
+- **MPI Errors**:
+
+  Confirm that OpenMPI is properly installed and in your PATH.
+
 
 Installation of Palace on Linux PCs
 ===================================

@@ -39,10 +39,11 @@ Contributors
 | **Eli Levenson-Falk, PhD** (University of Southern California) - Eternal Guidance Provider (Principle Investigator) 🙏🏽
 | **Clark Miyamoto** (New York University) - Code contributor 💻
 | **Madison Howard** (California Institute of Technology) - Bug Hunter 🐛
-| **Malida Hecht** (University of Southern California) - Data contributor 📀
+| **Kaveh Pezeshki** (Stanford University) - Documentation contributor 📄
 | **Anne Whelan** (US Navy) - Documentation contributor 📄
 | **Jenny Huang** (Columbia University) - Documentation contributor 📄
 | **Connie Miao** (Stanford University) - Data Contributor 📀
+| **Malida Hecht** (University of Southern California) - Data contributor 📀
 | **Daria Kowsari, PhD** (University of Southern California) - Data contributor 📀
 | **Vivek Maurya** (University of Southern California) - Data contributor 📀
 | **Haimeng Zhang, PhD** (IBM) - Data contributor 📀
