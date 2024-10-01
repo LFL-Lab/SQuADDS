@@ -4,7 +4,7 @@ Palace Installation Guide
 =========================
 
 Installation of Palace on HPC systems
-======================================
+=====================================
 
 Follow instructions to install Palace on Linux/HPC systems from the official palace site: https://awslabs.github.io/palace/stable/install/
 
