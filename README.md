@@ -2,7 +2,7 @@
   <img src="docs/_static/images/squadds_not_transparent.png" width="100%" alt="SQuADDS Logo" />
 </center>
 
-# Superconducting Qubit And Device Design and Simulation Database ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) ![Pepy Total Downloads](https://img.shields.io/pepy/dt/squadds) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow)
+# Superconducting Qubit And Device Design and Simulation Database ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) ![Pepy Total Downloads](https://img.shields.io/pepy/dt/squadds) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) [![arXiv](https://img.shields.io/badge/arXiv-2312.13483-<COLOR>.svg)](https://arxiv.org/abs/2312.13483) ![Alpha Version](https://img.shields.io/badge/Status-Alpha%20Version-yellow)
 
 > :warning: **This project is an alpha release and currently under active development. Some features and documentation may be incomplete. Please update to the latest release.**
 
