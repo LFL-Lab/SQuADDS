@@ -16,7 +16,7 @@ Contribution Items
 
 | **Documentation** - We welcome contributions to the documentation. If you find any typos or errors, please open an issue on GitHub.
 
-| **Implementation of Next Release** - If you would like to help in implementing the next version of SQuADDS, please look at what is being worked on for the `next release <https://github.com/shanto268/SQuADDS?tab=readme-ov-file#next-release>`_
+| **Implementation of our wish list** - If you would like to help in implementing the next version of SQuADDS, please look at `wish list <https://github.com/LFL-Lab/SQuADDS/blob/master/wish_list.md>`_ and feel free to contribute!
 
 Please see our `Contributing Guidelines <https://github.com/LFL-Lab/SQuADDS/blob/master/CONTRIBUTING.md>`_ for more information on how to get started.
 
