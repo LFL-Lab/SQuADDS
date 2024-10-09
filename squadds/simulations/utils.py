@@ -367,7 +367,10 @@ def chunk_sweep_options(sweep_opts, N):
     """
     # Extract claw_lengths and total_lengths from sweep_opts
     claw_lengths = sweep_opts['claw_opts']['connection_pads']['readout']['claw_length']
-    total_lengths = sweep_opts['cpw_opts']['total_length']
+    try:
+        total_lengths = sweep_opts['cpw_opts']['total_length']
+    except:
+        total_lengths = sweep_opts['cpw_options']['total_length']
 
     # Determine the number of claw_lengths to be assigned to each chunk
     base_chunk_size = len(claw_lengths) // N

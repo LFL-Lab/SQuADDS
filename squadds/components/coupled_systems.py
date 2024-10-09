@@ -78,7 +78,10 @@ class QubitCavity(QComponent):
         qubit_opts = Dict()
         self.copier(qubit_opts, p.qubit_options)
         qubit_opts["pos_y"] = 0
-        qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options['cpw_opts'].total_length > 2.500 else "-1000um"
+        try:
+            qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options['cpw_opts'].total_length > 2.500 else "-1000um"
+        except:
+            qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options['cpw_options'].total_length > 2.500 else "-1000um"
         self.qubit = TransmonCross(self.design, "{}_xmon".format(self.name), options = qubit_opts)
 
     def make_cavity(self):
@@ -99,7 +102,10 @@ class QubitCavity(QComponent):
         p = self.p
 
         temp_opts = Dict()
-        self.copier(temp_opts, p.cavity_claw_options['coupler_options'])
+        try:
+            self.copier(temp_opts, p.cavity_claw_options['coupler_options'])
+        except:
+            self.copier(temp_opts, p.cavity_claw_options['cplr_opts'])
 
         if(p.cavity_claw_options['coupler_type'].upper() == "CLT"):
             from qiskit_metal.qlibrary.couplers.coupled_line_tee import \
@@ -121,7 +127,10 @@ class QubitCavity(QComponent):
         from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
 
         p = self.p
-        p.cpw_opts = p.cavity_claw_options['cpw_opts']
+        try:
+            p.cpw_opts = p.cavity_claw_options['cpw_opts']
+        except:
+            p.cpw_opts = p.cavity_claw_options['cpw_options']
         
         left_opts = Dict()
         left_opts.update({'total_length': (p.cpw_opts.total_length if p.cavity_claw_options['coupler_type'] == 'capacitive' else p.cpw_opts.total_length/2) })

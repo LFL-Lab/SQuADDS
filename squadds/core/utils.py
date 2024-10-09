@@ -9,9 +9,8 @@ import webbrowser
 import numpy as np
 import pandas as pd
 from huggingface_hub import HfApi, HfFolder
-from tabulate import tabulate
-
 from squadds.core.globals import ENV_FILE_PATH
+from tabulate import tabulate
 
 
 def view_contributors_from_rst(rst_file_path):
@@ -479,7 +478,7 @@ def set_huggingface_api_key():
     # Append the new API key to the .env file
     with open(ENV_FILE_PATH, 'a') as file:
         file.write(f'\nHUGGINGFACE_API_KEY={api_key}\n')
-        print('API key added to .env file.')
+        print(f'API key added to {ENV_FILE_PATH} file.')
 
     api = HfApi()
     token = HfFolder.get_token()
