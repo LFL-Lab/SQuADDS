@@ -42,7 +42,7 @@
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../../_static/documentation_options.js?v=1e28cc32"></script>
-    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -581,6 +581,7 @@ document.write(`
   <h1>Source code for squadds.core.analysis</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">datashader</span> <span class="k">as</span> <span class="nn">ds</span>
 <span class="kn">import</span> <span class="nn">datashader.transfer_functions</span> <span class="k">as</span> <span class="nn">tf</span>
@@ -1221,6 +1222,182 @@ document.write(`
 
         <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Analyzer.get_qubit_options">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_qubit_options">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_qubit_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts qubit design options from the dataframe.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        df (pd.DataFrame): The dataframe containing design options.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">        Dict[str, List[Any]]: A dictionary containing lists of the extracted qubit options.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qubit_options_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;claw_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;claw_length&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;claw_width&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;ground_spacing&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;cross_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;cross_length&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;cross_width&#39;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">design_options</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_options&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">design_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has no &#39;design_options&#39;.&quot;</span><span class="p">)</span>
+                <span class="n">qubit_options</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;qubit_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+
+                <span class="n">claw_gap</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;readout&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;claw_gap&#39;</span><span class="p">)</span>
+                <span class="n">claw_length</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;readout&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;claw_length&#39;</span><span class="p">)</span>
+                <span class="n">claw_width</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;readout&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;claw_width&#39;</span><span class="p">)</span>
+                <span class="n">ground_spacing</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;readout&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">)</span>
+                <span class="n">cross_gap</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">)</span>
+                <span class="n">cross_length</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cross_length&#39;</span><span class="p">)</span>
+                <span class="n">cross_width</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cross_width&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="p">[</span><span class="n">claw_gap</span><span class="p">,</span> <span class="n">claw_length</span><span class="p">,</span> <span class="n">claw_width</span><span class="p">,</span> <span class="n">ground_spacing</span><span class="p">,</span> <span class="n">cross_gap</span><span class="p">,</span> <span class="n">cross_length</span><span class="p">,</span> <span class="n">cross_width</span><span class="p">]:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has missing qubit parameter(s).&quot;</span><span class="p">)</span>
+
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;claw_gap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claw_gap</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;claw_length&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claw_length</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;claw_width&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claw_width</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ground_spacing</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_gap</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;cross_length&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_length</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;cross_width&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_width</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">qubit_options_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">qubit_options_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">qubit_options_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
+
+
+
+<div class="viewcode-block" id="Analyzer.get_cpw_options">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_cpw_options">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_cpw_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts CPW options from the dataframe.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        df (pd.DataFrame): The dataframe containing design options.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">        Dict[str, List[Any]]: A dictionary containing lists of the extracted CPW options.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cpw_options_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;total_length&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;trace_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;trace_width&#39;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">design_options</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_options&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">design_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has no &#39;design_options&#39;.&quot;</span><span class="p">)</span>
+                <span class="n">cpw_opts</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cavity_claw_options&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cpw_opts&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;left_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+
+                <span class="n">total_length</span> <span class="o">=</span> <span class="n">cpw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;total_length&#39;</span><span class="p">)</span>
+                <span class="n">trace_gap</span> <span class="o">=</span> <span class="n">cpw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;trace_gap&#39;</span><span class="p">)</span>
+                <span class="n">trace_width</span> <span class="o">=</span> <span class="n">cpw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;trace_width&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="p">[</span><span class="n">total_length</span><span class="p">,</span> <span class="n">trace_gap</span><span class="p">,</span> <span class="n">trace_width</span><span class="p">]:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has missing CPW parameter(s).&quot;</span><span class="p">)</span>
+
+                <span class="n">cpw_options_dict</span><span class="p">[</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total_length</span><span class="p">)</span>
+                <span class="n">cpw_options_dict</span><span class="p">[</span><span class="s1">&#39;trace_gap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace_gap</span><span class="p">)</span>
+                <span class="n">cpw_options_dict</span><span class="p">[</span><span class="s1">&#39;trace_width&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace_width</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cpw_options_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">cpw_options_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">cpw_options_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
+
+
+
+<div class="viewcode-block" id="Analyzer.get_coupler_options">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_coupler_options">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_coupler_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts coupler options from the dataframe.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        df (pd.DataFrame): The dataframe containing design options.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">        Dict[str, List[Any]]: A dictionary containing lists of the extracted coupler options.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coupler_options_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;coupling_length&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;coupling_space&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;down_length&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;orientation&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;prime_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;prime_width&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;second_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;second_width&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;cap_distance&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;cap_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;cap_gap_ground&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;cap_width&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;finger_count&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;finger_length&#39;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">design_options</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_options&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">design_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has no &#39;design_options&#39;.&quot;</span><span class="p">)</span>
+                <span class="n">cavity_claw_options</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cavity_claw_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">cavity_claw_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coupler_type&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">coupler_type</span> <span class="o">==</span> <span class="s1">&#39;CLT&#39;</span><span class="p">:</span>
+                    <span class="n">coupler_options</span> <span class="o">=</span> <span class="n">cavity_claw_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coupler_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">extracted_options</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;coupling_length&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coupling_length&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;coupling_space&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coupling_space&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;down_length&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;down_length&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;orientation&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;orientation&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;prime_gap&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;prime_gap&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;prime_width&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;prime_width&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;second_gap&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;second_gap&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;second_width&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;second_width&#39;</span><span class="p">)</span>
+                    <span class="p">}</span>
+                <span class="k">elif</span> <span class="n">coupler_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;NCap&#39;</span><span class="p">,</span> <span class="s1">&#39;CapNInterdigital&#39;</span><span class="p">]:</span>
+                    <span class="n">coupler_options</span> <span class="o">=</span> <span class="n">cavity_claw_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coupler_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">extracted_options</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;cap_distance&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cap_distance&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;cap_gap&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cap_gap&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;cap_gap_ground&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cap_gap_ground&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;cap_width&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cap_width&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;finger_count&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;finger_count&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;finger_length&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;finger_length&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;orientation&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;orientation&#39;</span><span class="p">)</span>
+                    <span class="p">}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has an unsupported coupler_type: </span><span class="si">{</span><span class="n">coupler_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">extracted_options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">coupler_options_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">extracted_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">coupler_options_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">coupler_options_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">coupler_options_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
 </div>
 
 </pre></div>
@@ -1273,7 +1450,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.0.
     <br/>
   </p>
 </div>
