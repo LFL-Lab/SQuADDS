@@ -1,0 +1,1142 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>squadds.gds.processing &#8212; SQuADDS v0.3.5</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/katex-math.css?v=91adb8b6" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../_static/documentation_options.js?v=ba50482b"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../_static/katex.min.js?v=be8ff15f"></script>
+    <script src="../../../_static/auto-render.min.js?v=ad136472"></script>
+    <script src="../../../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/squadds/gds/processing';</script>
+    <link rel="icon" href="../../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">🎉 Our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a> is out! </div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+     
+  
+
+<a class="navbar-brand logo" href="https://lfl-lab.github.io/SQuADDS/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
+    <script>document.write(`<img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../source/resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../source/resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../source/release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../source/references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source/references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">squadds.gds....</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for squadds.gds.processing</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">gdspy</span>
+<span class="kn">import</span> <span class="nn">klayout.db</span> <span class="k">as</span> <span class="nn">kdb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="merge_shapes_in_layer">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.merge_shapes_in_layer">[docs]</a>
+<span class="k">def</span> <span class="nf">merge_shapes_in_layer</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">output_gds_file</span><span class="p">,</span> <span class="n">layer_number</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Selects all shapes in the given layer number from the input GDS file,</span>
+<span class="sd">    merges them together, and saves the result in the output GDS file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gds_file (str): Path to the input GDS file.</span>
+<span class="sd">        output_gds_file (str): Path to the output GDS file.</span>
+<span class="sd">        layer_number (int): The layer number whose shapes should be merged.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load the GDS file</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+    <span class="c1"># Find the index of the specified layer with datatype 0 (common in GDS files)</span>
+    <span class="n">layer_index</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer_number</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Iterate over each cell in the layout</span>
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">():</span>
+        <span class="c1"># Get the shapes in the specified layer</span>
+        <span class="n">shapes</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+
+        <span class="c1"># If there are shapes, merge them together using boolean union</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">shapes</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Merging shapes in layer </span><span class="si">{</span><span class="n">layer_number</span><span class="si">}</span><span class="s2"> in cell: </span><span class="si">{</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Create a region for the shapes on this layer</span>
+            <span class="n">region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">shapes</span><span class="p">)</span>
+            
+            <span class="c1"># Perform the boolean union to merge shapes</span>
+            <span class="n">merged_shapes</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">merged</span><span class="p">()</span>
+
+            <span class="c1"># Clear the original shapes</span>
+            <span class="n">shapes</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+            <span class="c1"># Insert the merged shapes back into the layer</span>
+            <span class="n">shapes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">merged_shapes</span><span class="p">)</span>
+
+    <span class="c1"># Save the modified layout to the output GDS file</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">output_gds_file</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Merged shapes in layer </span><span class="si">{</span><span class="n">layer_number</span><span class="si">}</span><span class="s2"> and saved to </span><span class="si">{</span><span class="n">output_gds_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="crop_top_left_rectangle">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.crop_top_left_rectangle">[docs]</a>
+<span class="k">def</span> <span class="nf">crop_top_left_rectangle</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">layer_number</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes a 300 x 100 um rectangle from the top left of the layer_number/datatype rectangle in the GDS file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gds_file (str): Path to the input GDS file.</span>
+<span class="sd">        width (int, optional): Width of the rectangle to remove in micrometers. Defaults to 300.</span>
+<span class="sd">        height (int, optional): Height of the rectangle to remove in micrometers. Defaults to 100.</span>
+<span class="sd">        layer_number (int, optional): The layer number of the rectangle to crop. Defaults to 5.</span>
+<span class="sd">        datatype (int, optional): The datatype of the rectangle to crop. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load the GDS file</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+    <span class="c1"># Iterate over each cell in the layout</span>
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">():</span>
+        <span class="c1"># Get the shapes in the 5/0 layer</span>
+        <span class="n">layer_index_5_0</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer_number</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
+        <span class="n">shapes_5_0</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index_5_0</span><span class="p">)</span>
+
+        <span class="c1"># Create a region from the 5/0 layer shapes</span>
+        <span class="n">region_5_0</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">shapes_5_0</span><span class="p">)</span>
+
+        <span class="c1"># Get the bounding box of the 5/0 layer shapes</span>
+        <span class="n">bbox_5_0</span> <span class="o">=</span> <span class="n">region_5_0</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+
+        <span class="c1"># Calculate the coordinates for the 300 x 100 um rectangle</span>
+        <span class="n">top_left_x</span> <span class="o">=</span> <span class="n">bbox_5_0</span><span class="o">.</span><span class="n">left</span>
+        <span class="n">top_left_y</span> <span class="o">=</span> <span class="n">bbox_5_0</span><span class="o">.</span><span class="n">top</span>
+        <span class="n">rect_width</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="n">layout</span><span class="o">.</span><span class="n">dbu</span>  <span class="c1"># Convert um to database units</span>
+        <span class="n">rect_height</span> <span class="o">=</span> <span class="n">height</span> <span class="o">/</span> <span class="n">layout</span><span class="o">.</span><span class="n">dbu</span>  <span class="c1"># Convert um to database units</span>
+
+        <span class="c1"># Create the 300 x 100 um rectangle</span>
+        <span class="n">rect_top_left</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">top_left_x</span><span class="p">,</span> <span class="n">top_left_y</span> <span class="o">-</span> <span class="n">rect_height</span><span class="p">,</span>
+                                <span class="n">top_left_x</span> <span class="o">+</span> <span class="n">rect_width</span><span class="p">,</span> <span class="n">top_left_y</span><span class="p">)</span>
+
+        <span class="c1"># Remove the 300 x 100 um rectangle from the 5/0 layer</span>
+        <span class="n">cropped_shapes</span> <span class="o">=</span> <span class="n">region_5_0</span> <span class="o">-</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">rect_top_left</span><span class="p">)</span>
+
+        <span class="c1"># Clear the original 5/0 layer shapes</span>
+        <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index_5_0</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="c1"># Insert the cropped shapes into the 5/0 layer</span>
+        <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index_5_0</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">cropped_shapes</span><span class="p">)</span>
+
+    <span class="c1"># Write the modified layout to the GDS file</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="n">height</span><span class="si">}</span><span class="s2"> um rectangle removed from the top left of the </span><span class="si">{</span><span class="n">layer_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">datatype</span><span class="si">}</span><span class="s2"> rectangle successfully.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output file: </span><span class="si">{</span><span class="n">gds_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="apply_fixes">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.apply_fixes">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_fixes</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies the required fixes to the GDS file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gds_file (str): Path to the input GDS file.</span>
+<span class="sd">        datatype (int, optional): The new datatype value for all layers. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Call the method to crop a 300 x 100 um rectangle on the top left of the 5/0 rectangle</span>
+    <span class="c1"># crop_top_left_rectangle(gds_file)</span>
+
+    <span class="c1"># Call the method to add a 703 layer datatype 0 rectangle covering the 5/0 layer</span>
+    <span class="n">add_703_layer</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+    <span class="c1"># Call the method to modify the GDS file datatypes</span>
+    <span class="n">modify_gds_datatypes</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
+
+    <span class="c1"># Call the method to delete layers with non-zero datatypes</span>
+    <span class="n">delete_non_zero_datatype_layers</span><span class="p">(</span><span class="n">gds_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.gds&#39;</span><span class="p">,</span> <span class="s1">&#39;_final.gds&#39;</span><span class="p">))</span>
+
+    <span class="c1"># Merge all metal layers</span>
+    <span class="n">merge_shapes_in_layer</span><span class="p">(</span><span class="n">gds_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.gds&#39;</span><span class="p">,</span> <span class="s1">&#39;_final.gds&#39;</span><span class="p">),</span> <span class="n">gds_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.gds&#39;</span><span class="p">,</span> <span class="s1">&#39;_final.gds&#39;</span><span class="p">),</span> <span class="mi">5</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="modify_gds_datatypes">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.modify_gds_datatypes">[docs]</a>
+<span class="k">def</span> <span class="nf">modify_gds_datatypes</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modifies the datatype of all layers in a GDS file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gds_file (str): Path to the input GDS file.</span>
+<span class="sd">        datatype (int, optional): The new datatype value for all layers. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load the GDS file</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+    <span class="c1"># Dictionary to store the merged layers</span>
+    <span class="n">merged_layers</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Iterate over each cell in the layout</span>
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">():</span>
+        <span class="c1"># Dictionary to store the layer numbers and their corresponding shapes</span>
+        <span class="n">layer_shapes</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Iterate over each layer in the layout</span>
+        <span class="k">for</span> <span class="n">layer_index</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer_indices</span><span class="p">():</span>
+            <span class="c1"># Get the layer number and datatype</span>
+            <span class="n">layer_info</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+            <span class="n">layer_number</span> <span class="o">=</span> <span class="n">layer_info</span><span class="o">.</span><span class="n">layer</span>
+            <span class="n">layer_datatype</span> <span class="o">=</span> <span class="n">layer_info</span><span class="o">.</span><span class="n">datatype</span>
+
+            <span class="c1"># Retrieve the shapes in the current layer for the cell</span>
+            <span class="n">shapes</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+
+            <span class="c1"># Add the shapes to the layer_shapes dictionary</span>
+            <span class="k">if</span> <span class="n">layer_number</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layer_shapes</span><span class="p">:</span>
+                <span class="n">layer_shapes</span><span class="p">[</span><span class="n">layer_number</span><span class="p">]</span> <span class="o">=</span> <span class="n">shapes</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">layer_shapes</span><span class="p">[</span><span class="n">layer_number</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">shapes</span><span class="p">)</span>
+
+        <span class="c1"># Merge layers with the same layer number using boolean union</span>
+        <span class="k">for</span> <span class="n">layer_number</span><span class="p">,</span> <span class="n">shapes</span> <span class="ow">in</span> <span class="n">layer_shapes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">layer_number</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">merged_layers</span><span class="p">:</span>
+                <span class="c1"># Create a new layer with the modified datatype</span>
+                <span class="n">merged_layer</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer_number</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
+                <span class="n">merged_layers</span><span class="p">[</span><span class="n">layer_number</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_layer</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Use the existing merged layer</span>
+                <span class="n">merged_layer</span> <span class="o">=</span> <span class="n">merged_layers</span><span class="p">[</span><span class="n">layer_number</span><span class="p">]</span>
+
+            <span class="c1"># Perform boolean union on the shapes</span>
+            <span class="n">merged_shapes</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">shapes</span><span class="p">)</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">merged_layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">merged_shapes</span><span class="p">)</span>
+
+        <span class="c1"># Delete the redundant layers</span>
+        <span class="k">for</span> <span class="n">layer_index</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer_indices</span><span class="p">():</span>
+            <span class="n">layer_info</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">layer_info</span><span class="o">.</span><span class="n">layer</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">merged_layers</span><span class="p">:</span>
+                <span class="n">cell</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+
+    <span class="c1"># Write the modified layout to the GDS file</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">gds_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.gds&#39;</span><span class="p">,</span> <span class="s1">&#39;_final.gds&#39;</span><span class="p">)</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Merged all redundant layers successfully.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output file: </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># delete_non_zero_datatype_layers(file_name)</span>
+
+<div class="viewcode-block" id="delete_non_zero_datatype_layers">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.delete_non_zero_datatype_layers">[docs]</a>
+<span class="k">def</span> <span class="nf">delete_non_zero_datatype_layers</span><span class="p">(</span><span class="n">gds_file</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Deletes all layers with datatypes not equal to 0 from the GDS file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gds_file (str): Path to the input GDS file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load the GDS file</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+    <span class="c1"># Iterate over each cell in the layout</span>
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">():</span>
+        <span class="c1"># Iterate over each layer in the layout</span>
+        <span class="k">for</span> <span class="n">layer_index</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer_indices</span><span class="p">():</span>
+            <span class="c1"># Get the layer datatype</span>
+            <span class="n">layer_info</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+            <span class="n">layer_datatype</span> <span class="o">=</span> <span class="n">layer_info</span><span class="o">.</span><span class="n">datatype</span>
+
+            <span class="c1"># If the layer datatype is not 0, delete the layer</span>
+            <span class="k">if</span> <span class="n">layer_datatype</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cell</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+
+    <span class="c1"># Write the modified layout to the GDS file</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Layers with non-zero datatypes deleted successfully.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output file: </span><span class="si">{</span><span class="n">gds_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># Call the method to add a 703 layer datatype 0 rectangle covering the 5/0 layer</span>
+    <span class="c1"># add_703_layer(gds_file.replace(&#39;_modified.gds&#39;, &#39;_final.gds&#39;))</span>
+
+<div class="viewcode-block" id="add_703_layer">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.add_703_layer">[docs]</a>
+<span class="k">def</span> <span class="nf">add_703_layer</span><span class="p">(</span><span class="n">gds_file</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a 703 layer datatype 0 rectangle covering the 5/0 layer in the GDS file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gds_file (str): Path to the input GDS file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load the GDS file</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+    <span class="c1"># Iterate over each cell in the layout</span>
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">():</span>
+        <span class="c1"># Get the shapes in the 5/0 layer</span>
+        <span class="n">layer_index_5_0</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">shapes_5_0</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index_5_0</span><span class="p">)</span>
+
+        <span class="c1"># Create a region from the 5/0 layer shapes</span>
+        <span class="n">region_5_0</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">shapes_5_0</span><span class="p">)</span>
+
+        <span class="c1"># Create a bounding box covering the 5/0 layer shapes</span>
+        <span class="n">bbox_5_0</span> <span class="o">=</span> <span class="n">region_5_0</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+
+        <span class="c1"># Create a 703 layer with datatype 0</span>
+        <span class="n">layer_index_703_0</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="mi">703</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Add a rectangle covering the 5/0 layer to the 703/0 layer</span>
+        <span class="n">rect_703_0</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">bbox_5_0</span><span class="p">)</span>
+        <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index_703_0</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">rect_703_0</span><span class="p">)</span>
+
+    <span class="c1"># Write the modified layout to the GDS file</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;703 layer datatype 0 rectangle added successfully.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output file: </span><span class="si">{</span><span class="n">gds_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_all_layer_numbers">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.get_all_layer_numbers">[docs]</a>
+<span class="k">def</span> <span class="nf">get_all_layer_numbers</span><span class="p">(</span><span class="n">gds_file</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves all unique layer numbers present in the GDS file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gds_file (str): Path to the input GDS file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of tuples, where each tuple contains (layer_number, datatype).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load the GDS file</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+    <span class="c1"># Create a set to store unique (layer, datatype) pairs</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c1"># Iterate over all layers in the layout</span>
+    <span class="k">for</span> <span class="n">layer_index</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer_indices</span><span class="p">():</span>
+        <span class="n">layer_info</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">layer_info</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">layer_info</span><span class="o">.</span><span class="n">datatype</span><span class="p">))</span>
+
+    <span class="c1"># Convert the set to a sorted list</span>
+    <span class="n">sorted_layers</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sorted_layers</span></div>
+
+
+
+
+<div class="viewcode-block" id="add_squares_to_layer">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.add_squares_to_layer">[docs]</a>
+<span class="k">def</span> <span class="nf">add_squares_to_layer</span><span class="p">(</span><span class="n">input_gds</span><span class="p">,</span> <span class="n">output_gds</span><span class="p">,</span> <span class="n">selected_layer</span><span class="p">,</span> <span class="n">selected_datatype</span><span class="p">,</span> <span class="n">square_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">keepout</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds squares to a specific layer in a GDS file.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        input_gds (str): The path to the input GDS file.</span>
+<span class="sd">        output_gds (str): The path to the output GDS file.</span>
+<span class="sd">        selected_layer (int): The layer number to add squares to.</span>
+<span class="sd">        selected_datatype (int): The datatype number to add squares to.</span>
+<span class="sd">        square_size (int, optional): The size of the squares to be added. Defaults to 5.</span>
+<span class="sd">        spacing (int, optional): The spacing between squares. Defaults to 10.</span>
+<span class="sd">        keepout (int, optional): The keepout area around the existing shapes. Defaults to 5.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read the GDS file</span>
+    <span class="n">gdsii</span> <span class="o">=</span> <span class="n">gdspy</span><span class="o">.</span><span class="n">GdsLibrary</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="n">input_gds</span><span class="p">)</span>
+
+    <span class="c1"># Create a new GDS file for the output</span>
+    <span class="n">gdsii_new</span> <span class="o">=</span> <span class="n">gdspy</span><span class="o">.</span><span class="n">GdsLibrary</span><span class="p">()</span>
+
+    <span class="c1"># Adjust spacing</span>
+    <span class="n">spacing</span> <span class="o">=</span> <span class="n">spacing</span><span class="o">*</span><span class="mi">2</span>
+
+    <span class="c1"># Copy all cells from the input GDS to the output GDS</span>
+    <span class="k">for</span> <span class="n">cell_name</span><span class="p">,</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">gdsii</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">gdsii_new</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+
+        <span class="c1"># Select the layer and datatype</span>
+        <span class="n">layer_to_process</span> <span class="o">=</span> <span class="p">(</span><span class="n">selected_layer</span><span class="p">,</span> <span class="n">selected_datatype</span><span class="p">)</span>
+
+        <span class="c1"># Get the shapes in the selected layer</span>
+        <span class="n">polygons</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_polygons</span><span class="p">(</span><span class="n">by_spec</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">layer_to_process</span> <span class="ow">in</span> <span class="n">polygons</span><span class="p">:</span>
+            <span class="c1"># Create a new layer and datatype for the squares</span>
+            <span class="n">new_layer</span> <span class="o">=</span> <span class="n">selected_layer</span>
+            <span class="n">new_datatype</span> <span class="o">=</span> <span class="n">selected_datatype</span> <span class="o">+</span> <span class="mi">2</span>
+
+            <span class="c1"># Calculate the bounding box of the existing shapes</span>
+            <span class="n">shapes</span> <span class="o">=</span> <span class="n">polygons</span><span class="p">[</span><span class="n">layer_to_process</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">shapes</span><span class="p">:</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># Ensure shape is a list of tuples</span>
+
+                <span class="n">min_x</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">keepout</span>
+                <span class="n">max_x</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">keepout</span>
+                <span class="n">min_y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">keepout</span>
+                <span class="n">max_y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">keepout</span>
+
+                <span class="c1"># Add squares within the geometry boundaries with keepout spacing</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">min_x</span>
+                <span class="k">while</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">max_x</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">min_y</span>
+                    <span class="k">while</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">max_y</span><span class="p">:</span>
+                        <span class="n">square</span> <span class="o">=</span> <span class="n">gdspy</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span>
+                            <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">square_size</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">square_size</span><span class="p">),</span>
+                            <span class="n">layer</span><span class="o">=</span><span class="n">new_layer</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="n">new_datatype</span>
+                        <span class="p">)</span>
+                        <span class="c1"># Check if the square points and the keepout area are within the existing polygon</span>
+                        <span class="n">square_points</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">square_size</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">square_size</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">square_size</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">square_size</span><span class="p">)]</span>
+                        <span class="n">keepout_points</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">keepout</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">keepout</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">square_size</span> <span class="o">+</span> <span class="n">keepout</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">keepout</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">square_size</span> <span class="o">+</span> <span class="n">keepout</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">square_size</span> <span class="o">+</span> <span class="n">keepout</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">keepout</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">square_size</span> <span class="o">+</span> <span class="n">keepout</span><span class="p">)</span>
+                        <span class="p">]</span>
+                        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">gdspy</span><span class="o">.</span><span class="n">inside</span><span class="p">(</span><span class="n">square_points</span><span class="p">,</span> <span class="p">[</span><span class="n">shape</span><span class="p">]))</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">gdspy</span><span class="o">.</span><span class="n">inside</span><span class="p">(</span><span class="n">keepout_points</span><span class="p">,</span> <span class="p">[</span><span class="n">shape</span><span class="p">])):</span>
+                            <span class="n">cell</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">square</span><span class="p">)</span>
+                        <span class="n">y</span> <span class="o">+=</span> <span class="n">spacing</span>
+                    <span class="n">x</span> <span class="o">+=</span> <span class="n">spacing</span>
+
+    <span class="c1"># Write the new GDS file</span>
+    <span class="n">gdsii_new</span><span class="o">.</span><span class="n">write_gds</span><span class="p">(</span><span class="n">output_gds</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_cheesing_effect">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.create_cheesing_effect">[docs]</a>
+<span class="k">def</span> <span class="nf">create_cheesing_effect</span><span class="p">(</span><span class="n">input_gds</span><span class="p">,</span> <span class="n">output_gds</span><span class="p">,</span> <span class="n">selected_layer</span><span class="p">,</span> <span class="n">selected_datatype</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a cheesing effect on a GDS file by subtracting a square layer from an original layer.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - input_gds (str): The path to the input GDS file.</span>
+<span class="sd">    - output_gds (str): The path to save the modified GDS file.</span>
+<span class="sd">    - selected_layer (int): The layer number of the original and square layers.</span>
+<span class="sd">    - selected_datatype (int): The datatype number of the original and square layers.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load the GDS file</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">input_gds</span><span class="p">)</span>
+
+    <span class="c1"># Get the top cell</span>
+    <span class="n">top_cell</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">top_cell</span><span class="p">()</span>
+
+    <span class="c1"># Define the layers</span>
+    <span class="n">original_layer</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">selected_layer</span><span class="p">,</span> <span class="n">selected_datatype</span><span class="p">)</span>
+    <span class="n">square_layer</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">selected_layer</span><span class="p">,</span> <span class="n">selected_datatype</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Boolean operation: A not B</span>
+    <span class="n">original_shapes</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">top_cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">original_layer</span><span class="p">))</span>
+    <span class="n">square_shapes</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">top_cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">square_layer</span><span class="p">))</span>
+    <span class="n">result_shapes</span> <span class="o">=</span> <span class="n">original_shapes</span> <span class="o">-</span> <span class="n">square_shapes</span>
+
+    <span class="c1"># Clear original layer and add result shapes</span>
+    <span class="n">top_cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">original_layer</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">top_cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">original_layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">result_shapes</span><span class="p">)</span>
+
+    <span class="c1"># Remove the squares layer</span>
+    <span class="n">top_cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">square_layer</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="c1"># Write the new GDS file</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">output_gds</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="bias_gds_features">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.bias_gds_features">[docs]</a>
+<span class="k">def</span> <span class="nf">bias_gds_features</span><span class="p">(</span><span class="n">input_gds</span><span class="p">,</span> <span class="n">output_gds</span><span class="p">,</span> <span class="n">bias</span><span class="p">,</span> <span class="n">layer_number</span><span class="p">,</span> <span class="n">datatype_number</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Biases features on a specific layer in a GDS file by expanding or contracting them by the specified amount using KLayout.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        input_gds (str): The path to the input GDS file.</span>
+<span class="sd">        output_gds (str): The path to the output GDS file.</span>
+<span class="sd">        bias (float): The amount by which to bias the features (in microns). Positive values expand features, negative values contract them.</span>
+<span class="sd">        layer_number (int): The layer number of the features to bias.</span>
+<span class="sd">        datatype_number (int, optional): The datatype number of the features to bias. If None, all datatypes on the layer are biased.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load the GDS file using KLayout</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">input_gds</span><span class="p">)</span>
+
+    <span class="c1"># Convert bias from microns to database units (nanometers)</span>
+    <span class="n">bias_db</span> <span class="o">=</span> <span class="n">bias</span> <span class="o">*</span> <span class="mi">1000</span>  <span class="c1"># KLayout uses nanometers as the unit</span>
+
+    <span class="c1"># Get the layer indices for the specified layer and datatype</span>
+    <span class="k">if</span> <span class="n">datatype_number</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># If datatype_number is None, get all datatypes on the layer</span>
+        <span class="n">layer_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">layer_info</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer_infos</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">layer_info</span><span class="o">.</span><span class="n">layer</span> <span class="o">==</span> <span class="n">layer_number</span><span class="p">:</span>
+                <span class="n">layer_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer_info</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">layer_info</span><span class="o">.</span><span class="n">datatype</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Get the specific layer index</span>
+        <span class="n">layer_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer_number</span><span class="p">,</span> <span class="n">datatype_number</span><span class="p">)]</span>
+
+    <span class="c1"># Iterate through all cells</span>
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">():</span>
+        <span class="c1"># Iterate through the specified layers</span>
+        <span class="k">for</span> <span class="n">layer_index</span> <span class="ow">in</span> <span class="n">layer_indices</span><span class="p">:</span>
+            <span class="n">shapes</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+            <span class="n">region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">shapes</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">region</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+                <span class="c1"># Perform the bias (grow or shrink)</span>
+                <span class="n">region</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">bias_db</span><span class="p">)</span>
+                <span class="c1"># Clear the original shapes</span>
+                <span class="n">shapes</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                <span class="c1"># Add the biased shapes back</span>
+                <span class="n">shapes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+
+    <span class="c1"># Write the biased GDS file</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">output_gds</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.2.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

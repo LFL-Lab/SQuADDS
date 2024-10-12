@@ -39,6 +39,10 @@ Resources
 
 Some learning resources we've found useful:
 
+- Helpful EM Simulation Resources:
+    - `CPW Resonator Simulations <https://smm.misis.ru/CPW-resonator-coupling/>`_
+    - `Various Microwave Calculator Tools <https://www.microwaves101.com/calculators>`_
+
 - Ansys Learning Resources:
     - `HowToSim YouTube Channel <https://youtube.com/@howtosim7253?feature=shared>`_
 

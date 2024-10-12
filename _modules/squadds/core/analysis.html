@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.core.analysis &#8212; SQuADDS v0.3.4</title>
+    <title>squadds.core.analysis &#8212; SQuADDS v0.3.5</title>
   
   
   
@@ -41,7 +41,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=1e28cc32"></script>
+    <script src="../../../_static/documentation_options.js?v=ba50482b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -1398,8 +1398,34 @@ document.write(`
                     <span class="n">coupler_options_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">coupler_options_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
+
+
+        
+<div class="viewcode-block" id="Analyzer.get_Ljs">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_Ljs">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_Ljs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the EJ values from the dataframe. Converts them to Josephson inductance values using pyEPR</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        df (pd.DataFrame): The dataframe containing design options. </span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">        np.array: An array of Josephson inductance values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pyEPR.calcs</span> <span class="kn">import</span> <span class="n">Convert</span>
+
+        <span class="c1"># EJ values are stored in a column named &#39;EJ&#39; in GHz</span>
+        <span class="n">EJ_values</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;EJ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        
+        <span class="c1"># Convert EJ (in MHz) to Josephson inductance (Lj) in nH</span>
+        <span class="n">Ljs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Convert</span><span class="o">.</span><span class="n">Lj_from_Ej</span><span class="p">(</span><span class="n">Ej</span><span class="p">,</span> <span class="n">units_in</span><span class="o">=</span><span class="s1">&#39;GHz&#39;</span><span class="p">,</span> <span class="n">units_out</span><span class="o">=</span><span class="s1">&#39;nH&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">Ej</span> <span class="ow">in</span> <span class="n">EJ_values</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">Ljs</span></div>
 </div>
 
+        
+        
 </pre></div>
 
                 </article>
@@ -1450,7 +1476,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.2.
     <br/>
   </p>
 </div>
