@@ -6,18 +6,6 @@ from squadds.core.utils import *
 from squadds.interpolations.interpolator import Interpolator
 
 
-def string_to_float(string):
-    """
-    Converts a string representation of a number to a float.
-
-    Args:
-        string (str): The string representation of the number.
-
-    Returns:
-        float: The converted float value.
-    """
-    return float(string[:-2])
-
 class ScalingInterpolator(Interpolator):
     """Class for scaling-based interpolation."""
     def __init__(self, analyzer: Analyzer, target_params: dict):

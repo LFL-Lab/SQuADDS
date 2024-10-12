@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.3.4 (2024-10-11)
+--------------------------
+
+* **Alpha Version 0.3.5**
+
+**New Features**
+
+- Added methods to `Analysis` to retrieve design parameters easily from any dataframe with `design_options` column
+- Added custom TransmonCross and JJ elements
+- Minor bug fixes in string inconsistencies and better error messaging
+- Added methods for getting `design_df` from ML interpolations
+- Added some post-processing methods for gds files
+
+---
+
 Version 0.3.4 (2024-09-27)
 --------------------------
 

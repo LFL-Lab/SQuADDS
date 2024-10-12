@@ -9,9 +9,35 @@ import webbrowser
 import numpy as np
 import pandas as pd
 from huggingface_hub import HfApi, HfFolder
-from squadds.core.globals import ENV_FILE_PATH
 from tabulate import tabulate
 
+from squadds.core.globals import ENV_FILE_PATH
+
+
+def float_to_string(value, units):
+    """
+    Converts a float value to a string representation with units.
+
+    Args:
+        value (float): The value to be converted.
+        units (str): The units to be appended to the value.
+
+    Returns:
+        str: The value as a string with the units.
+    """
+    return f"{value}{units}"
+
+def string_to_float(string):
+    """
+    Converts a string representation of a number to a float.
+
+    Args:
+        string (str): The string representation of the number.
+
+    Returns:
+        float: The converted float value.
+    """
+    return float(string[:-2])
 
 def view_contributors_from_rst(rst_file_path):
     """
@@ -759,5 +785,5 @@ def delete_categorical_columns(df):
 
     # Drop the selected columns
     df = df.drop(columns=category_columns)
-    
-    return df
+
+    return df 

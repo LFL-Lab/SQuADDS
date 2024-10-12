@@ -63,7 +63,13 @@ class QubitCavity(QComponent):
         self.make_qubit()
         self.make_cavity()
         self.make_pins()
-        print("There may be \"kinks\" in the CPW (a known issue from `qiskit-metal`). To remove the kinks, you can either:\n1. Adjust the `asymmetry` parameter.\n2. Modify the `start_jogged_extension` or `end_jogged_extension`.\n3. Change the `down_length` of the CoupledLineTee (CLT) component.\n4. Change the y-value of the CLT component by 20-50um until smooth.\nExperiment with these parameters to optimize the design.")
+        print(
+            'There might be "kinks" in the CPW, which is a known issue in `qiskit-metal`.\n'
+            'To resolve this, try adjusting the `start_straight` or `end_straight` parameters.\n'
+            'For more details and resolution tips, check out this guide:\n'
+            'https://qiskit-community.github.io/qiskit-metal/tut/2-From-components-to-chip/2.12-Simple-Meander.html'
+        )
+
 
 
     def make_qubit(self):

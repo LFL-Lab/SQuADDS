@@ -50,7 +50,7 @@ You can use our Docker image to run SQuADDS. The Docker image is available `here
 Fresh Environment Installation
 -------------------------------
 
-For installing SQuADDS (from PyPi) on a completely fresh environment on a UNIX machine, you can use the following shell script.
+For installing SQuADDS (from PyPi) on a completely fresh environment on a UNIX machine (or a Windows machine with Anaconda Prompt), you can use the following commands.
 
 .. code-block:: bash
 

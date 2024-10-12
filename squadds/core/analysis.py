@@ -762,3 +762,26 @@ class Analyzer:
                     coupler_options_dict[key].append(None)
 
         return {key: np.array(value) for key, value in coupler_options_dict.items()}
+
+        
+    def get_Ljs(self, df: pd.DataFrame):
+        """
+        Extracts the EJ values from the dataframe. Converts them to Josephson inductance values using pyEPR
+        
+        Parameters:
+        df (pd.DataFrame): The dataframe containing design options. 
+        
+        Returns:
+        np.array: An array of Josephson inductance values.
+        """
+        from pyEPR.calcs import Convert
+
+        # EJ values are stored in a column named 'EJ' in GHz
+        EJ_values = df['EJ'].values
+        
+        # Convert EJ (in MHz) to Josephson inductance (Lj) in nH
+        Ljs = np.array([Convert.Lj_from_Ej(Ej, units_in='GHz', units_out='nH') for Ej in EJ_values])
+        
+        return Ljs
+        
+        
