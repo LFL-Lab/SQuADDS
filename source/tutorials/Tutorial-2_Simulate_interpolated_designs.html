@@ -601,7 +601,7 @@ document.write(`
 <p>In this tutorial we will learn how to simulate designs obtained from the SQuADDS Database. We will be using <strong>Ansys HFSS</strong> as the simulator backend in this tutorial.</p>
 <p><strong>Warning: This tutorial will not run on Mac OS since Ansys HFSS is not available on Mac</strong></p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
@@ -676,9 +676,9 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<section id="Get-Target-Interpolated-Design">
-<h2>Get Target Interpolated Design<a class="headerlink" href="#Get-Target-Interpolated-Design" title="Link to this heading">#</a></h2>
-<p>Find the best geometries for your desired Hamiltonian parameters the same way as in <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html#Making-Systems-out-of-Circuit-QED-Elements">Tutorial 1</a>:</p>
+<section id="Capacitance-Matrix-Simulation-for-Qubits">
+<h2>Capacitance Matrix Simulation for Qubits<a class="headerlink" href="#Capacitance-Matrix-Simulation-for-Qubits" title="Link to this heading">#</a></h2>
+<p>Find the best geometries for your desired qubit Hamiltonian parameters the same way as in <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html#Making-Systems-out-of-Circuit-QED-Elements">Tutorial 1</a>:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -689,7 +689,6 @@ document.write(`
 <span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">)</span>
 <span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
-<span class="c1"># df</span>
 </pre></div>
 </div>
 </div>
@@ -725,7 +724,7 @@ document.write(`
 <p>Once you have the target design (in this case in Qiskit Metal format), you can then simulate it in whichever application you choose. However, we provide a native API to make it easier to get started with simulation on Ansys HFSS (support for AWS Palace will be provided hopefully in the near future!).</p>
 <p>We use the <code class="docutils literal notranslate"><span class="pre">AnsysSimulator</span></code> class to run simulations:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds</span> <span class="kn">import</span> <span class="n">AnsysSimulator</span>
@@ -778,7 +777,7 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<p>Then, we simulate our device with Ansys HFSS. In this case, we are simulating a TransmonCross object to get its corresponding capacitance matrix.</p>
+<p>Then, we simulate our device with Ansys HFSS. In this case, we are simulating a <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> object to get its corresponding capacitance matrix.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -805,7 +804,7 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<p>We can also analyze the simulated capacitance matrix results using the <code class="docutils literal notranslate"><span class="pre">get_xmon_info()</span></code> function, which returns the <code class="docutils literal notranslate"><span class="pre">qubit_anharmonicity_MHz</span></code> and <code class="docutils literal notranslate"><span class="pre">qubit_frequency_GHz</span></code>.</p>
+<p>Now, we analyze the simulated capacitance matrix results using the <code class="docutils literal notranslate"><span class="pre">get_xmon_info()</span></code> function, which returns the Hamiltonian parameters - <code class="docutils literal notranslate"><span class="pre">qubit_anharmonicity_MHz</span></code> and <code class="docutils literal notranslate"><span class="pre">qubit_frequency_GHz</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -892,9 +891,9 @@ document.write(`
 </section>
 <section id="Simulating-an-Interpolated-Qubit-+-Cavity-device">
 <h2>Simulating an Interpolated Qubit + Cavity device<a class="headerlink" href="#Simulating-an-Interpolated-Qubit-+-Cavity-device" title="Link to this heading">#</a></h2>
-<p>This time, we look for a complete device, which includes a TransmonCross object coupled to a RouteMeander CPW and CoupledLineTee, as in Tutorial 1.</p>
+<p>This time, we look for a complete interpolated device, which includes a TransmonCross object coupled to a RouteMeander CPW and CoupledLineTee, as in Tutorial 1 - which does not exist in the simulation database.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
@@ -902,12 +901,13 @@ document.write(`
 <span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
 <span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
 <span class="n">merged_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
-<span class="n">merged_df</span>
+
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -924,13 +924,15 @@ document.write(`
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.interpolations.physics</span> <span class="kn">import</span> <span class="n">ScalingInterpolator</span>
 
-<span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
-                                       <span class="n">num_top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                       <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span>
-                                       <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">results</span>
+<span class="c1"># Create an instance of ScalingInterpolator</span>
+<span class="n">interpolator</span> <span class="o">=</span> <span class="n">ScalingInterpolator</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">target_params</span><span class="p">)</span>
+
+<span class="n">design_df</span> <span class="o">=</span> <span class="n">interpolator</span><span class="o">.</span><span class="n">get_design</span><span class="p">()</span>
+
+<span class="c1"># Get the device from the design_df</span>
+<span class="n">device_interp</span> <span class="o">=</span> <span class="n">design_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -938,8 +940,7 @@ document.write(`
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best_device</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">best_device</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">device_interp</span>
 </pre></div>
 </div>
 </div>
@@ -948,7 +949,7 @@ document.write(`
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ansys_simulator</span> <span class="o">=</span> <span class="n">AnsysSimulator</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">best_device</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ansys_simulator</span> <span class="o">=</span> <span class="n">AnsysSimulator</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">device_interp</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -956,7 +957,7 @@ document.write(`
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ansys_results</span> <span class="o">=</span> <span class="n">ansys_simulator</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">best_device</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ansys_results</span> <span class="o">=</span> <span class="n">ansys_simulator</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">device_interp</span><span class="p">)</span>
 <span class="n">ansys_results</span>
 </pre></div>
 </div>
@@ -1173,7 +1174,7 @@ document.write(`
 <h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
 <div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
 </h3><p><p>Developed by Sadman Ahmed Shanto</p>
-</p><p><p>This tutorial is written by Andre Kuo</p>
+</p><p><p>This tutorial is written by Andre Kuo and Sadman Ahmed Shanto</p>
 </p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2023.</p>
 </p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
 </p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
@@ -1226,7 +1227,7 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Get-Target-Interpolated-Design">Get Target Interpolated Design</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Capacitance-Matrix-Simulation-for-Qubits">Capacitance Matrix Simulation for Qubits</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Simulate-the-Target-Design">Simulate the Target Design</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Extracting-the-data-needed-for-contributing-to-the-dataset">Extracting the data needed for contributing to the dataset</a></li>
 </ul>

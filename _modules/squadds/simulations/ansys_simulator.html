@@ -737,43 +737,21 @@ document.write(`
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">return_df</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>  <span class="c1"># have a qubit_cavity object</span>
-            <span class="n">device_dict</span> <span class="o">=</span> <span class="n">get_first_element_if_series</span><span class="p">(</span><span class="n">device_dict</span><span class="p">)</span>
-            <span class="n">qubit_geoms</span> <span class="o">=</span> <span class="n">get_first_element_if_series</span><span class="p">(</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">])</span>
-            <span class="n">cavity_geoms</span> <span class="o">=</span> <span class="n">get_first_element_if_series</span><span class="p">(</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">])</span>
-            <span class="n">qubit_setup</span> <span class="o">=</span> <span class="n">get_first_element_if_series</span><span class="p">(</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_qubit&quot;</span><span class="p">])</span>
-            <span class="n">cavity_setup</span> <span class="o">=</span> <span class="n">get_first_element_if_series</span><span class="p">(</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">])</span>
-            
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="c1"># have a qubit_cavity object</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
-                <span class="n">qubit_geoms</span><span class="o">=</span><span class="n">qubit_geoms</span><span class="p">,</span>
-                <span class="n">cavity_geoms</span><span class="o">=</span><span class="n">cavity_geoms</span>
+                <span class="n">qubit_geoms</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">],</span>
+                <span class="n">cavity_geoms</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
-                <span class="n">qubit_setup</span><span class="o">=</span><span class="n">qubit_setup</span><span class="p">,</span>
-                <span class="n">cavity_setup</span><span class="o">=</span><span class="n">cavity_setup</span>
+                <span class="n">qubit_setup</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_qubit&quot;</span><span class="p">],</span>
+                <span class="n">cavity_setup</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">]</span>
             <span class="p">)</span>
-            
-            <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_whole_device</span><span class="p">(</span>
-                <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
-                <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span>
-                <span class="n">LOM_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">qubit_setup</span><span class="p">,</span>
-                <span class="n">eigenmode_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">cavity_setup</span>
-            <span class="p">)</span>
-        
-        <span class="c1"># Handle non-qubit_cavity object case</span>
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># have a non-qubit_cavity object</span>
-            <span class="n">design_options</span> <span class="o">=</span> <span class="n">get_first_element_if_series</span><span class="p">(</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">])</span>
-            <span class="n">setup</span> <span class="o">=</span> <span class="n">get_first_element_if_series</span><span class="p">(</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">])</span>
+            <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_whole_device</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">qubit_setup</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">cavity_setup</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">design_options</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span> <span class="o">=</span> <span class="n">setup</span>
-
-            <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_single_design</span><span class="p">(</span>
-                <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
-                <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span>
-                <span class="n">lom_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span>
-            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># have a non-qubit_cavity object</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]</span>
+            <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span> <span class="n">lom_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="n">return_df</span></div>
 

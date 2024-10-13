@@ -591,10 +591,10 @@ document.write(`
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">qiskit_metal</span> <span class="k">as</span> <span class="nn">metal</span>
 <span class="kn">import</span> <span class="nn">scqubits</span> <span class="k">as</span> <span class="nn">scq</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
 <span class="kn">from</span> <span class="nn">prettytable</span> <span class="kn">import</span> <span class="n">PrettyTable</span>
 <span class="kn">from</span> <span class="nn">pyaedt</span> <span class="kn">import</span> <span class="n">Hfss</span>
 <span class="kn">from</span> <span class="nn">qiskit_metal</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">MetalGUI</span><span class="p">,</span> <span class="n">designs</span><span class="p">,</span> <span class="n">draw</span>
@@ -617,6 +617,22 @@ document.write(`
 <span class="kn">from</span> <span class="nn">squadds.components.coupled_systems</span> <span class="kn">import</span> <span class="n">QubitCavity</span>
 
 
+<div class="viewcode-block" id="get_cavity_claw_options_keys">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.get_cavity_claw_options_keys">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cavity_claw_options_keys</span><span class="p">(</span><span class="n">cavity_dict</span><span class="p">):</span>
+    <span class="c1"># Iterate over the keys of cavity_dict</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cpw&quot;</span><span class="p">):</span>
+            <span class="n">cpw_opts_key</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="k">elif</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cplr&quot;</span><span class="p">):</span>
+            <span class="n">cplr_opts_key</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    
+    <span class="k">return</span> <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span></div>
+
+
+
 <div class="viewcode-block" id="string_to_float">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.string_to_float">[docs]</a>
 <span class="k">def</span> <span class="nf">string_to_float</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
@@ -631,42 +647,6 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">string</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span></div>
 
-
-<div class="viewcode-block" id="get_cavity_claw_options">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.get_cavity_claw_options">[docs]</a>
-<span class="k">def</span> <span class="nf">get_cavity_claw_options</span><span class="p">(</span><span class="n">cavity_dict</span><span class="p">):</span>
-    <span class="c1"># Assuming cavity_dict is already defined</span>
-    <span class="n">cpw_opts</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">cplr_opts</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="c1"># Iterate over the keys of cavity_dict</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cpw&quot;</span><span class="p">):</span>
-            <span class="n">cpw_opts_key</span> <span class="o">=</span> <span class="n">key</span>
-            <span class="n">cpw_opts</span> <span class="o">=</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cplr&quot;</span><span class="p">):</span>
-            <span class="n">cplr_opts_key</span> <span class="o">=</span> <span class="n">key</span>
-            <span class="n">cplr_opts</span> <span class="o">=</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="n">cplr_opts_key</span><span class="p">]</span>
-    
-    <span class="k">return</span> <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span><span class="p">,</span> <span class="n">cpw_opts</span><span class="p">,</span> <span class="n">cplr_opts</span></div>
-
-
-<div class="viewcode-block" id="get_first_element_if_series">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.get_first_element_if_series">[docs]</a>
-<span class="k">def</span> <span class="nf">get_first_element_if_series</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Checks if the input value is a pd.Series and returns the first element if true.</span>
-<span class="sd">    Otherwise, returns the value unchanged.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        value: The input value, which could be a Series or other data type.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        The first element if the input is a pd.Series, otherwise the input value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Safely get the first element of the Series</span>
-    <span class="k">return</span> <span class="n">value</span></div>
 
 
 <div class="viewcode-block" id="getMeshScreenshot">
@@ -929,9 +909,9 @@ document.write(`
     <span class="k">return</span> <span class="n">claw</span></div>
 
 
-<div class="viewcode-block" id="create_coupler">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_coupler">[docs]</a>
-<span class="k">def</span> <span class="nf">create_coupler</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
+<div class="viewcode-block" id="create_ncap_coupler">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_ncap_coupler">[docs]</a>
+<span class="k">def</span> <span class="nf">create_ncap_coupler</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a coupler based on the given options and design.</span>
 
@@ -943,7 +923,25 @@ document.write(`
 <span class="sd">        The created coupler object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-90&quot;</span>
-    <span class="n">cplr</span> <span class="o">=</span> <span class="n">CapNInterdigitalTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;cplr&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">opts</span><span class="p">)</span> <span class="k">if</span> <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;finger_count&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">CoupledLineTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;cplr&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">opts</span><span class="p">)</span>
+    <span class="n">cplr</span> <span class="o">=</span> <span class="n">CapNInterdigitalTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;cplr&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">opts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cplr</span></div>
+
+
+<div class="viewcode-block" id="create_clt_coupler">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_clt_coupler">[docs]</a>
+<span class="k">def</span> <span class="nf">create_clt_coupler</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a CoupledLineTee coupler based on the given options and design.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        opts (dict): A dictionary containing the options for the coupler.</span>
+<span class="sd">        design: The design object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The created coupler object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-90&quot;</span>
+    <span class="n">cplr</span> <span class="o">=</span> <span class="n">CoupledLineTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;cplr&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">opts</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cplr</span></div>
 
 
@@ -969,7 +967,7 @@ document.write(`
     <span class="c1"># jogs = OrderedDict()</span>
     <span class="c1"># jogs[0] = [&quot;R90&quot;, f&#39;{adj_distance/(1.5)}um&#39;]</span>
     <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;lead&quot;</span> <span class="p">:</span> <span class="n">Dict</span><span class="p">(</span>
-                            <span class="n">start_straight</span> <span class="o">=</span> <span class="s2">&quot;100um&quot;</span><span class="p">,</span>
+                            <span class="n">start_straight</span> <span class="o">=</span> <span class="s2">&quot;50um&quot;</span><span class="p">,</span>
                             <span class="n">end_straight</span> <span class="o">=</span> <span class="s2">&quot;50um&quot;</span><span class="p">,</span>
                             
                             <span class="c1"># start_jogged_extension = jogs</span>
@@ -1049,11 +1047,10 @@ document.write(`
 <span class="sd">        list: A list of dictionaries, each containing a chunk of the sweep options.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Extract claw_lengths and total_lengths from sweep_opts</span>
+    <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span> <span class="o">=</span> <span class="n">get_cavity_claw_options_keys</span><span class="p">(</span><span class="n">sweep_opts</span><span class="p">)</span>
+
     <span class="n">claw_lengths</span> <span class="o">=</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_length&#39;</span><span class="p">]</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">total_lengths</span> <span class="o">=</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s1">&#39;cpw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="n">total_lengths</span> <span class="o">=</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s1">&#39;cpw_options&#39;</span><span class="p">][</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span>
+    <span class="n">total_lengths</span> <span class="o">=</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">][</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span>
 
     <span class="c1"># Determine the number of claw_lengths to be assigned to each chunk</span>
     <span class="n">base_chunk_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">claw_lengths</span><span class="p">)</span> <span class="o">//</span> <span class="n">N</span>
@@ -1075,12 +1072,12 @@ document.write(`
                     <span class="s1">&#39;readout&#39;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="p">}</span>
             <span class="p">},</span>
-            <span class="s1">&#39;cpw_opts&#39;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s1">&#39;cpw_opts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-            <span class="s1">&#39;cplr_opts&#39;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s1">&#39;cplr_opts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="s1">&#39;cpw_opts&#39;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="s1">&#39;cplr_opts&#39;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="n">cplr_opts_key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="p">}</span>
 
         <span class="n">new_sweep_opts</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">claw_length_chunk</span>
-        <span class="n">new_sweep_opts</span><span class="p">[</span><span class="s1">&#39;cpw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_lengths</span>
+        <span class="n">new_sweep_opts</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">][</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_lengths</span>
 
         <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_sweep_opts</span><span class="p">)</span>
 
