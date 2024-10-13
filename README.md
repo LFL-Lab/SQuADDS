@@ -192,12 +192,13 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 | Sara Sussman, PhD  | Fermilab                           | Bug Hunter                       |
 
 ## Developers
-- [shanto268](https://github.com/shanto268) - 293 contributions
+- [shanto268](https://github.com/shanto268) - 296 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
-- [LFL-Lab](https://github.com/LFL-Lab) - 2 contributions
+- [LFL-Lab](https://github.com/LFL-Lab) - 3 contributions
 - [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
 ---
+
 
 
 
