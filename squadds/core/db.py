@@ -11,12 +11,11 @@ import pandas as pd
 import requests
 from datasets import get_dataset_config_names, load_dataset
 from huggingface_hub import login
-from tabulate import tabulate
-from tqdm import tqdm
-
 from squadds.core.design_patterns import SingletonMeta
 from squadds.core.processing import *
 from squadds.core.utils import *
+from tabulate import tabulate
+from tqdm import tqdm
 
 #* HANDLE WARNING MESSAGES
 if sys.platform == "darwin":  # Checks if the operating system is macOS
@@ -372,7 +371,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         to the list. Finally, it prints the list of unique contributors in a tabular format with a banner.
         """
         try:
-            view_contributors_from_rst('../docs/source/developer/index.rst')
+            view_contributors_from_rst('https://raw.githubusercontent.com/LFL-Lab/SQuADDS/refs/heads/master/docs/source/developer/index.rst')
         except:
             print("Contributors not found in the documentation - missing index.rst file in the docs/source/developer directory.")
 

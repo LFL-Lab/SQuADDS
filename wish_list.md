@@ -77,6 +77,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Boring but Necessary:
 
+- add input type error handling to sim code
 - automated kink detection + meander smoothing prior to qiskit-metal rendering
 - letting users choose the `.env` file location OR telling them where to find it
 - Check for claw dimensions on the Hamiltonian space plot

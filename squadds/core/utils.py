@@ -8,10 +8,10 @@ import webbrowser
 
 import numpy as np
 import pandas as pd
+import requests
 from huggingface_hub import HfApi, HfFolder
-from tabulate import tabulate
-
 from squadds.core.globals import ENV_FILE_PATH
+from tabulate import tabulate
 
 
 def float_to_string(value, units):
@@ -39,12 +39,12 @@ def string_to_float(string):
     """
     return float(string[:-2])
 
-def view_contributors_from_rst(rst_file_path):
+def view_contributors_from_rst(rst_url):
     """
-    Extract and print relevant contributor information from the index.rst file.
+    Extract and print relevant contributor information from an index.rst file fetched from a URL.
 
     Args:
-        rst_file_path (str): The path to the `index.rst` file.
+        rst_url (str): The URL to the `index.rst` file.
 
     Returns:
         None
@@ -52,8 +52,11 @@ def view_contributors_from_rst(rst_file_path):
 
     contributors_data = []
 
-    with open(rst_file_path, 'r') as file:
-        content = file.read()
+    # Fetch the .rst file from the URL
+    response = requests.get(rst_url)
+    
+    if response.status_code == 200:
+        content = response.text
 
         # Find the Contributors section
         contributors_match = re.search(r'Contributors\s+-{3,}\s+(.*?)(\n\n|$)', content, re.S)
@@ -73,11 +76,13 @@ def view_contributors_from_rst(rst_file_path):
                         contribution = match.group(3)
                         contributors_data.append([name, institution, contribution])
 
-    if contributors_data:
-        headers = ["Name", "Institution", "Contribution"]
-        print(tabulate(contributors_data, headers=headers, tablefmt="grid"))
+        if contributors_data:
+            headers = ["Name", "Institution", "Contribution"]
+            print(tabulate(contributors_data, headers=headers, tablefmt="grid"))
+        else:
+            print("No contributors found in the RST file.")
     else:
-        print("No contributors found in the RST file.")
+        print(f"Failed to fetch the file. Status code: {response.status_code}")
 
 
 def save_intermediate_df(df, filename, file_idx):
