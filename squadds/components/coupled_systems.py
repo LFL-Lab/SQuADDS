@@ -159,7 +159,7 @@ class QubitCavity(QComponent):
         jogs = OrderedDict()
         jogs[0] = ["R90", f'{adj_distance/(1.5)}um']
         left_opts.update({"lead" : Dict(
-                                start_straight = "100um",
+                                start_straight = "150um",
                                 end_straight = "50um",
                                 
                                 start_jogged_extension = jogs
