@@ -23,10 +23,12 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/squadds_env:${{ github.event.release.tag_name }} .
-          docker tag ghcr.io/${{ github.repository_owner }}/squadds_env:${{ github.event.release.tag_name }} ghcr.io/${{ github.repository_owner }}/squadds_env:latest
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t ghcr.io/$REPO_OWNER/squadds_env:${{ github.event.release.tag_name }} .
+          docker tag ghcr.io/$REPO_OWNER/squadds_env:${{ github.event.release.tag_name }} ghcr.io/$REPO_OWNER/squadds_env:latest
 
       - name: Push Docker image to GitHub Packages
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/squadds_env:${{ github.event.release.tag_name }}
-          docker push ghcr.io/${{ github.repository_owner }}/squadds_env:latest
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          docker push ghcr.io/$REPO_OWNER/squadds_env:${{ github.event.release.tag_name }}
+          docker push ghcr.io/$REPO_OWNER/squadds_env:latest
