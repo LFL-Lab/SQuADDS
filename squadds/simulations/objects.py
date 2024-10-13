@@ -79,7 +79,10 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
     if device_dict["coupler_type"].upper() == "CLT":
         emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options, cross_dict=cross_dict)
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
-        data = get_sim_results(emode_df = emode_df, lom_df = lom_df)
+        try:
+            data = get_sim_results(emode_df = emode_df, lom_df = lom_df)
+        except:
+            return None, None, None
 
     elif device_dict["coupler_type"].lower() == "ncap":
         emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options)
