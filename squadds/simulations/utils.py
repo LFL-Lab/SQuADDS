@@ -10,10 +10,10 @@ from collections import OrderedDict
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
 import qiskit_metal as metal
 import scqubits as scq
 from matplotlib import pyplot as plt
-from pandas import DataFrame
 from prettytable import PrettyTable
 from pyaedt import Hfss
 from qiskit_metal import Dict, MetalGUI, designs, draw
@@ -35,6 +35,37 @@ from qiskit_metal.toolbox_metal import math_and_overrides
 from squadds.components.claw_coupler import TransmonClaw
 from squadds.components.coupled_systems import QubitCavity
 
+
+def get_cavity_claw_options(cavity_dict):
+    # Assuming cavity_dict is already defined
+    cpw_opts = None
+    cplr_opts = None
+
+    # Iterate over the keys of cavity_dict
+    for key in cavity_dict.keys():
+        if key.startswith("cpw"):
+            cpw_opts_key = key
+            cpw_opts = cavity_dict[cpw_opts_key]
+        elif key.startswith("cplr"):
+            cplr_opts_key = key
+            cplr_opts = cavity_dict[cplr_opts_key]
+    
+    return cpw_opts_key, cplr_opts_key, cpw_opts, cplr_opts
+
+def get_first_element_if_series(value):
+    """
+    Checks if the input value is a pd.Series and returns the first element if true.
+    Otherwise, returns the value unchanged.
+
+    Args:
+        value: The input value, which could be a Series or other data type.
+
+    Returns:
+        The first element if the input is a pd.Series, otherwise the input value.
+    """
+    if isinstance(value, pd.Series):
+        return value.iloc[0]  # Safely get the first element of the Series
+    return value
 
 def getMeshScreenshot(projectname, designname, solutiontype="Eigenmode"):
     """

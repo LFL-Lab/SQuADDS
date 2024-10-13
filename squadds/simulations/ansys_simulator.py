@@ -146,21 +146,43 @@ class AnsysSimulator:
             None
         """
         return_df = {}
-        if isinstance(self.analyzer.selected_system, list): # have a qubit_cavity object
+
+        if isinstance(self.analyzer.selected_system, list):  # have a qubit_cavity object
+            device_dict = get_first_element_if_series(device_dict)
+            qubit_geoms = get_first_element_if_series(device_dict["design_options_qubit"])
+            cavity_geoms = get_first_element_if_series(device_dict["design_options_cavity_claw"])
+            qubit_setup = get_first_element_if_series(device_dict["setup_qubit"])
+            cavity_setup = get_first_element_if_series(device_dict["setup_cavity_claw"])
+            
             self.geom_dict = Dict(
-                qubit_geoms = device_dict["design_options_qubit"],
-                cavity_geoms = device_dict["design_options_cavity_claw"]
+                qubit_geoms=qubit_geoms,
+                cavity_geoms=cavity_geoms
             )
             self.setup_dict = Dict(
-                qubit_setup = device_dict["setup_qubit"],
-                cavity_setup = device_dict["setup_cavity_claw"]
+                qubit_setup=qubit_setup,
+                cavity_setup=cavity_setup
             )
-            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(design=self.design, device_dict=device_dict, LOM_options=self.setup_dict.qubit_setup, eigenmode_options=self.setup_dict.cavity_setup)
+            
+            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(
+                design=self.design,
+                device_dict=device_dict,
+                LOM_options=self.setup_dict.qubit_setup,
+                eigenmode_options=self.setup_dict.cavity_setup
+            )
+        
+        # Handle non-qubit_cavity object case
+        else:  # have a non-qubit_cavity object
+            design_options = get_first_element_if_series(device_dict["design_options"])
+            setup = get_first_element_if_series(device_dict["setup"])
 
-        else: # have a non-qubit_cavity object
-            self.geom_dict = device_dict["design_options"]
-            self.setup_dict = device_dict["setup"]
-            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_single_design(design=self.design, device_dict=device_dict, lom_options=self.setup_dict)
+            self.geom_dict = design_options
+            self.setup_dict = setup
+
+            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_single_design(
+                design=self.design,
+                device_dict=device_dict,
+                lom_options=self.setup_dict
+            )
         
         return return_df
 

@@ -3,9 +3,9 @@
 SimulationConfig
 ========================================================================================================================
 """
-
 from datetime import datetime
 
+import pandas as pd
 from qiskit_metal.analyses.quantization import EPRanalysis, LOManalysis
 
 from .sweeper_helperfunctions import extract_QSweep_parameters
@@ -53,6 +53,8 @@ class SimulationConfig:
         self.min_converged_passes = min_converged_passes
         self.Lj = Lj
         self.Cj = Cj
+        self.cpw_opts_key = None
+        self.cplr_opts_key = None
 
 def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, open_gui=False):
     """
@@ -72,14 +74,23 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
     
     cross_dict = device_dict["design_options_qubit"]
     cavity_dict = device_dict["design_options_cavity_claw"]
+    coupler_type = device_dict["coupler_type"]
+
+    if isinstance(cavity_dict.keys(), pd.RangeIndex):
+        cavity_dict = cavity_dict.iloc[0]
+        cross_dict = cross_dict.iloc[0]
+        coupler_type = coupler_type.iloc[0]
+    
+    cpw_opts_key, cplr_opts_key, cpw_opts, cplr_opts = get_cavity_claw_options(cavity_dict)
     
     design.delete_all_components()
-    if device_dict["coupler_type"].upper() == "CLT":
+
+    if coupler_type.upper() == "CLT":
         emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options)
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
         data = get_sim_results(emode_df = emode_df, lom_df = lom_df)
 
-    elif device_dict["coupler_type"].lower() == "ncap":
+    elif coupler_type.lower() == "ncap":
         emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options)
         ncap_lom_df, ncap_lom_obj = run_capn_LOM(design, cavity_dict["cplr_opts"], LOM_options)
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
@@ -87,10 +98,10 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
 
     device_dict_format = Dict(
         cavity_options = Dict(
-            coupler_type = device_dict["coupler_type"],
-            coupler_options = cavity_dict["cplr_opts"],
+            coupler_type = coupler_type,
+            coupler_options = cplr_opts,
             cpw_opts = Dict (
-                left_options = cavity_dict["cpw_opts"],
+                    left_options = cpw_opts,
             )
             
         ),
@@ -150,7 +161,7 @@ def simulate_single_design(design, device_dict, emode_options={}, lom_options={}
     emode_obj = None
     lom_obj = None
 
-    if "cpw_opts" in device_dict.keys():
+    if ("cpw_opts" or "cpw_options") in device_dict.keys():
         emode_df, emode_obj = run_eigenmode(design, device_dict, emode_options)
         if coupler_type.lower() == "ncap":
             # emode_df, emode_obj = run_eigenmode(design, device_dict, sim_options)
@@ -245,10 +256,12 @@ def run_eigenmode(design, geometry_dict, sim_options):
             The EPRAnalysis object is returned for further analysis or post-processing.
     """
 
-    cpw_length = int("".join(filter(str.isdigit, geometry_dict["cpw_opts"]["total_length"])))
+    cpw_opts_key, cplr_opts_key, cpw_opts, cplr_opts = get_cavity_claw_options(geometry_dict)
+
+    coupler = create_coupler(geometry_dict[cplr_opts_key], design)
+    cpw_length = int("".join(filter(str.isdigit, geometry_dict[cpw_opts_key]["total_length"])))
+    cpw = create_cpw(geometry_dict[cpw_opts_key], coupler, design)
     claw = create_claw(geometry_dict["claw_opts"], cpw_length, design)
-    coupler = create_coupler(geometry_dict["cplr_opts"], design)
-    cpw = create_cpw(geometry_dict["cpw_opts"], coupler, design)
     config = SimulationConfig(min_converged_passes=3)
 
     epra, hfss = start_simulation(design, config)
@@ -266,7 +279,7 @@ def run_eigenmode(design, geometry_dict, sim_options):
     mesh_lengths = {}
     coupler_type = "CLT"
     # "finger_count" in geometry_dict["cplr_opts"]
-    if geometry_dict['cplr_opts'].get('finger_count') is not None :
+    if geometry_dict[cplr_opts_key].get('finger_count') is not None :
         coupler_type = "NCap"
         render_simulation_no_ports(epra, [cpw,claw], [(cpw.name, "start")], config.design_name, setup.vars)
         mesh_lengths = {'mesh1': {"objects": [f"trace_{cpw.name}", f"readout_connector_arm_{claw.name}"], "MaxLength": '4um'}}
