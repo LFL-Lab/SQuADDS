@@ -591,10 +591,10 @@ document.write(`
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">qiskit_metal</span> <span class="k">as</span> <span class="nn">metal</span>
 <span class="kn">import</span> <span class="nn">scqubits</span> <span class="k">as</span> <span class="nn">scq</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
 <span class="kn">from</span> <span class="nn">prettytable</span> <span class="kn">import</span> <span class="n">PrettyTable</span>
 <span class="kn">from</span> <span class="nn">pyaedt</span> <span class="kn">import</span> <span class="n">Hfss</span>
 <span class="kn">from</span> <span class="nn">qiskit_metal</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">MetalGUI</span><span class="p">,</span> <span class="n">designs</span><span class="p">,</span> <span class="n">draw</span>
@@ -615,6 +615,43 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">squadds.components.claw_coupler</span> <span class="kn">import</span> <span class="n">TransmonClaw</span>
 <span class="kn">from</span> <span class="nn">squadds.components.coupled_systems</span> <span class="kn">import</span> <span class="n">QubitCavity</span>
+
+
+<div class="viewcode-block" id="get_cavity_claw_options">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.get_cavity_claw_options">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cavity_claw_options</span><span class="p">(</span><span class="n">cavity_dict</span><span class="p">):</span>
+    <span class="c1"># Assuming cavity_dict is already defined</span>
+    <span class="n">cpw_opts</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cplr_opts</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Iterate over the keys of cavity_dict</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cpw&quot;</span><span class="p">):</span>
+            <span class="n">cpw_opts_key</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="n">cpw_opts</span> <span class="o">=</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cplr&quot;</span><span class="p">):</span>
+            <span class="n">cplr_opts_key</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="n">cplr_opts</span> <span class="o">=</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="n">cplr_opts_key</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span><span class="p">,</span> <span class="n">cpw_opts</span><span class="p">,</span> <span class="n">cplr_opts</span></div>
+
+
+<div class="viewcode-block" id="get_first_element_if_series">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.get_first_element_if_series">[docs]</a>
+<span class="k">def</span> <span class="nf">get_first_element_if_series</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if the input value is a pd.Series and returns the first element if true.</span>
+<span class="sd">    Otherwise, returns the value unchanged.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The input value, which could be a Series or other data type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The first element if the input is a pd.Series, otherwise the input value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Safely get the first element of the Series</span>
+    <span class="k">return</span> <span class="n">value</span></div>
 
 
 <div class="viewcode-block" id="getMeshScreenshot">

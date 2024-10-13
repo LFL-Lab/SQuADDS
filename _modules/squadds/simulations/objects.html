@@ -584,9 +584,9 @@ document.write(`
 <span class="sd">SimulationConfig</span>
 <span class="sd">========================================================================================================================</span>
 <span class="sd">&quot;&quot;&quot;</span>
-
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">qiskit_metal.analyses.quantization</span> <span class="kn">import</span> <span class="n">EPRanalysis</span><span class="p">,</span> <span class="n">LOManalysis</span>
 
 <span class="kn">from</span> <span class="nn">.sweeper_helperfunctions</span> <span class="kn">import</span> <span class="n">extract_QSweep_parameters</span>
@@ -635,7 +635,9 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">max_delta_f</span> <span class="o">=</span> <span class="n">max_delta_f</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_converged_passes</span> <span class="o">=</span> <span class="n">min_converged_passes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Lj</span> <span class="o">=</span> <span class="n">Lj</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Cj</span> <span class="o">=</span> <span class="n">Cj</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Cj</span> <span class="o">=</span> <span class="n">Cj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpw_opts_key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cplr_opts_key</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="simulate_whole_device">
@@ -658,14 +660,23 @@ document.write(`
     
     <span class="n">cross_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">]</span>
     <span class="n">cavity_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span>
+    <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cavity_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">pd</span><span class="o">.</span><span class="n">RangeIndex</span><span class="p">):</span>
+        <span class="n">cavity_dict</span> <span class="o">=</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cross_dict</span> <span class="o">=</span> <span class="n">cross_dict</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">coupler_type</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span><span class="p">,</span> <span class="n">cpw_opts</span><span class="p">,</span> <span class="n">cplr_opts</span> <span class="o">=</span> <span class="n">get_cavity_claw_options</span><span class="p">(</span><span class="n">cavity_dict</span><span class="p">)</span>
     
     <span class="n">design</span><span class="o">.</span><span class="n">delete_all_components</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;CLT&quot;</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">coupler_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;CLT&quot;</span><span class="p">:</span>
         <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">)</span>
         <span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cross_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">get_sim_results</span><span class="p">(</span><span class="n">emode_df</span> <span class="o">=</span> <span class="n">emode_df</span><span class="p">,</span> <span class="n">lom_df</span> <span class="o">=</span> <span class="n">lom_df</span><span class="p">)</span>
 
-    <span class="k">elif</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;ncap&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">coupler_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;ncap&quot;</span><span class="p">:</span>
         <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">)</span>
         <span class="n">ncap_lom_df</span><span class="p">,</span> <span class="n">ncap_lom_obj</span> <span class="o">=</span> <span class="n">run_capn_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">],</span> <span class="n">LOM_options</span><span class="p">)</span>
         <span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cross_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">)</span>
@@ -673,10 +684,10 @@ document.write(`
 
     <span class="n">device_dict_format</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
         <span class="n">cavity_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
-            <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">],</span>
-            <span class="n">coupler_options</span> <span class="o">=</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">],</span>
+            <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">coupler_type</span><span class="p">,</span>
+            <span class="n">coupler_options</span> <span class="o">=</span> <span class="n">cplr_opts</span><span class="p">,</span>
             <span class="n">cpw_opts</span> <span class="o">=</span> <span class="n">Dict</span> <span class="p">(</span>
-                <span class="n">left_options</span> <span class="o">=</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">],</span>
+                    <span class="n">left_options</span> <span class="o">=</span> <span class="n">cpw_opts</span><span class="p">,</span>
             <span class="p">)</span>
             
         <span class="p">),</span>
@@ -739,7 +750,7 @@ document.write(`
     <span class="n">emode_obj</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">lom_obj</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">if</span> <span class="s2">&quot;cpw_opts&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;cpw_opts&quot;</span> <span class="ow">or</span> <span class="s2">&quot;cpw_options&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_options</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">coupler_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;ncap&quot;</span><span class="p">:</span>
             <span class="c1"># emode_df, emode_obj = run_eigenmode(design, device_dict, sim_options)</span>
@@ -840,10 +851,12 @@ document.write(`
 <span class="sd">            The EPRAnalysis object is returned for further analysis or post-processing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">cpw_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">,</span> <span class="n">geometry_dict</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;total_length&quot;</span><span class="p">])))</span>
+    <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span><span class="p">,</span> <span class="n">cpw_opts</span><span class="p">,</span> <span class="n">cplr_opts</span> <span class="o">=</span> <span class="n">get_cavity_claw_options</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">)</span>
+
+    <span class="n">coupler</span> <span class="o">=</span> <span class="n">create_coupler</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">[</span><span class="n">cplr_opts_key</span><span class="p">],</span> <span class="n">design</span><span class="p">)</span>
+    <span class="n">cpw_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">,</span> <span class="n">geometry_dict</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">][</span><span class="s2">&quot;total_length&quot;</span><span class="p">])))</span>
+    <span class="n">cpw</span> <span class="o">=</span> <span class="n">create_cpw</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">],</span> <span class="n">coupler</span><span class="p">,</span> <span class="n">design</span><span class="p">)</span>
     <span class="n">claw</span> <span class="o">=</span> <span class="n">create_claw</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">],</span> <span class="n">cpw_length</span><span class="p">,</span> <span class="n">design</span><span class="p">)</span>
-    <span class="n">coupler</span> <span class="o">=</span> <span class="n">create_coupler</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">],</span> <span class="n">design</span><span class="p">)</span>
-    <span class="n">cpw</span> <span class="o">=</span> <span class="n">create_cpw</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">],</span> <span class="n">coupler</span><span class="p">,</span> <span class="n">design</span><span class="p">)</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">SimulationConfig</span><span class="p">(</span><span class="n">min_converged_passes</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
     <span class="n">epra</span><span class="p">,</span> <span class="n">hfss</span> <span class="o">=</span> <span class="n">start_simulation</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
@@ -861,7 +874,7 @@ document.write(`
     <span class="n">mesh_lengths</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">coupler_type</span> <span class="o">=</span> <span class="s2">&quot;CLT&quot;</span>
     <span class="c1"># &quot;finger_count&quot; in geometry_dict[&quot;cplr_opts&quot;]</span>
-    <span class="k">if</span> <span class="n">geometry_dict</span><span class="p">[</span><span class="s1">&#39;cplr_opts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;finger_count&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+    <span class="k">if</span> <span class="n">geometry_dict</span><span class="p">[</span><span class="n">cplr_opts_key</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;finger_count&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
         <span class="n">coupler_type</span> <span class="o">=</span> <span class="s2">&quot;NCap&quot;</span>
         <span class="n">render_simulation_no_ports</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="p">[</span><span class="n">cpw</span><span class="p">,</span><span class="n">claw</span><span class="p">],</span> <span class="p">[(</span><span class="n">cpw</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">)],</span> <span class="n">config</span><span class="o">.</span><span class="n">design_name</span><span class="p">,</span> <span class="n">setup</span><span class="o">.</span><span class="n">vars</span><span class="p">)</span>
         <span class="n">mesh_lengths</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mesh1&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;objects&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;trace_</span><span class="si">{</span><span class="n">cpw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;readout_connector_arm_</span><span class="si">{</span><span class="n">claw</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span> <span class="s2">&quot;MaxLength&quot;</span><span class="p">:</span> <span class="s1">&#39;4um&#39;</span><span class="p">}}</span>
