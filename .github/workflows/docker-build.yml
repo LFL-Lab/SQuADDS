@@ -9,8 +9,8 @@ on:
   workflow_dispatch:  
   
 permissions:
-  packages: write  
-  contents: read   
+  packages: write 
+  contents: read  
 
 jobs:
   build:
@@ -24,18 +24,18 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build and tag Docker image
         run: |
           REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          TAG_NAME=${{ github.event.release.tag_name || 'latest' }}  # Use 'latest' as fallback if tag_name is empty
+          TAG_NAME=${{ github.event.release.tag_name || 'latest' }} 
           docker build -t ghcr.io/$REPO_OWNER/squadds_env:$TAG_NAME .
           docker tag ghcr.io/$REPO_OWNER/squadds_env:$TAG_NAME ghcr.io/$REPO_OWNER/squadds_env:latest
 
       - name: Push Docker image to GitHub Packages
         run: |
           REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          TAG_NAME=${{ github.event.release.tag_name || 'latest' }}  # Use 'latest' as fallback if tag_name is empty
+          TAG_NAME=${{ github.event.release.tag_name || 'latest' }}  
           docker push ghcr.io/$REPO_OWNER/squadds_env:$TAG_NAME
           docker push ghcr.io/$REPO_OWNER/squadds_env:latest
