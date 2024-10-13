@@ -259,7 +259,9 @@ def run_eigenmode(design, geometry_dict, sim_options):
     cpw_opts_key, cplr_opts_key, cpw_opts, cplr_opts = get_cavity_claw_options(geometry_dict)
 
     coupler = create_coupler(geometry_dict[cplr_opts_key], design)
-    cpw_length = int("".join(filter(str.isdigit, geometry_dict[cpw_opts_key]["total_length"])))
+    # convert `geometry_dict[cpw_opts_key]["total_length"])` 
+    cpw_length = int(string_to_float(geometry_dict[cpw_opts_key]["total_length"]))
+    print(cpw_length)
     cpw = create_cpw(geometry_dict[cpw_opts_key], coupler, design)
     claw = create_claw(geometry_dict["claw_opts"], cpw_length, design)
     config = SimulationConfig(min_converged_passes=3)

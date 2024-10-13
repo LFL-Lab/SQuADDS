@@ -36,6 +36,18 @@ from squadds.components.claw_coupler import TransmonClaw
 from squadds.components.coupled_systems import QubitCavity
 
 
+def string_to_float(string):
+    """
+    Converts a string representation of a number to a float.
+
+    Args:
+        string (str): The string representation of the number.
+
+    Returns:
+        float: The converted float value.
+    """
+    return float(string[:-2])
+
 def get_cavity_claw_options(cavity_dict):
     # Assuming cavity_dict is already defined
     cpw_opts = None
