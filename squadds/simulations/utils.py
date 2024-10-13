@@ -10,10 +10,10 @@ from collections import OrderedDict
 from datetime import datetime
 
 import numpy as np
-import pandas as pd
 import qiskit_metal as metal
 import scqubits as scq
 from matplotlib import pyplot as plt
+from pandas import DataFrame
 from prettytable import PrettyTable
 from pyaedt import Hfss
 from qiskit_metal import Dict, MetalGUI, designs, draw
@@ -36,6 +36,19 @@ from squadds.components.claw_coupler import TransmonClaw
 from squadds.components.coupled_systems import QubitCavity
 
 
+def get_cavity_claw_options_keys(cavity_dict):
+    # Iterate over the keys of cavity_dict
+    for key in cavity_dict.keys():
+        if key.startswith("cpw"):
+            cpw_opts_key = key
+        elif key.startswith("cplr"):
+            cplr_opts_key = key
+        else:
+            cpw_opts_key, cplr_opts_key = None, None
+    
+    return cpw_opts_key, cplr_opts_key
+
+
 def string_to_float(string):
     """
     Converts a string representation of a number to a float.
@@ -48,36 +61,6 @@ def string_to_float(string):
     """
     return float(string[:-2])
 
-def get_cavity_claw_options(cavity_dict):
-    # Assuming cavity_dict is already defined
-    cpw_opts = None
-    cplr_opts = None
-
-    # Iterate over the keys of cavity_dict
-    for key in cavity_dict.keys():
-        if key.startswith("cpw"):
-            cpw_opts_key = key
-            cpw_opts = cavity_dict[cpw_opts_key]
-        elif key.startswith("cplr"):
-            cplr_opts_key = key
-            cplr_opts = cavity_dict[cplr_opts_key]
-    
-    return cpw_opts_key, cplr_opts_key, cpw_opts, cplr_opts
-
-def get_first_element_if_series(value):
-    """
-    Checks if the input value is a pd.Series and returns the first element if true.
-    Otherwise, returns the value unchanged.
-
-    Args:
-        value: The input value, which could be a Series or other data type.
-
-    Returns:
-        The first element if the input is a pd.Series, otherwise the input value.
-    """
-    if isinstance(value, pd.Series):
-        return value.iloc[0]  # Safely get the first element of the Series
-    return value
 
 def getMeshScreenshot(projectname, designname, solutiontype="Eigenmode"):
     """
@@ -303,7 +286,7 @@ def create_claw(opts, cpw_length, design):
     claw = TransmonClaw(design, 'claw', options=opts)
     return claw
 
-def create_coupler(opts, design):
+def create_ncap_coupler(opts, design):
     """
     Create a coupler based on the given options and design.
 
@@ -315,7 +298,22 @@ def create_coupler(opts, design):
         The created coupler object.
     """
     opts["orientation"] = "-90"
-    cplr = CapNInterdigitalTee(design, 'cplr', options = opts) if opts["finger_count"] is not None else CoupledLineTee(design, 'cplr', options = opts)
+    cplr = CapNInterdigitalTee(design, 'cplr', options = opts)
+    return cplr
+
+def create_clt_coupler(opts, design):
+    """
+    Create a CoupledLineTee coupler based on the given options and design.
+
+    Args:
+        opts (dict): A dictionary containing the options for the coupler.
+        design: The design object.
+
+    Returns:
+        The created coupler object.
+    """
+    opts["orientation"] = "-90"
+    cplr = CoupledLineTee(design, 'cplr', options = opts)
     return cplr
 
 def create_cpw(opts, cplr, design):
@@ -338,7 +336,7 @@ def create_cpw(opts, cplr, design):
     # jogs = OrderedDict()
     # jogs[0] = ["R90", f'{adj_distance/(1.5)}um']
     opts.update({"lead" : Dict(
-                            start_straight = "100um",
+                            start_straight = "50um",
                             end_straight = "50um",
                             
                             # start_jogged_extension = jogs
@@ -409,11 +407,10 @@ def chunk_sweep_options(sweep_opts, N):
         list: A list of dictionaries, each containing a chunk of the sweep options.
     """
     # Extract claw_lengths and total_lengths from sweep_opts
+    cpw_opts_key, cplr_opts_key = get_cavity_claw_options_keys(sweep_opts)
+
     claw_lengths = sweep_opts['claw_opts']['connection_pads']['readout']['claw_length']
-    try:
-        total_lengths = sweep_opts['cpw_opts']['total_length']
-    except:
-        total_lengths = sweep_opts['cpw_options']['total_length']
+    total_lengths = sweep_opts[cpw_opts_key]['total_length']
 
     # Determine the number of claw_lengths to be assigned to each chunk
     base_chunk_size = len(claw_lengths) // N
@@ -435,12 +432,12 @@ def chunk_sweep_options(sweep_opts, N):
                     'readout': sweep_opts['claw_opts']['connection_pads']['readout'].copy()
                 }
             },
-            'cpw_opts': sweep_opts['cpw_opts'].copy(),
-            'cplr_opts': sweep_opts['cplr_opts'].copy()
+            'cpw_opts': sweep_opts[cpw_opts_key].copy(),
+            'cplr_opts': sweep_opts[cplr_opts_key].copy()
         }
 
         new_sweep_opts['claw_opts']['connection_pads']['readout']['claw_length'] = claw_length_chunk
-        new_sweep_opts['cpw_opts']['total_length'] = total_lengths
+        new_sweep_opts[cpw_opts_key]['total_length'] = total_lengths
 
         chunks.append(new_sweep_opts)
 

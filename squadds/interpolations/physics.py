@@ -87,6 +87,7 @@ class ScalingInterpolator(Interpolator):
 
         # Scale resonator and coupling element dimensions
         updated_resonator_length = string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]["cpw_opts"]['total_length']) * (closest_cavity_cpw_design['cavity_frequency_GHz'] / f_res_target).values[0]
+        updated_resonator_length = round(updated_resonator_length)
 
         res_scaling = closest_f_cavity / f_res_target
         res_scaling = closest_f_cavity / f_res_target
@@ -123,9 +124,8 @@ class ScalingInterpolator(Interpolator):
         qubit_design_options['hfss_inductance'] = required_Lj*1e-9
         qubit_design_options["connection_pads"]["readout"]['Lj'] = f"{required_Lj}nH"
 
-        # setting the `claw_cpw_*` params to zero
+        # setting the `claw_cpw_length` params to zero
         qubit_design_options["connection_pads"]['readout']['claw_cpw_length'] = "0um"
-        qubit_design_options["connection_pads"]['readout']['claw_cpw_width'] = "0um"
 
         cavity_design_options = closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]
         cavity_design_options["cpw_opts"]['total_length'] = f"{updated_resonator_length}um"

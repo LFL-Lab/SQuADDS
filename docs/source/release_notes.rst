@@ -8,6 +8,7 @@ Version 0.3.4 (2024-10-11)
 
 **New Features**
 
+- Fixed bugs in the `AnsysSimulator` code
 - Added methods to `Analysis` to retrieve design parameters easily from any dataframe with `design_options` column
 - Added custom TransmonCross and JJ elements
 - Minor bug fixes in string inconsistencies and better error messaging

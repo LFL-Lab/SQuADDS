@@ -71,7 +71,7 @@ def get_design_from_ml_predictions(analyzer, test_data, y_pred_dnn):
 
         # Set 'claw_cpw_*' parameters to zero
         qubit_design_options["connection_pads"]['readout']['claw_cpw_length'] = "0um"
-        qubit_design_options["connection_pads"]['readout']['claw_cpw_width'] = "0um"
+        # qubit_design_options["connection_pads"]['readout']['claw_cpw_width'] = "0um"
 
         # Update the cavity design options with predicted values
         cavity_design_options["cpw_opts"]['total_length'] = f"{total_length_pred}um"

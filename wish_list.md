@@ -11,6 +11,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Simulations:
 
+- Stress-test and report any bugs for Ansys simulations using the SQuADDS package
 - Add guesses for bare resonator frequencies (50 ohm impedance matched) using API calls to https://www.microwaves101.com/calculators/864-coplanar-waveguide-calculator
 - Add more resonator property calculator methods via https://github.com/ooovector/cpw_coupling/blob/master/Conformal%20mapping%20of%20a%20CPW%20coupler.ipynb integration - may be a GUI? (https://smm.misis.ru/CPW-resonator-coupling/)
 - Generalize [SQDMetal](https://github.com/sqdlab/SQDMetal) Palace simulations to work with **any HPC** and make a PR
@@ -18,7 +19,6 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 - Integrate SQDMetal (fixed version) as a dependency of SQuADDS
 - Add an easy Palace simulation API on SQuADDS (with parallel processing)
 - Write a comprehensive tutorial on how to use Palace for simulations
-- Stress-test and report any bugs for Ansys simulations using the SQuADDS package
 - Provide compute resources to run simulations covering sparse regions of the Hamiltonian space
 
 ## Core:
@@ -62,6 +62,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 - Add any other workflow that assists developers in contributing
 - Implement an automated build check with comprehensive unit tests
+- Automated tests upon PR submission
 
 ## Feature Requests:
 
@@ -76,9 +77,8 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Boring but Necessary:
 
+- automated kink detection + meander smoothing prior to qiskit-metal rendering
 - letting users choose the `.env` file location OR telling them where to find it
-- Fix bugs in interpolated designs simulation run
-- Add meander smoothing support
 - Check for claw dimensions on the Hamiltonian space plot
 - **Check for breaking changes in the latest version of dependencies and update the package accordingly**
 - Create unit tests for each feature/file
