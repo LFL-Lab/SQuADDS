@@ -6,8 +6,8 @@ on:
       - main
   release:
     types: [created]
-  workflow_dispatch: 
-
+  workflow_dispatch:  
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,11 +25,13 @@ jobs:
       - name: Build and tag Docker image
         run: |
           REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker build -t ghcr.io/$REPO_OWNER/squadds_env:${{ github.event.release.tag_name }} .
-          docker tag ghcr.io/$REPO_OWNER/squadds_env:${{ github.event.release.tag_name }} ghcr.io/$REPO_OWNER/squadds_env:latest
+          TAG_NAME=${{ github.event.release.tag_name || 'latest' }}  # Use 'latest' as fallback if tag_name is empty
+          docker build -t ghcr.io/$REPO_OWNER/squadds_env:$TAG_NAME .
+          docker tag ghcr.io/$REPO_OWNER/squadds_env:$TAG_NAME ghcr.io/$REPO_OWNER/squadds_env:latest
 
       - name: Push Docker image to GitHub Packages
         run: |
           REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker push ghcr.io/$REPO_OWNER/squadds_env:${{ github.event.release.tag_name }}
+          TAG_NAME=${{ github.event.release.tag_name || 'latest' }}  # Use 'latest' as fallback if tag_name is empty
+          docker push ghcr.io/$REPO_OWNER/squadds_env:$TAG_NAME
           docker push ghcr.io/$REPO_OWNER/squadds_env:latest
