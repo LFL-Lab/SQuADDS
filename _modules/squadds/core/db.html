@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.core.db &#8212; SQuADDS v0.3.5</title>
+    <title>squadds.core.db &#8212; SQuADDS v0.3.6</title>
   
   
   
@@ -41,7 +41,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=ba50482b"></script>
+    <script src="../../../_static/documentation_options.js?v=8da8c241"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -592,11 +592,12 @@ document.write(`
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">get_dataset_config_names</span><span class="p">,</span> <span class="n">load_dataset</span>
 <span class="kn">from</span> <span class="nn">huggingface_hub</span> <span class="kn">import</span> <span class="n">login</span>
+<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
 <span class="kn">from</span> <span class="nn">squadds.core.design_patterns</span> <span class="kn">import</span> <span class="n">SingletonMeta</span>
 <span class="kn">from</span> <span class="nn">squadds.core.processing</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="c1">#* HANDLE WARNING MESSAGES</span>
 <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>  <span class="c1"># Checks if the operating system is macOS</span>
@@ -1156,6 +1157,31 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">view_device_contributors_of</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">component_name</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">Simulation Data Contributor(s):&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view_contributors_of_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="SQuADDS_DB.view_sim_contributors_of">
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_sim_contributors_of">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_sim_contributors_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">measured_device_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View the simulation contributors of a specific component, component name, and data type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            component (str): The component of interest.</span>
+<span class="sd">            component_name (str): The name of the component.</span>
+<span class="sd">            data_type (str): The type of data.</span>
+<span class="sd">            measured_device_name (str): The name of the measured device.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">component</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">component_name</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">data_type</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">Simulation Data Contributor(s):&quot;</span><span class="p">)</span>
