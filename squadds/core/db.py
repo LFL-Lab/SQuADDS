@@ -11,11 +11,12 @@ import pandas as pd
 import requests
 from datasets import get_dataset_config_names, load_dataset
 from huggingface_hub import login
+from tabulate import tabulate
+from tqdm import tqdm
+
 from squadds.core.design_patterns import SingletonMeta
 from squadds.core.processing import *
 from squadds.core.utils import *
-from tabulate import tabulate
-from tqdm import tqdm
 
 #* HANDLE WARNING MESSAGES
 if sys.platform == "darwin":  # Checks if the operating system is macOS
@@ -520,6 +521,28 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             self.view_device_contributors_of(component, component_name, data_type)
         except:
             pass
+        try:
+            print("="*80)
+            print(f"\t\t\tSimulation Data Contributor(s):")
+            print("="*80)
+            self.view_contributors_of_config(config)
+        except:
+            pass
+
+    def view_sim_contributors_of(self, component=None, component_name=None, data_type=None, measured_device_name=None):
+        """
+        View the simulation contributors of a specific component, component name, and data type.
+
+        Args:
+            component (str): The component of interest.
+            component_name (str): The name of the component.
+            data_type (str): The type of data.
+            measured_device_name (str): The name of the measured device.
+
+        Returns:
+            None
+        """
+        config = component + "-" + component_name + "-" + data_type
         try:
             print("="*80)
             print(f"\t\t\tSimulation Data Contributor(s):")

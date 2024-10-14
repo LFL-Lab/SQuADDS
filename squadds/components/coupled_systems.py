@@ -253,7 +253,7 @@ class QubitCavity(QComponent):
                             trace_gap = p.cavity_claw_options.cpw_opts.left_options.trace_gap)
         feedline = RouteStraight(self.design, 'feedline', options = feedline_opts)
 
-    def show(self, gui, include_wirebond_pads=False):
+    def show(self, gui, include_wirebond_pads=False, **kwargs):
         if include_wirebond_pads:
             self.make_wirebond_pads()
         else:
@@ -264,7 +264,8 @@ class QubitCavity(QComponent):
 
         gui.rebuild()
         gui.autoscale()
-        gui.screenshot()
+        figure_name = kwargs.get('figure_name', "QubitCavity.png")
+        gui.screenshot(figure_name)
 
 
     def to_gds(self, filename, include_wirebond_pads=False):

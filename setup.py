@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='SQuADDS',
-    version='0.3.5',
+    version='0.3.6',
     packages=find_packages(),
     description='Our project introduces an open-source database of programmatically generated and experimentally validated superconducting quantum device designs, accessible through a user-friendly interface, significantly lowering the entry barrier for research in this field.',
     long_description=open('README.md').read(),

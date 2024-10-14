@@ -1,19 +1,39 @@
 Release Notes
 =============
 
-Version 0.3.4 (2024-10-11)
+Version 0.3.6 (2024-10-13)
 --------------------------
 
-* **Alpha Version 0.3.5**
+* **Alpha Version 0.3.6**
+
+**Bug Fixes**
+
+- Fixed bugs in the `AnsysSimulator` code
+- Added non local rst dependencies for contributor list
+- Added some more db access methods
+
+---
+
+Version 0.3.5 (2024-10-11)
+--------------------------
+
+* **Alpha Version 0.3.5 [MAJOR RELEASE]**
 
 **New Features**
 
-- Fixed bugs in the `AnsysSimulator` code
 - Added methods to `Analysis` to retrieve design parameters easily from any dataframe with `design_options` column
 - Added custom TransmonCross and JJ elements
-- Minor bug fixes in string inconsistencies and better error messaging
 - Added methods for getting `design_df` from ML interpolations
-- Added some post-processing methods for gds files
+- Added some gds post-processing methods for gds files
+
+**Bug Fixes**
+
+- Fixed bugs in the `AnsysSimulator` code
+- Minor bug fixes in string inconsistencies and better error messaging
+
+**Change Log**
+
+https://github.com/LFL-Lab/SQuADDS/compare/v0.3.4...v0.3.5
 
 ---
 
