@@ -95,6 +95,21 @@ You can also use the GitHub version of SQuADDS by changing Step 4 to:
    pip install -r requirements.txt
    pip install -e .
 
+Installing SQuADDS on Apple Silicon
+-----------------------------------
+
+`qiskit-metal` currently lacks full native support for Apple Silicon due to `PySide` compatibility issues (`a PR resolving this issue is still waiting for review <https://github.com/qiskit-community/qiskit-metal/pull/908>`_). Since SQuADDS is built on top of `qiskit-metal`, sadly it also doesn't support Apple Silicon natively . However, you can still run SQuADDS on Apple Silicon by emulating the `x86` architecture with Rosetta.
+
+1. **Create a new conda environment** configured to emulate `x86` with Python 3.10 or 3.11:
+
+   .. code-block:: bash
+
+      CONDA_SUBDIR=osx-64 conda create -n <env_name> python=3.11
+      conda activate <env_name>
+      conda config --env --set subdir osx-64
+
+2. **Install `qiskit-metal` and `SQuADDS`** as outlined above within this environment.
+
 .. admonition:: Questions?
 
    Please reach out to `shanto@usc.edu <mailto:shanto@usc.edu>`__ if you face any installation issues.
