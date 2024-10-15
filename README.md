@@ -143,6 +143,7 @@ The following tutorials are available to help you get started with `SQuADDS`:
 - [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
 - [Tutorial 3: Contributing Experimentally-Validated Simulation Data to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html)
 - [Tutorial 4: Contributing Measured Devices' Data to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html)
+- [Tutorial 5: Designing a "fab-ready" chip with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.html)
 - [(COMING SOON) More tutorials]()
 
 ---
@@ -175,52 +176,27 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 
 ## Contributors
 
-
-| Name               | Institution                        | Contribution                     |
-|:-------------------|:-----------------------------------|:---------------------------------|
-| Clark Miyamoto     | New York University                | Code contributor                 |
-| Madison Howard     | California Institute of Technology | Bug Hunter                       |
-| Kaveh Pezeshki     | Stanford University                | Documentation contributor        |
-| Anne Whelan        | US Navy                            | Documentation contributor        |
-| Jenny Huang        | Columbia University                | Documentation contributor        |
-| Connie Miao        | Stanford University                | Data Contributor                 |
-| Malida Hecht       | University of Southern California  | Data contributor                 |
-| Daria Kowsari, PhD | University of Southern California  | Data contributor                 |
-| Vivek Maurya       | University of Southern California  | Data contributor                 |
-| Haimeng Zhang, PhD | IBM                                | Data contributor                 |
-| Ethan Zheng        | University of Southern California  | Data contributor  and Bug Hunter |
-| Sara Sussman, PhD  | Fermilab                           | Bug Hunter                       |
+| Name               | Institution                        | Contribution                    |
+| :----------------- | :--------------------------------- | :------------------------------ |
+| Clark Miyamoto     | New York University                | Code contributor                |
+| Madison Howard     | California Institute of Technology | Bug Hunter                      |
+| Kaveh Pezeshki     | Stanford University                | Documentation contributor       |
+| Anne Whelan        | US Navy                            | Documentation contributor       |
+| Jenny Huang        | Columbia University                | Documentation contributor       |
+| Connie Miao        | Stanford University                | Data Contributor                |
+| Malida Hecht       | University of Southern California  | Data contributor                |
+| Daria Kowsari, PhD | University of Southern California  | Data contributor                |
+| Vivek Maurya       | University of Southern California  | Data contributor                |
+| Haimeng Zhang, PhD | IBM                                | Data contributor                |
+| Ethan Zheng        | University of Southern California  | Data contributor and Bug Hunter |
+| Sara Sussman, PhD  | Fermilab                           | Bug Hunter                      |
 
 ## Developers
+
 - [shanto268](https://github.com/shanto268) - 305 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
 - [LFL-Lab](https://github.com/LFL-Lab) - 3 contributions
 - [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
+
 ---
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
