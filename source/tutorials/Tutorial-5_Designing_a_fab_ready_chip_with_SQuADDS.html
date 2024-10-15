@@ -1,0 +1,1828 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tutorial 5: Designing a “fab-ready” chip with SQuADDS &#8212; SQuADDS v0.3.6</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/katex-math.css?v=91adb8b6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=8da8c241"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/katex.min.js?v=be8ff15f"></script>
+    <script src="../../_static/auto-render.min.js?v=ad136472"></script>
+    <script src="../../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="API Reference" href="../apidocs/index.html" />
+    <link rel="prev" title="Tutorial 4: Contributing Measured Devices’ Data to the SQuADDS Database" href="Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">🎉 Our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a> is out! </div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+     
+  
+
+<a class="navbar-brand logo" href="https://lfl-lab.github.io/SQuADDS/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
+    <script>document.write(`<img src="../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-1_Getting_Started_with_SQuADDS.html">Tutorial 1: Getting Started with SQuADDS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-2_Simulate_interpolated_designs.html">Tutorial 2: Simulating Interpolated Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html">Tutorial 3: Contributing Experimentally Validated Simulation Data to SQuADDS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html">Tutorial 4: Contributing Measured Devices’ Data to the SQuADDS Database</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial 5: Designing a “fab-ready” chip with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Tutorials</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Tutorial 5:...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Tutorial-5:-Designing-a-%22fab-ready%22-chip-with-SQuADDS">
+<h1>Tutorial 5: Designing a “fab-ready” chip with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code><a class="headerlink" href="#Tutorial-5:-Designing-a-%22fab-ready%22-chip-with-SQuADDS" title="Link to this heading">#</a></h1>
+<p>In this tutorial, we will go over how to use <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> to design a fabrication ready chip addressing practical design constraints.</p>
+<section id="Chip-Design-Idea">
+<h2>Chip Design Idea<a class="headerlink" href="#Chip-Design-Idea" title="Link to this heading">#</a></h2>
+<p>We aim to design a chip with the following specifications:</p>
+<ol class="arabic simple">
+<li><p>A qubit with a target frequency of 3.7 GHz and an anharmonicity of -210 MHz.</p></li>
+<li><p>A readout resonator with a frequency determined by $ f_r = 2(f_q + <span class="math">\alpha</span>) $</p></li>
+<li><p>Strong coupling between the qubit and the cavity (i.e. punchout shift <span class="math">\(\approx\)</span> few MHz).</p></li>
+<li><p>Microwave measurements will be done in transmission.</p></li>
+<li><p>The design must allow for qubit drive functionality.</p></li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Query-the-SQuADDS-Database">
+<h2>Query the SQuADDS Database<a class="headerlink" href="#Query-the-SQuADDS-Database" title="Link to this heading">#</a></h2>
+<p>Let’s first query for the qubit-cavity pair of our interest.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds</span> <span class="kn">import</span> <span class="n">SQuADDS_DB</span><span class="p">,</span> <span class="n">Analyzer</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make a connection to the SQuADDS database</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="s2">&quot;qubit&quot;</span><span class="p">])</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+
+
+<span class="c1"># Initialize the Analyzer</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a3a6853305924010a780124bec9f504c", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "69c54710543443b39b602fb495cb0035", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b3f8f6358bb643f6befb14d67a15a66f", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<p>Query for the desired Hamiltonian parameters</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">3.7</span><span class="p">,</span>
+                <span class="s2">&quot;resonator_type&quot;</span><span class="p">:</span><span class="s2">&quot;quarter&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">210</span><span class="p">,</span>
+                <span class="s2">&quot;g_MHz&quot;</span><span class="p">:</span> <span class="mi">100</span> <span class="c1"># should provide a big punchout shift</span>
+                <span class="p">}</span>
+
+<span class="c1"># computing the cavity frequency desired as per the design requirements</span>
+<span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">]</span><span class="o">+</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">]</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span>
+    <span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
+    <span class="n">num_top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Time taken to add the coupled H params: 4.095033645629883 seconds
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>index_qc</th>
+      <th>PI_qubit</th>
+      <th>date_created_qubit</th>
+      <th>group_qubit</th>
+      <th>institution_qubit</th>
+      <th>uploader_qubit</th>
+      <th>claw_to_claw</th>
+      <th>claw_to_ground</th>
+      <th>cross_to_claw</th>
+      <th>cross_to_cross</th>
+      <th>...</th>
+      <th>resonator_type</th>
+      <th>renderer_options_cavity_claw</th>
+      <th>setup_cavity_claw</th>
+      <th>simulator_cavity_claw</th>
+      <th>design_options</th>
+      <th>EC</th>
+      <th>EJ</th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>g_MHz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>12514</th>
+      <td>1900</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-09-20-142549</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>Andre Kuo</td>
+      <td>102.50358</td>
+      <td>94.66779</td>
+      <td>7.2447</td>
+      <td>100.07658</td>
+      <td>...</td>
+      <td>quarter</td>
+      <td>None</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>Ansys HFSS</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+      <td>0.180488</td>
+      <td>10.278024</td>
+      <td>3.66213</td>
+      <td>-205.109839</td>
+      <td>98.903433</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 41 columns</p>
+</div></div>
+</div>
+<p>Lets extract all the relevant design parameters from <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> for our target Hamiltonian parameters.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_qubit</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">get_qubit_options</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="n">data_cpw</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">get_cpw_options</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="n">data_coupler</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">get_coupler_options</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="n">LJs</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">get_Ljs</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="c1"># in nH</span>
+</pre></div>
+</div>
+</div>
+<p><strong>Fabrication sadly is not perfect and we need to account for that in the design</strong></p>
+<p>To ensure we have at least workable device and we will spray the resonators such that they land on <span class="math">\(\omega_{02}\)</span> within fab uncertainties. We are going to create 4 such devices.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">num_pairs</span> <span class="o">=</span> <span class="mi">4</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s assume that our fab facility has an uncertainy of <span class="math">\(\pm\)</span> 0.75 GHz (seems very high but not uncommon) for the qubit frequency because we cannot control <span class="math">\(L_J\)</span> very well.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fab_errors</span> <span class="o">=</span> <span class="mf">0.75</span> <span class="c1"># GHz</span>
+</pre></div>
+</div>
+</div>
+<p>The resonator frequency, on the other hand, is <strong>much more stable</strong> and easy to realize with high accuracy. Since, for this design we want the cavity to land on <span class="math">\(\approx \omega_{02}\)</span>, we will need to adjust the resonator length to account for the uncertainty in the qubit frequency.</p>
+<p>Let’s compute the maximum and minimum resonator frequencies that we need with the given qubit frequency uncertainty.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">w_cav</span> <span class="o">=</span> <span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span>
+
+<span class="n">w_min</span> <span class="o">=</span> <span class="n">w_cav</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">fab_errors</span>
+<span class="n">w_max</span> <span class="o">=</span> <span class="n">w_cav</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">fab_errors</span>
+<span class="n">w_min</span><span class="p">,</span> <span class="n">w_max</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(5.48, 8.48)
+</pre></div></div>
+</div>
+<p>We will now “spray” the resonator frequencies within this range.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_cav_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">w_min</span><span class="p">,</span><span class="n">w_max</span><span class="p">,</span><span class="n">num_pairs</span><span class="p">)</span> <span class="c1">#GHz</span>
+<span class="n">target_cav_freqs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([5.48, 6.48, 7.48, 8.48])
+</pre></div></div>
+</div>
+<p>Let’s now get the updated resonator CPW lengths corresponding to these frequencies</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="n">string_to_float</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_cpw_length</span> <span class="o">=</span> <span class="n">string_to_float</span><span class="p">(</span><span class="n">data_cpw</span><span class="p">[</span><span class="s2">&quot;total_length&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">cpw_lengths</span> <span class="o">=</span> <span class="n">target_cpw_length</span> <span class="o">*</span> <span class="p">(</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span><span class="o">/</span> <span class="n">target_cav_freqs</span><span class="p">)</span>
+<span class="n">cpw_lengths</span>
+
+<span class="c1"># add &quot;um&quot; to the cpw lengths</span>
+<span class="n">cpw_lengths</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">um&quot;</span> <span class="k">for</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">cpw_lengths</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>SQuADDS gave us the <span class="math">\(L_j\)</span> values needed for our qubit fabrication. However, we need to compute the junction geometries that would give us these <span class="math">\(L_j\)</span> values.</p>
+<p>For that we would first decide on the junction type. Depending on your fab facility, you may have all the freedom to choose any junction type or you may be constrained to some specific junction types and sizes.</p>
+<p>For the sake of this tutorial, let’s say our hypothetical fab facility imposes the following constraints (very realistic):</p>
+<ol class="arabic simple" start="0">
+<li><p>They can only make Dolan Josephson junctions.</p></li>
+<li><p>The junction length can only be 200 nm.</p></li>
+<li><p>The junction width can only be a multiple of 10 nm but at minimum 100 nm.</p></li>
+<li><p>The facility allows only 4 different current densities, <span class="math">\(J_C \in 0.1, 0.25, 1.0, 3.0 \mu A/\mu m^2\)</span>.</p></li>
+</ol>
+<p>We need to compute the junction sizes that would give us the desired <span class="math">\(L_j\)</span> values in adherence to these constraints.</p>
+<p><strong>Recall:</strong></p>
+<p><span class="math">\(L_J = \frac{\Phi_0}{2\pi I_c}\)</span></p>
+<p><span class="math">\(I_c = J_c \times A = J_c \times (l_{JJ} \times w_{JJ})\)</span></p>
+<p>Since we know what our <span class="math">\(L_J\)</span> target is and <span class="math">\(l_{JJ}\)</span> is fixed by the foundry. Let’s calculate what <span class="math">\(w_{JJ}\)</span> needs to be for each <span class="math">\(J_C\)</span> they offer</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_JJ_width</span><span class="p">(</span><span class="n">Lj</span><span class="p">,</span> <span class="n">current_density</span><span class="p">,</span> <span class="n">JJ_length</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the width of the Josephson Junction (JJ) for a Dolan style junction.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    - Lj (float): Desired Josephson inductance in nH.</span>
+<span class="sd">    - current_density (float): Current density in μA/μm².</span>
+<span class="sd">    - JJ_length (float): Length of the Josephson Junction in nm.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - float: Width of the Josephson Junction in nm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert units</span>
+    <span class="n">Lj</span> <span class="o">=</span> <span class="n">Lj</span> <span class="o">*</span> <span class="mf">1e-9</span>  <span class="c1"># nH to H</span>
+    <span class="n">current_density</span> <span class="o">=</span> <span class="n">current_density</span> <span class="o">*</span> <span class="mf">1e-6</span>  <span class="c1"># μA/μm² to A/μm²</span>
+    <span class="n">JJ_length</span> <span class="o">=</span> <span class="n">JJ_length</span> <span class="o">*</span> <span class="mf">1e-3</span>  <span class="c1"># nm to μm</span>
+
+    <span class="c1"># Constants</span>
+    <span class="n">phi_0</span> <span class="o">=</span> <span class="mf">2.067833848e-15</span>  <span class="c1"># Flux quantum in Wb</span>
+
+    <span class="c1"># Calculate the critical current</span>
+    <span class="n">Ic</span> <span class="o">=</span> <span class="n">phi_0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">Lj</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the JJ_width</span>
+    <span class="n">JJ_width</span> <span class="o">=</span> <span class="n">Ic</span> <span class="o">/</span> <span class="p">(</span><span class="n">current_density</span> <span class="o">*</span> <span class="n">JJ_length</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">JJ_width</span> <span class="o">*</span> <span class="mf">1e3</span>  <span class="c1"># Convert from μm to nm</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">round_to_multiple_of_10</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rounds a float number to the nearest multiple of 10.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - n (float): The number to be rounded in nm</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - float: The rounded number in nm</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Identify the decimal component of the number</span>
+    <span class="n">integer_part</span><span class="p">,</span> <span class="n">decimal_part</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Find the nearest multiple of 10 for the integer part</span>
+    <span class="n">rounded_integer</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">integer_part</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span>
+
+    <span class="k">if</span> <span class="n">decimal_part</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="n">rounded_integer</span> <span class="o">+=</span> <span class="mi">10</span>
+
+    <span class="k">return</span> <span class="n">rounded_integer</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">current_densities</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">]</span>  <span class="c1"># in μA/μm²</span>
+<span class="n">foundry_min_JJ_width</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1">#nm</span>
+
+<span class="n">JJ_length</span> <span class="o">=</span> <span class="mi">200</span>  <span class="c1">#nm</span>
+
+<span class="c1"># Compute JJ_width for each Lj and each current density</span>
+<span class="n">JJ_widths_for_Ljs</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">Lj</span> <span class="ow">in</span> <span class="n">LJs</span><span class="p">:</span>
+    <span class="n">JJ_widths_for_Ljs</span><span class="p">[</span><span class="n">Lj</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">Jc</span> <span class="ow">in</span> <span class="n">current_densities</span><span class="p">:</span>
+        <span class="n">JJ_widths_for_Ljs</span><span class="p">[</span><span class="n">Lj</span><span class="p">][</span><span class="n">Jc</span><span class="p">]</span> <span class="o">=</span> <span class="n">round_to_multiple_of_10</span><span class="p">(</span><span class="n">compute_JJ_width</span><span class="p">(</span><span class="n">Lj</span><span class="p">,</span> <span class="n">Jc</span><span class="p">,</span> <span class="n">JJ_length</span><span class="p">))</span>
+
+<span class="n">JJ_widths_for_Ljs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{15.903982052718824: {0.1: 1040, 0.25: 420, 1: 100, 3.0: 30}}
+</pre></div></div>
+</div>
+<p>We should use <span class="math">\(J_C = 0.25 \mu A/ \mu m^2\)</span> for this run since that satisfies our fab constraints and gives us a reasonable <span class="math">\(w_{JJ}\)</span></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">J_C</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="c1"># μA/μm²</span>
+<span class="n">JJ_width</span> <span class="o">=</span> <span class="n">JJ_widths_for_Ljs</span><span class="p">[</span><span class="n">LJs</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">J_C</span><span class="p">]</span> <span class="c1"># nm</span>
+<span class="n">JJ_width</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+420
+</pre></div></div>
+</div>
+</section>
+<section id="Making-the-Design">
+<h2>Making the Design<a class="headerlink" href="#Making-the-Design" title="Link to this heading">#</a></h2>
+<p>We will use <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> to create the design.</p>
+<p>Importing all the qiskit-metal and helper libraries</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">shapely.errors</span> <span class="kn">import</span> <span class="n">ShapelyDeprecationWarning</span>
+
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">ShapelyDeprecationWarning</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qiskit_metal</span> <span class="kn">import</span> <span class="n">draw</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">designs</span><span class="p">,</span> <span class="n">MetalGUI</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.toolbox_metal</span> <span class="kn">import</span> <span class="n">math_and_overrides</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.core</span> <span class="kn">import</span> <span class="n">QComponent</span>
+<span class="kn">import</span> <span class="nn">qiskit_metal</span> <span class="k">as</span> <span class="nn">metal</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.terminations.launchpad_wb</span> <span class="kn">import</span> <span class="n">LaunchpadWirebond</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.terminations.short_to_ground</span> <span class="kn">import</span> <span class="n">ShortToGround</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.straight_path</span> <span class="kn">import</span> <span class="n">RouteStraight</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.framed_path</span> <span class="kn">import</span> <span class="n">RouteFramed</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.anchored_path</span> <span class="kn">import</span> <span class="n">RouteAnchors</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.mixed_path</span> <span class="kn">import</span> <span class="n">RouteMixed</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.meandered</span> <span class="kn">import</span> <span class="n">RouteMeander</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.terminations.open_to_ground</span> <span class="kn">import</span> <span class="n">OpenToGround</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span> <span class="kn">import</span> <span class="n">CoupledLineTee</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee</span> <span class="kn">import</span> <span class="n">CapNInterdigitalTee</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.couplers.line_tee</span> <span class="kn">import</span> <span class="n">LineTee</span>
+<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.pathfinder</span> <span class="kn">import</span> <span class="n">RoutePathfinder</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+</div>
+<p>Using the custom <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> component from <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> to create the qubits.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.components.qubits</span> <span class="kn">import</span> <span class="n">TransmonCross</span>
+</pre></div>
+</div>
+</div>
+<p>Defining some helper methods to create the various structures we need in our design.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="k">def</span> <span class="nf">create_qubit</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pos_x</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span><span class="n">JJ_flip</span><span class="p">,</span><span class="n">LJ</span><span class="p">,</span><span class="n">jj_width</span><span class="p">,</span><span class="n">jj_length</span><span class="p">,</span><span class="n">claw_gap</span><span class="p">,</span> <span class="n">claw_length</span><span class="p">,</span> <span class="n">claw_width</span><span class="p">,</span> <span class="n">cross_length</span><span class="p">,</span> <span class="n">cross_width</span><span class="p">,</span> <span class="n">cross_gap</span><span class="p">,</span> <span class="n">ground_spacing</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">xmon_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">connection_pads</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">c</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">connector_location</span><span class="o">=</span><span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="n">connector_type</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span>
+                   <span class="n">claw_length</span><span class="o">=</span><span class="n">claw_length</span><span class="p">,</span>
+                   <span class="n">claw_gap</span><span class="o">=</span><span class="n">claw_gap</span><span class="p">,</span>
+                   <span class="n">ground_spacing</span><span class="o">=</span><span class="n">ground_spacing</span><span class="p">,</span>
+                   <span class="n">claw_width</span><span class="o">=</span><span class="n">claw_width</span><span class="p">,</span>
+                   <span class="n">claw_cpw_length</span><span class="o">=</span><span class="s1">&#39;0um&#39;</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">cross_length</span><span class="o">=</span><span class="n">cross_length</span><span class="p">,</span>
+        <span class="n">cross_gap</span><span class="o">=</span><span class="n">cross_gap</span><span class="p">,</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+        <span class="n">pos_x</span><span class="o">=</span><span class="n">pos_x</span><span class="p">,</span>
+        <span class="n">pos_y</span><span class="o">=</span><span class="n">pos_y</span><span class="p">,</span>
+        <span class="n">cross_width</span><span class="o">=</span><span class="n">cross_width</span><span class="p">,</span>
+        <span class="n">hfss_inductance</span><span class="o">=</span><span class="n">LJ</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="p">),</span>
+        <span class="n">aedt_hfss_inductance</span><span class="o">=</span><span class="n">LJ</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="p">),</span>
+        <span class="n">style</span><span class="o">=</span><span class="s2">&quot;JJ_Dolan&quot;</span><span class="p">,</span>
+        <span class="n">Dolan_JJ</span>  <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">JJ_width</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">jj_width</span><span class="si">}</span><span class="s1">nm&#39;</span><span class="p">,</span>
+                          <span class="n">JJ_flip</span>  <span class="o">=</span> <span class="n">JJ_flip</span><span class="p">),</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">TransmonCross</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">xmon_options</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">create_cpw</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">start_component</span><span class="p">,</span> <span class="n">end_component</span><span class="p">,</span> <span class="n">total_length</span><span class="p">,</span> <span class="n">trace_gap</span><span class="p">,</span> <span class="n">trace_width</span><span class="p">):</span>
+    <span class="n">cpw_opts</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+        <span class="n">pin_inputs</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">start_component</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;second_end&#39;</span><span class="p">),</span>
+                        <span class="n">end_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">end_component</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)),</span>
+        <span class="n">lead</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">start_straight</span><span class="o">=</span><span class="s1">&#39;5um&#39;</span><span class="p">,</span> <span class="n">end_straight</span><span class="o">=</span><span class="s1">&#39;0um&#39;</span><span class="p">),</span>
+        <span class="n">fillet</span><span class="o">=</span><span class="s1">&#39;30.9um&#39;</span><span class="p">,</span>
+        <span class="n">total_length</span><span class="o">=</span><span class="n">total_length</span><span class="p">,</span>
+        <span class="n">trace_width</span><span class="o">=</span><span class="n">trace_width</span><span class="p">,</span>
+        <span class="n">meander</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">spacing</span><span class="o">=</span><span class="s1">&#39;100um&#39;</span><span class="p">,</span> <span class="n">asymmetry</span><span class="o">=</span><span class="s1">&#39;-50um&#39;</span><span class="p">),</span>
+        <span class="n">trace_gap</span><span class="o">=</span><span class="n">trace_gap</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">RouteMeander</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">cpw_opts</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">create_clt</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">coupling_length</span><span class="p">,</span> <span class="n">coupling_space</span><span class="p">,</span> <span class="n">down_length</span><span class="p">,</span> <span class="n">prime_gap</span><span class="p">,</span> <span class="n">prime_width</span><span class="p">,</span> <span class="n">second_gap</span><span class="p">,</span> <span class="n">second_width</span><span class="p">):</span>
+    <span class="n">clt_opts</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+        <span class="n">prime_width</span><span class="o">=</span><span class="n">prime_width</span><span class="p">,</span>
+        <span class="n">prime_gap</span><span class="o">=</span><span class="n">prime_gap</span><span class="p">,</span>
+        <span class="n">second_width</span><span class="o">=</span><span class="n">second_width</span><span class="p">,</span>
+        <span class="n">second_gap</span><span class="o">=</span><span class="n">second_gap</span><span class="p">,</span>
+        <span class="n">coupling_space</span><span class="o">=</span><span class="n">coupling_space</span><span class="p">,</span>
+        <span class="n">coupling_length</span><span class="o">=</span><span class="n">coupling_length</span><span class="p">,</span>
+        <span class="n">open_termination</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+        <span class="n">pos_y</span><span class="o">=</span><span class="n">pos_y</span><span class="p">,</span>
+        <span class="n">down_length</span><span class="o">=</span><span class="n">down_length</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">CoupledLineTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">clt_opts</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">create_wirebond</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;160um&#39;</span><span class="p">,</span> <span class="n">pad_length</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span> <span class="n">tapper_height</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s2">&quot;11.7um&quot;</span><span class="p">,</span><span class="n">trace_gap</span><span class="o">=</span><span class="s2">&quot;5.1um&quot;</span><span class="p">):</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+        <span class="n">pos_y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pos_y</span><span class="si">}</span><span class="s2">mm&quot;</span><span class="p">,</span>
+        <span class="n">pad_width</span><span class="o">=</span><span class="n">pad_width</span><span class="p">,</span>
+        <span class="n">pad_length</span><span class="o">=</span><span class="n">pad_length</span><span class="p">,</span>
+        <span class="n">tapper_height</span><span class="o">=</span><span class="n">tapper_height</span><span class="p">,</span>
+        <span class="n">trace_width</span><span class="o">=</span><span class="n">trace_width</span><span class="p">,</span>
+        <span class="n">trace_gap</span><span class="o">=</span><span class="n">trace_gap</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">LaunchpadWirebond</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">create_feedline</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">start_component</span><span class="p">,</span> <span class="n">start_pin</span><span class="p">,</span> <span class="n">end_component</span><span class="p">,</span> <span class="n">end_pin</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s1">&#39;11.7um&#39;</span><span class="p">,</span> <span class="n">trace_gap</span><span class="o">=</span><span class="s1">&#39;5.1um&#39;</span><span class="p">):</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+        <span class="n">pin_inputs</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+            <span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">start_component</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="n">start_pin</span><span class="p">),</span>
+            <span class="n">end_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">end_component</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="n">end_pin</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">trace_width</span><span class="o">=</span><span class="n">trace_width</span><span class="p">,</span>
+        <span class="n">trace_gap</span><span class="o">=</span><span class="n">trace_gap</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">RouteStraight</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Before designing the chip, we need to think about our requirements, resources and constraints.</p>
+<p>Let’s start with our board - since we are planning to have 4 qubits each with its own drive line and measure in transmission (2 ports), we need to ensure that we have have a total of 6 ports.</p>
+<div style="text-align: center;"><div style="display: inline-flex; justify-content: center; align-items: center; gap: 20px;"><div style="flex: 1; text-align: center;"><p><img alt="Figure 1" src="source/tutorials/figures/board.png" /></p>
+</div></div></div><p>The board cut out is about 5.4mm x 5.4mm so we need to ensure our chip size is less than that and give ourselves enough room for chip packaging and removal safely (and without much stress) with a tweezer.</p>
+<p>Let’s start the GUI instance and create the design for a chip that is 5 mm x 5 mm</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design</span> <span class="o">=</span> <span class="n">metal</span><span class="o">.</span><span class="n">designs</span><span class="o">.</span><span class="n">design_planar</span><span class="o">.</span><span class="n">DesignPlanar</span><span class="p">()</span>
+<span class="n">design</span><span class="o">.</span><span class="n">overwrite_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">design</span><span class="o">.</span><span class="n">_chips</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">size_x</span> <span class="o">=</span> <span class="s1">&#39;5mm&#39;</span>
+<span class="n">design</span><span class="o">.</span><span class="n">_chips</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">size_y</span> <span class="o">=</span> <span class="s1">&#39;5mm&#39;</span>
+<span class="n">gui</span> <span class="o">=</span> <span class="n">metal</span><span class="o">.</span><span class="n">MetalGUI</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+09:08AM 05s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  WARNING: Populating font family aliases took 392 ms. Replace uses of missing font family &#34;Courier&#34; with one that exists to avoid this cost.
+
+</pre></div></div>
+</div>
+<p>The ports on our chip need to be arranged in a way such that they are closest to the CPW trace of our board (schematic pictured above) for easy wirebonding.</p>
+<p>It also needs to be made sure that the ports have an impedance of 50 Ohms. The following port dimenstions and their arrangement satisfy the above requirements:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># wirebond pads for the feedline</span>
+<span class="n">wb1</span> <span class="o">=</span> <span class="n">create_wirebond</span><span class="p">(</span><span class="s1">&#39;wb_top&#39;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=-</span><span class="mi">90</span><span class="p">,</span> <span class="n">pos_y</span><span class="o">=</span><span class="mf">2.5</span> <span class="o">-</span> <span class="mf">0.4</span><span class="p">,</span>  <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;160um&#39;</span><span class="p">,</span> <span class="n">pad_length</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span> <span class="n">tapper_height</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s2">&quot;11.7um&quot;</span><span class="p">,</span> <span class="n">trace_gap</span><span class="o">=</span><span class="s2">&quot;5.1um&quot;</span><span class="p">)</span>
+<span class="n">wb2</span> <span class="o">=</span> <span class="n">create_wirebond</span><span class="p">(</span><span class="s1">&#39;wb_bottom&#39;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">pos_y</span><span class="o">=-</span><span class="mf">2.5</span> <span class="o">+</span> <span class="mf">0.6</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;160um&#39;</span><span class="p">,</span> <span class="n">pad_length</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span> <span class="n">tapper_height</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s2">&quot;11.7um&quot;</span><span class="p">,</span> <span class="n">trace_gap</span><span class="o">=</span><span class="s2">&quot;5.1um&quot;</span><span class="p">)</span>
+
+<span class="c1"># create the feedline</span>
+<span class="n">feedline</span> <span class="o">=</span> <span class="n">create_feedline</span><span class="p">(</span><span class="s1">&#39;feedline&#39;</span><span class="p">,</span> <span class="s1">&#39;wb_top&#39;</span><span class="p">,</span> <span class="s1">&#39;tie&#39;</span><span class="p">,</span> <span class="s1">&#39;wb_bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;tie&#39;</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s2">&quot;11.7um&quot;</span><span class="p">,</span> <span class="n">trace_gap</span><span class="o">=</span><span class="s1">&#39;5.1um&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># charge lines</span>
+<span class="n">lp3</span> <span class="o">=</span> <span class="n">LaunchpadWirebond</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;LP3&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">pos_x</span> <span class="o">=</span> <span class="s1">&#39;-2mm&#39;</span><span class="p">,</span> <span class="n">pos_y</span> <span class="o">=</span> <span class="s1">&#39;-1.3mm&#39;</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s1">&#39;10um&#39;</span><span class="p">,</span>
+                                                               <span class="n">trace_gap</span><span class="o">=</span><span class="s1">&#39;6um&#39;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;150um&#39;</span><span class="p">,</span> <span class="n">pad_height</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">))</span>
+
+<span class="n">lp1</span> <span class="o">=</span> <span class="n">LaunchpadWirebond</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;LP1&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">pos_x</span> <span class="o">=</span> <span class="s1">&#39;-2mm&#39;</span><span class="p">,</span> <span class="n">pos_y</span> <span class="o">=</span> <span class="s1">&#39;1.3mm&#39;</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s1">&#39;10um&#39;</span><span class="p">,</span>
+                                                               <span class="n">trace_gap</span><span class="o">=</span><span class="s1">&#39;6um&#39;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;150um&#39;</span><span class="p">,</span> <span class="n">pad_height</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">))</span>
+
+
+<span class="n">lp4</span> <span class="o">=</span> <span class="n">LaunchpadWirebond</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;LP4&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">pos_x</span> <span class="o">=</span> <span class="s1">&#39;2mm&#39;</span><span class="p">,</span> <span class="n">pos_y</span> <span class="o">=</span> <span class="s1">&#39;-1.3mm&#39;</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s1">&#39;10um&#39;</span><span class="p">,</span>
+                                                               <span class="n">trace_gap</span><span class="o">=</span><span class="s1">&#39;6um&#39;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;180&#39;</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;150um&#39;</span><span class="p">,</span> <span class="n">pad_height</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">))</span>
+
+<span class="n">lp2</span> <span class="o">=</span> <span class="n">LaunchpadWirebond</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;LP2&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">pos_x</span> <span class="o">=</span> <span class="s1">&#39;2mm&#39;</span><span class="p">,</span> <span class="n">pos_y</span> <span class="o">=</span> <span class="s1">&#39;1.3mm&#39;</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s1">&#39;10um&#39;</span><span class="p">,</span>
+                                                               <span class="n">trace_gap</span><span class="o">=</span><span class="s1">&#39;6um&#39;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;180&#39;</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;150um&#39;</span><span class="p">,</span> <span class="n">pad_height</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">))</span>
+
+<span class="n">charge_line_ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">lp1</span><span class="p">,</span> <span class="n">lp2</span><span class="p">,</span> <span class="n">lp3</span><span class="p">,</span> <span class="n">lp4</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">autoscale</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s2">&quot;figures/ports.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_46_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_46_0.png" style="width: 500px;" />
+</div>
+</div>
+<p>Let’s start with a rough sketch of what we want the design to look like.</p>
+<div style="text-align: center;"><div style="display: inline-flex; justify-content: center; align-items: center; gap: 20px;"><div style="flex: 1; text-align: center;"><p><img alt="Figure 1" src="source/tutorials/figures/sketch.jpeg" /></p>
+</div></div></div><p><strong>I am clearly an artist</strong></p>
+<p>Nice! Let’s now add the qubits and the resonators to the design.</p>
+<p>Using the following orientations and positions for the qubits (and the Dolan JJs) for minimal cross-talk, best use of space, and ensuring that all the JJs can be written in single evaporation run</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_orientations</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;-90&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;-90&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">]</span>
+<span class="n">clt_orientations</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;-90&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;-90&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">]</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;-1500um&#39;</span><span class="p">,</span> <span class="s1">&#39;800um&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;1500um&#39;</span><span class="p">,</span> <span class="s1">&#39;1700um&#39;</span><span class="p">),</span>
+             <span class="p">(</span><span class="s1">&#39;-1500um&#39;</span><span class="p">,</span> <span class="s1">&#39;-750um&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;1500um&#39;</span><span class="p">,</span> <span class="s1">&#39;-200um&#39;</span><span class="p">)]</span>
+<span class="n">JJ_flips</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Lists to store the various design objects</span>
+<span class="n">cpw_objects</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">qubit_objects</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">clt_objects</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># Loop through each entry to create design objects</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_pairs</span><span class="p">):</span>
+    <span class="n">qubit_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Q</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">clt_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;clt</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">cpw_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;cpw</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="c1"># respecting the minimum JJ width</span>
+    <span class="n">jj_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">JJ_width</span><span class="p">,</span> <span class="n">foundry_min_JJ_width</span><span class="p">)</span>
+
+    <span class="c1"># Create the qubit</span>
+    <span class="n">qubit_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">create_qubit</span><span class="p">(</span>
+            <span class="n">qubit_name</span><span class="p">,</span>
+            <span class="n">pos_x</span><span class="o">=</span><span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">pos_y</span><span class="o">=</span><span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="n">qubit_orientations</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="n">JJ_flip</span><span class="o">=</span><span class="n">JJ_flips</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="n">LJ</span><span class="o">=</span><span class="n">LJs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">jj_width</span><span class="o">=</span><span class="n">jj_width</span><span class="p">,</span>
+            <span class="n">jj_length</span><span class="o">=</span><span class="n">JJ_length</span><span class="p">,</span>
+            <span class="n">claw_gap</span><span class="o">=</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;claw_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">claw_length</span><span class="o">=</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;claw_length&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">claw_width</span><span class="o">=</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;claw_width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">cross_length</span><span class="o">=</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_length&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">cross_width</span><span class="o">=</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">cross_gap</span><span class="o">=</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">ground_spacing</span><span class="o">=</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Create the CLT</span>
+    <span class="n">clt_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">create_clt</span><span class="p">(</span>
+            <span class="n">clt_name</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="n">clt_orientations</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="n">pos_y</span><span class="o">=</span><span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">coupling_length</span><span class="o">=</span><span class="n">data_coupler</span><span class="p">[</span><span class="s1">&#39;coupling_length&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">coupling_space</span><span class="o">=</span><span class="n">data_coupler</span><span class="p">[</span><span class="s1">&#39;coupling_space&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">down_length</span><span class="o">=</span><span class="n">data_coupler</span><span class="p">[</span><span class="s1">&#39;down_length&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">prime_gap</span><span class="o">=</span><span class="n">data_coupler</span><span class="p">[</span><span class="s1">&#39;prime_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">prime_width</span><span class="o">=</span><span class="n">data_coupler</span><span class="p">[</span><span class="s1">&#39;prime_width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">second_gap</span><span class="o">=</span><span class="n">data_coupler</span><span class="p">[</span><span class="s1">&#39;second_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">second_width</span><span class="o">=</span><span class="n">data_coupler</span><span class="p">[</span><span class="s1">&#39;second_width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Create the CPW</span>
+    <span class="n">cpw_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">create_cpw</span><span class="p">(</span>
+            <span class="n">cpw_name</span><span class="p">,</span>
+            <span class="n">start_component</span><span class="o">=</span><span class="n">clt_name</span><span class="p">,</span>
+            <span class="n">end_component</span><span class="o">=</span><span class="n">qubit_name</span><span class="p">,</span>
+            <span class="n">total_length</span><span class="o">=</span><span class="n">cpw_lengths</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="n">trace_gap</span><span class="o">=</span><span class="n">data_cpw</span><span class="p">[</span><span class="s1">&#39;trace_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">trace_width</span><span class="o">=</span><span class="n">data_cpw</span><span class="p">[</span><span class="s1">&#39;trace_width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+09:08AM 06s WARNING [check_lengths]: For path table, component=cpw1, key=trace has short segments that could cause issues with fillet. Values in (1-1) (21-22)  are index(es) in shapely geometry.
+09:08AM 06s WARNING [check_lengths]: For path table, component=cpw1, key=cut has short segments that could cause issues with fillet. Values in (1-1) (21-22)  are index(es) in shapely geometry.
+09:08AM 06s WARNING [check_lengths]: For path table, component=cpw2, key=trace has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+09:08AM 06s WARNING [check_lengths]: For path table, component=cpw2, key=cut has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw3, key=trace has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw3, key=cut has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw4, key=trace has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw4, key=cut has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">autoscale</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s2">&quot;figures/chip1.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw1, key=trace has short segments that could cause issues with fillet. Values in (1-1) (21-22)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw1, key=cut has short segments that could cause issues with fillet. Values in (1-1) (21-22)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw2, key=trace has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw2, key=cut has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw3, key=trace has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw3, key=cut has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw4, key=trace has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+09:08AM 07s WARNING [check_lengths]: For path table, component=cpw4, key=cut has short segments that could cause issues with fillet. Values in (19-20)  are index(es) in shapely geometry.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_51_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_51_1.png" style="width: 500px;" />
+</div>
+</div>
+<p>Lets zoom in on a qubit and its JJ to see how it looks.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gui</span><span class="o">.</span><span class="n">zoom_on_components</span><span class="p">([</span><span class="s1">&#39;Q4_JJ_Dolan&#39;</span><span class="p">])</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s2">&quot;figures/q1_jj_zoomed.png&quot;</span><span class="p">)</span>
+
+<span class="n">gui</span><span class="o">.</span><span class="n">zoom_on_components</span><span class="p">([</span><span class="s1">&#39;Q1&#39;</span><span class="p">])</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s2">&quot;figures/q1_zoomed.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_53_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_53_0.png" style="width: 500px;" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_53_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_53_1.png" style="width: 500px;" />
+</div>
+</div>
+<p>Awesome the junctions and the qubits look great. However, as we can see there are some “kinks” in some of the CPW lines - lets take a closer look</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gui</span><span class="o">.</span><span class="n">zoom_on_components</span><span class="p">([</span><span class="s1">&#39;cpw1&#39;</span><span class="p">])</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s2">&quot;figures/cpw1_zoomed.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_55_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_55_0.png" style="width: 500px;" />
+</div>
+</div>
+<p>We can fix this by changing the <code class="docutils literal notranslate"><span class="pre">lead.end_straight</span></code> and <code class="docutils literal notranslate"><span class="pre">lead.start_straigh</span></code> parameters. These numbers are to be adjusted until the issue is resolved.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">cpw</span> <span class="ow">in</span> <span class="n">cpw_objects</span><span class="p">:</span>
+    <span class="n">cpw</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">lead</span><span class="o">.</span><span class="n">start_straight</span> <span class="o">=</span> <span class="s1">&#39;75um&#39;</span>
+    <span class="n">cpw</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">lead</span><span class="o">.</span><span class="n">end_straight</span> <span class="o">=</span> <span class="s1">&#39;50um&#39;</span>
+
+<span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">zoom_on_components</span><span class="p">([</span><span class="s1">&#39;cpw1&#39;</span><span class="p">])</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s2">&quot;figures/cpw1_zoomed2.png&quot;</span><span class="p">)</span>
+
+<span class="n">gui</span><span class="o">.</span><span class="n">autoscale</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s2">&quot;figures/chip1_v1.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_57_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_57_0.png" style="width: 500px;" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_57_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_57_1.png" style="width: 500px;" />
+</div>
+</div>
+<p>Great that fixed it!</p>
+<p>Now, lets add the charge lines! To do this we need to first add the <code class="docutils literal notranslate"><span class="pre">OpenToGround</span></code> pins first. The following method will add the pins below/above the qubits as we specify with our chosen distance from it.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_charge_line_otgs</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="c1"># get the qubit position as float</span>
+    <span class="n">qubit_pos_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">qubit</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">pos_x</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">qubit_pos_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">qubit</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">pos_y</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="c1"># get qubit cross length and cros gap</span>
+    <span class="n">qubit_cross_length</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">qubit</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">cross_length</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">qubit_cross_gap</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">qubit</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">cross_gap</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">qubit_name</span> <span class="o">=</span> <span class="n">qubit</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c1"># get the port name</span>
+    <span class="n">port_name</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c1"># set the otg name</span>
+    <span class="n">otg_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;otg_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;below&quot;</span><span class="p">:</span>
+        <span class="c1"># place the OpenToGround termination below the qubit</span>
+        <span class="n">otg</span> <span class="o">=</span> <span class="n">OpenToGround</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">otg_name</span><span class="p">,</span> <span class="n">Dict</span><span class="p">(</span><span class="n">pos_x</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">qubit_pos_x</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span> <span class="n">pos_y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">qubit_pos_y</span><span class="o">-</span><span class="n">qubit_cross_length</span><span class="o">-</span><span class="n">qubit_cross_gap</span><span class="o">-</span><span class="n">distance</span><span class="o">-</span><span class="mi">6</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;90&#39;</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;above&quot;</span><span class="p">:</span>
+        <span class="c1"># place the OpenToGround termination above the qubit</span>
+        <span class="n">otg</span> <span class="o">=</span> <span class="n">OpenToGround</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">otg_name</span><span class="p">,</span> <span class="n">Dict</span><span class="p">(</span><span class="n">pos_x</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">qubit_pos_x</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span> <span class="n">pos_y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">qubit_pos_y</span><span class="o">+</span><span class="n">qubit_cross_length</span><span class="o">+</span><span class="n">qubit_cross_gap</span><span class="o">+</span><span class="n">distance</span><span class="o">-</span><span class="mi">6</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;-90&#39;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">otg</span>
+<br/><br/></pre></div>
+</div>
+</div>
+<p>We will then need to add the charge lines from the ports to the <code class="docutils literal notranslate"><span class="pre">OpenToGround</span></code> pins. For this we are using <code class="docutils literal notranslate"><span class="pre">RouteAnchors</span></code> since all other options lead to 90 turns which are bad - cause radiation loss and massive TLS loss.</p>
+<p>I only use one anchor which I set at the x position of the qubit center and the y position of the port center.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_charge_line</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">otg</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="c1"># Create an OrderedDict for the anchors</span>
+    <span class="n">anch_list</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+    <span class="c1"># Define anchors based on the qubit and port positions</span>
+    <span class="c1"># You can adjust this based on your specific layout needs</span>
+    <span class="n">anch_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">qubit</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">pos_y</span><span class="p">])</span>
+
+    <span class="c1"># Create the RouteAnchors instance</span>
+    <span class="n">route</span> <span class="o">=</span> <span class="n">RouteAnchors</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">Dict</span><span class="p">(</span>
+        <span class="n">fillet</span><span class="o">=</span><span class="s1">&#39;80um&#39;</span><span class="p">,</span>
+        <span class="n">anchors</span><span class="o">=</span><span class="n">anch_list</span><span class="p">,</span>
+        <span class="n">pin_inputs</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+            <span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">port</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;tie&#39;</span><span class="p">),</span>  <span class="c1"># Start pin (port)</span>
+            <span class="n">end_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">otg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;open&#39;</span><span class="p">)</span>  <span class="c1"># End pin (qubit)</span>
+        <span class="p">),</span>
+        <span class="n">lead</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+            <span class="n">start_straight</span><span class="o">=</span><span class="s1">&#39;15um&#39;</span><span class="p">,</span>  <span class="c1"># Lead-in straight section</span>
+            <span class="n">end_straight</span><span class="o">=</span><span class="s1">&#39;50um&#39;</span>     <span class="c1"># Lead-out straight section</span>
+        <span class="p">)</span>
+    <span class="p">))</span>
+
+    <span class="c1"># Ensure the start and end pins are set, which defines head and tail points</span>
+    <span class="n">route</span><span class="o">.</span><span class="n">set_pin</span><span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">)</span>  <span class="c1"># Set the head (start pin)</span>
+    <span class="n">route</span><span class="o">.</span><span class="n">set_pin</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">)</span>    <span class="c1"># Set the tail (end pin)</span>
+
+    <span class="c1"># You can now get the points</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">route</span>
+<br/></pre></div>
+</div>
+</div>
+<p>Now, we instantiate these objects to make the charge lines. The “gaps” (i.e the distance between the charge line and the qubit) are to be chosen such that <span class="math">\(T_1\)</span> does not get too shortened.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">placement</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;above&quot;</span><span class="p">,</span> <span class="s2">&quot;below&quot;</span><span class="p">,</span> <span class="s2">&quot;below&quot;</span><span class="p">,</span> <span class="s2">&quot;below&quot;</span><span class="p">]</span>
+<span class="n">gaps</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">]</span> <span class="c1">#um</span>
+
+<span class="n">otg_objects</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">charge_lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">qubit_objects</span><span class="p">)):</span>
+    <span class="n">qubit</span> <span class="o">=</span> <span class="n">qubit_objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">charge_line_ports</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">otg</span> <span class="o">=</span> <span class="n">create_charge_line_otgs</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">gaps</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">placement</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">cl</span> <span class="o">=</span> <span class="n">create_charge_line</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">otg</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;cl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">otg_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">otg</span><span class="p">)</span>
+    <span class="n">charge_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
+
+<span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">autoscale</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s2">&quot;figures/completed_chip.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+09:08AM 09s WARNING [add_pins_to_table]: Component: 5 and pin: tie are already in net_info with net_id 33
+09:08AM 09s WARNING [connect_pins]: NetId was not added for 5, tie, 33, start and will not be added to components.
+09:08AM 09s WARNING [add_pins_to_table]: Component: 32 and pin: open are already in net_info with net_id 34
+09:08AM 09s WARNING [connect_pins]: NetId was not added for 32, open, 33, end and will not be added to components.
+09:08AM 10s WARNING [add_pins_to_table]: Component: 7 and pin: tie are already in net_info with net_id 35
+09:08AM 10s WARNING [connect_pins]: NetId was not added for 7, tie, 35, start and will not be added to components.
+09:08AM 10s WARNING [add_pins_to_table]: Component: 34 and pin: open are already in net_info with net_id 36
+09:08AM 10s WARNING [connect_pins]: NetId was not added for 34, open, 35, end and will not be added to components.
+09:08AM 10s WARNING [add_pins_to_table]: Component: 4 and pin: tie are already in net_info with net_id 37
+09:08AM 10s WARNING [connect_pins]: NetId was not added for 4, tie, 37, start and will not be added to components.
+09:08AM 10s WARNING [add_pins_to_table]: Component: 36 and pin: open are already in net_info with net_id 38
+09:08AM 10s WARNING [connect_pins]: NetId was not added for 36, open, 37, end and will not be added to components.
+09:08AM 10s WARNING [add_pins_to_table]: Component: 6 and pin: tie are already in net_info with net_id 39
+09:08AM 10s WARNING [connect_pins]: NetId was not added for 6, tie, 39, start and will not be added to components.
+09:08AM 10s WARNING [add_pins_to_table]: Component: 38 and pin: open are already in net_info with net_id 40
+09:08AM 10s WARNING [connect_pins]: NetId was not added for 38, open, 39, end and will not be added to components.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_63_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_63_1.png" style="width: 500px;" />
+</div>
+</div>
+</section>
+</section>
+<section id="Exporting-the-Design">
+<h1>Exporting the Design<a class="headerlink" href="#Exporting-the-Design" title="Link to this heading">#</a></h1>
+<p>Set the layer numbers to your foundry/fab facility standards.</p>
+<p>For example, lets say our foundry wants all metal layers except for the charge lines to be layer 3 and the charge lines (and ports) to be layer 6. <em>I have to admit this is a very odd request but I think its a good teaching point</em></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">charge_line_layer</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">metal_layer</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+</div>
+</div>
+<p>Assign metal layers to the respective QComponents.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">comps</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;wb_top&#39;</span><span class="p">,</span> <span class="s1">&#39;wb_bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;feedline&#39;</span><span class="p">]</span>
+<span class="n">numbered_comps</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cpw&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;clt&#39;</span><span class="p">,</span> <span class="s1">&#39;otg_&#39;</span><span class="p">]</span>
+
+<span class="n">metal_obj_names</span> <span class="o">=</span> <span class="n">comps</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">numbered_comps</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)]</span>
+
+<span class="k">for</span> <span class="n">component_name</span><span class="p">,</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">design</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">component_name</span> <span class="ow">in</span> <span class="n">metal_obj_names</span><span class="p">:</span>
+        <span class="n">component</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metal_layer</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<p>Adjusting the charge line layers.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">numbered_comps</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cl_&#39;</span><span class="p">,</span> <span class="s1">&#39;LP&#39;</span><span class="p">]</span>
+
+<span class="n">charge_line_obj_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">numbered_comps</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)]</span>
+
+<span class="k">for</span> <span class="n">component_name</span><span class="p">,</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">design</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">component_name</span> <span class="ow">in</span> <span class="n">charge_line_obj_names</span><span class="p">:</span>
+        <span class="n">component</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">charge_line_layer</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Rebuild the <code class="docutils literal notranslate"><span class="pre">gui</span></code> to save the changes.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Processing the gds now.</p>
+<p>We want to include ground plane holes to ensure that we don’t trap flux.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">a_gds</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">renderers</span><span class="o">.</span><span class="n">gds</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;fabricate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;True&#39;</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;cheese&#39;</span><span class="p">][</span><span class="s1">&#39;view_in_file&#39;</span><span class="p">][</span><span class="s1">&#39;main&#39;</span><span class="p">][</span><span class="n">metal_layer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;cheese&#39;</span><span class="p">][</span><span class="s1">&#39;view_in_file&#39;</span><span class="p">][</span><span class="s1">&#39;main&#39;</span><span class="p">][</span><span class="n">charge_line_layer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">no_cheese</span><span class="p">[</span><span class="s1">&#39;view_in_file&#39;</span><span class="p">][</span><span class="s1">&#39;main&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">3</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Defining the ground plane holes.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">cheese</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="s2">&quot;2&quot;</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">cheese</span><span class="o">.</span><span class="n">cheese_0_x</span> <span class="o">=</span> <span class="s2">&quot;25um&quot;</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">cheese</span><span class="o">.</span><span class="n">cheese_0_y</span> <span class="o">=</span> <span class="s2">&quot;25um&quot;</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">cheese</span><span class="o">.</span><span class="n">edge_nocheese</span> <span class="o">=</span> <span class="s2">&quot;200um&quot;</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">cheese</span><span class="o">.</span><span class="n">delta_x</span> <span class="o">=</span> <span class="s2">&quot;125um&quot;</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">cheese</span><span class="o">.</span><span class="n">delta_y</span> <span class="o">=</span> <span class="s2">&quot;125um&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>Defining the keepout regions.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">no_cheese</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="s2">&quot;3&quot;</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">no_cheese</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="s2">&quot;100um&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>Exporting the gds file</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;gds_files/USC4Q_qff2024&quot;</span>
+<span class="n">a_gds</span><span class="o">.</span><span class="n">export_to_gds</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">.gds&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+09:08AM 43s WARNING [_qgeometry_to_gds]: Unexpected shapely object geometry.The variable qgeometry_element is &lt;class &#39;numpy.float64&#39;&gt;, method can currently handle Polygon and FlexPath.
+09:08AM 43s WARNING [_qgeometry_to_gds]: Unexpected shapely object geometry.The variable qgeometry_element is &lt;class &#39;numpy.float64&#39;&gt;, method can currently handle Polygon and FlexPath.
+09:08AM 43s WARNING [_import_junction_gds_file]: Not able to find file:&#34;../resources/Fake_Junctions.GDS&#34;.  Not used to replace junction. Checked directory:&#34;/Users/shanto/LFL/SQuADDS/SQuADDS/resources&#34;.
+09:08AM 43s WARNING [_check_either_cheese]: layer=20 is not in chip=main either in no_cheese_view_in_file or cheese_view_in_file from self.options.
+09:08AM 43s WARNING [_check_either_cheese]: layer=60 is not in chip=main either in no_cheese_view_in_file or cheese_view_in_file from self.options.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+1
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> also provides some useful gds post-procesessing methods available in the <code class="docutils literal notranslate"><span class="pre">squadds.gds.processing</span></code> module that we encourage you to explore (and contribute to!).</p>
+<p>Now you can do run it through the DRC software and address any errors and thats it you are now ready to go to your local cleanroom and make this device or send it to your foundry!</p>
+<section id="License">
+<h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
+<div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>This tutorial is written by Sadman Ahmed Shanto</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2024.</p>
+</p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Tutorial 4: Contributing Measured Devices’ Data to the SQuADDS Database</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../apidocs/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API Reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Tutorial 5: Designing a “fab-ready” chip with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Chip-Design-Idea">Chip Design Idea</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Query-the-SQuADDS-Database">Query the SQuADDS Database</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Making-the-Design">Making the Design</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#Exporting-the-Design">Exporting the Design</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#License">License</a></li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/source/tutorials/Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.ipynb.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
