@@ -1,6 +1,6 @@
 ---
-name: "\U+1F4CB General Issue"
-about: Report any other issue not covered by specific templates
+name: "📝 General Issue"
+about: "Report any other issue not covered by specific templates"
 title: '[ISSUE] '
 labels: question, help-wanted
 assignees: ''
