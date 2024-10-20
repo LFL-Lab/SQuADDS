@@ -1,5 +1,5 @@
 ---
-name: Installation Issue
+name: "\U+1F4DD Installation Issue"
 about: Report any issues related to installing `SQuADDS`
 title: '[INSTALLATION] '
 labels: installation, bug
