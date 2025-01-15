@@ -126,6 +126,11 @@ Installation Issues
 
 **A:** You may need to restart the kernel after installing `SQuADDS`. To do this, go to the `Kernel` menu in Jupyter Notebook and select `Restart`.
 
+**Q: Getting** ``ERROR: Failed building wheel for klayout`` **while building from GitHub in Windows**
+
+**A:** This problem can be solved simply by installing KLayout independently from the website `here <https://www.klayout.de/build.html>`_, and commenting out the ``klayout==0.29.0`` in the ``requirements.txt`` file.
+The ``requirements.txt`` file can found in the cloned repository. Then re-run the commands. 
+
 Accessing the Database
 -----------------------
 
