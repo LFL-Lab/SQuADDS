@@ -16,20 +16,22 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
@@ -37,10 +39,11 @@
     <link rel="stylesheet" type="text/css" href="../../_static/katex-math.css?v=91adb8b6" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=8da8c241"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -84,19 +87,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -104,7 +96,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -112,8 +103,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -150,7 +141,7 @@
     
     
     <img src="../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
-    <script>document.write(`<img src="../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+    <img src="../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
   
   
 </a></div>
@@ -200,7 +191,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -267,29 +260,21 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
         <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -338,15 +323,11 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
@@ -365,7 +346,8 @@ document.write(`
       
       
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -475,15 +457,11 @@ document.write(`
         
           <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -547,9 +525,14 @@ document.write(`
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -567,8 +550,6 @@ document.write(`
       
         <div class="header-article-item">
 
-
-
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -580,7 +561,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">Tutorials</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Tutorial 5:...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial 5: Designing a “fab-ready” chip with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></span></li>
   </ul>
 </nav>
 </div>
@@ -635,9 +616,9 @@ document.write(`
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds</span> <span class="kn">import</span> <span class="n">SQuADDS_DB</span><span class="p">,</span> <span class="n">Analyzer</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQuADDS_DB</span><span class="p">,</span> <span class="n">Analyzer</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 </pre></div>
 </div>
 </div>
@@ -869,7 +850,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="n">string_to_float</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">string_to_float</span>
 </pre></div>
 </div>
 </div>
@@ -905,7 +886,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_JJ_width</span><span class="p">(</span><span class="n">Lj</span><span class="p">,</span> <span class="n">current_density</span><span class="p">,</span> <span class="n">JJ_length</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_JJ_width</span><span class="p">(</span><span class="n">Lj</span><span class="p">,</span> <span class="n">current_density</span><span class="p">,</span> <span class="n">JJ_length</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the width of the Josephson Junction (JJ) for a Dolan style junction.</span>
 
@@ -939,7 +920,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">round_to_multiple_of_10</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">round_to_multiple_of_10</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rounds a float number to the nearest multiple of 10.</span>
 
@@ -1021,8 +1002,8 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">shapely.errors</span> <span class="kn">import</span> <span class="n">ShapelyDeprecationWarning</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShapelyDeprecationWarning</span>
 
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">ShapelyDeprecationWarning</span><span class="p">)</span>
@@ -1033,26 +1014,26 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qiskit_metal</span> <span class="kn">import</span> <span class="n">draw</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">designs</span><span class="p">,</span> <span class="n">MetalGUI</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.toolbox_metal</span> <span class="kn">import</span> <span class="n">math_and_overrides</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.core</span> <span class="kn">import</span> <span class="n">QComponent</span>
-<span class="kn">import</span> <span class="nn">qiskit_metal</span> <span class="k">as</span> <span class="nn">metal</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.terminations.launchpad_wb</span> <span class="kn">import</span> <span class="n">LaunchpadWirebond</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.terminations.short_to_ground</span> <span class="kn">import</span> <span class="n">ShortToGround</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.straight_path</span> <span class="kn">import</span> <span class="n">RouteStraight</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.framed_path</span> <span class="kn">import</span> <span class="n">RouteFramed</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.anchored_path</span> <span class="kn">import</span> <span class="n">RouteAnchors</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.mixed_path</span> <span class="kn">import</span> <span class="n">RouteMixed</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.meandered</span> <span class="kn">import</span> <span class="n">RouteMeander</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.terminations.open_to_ground</span> <span class="kn">import</span> <span class="n">OpenToGround</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span> <span class="kn">import</span> <span class="n">CoupledLineTee</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee</span> <span class="kn">import</span> <span class="n">CapNInterdigitalTee</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.couplers.line_tee</span> <span class="kn">import</span> <span class="n">LineTee</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.pathfinder</span> <span class="kn">import</span> <span class="n">RoutePathfinder</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">draw</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">designs</span><span class="p">,</span> <span class="n">MetalGUI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.toolbox_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">math_and_overrides</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">QComponent</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">metal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.launchpad_wb</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaunchpadWirebond</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.short_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShortToGround</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.straight_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteStraight</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.framed_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteFramed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.anchored_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteAnchors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.mixed_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMixed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.meandered</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMeander</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.open_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenToGround</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoupledLineTee</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapNInterdigitalTee</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineTee</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.pathfinder</span><span class="w"> </span><span class="kn">import</span> <span class="n">RoutePathfinder</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 </pre></div>
 </div>
 </div>
@@ -1061,7 +1042,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">squadds.components.qubits</span> <span class="kn">import</span> <span class="n">TransmonCross</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.qubits</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCross</span>
 </pre></div>
 </div>
 </div>
@@ -1070,7 +1051,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="k">def</span> <span class="nf">create_qubit</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pos_x</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span><span class="n">JJ_flip</span><span class="p">,</span><span class="n">LJ</span><span class="p">,</span><span class="n">jj_width</span><span class="p">,</span><span class="n">jj_length</span><span class="p">,</span><span class="n">claw_gap</span><span class="p">,</span> <span class="n">claw_length</span><span class="p">,</span> <span class="n">claw_width</span><span class="p">,</span> <span class="n">cross_length</span><span class="p">,</span> <span class="n">cross_width</span><span class="p">,</span> <span class="n">cross_gap</span><span class="p">,</span> <span class="n">ground_spacing</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_qubit</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pos_x</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span><span class="n">JJ_flip</span><span class="p">,</span><span class="n">LJ</span><span class="p">,</span><span class="n">jj_width</span><span class="p">,</span><span class="n">jj_length</span><span class="p">,</span><span class="n">claw_gap</span><span class="p">,</span> <span class="n">claw_length</span><span class="p">,</span> <span class="n">claw_width</span><span class="p">,</span> <span class="n">cross_length</span><span class="p">,</span> <span class="n">cross_width</span><span class="p">,</span> <span class="n">cross_gap</span><span class="p">,</span> <span class="n">ground_spacing</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">xmon_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
         <span class="n">connection_pads</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
             <span class="n">c</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">connector_location</span><span class="o">=</span><span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="n">connector_type</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span>
@@ -1095,7 +1076,7 @@ array([5.48, 6.48, 7.48, 8.48])
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">TransmonCross</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">xmon_options</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">create_cpw</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">start_component</span><span class="p">,</span> <span class="n">end_component</span><span class="p">,</span> <span class="n">total_length</span><span class="p">,</span> <span class="n">trace_gap</span><span class="p">,</span> <span class="n">trace_width</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_cpw</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">start_component</span><span class="p">,</span> <span class="n">end_component</span><span class="p">,</span> <span class="n">total_length</span><span class="p">,</span> <span class="n">trace_gap</span><span class="p">,</span> <span class="n">trace_width</span><span class="p">):</span>
     <span class="n">cpw_opts</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
         <span class="n">pin_inputs</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">start_component</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;second_end&#39;</span><span class="p">),</span>
                         <span class="n">end_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">end_component</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)),</span>
@@ -1108,7 +1089,7 @@ array([5.48, 6.48, 7.48, 8.48])
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">RouteMeander</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">cpw_opts</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">create_clt</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">coupling_length</span><span class="p">,</span> <span class="n">coupling_space</span><span class="p">,</span> <span class="n">down_length</span><span class="p">,</span> <span class="n">prime_gap</span><span class="p">,</span> <span class="n">prime_width</span><span class="p">,</span> <span class="n">second_gap</span><span class="p">,</span> <span class="n">second_width</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_clt</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">coupling_length</span><span class="p">,</span> <span class="n">coupling_space</span><span class="p">,</span> <span class="n">down_length</span><span class="p">,</span> <span class="n">prime_gap</span><span class="p">,</span> <span class="n">prime_width</span><span class="p">,</span> <span class="n">second_gap</span><span class="p">,</span> <span class="n">second_width</span><span class="p">):</span>
     <span class="n">clt_opts</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
         <span class="n">prime_width</span><span class="o">=</span><span class="n">prime_width</span><span class="p">,</span>
         <span class="n">prime_gap</span><span class="o">=</span><span class="n">prime_gap</span><span class="p">,</span>
@@ -1123,7 +1104,7 @@ array([5.48, 6.48, 7.48, 8.48])
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">CoupledLineTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">clt_opts</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">create_wirebond</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;160um&#39;</span><span class="p">,</span> <span class="n">pad_length</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span> <span class="n">tapper_height</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s2">&quot;11.7um&quot;</span><span class="p">,</span><span class="n">trace_gap</span><span class="o">=</span><span class="s2">&quot;5.1um&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_wirebond</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;160um&#39;</span><span class="p">,</span> <span class="n">pad_length</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span> <span class="n">tapper_height</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s2">&quot;11.7um&quot;</span><span class="p">,</span><span class="n">trace_gap</span><span class="o">=</span><span class="s2">&quot;5.1um&quot;</span><span class="p">):</span>
     <span class="n">options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
         <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
         <span class="n">pos_y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pos_y</span><span class="si">}</span><span class="s2">mm&quot;</span><span class="p">,</span>
@@ -1136,7 +1117,7 @@ array([5.48, 6.48, 7.48, 8.48])
     <span class="k">return</span> <span class="n">LaunchpadWirebond</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">create_feedline</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">start_component</span><span class="p">,</span> <span class="n">start_pin</span><span class="p">,</span> <span class="n">end_component</span><span class="p">,</span> <span class="n">end_pin</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s1">&#39;11.7um&#39;</span><span class="p">,</span> <span class="n">trace_gap</span><span class="o">=</span><span class="s1">&#39;5.1um&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_feedline</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">start_component</span><span class="p">,</span> <span class="n">start_pin</span><span class="p">,</span> <span class="n">end_component</span><span class="p">,</span> <span class="n">end_pin</span><span class="p">,</span> <span class="n">trace_width</span><span class="o">=</span><span class="s1">&#39;11.7um&#39;</span><span class="p">,</span> <span class="n">trace_gap</span><span class="o">=</span><span class="s1">&#39;5.1um&#39;</span><span class="p">):</span>
     <span class="n">options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
         <span class="n">pin_inputs</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
             <span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">start_component</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="n">start_pin</span><span class="p">),</span>
@@ -1444,7 +1425,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_charge_line_otgs</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_charge_line_otgs</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
     <span class="c1"># get the qubit position as float</span>
     <span class="n">qubit_pos_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">qubit</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">pos_x</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
     <span class="n">qubit_pos_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">qubit</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">pos_y</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
@@ -1475,7 +1456,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_charge_line</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">otg</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_charge_line</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">otg</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="c1"># Create an OrderedDict for the anchors</span>
     <span class="n">anch_list</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
 
@@ -1734,7 +1715,8 @@ array([5.48, 6.48, 7.48, 8.48])
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -1754,13 +1736,13 @@ array([5.48, 6.48, 7.48, 8.48])
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../../_sources/source/tutorials/Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.ipynb.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/source/tutorials/Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1775,8 +1757,8 @@ array([5.48, 6.48, 7.48, 8.48])
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1809,7 +1791,8 @@ array([5.48, 6.48, 7.48, 8.48])
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

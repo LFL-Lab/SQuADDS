@@ -15,20 +15,22 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -36,10 +38,11 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/katex-math.css?v=91adb8b6" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=8da8c241"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -83,19 +86,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -103,7 +95,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -111,8 +102,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -149,7 +140,7 @@
     
     
     <img src="../../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
-    <script>document.write(`<img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+    <img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
   
   
 </a></div>
@@ -199,7 +190,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -266,29 +259,21 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
         <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -337,15 +322,11 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
@@ -362,7 +343,8 @@ document.write(`
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -472,15 +454,11 @@ document.write(`
         
           <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -528,9 +506,14 @@ document.write(`
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -548,8 +531,6 @@ document.write(`
       
         <div class="header-article-item">
 
-
-
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -561,7 +542,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">squadds.core...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">squadds.core.analysis</span></li>
   </ul>
 </nav>
 </div>
@@ -579,24 +560,24 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for squadds.core.analysis</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">multiprocessing</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">datashader</span> <span class="k">as</span> <span class="nn">ds</span>
-<span class="kn">import</span> <span class="nn">datashader.transfer_functions</span> <span class="k">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">psutil</span>
-<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
-<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Patch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datashader</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ds</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datashader.transfer_functions</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.cm</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Patch</span>
 
-<span class="kn">from</span> <span class="nn">squadds.calcs.transmon_cross</span> <span class="kn">import</span> <span class="n">TransmonCrossHamiltonian</span>
-<span class="kn">from</span> <span class="nn">squadds.core.metrics</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">squadds.core.processing</span> <span class="kn">import</span> <span class="n">merge_dfs</span><span class="p">,</span> <span class="n">unify_columns</span>
-<span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="n">create_unified_design_options</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.calcs.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCrossHamiltonian</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">merge_dfs</span><span class="p">,</span> <span class="n">unify_columns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_unified_design_options</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">=====================================================================================</span>
@@ -606,7 +587,7 @@ document.write(`
 <span class="c1"># Helper function to scale values with &#39;um&#39; in them</span>
 <div class="viewcode-block" id="scale_value">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.scale_value">[docs]</a>
-<span class="k">def</span> <span class="nf">scale_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ratio</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">scale_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ratio</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Scales the given value by the specified ratio.</span>
 
@@ -629,7 +610,7 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;</span>
 <div class="viewcode-block" id="Analyzer">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer">[docs]</a>
-<span class="k">class</span> <span class="nc">Analyzer</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Analyzer</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Analyzer class is responsible for analyzing designs and finding the closest designs based on target parameters.</span>
 
@@ -648,7 +629,7 @@ document.write(`
     <span class="n">__supported_metrics__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Euclidean&#39;</span><span class="p">,</span> <span class="s1">&#39;Manhattan&#39;</span><span class="p">,</span> <span class="s1">&#39;Chebyshev&#39;</span><span class="p">,</span> <span class="s1">&#39;Weighted Euclidean&#39;</span> <span class="p">,</span> <span class="s1">&#39;Custom&#39;</span><span class="p">]</span>
     <span class="n">__supported_estimation_methods__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Interpolation&#39;</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes an instance of the Analysis class.</span>
 
@@ -678,11 +659,11 @@ document.write(`
 <span class="sd">            - target_params: The target parameters.</span>
 <span class="sd">            - H_param_keys: The H parameter keys.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">squadds.core.db</span> <span class="kn">import</span> <span class="n">SQuADDS_DB</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQuADDS_DB</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">db</span> <span class="k">if</span> <span class="n">db</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reload_db</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_initialize_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">selected_component_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">selected_component</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">selected_data_type</span>
@@ -715,7 +696,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.reload_db">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.reload_db">[docs]</a>
-    <span class="k">def</span> <span class="nf">reload_db</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reload_db</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reload the Analyzer with the current singleton SQuADDS_DB object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -724,7 +705,7 @@ document.write(`
         
 <div class="viewcode-block" id="Analyzer._add_target_params_columns">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer._add_target_params_columns">[docs]</a>
-    <span class="k">def</span> <span class="nf">_add_target_params_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_target_params_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds target parameter columns to the dataframe based on the selected system.</span>
 
@@ -761,7 +742,7 @@ document.write(`
     
 <div class="viewcode-block" id="Analyzer._fix_cavity_claw_df">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer._fix_cavity_claw_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">_fix_cavity_claw_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fix_cavity_claw_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fix the cavity claw DataFrame by renaming columns and updating values.</span>
 
@@ -790,7 +771,7 @@ document.write(`
     
 <div class="viewcode-block" id="Analyzer._get_H_param_keys">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer._get_H_param_keys">[docs]</a>
-    <span class="k">def</span> <span class="nf">_get_H_param_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_H_param_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the parameter keys for the Hamiltonian (H) based on the selected system.</span>
 
@@ -817,7 +798,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.target_param_keys">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.target_param_keys">[docs]</a>
-    <span class="k">def</span> <span class="nf">target_param_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">target_param_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            list: The target parameter keys.</span>
@@ -827,7 +808,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.set_metric_strategy">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.set_metric_strategy">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_metric_strategy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">MetricStrategy</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_metric_strategy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">MetricStrategy</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the metric strategy to use for calculating the distance metric.</span>
 
@@ -841,7 +822,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">metric_strategy</span> <span class="o">=</span> <span class="n">strategy</span> </div>
 
 
-    <span class="k">def</span> <span class="nf">_outside_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_outside_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if entered parameters are outside the bounds of a dataframe.</span>
 <span class="sd">        Args:</span>
@@ -881,7 +862,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.get_complete_df">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_complete_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_complete_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_complete_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                          <span class="n">target_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                          <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Euclidean&#39;</span><span class="p">,</span>
                          <span class="n">display</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
@@ -921,7 +902,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.find_closest">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.find_closest">[docs]</a>
-    <span class="k">def</span> <span class="nf">find_closest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_closest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                          <span class="n">target_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                          <span class="n">num_top</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                          <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Euclidean&#39;</span><span class="p">,</span>
@@ -1060,7 +1041,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.get_closest_cavity">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_closest_cavity">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_closest_cavity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_closest_cavity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the closest cavity design.</span>
 
@@ -1084,13 +1065,13 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.compute_metric_distances">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.compute_metric_distances">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_metric_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_metric_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_strategy</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Analyzer.get_interpolated_design">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_interpolated_design">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_interpolated_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_interpolated_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                      <span class="n">target_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                      <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Euclidean&#39;</span><span class="p">,</span>
                      <span class="n">display</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
@@ -1102,7 +1083,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.get_design">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_design">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts the design parameters from the dataframe and returns a dict.</span>
 
@@ -1114,7 +1095,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.get_param">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_param">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts a specific parameter from the design dict.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1124,7 +1105,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.closest_design_in_H_space">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.closest_design_in_H_space">[docs]</a>
-    <span class="k">def</span> <span class="nf">closest_design_in_H_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">closest_design_in_H_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots a scatter plot of the closest design in the H-space.</span>
 
 <span class="sd">        This method creates a scatter plot with two subplots. The first subplot shows the relationship between &#39;cavity_frequency_GHz&#39; and &#39;kappa_kHz&#39;, while the second subplot shows the relationship between &#39;anharmonicity_MHz&#39; and &#39;g_MHz&#39;. The scatter plot includes pre-simulated data, target data, and the closest design entry from the database.</span>
@@ -1226,7 +1207,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.get_qubit_options">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_qubit_options">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_qubit_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_qubit_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts qubit design options from the dataframe.</span>
 <span class="sd">        </span>
@@ -1283,7 +1264,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.get_cpw_options">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_cpw_options">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_cpw_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cpw_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts CPW options from the dataframe.</span>
 <span class="sd">        </span>
@@ -1328,7 +1309,7 @@ document.write(`
 
 <div class="viewcode-block" id="Analyzer.get_coupler_options">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_coupler_options">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_coupler_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_coupler_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts coupler options from the dataframe.</span>
 <span class="sd">        </span>
@@ -1403,7 +1384,7 @@ document.write(`
         
 <div class="viewcode-block" id="Analyzer.get_Ljs">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_Ljs">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_Ljs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_Ljs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts the EJ values from the dataframe. Converts them to Josephson inductance values using pyEPR</span>
 <span class="sd">        </span>
@@ -1413,7 +1394,7 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">        np.array: An array of Josephson inductance values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">pyEPR.calcs</span> <span class="kn">import</span> <span class="n">Convert</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyEPR.calcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convert</span>
 
         <span class="c1"># EJ values are stored in a column named &#39;EJ&#39; in GHz</span>
         <span class="n">EJ_values</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;EJ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
@@ -1455,8 +1436,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1489,7 +1470,8 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

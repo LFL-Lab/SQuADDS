@@ -15,20 +15,22 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -36,10 +38,11 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/katex-math.css?v=91adb8b6" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=8da8c241"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -83,19 +86,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -103,7 +95,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -111,8 +102,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -149,7 +140,7 @@
     
     
     <img src="../../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
-    <script>document.write(`<img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+    <img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
   
   
 </a></div>
@@ -199,7 +190,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -266,29 +259,21 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
         <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -337,15 +322,11 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
@@ -362,7 +343,8 @@ document.write(`
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -472,15 +454,11 @@ document.write(`
         
           <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -528,9 +506,14 @@ document.write(`
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -548,8 +531,6 @@ document.write(`
       
         <div class="header-article-item">
 
-
-
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -561,7 +542,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">squadds.simu...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">squadds.simulations.utils</span></li>
   </ul>
 </nav>
 </div>
@@ -584,42 +565,42 @@ document.write(`
 <span class="sd">This file contains utility functions for the simulation.</span>
 <span class="sd">========================================================================================================================</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">qiskit_metal</span> <span class="k">as</span> <span class="nn">metal</span>
-<span class="kn">import</span> <span class="nn">scqubits</span> <span class="k">as</span> <span class="nn">scq</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
-<span class="kn">from</span> <span class="nn">prettytable</span> <span class="kn">import</span> <span class="n">PrettyTable</span>
-<span class="kn">from</span> <span class="nn">pyaedt</span> <span class="kn">import</span> <span class="n">Hfss</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">MetalGUI</span><span class="p">,</span> <span class="n">designs</span><span class="p">,</span> <span class="n">draw</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.core</span> <span class="kn">import</span> <span class="n">QComponent</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee</span> <span class="kn">import</span> \
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">metal</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scqubits</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scq</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prettytable</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrettyTable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyaedt</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hfss</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">MetalGUI</span><span class="p">,</span> <span class="n">designs</span><span class="p">,</span> <span class="n">draw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">QComponent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">CapNInterdigitalTee</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span> <span class="kn">import</span> <span class="n">CoupledLineTee</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.couplers.line_tee</span> <span class="kn">import</span> <span class="n">LineTee</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.qubits.transmon_cross</span> <span class="kn">import</span> <span class="n">TransmonCross</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.terminations.launchpad_wb</span> <span class="kn">import</span> <span class="n">LaunchpadWirebond</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.terminations.open_to_ground</span> <span class="kn">import</span> <span class="n">OpenToGround</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.terminations.short_to_ground</span> <span class="kn">import</span> <span class="n">ShortToGround</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.anchored_path</span> <span class="kn">import</span> <span class="n">RouteAnchors</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.meandered</span> <span class="kn">import</span> <span class="n">RouteMeander</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.mixed_path</span> <span class="kn">import</span> <span class="n">RouteMixed</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.qlibrary.tlines.straight_path</span> <span class="kn">import</span> <span class="n">RouteStraight</span>
-<span class="kn">from</span> <span class="nn">qiskit_metal.toolbox_metal</span> <span class="kn">import</span> <span class="n">math_and_overrides</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoupledLineTee</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineTee</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.qubits.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCross</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.launchpad_wb</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaunchpadWirebond</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.open_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenToGround</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.short_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShortToGround</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.anchored_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteAnchors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.meandered</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMeander</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.mixed_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMixed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.straight_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteStraight</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.toolbox_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">math_and_overrides</span>
 
-<span class="kn">from</span> <span class="nn">squadds.components.claw_coupler</span> <span class="kn">import</span> <span class="n">TransmonClaw</span>
-<span class="kn">from</span> <span class="nn">squadds.components.coupled_systems</span> <span class="kn">import</span> <span class="n">QubitCavity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.claw_coupler</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonClaw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.coupled_systems</span><span class="w"> </span><span class="kn">import</span> <span class="n">QubitCavity</span>
 
 
 <div class="viewcode-block" id="get_cavity_claw_options_keys">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.get_cavity_claw_options_keys">[docs]</a>
-<span class="k">def</span> <span class="nf">get_cavity_claw_options_keys</span><span class="p">(</span><span class="n">cavity_dict</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cavity_claw_options_keys</span><span class="p">(</span><span class="n">cavity_dict</span><span class="p">):</span>
     <span class="c1"># Iterate over the keys of cavity_dict</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cpw&quot;</span><span class="p">):</span>
@@ -635,7 +616,7 @@ document.write(`
 
 <div class="viewcode-block" id="string_to_float">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.string_to_float">[docs]</a>
-<span class="k">def</span> <span class="nf">string_to_float</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">string_to_float</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a string representation of a number to a float.</span>
 
@@ -651,7 +632,7 @@ document.write(`
 
 <div class="viewcode-block" id="getMeshScreenshot">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.getMeshScreenshot">[docs]</a>
-<span class="k">def</span> <span class="nf">getMeshScreenshot</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="n">designname</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">getMeshScreenshot</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="n">designname</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a screenshot of the mesh for a given project, design, and solution type.</span>
 
@@ -668,7 +649,7 @@ document.write(`
 
 <div class="viewcode-block" id="generate_bbox">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.generate_bbox">[docs]</a>
-<span class="k">def</span> <span class="nf">generate_bbox</span><span class="p">(</span><span class="n">component</span><span class="p">:</span> <span class="n">QComponent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_bbox</span><span class="p">(</span><span class="n">component</span><span class="p">:</span> <span class="n">QComponent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a bounding box dictionary from a given QComponent.</span>
 
@@ -690,7 +671,7 @@ document.write(`
 
 <div class="viewcode-block" id="setMaterialProperties">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.setMaterialProperties">[docs]</a>
-<span class="k">def</span> <span class="nf">setMaterialProperties</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span><span class="n">designname</span><span class="p">,</span><span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setMaterialProperties</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span><span class="n">designname</span><span class="p">,</span><span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interfaces with ANSYS via pyEPR for more custom automation.</span>
 <span class="sd">    1. Connects to ANSYS.</span>
@@ -718,7 +699,7 @@ document.write(`
 
 <div class="viewcode-block" id="ultra_cold_silicon">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.ultra_cold_silicon">[docs]</a>
-<span class="k">def</span> <span class="nf">ultra_cold_silicon</span><span class="p">(</span><span class="n">aedt</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ultra_cold_silicon</span><span class="p">(</span><span class="n">aedt</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Change silicon properties to ultra cold silicon</span>
 
 <span class="sd">    Args:</span>
@@ -732,7 +713,7 @@ document.write(`
 
 <div class="viewcode-block" id="delete_old_setups">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.delete_old_setups">[docs]</a>
-<span class="k">def</span> <span class="nf">delete_old_setups</span><span class="p">(</span><span class="n">aedt</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_old_setups</span><span class="p">(</span><span class="n">aedt</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete old setups</span>
 
 <span class="sd">    Args:</span>
@@ -745,7 +726,7 @@ document.write(`
 
 <div class="viewcode-block" id="calculate_center_and_dimensions">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.calculate_center_and_dimensions">[docs]</a>
-<span class="k">def</span> <span class="nf">calculate_center_and_dimensions</span><span class="p">(</span><span class="n">bbox</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_center_and_dimensions</span><span class="p">(</span><span class="n">bbox</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the center and dimensions from the bounding box.</span>
 
@@ -765,7 +746,7 @@ document.write(`
 
 <div class="viewcode-block" id="get_freq">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.get_freq">[docs]</a>
-<span class="k">def</span> <span class="nf">get_freq</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">test_hfss</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_freq</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">test_hfss</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analyze the simulation, plot the results, and report the frequencies, Q, and kappa.</span>
 
@@ -793,7 +774,7 @@ document.write(`
 
 <div class="viewcode-block" id="get_freq_Q_kappa">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.get_freq_Q_kappa">[docs]</a>
-<span class="k">def</span> <span class="nf">get_freq_Q_kappa</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">test_hfss</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_freq_Q_kappa</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">test_hfss</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analyze the simulation, plot the results, and report the frequencies, Q, and kappa.</span>
 
@@ -824,7 +805,7 @@ document.write(`
 
 <div class="viewcode-block" id="mesh_objects">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.mesh_objects">[docs]</a>
-<span class="k">def</span> <span class="nf">mesh_objects</span><span class="p">(</span><span class="n">modeler</span><span class="p">,</span> <span class="n">mesh_lengths</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mesh_objects</span><span class="p">(</span><span class="n">modeler</span><span class="p">,</span> <span class="n">mesh_lengths</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Draw the rectangle in the Ansys modeler, update the model, and set the mesh based on the input dictionary.</span>
 
@@ -841,7 +822,7 @@ document.write(`
 
 <div class="viewcode-block" id="add_ground_strip_and_mesh">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.add_ground_strip_and_mesh">[docs]</a>
-<span class="k">def</span> <span class="nf">add_ground_strip_and_mesh</span><span class="p">(</span><span class="n">modeler</span><span class="p">,</span> <span class="n">coupler</span><span class="p">,</span> <span class="n">mesh_lengths</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_ground_strip_and_mesh</span><span class="p">(</span><span class="n">modeler</span><span class="p">,</span> <span class="n">coupler</span><span class="p">,</span> <span class="n">mesh_lengths</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Draw the rectangle in the Ansys modeler, update the model, and set the mesh based on the input dictionary.</span>
 
@@ -874,7 +855,7 @@ document.write(`
 
 <div class="viewcode-block" id="create_qubitcavity">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_qubitcavity">[docs]</a>
-<span class="k">def</span> <span class="nf">create_qubitcavity</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_qubitcavity</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a QubitCavity object.</span>
 
@@ -891,7 +872,7 @@ document.write(`
 
 <div class="viewcode-block" id="create_claw">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_claw">[docs]</a>
-<span class="k">def</span> <span class="nf">create_claw</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">cpw_length</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_claw</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">cpw_length</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a TransmonClaw object with the given options, cpw_length, and design.</span>
 
@@ -911,7 +892,7 @@ document.write(`
 
 <div class="viewcode-block" id="create_ncap_coupler">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_ncap_coupler">[docs]</a>
-<span class="k">def</span> <span class="nf">create_ncap_coupler</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_ncap_coupler</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a coupler based on the given options and design.</span>
 
@@ -929,7 +910,7 @@ document.write(`
 
 <div class="viewcode-block" id="create_clt_coupler">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_clt_coupler">[docs]</a>
-<span class="k">def</span> <span class="nf">create_clt_coupler</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_clt_coupler</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a CoupledLineTee coupler based on the given options and design.</span>
 
@@ -947,7 +928,7 @@ document.write(`
 
 <div class="viewcode-block" id="create_cpw">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_cpw">[docs]</a>
-<span class="k">def</span> <span class="nf">create_cpw</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">cplr</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_cpw</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">cplr</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a coplanar waveguide (CPW) based on the given options, coupler, and design.</span>
 
@@ -986,7 +967,7 @@ document.write(`
 
 <div class="viewcode-block" id="make_table">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.make_table">[docs]</a>
-<span class="k">def</span> <span class="nf">make_table</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_table</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a table from a dictionary with a specified title.</span>
 
@@ -1016,7 +997,7 @@ document.write(`
 
 <div class="viewcode-block" id="save_simulation_data_to_json">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.save_simulation_data_to_json">[docs]</a>
-<span class="k">def</span> <span class="nf">save_simulation_data_to_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_simulation_data_to_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Save simulation data to a JSON file.</span>
 
@@ -1035,7 +1016,7 @@ document.write(`
 
 <div class="viewcode-block" id="chunk_sweep_options">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.chunk_sweep_options">[docs]</a>
-<span class="k">def</span> <span class="nf">chunk_sweep_options</span><span class="p">(</span><span class="n">sweep_opts</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">chunk_sweep_options</span><span class="p">(</span><span class="n">sweep_opts</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Divide the sweep options into multiple chunks based on the number of computers.</span>
 
@@ -1089,7 +1070,7 @@ document.write(`
 
 <div class="viewcode-block" id="find_a_fq">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.find_a_fq">[docs]</a>
-<span class="k">def</span> <span class="nf">find_a_fq</span><span class="p">(</span><span class="n">C_g</span><span class="p">,</span> <span class="n">C_B</span><span class="p">,</span> <span class="n">Lj</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_a_fq</span><span class="p">(</span><span class="n">C_g</span><span class="p">,</span> <span class="n">C_B</span><span class="p">,</span> <span class="n">Lj</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the anharmonicity and frequency of a transmon qubit.</span>
 
@@ -1124,7 +1105,7 @@ document.write(`
 
 <div class="viewcode-block" id="find_g_a_fq">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.find_g_a_fq">[docs]</a>
-<span class="k">def</span> <span class="nf">find_g_a_fq</span><span class="p">(</span><span class="n">C_g</span><span class="p">,</span> <span class="n">C_B</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">Lj</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_g_a_fq</span><span class="p">(</span><span class="n">C_g</span><span class="p">,</span> <span class="n">C_B</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">Lj</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the values of g, a, and f_q for a transmon qubit.</span>
 
@@ -1165,7 +1146,7 @@ document.write(`
 
 <div class="viewcode-block" id="find_kappa">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.find_kappa">[docs]</a>
-<span class="k">def</span> <span class="nf">find_kappa</span><span class="p">(</span><span class="n">f_rough</span><span class="p">,</span> <span class="n">C_tg</span><span class="p">,</span> <span class="n">C_tb</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_kappa</span><span class="p">(</span><span class="n">f_rough</span><span class="p">,</span> <span class="n">C_tg</span><span class="p">,</span> <span class="n">C_tb</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the cavity linewidth (kappa) using the rough frequency and capacitances.</span>
 <span class="sd">    </span>
@@ -1189,7 +1170,7 @@ document.write(`
 
 <div class="viewcode-block" id="find_chi">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.find_chi">[docs]</a>
-<span class="k">def</span> <span class="nf">find_chi</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">f_q</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">f_r</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_chi</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">f_q</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">f_r</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the full cavity frequency shift between |0&gt; and |1&gt; states of a qubit using g, f_r, f_q, and alpha. It uses the result derived using 2nd-order pertubation theory (equation 9 in SquaDDs paper).</span>
 
@@ -1215,7 +1196,7 @@ document.write(`
 
 <div class="viewcode-block" id="read_json_files">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.read_json_files">[docs]</a>
-<span class="k">def</span> <span class="nf">read_json_files</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_json_files</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read all JSON files from a specified directory.</span>
 
@@ -1237,7 +1218,7 @@ document.write(`
 
 <div class="viewcode-block" id="extract_value">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.extract_value">[docs]</a>
-<span class="k">def</span> <span class="nf">extract_value</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_value</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extracts the value of a specified key from a given nested dictionary.</span>
 
@@ -1267,7 +1248,7 @@ document.write(`
 
 <div class="viewcode-block" id="convert_str_to_float">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.convert_str_to_float">[docs]</a>
-<span class="k">def</span> <span class="nf">convert_str_to_float</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_str_to_float</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    COnvert value from str to float</span>
 <span class="sd">    </span>
@@ -1277,12 +1258,12 @@ document.write(`
 
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
 
-    <span class="kn">import</span> <span class="nn">re</span></div>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span></div>
 
 
 <div class="viewcode-block" id="extract_number">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.extract_number">[docs]</a>
-<span class="k">def</span> <span class="nf">extract_number</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_number</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Remove non-digit characters from a string, except for decimal.</span>
 
@@ -1298,7 +1279,7 @@ document.write(`
 
 <div class="viewcode-block" id="unpack">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.unpack">[docs]</a>
-<span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="n">parent_value</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="n">parent_value</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A function to unpack one level of nesting in a python dictionary</span>
 <span class="sd">    :param parent_key: The key in the parent dictionary being flattened</span>
@@ -1326,7 +1307,7 @@ document.write(`
 
 <div class="viewcode-block" id="flatten_dict">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.flatten_dict">[docs]</a>
-<span class="k">def</span> <span class="nf">flatten_dict</span><span class="p">(</span><span class="n">dictionary_</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">flatten_dict</span><span class="p">(</span><span class="n">dictionary_</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A function to flatten a nested dictionary</span>
 <span class="sd">    :param dictionary_: The dictionary to be flattened</span>
@@ -1388,8 +1369,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1422,7 +1403,8 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

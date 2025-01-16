@@ -15,20 +15,22 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -36,10 +38,11 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/katex-math.css?v=91adb8b6" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=8da8c241"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -83,19 +86,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -103,7 +95,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -111,8 +102,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -149,7 +140,7 @@
     
     
     <img src="../../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
-    <script>document.write(`<img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+    <img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
   
   
 </a></div>
@@ -199,7 +190,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -266,29 +259,21 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
         <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -337,15 +322,11 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
@@ -362,7 +343,8 @@ document.write(`
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -472,15 +454,11 @@ document.write(`
         
           <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -528,9 +506,14 @@ document.write(`
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -548,8 +531,6 @@ document.write(`
       
         <div class="header-article-item">
 
-
-
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -561,7 +542,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">squadds.data...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">squadds.database.contributor</span></li>
   </ul>
 </nav>
 </div>
@@ -579,17 +560,17 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for squadds.database.contributor</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
-<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">get_dataset_config_names</span><span class="p">,</span> <span class="n">load_dataset</span>
-<span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_dataset_config_names</span><span class="p">,</span> <span class="n">load_dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
 
-<span class="kn">from</span> <span class="nn">squadds.core.globals</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">compare_schemas</span><span class="p">,</span> <span class="n">delete_HF_cache</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.globals</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">compare_schemas</span><span class="p">,</span> <span class="n">delete_HF_cache</span><span class="p">,</span>
                                 <span class="n">get_config_schema</span><span class="p">,</span> <span class="n">get_entire_schema</span><span class="p">,</span> <span class="n">get_type</span><span class="p">,</span>
                                 <span class="n">is_float</span><span class="p">,</span> <span class="n">validate_types</span><span class="p">)</span>
 
@@ -601,7 +582,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData">[docs]</a>
-<span class="k">class</span> <span class="nc">ExistingConfigData</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExistingConfigData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Represents an existing configuration data object.</span>
 
@@ -639,7 +620,7 @@ document.write(`
 <span class="sd">        _validate_types(): Validates the types of the data.</span>
 <span class="sd">        _validate_content_v0(): Validates the content of the contribution against the dataset schema.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span> <span class="o">=</span> <span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_config_name</span><span class="p">()</span>
@@ -658,7 +639,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData._validate_config_name">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._validate_config_name">[docs]</a>
-    <span class="k">def</span> <span class="nf">_validate_config_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_config_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Validates the config name against the supported config names.</span>
 
@@ -672,7 +653,7 @@ document.write(`
         
 <div class="viewcode-block" id="ExistingConfigData.get_config_schema">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.get_config_schema">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_config_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_config_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Connects to the repository with the given configuration name. Chooses the first entry from the config dataset and extracts the schema.</span>
 
@@ -689,7 +670,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.show_config_schema">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.show_config_schema">[docs]</a>
-    <span class="k">def</span> <span class="nf">show_config_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_config_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Connects to the repository with the given configuration name. Chooses the first entry from the config dataset and extracts the schema.</span>
 
@@ -706,7 +687,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData._supported_config_names">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._supported_config_names">[docs]</a>
-    <span class="k">def</span> <span class="nf">_supported_config_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_supported_config_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves the supported configuration names from the repository.</span>
 
@@ -721,7 +702,7 @@ document.write(`
     <span class="c1"># method that returns the contribution data in a dictionary format</span>
 <div class="viewcode-block" id="ExistingConfigData.show">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.show">[docs]</a>
-    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print the contribution data in a pretty format.</span>
 
@@ -735,7 +716,7 @@ document.write(`
         <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span></div>
 
         
-    <span class="k">def</span> <span class="nf">__set_contributor_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_contributor_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;GROUP_NAME&#39;</span><span class="p">),</span>
             <span class="s2">&quot;PI&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PI_NAME&#39;</span><span class="p">),</span>
@@ -747,7 +728,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.get_contributor_info">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.get_contributor_info">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_contributor_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_contributor_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the contributor information.</span>
 
@@ -759,7 +740,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.add_sim_result">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.add_sim_result">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_sim_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_name</span><span class="p">,</span> <span class="n">result_value</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_sim_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_name</span><span class="p">,</span> <span class="n">result_value</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a simulation result to the contributor.</span>
 
@@ -778,7 +759,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.add_sim_setup">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.add_sim_setup">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_sim_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim_setup</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_sim_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim_setup</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds simulation setup options to the contribution.</span>
 
@@ -806,7 +787,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.add_design">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.add_design">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a design to the contribution.</span>
 
@@ -837,7 +818,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.add_design_v0">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.add_design_v0">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_design_v0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_design_v0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a design to the contribution.</span>
 
@@ -869,7 +850,7 @@ document.write(`
     
 <div class="viewcode-block" id="ExistingConfigData.to_dict">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.to_dict">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts the Contributor object to a dictionary.</span>
 
@@ -895,7 +876,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.clear">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.clear">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clears the contribution data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -909,7 +890,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.add_notes">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.add_notes">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_notes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_notes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="p">{}):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds notes to the contribution.</span>
 
@@ -925,7 +906,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.validate_structure">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.validate_structure">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actual_structure</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actual_structure</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the structure of the contributor object.</span>
 
@@ -950,7 +931,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData._validate_structure">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._validate_structure">[docs]</a>
-    <span class="k">def</span> <span class="nf">_validate_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the structure of the contributor object.</span>
 
@@ -973,7 +954,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.validate_types">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.validate_types">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            data (dict): The data to be validated.</span>
@@ -986,7 +967,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData._validate_types">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._validate_types">[docs]</a>
-    <span class="k">def</span> <span class="nf">_validate_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the types of the data using the schema defined in the config.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -998,7 +979,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData._validate_content_v0">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._validate_content_v0">[docs]</a>
-    <span class="k">def</span> <span class="nf">_validate_content_v0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_content_v0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the content of the contribution against the dataset schema.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1023,7 +1004,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.validate_content">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.validate_content">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            data (dict): The data to be validated.</span>
@@ -1031,7 +1012,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_entry</span>
 
-        <span class="k">def</span> <span class="nf">get_nested</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_nested</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span>
                     <span class="n">dictionary</span> <span class="o">=</span> <span class="n">dictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -1040,14 +1021,14 @@ document.write(`
             <span class="k">return</span> <span class="n">dictionary</span></div>
 
     
-    <span class="k">def</span> <span class="nf">_validate_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the content of the contribution against the dataset schema.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_entry</span>
 
-        <span class="k">def</span> <span class="nf">get_nested</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_nested</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span>
                     <span class="n">dictionary</span> <span class="o">=</span> <span class="n">dictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -1055,7 +1036,7 @@ document.write(`
                     <span class="k">return</span> <span class="kc">None</span>
             <span class="k">return</span> <span class="n">dictionary</span>
 
-        <span class="k">def</span> <span class="nf">find_common_keys</span><span class="p">(</span><span class="n">dict1</span><span class="p">,</span> <span class="n">dict2</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">find_common_keys</span><span class="p">(</span><span class="n">dict1</span><span class="p">,</span> <span class="n">dict2</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Recursively find and compare common keys in two dictionaries.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
@@ -1094,7 +1075,7 @@ document.write(`
 
         <span class="c1"># return common_keys, mismatched_keys, missing_keys</span>
 
-    <span class="k">def</span> <span class="nf">_validate_content_v1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_content_v1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the content of the contribution against the dataset schema.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1115,7 +1096,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.validate">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.validate">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the contribution by performing various checks.</span>
 
@@ -1139,7 +1120,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.validate_sweep">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.validate_sweep">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate_sweep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_sweep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the sweep data by performing structure, type, and content validation on each entry.</span>
 
@@ -1167,7 +1148,7 @@ document.write(`
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Invalidates the contributor by setting the isValidated flag to False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1175,7 +1156,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.update_repo">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.update_repo">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_repo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_repo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the repository at the specified path.</span>
 
@@ -1219,7 +1200,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.update_db">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.update_db">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_db</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">,</span> <span class="n">is_sweep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_db</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">,</span> <span class="n">is_sweep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the local repository with the validated data.</span>
 
@@ -1258,7 +1239,7 @@ document.write(`
             
 <div class="viewcode-block" id="ExistingConfigData.upload_to_HF">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.upload_to_HF">[docs]</a>
-    <span class="k">def</span> <span class="nf">upload_to_HF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">upload_to_HF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Uploads validated data to the specified repository.</span>
 
@@ -1308,7 +1289,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.from_json">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.from_json">[docs]</a>
-    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">is_sweep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">is_sweep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads a contribution from a JSON file.</span>
 
@@ -1358,7 +1339,7 @@ document.write(`
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">is_validated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_validated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns True if the contribution is validated, False otherwise.</span>
 
@@ -1369,7 +1350,7 @@ document.write(`
 
 <div class="viewcode-block" id="ExistingConfigData.contribute">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.contribute">[docs]</a>
-    <span class="k">def</span> <span class="nf">contribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">,</span> <span class="n">is_sweep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">,</span> <span class="n">is_sweep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Contributes to the repository by updating the local repo, updating the database, and uploading to HF.</span>
 
@@ -1390,7 +1371,7 @@ document.write(`
     
 <div class="viewcode-block" id="ExistingConfigData.submit">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.submit">[docs]</a>
-    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sends the data and the config name to a remote server.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1426,8 +1407,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1460,7 +1441,8 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

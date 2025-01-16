@@ -15,20 +15,22 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -36,10 +38,11 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/katex-math.css?v=91adb8b6" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=8da8c241"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -83,19 +86,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -103,7 +95,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -111,8 +102,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -149,7 +140,7 @@
     
     
     <img src="../../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
-    <script>document.write(`<img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+    <img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
   
   
 </a></div>
@@ -199,7 +190,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -266,29 +259,21 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
         <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -337,15 +322,11 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
@@ -362,7 +343,8 @@ document.write(`
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -472,15 +454,11 @@ document.write(`
         
           <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -528,9 +506,14 @@ document.write(`
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -548,8 +531,6 @@ document.write(`
       
         <div class="header-article-item">
 
-
-
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -561,7 +542,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">squadds.calc...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">squadds.calcs.transmon_cross</span></li>
   </ul>
 </nav>
 </div>
@@ -582,17 +563,17 @@ document.write(`
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">#!TODO: Generalize the half-wave cavity method usage</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">psutil</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">jit</span><span class="p">,</span> <span class="n">prange</span>
-<span class="kn">from</span> <span class="nn">pyEPR.calcs</span> <span class="kn">import</span> <span class="n">Convert</span>
-<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="kn">import</span> <span class="n">Planck</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">hbar</span><span class="p">,</span> <span class="n">pi</span>
-<span class="kn">from</span> <span class="nn">scqubits.core.transmon</span> <span class="kn">import</span> <span class="n">Transmon</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span><span class="p">,</span> <span class="n">prange</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyEPR.calcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convert</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Planck</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">hbar</span><span class="p">,</span> <span class="n">pi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scqubits.core.transmon</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transmon</span>
 
-<span class="kn">from</span> <span class="nn">squadds.calcs.qubit</span> <span class="kn">import</span> <span class="n">QubitHamiltonian</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.calcs.qubit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QubitHamiltonian</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">========================================================</span>
@@ -611,7 +592,7 @@ document.write(`
 <div class="viewcode-block" id="Ec_from_Cs">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.Ec_from_Cs">[docs]</a>
 <span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">Ec_from_Cs</span><span class="p">(</span><span class="n">Cs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Ec_from_Cs</span><span class="p">(</span><span class="n">Cs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the charging energy (Ec) in GHz from the capacitance (Cs) in fF.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -625,7 +606,7 @@ document.write(`
 <div class="viewcode-block" id="EC_numba">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.EC_numba">[docs]</a>
 <span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">EC_numba</span><span class="p">(</span><span class="n">cross_to_claw</span><span class="p">,</span> <span class="n">cross_to_ground</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">EC_numba</span><span class="p">(</span><span class="n">cross_to_claw</span><span class="p">,</span> <span class="n">cross_to_ground</span><span class="p">):</span>
     <span class="n">C_eff_fF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">cross_to_ground</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">cross_to_claw</span><span class="p">)</span>
     <span class="n">EC</span> <span class="o">=</span> <span class="n">Ec_from_Cs</span><span class="p">(</span><span class="n">C_eff_fF</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">EC</span></div>
@@ -634,7 +615,7 @@ document.write(`
 <div class="viewcode-block" id="g_from_cap_matrix_numba">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.g_from_cap_matrix_numba">[docs]</a>
 <span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">g_from_cap_matrix_numba</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">C_c</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">g_from_cap_matrix_numba</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">C_c</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    !TODO: resolve the error : \&quot;The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.\&quot; for this method</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -655,26 +636,26 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian">[docs]</a>
-<span class="k">class</span> <span class="nc">TransmonCrossHamiltonian</span><span class="p">(</span><span class="n">QubitHamiltonian</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransmonCrossHamiltonian</span><span class="p">(</span><span class="n">QubitHamiltonian</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class representing the Hamiltonian for a transmon qubit in a cross-coupled configuration.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the TransmonCrossHamiltonian object.</span>
 
 <span class="sd">        Attributes:</span>
 <span class="sd">            - analysis: The analysis object associated with the Hamiltonian.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">scqubits</span> <span class="k">as</span> <span class="nn">scq</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">scqubits</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scq</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">selected_resonator_type</span>
         <span class="n">scq</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="s2">&quot;GHz&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.plot_data">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.plot_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_frame</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the data from the given DataFrame.</span>
 
@@ -687,7 +668,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.EC">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.EC">[docs]</a>
-    <span class="k">def</span> <span class="nf">EC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cross_to_claw</span><span class="p">,</span> <span class="n">cross_to_ground</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">EC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cross_to_claw</span><span class="p">,</span> <span class="n">cross_to_ground</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the charging energy (EC) of the transmon qubit.</span>
 
@@ -703,7 +684,7 @@ document.write(`
         <span class="k">return</span> <span class="n">EC</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_calculate_target_qubit_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w_q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_target_qubit_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w_q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the target qubit parameters (EJ, EC, EJEC, Lj) based on the given qubit frequency (w_q) and anharmonicity (alpha).</span>
 
@@ -728,7 +709,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.EJ_and_LJ">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.EJ_and_LJ">[docs]</a>
-    <span class="k">def</span> <span class="nf">EJ_and_LJ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w_q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">EJ_and_LJ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w_q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the Josephson energy (EJ) and Josephson inductance (Lj) based on the given qubit frequency (w_q) and anharmonicity (alpha).</span>
 
@@ -749,7 +730,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.EJ">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.EJ">[docs]</a>
-    <span class="k">def</span> <span class="nf">EJ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w_q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">EJ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w_q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the Josephson energy (EJ) based on the given qubit frequency (w_q) and anharmonicity (alpha).</span>
 
@@ -767,7 +748,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.calculate_target_quantities">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.calculate_target_quantities">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculate_target_quantities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_res</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">w_q</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_target_quantities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_res</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">w_q</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the target quantities (C_q, C_c, EJ, EC, EJ_EC_ratio) based on the given parameters.</span>
 
@@ -805,7 +786,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.g_and_alpha">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.g_and_alpha">[docs]</a>
-    <span class="k">def</span> <span class="nf">g_and_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">C_c</span><span class="p">,</span> <span class="n">f_q</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">g_and_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">C_c</span><span class="p">,</span> <span class="n">f_q</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the coupling strength (g) and anharmonicity (alpha) based on the given parameters.</span>
 
@@ -833,7 +814,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.g_alpha_freq">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.g_alpha_freq">[docs]</a>
-    <span class="k">def</span> <span class="nf">g_alpha_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">C_c</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">g_alpha_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">C_c</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the coupling strength, anharmonicity, and transition frequency of a transmon qubit.</span>
 
@@ -848,7 +829,7 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">            - (g, alpha, freq) (tuple): A tuple containing the coupling strength (g), anharmonicity (alpha), and transition frequency (freq).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">scqubits</span> <span class="k">as</span> <span class="nn">scq</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">scqubits</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scq</span>
         <span class="n">scq</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="s2">&quot;GHz&quot;</span><span class="p">)</span>
         <span class="n">C_q</span> <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">C_c</span>
         <span class="k">if</span> <span class="n">res_type</span> <span class="o">==</span> <span class="s2">&quot;half&quot;</span><span class="p">:</span>
@@ -867,7 +848,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.g_from_cap_matrix">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.g_from_cap_matrix">[docs]</a>
-    <span class="k">def</span> <span class="nf">g_from_cap_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">C_c</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">g_from_cap_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">C_c</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the coupling strength &#39;g&#39; between a transmon qubit and a resonator</span>
 <span class="sd">        based on the capacitance matrix.</span>
@@ -901,7 +882,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.get_freq_alpha_fixed_LJ">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.get_freq_alpha_fixed_LJ">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_freq_alpha_fixed_LJ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig4_df</span><span class="p">,</span> <span class="n">LJ_target</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_freq_alpha_fixed_LJ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig4_df</span><span class="p">,</span> <span class="n">LJ_target</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the frequencies and anharmonicities of transmons with a fixed LJ value.</span>
 
@@ -923,7 +904,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.E01_and_anharmonicity">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.E01_and_anharmonicity">[docs]</a>
-    <span class="k">def</span> <span class="nf">E01_and_anharmonicity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="p">,</span> <span class="n">ng</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncut</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">E01_and_anharmonicity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="p">,</span> <span class="n">ng</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncut</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the energy of the first excited state (E01) and the anharmonicity (alpha) of a transmon qubit.</span>
 
@@ -945,7 +926,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.E01">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.E01">[docs]</a>
-    <span class="k">def</span> <span class="nf">E01</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="p">,</span> <span class="n">ng</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncut</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">E01</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="p">,</span> <span class="n">ng</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncut</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the energy of the first excited state (E01) of a transmon qubit.</span>
 
@@ -965,7 +946,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.add_qubit_H_params">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.add_qubit_H_params">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_qubit_H_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_qubit_H_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add qubit Hamiltonian parameters to the DataFrame.</span>
 
@@ -986,7 +967,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.add_qubit_H_params_chunk">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.add_qubit_H_params_chunk">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_qubit_H_params_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_qubit_H_params_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add qubit Hamiltonian parameters to the DataFrame chunk.</span>
 
@@ -1017,7 +998,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.add_cavity_coupled_H_params">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.add_cavity_coupled_H_params">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_cavity_coupled_H_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_chunks</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span><span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_cavity_coupled_H_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_chunks</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span><span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add cavity-coupled Hamiltonian parameters to the dataframe.</span>
 
@@ -1053,7 +1034,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.add_cavity_coupled_H_params_chunk">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.add_cavity_coupled_H_params_chunk">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_cavity_coupled_H_params_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_cavity_coupled_H_params_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add cavity-coupled Hamiltonian parameters to the DataFrame chunk.</span>
 
@@ -1083,7 +1064,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.parallel_process_dataframe">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.parallel_process_dataframe">[docs]</a>
-    <span class="k">def</span> <span class="nf">parallel_process_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">num_chunks</span><span class="p">,</span> <span class="n">Z_0</span> <span class="o">=</span> <span class="mi">50</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parallel_process_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">num_chunks</span><span class="p">,</span> <span class="n">Z_0</span> <span class="o">=</span> <span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process the DataFrame in parallel.</span>
 
@@ -1108,7 +1089,7 @@ document.write(`
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.chi">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.chi">[docs]</a>
-    <span class="k">def</span> <span class="nf">chi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">f_r</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">chi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">f_r</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the full cavity frequency shift between |0&gt; and |1&gt; states of a qubit using g, f_r, f_q, and alpha. It uses the result derived using 2nd-order perturbation theory (equation 9 in SQuaDDS paper).</span>
 <span class="sd">        Args:</span>
@@ -1163,8 +1144,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1197,7 +1178,8 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

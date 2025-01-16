@@ -15,20 +15,22 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -36,10 +38,11 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/katex-math.css?v=91adb8b6" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=8da8c241"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -83,19 +86,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -103,7 +95,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -111,8 +102,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -149,7 +140,7 @@
     
     
     <img src="../../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
-    <script>document.write(`<img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+    <img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
   
   
 </a></div>
@@ -199,7 +190,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -266,29 +259,21 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
         <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -337,15 +322,11 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
@@ -362,7 +343,8 @@ document.write(`
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -472,15 +454,11 @@ document.write(`
         
           <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -528,9 +506,14 @@ document.write(`
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -548,8 +531,6 @@ document.write(`
       
         <div class="header-article-item">
 
-
-
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -561,7 +542,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">squadds.core.db</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">squadds.core.db</span></li>
   </ul>
 </nav>
 </div>
@@ -582,22 +563,22 @@ document.write(`
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">!TODO: add FULL support for half-wave cavity</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pprint</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">get_dataset_config_names</span><span class="p">,</span> <span class="n">load_dataset</span>
-<span class="kn">from</span> <span class="nn">huggingface_hub</span> <span class="kn">import</span> <span class="n">login</span>
-<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_dataset_config_names</span><span class="p">,</span> <span class="n">load_dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">login</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tabulate</span><span class="w"> </span><span class="kn">import</span> <span class="n">tabulate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span> <span class="nn">squadds.core.design_patterns</span> <span class="kn">import</span> <span class="n">SingletonMeta</span>
-<span class="kn">from</span> <span class="nn">squadds.core.processing</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">squadds.core.utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.design_patterns</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingletonMeta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.processing</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="c1">#* HANDLE WARNING MESSAGES</span>
 <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>  <span class="c1"># Checks if the operating system is macOS</span>
@@ -605,7 +586,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB">[docs]</a>
-<span class="k">class</span> <span class="nc">SQuADDS_DB</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">SingletonMeta</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SQuADDS_DB</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">SingletonMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class representing the SQuADDS database.</span>
 
@@ -629,7 +610,7 @@ document.write(`
 <span class="sd">        select_cavity_claw(cavity): Select a cavity.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the SQuADDS_DB class.</span>
 
@@ -677,7 +658,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.check_login">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.check_login">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if the user is logged in to Hugging Face.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -689,7 +670,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.get_existing_files">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_existing_files">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_existing_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_existing_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves the list of existing files in the repository.</span>
 <span class="sd">        </span>
@@ -704,7 +685,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.upload_dataset">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.upload_dataset">[docs]</a>
-    <span class="k">def</span> <span class="nf">upload_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_paths</span><span class="p">,</span> <span class="n">repo_file_names</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">upload_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_paths</span><span class="p">,</span> <span class="n">repo_file_names</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Uploads a dataset to the repository.</span>
 <span class="sd">        </span>
@@ -735,7 +716,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.supported_components">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.supported_components">[docs]</a>
-    <span class="k">def</span> <span class="nf">supported_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">supported_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of supported components based on the configurations.</span>
 
@@ -757,7 +738,7 @@ document.write(`
     
 <div class="viewcode-block" id="SQuADDS_DB.supported_component_names">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.supported_component_names">[docs]</a>
-    <span class="k">def</span> <span class="nf">supported_component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">supported_component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of supported component names extracted from the configs.</span>
 
@@ -779,7 +760,7 @@ document.write(`
     
 <div class="viewcode-block" id="SQuADDS_DB.supported_data_types">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.supported_data_types">[docs]</a>
-    <span class="k">def</span> <span class="nf">supported_data_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">supported_data_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of supported data types.</span>
 
@@ -802,7 +783,7 @@ document.write(`
         
 <div class="viewcode-block" id="SQuADDS_DB.supported_config_names">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.supported_config_names">[docs]</a>
-    <span class="k">def</span> <span class="nf">supported_config_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">supported_config_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves the supported configuration names from the repository.</span>
 
@@ -820,7 +801,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.get_configs">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_configs">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_configs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_configs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the configurations stored in the database.</span>
 
@@ -833,7 +814,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.get_component_names">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_component_names">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the names of the components associated with a specific component.</span>
 
@@ -860,7 +841,7 @@ document.write(`
         
 <div class="viewcode-block" id="SQuADDS_DB.view_component_names">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_component_names">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prints the names of the components available in the database.</span>
 
@@ -886,7 +867,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.view_datasets">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_datasets">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View the datasets available in the database.</span>
 
@@ -923,7 +904,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.get_dataset_info">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_dataset_info">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_dataset_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_dataset_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves and prints information about a dataset.</span>
 
@@ -983,7 +964,7 @@ document.write(`
         
 <div class="viewcode-block" id="SQuADDS_DB.view_all_contributors">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_all_contributors">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_all_contributors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_all_contributors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View all unique contributors and their relevant information from simulation configurations.</span>
 
@@ -1000,7 +981,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.view_all_simulation_contributors">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_all_simulation_contributors">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_all_simulation_contributors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_all_simulation_contributors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View all unique simulation contributors and their relevant information.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1040,7 +1021,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.get_measured_devices">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_measured_devices">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_measured_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_measured_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve all measured devices with their corresponding design codes, paper links, images, foundries, and fabrication recipes.</span>
 
@@ -1077,7 +1058,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.view_measured_devices">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_measured_devices">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_measured_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_measured_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View all measured devices with their corresponding design codes, paper links, images, foundries, and fabrication recipes.</span>
 
@@ -1111,7 +1092,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.view_contributors_of_config">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_contributors_of_config">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_contributors_of_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_contributors_of_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View the contributors of a specific configuration.</span>
 
@@ -1136,7 +1117,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.view_contributors_of">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_contributors_of">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_contributors_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">measured_device_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_contributors_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">measured_device_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View contributors of a specific component, component name, and data type.</span>
 
@@ -1168,7 +1149,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.view_sim_contributors_of">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_sim_contributors_of">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_sim_contributors_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">measured_device_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_sim_contributors_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">measured_device_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View the simulation contributors of a specific component, component name, and data type.</span>
 
@@ -1193,7 +1174,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.view_simulation_results">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_simulation_results">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_simulation_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_simulation_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View the simulation results of a specific device specified with a device name.</span>
 
@@ -1215,7 +1196,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.get_device_contributors_of">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_device_contributors_of">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_device_contributors_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_device_contributors_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View the reference/source experimental device that was used to validate a specific simulation configuration.  </span>
 <span class="sd">        </span>
@@ -1255,7 +1236,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.view_device_contributors_of">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_device_contributors_of">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_device_contributors_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_device_contributors_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View the reference/source experimental device that was used to validate a specific simulation configuration.  </span>
 <span class="sd">        </span>
@@ -1295,7 +1276,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.view_reference_device_of">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_reference_device_of">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_reference_device_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_reference_device_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View the reference/source experimental device that was used to validate a specific simulation configuration.  </span>
 <span class="sd">        </span>
@@ -1331,7 +1312,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.view_recipe_of">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_recipe_of">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_recipe_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_recipe_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve the foundry and fabrication recipe information for a specified device.</span>
 <span class="sd">        </span>
@@ -1359,7 +1340,7 @@ document.write(`
   
 <div class="viewcode-block" id="SQuADDS_DB.view_reference_devices">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.view_reference_devices">[docs]</a>
-    <span class="k">def</span> <span class="nf">view_reference_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_reference_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View all unique reference (experimental) devices and their relevant information.</span>
 
@@ -1389,7 +1370,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.select_components">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_components">[docs]</a>
-    <span class="k">def</span> <span class="nf">select_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects components based on the provided component dictionary or string.</span>
 
@@ -1411,7 +1392,7 @@ document.write(`
         
 <div class="viewcode-block" id="SQuADDS_DB.select_system">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_system">[docs]</a>
-    <span class="k">def</span> <span class="nf">select_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects the system and component(s) to be used.</span>
 
@@ -1448,7 +1429,7 @@ document.write(`
     
 <div class="viewcode-block" id="SQuADDS_DB.select_qubit">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_qubit">[docs]</a>
-    <span class="k">def</span> <span class="nf">select_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects a qubit and sets the necessary attributes for the selected qubit.</span>
 
@@ -1478,7 +1459,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.select_cavity_claw">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_cavity_claw">[docs]</a>
-    <span class="k">def</span> <span class="nf">select_cavity_claw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cavity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_cavity_claw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cavity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects a cavity claw component.</span>
 
@@ -1508,7 +1489,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.select_cavity">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_cavity">[docs]</a>
-    <span class="k">def</span> <span class="nf">select_cavity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cavity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_cavity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cavity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects a cavity and sets the necessary attributes for further operations.</span>
 
@@ -1538,7 +1519,7 @@ document.write(`
         
 <div class="viewcode-block" id="SQuADDS_DB.select_resonator_type">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_resonator_type">[docs]</a>
-    <span class="k">def</span> <span class="nf">select_resonator_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resonator_type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_resonator_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resonator_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Select the coupler based on the resonator type.</span>
 
@@ -1561,7 +1542,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.select_coupler">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.select_coupler">[docs]</a>
-    <span class="k">def</span> <span class="nf">select_coupler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coupler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_coupler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coupler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects a coupler for the database.</span>
 
@@ -1593,7 +1574,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.see_dataset">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.see_dataset">[docs]</a>
-    <span class="k">def</span> <span class="nf">see_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">see_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        View a dataset based on the provided data type, component, and component name.</span>
 
@@ -1657,7 +1638,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.get_dataset">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.get_dataset">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves a dataset based on the specified data type, component, and component name.</span>
 
@@ -1721,7 +1702,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.create_system_df">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.create_system_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_system_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_system_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates and returns a DataFrame based on the selected system.</span>
 
@@ -1761,7 +1742,7 @@ document.write(`
         <span class="k">return</span> <span class="n">df</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_create_single_component_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_single_component_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a DataFrame for a single component system.&quot;&quot;&quot;</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_data_type</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_component</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_component_name</span><span class="p">)</span>
 
@@ -1774,7 +1755,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.generate_updated_half_wave_cavity_df">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.generate_updated_half_wave_cavity_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_updated_half_wave_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_updated_half_wave_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        !TODO: speed this up!</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1795,7 +1776,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.generate_qubit_half_wave_cavity_df">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.generate_qubit_half_wave_cavity_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_qubit_half_wave_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_qubit_half_wave_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a DataFrame that combines the qubit and half-wave cavity data.</span>
 
@@ -1851,7 +1832,7 @@ document.write(`
         <span class="k">return</span> <span class="n">opt_df</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_create_multi_component_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="p">,</span> <span class="n">num_cpu</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_multi_component_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="p">,</span> <span class="n">num_cpu</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a DataFrame for a multi-component system.&quot;&quot;&quot;</span>
         <span class="n">qubit_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_qubit</span><span class="p">)</span>
         <span class="n">cavity_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eigenmode&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_cavity</span><span class="p">)</span>
@@ -1870,7 +1851,7 @@ document.write(`
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_qubit_cavity_df</span><span class="p">(</span><span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">claw_merger_terms</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="n">parallelize</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="n">num_cpu</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span>
 
-    <span class="k">def</span> <span class="nf">_update_cap_interdigital_tee_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_cap_interdigital_tee_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates parameters for CapNInterdigitalTee coupler.&quot;&quot;&quot;</span>
         <span class="n">ncap_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;coupler&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;NCap&quot;</span><span class="p">)</span>
         <span class="n">ncap_sim_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bottom_to_bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom_to_ground&#39;</span><span class="p">,</span> <span class="s1">&#39;ground_to_ground&#39;</span><span class="p">,</span> <span class="s1">&#39;top_to_bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;top_to_ground&#39;</span><span class="p">,</span> <span class="s1">&#39;top_to_top&#39;</span><span class="p">]</span>
@@ -1880,7 +1861,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.create_qubit_cavity_df">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.create_qubit_cavity_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_qubit_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_qubit_cavity_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a merged DataFrame by merging the qubit and cavity DataFrames based on the specified merger terms.</span>
 
@@ -1922,7 +1903,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.unselect_all">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.unselect_all">[docs]</a>
-    <span class="k">def</span> <span class="nf">unselect_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unselect_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clears the selected component, data type, qubit, cavity, coupler, and system.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1938,7 +1919,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.show_selections">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.show_selections">[docs]</a>
-    <span class="k">def</span> <span class="nf">show_selections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_selections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prints the selected system, component, and data type.</span>
 
@@ -1962,7 +1943,7 @@ document.write(`
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected resonator type: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_set_target_param_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_target_param_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the target parameter keys based on the provided DataFrame.</span>
 
@@ -1991,13 +1972,13 @@ document.write(`
             <span class="c1"># update the attribute to remove any elements that start with &quot;unit&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_param_keys</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;unit&quot;</span><span class="p">)]</span>
     
-    <span class="k">def</span> <span class="nf">_get_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
         <span class="c1"># TODO: needs implementation </span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
 <div class="viewcode-block" id="SQuADDS_DB.unselect">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.unselect">[docs]</a>
-    <span class="k">def</span> <span class="nf">unselect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unselect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unselects the specified parameter.</span>
 
@@ -2035,13 +2016,13 @@ document.write(`
     
 <div class="viewcode-block" id="SQuADDS_DB.show_selected_system">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.show_selected_system">[docs]</a>
-    <span class="k">def</span> <span class="nf">show_selected_system</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_selected_system</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Waiting on Andre&#39;s code&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SQuADDS_DB.find_parquet_files">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.find_parquet_files">[docs]</a>
-    <span class="k">def</span> <span class="nf">find_parquet_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_parquet_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Searches for `parquet` files in the repository and returns their paths/filenames.</span>
 <span class="sd">        </span>
@@ -2055,7 +2036,7 @@ document.write(`
 
 <div class="viewcode-block" id="SQuADDS_DB.read_parquet_file">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.db.SQuADDS_DB.read_parquet_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_parquet_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_parquet_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes in the filename and returns the object to be read as a pandas dataframe.</span>
 <span class="sd">        </span>
@@ -2103,8 +2084,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2137,7 +2118,8 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

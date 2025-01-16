@@ -15,20 +15,22 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -36,10 +38,11 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/katex-math.css?v=91adb8b6" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=8da8c241"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -83,19 +86,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -103,7 +95,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -111,8 +102,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -149,7 +140,7 @@
     
     
     <img src="../../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
-    <script>document.write(`<img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark" alt="SQuADDS Logo"/>`);</script>
+    <img src="../../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
   
   
 </a></div>
@@ -199,7 +190,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -266,29 +259,21 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
         <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -337,15 +322,11 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
@@ -362,7 +343,8 @@ document.write(`
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -472,15 +454,11 @@ document.write(`
         
           <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -528,9 +506,14 @@ document.write(`
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -548,8 +531,6 @@ document.write(`
       
         <div class="header-article-item">
 
-
-
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -561,7 +542,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">squadds.gds....</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">squadds.gds.processing</span></li>
   </ul>
 </nav>
 </div>
@@ -579,14 +560,14 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for squadds.gds.processing</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">gdspy</span>
-<span class="kn">import</span> <span class="nn">klayout.db</span> <span class="k">as</span> <span class="nn">kdb</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">gdspy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">klayout.db</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kdb</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 
 <div class="viewcode-block" id="merge_shapes_in_layer">
 <a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.merge_shapes_in_layer">[docs]</a>
-<span class="k">def</span> <span class="nf">merge_shapes_in_layer</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">output_gds_file</span><span class="p">,</span> <span class="n">layer_number</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge_shapes_in_layer</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">output_gds_file</span><span class="p">,</span> <span class="n">layer_number</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Selects all shapes in the given layer number from the input GDS file,</span>
 <span class="sd">    merges them together, and saves the result in the output GDS file.</span>
@@ -635,7 +616,7 @@ document.write(`
 
 <div class="viewcode-block" id="crop_top_left_rectangle">
 <a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.crop_top_left_rectangle">[docs]</a>
-<span class="k">def</span> <span class="nf">crop_top_left_rectangle</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">layer_number</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">crop_top_left_rectangle</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">layer_number</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Removes a 300 x 100 um rectangle from the top left of the layer_number/datatype rectangle in the GDS file.</span>
 
@@ -693,7 +674,7 @@ document.write(`
 
 <div class="viewcode-block" id="apply_fixes">
 <a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.apply_fixes">[docs]</a>
-<span class="k">def</span> <span class="nf">apply_fixes</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_fixes</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies the required fixes to the GDS file.</span>
 
@@ -723,7 +704,7 @@ document.write(`
 
 <div class="viewcode-block" id="modify_gds_datatypes">
 <a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.modify_gds_datatypes">[docs]</a>
-<span class="k">def</span> <span class="nf">modify_gds_datatypes</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">modify_gds_datatypes</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modifies the datatype of all layers in a GDS file.</span>
 
@@ -794,7 +775,7 @@ document.write(`
 
 <div class="viewcode-block" id="delete_non_zero_datatype_layers">
 <a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.delete_non_zero_datatype_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">delete_non_zero_datatype_layers</span><span class="p">(</span><span class="n">gds_file</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_non_zero_datatype_layers</span><span class="p">(</span><span class="n">gds_file</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Deletes all layers with datatypes not equal to 0 from the GDS file.</span>
 
@@ -832,7 +813,7 @@ document.write(`
 
 <div class="viewcode-block" id="add_703_layer">
 <a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.add_703_layer">[docs]</a>
-<span class="k">def</span> <span class="nf">add_703_layer</span><span class="p">(</span><span class="n">gds_file</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_703_layer</span><span class="p">(</span><span class="n">gds_file</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a 703 layer datatype 0 rectangle covering the 5/0 layer in the GDS file.</span>
 
@@ -874,7 +855,7 @@ document.write(`
 
 <div class="viewcode-block" id="get_all_layer_numbers">
 <a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.get_all_layer_numbers">[docs]</a>
-<span class="k">def</span> <span class="nf">get_all_layer_numbers</span><span class="p">(</span><span class="n">gds_file</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_all_layer_numbers</span><span class="p">(</span><span class="n">gds_file</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieves all unique layer numbers present in the GDS file.</span>
 
@@ -906,7 +887,7 @@ document.write(`
 
 <div class="viewcode-block" id="add_squares_to_layer">
 <a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.add_squares_to_layer">[docs]</a>
-<span class="k">def</span> <span class="nf">add_squares_to_layer</span><span class="p">(</span><span class="n">input_gds</span><span class="p">,</span> <span class="n">output_gds</span><span class="p">,</span> <span class="n">selected_layer</span><span class="p">,</span> <span class="n">selected_datatype</span><span class="p">,</span> <span class="n">square_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">keepout</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_squares_to_layer</span><span class="p">(</span><span class="n">input_gds</span><span class="p">,</span> <span class="n">output_gds</span><span class="p">,</span> <span class="n">selected_layer</span><span class="p">,</span> <span class="n">selected_datatype</span><span class="p">,</span> <span class="n">square_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">keepout</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds squares to a specific layer in a GDS file.</span>
 
@@ -979,7 +960,7 @@ document.write(`
 
 <div class="viewcode-block" id="create_cheesing_effect">
 <a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.create_cheesing_effect">[docs]</a>
-<span class="k">def</span> <span class="nf">create_cheesing_effect</span><span class="p">(</span><span class="n">input_gds</span><span class="p">,</span> <span class="n">output_gds</span><span class="p">,</span> <span class="n">selected_layer</span><span class="p">,</span> <span class="n">selected_datatype</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_cheesing_effect</span><span class="p">(</span><span class="n">input_gds</span><span class="p">,</span> <span class="n">output_gds</span><span class="p">,</span> <span class="n">selected_layer</span><span class="p">,</span> <span class="n">selected_datatype</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a cheesing effect on a GDS file by subtracting a square layer from an original layer.</span>
 
@@ -1021,7 +1002,7 @@ document.write(`
 
 <div class="viewcode-block" id="bias_gds_features">
 <a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.bias_gds_features">[docs]</a>
-<span class="k">def</span> <span class="nf">bias_gds_features</span><span class="p">(</span><span class="n">input_gds</span><span class="p">,</span> <span class="n">output_gds</span><span class="p">,</span> <span class="n">bias</span><span class="p">,</span> <span class="n">layer_number</span><span class="p">,</span> <span class="n">datatype_number</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bias_gds_features</span><span class="p">(</span><span class="n">input_gds</span><span class="p">,</span> <span class="n">output_gds</span><span class="p">,</span> <span class="n">bias</span><span class="p">,</span> <span class="n">layer_number</span><span class="p">,</span> <span class="n">datatype_number</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Biases features on a specific layer in a GDS file by expanding or contracting them by the specified amount using KLayout.</span>
 
@@ -1096,8 +1077,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1130,7 +1111,8 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>
