@@ -28,10 +28,8 @@ Developers
 ----------
 
 | `Sadman Ahmed Shanto <https://www.sadmanahmedshanto.com>`_ (University of Southern California) - Project Lead 🤖
-| `Andre Kuo <https://www.linkedin.com/in/andrekuo>`_ (University of Southern California)
-| `Elizabeth Kunz <https://www.linkedin.com/in/elizabeth-kunz-644848207/>`_ (University of Southern California)
-| `Adhish Chakravorty <https://www.linkedin.com/in/adhish-chakravorty-474176211/>`_ (University of Southern California)
-| `Evangelos Vlachos <https://www.linkedin.com/in/evangelos-vlachos93>`_ (University of Southern California)
+| `Andre Kuo <https://www.linkedin.com/in/andrekuo>`_ (HRL Laboratories)
+
 
 Contributors
 ------------
@@ -39,6 +37,7 @@ Contributors
 | **Eli Levenson-Falk, PhD** (University of Southern California) - Eternal Guidance Provider (Principle Investigator) 🙏🏽
 | **Clark Miyamoto** (New York University) - Code contributor 💻
 | **Madison Howard** (California Institute of Technology) - Bug Hunter 🐛
+| **Evangelos Vlachos** (University of Southern California) - Code contributor 💻
 | **Kaveh Pezeshki** (Stanford University) - Documentation contributor 📄
 | **Anne Whelan** (US Navy) - Documentation contributor 📄
 | **Jenny Huang** (Columbia University) - Documentation contributor 📄
@@ -47,5 +46,8 @@ Contributors
 | **Daria Kowsari, PhD** (University of Southern California) - Data contributor 📀
 | **Vivek Maurya** (University of Southern California) - Data contributor 📀
 | **Haimeng Zhang, PhD** (IBM) - Data contributor 📀
+| **Elizabeth Kunz** (University of Southern California) - Documentation 📄 and  Code contributor 💻
+| **Adhish Chakravorty** (University of Southern California) - Documentation 📄 and  Code contributor 💻
 | **Ethan Zheng** (University of Southern California) - Data contributor 📀 and Bug Hunter 🐛
 | **Sara Sussman, PhD** (Fermilab) - Bug Hunter 🐛
+| **Priyangshu Chatterjee** (IIT Kharagpur) -  Documentation contributor 📄
