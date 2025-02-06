@@ -456,3 +456,298 @@ def bias_gds_features(input_gds, output_gds, bias, layer_number, datatype_number
 
     # Write the biased GDS file
     layout.write(output_gds)
+
+def flatten_to_top_cell(gds_file, output_gds_file=None, prune=True):
+    """
+    Flattens all hierarchical cells in the input GDS file into the top cell.
+
+    This function reads the specified GDS file using KLayout's database API,
+    flattens the hierarchical structure (i.e. merges all cell instances into the
+    top-level cell) using the specified prune option, and writes the resulting
+    flattened layout to an output GDS file. If no output file name is provided, the
+    function saves the flattened layout with the suffix '_flattened.gds'.
+
+    Args:
+        gds_file (str): Path to the input GDS file.
+        output_gds_file (str, optional): Path to the output flattened GDS file.
+                                         Defaults to None, in which case the output
+                                         filename is derived from gds_file.
+        prune (bool, optional): Whether to prune empty cells during flattening.
+                                Defaults to True.
+
+    Returns:
+        None
+    """
+    try:
+        # Load the GDS file using KLayout's API.
+        layout = kdb.Layout()
+        layout.read(gds_file)
+        
+        # Get the top cell of the layout.
+        top_cell = layout.top_cell()
+        if top_cell is None:
+            raise ValueError("No top cell found in the layout. Cannot flatten without a top cell.")
+        
+        # Flatten the top cell.
+        # Here, 'prune' determines if empty cells should be pruned after flattening.
+        top_cell.flatten(prune)
+        
+        # Determine the output file name if not provided.
+        if output_gds_file is None:
+            if gds_file.lower().endswith('.gds'):
+                output_gds_file = gds_file[:-4] + '_flattened.gds'
+            else:
+                output_gds_file = gds_file + '_flattened.gds'
+        
+        # Write the flattened layout to the output file.
+        layout.write(output_gds_file)
+        print(f"Flattened layout successfully written to {output_gds_file}")
+    
+    except Exception as e:
+        print(f"Error flattening the GDS file '{gds_file}': {e}")
+
+
+def invert_layer(gds_file, layer_number, datatype, output_gds_file=None):
+    """
+    Inverts a specified layer and datatype in a GDS file such that all areas
+    with shapes become holes, and all areas without shapes become filled.
+
+    Args:
+        gds_file (str): Path to the input GDS file.
+        layer_number (int): The layer number to invert.
+        datatype (int): The datatype of the layer to invert.
+        output_gds_file (str, optional): Path to the output GDS file. If None,
+                                         a default output file name is generated.
+
+    Returns:
+        None
+    """
+    try:
+        # Load the GDS file
+        layout = kdb.Layout()
+        layout.read(gds_file)
+
+        # Create a layer index for the specified layer/datatype
+        target_layer = layout.layer(layer_number, datatype)
+
+        # Iterate over all cells in the layout
+        for cell in layout.each_cell():
+            # Get all shapes in the target layer as a region
+            region = kdb.Region(cell.shapes(target_layer))
+
+            if region.is_empty():
+                print(f"No shapes found on layer {layer_number}/{datatype} in cell: {cell.name}")
+                continue
+
+            # Get the bounding box of the entire layer
+            bbox = region.bbox()
+            full_box = kdb.Region(kdb.Box(bbox))
+
+            # Subtract the existing shapes from the full bounding box
+            inverted_region = full_box - region
+
+            # Clear the original shapes
+            cell.shapes(target_layer).clear()
+
+            # Add the inverted region back to the layer
+            cell.shapes(target_layer).insert(inverted_region)
+
+        # Determine the output file name if not provided
+        if output_gds_file is None:
+            if gds_file.lower().endswith('.gds'):
+                output_gds_file = gds_file[:-4] + '_inverted.gds'
+            else:
+                output_gds_file = gds_file + '_inverted.gds'
+
+        # Write the modified layout to the output GDS file
+        layout.write(output_gds_file)
+        print(f"Inverted layer {layer_number}/{datatype} successfully.")
+        print(f"Output written to {output_gds_file}")
+
+    except Exception as e:
+        print(f"Error processing GDS file '{gds_file}': {e}")
+
+def add_square_border_to_gds(input_gds_file,
+                                      output_gds_file,
+                                      size_um=5000,
+                                      thickness_um=23,
+                                      layer_number=1,
+                                      datatype=0):
+    """
+    Adds a centered square border to the TOP cell of an existing GDS file.
+
+    Args:
+        input_gds_file (str): Path to the input GDS file.
+        output_gds_file (str): Path to the output GDS file.
+        size_um (float): Size of the outer square in micrometers. Defaults to 5000.
+        thickness_um (float): Thickness of the square border in micrometers. Defaults to 23.
+        layer_number (int): Layer number to assign the square. Defaults to 1.
+        datatype (int): Datatype to assign the square. Defaults to 0.
+
+    Returns:
+        None
+    """
+    thickness_um = thickness_um*1e3
+    size_um = size_um*1e3
+    try:
+        # Load the input GDS file
+        layout = kdb.Layout()
+        layout.read(input_gds_file)
+
+        # Get the top cell or create one if it doesn't exist
+        top_cell = layout.top_cell()
+        if top_cell is None:
+            top_cell = layout.create_cell("TOP")
+
+        # Calculate the bounding box of the existing content in the TOP cell
+        bbox = None
+        for layer_idx in layout.layer_indices():
+            for shape in top_cell.each_shape(layer_idx):
+                if bbox is None:
+                    bbox = shape.bbox()
+                else:
+                    bbox = bbox + shape.bbox()
+
+        # Check if the bounding box is valid
+        if bbox is None or (bbox.width() == 0 and bbox.height() == 0):
+            print("Warning: The TOP cell is empty. Centering the square at (0, 0).")
+            center_x, center_y = 0, 0
+        else:
+            center_x = (bbox.left + bbox.right) / 2
+            center_y = (bbox.bottom + bbox.top) / 2
+
+        # Define the layer
+        layer_index = layout.layer(layer_number, datatype)
+
+        # Calculate the coordinates for the outer and inner square
+        half_size = size_um / 2
+        half_inner_size = half_size - thickness_um
+
+        # Outer square (full-size), centered
+        outer_square = kdb.Box(
+            center_x - half_size, center_y - half_size,
+            center_x + half_size, center_y + half_size
+        )
+
+        # Inner square (cut-out for border thickness), centered
+        inner_square = kdb.Box(
+            center_x - half_inner_size, center_y - half_inner_size,
+            center_x + half_inner_size, center_y + half_inner_size
+        )
+
+        # Create regions for the outer and inner squares
+        outer_region = kdb.Region(outer_square)
+        inner_region = kdb.Region(inner_square)
+
+        # Subtract the inner square from the outer square to create the border
+        border_region = outer_region - inner_region
+
+        # Insert the border into the top cell on the specified layer
+        top_cell.shapes(layer_index).insert(border_region)
+
+        # Write the modified layout to the output GDS file
+        layout.write(output_gds_file)
+        print(f"Centered square border added to {input_gds_file} and saved as {output_gds_file}")
+
+    except Exception as e:
+        print(f"Error processing GDS file: {e}")
+
+
+def create_marker_blocks(input_gds_file,
+                         output_gds_file,
+                         marker_size_um=8,
+                         marker_distance_um=52,
+                         border_thickness_um=23,
+                         layer_number=1,
+                         datatype=0,
+                         additional_marker_size_um=5,
+                         additional_layer_number=7,
+                         additional_datatype=0):
+    """
+    Creates marker blocks (squares) of a given size at a specified distance 
+    from the corners of the border in the TOP cell of an existing GDS file, 
+    and an additional set of smaller squares on a different layer/datatype.
+
+    Args:
+        input_gds_file (str): Path to the input GDS file.
+        output_gds_file (str): Path to the output GDS file.
+        marker_size_um (float): Size of the main marker squares in micrometers. Defaults to 8.
+        marker_distance_um (float): Distance from the border corners in micrometers. Defaults to 52.
+        border_thickness_um (float): Thickness of the border in micrometers. Defaults to 23.
+        layer_number (int): Layer number to assign the main marker blocks. Defaults to 1.
+        datatype (int): Datatype to assign the main marker blocks. Defaults to 0.
+        additional_marker_size_um (float): Size of the additional marker squares in micrometers. Defaults to 5.
+        additional_layer_number (int): Layer number for the additional marker squares. Defaults to 7.
+        additional_datatype (int): Datatype for the additional marker squares. Defaults to 0.
+
+    Returns:
+        None
+    """
+    try:
+        # Load the input GDS file
+        layout = kdb.Layout()
+        layout.read(input_gds_file)
+
+        # Get the top cell
+        top_cell = layout.top_cell()
+        if top_cell is None:
+            raise ValueError("The input GDS file does not have a TOP cell.")
+
+        # Calculate the bounding box of the existing content in the TOP cell
+        bbox = None
+        for layer_idx in layout.layer_indices():
+            for shape in top_cell.each_shape(layer_idx):
+                if bbox is None:
+                    bbox = shape.bbox()
+                else:
+                    bbox = bbox + shape.bbox()
+
+        # Check if the bounding box is valid
+        if bbox is None or (bbox.width() == 0 and bbox.height() == 0):
+            raise ValueError("The TOP cell is empty. Cannot create marker blocks.")
+
+        # Convert marker size and distance to database units (nanometers)
+        dbu = layout.dbu
+        marker_distance_um += border_thickness_um
+        marker_size = marker_size_um / dbu
+        marker_distance = marker_distance_um / dbu
+        additional_marker_size = additional_marker_size_um / dbu
+
+        # Define the layers
+        layer_index_main = layout.layer(layer_number, datatype)
+        layer_index_additional = layout.layer(additional_layer_number, additional_datatype)
+
+        # Calculate the coordinates of the marker blocks
+        half_marker_size = marker_size / 2
+        half_additional_marker_size = additional_marker_size / 2
+
+        # Adjust placement to ensure the marker is exactly `marker_distance_um` from the border edges
+        marker_positions = [
+            (bbox.left + marker_distance + half_marker_size, bbox.top - marker_distance - half_marker_size),  # Top-left
+            (bbox.right - marker_distance - half_marker_size, bbox.top - marker_distance - half_marker_size),  # Top-right
+            (bbox.left + marker_distance + half_marker_size, bbox.bottom + marker_distance + half_marker_size),  # Bottom-left
+            (bbox.right - marker_distance - half_marker_size, bbox.bottom + marker_distance + half_marker_size),  # Bottom-right
+        ]
+
+        # Create and insert the main marker blocks
+        for x, y in marker_positions:
+            # Main marker block
+            main_marker_square = kdb.Box(
+                x - half_marker_size, y - half_marker_size,
+                x + half_marker_size, y + half_marker_size
+            )
+            top_cell.shapes(layer_index_main).insert(main_marker_square)
+
+            # Additional smaller marker block at the same position
+            additional_marker_square = kdb.Box(
+                x - half_additional_marker_size, y - half_additional_marker_size,
+                x + half_additional_marker_size, y + half_additional_marker_size
+            )
+            top_cell.shapes(layer_index_additional).insert(additional_marker_square)
+
+        # Write the modified layout to the output GDS file
+        layout.write(output_gds_file)
+        print(f"Marker blocks and additional blocks added to {input_gds_file} and saved as {output_gds_file}")
+
+    except Exception as e:
+        print(f"Error creating marker blocks: {e}")
