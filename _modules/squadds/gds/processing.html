@@ -1048,6 +1048,313 @@
     <span class="c1"># Write the biased GDS file</span>
     <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">output_gds</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="flatten_to_top_cell">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.flatten_to_top_cell">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">flatten_to_top_cell</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">output_gds_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flattens all hierarchical cells in the input GDS file into the top cell.</span>
+
+<span class="sd">    This function reads the specified GDS file using KLayout&#39;s database API,</span>
+<span class="sd">    flattens the hierarchical structure (i.e. merges all cell instances into the</span>
+<span class="sd">    top-level cell) using the specified prune option, and writes the resulting</span>
+<span class="sd">    flattened layout to an output GDS file. If no output file name is provided, the</span>
+<span class="sd">    function saves the flattened layout with the suffix &#39;_flattened.gds&#39;.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gds_file (str): Path to the input GDS file.</span>
+<span class="sd">        output_gds_file (str, optional): Path to the output flattened GDS file.</span>
+<span class="sd">                                         Defaults to None, in which case the output</span>
+<span class="sd">                                         filename is derived from gds_file.</span>
+<span class="sd">        prune (bool, optional): Whether to prune empty cells during flattening.</span>
+<span class="sd">                                Defaults to True.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load the GDS file using KLayout&#39;s API.</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+        
+        <span class="c1"># Get the top cell of the layout.</span>
+        <span class="n">top_cell</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">top_cell</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">top_cell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No top cell found in the layout. Cannot flatten without a top cell.&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Flatten the top cell.</span>
+        <span class="c1"># Here, &#39;prune&#39; determines if empty cells should be pruned after flattening.</span>
+        <span class="n">top_cell</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">prune</span><span class="p">)</span>
+        
+        <span class="c1"># Determine the output file name if not provided.</span>
+        <span class="k">if</span> <span class="n">output_gds_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">gds_file</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.gds&#39;</span><span class="p">):</span>
+                <span class="n">output_gds_file</span> <span class="o">=</span> <span class="n">gds_file</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_flattened.gds&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output_gds_file</span> <span class="o">=</span> <span class="n">gds_file</span> <span class="o">+</span> <span class="s1">&#39;_flattened.gds&#39;</span>
+        
+        <span class="c1"># Write the flattened layout to the output file.</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">output_gds_file</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Flattened layout successfully written to </span><span class="si">{</span><span class="n">output_gds_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error flattening the GDS file &#39;</span><span class="si">{</span><span class="n">gds_file</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="invert_layer">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.invert_layer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">invert_layer</span><span class="p">(</span><span class="n">gds_file</span><span class="p">,</span> <span class="n">layer_number</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span> <span class="n">output_gds_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inverts a specified layer and datatype in a GDS file such that all areas</span>
+<span class="sd">    with shapes become holes, and all areas without shapes become filled.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gds_file (str): Path to the input GDS file.</span>
+<span class="sd">        layer_number (int): The layer number to invert.</span>
+<span class="sd">        datatype (int): The datatype of the layer to invert.</span>
+<span class="sd">        output_gds_file (str, optional): Path to the output GDS file. If None,</span>
+<span class="sd">                                         a default output file name is generated.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load the GDS file</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gds_file</span><span class="p">)</span>
+
+        <span class="c1"># Create a layer index for the specified layer/datatype</span>
+        <span class="n">target_layer</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer_number</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
+
+        <span class="c1"># Iterate over all cells in the layout</span>
+        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">():</span>
+            <span class="c1"># Get all shapes in the target layer as a region</span>
+            <span class="n">region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">target_layer</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No shapes found on layer </span><span class="si">{</span><span class="n">layer_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">datatype</span><span class="si">}</span><span class="s2"> in cell: </span><span class="si">{</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Get the bounding box of the entire layer</span>
+            <span class="n">bbox</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+            <span class="n">full_box</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">bbox</span><span class="p">))</span>
+
+            <span class="c1"># Subtract the existing shapes from the full bounding box</span>
+            <span class="n">inverted_region</span> <span class="o">=</span> <span class="n">full_box</span> <span class="o">-</span> <span class="n">region</span>
+
+            <span class="c1"># Clear the original shapes</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">target_layer</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+            <span class="c1"># Add the inverted region back to the layer</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">target_layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">inverted_region</span><span class="p">)</span>
+
+        <span class="c1"># Determine the output file name if not provided</span>
+        <span class="k">if</span> <span class="n">output_gds_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">gds_file</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.gds&#39;</span><span class="p">):</span>
+                <span class="n">output_gds_file</span> <span class="o">=</span> <span class="n">gds_file</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_inverted.gds&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output_gds_file</span> <span class="o">=</span> <span class="n">gds_file</span> <span class="o">+</span> <span class="s1">&#39;_inverted.gds&#39;</span>
+
+        <span class="c1"># Write the modified layout to the output GDS file</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">output_gds_file</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Inverted layer </span><span class="si">{</span><span class="n">layer_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">datatype</span><span class="si">}</span><span class="s2"> successfully.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output written to </span><span class="si">{</span><span class="n">output_gds_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing GDS file &#39;</span><span class="si">{</span><span class="n">gds_file</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_square_border_to_gds">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.add_square_border_to_gds">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_square_border_to_gds</span><span class="p">(</span><span class="n">input_gds_file</span><span class="p">,</span>
+                                      <span class="n">output_gds_file</span><span class="p">,</span>
+                                      <span class="n">size_um</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
+                                      <span class="n">thickness_um</span><span class="o">=</span><span class="mi">23</span><span class="p">,</span>
+                                      <span class="n">layer_number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                      <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a centered square border to the TOP cell of an existing GDS file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_gds_file (str): Path to the input GDS file.</span>
+<span class="sd">        output_gds_file (str): Path to the output GDS file.</span>
+<span class="sd">        size_um (float): Size of the outer square in micrometers. Defaults to 5000.</span>
+<span class="sd">        thickness_um (float): Thickness of the square border in micrometers. Defaults to 23.</span>
+<span class="sd">        layer_number (int): Layer number to assign the square. Defaults to 1.</span>
+<span class="sd">        datatype (int): Datatype to assign the square. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">thickness_um</span> <span class="o">=</span> <span class="n">thickness_um</span><span class="o">*</span><span class="mf">1e3</span>
+    <span class="n">size_um</span> <span class="o">=</span> <span class="n">size_um</span><span class="o">*</span><span class="mf">1e3</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load the input GDS file</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">input_gds_file</span><span class="p">)</span>
+
+        <span class="c1"># Get the top cell or create one if it doesn&#39;t exist</span>
+        <span class="n">top_cell</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">top_cell</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">top_cell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">top_cell</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">create_cell</span><span class="p">(</span><span class="s2">&quot;TOP&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the bounding box of the existing content in the TOP cell</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">layer_idx</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer_indices</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">top_cell</span><span class="o">.</span><span class="n">each_shape</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">bbox</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span> <span class="o">+</span> <span class="n">shape</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+
+        <span class="c1"># Check if the bounding box is valid</span>
+        <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">bbox</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: The TOP cell is empty. Centering the square at (0, 0).&quot;</span><span class="p">)</span>
+            <span class="n">center_x</span><span class="p">,</span> <span class="n">center_y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">center_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">left</span> <span class="o">+</span> <span class="n">bbox</span><span class="o">.</span><span class="n">right</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">center_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">bottom</span> <span class="o">+</span> <span class="n">bbox</span><span class="o">.</span><span class="n">top</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="c1"># Define the layer</span>
+        <span class="n">layer_index</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer_number</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the coordinates for the outer and inner square</span>
+        <span class="n">half_size</span> <span class="o">=</span> <span class="n">size_um</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">half_inner_size</span> <span class="o">=</span> <span class="n">half_size</span> <span class="o">-</span> <span class="n">thickness_um</span>
+
+        <span class="c1"># Outer square (full-size), centered</span>
+        <span class="n">outer_square</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+            <span class="n">center_x</span> <span class="o">-</span> <span class="n">half_size</span><span class="p">,</span> <span class="n">center_y</span> <span class="o">-</span> <span class="n">half_size</span><span class="p">,</span>
+            <span class="n">center_x</span> <span class="o">+</span> <span class="n">half_size</span><span class="p">,</span> <span class="n">center_y</span> <span class="o">+</span> <span class="n">half_size</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Inner square (cut-out for border thickness), centered</span>
+        <span class="n">inner_square</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+            <span class="n">center_x</span> <span class="o">-</span> <span class="n">half_inner_size</span><span class="p">,</span> <span class="n">center_y</span> <span class="o">-</span> <span class="n">half_inner_size</span><span class="p">,</span>
+            <span class="n">center_x</span> <span class="o">+</span> <span class="n">half_inner_size</span><span class="p">,</span> <span class="n">center_y</span> <span class="o">+</span> <span class="n">half_inner_size</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Create regions for the outer and inner squares</span>
+        <span class="n">outer_region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">outer_square</span><span class="p">)</span>
+        <span class="n">inner_region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">inner_square</span><span class="p">)</span>
+
+        <span class="c1"># Subtract the inner square from the outer square to create the border</span>
+        <span class="n">border_region</span> <span class="o">=</span> <span class="n">outer_region</span> <span class="o">-</span> <span class="n">inner_region</span>
+
+        <span class="c1"># Insert the border into the top cell on the specified layer</span>
+        <span class="n">top_cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">border_region</span><span class="p">)</span>
+
+        <span class="c1"># Write the modified layout to the output GDS file</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">output_gds_file</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Centered square border added to </span><span class="si">{</span><span class="n">input_gds_file</span><span class="si">}</span><span class="s2"> and saved as </span><span class="si">{</span><span class="n">output_gds_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing GDS file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="create_marker_blocks">
+<a class="viewcode-back" href="../../../source/squadds.gds.html#squadds.gds.processing.create_marker_blocks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_marker_blocks</span><span class="p">(</span><span class="n">input_gds_file</span><span class="p">,</span>
+                         <span class="n">output_gds_file</span><span class="p">,</span>
+                         <span class="n">marker_size_um</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+                         <span class="n">marker_distance_um</span><span class="o">=</span><span class="mi">52</span><span class="p">,</span>
+                         <span class="n">border_thickness_um</span><span class="o">=</span><span class="mi">23</span><span class="p">,</span>
+                         <span class="n">layer_number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                         <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">additional_marker_size_um</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                         <span class="n">additional_layer_number</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+                         <span class="n">additional_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates marker blocks (squares) of a given size at a specified distance </span>
+<span class="sd">    from the corners of the border in the TOP cell of an existing GDS file, </span>
+<span class="sd">    and an additional set of smaller squares on a different layer/datatype.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_gds_file (str): Path to the input GDS file.</span>
+<span class="sd">        output_gds_file (str): Path to the output GDS file.</span>
+<span class="sd">        marker_size_um (float): Size of the main marker squares in micrometers. Defaults to 8.</span>
+<span class="sd">        marker_distance_um (float): Distance from the border corners in micrometers. Defaults to 52.</span>
+<span class="sd">        border_thickness_um (float): Thickness of the border in micrometers. Defaults to 23.</span>
+<span class="sd">        layer_number (int): Layer number to assign the main marker blocks. Defaults to 1.</span>
+<span class="sd">        datatype (int): Datatype to assign the main marker blocks. Defaults to 0.</span>
+<span class="sd">        additional_marker_size_um (float): Size of the additional marker squares in micrometers. Defaults to 5.</span>
+<span class="sd">        additional_layer_number (int): Layer number for the additional marker squares. Defaults to 7.</span>
+<span class="sd">        additional_datatype (int): Datatype for the additional marker squares. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load the input GDS file</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">input_gds_file</span><span class="p">)</span>
+
+        <span class="c1"># Get the top cell</span>
+        <span class="n">top_cell</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">top_cell</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">top_cell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The input GDS file does not have a TOP cell.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the bounding box of the existing content in the TOP cell</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">layer_idx</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer_indices</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">top_cell</span><span class="o">.</span><span class="n">each_shape</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">bbox</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span> <span class="o">+</span> <span class="n">shape</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+
+        <span class="c1"># Check if the bounding box is valid</span>
+        <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">bbox</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The TOP cell is empty. Cannot create marker blocks.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Convert marker size and distance to database units (nanometers)</span>
+        <span class="n">dbu</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">dbu</span>
+        <span class="n">marker_distance_um</span> <span class="o">+=</span> <span class="n">border_thickness_um</span>
+        <span class="n">marker_size</span> <span class="o">=</span> <span class="n">marker_size_um</span> <span class="o">/</span> <span class="n">dbu</span>
+        <span class="n">marker_distance</span> <span class="o">=</span> <span class="n">marker_distance_um</span> <span class="o">/</span> <span class="n">dbu</span>
+        <span class="n">additional_marker_size</span> <span class="o">=</span> <span class="n">additional_marker_size_um</span> <span class="o">/</span> <span class="n">dbu</span>
+
+        <span class="c1"># Define the layers</span>
+        <span class="n">layer_index_main</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer_number</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
+        <span class="n">layer_index_additional</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">additional_layer_number</span><span class="p">,</span> <span class="n">additional_datatype</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the coordinates of the marker blocks</span>
+        <span class="n">half_marker_size</span> <span class="o">=</span> <span class="n">marker_size</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">half_additional_marker_size</span> <span class="o">=</span> <span class="n">additional_marker_size</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="c1"># Adjust placement to ensure the marker is exactly `marker_distance_um` from the border edges</span>
+        <span class="n">marker_positions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">left</span> <span class="o">+</span> <span class="n">marker_distance</span> <span class="o">+</span> <span class="n">half_marker_size</span><span class="p">,</span> <span class="n">bbox</span><span class="o">.</span><span class="n">top</span> <span class="o">-</span> <span class="n">marker_distance</span> <span class="o">-</span> <span class="n">half_marker_size</span><span class="p">),</span>  <span class="c1"># Top-left</span>
+            <span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">right</span> <span class="o">-</span> <span class="n">marker_distance</span> <span class="o">-</span> <span class="n">half_marker_size</span><span class="p">,</span> <span class="n">bbox</span><span class="o">.</span><span class="n">top</span> <span class="o">-</span> <span class="n">marker_distance</span> <span class="o">-</span> <span class="n">half_marker_size</span><span class="p">),</span>  <span class="c1"># Top-right</span>
+            <span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">left</span> <span class="o">+</span> <span class="n">marker_distance</span> <span class="o">+</span> <span class="n">half_marker_size</span><span class="p">,</span> <span class="n">bbox</span><span class="o">.</span><span class="n">bottom</span> <span class="o">+</span> <span class="n">marker_distance</span> <span class="o">+</span> <span class="n">half_marker_size</span><span class="p">),</span>  <span class="c1"># Bottom-left</span>
+            <span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">right</span> <span class="o">-</span> <span class="n">marker_distance</span> <span class="o">-</span> <span class="n">half_marker_size</span><span class="p">,</span> <span class="n">bbox</span><span class="o">.</span><span class="n">bottom</span> <span class="o">+</span> <span class="n">marker_distance</span> <span class="o">+</span> <span class="n">half_marker_size</span><span class="p">),</span>  <span class="c1"># Bottom-right</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Create and insert the main marker blocks</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">marker_positions</span><span class="p">:</span>
+            <span class="c1"># Main marker block</span>
+            <span class="n">main_marker_square</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+                <span class="n">x</span> <span class="o">-</span> <span class="n">half_marker_size</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">half_marker_size</span><span class="p">,</span>
+                <span class="n">x</span> <span class="o">+</span> <span class="n">half_marker_size</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">half_marker_size</span>
+            <span class="p">)</span>
+            <span class="n">top_cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index_main</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">main_marker_square</span><span class="p">)</span>
+
+            <span class="c1"># Additional smaller marker block at the same position</span>
+            <span class="n">additional_marker_square</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+                <span class="n">x</span> <span class="o">-</span> <span class="n">half_additional_marker_size</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">half_additional_marker_size</span><span class="p">,</span>
+                <span class="n">x</span> <span class="o">+</span> <span class="n">half_additional_marker_size</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">half_additional_marker_size</span>
+            <span class="p">)</span>
+            <span class="n">top_cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index_additional</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">additional_marker_square</span><span class="p">)</span>
+
+        <span class="c1"># Write the modified layout to the output GDS file</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">output_gds_file</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Marker blocks and additional blocks added to </span><span class="si">{</span><span class="n">input_gds_file</span><span class="si">}</span><span class="s2"> and saved as </span><span class="si">{</span><span class="n">output_gds_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating marker blocks: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
 </pre></div>
 
                 </article>
