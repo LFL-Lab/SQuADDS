@@ -93,6 +93,8 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Fancy/For Fun:
 
+- Setup a Model Context Protocol server for SQuADDS
 - Implement LLM-based queries for SQuADDS using [pandas-ai](https://docs.pandas-ai.com/intro) (support for OpenAI and local LLaMA models)
-
+- Set up a server with an intuitive web UI for handling the MVP use cases of SQuADDS
+- 
 ---
