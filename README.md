@@ -153,6 +153,8 @@ The following tutorials are available to help you get started with `SQuADDS`:
 
 We welcome contributions from the community! Here is our [work wish list](wish_list.md).
 
+You can use our [web portal](https://squadds-portal.vercel.app) to contribute your files - [https://squadds-portal.vercel.app](https://squadds-portal.vercel.app)
+
 Please see our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get started and absolutely feel free to reach out to us if you have any questions.
 
 ---
