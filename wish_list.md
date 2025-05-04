@@ -19,6 +19,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 - Integrate SQDMetal (fixed version) as a dependency of SQuADDS
 - Add an easy Palace simulation API on SQuADDS (with parallel processing)
 - Write a comprehensive tutorial on how to use Palace for simulations
+- Make Ansys simulation handle arbitrary geometries for eigenmode and cap matrix simulations
 - Provide compute resources to run simulations covering sparse regions of the Hamiltonian space
 
 ## Core:
@@ -78,11 +79,13 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Boring but Necessary:
 
+- say that coupling is capacitive and handle inductive logic
+- order of `select_system` and specifying it as we grow beyond two
+- **Check for breaking changes in the latest version of dependencies and update the package accordingly**
 - add input type error handling to sim code
 - automated kink detection + meander smoothing prior to qiskit-metal rendering
 - letting users choose the `.env` file location OR telling them where to find it
 - Check for claw dimensions on the Hamiltonian space plot
-- **Check for breaking changes in the latest version of dependencies and update the package accordingly**
 - Create unit tests for each feature/file
 - Establish proper train/test splits and modify `SQuADDS_DB()` to always return all data
 - Standardize the handling of units for simulated results and implement necessary backend changes
