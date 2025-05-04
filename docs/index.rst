@@ -59,7 +59,9 @@ Quick Links
 
 - `Getting Started Guide <https://lfl-lab.github.io/SQuADDS/source/getting_started.html>`_: Learn how to set up and start using SQuADDS.
 - `Tutorials <https://lfl-lab.github.io/SQuADDS/source/tutorials/index.html>`_: Step-by-step guides for common workflows and use cases.
+- `Chat with the Codebase <https://deepwiki.com/LFL-Lab/SQuADDS>`_: Chat with the codebase using DeepWiki.
 - `API Reference <https://lfl-lab.github.io/SQuADDS/source/apidocs/index.html>`_: Explore the full API documentation for SQuADDS.
+- `Contribution Portal <https://squadds-portal.vercel.app/>`_: Contribute to SQuADDS in seconds.
 - `Contributing <https://lfl-lab.github.io/SQuADDS/source/resources/contribute.html>`_: Get involved and contribute to the development of SQuADDS.
 - `Developer Notes <https://lfl-lab.github.io/SQuADDS/source/developer/index.html>`_: Insights and guidelines for developers.
 - `Simulation Notes <https://lfl-lab.github.io/SQuADDS/source/resources/simulations.html>`_: Detailed documentation of our simulations.

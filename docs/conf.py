@@ -79,6 +79,11 @@ html_theme_options = {
             "url": "https://huggingface.co/datasets/SQuADDS/SQuADDS_DB",
             "icon": "fas fa-face-smile",
         },
+        {
+            "name": "DeepWiki",
+            "url": "https://deepwiki.com/LFL-Lab/SQuADDS",
+            "icon": "fas fa-robot",
+        }
         # {
             # "name": "LFL Lab",
             # "url": "https://dornsife.usc.edu/lfl/",
@@ -90,7 +95,7 @@ html_theme_options = {
     "collapse_navigation": True,
 }
 html_context = {
-    "theme_announcement": "🎉 Our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a> is out! ",
+    "theme_announcement": "Read our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a>",
     "expandable_sidebar": True,
     "google_analytics_id": "G-R5QKJDWM2W", 
     "footer": "_footer.html",  # Add this line to reference your custom footer
