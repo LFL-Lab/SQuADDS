@@ -7,3 +7,5 @@ This section provides detailed documentation for all modules, classes, functions
    :maxdepth: 2
 
    ../modules
+
+You can also chat with the codebase on `DeepWiki <https://deepwiki.com/LFL-Lab/SQuADDS/>`_.
