@@ -14,6 +14,10 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 
 **Hugging Face Link:** [https://huggingface.co/datasets/SQuADDS/SQuADDS_DB](https://huggingface.co/datasets/SQuADDS/SQuADDS_DB)
 
+**Contribution Portal Link:** [https://squadds-portal.vercel.app](https://squadds-portal.vercel.app)
+
+**Chat with the Codebase:** [https://deepwiki.com/LFL-Lab/SQuADDS/1-overview](https://deepwiki.com/LFL-Lab/SQuADDS/1-overview)
+
 ## Table of Contents
 
 - [Citation](#citation)
