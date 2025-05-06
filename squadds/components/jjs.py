@@ -1,4 +1,5 @@
 import numpy as np
+import shapely
 from qiskit_metal import Dict, draw
 from qiskit_metal.qlibrary.core.base import QComponent
 
@@ -110,6 +111,14 @@ class JjDolan(QComponent):
         ### Add everything to QGeometry
         self.add_qgeometry('poly', {'bridge': bridge}, layer=p.bridge_layer, subtract=False)
         self.add_qgeometry('poly', {'JJ': JJ}, layer=p.JJ_layer, subtract=False)
+
+        # Add a LineString for the junction
+        coords = list(JJ.exterior.coords)
+        # Use the midpoints of the two short sides (indices 0-1 and 3-4 for this polygon)
+        mid1 = ((coords[0][0] + coords[1][0]) / 2, (coords[0][1] + coords[1][1]) / 2)
+        mid2 = ((coords[3][0] + coords[4][0]) / 2, (coords[3][1] + coords[4][1]) / 2)
+        ls = shapely.geometry.LineString([mid1, mid2])
+        self.add_qgeometry('junction', {'design': ls}, width=p.JJ_width, layer=p.JJ_layer)
 
 class SquidLoopDolan(QComponent):
     '''
@@ -295,9 +304,7 @@ class SquidLoopDolan(QComponent):
     
     def make_junction(self):
         '''Makes the JJs'''
-        
         p = self.parse_options()
-        
         #These are some parameters given by LFL's design prefererances
         JJ_taper = 0.002 - 0.00136 #0.5um
         finger_length = 0.00136 #1.36um
@@ -327,3 +334,16 @@ class SquidLoopDolan(QComponent):
         ### Add to QGeometry
         self.add_qgeometry('poly', {'JJ': JJ}, layer=p.JJ_layer, subtract=False)
         self.add_qgeometry('poly', {"JJ2":JJ2}, layer=p.JJ_layer, subtract=False)
+
+        # Add LineStrings for both junctions
+        coords1 = list(JJ.exterior.coords)
+        mid1a = ((coords1[0][0] + coords1[1][0]) / 2, (coords1[0][1] + coords1[1][1]) / 2)
+        mid1b = ((coords1[3][0] + coords1[4][0]) / 2, (coords1[3][1] + coords1[4][1]) / 2)
+        ls1 = shapely.geometry.LineString([mid1a, mid1b])
+        self.add_qgeometry('junction', {'JJ': ls1}, width=p.JJ_width, layer=p.JJ_layer)
+
+        coords2 = list(JJ2.exterior.coords)
+        mid2a = ((coords2[0][0] + coords2[1][0]) / 2, (coords2[0][1] + coords2[1][1]) / 2)
+        mid2b = ((coords2[3][0] + coords2[4][0]) / 2, (coords2[3][1] + coords2[4][1]) / 2)
+        ls2 = shapely.geometry.LineString([mid2a, mid2b])
+        self.add_qgeometry('junction', {'JJ2': ls2}, width=p.JJ_width, layer=p.JJ_layer)
