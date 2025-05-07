@@ -1,0 +1,1868 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Simulating Qiskit Metal design objects with palace using SQDMetal &#8212; SQuADDS v0.3.6</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/katex-math.css?v=91adb8b6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=8da8c241"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/katex.min.js?v=be8ff15f"></script>
+    <script src="../../_static/auto-render.min.js?v=ad136472"></script>
+    <script src="../../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Read our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+     
+  
+
+<a class="navbar-brand logo" href="https://lfl-lab.github.io/SQuADDS/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
+    <img src="../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="DeepWiki" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-robot fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">DeepWiki</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="DeepWiki" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-robot fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">DeepWiki</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Simulating-Qiskit-Metal-design-objects-with-palace-using-SQDMetal">
+<h1>Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code><a class="headerlink" href="#Simulating-Qiskit-Metal-design-objects-with-palace-using-SQDMetal" title="Link to this heading">#</a></h1>
+<p>In this tutorial, we will cover how to do electrostatic and eigenmode simulations of a qubit-cavity system using <code class="docutils literal notranslate"><span class="pre">palace</span></code>.</p>
+<p><strong>Requirements:</strong></p>
+<ul class="simple">
+<li><p>☐ Ensure that <code class="docutils literal notranslate"><span class="pre">`SQDMetal</span></code> &lt;<a class="github reference external" href="https://github.com/sqdlab/SQDMetal">sqdlab/SQDMetal</a>&gt;`__ is installed in your environment.</p></li>
+<li><p>☐ Ensure that <code class="docutils literal notranslate"><span class="pre">`palace</span></code> &lt;<a class="github reference external" href="https://github.com/sqdlab/palace">sqdlab/palace</a>&gt;`__ is installed in your environment. Instructions <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/resources/palace.html">here</a>.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;KMP_DUPLICATE_LIB_OK&quot;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;TRUE&quot;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PMIX_MCA_gds&quot;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;hash&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">gmsh</span>
+<span class="n">gmsh</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Define the path to the <code class="docutils literal notranslate"><span class="pre">palace</span></code> executable</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">path_to_palace</span> <span class="o">=</span> <span class="s1">&#39;path/to/palace&#39;</span>
+</pre></div>
+</div>
+</div>
+<section id="Electrostatic-Simulation">
+<h2>Electrostatic Simulation<a class="headerlink" href="#Electrostatic-Simulation" title="Link to this heading">#</a></h2>
+<section id="Extracting-the-Capacitance-Matrix">
+<h3>Extracting the Capacitance Matrix<a class="headerlink" href="#Extracting-the-Capacitance-Matrix" title="Link to this heading">#</a></h3>
+<p>Importing the relevant modules</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">metal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">designs</span><span class="p">,</span> <span class="n">draw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetalGUI</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">open_docs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.toolbox_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">math_and_overrides</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">QComponent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.meandered</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMeander</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.straight_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteStraight</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.pathfinder</span><span class="w"> </span><span class="kn">import</span> <span class="n">RoutePathfinder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.launchpad_wb</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaunchpadWirebond</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.open_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenToGround</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.short_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShortToGround</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoupledLineTee</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.qubits.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCross</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</pre></div>
+</div>
+</div>
+<p>We want to get the cap matrix for a system with TransmonCross, claw and ground (similar to the simulations we ran to build <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code>)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQuADDS_DB</span><span class="p">,</span> <span class="n">Analyzer</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># First, get a design from SQuADDS</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+
+<span class="c1"># Define target parameters for your qubit</span>
+<span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">4.2</span><span class="p">,</span>  <span class="c1"># Example value</span>
+    <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">200</span>    <span class="c1"># Example value</span>
+<span class="p">}</span>
+
+<span class="c1"># Find the closest design</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="p">,</span> <span class="n">num_top</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">best_device</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Get the design options</span>
+<span class="n">qubit_options</span> <span class="o">=</span> <span class="n">best_device</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "5a88d4831ba443d88d214b9c0031c386", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e589b98353e848669b4428b2ec52c5d4", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up chip design as planar</span>
+<span class="n">design</span> <span class="o">=</span> <span class="n">designs</span><span class="o">.</span><span class="n">DesignPlanar</span><span class="p">({},</span> <span class="n">overwrite_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="c1"># Create GUI</span>
+<span class="n">gui</span> <span class="o">=</span> <span class="n">MetalGUI</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+
+<span class="c1"># Qubit and a claw</span>
+<span class="c1"># Create the TransmonCross object with the modified options</span>
+<span class="c1"># Update only the position parameters</span>
+<span class="n">qubit_options</span><span class="p">[</span><span class="s2">&quot;pos_x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0.6075mm&#39;</span>
+<span class="n">qubit_options</span><span class="p">[</span><span class="s2">&quot;pos_y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;-1.464&#39;</span>
+<span class="n">Q1</span> <span class="o">=</span> <span class="n">TransmonCross</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;Q1&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">qubit_options</span><span class="p">)</span>
+
+<span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">design</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">autoscale</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s1">&#39;sims/qubit.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+06:04PM 28s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  WARNING: Populating font family aliases took 259 ms. Replace uses of missing font family &#34;Courier&#34; with one that exists to avoid this cost.
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-7_Simulate_designs_with_palace_11_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-7_Simulate_designs_with_palace_11_1.png" style="width: 500px;" />
+</div>
+</div>
+<p>Call the <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code> objects. Change the hyper-parameters as needed for a more accurate simulation.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">SQDMetal.PALACE.Capacitance_Simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">PALACE_Capacitance_Simulation</span>
+
+<span class="n">user_defined_options</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;mesh_refinement&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                             <span class="c1">#refines mesh in PALACE - essetially divides every mesh element in half</span>
+                <span class="s2">&quot;dielectric_material&quot;</span><span class="p">:</span> <span class="s2">&quot;silicon&quot;</span><span class="p">,</span>                  <span class="c1">#choose dielectric material - &#39;silicon&#39; or &#39;sapphire&#39;</span>
+                <span class="s2">&quot;solver_order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>                                 <span class="c1">#increasing solver order increases accuracy of simulation, but significantly increases sim time</span>
+                <span class="s2">&quot;solver_tol&quot;</span><span class="p">:</span> <span class="mf">1.0e-8</span><span class="p">,</span>                              <span class="c1">#error residual tolerance for iterative solver</span>
+                <span class="s2">&quot;solver_maxits&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>                              <span class="c1">#number of solver iterations</span>
+                <span class="s2">&quot;mesh_max&quot;</span><span class="p">:</span> <span class="mf">120e-6</span><span class="p">,</span>                                <span class="c1">#maxiumum element size for the mesh in mm</span>
+                <span class="s2">&quot;mesh_sampling&quot;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span>                              <span class="c1">#number of points to mesh along a geometry</span>
+                <span class="s2">&quot;fillet_resolution&quot;</span><span class="p">:</span><span class="mi">12</span><span class="p">,</span>                            <span class="c1">#number of vertices per quarter turn on a filleted path</span>
+                <span class="s2">&quot;num_cpus&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>                                      <span class="c1">#number of CPU cores to use for simulation</span>
+                <span class="s2">&quot;palace_dir&quot;</span><span class="p">:</span><span class="n">path_to_palace</span>
+                <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Creat the Palace Eigenmode simulation</span>
+<span class="n">cap_sim</span> <span class="o">=</span> <span class="n">PALACE_Capacitance_Simulation</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;xmon_cap_sim_GMSH&#39;</span><span class="p">,</span>                                 <span class="c1">#name of simulation</span>
+                                        <span class="n">metal_design</span> <span class="o">=</span> <span class="n">design</span><span class="p">,</span>                                      <span class="c1">#feed in qiskit metal design</span>
+                                        <span class="n">sim_parent_directory</span> <span class="o">=</span> <span class="s2">&quot;sims/&quot;</span><span class="p">,</span>            <span class="c1">#choose directory where mesh file, config file and HPC batch file will be saved</span>
+                                        <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;simPC&#39;</span><span class="p">,</span>                                             <span class="c1">#choose simulation mode &#39;HPC&#39; or &#39;simPC&#39;</span>
+                                        <span class="n">meshing</span> <span class="o">=</span> <span class="s1">&#39;GMSH&#39;</span><span class="p">,</span>                                           <span class="c1">#choose meshing &#39;GMSH&#39; or &#39;COMSOL&#39;</span>
+                                        <span class="n">user_options</span> <span class="o">=</span> <span class="n">user_defined_options</span><span class="p">,</span>                        <span class="c1">#provide options chosen above</span>
+                                        <span class="n">view_design_gmsh_gui</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                               <span class="c1">#view design in GMSH gui</span>
+                                        <span class="n">create_files</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                        <span class="p">)</span>                                        <span class="c1">#create mesh, config and HPC batch files</span>
+
+<span class="n">cap_sim</span><span class="o">.</span><span class="n">add_metallic</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">fuse_threshold</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+<span class="n">cap_sim</span><span class="o">.</span><span class="n">add_ground_plane</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<p>To generate a fine mesh around our region of interest, we can use the <code class="docutils literal notranslate"><span class="pre">fine_mesh_in_rectangle</span></code> method by first getting the bounds of the region of interest.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bounds</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="s2">&quot;Q1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">qgeometry_bounds</span><span class="p">()</span>
+<span class="n">bounds</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([ 0.3675, -1.704 ,  0.9277, -1.224 ])
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Fine-mesh the transmon cross qubit region</span>
+<span class="n">cap_sim</span><span class="o">.</span><span class="n">fine_mesh_in_rectangle</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">mesh_sampling</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">mesh_min</span><span class="o">=</span><span class="mf">10e-3</span><span class="p">,</span> <span class="n">mesh_max</span><span class="o">=</span><span class="mf">125e-3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cap_sim</span><span class="o">.</span><span class="n">prepare_simulation</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>You can check to see if all the metal components are correctly identified</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cap_sim</span><span class="o">.</span><span class="n">display_conductor_indices</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-7_Simulate_designs_with_palace_20_0.svg" src="../../_images/source_tutorials_Tutorial-7_Simulate_designs_with_palace_20_0.svg" />
+</div>
+</div>
+<p>Similarly, you can verify the mesh is correct by visualizing the mesh</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">SQDMetal.PALACE.Utilities.GMSH_Navigator</span><span class="w"> </span><span class="kn">import</span> <span class="n">GMSH_Navigator</span>
+
+<span class="n">gmsh_nav</span> <span class="o">=</span> <span class="n">GMSH_Navigator</span><span class="p">(</span><span class="n">cap_sim</span><span class="o">.</span><span class="n">path_mesh</span><span class="p">)</span>
+<span class="n">gmsh_nav</span><span class="o">.</span><span class="n">open_GUI</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>If all looks good, you can run the simulation</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cap_matrix</span> <span class="o">=</span><span class="n">cap_sim</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&gt;&gt; /opt/homebrew/bin/mpirun -n 10 /Users/shanto/LFL/palace/build/bin/palace-arm64.bin xmon_cap_sim_GMSH.json
+
+_____________     _______
+_____   __   \____ __   /____ ____________
+____   /_/  /  __ ` /  /  __ ` /  ___/  _ \
+___   _____/  /_/  /  /  /_/  /  /__/  ___/
+  /__/     \___,__/__/\___,__/\_____\_____/
+
+Git changeset ID: v0.13.0-117-g748660c
+Running with 10 MPI processes
+Device configuration: cpu
+Memory configuration: host-std
+libCEED backend: /cpu/self/xsmm/blocked
+
+Added 365 elements in 2 iterations of local bisection for under-resolved interior boundaries
+Added 7772 duplicate vertices for interior boundaries in the mesh
+Added 16409 duplicate boundary elements for interior boundaries in the mesh
+Added 4040 boundary elements for material interfaces to the mesh
+Finished partitioning mesh into 10 subdomains
+
+Characteristic length and time scales:
+ L₀ = 1.080e-02 m, t₀ = 3.602e-02 ns
+
+Mesh curvature order: 1
+Mesh bounding box:
+ (Xmin, Ymin, Zmin) = (-5.400e-03, -3.600e-03, -7.500e-04) m
+ (Xmax, Ymax, Zmax) = (+5.400e-03, +3.600e-03, +7.500e-04) m
+
+Parallel Mesh Stats:
+
+                minimum     average     maximum       total
+ vertices          7411        7925        8379       79254
+ edges            47827       49946       51265      499469
+ faces            78191       80686       81706      806861
+ elements         37774       38664       38981      386644
+ neighbors            2           5           8
+
+            minimum     maximum
+ h      0.000554209    0.021202
+ kappa      1.01738     9.91696
+
+Configuring Dirichlet BC at attributes:
+ 7, 1-3
+
+Assembling system matrices, number of global unknowns:
+ H1 (p = 3): 1885053, ND (p = 3): 7499505, RT (p = 3): 9480894
+ Operator assembly level: Partial
+ Mesh geometries:
+  Tetrahedron: P = 45, Q = 24 (quadrature order = 6)
+
+Assembling multigrid hierarchy:
+ Level 0 (p = 1): 79254 unknowns, 1105488 NNZ
+ Level 1 (p = 2): 578723 unknowns
+ Level 2 (p = 3): 1885053 unknowns
+
+Computing electrostatic fields for 3 terminal boundaries
+
+It 1/3: Index = 1 (elapsed time = 4.20e-08 s)
+
+  Residual norms for PCG solve
+  0 KSP residual norm ||r||_B = 4.269048e+01
+  1 KSP residual norm ||r||_B = 1.749241e+00
+  2 KSP residual norm ||r||_B = 1.651200e-01
+  3 KSP residual norm ||r||_B = 2.212714e-02
+  4 KSP residual norm ||r||_B = 2.414038e-03
+  5 KSP residual norm ||r||_B = 2.896645e-04
+  6 KSP residual norm ||r||_B = 3.401026e-05
+  7 KSP residual norm ||r||_B = 4.284928e-06
+  8 KSP residual norm ||r||_B = 5.288006e-07
+PCG solver converged in 8 iterations (avg. reduction factor: 7.834e-02)
+ Sol. ||V|| = 8.410940e+02 (||RHS|| = 3.736942e+02)
+ Field energy E = 1.589e+00 J
+ Updating solution error estimates
+ Wrote fields to disk for terminal 1
+
+It 2/3: Index = 2 (elapsed time = 4.67e+01 s)
+
+  Residual norms for PCG solve
+  0 KSP residual norm ||r||_B = 2.060743e+00
+  1 KSP residual norm ||r||_B = 9.338060e-02
+  2 KSP residual norm ||r||_B = 1.373208e-02
+  3 KSP residual norm ||r||_B = 1.627601e-03
+  4 KSP residual norm ||r||_B = 1.660958e-04
+  5 KSP residual norm ||r||_B = 2.152629e-05
+  6 KSP residual norm ||r||_B = 3.048275e-06
+  7 KSP residual norm ||r||_B = 3.173193e-07
+PCG solver converged in 7 iterations (avg. reduction factor: 6.812e-02)
+ Sol. ||V|| = 7.989421e+01 (||RHS|| = 4.697929e+01)
+ Field energy E = 2.245e-02 J
+ Updating solution error estimates
+ Wrote fields to disk for terminal 2
+
+It 3/3: Index = 3 (elapsed time = 8.36e+01 s)
+
+  Residual norms for PCG solve
+  0 KSP residual norm ||r||_B = 3.246957e+00
+  1 KSP residual norm ||r||_B = 2.966557e-01
+  2 KSP residual norm ||r||_B = 3.909164e-02
+  3 KSP residual norm ||r||_B = 4.689463e-03
+  4 KSP residual norm ||r||_B = 5.354813e-04
+  5 KSP residual norm ||r||_B = 6.274562e-05
+  6 KSP residual norm ||r||_B = 7.532947e-06
+  7 KSP residual norm ||r||_B = 8.276786e-07
+  8 KSP residual norm ||r||_B = 9.478029e-08
+PCG solver converged in 8 iterations (avg. reduction factor: 7.698e-02)
+ Sol. ||V|| = 1.785651e+02 (||RHS|| = 7.743450e+01)
+ Field energy E = 2.136e-02 J
+ Updating solution error estimates
+ Wrote fields to disk for terminal 3
+
+Completed 0 iterations of adaptive mesh refinement (AMR):
+ Indicator norm = 2.201e-01, global unknowns = 1885053
+ Max. iterations = 0, tol. = 1.000e-02
+
+Elapsed Time Report (s)           Min.        Max.        Avg.
+==============================================================
+Initialization                   8.138       8.272       8.178
+Operator Construction            3.105       3.242       3.178
+Linear Solve                     1.778       1.991       1.890
+  Setup                         15.113      15.127      15.120
+  Preconditioner                39.231      39.576      39.424
+  Coarse Solve                   1.100       1.294       1.156
+Estimation                       1.495       1.597       1.543
+  Construction                  27.965      27.967      27.966
+  Solve                         40.739      40.740      40.739
+Postprocessing                   4.352       4.452       4.405
+Disk IO                         34.163      34.169      34.167
+--------------------------------------------------------------
+Total                          177.907     177.918     177.914
+
+Error in plotting: &#39;Data array (V) not present in this dataset.&#39;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">cap_matrix</span><span class="p">)</span>
+
+<span class="c1"># get rid of the first column</span>
+<span class="n">cdf</span> <span class="o">=</span> <span class="n">cdf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+
+<span class="c1"># assigning the columns and indices based on our geometry</span>
+<span class="n">cdf</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ground&quot;</span><span class="p">,</span> <span class="s2">&quot;claw&quot;</span><span class="p">,</span> <span class="s2">&quot;cross&quot;</span><span class="p">]</span>
+<span class="n">cdf</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ground&quot;</span><span class="p">,</span> <span class="s2">&quot;claw&quot;</span><span class="p">,</span> <span class="s2">&quot;cross&quot;</span><span class="p">]</span>
+<span class="n">cdf</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ground</th>
+      <th>claw</th>
+      <th>cross</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ground</th>
+      <td>8.437722e-12</td>
+      <td>-1.121216e-13</td>
+      <td>-1.013370e-13</td>
+    </tr>
+    <tr>
+      <th>claw</th>
+      <td>-1.121216e-13</td>
+      <td>1.191759e-13</td>
+      <td>-5.203190e-15</td>
+    </tr>
+    <tr>
+      <th>cross</th>
+      <td>-1.013370e-13</td>
+      <td>-5.203190e-15</td>
+      <td>1.134092e-13</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The above dataframe is the capacitance matrix for our system in Farads.</p>
+<p>To get a more accurate result - consider a higher order solver and a finer mesh.</p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="Eigenmodal-Simulation">
+<h2>Eigenmodal Simulation<a class="headerlink" href="#Eigenmodal-Simulation" title="Link to this heading">#</a></h2>
+<section id="For-a-qubit-cavity-system">
+<h3>For a qubit-cavity system<a class="headerlink" href="#For-a-qubit-cavity-system" title="Link to this heading">#</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import useful packages</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">metal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">designs</span><span class="p">,</span> <span class="n">draw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetalGUI</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">open_docs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.toolbox_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">math_and_overrides</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">QComponent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.qubits</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCross</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.meandered</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMeander</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.straight_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteStraight</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.pathfinder</span><span class="w"> </span><span class="kn">import</span> <span class="n">RoutePathfinder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.launchpad_wb</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaunchpadWirebond</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.open_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenToGround</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.short_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShortToGround</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoupledLineTee</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+</pre></div>
+</div>
+</div>
+<p>For this example lets use an example geometry from <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.html#Making-the-Design">Tutorial 5</a> and build the design with <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">unselect_all</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="s2">&quot;qubit&quot;</span><span class="p">])</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+
+<span class="n">analyzer</span><span class="o">.</span><span class="n">reload_db</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9310c61ad2ac4daf8f410ed9eb253204", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">3.7</span><span class="p">,</span>
+                <span class="s2">&quot;resonator_type&quot;</span><span class="p">:</span><span class="s2">&quot;quarter&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">210</span><span class="p">,</span>
+                <span class="s2">&quot;g_MHz&quot;</span><span class="p">:</span> <span class="mi">100</span> <span class="c1"># should provide a big punchout shift</span>
+                <span class="p">}</span>
+
+<span class="c1"># computing the cavity frequency desired as per the design requirements</span>
+<span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">]</span><span class="o">+</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">]</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span><span class="n">num_top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">)</span>
+<span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Time taken to add the coupled H params: 3.9966211318969727 seconds
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>index_qc</th>
+      <th>renderer_options_qubit</th>
+      <th>setup_qubit</th>
+      <th>simulator_qubit</th>
+      <th>claw_to_claw</th>
+      <th>claw_to_ground</th>
+      <th>cross_to_claw</th>
+      <th>cross_to_cross</th>
+      <th>cross_to_ground</th>
+      <th>ground_to_ground</th>
+      <th>...</th>
+      <th>coupler_type</th>
+      <th>design_options_cavity_claw</th>
+      <th>design_tool_cavity_claw</th>
+      <th>resonator_type</th>
+      <th>design_options</th>
+      <th>EC</th>
+      <th>EJ</th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>g_MHz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>12514</th>
+      <td>1900</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
+      <td>102.50358</td>
+      <td>94.66779</td>
+      <td>7.2447</td>
+      <td>100.07658</td>
+      <td>100.07658</td>
+      <td>246.94274</td>
+      <td>...</td>
+      <td>CLT</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+      <td>0.180488</td>
+      <td>10.278024</td>
+      <td>3.66213</td>
+      <td>-205.109839</td>
+      <td>98.903433</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 41 columns</p>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_qubit</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">get_qubit_options</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="n">data_cpw</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">get_cpw_options</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="n">data_coupler</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">get_coupler_options</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="n">LJs</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">get_Ljs</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="c1"># in nH</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design</span><span class="o">.</span><span class="n">delete_all_components</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;bound method QDesign.delete_all_components of &lt;qiskit_metal.designs.design_planar.DesignPlanar object at 0x1bda18950&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design</span> <span class="o">=</span> <span class="n">designs</span><span class="o">.</span><span class="n">DesignPlanar</span><span class="p">({},</span> <span class="n">overwrite_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">gui</span> <span class="o">=</span> <span class="n">MetalGUI</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+
+
+<span class="c1"># Set up chip dimensions</span>
+<span class="n">design</span><span class="o">.</span><span class="n">chips</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">size_x</span> <span class="o">=</span> <span class="s1">&#39;4.6mm&#39;</span>
+<span class="n">design</span><span class="o">.</span><span class="n">chips</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">size_y</span> <span class="o">=</span> <span class="s1">&#39;2.4mm&#39;</span>
+<span class="n">design</span><span class="o">.</span><span class="n">chips</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">size_z</span> <span class="o">=</span> <span class="s1">&#39;-280um&#39;</span>
+<span class="n">design</span><span class="o">.</span><span class="n">chips</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">center_x</span> <span class="o">=</span> <span class="s1">&#39;0mm&#39;</span>
+<span class="n">design</span><span class="o">.</span><span class="n">chips</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">center_y</span> <span class="o">=</span> <span class="s1">&#39;-1mm&#39;</span>
+<br/></pre></div>
+</div>
+</div>
+<p>Lets create the qubit with a junction and a claw</p>
+</section>
+<section id="Qubit">
+<h3>Qubit<a class="headerlink" href="#Qubit" title="Link to this heading">#</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">SQDMetal.Comps.Xmon</span><span class="w"> </span><span class="kn">import</span> <span class="n">Xmon</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">SQDMetal.Comps.Junctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">JunctionDolanPinStretch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">SQDMetal.Comps.Capacitors</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapacitorProngPin</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate vBar_gap and hBar_gap</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_um</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract float from &#39;30um&#39;.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;um&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+<span class="c1"># Unpack parameters from data_qubit</span>
+<span class="n">cross_width</span> <span class="o">=</span> <span class="n">extract_um</span><span class="p">(</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">cross_length</span> <span class="o">=</span> <span class="n">extract_um</span><span class="p">(</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_length&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">cross_gap</span> <span class="o">=</span> <span class="n">extract_um</span><span class="p">(</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Now create the Xmon</span>
+<span class="n">xmon</span> <span class="o">=</span> <span class="n">Xmon</span><span class="p">(</span>
+    <span class="n">design</span><span class="p">,</span>
+    <span class="s1">&#39;xmon&#39;</span><span class="p">,</span>
+    <span class="n">options</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+        <span class="n">pos_x</span> <span class="o">=</span> <span class="s1">&#39;0.375mm&#39;</span><span class="p">,</span>
+        <span class="n">pos_y</span> <span class="o">=</span> <span class="s1">&#39;-1.3&#39;</span><span class="p">,</span>
+        <span class="n">hBar_width</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cross_width</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span>
+        <span class="n">vBar_width</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cross_width</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span>
+        <span class="n">vBar_gap</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cross_gap</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span>
+        <span class="n">hBar_gap</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cross_gap</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span>
+        <span class="n">cross_width</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="mi">2</span><span class="o">*</span><span class="n">cross_length</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span>
+        <span class="n">cross_height</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="mi">2</span><span class="o">*</span><span class="n">cross_length</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span>
+        <span class="n">gap_up</span> <span class="o">=</span> <span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">gap_left</span> <span class="o">=</span> <span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">gap_right</span> <span class="o">=</span> <span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">gap_down</span> <span class="o">=</span> <span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Claw</span>
+<span class="n">prong_length</span> <span class="o">=</span> <span class="n">extract_um</span><span class="p">(</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;claw_length&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">extract_um</span><span class="p">(</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;claw_width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">pin_gap_side</span> <span class="o">=</span> <span class="n">extract_um</span><span class="p">(</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;claw_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="n">extract_um</span><span class="p">(</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="n">extract_um</span><span class="p">(</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">claw</span> <span class="o">=</span> <span class="n">CapacitorProngPin</span><span class="p">(</span>
+    <span class="n">design</span><span class="p">,</span>
+    <span class="s1">&#39;claw&#39;</span><span class="p">,</span>
+    <span class="n">options</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+        <span class="n">pin_inputs</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s1">&#39;xmon&#39;</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;up&#39;</span><span class="p">)),</span>
+        <span class="n">prong_width</span> <span class="o">=</span> <span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;claw_width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">pad_thickness</span> <span class="o">=</span> <span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;claw_width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">gap_front</span> <span class="o">=</span> <span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">gap_back</span> <span class="o">=</span> <span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;claw_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">gap_side</span> <span class="o">=</span> <span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;claw_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">prong_length</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prong_length</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span>
+        <span class="n">pin_gap_side</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pin_gap_side</span><span class="si">}</span><span class="s2">um&quot;</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Junction</span>
+<span class="n">junction</span> <span class="o">=</span> <span class="n">JunctionDolanPinStretch</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;junction&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">pin_inputs</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;xmon&#39;</span><span class="p">,</span><span class="n">pin</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)),</span>
+                                                         <span class="n">dist_extend</span><span class="o">=</span><span class="n">data_qubit</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                                         <span class="n">layer</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                                         <span class="n">finger_width</span><span class="o">=</span><span class="s1">&#39;0.4um&#39;</span><span class="p">,</span> <span class="n">t_pad_size</span><span class="o">=</span><span class="s1">&#39;0.385um&#39;</span><span class="p">,</span>
+                                                         <span class="n">squid_width</span><span class="o">=</span><span class="s1">&#39;5.4um&#39;</span><span class="p">,</span> <span class="n">prong_width</span><span class="o">=</span><span class="s1">&#39;0.9um&#39;</span><span class="p">))</span>
+<br/><br/></pre></div>
+</div>
+</div>
+<p>Now lets add the resonator and feedline</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Lauchpad 1</span>
+<span class="n">x1</span> <span class="o">=</span> <span class="s1">&#39;-2mm&#39;</span>
+<span class="n">y1</span> <span class="o">=</span> <span class="s1">&#39;0mm&#39;</span>
+<span class="n">launch_options1</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">chip</span><span class="o">=</span><span class="s1">&#39;main&#39;</span><span class="p">,</span> <span class="n">pos_x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">pos_y</span><span class="o">=</span><span class="n">y1</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;360&#39;</span><span class="p">,</span> <span class="n">lead_length</span><span class="o">=</span><span class="s1">&#39;30um&#39;</span><span class="p">,</span> <span class="n">pad_height</span><span class="o">=</span><span class="s1">&#39;103um&#39;</span><span class="p">,</span>
+                      <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;103um&#39;</span><span class="p">,</span> <span class="n">pad_gap</span><span class="o">=</span><span class="s1">&#39;60um&#39;</span><span class="p">,</span> <span class="n">trace_width</span> <span class="o">=</span> <span class="n">data_cpw</span><span class="p">[</span><span class="s2">&quot;trace_width&quot;</span><span class="p">],</span> <span class="n">trace_gap</span> <span class="o">=</span> <span class="n">data_cpw</span><span class="p">[</span><span class="s2">&quot;trace_gap&quot;</span><span class="p">])</span>
+<span class="n">LP1</span> <span class="o">=</span> <span class="n">LaunchpadWirebond</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;LP1&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">launch_options1</span><span class="p">)</span>
+
+<span class="c1"># Launchpad 2</span>
+<span class="n">x2</span> <span class="o">=</span> <span class="s1">&#39;2mm&#39;</span>
+<span class="n">y1</span> <span class="o">=</span> <span class="s1">&#39;0mm&#39;</span>
+<span class="n">launch_options2</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">chip</span><span class="o">=</span><span class="s1">&#39;main&#39;</span><span class="p">,</span> <span class="n">pos_x</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span> <span class="n">pos_y</span><span class="o">=</span><span class="n">y1</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;180&#39;</span><span class="p">,</span> <span class="n">lead_length</span><span class="o">=</span><span class="s1">&#39;30um&#39;</span><span class="p">,</span> <span class="n">pad_height</span><span class="o">=</span><span class="s1">&#39;103um&#39;</span><span class="p">,</span>
+                      <span class="n">pad_width</span><span class="o">=</span><span class="s1">&#39;103um&#39;</span><span class="p">,</span> <span class="n">pad_gap</span><span class="o">=</span><span class="s1">&#39;60um&#39;</span><span class="p">,</span> <span class="n">trace_width</span> <span class="o">=</span> <span class="n">data_cpw</span><span class="p">[</span><span class="s2">&quot;trace_width&quot;</span><span class="p">],</span> <span class="n">trace_gap</span> <span class="o">=</span> <span class="n">data_cpw</span><span class="p">[</span><span class="s2">&quot;trace_gap&quot;</span><span class="p">])</span>
+<span class="n">LP2</span> <span class="o">=</span> <span class="n">LaunchpadWirebond</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;LP2&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">launch_options2</span><span class="p">)</span>
+
+<span class="c1"># Using path finder to connect the two launchpads</span>
+<span class="n">feedline</span> <span class="o">=</span> <span class="n">RoutePathfinder</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;feedline&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">chip</span><span class="o">=</span><span class="s1">&#39;main&#39;</span><span class="p">,</span> <span class="n">trace_width</span> <span class="o">=</span> <span class="n">data_cpw</span><span class="p">[</span><span class="s2">&quot;trace_width&quot;</span><span class="p">],</span>
+                                            <span class="n">trace_gap</span> <span class="o">=</span> <span class="n">data_cpw</span><span class="p">[</span><span class="s2">&quot;trace_gap&quot;</span><span class="p">],</span>
+                                            <span class="n">fillet</span><span class="o">=</span><span class="s1">&#39;90um&#39;</span><span class="p">,</span>
+                                            <span class="n">hfss_wire_bonds</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                            <span class="n">lead</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">end_straight</span><span class="o">=</span><span class="s1">&#39;0.1mm&#39;</span><span class="p">),</span>
+                                            <span class="n">pin_inputs</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+                                                <span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+                                                    <span class="n">component</span><span class="o">=</span><span class="s1">&#39;LP1&#39;</span><span class="p">,</span>
+                                                    <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;tie&#39;</span><span class="p">),</span>
+                                                <span class="n">end_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+                                                    <span class="n">component</span><span class="o">=</span><span class="s1">&#39;LP2&#39;</span><span class="p">,</span>
+                                                    <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;tie&#39;</span><span class="p">)</span>
+                                            <span class="p">)))</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#open to ground for resonator</span>
+<span class="n">otg1</span> <span class="o">=</span> <span class="n">OpenToGround</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;otg1&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">chip</span><span class="o">=</span><span class="s1">&#39;main&#39;</span><span class="p">,</span> <span class="n">pos_x</span><span class="o">=</span><span class="s1">&#39;-0.2mm&#39;</span><span class="p">,</span>  <span class="n">pos_y</span><span class="o">=</span><span class="s1">&#39;-40um&#39;</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="mi">180</span><span class="p">))</span>
+
+
+<span class="c1"># Resonator and feedline gap width (W) and center conductor width (S)</span>
+<span class="n">design</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;cpw_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_cpw</span><span class="p">[</span><span class="s2">&quot;trace_width&quot;</span><span class="p">]</span>
+<span class="n">design</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;cpw_gap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_cpw</span><span class="p">[</span><span class="s2">&quot;trace_gap&quot;</span><span class="p">]</span>
+
+<span class="c1"># Use RouteMeander to fix the total length of the resonator</span>
+<span class="n">res1</span> <span class="o">=</span> <span class="n">RouteMeander</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;resonator&#39;</span><span class="p">,</span>  <span class="n">Dict</span><span class="p">(</span>
+        <span class="n">trace_width</span> <span class="o">=</span><span class="s1">&#39;10um&#39;</span><span class="p">,</span>
+        <span class="n">trace_gap</span> <span class="o">=</span><span class="s1">&#39;6um&#39;</span><span class="p">,</span>
+        <span class="n">total_length</span><span class="o">=</span><span class="s1">&#39;3.7mm&#39;</span><span class="p">,</span>
+        <span class="n">hfss_wire_bonds</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">fillet</span><span class="o">=</span><span class="s1">&#39;99.9 um&#39;</span><span class="p">,</span>
+        <span class="n">lead</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">start_straight</span><span class="o">=</span><span class="s1">&#39;300um&#39;</span><span class="p">),</span>
+        <span class="n">pin_inputs</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+        <span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span> <span class="s1">&#39;otg1&#39;</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span> <span class="s1">&#39;open&#39;</span><span class="p">),</span>
+        <span class="n">end_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span> <span class="s1">&#39;claw&#39;</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span> <span class="s1">&#39;a&#39;</span><span class="p">)),</span> <span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Check the design</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># rebuild the GUI</span>
+<span class="n">design</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">autoscale</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s1">&#39;sims/qubit-cavity.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-7_Simulate_designs_with_palace_44_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-7_Simulate_designs_with_palace_44_0.png" style="width: 500px;" />
+</div>
+</div>
+<p>Define the hyper-parameters for the eigenmode simulation</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">SQDMetal.PALACE.Eigenmode_Simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">PALACE_Eigenmode_Simulation</span>
+
+<span class="c1">#Eigenmode Simulation Options</span>
+<span class="n">user_defined_options</span> <span class="o">=</span> <span class="p">{</span>
+                 <span class="s2">&quot;mesh_refinement&quot;</span><span class="p">:</span>  <span class="mi">0</span><span class="p">,</span>                             <span class="c1">#refines mesh in PALACE - essetially divides every mesh element in half</span>
+                 <span class="s2">&quot;dielectric_material&quot;</span><span class="p">:</span> <span class="s2">&quot;silicon&quot;</span><span class="p">,</span>                  <span class="c1">#choose dielectric material - &#39;silicon&#39; or &#39;sapphire&#39;</span>
+                 <span class="s2">&quot;starting_freq&quot;</span><span class="p">:</span> <span class="mf">2e9</span><span class="p">,</span>                              <span class="c1">#starting frequency in Hz</span>
+                 <span class="s2">&quot;number_of_freqs&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>                              <span class="c1">#number of eigenmodes to find</span>
+                 <span class="s2">&quot;solns_to_save&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>                                <span class="c1">#number of electromagnetic field visualizations to save</span>
+                 <span class="s2">&quot;solver_order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>                                 <span class="c1">#increasing solver order increases accuracy of simulation, but significantly increases sim time</span>
+                 <span class="s2">&quot;solver_tol&quot;</span><span class="p">:</span> <span class="mf">1.0e-3</span><span class="p">,</span>                              <span class="c1">#error residual tolerance foriterative solver</span>
+                 <span class="s2">&quot;solver_maxits&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                              <span class="c1">#number of solver iterations</span>
+                 <span class="s2">&quot;mesh_max&quot;</span><span class="p">:</span> <span class="mf">120e-3</span><span class="p">,</span>                                <span class="c1">#maxiumum element size for the mesh in mm</span>
+                 <span class="s2">&quot;mesh_min&quot;</span><span class="p">:</span> <span class="mf">10e-3</span><span class="p">,</span>                                 <span class="c1">#minimum element size for the mesh in mm</span>
+                 <span class="s2">&quot;mesh_sampling&quot;</span><span class="p">:</span> <span class="mi">130</span><span class="p">,</span>                              <span class="c1">#number of points to mesh along a geometry</span>
+                 <span class="s2">&quot;fillet_resolution&quot;</span><span class="p">:</span><span class="mi">12</span><span class="p">,</span>
+                 <span class="s2">&quot;num_cpus&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>                                      <span class="c1">#number of CPU cores to use for simulation</span>
+                 <span class="s2">&quot;palace_dir&quot;</span><span class="p">:</span><span class="n">path_to_palace</span>
+                <span class="p">}</span>
+
+<span class="c1">#Creat the Palace Eigenmode simulation</span>
+<span class="n">eigen_sim</span> <span class="o">=</span> <span class="n">PALACE_Eigenmode_Simulation</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span><span class="s1">&#39;GMSH_eigen_test&#39;</span><span class="p">,</span>                              <span class="c1">#name of simulation</span>
+                                        <span class="n">metal_design</span> <span class="o">=</span> <span class="n">design</span><span class="p">,</span>                                      <span class="c1">#feed in qiskit metal design</span>
+                                        <span class="n">sim_parent_directory</span> <span class="o">=</span> <span class="s2">&quot;sims/&quot;</span><span class="p">,</span>            <span class="c1">#choose directory where mesh file, config file and HPC batch file will be saved</span>
+                                        <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;simPC&#39;</span><span class="p">,</span>                                               <span class="c1">#choose simulation mode &#39;HPC&#39; or &#39;simPC&#39;</span>
+                                        <span class="n">meshing</span> <span class="o">=</span> <span class="s1">&#39;GMSH&#39;</span><span class="p">,</span>                                         <span class="c1">#choose meshing &#39;GMSH&#39; or &#39;COMSOL&#39;</span>
+                                        <span class="n">user_options</span> <span class="o">=</span> <span class="n">user_defined_options</span><span class="p">,</span>                        <span class="c1">#provide options chosen above</span>
+                                        <span class="n">view_design_gmsh_gui</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                               <span class="c1">#view design in GMSH gui</span>
+                                        <span class="n">create_files</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>                                        <span class="c1">#create mesh, config and HPC batch files</span>
+<br/></pre></div>
+</div>
+</div>
+<p>Assigning the materials to the interfaces, add ports to the design, and add some mesh.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">SQDMetal.Utilities.Materials</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaterialInterface</span>
+
+<span class="n">eigen_sim</span><span class="o">.</span><span class="n">add_metallic</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">fuse_threshold</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+<span class="n">eigen_sim</span><span class="o">.</span><span class="n">add_ground_plane</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+
+<span class="c1">#Fine-mesh the transmon cross qubit region</span>
+<span class="n">eigen_sim</span><span class="o">.</span><span class="n">fine_mesh_in_rectangle</span><span class="p">(</span><span class="mf">0.2875e-3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.2e-3</span><span class="p">,</span> <span class="mf">0.63e-3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.72e-3</span><span class="p">,</span> <span class="n">min_size</span><span class="o">=</span><span class="mf">15e-6</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mf">120e-6</span><span class="p">)</span>
+
+<span class="c1">#Add in the RF ports</span>
+<span class="n">eigen_sim</span><span class="o">.</span><span class="n">create_port_CPW_on_Launcher</span><span class="p">(</span><span class="s1">&#39;LP1&#39;</span><span class="p">,</span> <span class="mf">20e-6</span><span class="p">)</span>
+<span class="n">eigen_sim</span><span class="o">.</span><span class="n">create_port_CPW_on_Launcher</span><span class="p">(</span><span class="s1">&#39;LP2&#39;</span><span class="p">,</span> <span class="mf">20e-6</span><span class="p">)</span>
+<span class="n">eigen_sim</span><span class="o">.</span><span class="n">create_port_JosephsonJunction</span><span class="p">(</span><span class="s1">&#39;junction&#39;</span><span class="p">,</span> <span class="n">L_J</span><span class="o">=</span><span class="n">LJs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-9</span><span class="p">,</span> <span class="n">C_J</span><span class="o">=</span><span class="mf">10e-15</span><span class="p">)</span> <span class="c1"># Guessing the C_J value really</span>
+
+<span class="c1"># #Fine-mesh routed paths</span>
+<span class="n">eigen_sim</span><span class="o">.</span><span class="n">fine_mesh_around_comp_boundaries</span><span class="p">([</span><span class="s1">&#39;feedline&#39;</span><span class="p">,</span> <span class="s1">&#39;resonator&#39;</span><span class="p">],</span> <span class="n">min_size</span><span class="o">=</span><span class="mf">25e-6</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mf">250e-6</span><span class="p">)</span>
+<span class="n">eigen_sim</span><span class="o">.</span><span class="n">fine_mesh_around_comp_boundaries</span><span class="p">([</span><span class="s1">&#39;xmon&#39;</span><span class="p">],</span> <span class="n">min_size</span><span class="o">=</span><span class="mf">14e-6</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mf">75e-6</span><span class="p">)</span>
+
+<span class="n">eigen_sim</span><span class="o">.</span><span class="n">setup_EPR_interfaces</span><span class="p">(</span><span class="n">metal_air</span><span class="o">=</span><span class="n">MaterialInterface</span><span class="p">(</span><span class="s1">&#39;Aluminium-Vacuum&#39;</span><span class="p">),</span> <span class="n">substrate_air</span><span class="o">=</span><span class="n">MaterialInterface</span><span class="p">(</span><span class="s1">&#39;Silicon-Vacuum&#39;</span><span class="p">),</span> <span class="n">substrate_metal</span><span class="o">=</span><span class="n">MaterialInterface</span><span class="p">(</span><span class="s1">&#39;Silicon-Aluminium&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eigen_sim</span><span class="o">.</span><span class="n">prepare_simulation</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Checking the meshfile</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gmsh_nav</span> <span class="o">=</span> <span class="n">GMSH_Navigator</span><span class="p">(</span><span class="n">eigen_sim</span><span class="o">.</span><span class="n">path_mesh</span><span class="p">)</span>
+<span class="n">gmsh_nav</span><span class="o">.</span><span class="n">open_GUI</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>If all looks good, lets run the simulation</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eigen_sim</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&gt;&gt; /opt/homebrew/bin/mpirun -n 10 /Users/shanto/LFL/palace/build/bin/palace-arm64.bin GMSH_eigen_test.json
+
+_____________     _______
+_____   __   \____ __   /____ ____________
+____   /_/  /  __ ` /  /  __ ` /  ___/  _ \
+___   _____/  /_/  /  /  /_/  /  /__/  ___/
+  /__/     \___,__/__/\___,__/\_____\_____/
+
+Git changeset ID: v0.13.0-117-g748660c
+Running with 10 MPI processes
+Device configuration: cpu
+Memory configuration: host-std
+libCEED backend: /cpu/self/xsmm/blocked
+
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+
+Verification failed: ((e1 &gt;= 0 &amp;&amp; e2 &gt;= 0) || face_to_be.find(f) == face_to_be.end()) is false:
+ --&gt; A non-periodic face (107857) cannot have multiple boundary elements
+ ... in function: std::unordered_map&lt;int, int&gt; palace::(anonymous namespace)::GetFaceToBdrElementMap(const mfem::Mesh &amp;, const config::BoundaryData &amp;)
+ ... in file: /Users/shanto/LFL/palace/palace/utils/geodata.cpp:2318
+
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+  Proc: [[63426,1],0]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+prterun has exited due to process rank 0 with PID 0 on node GlobalMachine calling
+&#34;abort&#34;. This may have caused other processes in the application to be
+terminated by signals sent by prterun (as reported here).
+--------------------------------------------------------------------------
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Error in plotting: &#39;Data array (E_real) not present in this dataset.&#39;
+</pre></div></div>
+</div>
+<p>Reading the eigenmode data now</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">read_csv_to_dataframe</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+<span class="n">eigen_df</span> <span class="o">=</span> <span class="n">read_csv_to_dataframe</span><span class="p">(</span><span class="s2">&quot;sims/GMSH_eigen_test/outputFiles/eig.csv&quot;</span><span class="p">)</span>
+<span class="n">eigen_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">eigen_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="n">eigen_df</span><span class="p">[</span><span class="s2">&quot;kappa (kHz)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eigen_df</span><span class="p">[</span><span class="s2">&quot;Re</span><span class="si">{f}</span><span class="s2"> (GHz)&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">eigen_df</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e6</span>
+<span class="n">eigen_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>m</th>
+      <th>Re{f} (GHz)</th>
+      <th>Im{f} (GHz)</th>
+      <th>Q</th>
+      <th>Error (Bkwd.)</th>
+      <th>Error (Abs.)</th>
+      <th>kappa (kHz)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.0</td>
+      <td>2.270409</td>
+      <td>2.217874</td>
+      <td>0.715530</td>
+      <td>1.325732e-07</td>
+      <td>0.030509</td>
+      <td>3.173043e+06</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2.0</td>
+      <td>3.924083</td>
+      <td>0.000187</td>
+      <td>10495.308780</td>
+      <td>1.018395e-08</td>
+      <td>0.002344</td>
+      <td>3.738893e+02</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3.0</td>
+      <td>7.180064</td>
+      <td>0.055986</td>
+      <td>64.126155</td>
+      <td>7.566434e-07</td>
+      <td>0.174130</td>
+      <td>1.119678e+05</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4.0</td>
+      <td>7.993104</td>
+      <td>0.045029</td>
+      <td>88.756526</td>
+      <td>7.881346e-07</td>
+      <td>0.181378</td>
+      <td>9.005652e+04</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5.0</td>
+      <td>9.645261</td>
+      <td>0.097638</td>
+      <td>49.395464</td>
+      <td>7.960715e-07</td>
+      <td>0.183206</td>
+      <td>1.952661e+05</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>6.0</td>
+      <td>9.895415</td>
+      <td>0.082075</td>
+      <td>60.284749</td>
+      <td>1.309094e-06</td>
+      <td>0.301272</td>
+      <td>1.641446e+05</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>7.0</td>
+      <td>10.603226</td>
+      <td>0.248620</td>
+      <td>21.329987</td>
+      <td>7.207989e-07</td>
+      <td>0.165884</td>
+      <td>4.971042e+05</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>8.0</td>
+      <td>11.631683</td>
+      <td>0.142909</td>
+      <td>40.699110</td>
+      <td>7.594430e-07</td>
+      <td>0.174779</td>
+      <td>2.857970e+05</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>From our requirements, we wanted a qubit frequency of 3.7 GHz and a cavity frequency of</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+6.98
+</pre></div></div>
+</div>
+<p>Now its time to visualize all the eigenmodes in <code class="docutils literal notranslate"><span class="pre">paraview</span></code>. Here are some screenshots from this toy example.</p>
+<table><tr><td><p><img alt="Mode 2" class="no-scaled-link" src="../../_images/mode2.png" style="width: 30%;" /></p>
+</td><td><p><img alt="Mode 3" class="no-scaled-link" src="../../_images/mode3.png" style="width: 30%;" /></p>
+</td><td><p><img alt="Mode 4" class="no-scaled-link" src="../../_images/mode4.png" style="width: 30%;" /></p>
+</td></tr><tr><td><p>Mode 2: Qubit Mode</p>
+</td><td><p>Mode 3: Hybrid Mode</p>
+</td><td><p>Mode 4: Cavity Mode</p>
+</td></tr></table><p>It seems like that indeed mode 2 is the qubit mode! Mode 2 seems to be some sort of hybrid mode while mode 4 looks to be like the cavity mode.</p>
+<p>Of course, this simulation was done with really course hyperparameters (ran in 13 seconds on my 2021 Macbook Pro) so this results are somewhat promising!</p>
+</section>
+</section>
+<section id="Work-In-Progress-⏳">
+<h2>Work In Progress ⏳<a class="headerlink" href="#Work-In-Progress-⏳" title="Link to this heading">#</a></h2>
+<p>We are studying the hyper-parameters needed to converge our simulations to that of Ansys/experimentally verified results with <code class="docutils literal notranslate"><span class="pre">palace</span></code>. Once that is done, we will update this tutorial with a more comprehensive guide and native API</p>
+</section>
+<section id="License">
+<h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
+<div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>This tutorial is written by Sadman Ahmed Shanto</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2025.</p>
+</p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Electrostatic-Simulation">Electrostatic Simulation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Extracting-the-Capacitance-Matrix">Extracting the Capacitance Matrix</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Eigenmodal-Simulation">Eigenmodal Simulation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#For-a-qubit-cavity-system">For a qubit-cavity system</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Qubit">Qubit</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Work-In-Progress-⏳">Work In Progress ⏳</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#License">License</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/source/tutorials/Tutorial-7_Simulate_designs_with_palace.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
