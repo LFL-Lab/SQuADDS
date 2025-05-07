@@ -1,0 +1,1075 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tutorial 6: Adding Airbridges &#8212; SQuADDS v0.3.6</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/katex-math.css?v=91adb8b6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=8da8c241"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/katex.min.js?v=be8ff15f"></script>
+    <script src="../../_static/auto-render.min.js?v=ad136472"></script>
+    <script src="../../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Read our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+     
+  
+
+<a class="navbar-brand logo" href="https://lfl-lab.github.io/SQuADDS/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
+    <img src="../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="DeepWiki" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-robot fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">DeepWiki</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="DeepWiki" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-robot fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">DeepWiki</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial 6: Adding Airbridges</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Tutorial-6:-Adding-Airbridges">
+<h1>Tutorial 6: Adding Airbridges<a class="headerlink" href="#Tutorial-6:-Adding-Airbridges" title="Link to this heading">#</a></h1>
+<section id="Basic-CPW-Example">
+<h2>Basic CPW Example<a class="headerlink" href="#Basic-CPW-Example" title="Link to this heading">#</a></h2>
+<p>Let’s start by creating a simple CPW and adding some airbridges to it.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>uninstall<span class="w"> </span>-y<span class="w"> </span>squadds
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>../.
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Obtaining file:///Users/shanto/LFL/SQuADDS/SQuADDS
+  Preparing metadata (setup.py) ... done
+Requirement already satisfied: dask==2024.6.2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (2024.6.2)
+Requirement already satisfied: datasets==2.19.2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (2.19.2)
+Requirement already satisfied: huggingface_hub==0.21.4 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.21.4)
+Requirement already satisfied: memory_profiler==0.61.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.61.0)
+Requirement already satisfied: numba==0.60.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.60.0)
+Requirement already satisfied: numpy&gt;=1.16.6 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.23.5)
+Requirement already satisfied: pandas==1.5.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.5.3)
+Requirement already satisfied: prettytable in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (3.10.0)
+Requirement already satisfied: psutil==5.9.8 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (5.9.8)
+Requirement already satisfied: pyaedt&gt;=0.6.46 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.6.46)
+Requirement already satisfied: pyarrow==15.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (15.0.1)
+Requirement already satisfied: pyEPR==1.1.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.1.5)
+Requirement already satisfied: pyEPR_quantum&gt;=0.8.5.7 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.8.5.7)
+Requirement already satisfied: python-dotenv in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.0.1)
+Requirement already satisfied: scipy&gt;=1.10.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.10.0)
+Requirement already satisfied: scqubits&gt;=3.3.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (4.0.0)
+Requirement already satisfied: seaborn in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.13.2)
+Requirement already satisfied: setuptools in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (69.2.0)
+Requirement already satisfied: tabulate in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.9.0)
+Requirement already satisfied: tqdm in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (4.66.2)
+Requirement already satisfied: cython&gt;=0.29.20 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.29.37)
+Requirement already satisfied: qutip&gt;=4.3.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (4.7.1)
+Requirement already satisfied: addict in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (2.4.0)
+Requirement already satisfied: datashader&gt;=0.16.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.16.3)
+Requirement already satisfied: joblib&gt;=1.3.2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.3.2)
+Requirement already satisfied: Requests==2.32.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (2.32.3)
+Requirement already satisfied: PyGithub==2.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (2.4.0)
+Requirement already satisfied: GitPython==3.1.43 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (3.1.43)
+Requirement already satisfied: klayout==0.29.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.29.0)
+Requirement already satisfied: gdspy&gt;=1.6.12 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.6.12)
+Requirement already satisfied: click&gt;=8.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (8.1.7)
+Requirement already satisfied: cloudpickle&gt;=1.5.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (3.0.0)
+Requirement already satisfied: fsspec&gt;=2021.09.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (2024.2.0)
+Requirement already satisfied: packaging&gt;=20.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (24.0)
+Requirement already satisfied: partd&gt;=1.2.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (1.4.2)
+Requirement already satisfied: pyyaml&gt;=5.3.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (6.0)
+Requirement already satisfied: toolz&gt;=0.10.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (0.12.1)
+Requirement already satisfied: importlib-metadata&gt;=4.13.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (7.0.2)
+Requirement already satisfied: filelock in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (3.13.1)
+Requirement already satisfied: pyarrow-hotfix in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (0.6)
+Requirement already satisfied: dill&lt;0.3.9,&gt;=0.3.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (0.3.8)
+Requirement already satisfied: xxhash in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (3.4.1)
+Requirement already satisfied: multiprocess in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (0.70.16)
+Requirement already satisfied: aiohttp in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (3.9.3)
+Requirement already satisfied: gitdb&lt;5,&gt;=4.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from GitPython==3.1.43-&gt;SQuADDS==0.3.6) (4.0.11)
+Requirement already satisfied: typing-extensions&gt;=3.7.4.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from huggingface_hub==0.21.4-&gt;SQuADDS==0.3.6) (4.10.0)
+Requirement already satisfied: llvmlite&lt;0.44,&gt;=0.43.0dev0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from numba==0.60.0-&gt;SQuADDS==0.3.6) (0.43.0)
+Requirement already satisfied: python-dateutil&gt;=2.8.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pandas==1.5.3-&gt;SQuADDS==0.3.6) (2.9.0)
+Requirement already satisfied: pytz&gt;=2020.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pandas==1.5.3-&gt;SQuADDS==0.3.6) (2024.1)
+Requirement already satisfied: pynacl&gt;=1.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (1.5.0)
+Requirement already satisfied: pyjwt&gt;=2.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyjwt[crypto]&gt;=2.4.0-&gt;PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (2.9.0)
+Requirement already satisfied: urllib3&gt;=1.26.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (2.2.1)
+Requirement already satisfied: Deprecated in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (1.2.14)
+Requirement already satisfied: charset-normalizer&lt;4,&gt;=2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from Requests==2.32.3-&gt;SQuADDS==0.3.6) (3.3.2)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from Requests==2.32.3-&gt;SQuADDS==0.3.6) (3.6)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from Requests==2.32.3-&gt;SQuADDS==0.3.6) (2024.2.2)
+Requirement already satisfied: colorcet in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (3.1.0)
+Requirement already satisfied: multipledispatch in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (1.0.0)
+Requirement already satisfied: param in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (2.1.1)
+Requirement already satisfied: pillow in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (10.2.0)
+Requirement already satisfied: pyct in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (0.5.0)
+Requirement already satisfied: xarray in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (2024.2.0)
+Requirement already satisfied: pythonnet==3.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (3.0.1)
+Requirement already satisfied: rpyc==5.3.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (5.3.0)
+Requirement already satisfied: pyvista&gt;=0.34.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (0.43.4)
+Requirement already satisfied: matplotlib in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (3.7.0)
+Requirement already satisfied: clr-loader&lt;0.3.0,&gt;=0.2.2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pythonnet==3.0.1-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (0.2.6)
+Requirement already satisfied: plumbum in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from rpyc==5.3.0-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (1.8.2)
+Requirement already satisfied: sympy&gt;=1.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.12)
+Requirement already satisfied: sphinx-rtd-theme&gt;=0.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.0.0)
+Requirement already satisfied: pint&gt;=0.8 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.20.1)
+Requirement already satisfied: ipython&gt;=7.0.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (8.12.3)
+Requirement already satisfied: cycler in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from scqubits&gt;=3.3.0-&gt;SQuADDS==0.3.6) (0.12.1)
+Requirement already satisfied: wcwidth in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from prettytable-&gt;SQuADDS==0.3.6) (0.2.13)
+Requirement already satisfied: aiosignal&gt;=1.1.2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from aiohttp-&gt;datasets==2.19.2-&gt;SQuADDS==0.3.6) (1.3.1)
+Requirement already satisfied: attrs&gt;=17.3.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from aiohttp-&gt;datasets==2.19.2-&gt;SQuADDS==0.3.6) (23.2.0)
+Requirement already satisfied: frozenlist&gt;=1.1.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from aiohttp-&gt;datasets==2.19.2-&gt;SQuADDS==0.3.6) (1.4.1)
+Requirement already satisfied: multidict&lt;7.0,&gt;=4.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from aiohttp-&gt;datasets==2.19.2-&gt;SQuADDS==0.3.6) (6.0.5)
+Requirement already satisfied: yarl&lt;2.0,&gt;=1.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from aiohttp-&gt;datasets==2.19.2-&gt;SQuADDS==0.3.6) (1.9.4)
+Requirement already satisfied: smmap&lt;6,&gt;=3.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from gitdb&lt;5,&gt;=4.0.1-&gt;GitPython==3.1.43-&gt;SQuADDS==0.3.6) (5.0.1)
+Requirement already satisfied: zipp&gt;=0.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from importlib-metadata&gt;=4.13.0-&gt;dask==2024.6.2-&gt;SQuADDS==0.3.6) (3.17.0)
+Requirement already satisfied: backcall in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.2.0)
+Requirement already satisfied: decorator in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (5.1.1)
+Requirement already satisfied: jedi&gt;=0.16 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.19.1)
+Requirement already satisfied: matplotlib-inline in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.1.6)
+Requirement already satisfied: pickleshare in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.7.5)
+Requirement already satisfied: prompt-toolkit!=3.0.37,&lt;3.1.0,&gt;=3.0.30 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (3.0.42)
+Requirement already satisfied: pygments&gt;=2.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.14.0)
+Requirement already satisfied: stack-data in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.6.2)
+Requirement already satisfied: traitlets&gt;=5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (5.14.2)
+Requirement already satisfied: pexpect&gt;4.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (4.9.0)
+Requirement already satisfied: appnope in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.1.4)
+Requirement already satisfied: contourpy&gt;=1.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from matplotlib-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (1.2.0)
+Requirement already satisfied: fonttools&gt;=4.22.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from matplotlib-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (4.49.0)
+Requirement already satisfied: kiwisolver&gt;=1.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from matplotlib-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (1.4.5)
+Requirement already satisfied: pyparsing&gt;=2.3.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from matplotlib-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (3.1.2)
+Requirement already satisfied: locket in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from partd&gt;=1.2.0-&gt;dask==2024.6.2-&gt;SQuADDS==0.3.6) (1.0.0)
+Requirement already satisfied: cryptography&gt;=3.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyjwt[crypto]&gt;=2.4.0-&gt;PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (43.0.1)
+Requirement already satisfied: cffi&gt;=1.4.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pynacl&gt;=1.4.0-&gt;PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (1.16.0)
+Requirement already satisfied: six&gt;=1.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from python-dateutil&gt;=2.8.1-&gt;pandas==1.5.3-&gt;SQuADDS==0.3.6) (1.16.0)
+Requirement already satisfied: pooch in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyvista&gt;=0.34.1-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (1.8.1)
+Requirement already satisfied: scooby&gt;=0.5.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyvista&gt;=0.34.1-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (0.9.2)
+Requirement already satisfied: vtk in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyvista&gt;=0.34.1-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (9.3.0)
+Requirement already satisfied: sphinx&lt;8,&gt;=5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (7.2.6)
+Requirement already satisfied: docutils&lt;0.21 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.20.1)
+Requirement already satisfied: sphinxcontrib-jquery&lt;5,&gt;=4 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (4.1)
+Requirement already satisfied: mpmath&gt;=0.19 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sympy&gt;=1.3-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.3.0)
+Requirement already satisfied: wrapt&lt;2,&gt;=1.10 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from Deprecated-&gt;PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (1.14.1)
+Requirement already satisfied: pycparser in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from cffi&gt;=1.4.1-&gt;pynacl&gt;=1.4.0-&gt;PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (2.21)
+Requirement already satisfied: parso&lt;0.9.0,&gt;=0.8.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from jedi&gt;=0.16-&gt;ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.8.3)
+Requirement already satisfied: ptyprocess&gt;=0.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pexpect&gt;4.3-&gt;ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.7.0)
+Requirement already satisfied: sphinxcontrib-applehelp in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.0.8)
+Requirement already satisfied: sphinxcontrib-devhelp in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.0.6)
+Requirement already satisfied: sphinxcontrib-jsmath in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.0.1)
+Requirement already satisfied: sphinxcontrib-htmlhelp&gt;=2.0.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.0.5)
+Requirement already satisfied: sphinxcontrib-serializinghtml&gt;=1.1.9 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.1.10)
+Requirement already satisfied: sphinxcontrib-qthelp in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.0.7)
+Requirement already satisfied: Jinja2&gt;=3.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (3.1.3)
+Requirement already satisfied: snowballstemmer&gt;=2.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.2.0)
+Requirement already satisfied: babel&gt;=2.9 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.14.0)
+Requirement already satisfied: alabaster&lt;0.8,&gt;=0.7 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.7.16)
+Requirement already satisfied: imagesize&gt;=1.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.4.1)
+Requirement already satisfied: platformdirs&gt;=2.5.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pooch-&gt;pyvista&gt;=0.34.1-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (4.2.0)
+Requirement already satisfied: executing&gt;=1.2.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from stack-data-&gt;ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.0.1)
+Requirement already satisfied: asttokens&gt;=2.1.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from stack-data-&gt;ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.4.1)
+Requirement already satisfied: pure-eval in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from stack-data-&gt;ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.2.2)
+Requirement already satisfied: MarkupSafe&gt;=2.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from Jinja2&gt;=3.0-&gt;sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.1.5)
+Installing collected packages: SQuADDS
+  Attempting uninstall: SQuADDS
+    Found existing installation: SQuADDS 0.3.6
+    Uninstalling SQuADDS-0.3.6:
+      Successfully uninstalled SQuADDS-0.3.6
+  Running setup.py develop for SQuADDS
+Successfully installed SQuADDS-0.3.6
+
+<span class="ansi-bold">[</span><span class="ansi-blue-fg">notice</span><span class="ansi-bold">]</span> A new release of pip is available: <span class="ansi-red-fg">24.1.1</span> -&gt; <span class="ansi-green-fg">25.1.1</span>
+<span class="ansi-bold">[</span><span class="ansi-blue-fg">notice</span><span class="ansi-bold">]</span> To update, run: <span class="ansi-green-fg">pip install --upgrade pip</span>
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">metal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">designs</span><span class="p">,</span> <span class="n">draw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetalGUI</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Headings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.open_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenToGround</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.meandered</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMeander</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design</span> <span class="o">=</span> <span class="n">designs</span><span class="o">.</span><span class="n">DesignPlanar</span><span class="p">()</span>
+<span class="n">design</span><span class="o">.</span><span class="n">overwrite_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="n">gui</span> <span class="o">=</span> <span class="n">MetalGUI</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+01:31PM 17s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  WARNING: Populating font family aliases took 255 ms. Replace uses of missing font family &#34;Courier&#34; with one that exists to avoid this cost.
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">open_start_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">pos_x</span><span class="o">=</span><span class="s1">&#39;1000um&#39;</span><span class="p">,</span>
+                         <span class="n">pos_y</span><span class="o">=</span><span class="s1">&#39;0um&#39;</span><span class="p">,</span>
+                         <span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;-90&#39;</span><span class="p">)</span>
+
+<span class="n">open_start_meander</span> <span class="o">=</span> <span class="n">OpenToGround</span><span class="p">(</span><span class="n">design</span><span class="p">,</span><span class="s1">&#39;Open_meander_start&#39;</span><span class="p">,</span><span class="n">options</span><span class="o">=</span><span class="n">open_start_options</span><span class="p">)</span>
+
+
+
+
+
+<span class="n">open_end_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">pos_x</span><span class="o">=</span><span class="s1">&#39;1000um&#39;</span><span class="p">,</span>
+                        <span class="n">pos_y</span><span class="o">=</span><span class="s1">&#39;1500um&#39;</span><span class="p">,</span>
+                        <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;90&#39;</span><span class="p">,</span>
+                        <span class="n">termination_gap</span><span class="o">=</span><span class="s1">&#39;10um&#39;</span><span class="p">)</span>
+
+<span class="n">open_end_meander</span> <span class="o">=</span> <span class="n">OpenToGround</span><span class="p">(</span><span class="n">design</span><span class="p">,</span><span class="s1">&#39;Open_meander_end&#39;</span><span class="p">,</span><span class="n">options</span><span class="o">=</span><span class="n">open_end_options</span><span class="p">)</span>
+
+<span class="n">meander_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">pin_inputs</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+                                            <span class="n">component</span><span class="o">=</span><span class="s1">&#39;Open_meander_start&#39;</span><span class="p">,</span>
+                                            <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;open&#39;</span><span class="p">),</span>
+                                        <span class="n">end_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+                                            <span class="n">component</span><span class="o">=</span><span class="s1">&#39;Open_meander_end&#39;</span><span class="p">,</span>
+                                            <span class="n">pin</span><span class="o">=</span><span class="s1">&#39;open&#39;</span><span class="p">)</span>
+                                        <span class="p">),</span>
+                      <span class="n">total_length</span><span class="o">=</span><span class="s1">&#39;9mm&#39;</span><span class="p">,</span>
+                      <span class="n">fillet</span><span class="o">=</span><span class="s1">&#39;99.99um&#39;</span><span class="p">)</span>
+
+<span class="n">meander</span> <span class="o">=</span> <span class="n">RouteMeander</span><span class="p">(</span><span class="n">design</span><span class="p">,</span><span class="s1">&#39;meander&#39;</span><span class="p">,</span><span class="n">options</span><span class="o">=</span><span class="n">meander_options</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+01:31PM 17s WARNING [check_lengths]: For path table, component=meander, key=trace has short segments that could cause issues with fillet. Values in (1-1)  are index(es) in shapely geometry.
+01:31PM 17s WARNING [check_lengths]: For path table, component=meander, key=cut has short segments that could cause issues with fillet. Values in (1-1)  are index(es) in shapely geometry.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">zoom_on_components</span><span class="p">([</span><span class="s1">&#39;meander&#39;</span><span class="p">])</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+01:31PM 20s WARNING [check_lengths]: For path table, component=meander, key=trace has short segments that could cause issues with fillet. Values in (1-1)  are index(es) in shapely geometry.
+01:31PM 20s WARNING [check_lengths]: For path table, component=meander, key=cut has short segments that could cause issues with fillet. Values in (1-1)  are index(es) in shapely geometry.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_7_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_7_1.png" style="width: 500px;" />
+</div>
+</div>
+<p>First we need to calculate the <code class="docutils literal notranslate"><span class="pre">cross_over_length</span></code> and <code class="docutils literal notranslate"><span class="pre">pitch</span></code> for the airbridge design.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cpw_width</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">cpw_width</span>
+<span class="n">cpw_gap</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">cpw_gap</span>
+
+<span class="n">cpw_width</span><span class="p">,</span> <span class="n">cpw_gap</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&#39;10 um&#39;, &#39;6 um&#39;)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">crossover_length</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">parse_value</span><span class="p">(</span><span class="n">cpw_width</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">design</span><span class="o">.</span><span class="n">parse_value</span><span class="p">(</span><span class="n">cpw_gap</span><span class="p">))</span>
+<span class="n">crossover_length</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.022
+</pre></div></div>
+</div>
+<p>We’re going to make our <code class="docutils literal notranslate"><span class="pre">crossover_length</span></code> slightly longer than the entirety of the cpw width + gap. That way when we’re on the turns of the meander, we can place our airbridges without having them intersect hte CPW.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.airbridge.airbridge_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">AirbridgeGenerator</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">AirbridgeGenerator</span><span class="p">(</span>
+    <span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span>
+    <span class="n">target_comps</span><span class="o">=</span><span class="p">[</span><span class="n">meander</span><span class="p">],</span>
+    <span class="n">crossover_length</span><span class="o">=</span><span class="p">[</span><span class="n">crossover_length</span><span class="p">],</span>
+    <span class="n">min_spacing</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span>
+    <span class="n">pitch</span><span class="o">=</span><span class="mf">0.070</span><span class="p">,</span>
+    <span class="n">add_curved_ab</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">zoom_on_components</span><span class="p">([</span><span class="s1">&#39;meander&#39;</span><span class="p">])</span>
+<span class="n">gui</span><span class="o">.</span><span class="n">screenshot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+01:31PM 25s WARNING [check_lengths]: For path table, component=meander, key=trace has short segments that could cause issues with fillet. Values in (1-1)  are index(es) in shapely geometry.
+01:31PM 25s WARNING [check_lengths]: For path table, component=meander, key=cut has short segments that could cause issues with fillet. Values in (1-1)  are index(es) in shapely geometry.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_13_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_13_1.png" style="width: 500px;" />
+</div>
+</div>
+<p>A high-level picture of what is happening on the backend.</p>
+<ol class="arabic simple">
+<li><p>You give <code class="docutils literal notranslate"><span class="pre">Airbridge_Generator()</span></code> a <code class="docutils literal notranslate"><span class="pre">target_cpw</span></code>. This is some cpw which you want to auto generate airbridges on.</p></li>
+<li><p>You give it it’s favorite options</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cross_over_length</span></code> (thickness of bridge)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min_spacing</span></code> (minimum spacing between bridges. This should be at least as large as your CPW’s gap)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pitch</span></code> (spacing between the centers of each bridge)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">add_curved_ab</span></code> (if you want have airbridges on the turning points of your CPW) [default is True]</p></li>
+</ul>
+</li>
+</ol>
+<p><strong>Note: Adding airbridges to the turning points of your CPW sometimes causes issue with the airbridges being too close to each other. In which case you may want to either set ``min_spacing`` higher or set ``add_curved_ab`` to False.</strong></p>
+<ol class="arabic simple" start="3">
+<li><p>The generator then gets all the turning points of your CPW and calculates the directionality of them. It then uses a simplistic algorithm (I titled <code class="docutils literal notranslate"><span class="pre">find_ab_placement()</span></code>) to find where to place and their direction</p></li>
+<li><p>Finally the generator calls the original <code class="docutils literal notranslate"><span class="pre">squadds.components.airbridge.airbridge.py</span></code> and makes the airbridges in the locations specificed previously.</p></li>
+</ol>
+</section>
+<section id="License">
+<h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
+<div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>This tutorial is written by Sadman Ahmed Shanto</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2025.</p>
+</p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Basic-CPW-Example">Basic CPW Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#License">License</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/source/tutorials/Tutorial-6_Adding_Airbridges.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
