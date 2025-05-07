@@ -8,6 +8,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 - Addressing TODOs in the code
 - Fixing any bugs in the code
 - Robustly handling caching and environment variables setup for all OS (some Windows users had issues)
+- Check front-end UI code for thoroughly against API calls
 
 ## Simulations:
 
@@ -37,6 +38,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 - Provide APIs (modules/methods) to easily add more data columns to existing simulation entries in the database (e.g., allowing users to rerun geometries and add participation ratios)
 - Transition datasets to `SQLite` or another format to handle larger-than-memory datasets as we scale
 - Refactor code to implement faster methods with lower memory usage for handling DataFrame operations
+- Speeding up the process for front-end UI user flow
 
 ## Contribution:
 
@@ -75,6 +77,8 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
     - [Circuit Recognizer](https://github.com/mahmut-aksakalli/circuit_recognizer)
     - [CircuitNet](https://github.com/aaanthonyyy/CircuitNet)
 - Incorporate [SCILLA](https://github.com/aspuru-guzik-group/scilla?tab=readme-ov-file) and/or its applications
+- Add interpolation of individual components (both API and UI)
+- Searching of half-wave resonator designs
 
 ## Boring but Necessary:
 
@@ -95,6 +99,4 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 - Setup a Model Context Protocol server for SQuADDS
 - Implement LLM-based queries for SQuADDS using [pandas-ai](https://docs.pandas-ai.com/intro) (support for OpenAI and local LLaMA models)
-- Set up a server with an intuitive web UI for handling the MVP use cases of SQuADDS
-- 
----
+- Add visual components to the SQuADDS UI
