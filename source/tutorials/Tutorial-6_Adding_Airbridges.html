@@ -60,7 +60,7 @@
     <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Simulating Qiskit Metal design objects with palace using SQDMetal" href="Tutorial-7_Simulate_designs_with_palace.html" />
+    <link rel="next" title="Tutorial 7: Simulating Qiskit Metal design objects with palace using SQDMetal" href="Tutorial-7_Simulate_designs_with_palace.html" />
     <link rel="prev" title="Tutorial 5: Designing a “fab-ready” chip with SQuADDS" href="Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.html" />
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
@@ -544,7 +544,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html">Tutorial 4: Contributing Measured Devices’ Data to the SQuADDS Database</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.html">Tutorial 5: Designing a “fab-ready” chip with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial 6: Adding Airbridges</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Tutorial-7_Simulate_designs_with_palace.html">Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-7_Simulate_designs_with_palace.html">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
 </ul>
 </div>
 </nav></div>
@@ -610,168 +610,6 @@
 <section id="Basic-CPW-Example">
 <h2>Basic CPW Example<a class="headerlink" href="#Basic-CPW-Example" title="Link to this heading">#</a></h2>
 <p>Let’s start by creating a simple CPW and adding some airbridges to it.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>uninstall<span class="w"> </span>-y<span class="w"> </span>squadds
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>../.
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Obtaining file:///Users/shanto/LFL/SQuADDS/SQuADDS
-  Preparing metadata (setup.py) ... done
-Requirement already satisfied: dask==2024.6.2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (2024.6.2)
-Requirement already satisfied: datasets==2.19.2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (2.19.2)
-Requirement already satisfied: huggingface_hub==0.21.4 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.21.4)
-Requirement already satisfied: memory_profiler==0.61.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.61.0)
-Requirement already satisfied: numba==0.60.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.60.0)
-Requirement already satisfied: numpy&gt;=1.16.6 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.23.5)
-Requirement already satisfied: pandas==1.5.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.5.3)
-Requirement already satisfied: prettytable in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (3.10.0)
-Requirement already satisfied: psutil==5.9.8 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (5.9.8)
-Requirement already satisfied: pyaedt&gt;=0.6.46 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.6.46)
-Requirement already satisfied: pyarrow==15.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (15.0.1)
-Requirement already satisfied: pyEPR==1.1.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.1.5)
-Requirement already satisfied: pyEPR_quantum&gt;=0.8.5.7 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.8.5.7)
-Requirement already satisfied: python-dotenv in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.0.1)
-Requirement already satisfied: scipy&gt;=1.10.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.10.0)
-Requirement already satisfied: scqubits&gt;=3.3.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (4.0.0)
-Requirement already satisfied: seaborn in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.13.2)
-Requirement already satisfied: setuptools in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (69.2.0)
-Requirement already satisfied: tabulate in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.9.0)
-Requirement already satisfied: tqdm in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (4.66.2)
-Requirement already satisfied: cython&gt;=0.29.20 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.29.37)
-Requirement already satisfied: qutip&gt;=4.3.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (4.7.1)
-Requirement already satisfied: addict in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (2.4.0)
-Requirement already satisfied: datashader&gt;=0.16.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.16.3)
-Requirement already satisfied: joblib&gt;=1.3.2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.3.2)
-Requirement already satisfied: Requests==2.32.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (2.32.3)
-Requirement already satisfied: PyGithub==2.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (2.4.0)
-Requirement already satisfied: GitPython==3.1.43 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (3.1.43)
-Requirement already satisfied: klayout==0.29.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (0.29.0)
-Requirement already satisfied: gdspy&gt;=1.6.12 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from SQuADDS==0.3.6) (1.6.12)
-Requirement already satisfied: click&gt;=8.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (8.1.7)
-Requirement already satisfied: cloudpickle&gt;=1.5.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (3.0.0)
-Requirement already satisfied: fsspec&gt;=2021.09.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (2024.2.0)
-Requirement already satisfied: packaging&gt;=20.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (24.0)
-Requirement already satisfied: partd&gt;=1.2.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (1.4.2)
-Requirement already satisfied: pyyaml&gt;=5.3.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (6.0)
-Requirement already satisfied: toolz&gt;=0.10.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (0.12.1)
-Requirement already satisfied: importlib-metadata&gt;=4.13.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from dask==2024.6.2-&gt;SQuADDS==0.3.6) (7.0.2)
-Requirement already satisfied: filelock in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (3.13.1)
-Requirement already satisfied: pyarrow-hotfix in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (0.6)
-Requirement already satisfied: dill&lt;0.3.9,&gt;=0.3.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (0.3.8)
-Requirement already satisfied: xxhash in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (3.4.1)
-Requirement already satisfied: multiprocess in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (0.70.16)
-Requirement already satisfied: aiohttp in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datasets==2.19.2-&gt;SQuADDS==0.3.6) (3.9.3)
-Requirement already satisfied: gitdb&lt;5,&gt;=4.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from GitPython==3.1.43-&gt;SQuADDS==0.3.6) (4.0.11)
-Requirement already satisfied: typing-extensions&gt;=3.7.4.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from huggingface_hub==0.21.4-&gt;SQuADDS==0.3.6) (4.10.0)
-Requirement already satisfied: llvmlite&lt;0.44,&gt;=0.43.0dev0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from numba==0.60.0-&gt;SQuADDS==0.3.6) (0.43.0)
-Requirement already satisfied: python-dateutil&gt;=2.8.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pandas==1.5.3-&gt;SQuADDS==0.3.6) (2.9.0)
-Requirement already satisfied: pytz&gt;=2020.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pandas==1.5.3-&gt;SQuADDS==0.3.6) (2024.1)
-Requirement already satisfied: pynacl&gt;=1.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (1.5.0)
-Requirement already satisfied: pyjwt&gt;=2.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyjwt[crypto]&gt;=2.4.0-&gt;PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (2.9.0)
-Requirement already satisfied: urllib3&gt;=1.26.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (2.2.1)
-Requirement already satisfied: Deprecated in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (1.2.14)
-Requirement already satisfied: charset-normalizer&lt;4,&gt;=2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from Requests==2.32.3-&gt;SQuADDS==0.3.6) (3.3.2)
-Requirement already satisfied: idna&lt;4,&gt;=2.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from Requests==2.32.3-&gt;SQuADDS==0.3.6) (3.6)
-Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from Requests==2.32.3-&gt;SQuADDS==0.3.6) (2024.2.2)
-Requirement already satisfied: colorcet in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (3.1.0)
-Requirement already satisfied: multipledispatch in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (1.0.0)
-Requirement already satisfied: param in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (2.1.1)
-Requirement already satisfied: pillow in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (10.2.0)
-Requirement already satisfied: pyct in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (0.5.0)
-Requirement already satisfied: xarray in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from datashader&gt;=0.16.0-&gt;SQuADDS==0.3.6) (2024.2.0)
-Requirement already satisfied: pythonnet==3.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (3.0.1)
-Requirement already satisfied: rpyc==5.3.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (5.3.0)
-Requirement already satisfied: pyvista&gt;=0.34.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (0.43.4)
-Requirement already satisfied: matplotlib in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (3.7.0)
-Requirement already satisfied: clr-loader&lt;0.3.0,&gt;=0.2.2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pythonnet==3.0.1-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (0.2.6)
-Requirement already satisfied: plumbum in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from rpyc==5.3.0-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (1.8.2)
-Requirement already satisfied: sympy&gt;=1.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.12)
-Requirement already satisfied: sphinx-rtd-theme&gt;=0.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.0.0)
-Requirement already satisfied: pint&gt;=0.8 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.20.1)
-Requirement already satisfied: ipython&gt;=7.0.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (8.12.3)
-Requirement already satisfied: cycler in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from scqubits&gt;=3.3.0-&gt;SQuADDS==0.3.6) (0.12.1)
-Requirement already satisfied: wcwidth in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from prettytable-&gt;SQuADDS==0.3.6) (0.2.13)
-Requirement already satisfied: aiosignal&gt;=1.1.2 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from aiohttp-&gt;datasets==2.19.2-&gt;SQuADDS==0.3.6) (1.3.1)
-Requirement already satisfied: attrs&gt;=17.3.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from aiohttp-&gt;datasets==2.19.2-&gt;SQuADDS==0.3.6) (23.2.0)
-Requirement already satisfied: frozenlist&gt;=1.1.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from aiohttp-&gt;datasets==2.19.2-&gt;SQuADDS==0.3.6) (1.4.1)
-Requirement already satisfied: multidict&lt;7.0,&gt;=4.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from aiohttp-&gt;datasets==2.19.2-&gt;SQuADDS==0.3.6) (6.0.5)
-Requirement already satisfied: yarl&lt;2.0,&gt;=1.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from aiohttp-&gt;datasets==2.19.2-&gt;SQuADDS==0.3.6) (1.9.4)
-Requirement already satisfied: smmap&lt;6,&gt;=3.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from gitdb&lt;5,&gt;=4.0.1-&gt;GitPython==3.1.43-&gt;SQuADDS==0.3.6) (5.0.1)
-Requirement already satisfied: zipp&gt;=0.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from importlib-metadata&gt;=4.13.0-&gt;dask==2024.6.2-&gt;SQuADDS==0.3.6) (3.17.0)
-Requirement already satisfied: backcall in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.2.0)
-Requirement already satisfied: decorator in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (5.1.1)
-Requirement already satisfied: jedi&gt;=0.16 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.19.1)
-Requirement already satisfied: matplotlib-inline in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.1.6)
-Requirement already satisfied: pickleshare in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.7.5)
-Requirement already satisfied: prompt-toolkit!=3.0.37,&lt;3.1.0,&gt;=3.0.30 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (3.0.42)
-Requirement already satisfied: pygments&gt;=2.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.14.0)
-Requirement already satisfied: stack-data in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.6.2)
-Requirement already satisfied: traitlets&gt;=5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (5.14.2)
-Requirement already satisfied: pexpect&gt;4.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (4.9.0)
-Requirement already satisfied: appnope in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.1.4)
-Requirement already satisfied: contourpy&gt;=1.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from matplotlib-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (1.2.0)
-Requirement already satisfied: fonttools&gt;=4.22.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from matplotlib-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (4.49.0)
-Requirement already satisfied: kiwisolver&gt;=1.0.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from matplotlib-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (1.4.5)
-Requirement already satisfied: pyparsing&gt;=2.3.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from matplotlib-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (3.1.2)
-Requirement already satisfied: locket in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from partd&gt;=1.2.0-&gt;dask==2024.6.2-&gt;SQuADDS==0.3.6) (1.0.0)
-Requirement already satisfied: cryptography&gt;=3.4.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyjwt[crypto]&gt;=2.4.0-&gt;PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (43.0.1)
-Requirement already satisfied: cffi&gt;=1.4.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pynacl&gt;=1.4.0-&gt;PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (1.16.0)
-Requirement already satisfied: six&gt;=1.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from python-dateutil&gt;=2.8.1-&gt;pandas==1.5.3-&gt;SQuADDS==0.3.6) (1.16.0)
-Requirement already satisfied: pooch in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyvista&gt;=0.34.1-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (1.8.1)
-Requirement already satisfied: scooby&gt;=0.5.1 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyvista&gt;=0.34.1-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (0.9.2)
-Requirement already satisfied: vtk in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pyvista&gt;=0.34.1-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (9.3.0)
-Requirement already satisfied: sphinx&lt;8,&gt;=5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (7.2.6)
-Requirement already satisfied: docutils&lt;0.21 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.20.1)
-Requirement already satisfied: sphinxcontrib-jquery&lt;5,&gt;=4 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (4.1)
-Requirement already satisfied: mpmath&gt;=0.19 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sympy&gt;=1.3-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.3.0)
-Requirement already satisfied: wrapt&lt;2,&gt;=1.10 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from Deprecated-&gt;PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (1.14.1)
-Requirement already satisfied: pycparser in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from cffi&gt;=1.4.1-&gt;pynacl&gt;=1.4.0-&gt;PyGithub==2.4.0-&gt;SQuADDS==0.3.6) (2.21)
-Requirement already satisfied: parso&lt;0.9.0,&gt;=0.8.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from jedi&gt;=0.16-&gt;ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.8.3)
-Requirement already satisfied: ptyprocess&gt;=0.5 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pexpect&gt;4.3-&gt;ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.7.0)
-Requirement already satisfied: sphinxcontrib-applehelp in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.0.8)
-Requirement already satisfied: sphinxcontrib-devhelp in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.0.6)
-Requirement already satisfied: sphinxcontrib-jsmath in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.0.1)
-Requirement already satisfied: sphinxcontrib-htmlhelp&gt;=2.0.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.0.5)
-Requirement already satisfied: sphinxcontrib-serializinghtml&gt;=1.1.9 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.1.10)
-Requirement already satisfied: sphinxcontrib-qthelp in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.0.7)
-Requirement already satisfied: Jinja2&gt;=3.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (3.1.3)
-Requirement already satisfied: snowballstemmer&gt;=2.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.2.0)
-Requirement already satisfied: babel&gt;=2.9 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.14.0)
-Requirement already satisfied: alabaster&lt;0.8,&gt;=0.7 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.7.16)
-Requirement already satisfied: imagesize&gt;=1.3 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (1.4.1)
-Requirement already satisfied: platformdirs&gt;=2.5.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from pooch-&gt;pyvista&gt;=0.34.1-&gt;pyaedt&gt;=0.6.46-&gt;SQuADDS==0.3.6) (4.2.0)
-Requirement already satisfied: executing&gt;=1.2.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from stack-data-&gt;ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.0.1)
-Requirement already satisfied: asttokens&gt;=2.1.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from stack-data-&gt;ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.4.1)
-Requirement already satisfied: pure-eval in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from stack-data-&gt;ipython&gt;=7.0.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (0.2.2)
-Requirement already satisfied: MarkupSafe&gt;=2.0 in /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages (from Jinja2&gt;=3.0-&gt;sphinx&lt;8,&gt;=5-&gt;sphinx-rtd-theme&gt;=0.4.0-&gt;pyEPR_quantum&gt;=0.8.5.7-&gt;SQuADDS==0.3.6) (2.1.5)
-Installing collected packages: SQuADDS
-  Attempting uninstall: SQuADDS
-    Found existing installation: SQuADDS 0.3.6
-    Uninstalling SQuADDS-0.3.6:
-      Successfully uninstalled SQuADDS-0.3.6
-  Running setup.py develop for SQuADDS
-Successfully installed SQuADDS-0.3.6
-
-<span class="ansi-bold">[</span><span class="ansi-blue-fg">notice</span><span class="ansi-bold">]</span> A new release of pip is available: <span class="ansi-red-fg">24.1.1</span> -&gt; <span class="ansi-green-fg">25.1.1</span>
-<span class="ansi-bold">[</span><span class="ansi-blue-fg">notice</span><span class="ansi-bold">]</span> To update, run: <span class="ansi-green-fg">pip install --upgrade pip</span>
-</pre></div></div>
-</div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -880,7 +718,7 @@ Successfully installed SQuADDS-0.3.6
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_7_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_7_1.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_5_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_5_1.png" style="width: 500px;" />
 </div>
 </div>
 <p>First we need to calculate the <code class="docutils literal notranslate"><span class="pre">cross_over_length</span></code> and <code class="docutils literal notranslate"><span class="pre">pitch</span></code> for the airbridge design.</p>
@@ -962,7 +800,7 @@ Successfully installed SQuADDS-0.3.6
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_13_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_13_1.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_11_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-6_Adding_Airbridges_11_1.png" style="width: 500px;" />
 </div>
 </div>
 <p>A high-level picture of what is happening on the backend.</p>
@@ -1018,7 +856,7 @@ Successfully installed SQuADDS-0.3.6
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></p>
+        <p class="prev-next-title">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
