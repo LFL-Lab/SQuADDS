@@ -12,6 +12,7 @@ Tutorials
    Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.ipynb
    Tutorial-6_Adding_Airbridges.ipynb
    Tutorial-7_Simulate_designs_with_palace.ipynb
+   Tutorial-8_ML_interpolation_in_SQuADDS.ipynb
    
 .. note::
    

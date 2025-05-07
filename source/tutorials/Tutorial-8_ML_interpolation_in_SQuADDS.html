@@ -1,0 +1,2077 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tutorial 8: Machine Learning with SQuADDS &#8212; SQuADDS v0.3.7</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/katex-math.css?v=91adb8b6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/katex.min.js?v=be8ff15f"></script>
+    <script src="../../_static/auto-render.min.js?v=ad136472"></script>
+    <script src="../../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="API Reference" href="../apidocs/index.html" />
+    <link rel="prev" title="Tutorial 7: Simulating Qiskit Metal design objects with palace using SQDMetal" href="Tutorial-7_Simulate_designs_with_palace.html" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Read our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+     
+  
+
+<a class="navbar-brand logo" href="https://lfl-lab.github.io/SQuADDS/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
+    <img src="../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="DeepWiki" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-robot fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">DeepWiki</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="DeepWiki" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-robot fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">DeepWiki</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-0_Using_the_SQuADDS_WebUI.html">Tutorial 0: Using the SQuADDS Web UI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-1_Getting_Started_with_SQuADDS.html">Tutorial 1: Getting Started with SQuADDS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-2_Simulate_interpolated_designs.html">Tutorial 2: Simulating Interpolated Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html">Tutorial 3: Contributing Experimentally Validated Simulation Data to SQuADDS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html">Tutorial 4: Contributing Measured Devices’ Data to the SQuADDS Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.html">Tutorial 5: Designing a “fab-ready” chip with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-6_Adding_Airbridges.html">Tutorial 6: Adding Airbridges</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-7_Simulate_designs_with_palace.html">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial 8: Machine Learning with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Tutorials</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial 8: Machine Learning with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Tutorial-8:-Machine-Learning-with-SQuADDS">
+<h1>Tutorial 8: Machine Learning with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code><a class="headerlink" href="#Tutorial-8:-Machine-Learning-with-SQuADDS" title="Link to this heading">#</a></h1>
+<p>In this tutorial, we will walk you through how to use SQuADDS to create ML interpolation solutions.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<section id="Collecting-Training-Data-from-SQuADDS">
+<h2>Collecting Training Data from <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code><a class="headerlink" href="#Collecting-Training-Data-from-SQuADDS" title="Link to this heading">#</a></h2>
+<p>For this tutorial, we will be trying to predict the design space variables of a qubit-cavity system.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQuADDS_DB</span><span class="p">,</span> <span class="n">Analyzer</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
+<span class="n">merged_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "faa412c5f85648bc902136c3051f9d6e", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "7d7f386ad2d84939b6d037e7e3bbb5a0", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "5c790bec4d3344afa9bed7886f13d937", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<p>Recall that we need all Hamiltonian parameters to generate a <strong>complete</strong> training dataset. For this tutorial, I have chosen some demo targets to generate the training data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">seed_data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;data/seed_data.csv&#39;</span><span class="p">)</span>
+<span class="n">seed_data_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cavity_frequency_GHz</th>
+      <th>kappa_kHz</th>
+      <th>g_MHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>res_type</th>
+      <th>qubit_frequency_GHz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>6.920735</td>
+      <td>163.433945</td>
+      <td>102.199270</td>
+      <td>-194.264031</td>
+      <td>quarter</td>
+      <td>4.621651</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>6.468747</td>
+      <td>127.175543</td>
+      <td>67.947060</td>
+      <td>-288.056418</td>
+      <td>quarter</td>
+      <td>5.514262</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>6.965297</td>
+      <td>35.666245</td>
+      <td>73.162768</td>
+      <td>-235.346921</td>
+      <td>quarter</td>
+      <td>5.039644</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>5.806681</td>
+      <td>153.074402</td>
+      <td>90.698935</td>
+      <td>-160.933514</td>
+      <td>quarter</td>
+      <td>4.241134</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5.889439</td>
+      <td>97.823504</td>
+      <td>84.702197</td>
+      <td>-219.068857</td>
+      <td>quarter</td>
+      <td>4.879756</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>5.762119</td>
+      <td>211.778480</td>
+      <td>69.241372</td>
+      <td>-280.304835</td>
+      <td>quarter</td>
+      <td>5.448084</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Now we generate the training data using this <code class="docutils literal notranslate"><span class="pre">seed_df</span></code></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.interpolations.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_qubit_cavity_training_data</span>
+
+<span class="n">training_df</span> <span class="o">=</span> <span class="n">generate_qubit_cavity_training_data</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">seed_data_df</span><span class="p">,</span><span class="s2">&quot;data/training_data.parquet&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Time taken to add the coupled H params: 4.568953037261963 seconds
+Target parameters have already been computed.
+Target parameters have already been computed.
+Target parameters have already been computed.
+Target parameters have already been computed.
+Target parameters have already been computed.
+Training data saved to data/training_data.parquet
+</pre></div></div>
+</div>
+<p>As we can see the <code class="docutils literal notranslate"><span class="pre">training_df</span></code> has information about both the design space variables (<strong>our targets</strong>) and its corresponding Hamiltonian parameters (<strong>our features</strong>).</p>
+<p>Now, we are ready to train an ML model!</p>
+</section>
+<section id="Preprocessing-the-Training-Data">
+<h2>Preprocessing the Training Data<a class="headerlink" href="#Preprocessing-the-Training-Data" title="Link to this heading">#</a></h2>
+<p>Let’s first import the usual “suspects” in the ML world.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">hf_hub_download</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">KFold</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolynomialFeatures</span><span class="p">,</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.keras.callbacks</span><span class="w"> </span><span class="kn">import</span> <span class="n">EarlyStopping</span><span class="p">,</span> <span class="n">ModelCheckpoint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.keras.layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">BatchNormalization</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Dropout</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.keras.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequential</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.keras.optimizers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adam</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">r2_score</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">training_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">&quot;data/training_data.parquet&quot;</span><span class="p">)</span>
+<span class="n">training_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>claw_length</th>
+      <th>cavity_frequency_GHz</th>
+      <th>kappa_kHz</th>
+      <th>EC</th>
+      <th>EJ</th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>g_MHz</th>
+      <th>cross_length</th>
+      <th>cross_gap</th>
+      <th>ground_spacing</th>
+      <th>coupling_length</th>
+      <th>total_length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>160.0</td>
+      <td>8.963333</td>
+      <td>282.985474</td>
+      <td>0.119465</td>
+      <td>16.346243</td>
+      <td>3.829124</td>
+      <td>-128.92902</td>
+      <td>52.250558</td>
+      <td>310.0</td>
+      <td>30.0</td>
+      <td>10.0</td>
+      <td>200.0</td>
+      <td>2700.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>160.0</td>
+      <td>6.911806</td>
+      <td>689.394209</td>
+      <td>0.119465</td>
+      <td>16.346243</td>
+      <td>3.829124</td>
+      <td>-128.92902</td>
+      <td>40.291451</td>
+      <td>310.0</td>
+      <td>30.0</td>
+      <td>10.0</td>
+      <td>500.0</td>
+      <td>3400.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>160.0</td>
+      <td>8.968642</td>
+      <td>205.609615</td>
+      <td>0.119465</td>
+      <td>16.346243</td>
+      <td>3.829124</td>
+      <td>-128.92902</td>
+      <td>52.281505</td>
+      <td>310.0</td>
+      <td>30.0</td>
+      <td>10.0</td>
+      <td>200.0</td>
+      <td>2700.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>160.0</td>
+      <td>6.767688</td>
+      <td>36.337103</td>
+      <td>0.119465</td>
+      <td>16.346243</td>
+      <td>3.829124</td>
+      <td>-128.92902</td>
+      <td>39.451337</td>
+      <td>310.0</td>
+      <td>30.0</td>
+      <td>10.0</td>
+      <td>100.0</td>
+      <td>3900.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>160.0</td>
+      <td>6.576639</td>
+      <td>136.678808</td>
+      <td>0.119465</td>
+      <td>16.346243</td>
+      <td>3.829124</td>
+      <td>-128.92902</td>
+      <td>38.337641</td>
+      <td>310.0</td>
+      <td>30.0</td>
+      <td>10.0</td>
+      <td>230.0</td>
+      <td>3900.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Although there should not be any duplicates in the training data, we will remove them just in case.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">training_df</span> <span class="o">=</span> <span class="n">training_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+
+<span class="c1"># reset the index</span>
+<span class="n">training_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now we can split the data into features (<code class="docutils literal notranslate"><span class="pre">X</span></code> - the Hamiltonian parameters) and targets (<code class="docutils literal notranslate"><span class="pre">y</span></code> - the design space variables).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hamiltonian_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;qubit_frequency_GHz&#39;</span><span class="p">,</span> <span class="s1">&#39;anharmonicity_MHz&#39;</span><span class="p">,</span> <span class="s1">&#39;cavity_frequency_GHz&#39;</span><span class="p">,</span> <span class="s1">&#39;kappa_kHz&#39;</span><span class="p">,</span> <span class="s1">&#39;g_MHz&#39;</span><span class="p">]</span>
+<span class="n">design_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cross_length&#39;</span><span class="p">,</span> <span class="s1">&#39;claw_length&#39;</span><span class="p">,</span><span class="s1">&#39;coupling_length&#39;</span><span class="p">,</span> <span class="s1">&#39;total_length&#39;</span><span class="p">,</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">training_df</span><span class="p">[</span><span class="n">hamiltonian_parameters</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="c1"># Hamiltonian parameters</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">training_df</span><span class="p">[</span><span class="n">design_parameters</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="c1"># Design parameters</span>
+</pre></div>
+</div>
+</div>
+<p>Now, we can split the data into training and testing sets.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Polynomial features help capture non-linear relationships by generating combinations of input features (<span class="math">\(n\)</span>) raised to powers up to a specified degree (<span class="math">\(d\)</span>).</p>
+<p>The resulting feature set includes original features, squared terms, and interaction terms (size $ :nbsphinx-math:<a href="#id1"><span class="problematic" id="id2">`</span></a>binom{n+d}{d}`$), allowing linear models to fit more complex patterns.</p>
+<p>We will use the <code class="docutils literal notranslate"><span class="pre">PolynomialFeatures</span></code> class from <code class="docutils literal notranslate"><span class="pre">sklearn.preprocessing</span></code> to generate polynomial features.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">poly</span> <span class="o">=</span> <span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">X_train_poly</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+<span class="n">X_test_poly</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1"># Save the polynomial feature transformer</span>
+<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="s1">&#39;models/poly_transformer.pkl&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;models/poly_transformer.pkl&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X_train_poly</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+((17268, 55), (17268, 5))
+</pre></div></div>
+</div>
+<p>Finally, we need to normalize both the features and the target values. This ensures that all data is on the same scale, which helps the model learn more effectively. We use <code class="docutils literal notranslate"><span class="pre">StandardScaler</span></code> from <code class="docutils literal notranslate"><span class="pre">sklearn.preprocessing</span></code> to do this.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Normalize the data</span>
+<span class="n">scaler_X</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+<span class="n">scaler_y</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+
+
+<span class="n">X_train_poly</span> <span class="o">=</span> <span class="n">scaler_X</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train_poly</span><span class="p">)</span>
+<span class="n">X_test_poly</span> <span class="o">=</span> <span class="n">scaler_X</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test_poly</span><span class="p">)</span>
+
+<span class="n">y_train</span> <span class="o">=</span> <span class="n">scaler_y</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y_train</span><span class="p">)</span>
+<span class="n">y_test</span> <span class="o">=</span> <span class="n">scaler_y</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+
+
+<span class="c1"># Save the scalers</span>
+<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">scaler_X</span><span class="p">,</span> <span class="s1">&#39;models/scaler_X.pkl&#39;</span><span class="p">)</span>
+<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">scaler_y</span><span class="p">,</span> <span class="s1">&#39;models/scaler_y.pkl&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;models/scaler_y.pkl&#39;]
+</pre></div></div>
+</div>
+</section>
+<section id="ML-Model-Training:">
+<h2>ML Model Training:<a class="headerlink" href="#ML-Model-Training:" title="Link to this heading">#</a></h2>
+<section id="Simple-Deep-Neural-Network-(DNN)">
+<h3>Simple Deep Neural Network (DNN)<a class="headerlink" href="#Simple-Deep-Neural-Network-(DNN)" title="Link to this heading">#</a></h3>
+<p>We’ll begin with a simple deep neural network (DNN) to predict the design space variables (<code class="docutils literal notranslate"><span class="pre">y</span></code>) from the Hamiltonian parameters (<code class="docutils literal notranslate"><span class="pre">X</span></code>).</p>
+<ul class="simple">
+<li><p>The model consists of three hidden layers:</p>
+<ul>
+<li><p>256, 128, and 64 neurons, respectively.</p></li>
+<li><p>Each layer uses ReLU activation.</p></li>
+</ul>
+</li>
+<li><p>To improve generalization and reduce overfitting:</p>
+<ul>
+<li><p><strong>Batch Normalization</strong> is applied after each layer.</p></li>
+<li><p><strong>Dropout (30%)</strong> is applied after each layer.</p></li>
+</ul>
+</li>
+<li><p>The output layer matches the number of design variables.</p></li>
+<li><p>The optimizer used is <strong>Adam</strong> with a learning rate of 0.001, and the loss function is <strong>mean squared error</strong>.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">simple_dnn_model</span><span class="p">(</span><span class="n">neurons1</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">neurons2</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">neurons3</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.001</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">neurons1</span><span class="p">,</span> <span class="n">input_dim</span><span class="o">=</span><span class="n">X_train_poly</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">BatchNormalization</span><span class="p">())</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.3</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">neurons2</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">BatchNormalization</span><span class="p">())</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.3</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">neurons3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">BatchNormalization</span><span class="p">())</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.3</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">y_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>  <span class="c1"># Output layer with the same number of neurons as output features</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;mean_squared_error&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
+<br/></pre></div>
+</div>
+</div>
+<p>Now, we will train the DNN model on the training data for up to 500 epochs.</p>
+<p>To ensure we save the best performing model, we have added a <strong>ModelCheckpoint</strong> callback that saves the model whenever the validation loss improves.</p>
+<p>Additionally, we’ve added an <strong>EarlyStopping</strong> callback to stop training if the validation loss doesn’t improve for 10 consecutive epochs. This helps prevent overfitting and reduces unnecessary training time by restoring the model’s weights to the best epoch.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define callbacks for early stopping and model checkpoint</span>
+<span class="n">model_checkpoint</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span><span class="s1">&#39;models/simple_dnn.keras&#39;</span><span class="p">,</span> <span class="n">save_best_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="s1">&#39;val_loss&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">)</span>
+<span class="n">early_stopping</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="p">(</span><span class="n">monitor</span><span class="o">=</span><span class="s1">&#39;val_loss&#39;</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">restore_best_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">)</span>
+
+<span class="c1"># Train the model on the entire training data with callbacks</span>
+<span class="n">dnn</span> <span class="o">=</span> <span class="n">simple_dnn_model</span><span class="p">()</span>
+<span class="n">history</span> <span class="o">=</span> <span class="n">dnn</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_poly</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">model_checkpoint</span><span class="p">,</span><span class="n">early_stopping</span><span class="p">])</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Epoch 1/500
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/shanto/anaconda3/envs/lfl_qp/lib/python3.9/site-packages/keras/src/layers/core/dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">2s</span> 1ms/step - loss: 1.2538 - val_loss: 0.2215
+Epoch 2/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.3658 - val_loss: 0.2076
+Epoch 3/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.3165 - val_loss: 0.1932
+Epoch 4/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.3095 - val_loss: 0.1919
+Epoch 5/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.3045 - val_loss: 0.1836
+Epoch 6/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2983 - val_loss: 0.1706
+Epoch 7/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2852 - val_loss: 0.1619
+Epoch 8/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2758 - val_loss: 0.1492
+Epoch 9/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2726 - val_loss: 0.1491
+Epoch 10/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2683 - val_loss: 0.1467
+Epoch 11/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 979us/step - loss: 0.2597 - val_loss: 0.1401
+Epoch 12/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2578 - val_loss: 0.1452
+Epoch 13/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2567 - val_loss: 0.1487
+Epoch 14/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 974us/step - loss: 0.2587 - val_loss: 0.1421
+Epoch 15/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2580 - val_loss: 0.1428
+Epoch 16/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2557 - val_loss: 0.1320
+Epoch 17/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2503 - val_loss: 0.1301
+Epoch 18/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 958us/step - loss: 0.2489 - val_loss: 0.1363
+Epoch 19/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2428 - val_loss: 0.1413
+Epoch 20/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2487 - val_loss: 0.1282
+Epoch 21/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2433 - val_loss: 0.1268
+Epoch 22/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 994us/step - loss: 0.2437 - val_loss: 0.1316
+Epoch 23/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2468 - val_loss: 0.1222
+Epoch 24/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 971us/step - loss: 0.2397 - val_loss: 0.1247
+Epoch 25/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 990us/step - loss: 0.2391 - val_loss: 0.1283
+Epoch 26/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2468 - val_loss: 0.1281
+Epoch 27/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 965us/step - loss: 0.2386 - val_loss: 0.1236
+Epoch 28/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 963us/step - loss: 0.2347 - val_loss: 0.1255
+Epoch 29/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2354 - val_loss: 0.1253
+Epoch 30/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2368 - val_loss: 0.1185
+Epoch 31/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2338 - val_loss: 0.1224
+Epoch 32/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2325 - val_loss: 0.1174
+Epoch 33/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2370 - val_loss: 0.1186
+Epoch 34/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2336 - val_loss: 0.1194
+Epoch 35/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2312 - val_loss: 0.1070
+Epoch 36/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2335 - val_loss: 0.1076
+Epoch 37/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 984us/step - loss: 0.2315 - val_loss: 0.1111
+Epoch 38/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 986us/step - loss: 0.2294 - val_loss: 0.1064
+Epoch 39/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2278 - val_loss: 0.1067
+Epoch 40/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2292 - val_loss: 0.1029
+Epoch 41/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2280 - val_loss: 0.1029
+Epoch 42/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2262 - val_loss: 0.1059
+Epoch 43/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2232 - val_loss: 0.1036
+Epoch 44/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2254 - val_loss: 0.1028
+Epoch 45/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 987us/step - loss: 0.2256 - val_loss: 0.0983
+Epoch 46/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2196 - val_loss: 0.1087
+Epoch 47/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2252 - val_loss: 0.0960
+Epoch 48/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2199 - val_loss: 0.0950
+Epoch 49/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2197 - val_loss: 0.0989
+Epoch 50/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2136 - val_loss: 0.0864
+Epoch 51/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2190 - val_loss: 0.0855
+Epoch 52/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2173 - val_loss: 0.0929
+Epoch 53/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2161 - val_loss: 0.0921
+Epoch 54/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2163 - val_loss: 0.0899
+Epoch 55/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 965us/step - loss: 0.2132 - val_loss: 0.0953
+Epoch 56/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2152 - val_loss: 0.0817
+Epoch 57/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2143 - val_loss: 0.0974
+Epoch 58/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 991us/step - loss: 0.2106 - val_loss: 0.0773
+Epoch 59/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2118 - val_loss: 0.0830
+Epoch 60/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 949us/step - loss: 0.2094 - val_loss: 0.0944
+Epoch 61/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 942us/step - loss: 0.2091 - val_loss: 0.0814
+Epoch 62/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2068 - val_loss: 0.0777
+Epoch 63/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 958us/step - loss: 0.2132 - val_loss: 0.0791
+Epoch 64/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2052 - val_loss: 0.0856
+Epoch 65/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2118 - val_loss: 0.0732
+Epoch 66/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2070 - val_loss: 0.0744
+Epoch 67/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 988us/step - loss: 0.2068 - val_loss: 0.0850
+Epoch 68/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 986us/step - loss: 0.2067 - val_loss: 0.0784
+Epoch 69/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 996us/step - loss: 0.2069 - val_loss: 0.0712
+Epoch 70/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 966us/step - loss: 0.2029 - val_loss: 0.0740
+Epoch 71/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2055 - val_loss: 0.0757
+Epoch 72/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2061 - val_loss: 0.0763
+Epoch 73/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2016 - val_loss: 0.0786
+Epoch 74/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 986us/step - loss: 0.2024 - val_loss: 0.0743
+Epoch 75/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 954us/step - loss: 0.2066 - val_loss: 0.0781
+Epoch 76/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 949us/step - loss: 0.2012 - val_loss: 0.0779
+Epoch 77/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 974us/step - loss: 0.2064 - val_loss: 0.0752
+Epoch 78/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 967us/step - loss: 0.2024 - val_loss: 0.0752
+Epoch 79/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2002 - val_loss: 0.0711
+Epoch 80/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2001 - val_loss: 0.0814
+Epoch 81/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2048 - val_loss: 0.0773
+Epoch 82/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2032 - val_loss: 0.0664
+Epoch 83/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 975us/step - loss: 0.1995 - val_loss: 0.0711
+Epoch 84/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2018 - val_loss: 0.0858
+Epoch 85/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 953us/step - loss: 0.1966 - val_loss: 0.0726
+Epoch 86/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 964us/step - loss: 0.1973 - val_loss: 0.0765
+Epoch 87/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1980 - val_loss: 0.0697
+Epoch 88/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1992 - val_loss: 0.0597
+Epoch 89/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1910 - val_loss: 0.0690
+Epoch 90/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 965us/step - loss: 0.1944 - val_loss: 0.0537
+Epoch 91/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1943 - val_loss: 0.0690
+Epoch 92/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1872 - val_loss: 0.0691
+Epoch 93/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1000us/step - loss: 0.1952 - val_loss: 0.0766
+Epoch 94/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 960us/step - loss: 0.1982 - val_loss: 0.0550
+Epoch 95/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1977 - val_loss: 0.0763
+Epoch 96/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1976 - val_loss: 0.0701
+Epoch 97/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2009 - val_loss: 0.0732
+Epoch 98/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2029 - val_loss: 0.0662
+Epoch 99/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2033 - val_loss: 0.0655
+Epoch 100/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1995 - val_loss: 0.0712
+Epoch 101/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1979 - val_loss: 0.0622
+Epoch 102/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2070 - val_loss: 0.0848
+Epoch 103/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 972us/step - loss: 0.2039 - val_loss: 0.0754
+Epoch 104/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2013 - val_loss: 0.0723
+Epoch 105/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.2002 - val_loss: 0.0665
+Epoch 106/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1967 - val_loss: 0.0655
+Epoch 107/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1938 - val_loss: 0.0625
+Epoch 108/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 957us/step - loss: 0.1964 - val_loss: 0.0719
+Epoch 109/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1930 - val_loss: 0.0703
+Epoch 110/500
+<span class="ansi-bold">864/864</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 1ms/step - loss: 0.1893 - val_loss: 0.0655
+</pre></div></div>
+</div>
+</section>
+<section id="Training-Evaluation">
+<h3>Training Evaluation<a class="headerlink" href="#Training-Evaluation" title="Link to this heading">#</a></h3>
+<p>Let’s look at the training history to see how the model performed during training.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">history_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
+<span class="n">history_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;models/dnn_training_history.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot training &amp; validation loss values</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Train Loss&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;val_loss&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Validation Loss&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Model Loss&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Epoch&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Loss&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;figures/dnn_training_validation_loss.png&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-8_ML_interpolation_in_SQuADDS_36_0.png" src="../../_images/source_tutorials_Tutorial-8_ML_interpolation_in_SQuADDS_36_0.png" />
+</div>
+</div>
+<p>Now, we can evaluate the model on the test data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Evaluate on the test data</span>
+<span class="n">test_mse</span> <span class="o">=</span> <span class="n">dnn</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test_poly</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Predictions</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">dnn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test_poly</span><span class="p">)</span>
+
+
+<span class="c1"># Inverse transform the predictions and actual values to get them back to original scale</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">scaler_y</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
+<span class="n">y_test</span> <span class="o">=</span> <span class="n">scaler_y</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-bold">96/96</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 867us/step
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot predicted vs actual values for each target variable</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">y_test</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">y_pred</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">y_test</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">y_test</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])],</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">y_test</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">y_test</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])],</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Target Variable: </span><span class="si">{</span><span class="n">design_parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Actual&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Predicted&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;figures/dnn_predicted_vs_actual.png&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-8_ML_interpolation_in_SQuADDS_39_0.png" src="../../_images/source_tutorials_Tutorial-8_ML_interpolation_in_SQuADDS_39_0.png" />
+</div>
+</div>
+<p>Cool to see that such a basic model can generally capture the trends in the data (sort of haha). Of course, we can always improve the model by tuning the hyperparameters, adding more data, or using more sophisticated models.</p>
+<p>Let’s see how the model performs on some different data points so that we can compare it to the scaling interpolation algorithm and the closest simulation results. First, lets load the test dataframes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">test_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;data/test_data.csv&quot;</span><span class="p">)</span>
+<span class="n">test_data</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>qubit_frequency_GHz</th>
+      <th>cavity_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>kappa_kHz</th>
+      <th>g_MHz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>4.621651</td>
+      <td>6.920735</td>
+      <td>-194.264031</td>
+      <td>163.433945</td>
+      <td>102.199270</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>5.514262</td>
+      <td>6.468747</td>
+      <td>-288.056418</td>
+      <td>127.175543</td>
+      <td>67.947060</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>5.039644</td>
+      <td>6.965297</td>
+      <td>-235.346921</td>
+      <td>35.666245</td>
+      <td>73.162768</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4.241134</td>
+      <td>5.806681</td>
+      <td>-160.933514</td>
+      <td>153.074402</td>
+      <td>90.698935</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4.879756</td>
+      <td>5.889439</td>
+      <td>-219.068857</td>
+      <td>97.823504</td>
+      <td>84.702197</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>5.448084</td>
+      <td>5.762119</td>
+      <td>-280.304835</td>
+      <td>211.778480</td>
+      <td>69.241372</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Using the trained model to predict the design space variables for the test data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extract input features</span>
+<span class="n">X_test</span> <span class="o">=</span> <span class="n">test_data</span><span class="p">[</span><span class="n">hamiltonian_parameters</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+<span class="c1"># Transform input features</span>
+<span class="n">X_test_poly</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">X_test_poly</span> <span class="o">=</span> <span class="n">scaler_X</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test_poly</span><span class="p">)</span>
+
+<span class="c1"># Make predictions with the DNN model</span>
+<span class="n">y_pred_dnn</span> <span class="o">=</span> <span class="n">scaler_y</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">dnn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test_poly</span><span class="p">))</span>
+
+<span class="c1"># save the predictions for future use</span>
+<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s2">&quot;data/y_pred_dnn.csv&quot;</span><span class="p">,</span> <span class="n">y_pred_dnn</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-bold">1/1</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 10ms/step
+</pre></div></div>
+</div>
+<p>Loading the corresponding scaling interpolation and closest simulation data points for comparison.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interp_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/scaling_interp_data.csv&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">interp_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;total_length&#39;</span><span class="p">,</span> <span class="s1">&#39;coupling_length&#39;</span><span class="p">,</span> <span class="s1">&#39;cross_length&#39;</span><span class="p">,</span> <span class="s1">&#39;claw_length&#39;</span><span class="p">,</span> <span class="s1">&#39;Ej&#39;</span><span class="p">,</span> <span class="s1">&#39;ground_spacing&#39;</span><span class="p">]</span>
+
+<span class="c1"># Sort to match the order of target_names</span>
+<span class="n">scaling_interp_pred</span> <span class="o">=</span> <span class="n">interp_df</span><span class="p">[</span><span class="n">design_parameters</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">closest_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/closest_sim_data.csv&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">closest_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;total_length&#39;</span><span class="p">,</span> <span class="s1">&#39;coupling_length&#39;</span><span class="p">,</span> <span class="s1">&#39;cross_length&#39;</span><span class="p">,</span> <span class="s1">&#39;claw_length&#39;</span><span class="p">,</span> <span class="s1">&#39;ground_spacing&#39;</span><span class="p">,</span> <span class="s1">&#39;Ej&#39;</span><span class="p">]</span>
+
+<span class="c1"># Sort to match the order of target_names</span>
+<span class="n">closest_results</span> <span class="o">=</span> <span class="n">closest_df</span><span class="p">[</span><span class="n">design_parameters</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+</div>
+<p>Moments of truth! Let’s see how the model performs compared to the scaling (physics) interpolation and closest simulation results.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;whitegrid&quot;</span><span class="p">,</span> <span class="n">font_scale</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">(</span><span class="s2">&quot;husl&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># Get a palette with 3 different hues</span>
+
+<span class="c1"># Plot comparisons of predicted values</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">target_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">design_parameters</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y_pred_dnn</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;ML&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">scaling_interp_pred</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Physics&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">closest_results</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Closest&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-.&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mu m$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="c1"># Adding title and customizing fonts</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">target_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Targets&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+
+    <span class="c1"># Improve legends</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">fancybox</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">framealpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="c1"># Adding grid and minor ticks for better readability</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">minorticks_on</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;figures/comparison_predicted_values.png&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-8_ML_interpolation_in_SQuADDS_49_0.png" src="../../_images/source_tutorials_Tutorial-8_ML_interpolation_in_SQuADDS_49_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Simulate-and-Benchmark-the-ML-Model">
+<h2>Simulate and Benchmark the ML Model<a class="headerlink" href="#Simulate-and-Benchmark-the-ML-Model" title="Link to this heading">#</a></h2>
+<p>To truly evaluate the model’s performance, we need to simulate the qubit-cavity system using the predicted design space variables and compute the corresponding Hamiltonian parameters and see how they compare to the target Hamiltonian parameters.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQuADDS_DB</span><span class="p">,</span> <span class="n">Analyzer</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
+<span class="n">merged_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d9113d1df00b4eec9c5a42b08ebc4f7f", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1c3eb750baf04314a89847fe113c45aa", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b11ad8f20bf34b4ba16dc784765199d2", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y_pred_dnn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;data/y_pred_dnn.csv&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">test_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;data/test_data.csv&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Using the following method to extract the <code class="docutils literal notranslate"><span class="pre">designs_df</span></code> that we will use to simulate the qubit-cavity system.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.interpolations.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_design_from_ml_predictions</span>
+
+<span class="n">designs_df</span> <span class="o">=</span> <span class="n">get_design_from_ml_predictions</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">test_data</span><span class="p">,</span> <span class="n">y_pred_dnn</span><span class="p">)</span>
+<span class="n">designs_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Time taken to add the coupled H params: 3.9641311168670654 seconds
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>coupler_type</th>
+      <th>design_options_qubit</th>
+      <th>design_options_cavity_claw</th>
+      <th>setup_qubit</th>
+      <th>setup_cavity_claw</th>
+      <th>design_options</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CLT</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CLT</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CLT</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CLT</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CLT</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>CLT</td>
+      <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>{'basis_order': 1, 'max_delta_f': 0.05, 'max_p...</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<section id="Ansys-Simulation">
+<h3>Ansys Simulation<a class="headerlink" href="#Ansys-Simulation" title="Link to this heading">#</a></h3>
+<p>Now to simulate each design in the <code class="docutils literal notranslate"><span class="pre">designs_df</span></code> in Ansys and extract the Hamiltonian parameters.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnsysSimulator</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">H_params_simmed</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">designs_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Simulating design </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">designs_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="n">ansys_simulator</span> <span class="o">=</span> <span class="n">AnsysSimulator</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+    <span class="n">ansys_results</span> <span class="o">=</span> <span class="n">ansys_simulator</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">hamiltonian_results</span> <span class="o">=</span> <span class="n">ansys_results</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
+    <span class="n">H_params_simmed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hamiltonian_results</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>For the model used in this example but with its hyperparameters optimized, I was able to get the following results</p>
+<div style="text-align: center;"><div style="display: inline-flex; justify-content: center; align-items: center; gap: 20px;"><div style="flex: 1; text-align: center;"><p><img alt="Figure 1" src="../../_images/ga.png" /></p>
+</div><div style="flex: 1; text-align: center;"><p><img alt="Figure 2" src="../../_images/kc.png" /></p>
+</div></div></div></section>
+<section id="palace-Simulations">
+<h3><code class="docutils literal notranslate"><span class="pre">palace</span></code> Simulations<a class="headerlink" href="#palace-Simulations" title="Link to this heading">#</a></h3>
+<p>If you don’t have access to Ansys, you can use the <code class="docutils literal notranslate"><span class="pre">`palace</span></code> &lt;<a class="reference external" href="https://awslabs.github.io/palace/">https://awslabs.github.io/palace/</a>&gt;`__ simulator to simulate the qubit-cavity system. We cover how to use <code class="docutils literal notranslate"><span class="pre">palace</span></code> in <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-7_ML_interpolation_in_SQuADDS.html">tutorial 7</a>.</p>
+<p>We are actively working on developing robust, accurate, and stable simulations using the <code class="docutils literal notranslate"><span class="pre">palace</span></code> backend in collaboration with our friends at the <a class="reference external" href="https://www.sqdlab.org/">SQDLab</a>.</p>
+<p>In the meantime, we encourage you to explore <code class="docutils literal notranslate"><span class="pre">palace</span></code> on your own with the following resources:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://awslabs.github.io/palace/">Palace Documentation</a><strong>:</strong> Official documentation for the <code class="docutils literal notranslate"><span class="pre">palace</span></code> simulator.</p></li>
+<li><p><a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/resources/palace.html">Palace Installation Guide</a><strong>:</strong> Step-by-step instructions on how to install <code class="docutils literal notranslate"><span class="pre">palace</span></code> on all platforms.</p></li>
+<li><p><a class="reference external" href="https://github.com/sqdlab/SQDMetal">Palace Simulation with Qiskit Metal</a><strong>:</strong> A simulation framework for using <code class="docutils literal notranslate"><span class="pre">palace</span></code> from <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code>.</p></li>
+<li><p><a class="reference external" href="https://github.com/sqdlab/SQDMetal/blob/main/docs/User/WorkedExamples/README.md">SQDMetal Example workflow with Palace</a><strong>:</strong> A worked example of using <code class="docutils literal notranslate"><span class="pre">palace</span></code> with <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> to run eigenmode and capacitance simulations.</p></li>
+</ul>
+<p>These resources should help you get started with <code class="docutils literal notranslate"><span class="pre">palace</span></code> and enable you to perform simulations effectively until our enhanced integration is ready. Consider contributing to <a class="reference external" href="https://github.com/sqdlab/SQDMetal">SQDMetal</a> and <a class="reference external" href="https://github.com/lfl-lab/SQuADDS">SQuADDS</a> to help us improve the <code class="docutils literal notranslate"><span class="pre">palace</span></code> integration!</p>
+</section>
+<section id="COMSOL-Simulation">
+<h3>COMSOL Simulation<a class="headerlink" href="#COMSOL-Simulation" title="Link to this heading">#</a></h3>
+<p>You can also use <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code> to run the simulations in COMSOL as well. Read more about it <a class="reference external" href="https://github.com/sqdlab/SQDMetal/blob/main/docs/User/Sim_Comsol.md">here</a></p>
+</section>
+</section>
+<section id="Deploy-the-ML-Model-to-HuggingFace">
+<h2>Deploy the ML Model to HuggingFace<a class="headerlink" href="#Deploy-the-ML-Model-to-HuggingFace" title="Link to this heading">#</a></h2>
+<p>Once you have developed a model that you are happy with and ideally performs really well, you can deploy it to HuggingFace for others to use.</p>
+<p>HuggingFace makes it ridiculously easy to deploy an ML model. All you need to do is:</p>
+<ol class="arabic simple">
+<li><p>Load the model.</p></li>
+<li><p>Save the model in the format required by HuggingFace.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;hf://</span><span class="si">{</span><span class="n">hf_username</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.keras.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model</span>
+
+<span class="n">model_dnn</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;models/simple_dnn.keras&quot;</span><span class="p">)</span>
+<span class="n">model_dnn</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;hf://shanto268/qiskit-fall-fest-2024-test-model&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>If your model is <strong>REALLYYYYY good</strong>, then send me an <a class="reference external" href="mailto:shanto&#37;&#52;&#48;usc&#46;edu">email</a> with the link to your model and I will add it to the SQuADDS ML model collection.</p>
+</section>
+<section id="Next-Steps...">
+<h2>Next Steps…<a class="headerlink" href="#Next-Steps..." title="Link to this heading">#</a></h2>
+<p>Please contribute to <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/resources/contribute.html">SQuADDS!</a></p>
+</section>
+<section id="License">
+<h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
+<div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>This tutorial is written by Sadman Ahmed Shanto</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2025.</p>
+</p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Tutorial-7_Simulate_designs_with_palace.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../apidocs/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API Reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Collecting-Training-Data-from-SQuADDS">Collecting Training Data from <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Preprocessing-the-Training-Data">Preprocessing the Training Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ML-Model-Training:">ML Model Training:</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Simple-Deep-Neural-Network-(DNN)">Simple Deep Neural Network (DNN)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Training-Evaluation">Training Evaluation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Simulate-and-Benchmark-the-ML-Model">Simulate and Benchmark the ML Model</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Ansys-Simulation">Ansys Simulation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#palace-Simulations"><code class="docutils literal notranslate"><span class="pre">palace</span></code> Simulations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#COMSOL-Simulation">COMSOL Simulation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Deploy-the-ML-Model-to-HuggingFace">Deploy the ML Model to HuggingFace</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Next-Steps...">Next Steps…</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#License">License</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/source/tutorials/Tutorial-8_ML_interpolation_in_SQuADDS.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
