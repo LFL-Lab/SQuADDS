@@ -4,53 +4,42 @@ Getting Started with SQuADDS
 .. image:: https://img.shields.io/badge/-Setup-blue
    :alt: Setup
 
-This guide helps you get started with **SQuADDS**, a database for superconducting qubit and device design and simulation.
+This guide helps you get started with **SQuADDS**
 
 Installation
 ============
 
-There are multiple ways to install SQuADDS. Choose the method that best suits your environment.
+SQuADDS is built on top of `qiskit-metal`, which is a crucial dependency. The installation process depends on whether you already have `qiskit-metal` installed in your environment or not.
 
+1. Installing SQuADDS with Existing `qiskit-metal`
+----------------------------------------------------
+.. _installing-squadds-with-existing-qiskit-metal:
 
-Install using pip
------------------
+If you already have `qiskit-metal` installed and running in your environment, you can install SQuADDS in two ways:
 
-SQuADDS can be installed using pip in an environment with `qiskit-metal` pre-installed.
-
-.. code-block:: bash
-
-   pip install SQuADDS
-
-Install from GitHub
--------------------
-
-Alternatively, you can install SQuADDS from source.
-
-1. **Clone Repository**: Navigate to your chosen directory and clone the repository.
-
+a) Using pip:
    .. code-block:: bash
 
-      cd <REPO-PATH>
+      pip install SQuADDS
+
+b) From source:
+   .. code-block:: bash
+
       git clone https://github.com/LFL-Lab/SQuADDS.git
-
-2. **Install Dependencies**: Activate a clean conda environment (with qiskit-metal) and install dependencies.
-
-   .. code-block:: bash
-
-      conda activate <YOUR-ENV>
       cd SQuADDS
-      pip install -r requirements.txt
-      pip install -e . 
+      pip install -e .
 
-Install using Docker
---------------------
+2. Installing SQuADDS on a Fresh Environment
+-------------------------------------------
+.. _installing-squadds-on-a-fresh-environment:
 
-You can use our Docker image to run SQuADDS. The Docker image is available `here <https://github.com/LFL-Lab/SQuADDS/pkgs/container/squadds_env>`__. Instructions on how to use the Docker image can be found `here <https://github.com/LFL-Lab/SQuADDS?tab=readme-ov-file#run-using-docker>`__
+If you don't have `qiskit-metal` installed, you'll need to set up a new environment first. We provide a shell script that:
 
-Fresh Environment Installation
--------------------------------
+- Creates a new conda environment with Python 3.10
+- Installs `qiskit-metal` and its dependencies
+- Sets up the environment for SQuADDS
 
-For installing SQuADDS (from PyPi) on a completely fresh environment on a UNIX machine (or a Windows machine with Anaconda Prompt), you can use the following commands.
+Run the following script:
 
 .. code-block:: bash
 
@@ -65,50 +54,88 @@ For installing SQuADDS (from PyPi) on a completely fresh environment on a UNIX m
 
    # Step 2: Set up Miniconda environment
    echo "Setting up Conda environment..."
-   conda env list
-   conda remove --name qiskit-metal-env --all --yes || true
-   conda env create -n qiskit-metal-env -f environment.yml
+   conda env create -n <env_name> -f environment.yml
    echo "Conda environment created."
 
    # Activate the Conda environment
    source "$(conda info --base)/etc/profile.d/conda.sh"
-   conda activate qiskit-metal-env
+   conda activate <env_name>
 
    # Step 3: Install Qiskit-Metal
    echo "Installing Qiskit-Metal..."
    python -m pip install --no-deps -e git+https://github.com/Qiskit/qiskit-metal.git#egg=qiskit-metal
 
-   # Step 4: Install SQuADDS from PyPi
-   echo "Installing SQuADDS from pypi"
-   pip install SQuADDS
-
-You can also use the GitHub version of SQuADDS by changing Step 4 to:
-
-.. code-block:: bash
-
-   # Step 4: Install SQuADDS from source
-   echo "Installing SQuADDS from source"
-   # Clone the repository
-   git clone https://github.com/LFL-Lab/SQuADDS.git
-   cd SQuADDS
-   python -m pip install --upgrade pip
-   pip install -r requirements.txt
-   pip install -e .
+After running this script, you'll have a working `qiskit-metal` environment. You can then follow the instructions in :ref:`installing-squadds-with-existing-qiskit-metal` to install SQuADDS.
 
 Installing SQuADDS on Apple Silicon
 -----------------------------------
 
-`qiskit-metal` currently lacks full native support for Apple Silicon due to `PySide` compatibility issues (`a PR resolving this issue is still waiting for review <https://github.com/qiskit-community/qiskit-metal/pull/908>`_). Since SQuADDS is built on top of `qiskit-metal`, sadly it also doesn't support Apple Silicon natively . However, you can still run SQuADDS on Apple Silicon by emulating the `x86` architecture with Rosetta.
+`qiskit-metal` currently lacks full native support for Apple Silicon due to `PySide` compatibility issues. However, you can run SQuADDS on Apple Silicon by emulating the `x86` architecture with Rosetta 2.
 
-1. **Create a new conda environment** configured to emulate `x86` with Python 3.10 or 3.11:
+First, ensure Rosetta 2 is installed:
+.. code-block:: bash
 
-   .. code-block:: bash
+   softwareupdate --install-rosetta
 
-      CONDA_SUBDIR=osx-64 conda create -n <env_name> python=3.11
-      conda activate <env_name>
-      conda config --env --set subdir osx-64
+Then, create a new conda environment configured to emulate `x86`:
+.. code-block:: bash
 
-2. **Install `qiskit-metal` and `SQuADDS`** as outlined above within this environment.
+   # Create environment with x86 emulation
+   CONDA_SUBDIR=osx-64 conda create -n <env_name> python=3.10
+   conda activate <env_name>
+   conda config --env --set subdir osx-64
+
+This environment will now use Rosetta 2 to run x86 applications. You can then follow the same principles as in :ref:`installing-squadds-on-a-fresh-environment` to set up `qiskit-metal` in this environment.
+
+.. code-block:: bash
+
+   #!/bin/bash
+
+   # Ensure script fails if any command fails
+   set -e
+
+   # Step 1: Download environment.yml from Qiskit-Metal repository
+   echo "Downloading environment.yml..."
+   curl -O https://raw.githubusercontent.com/Qiskit/qiskit-metal/main/environment.yml
+
+   # Step 2: Update the existing conda environment
+   echo "Updating Conda environment..."
+   conda env update -n <env_name> -f environment.yml
+   echo "Conda environment updated."
+
+   # Activate the Conda environment
+   source "$(conda info --base)/etc/profile.d/conda.sh"
+   conda activate <env_name>
+
+   # Step 3: Install Qiskit-Metal
+   echo "Installing Qiskit-Metal..."
+   python -m pip install --no-deps -e git+https://github.com/Qiskit/qiskit-metal.git#egg=qiskit-metal
+
+Now, for installing `SQuADDS`, follow the same principles as in :ref:`installing-squadds-with-existing-qiskit-metal`.
+
+.. note::
+   The `CONDA_SUBDIR=osx-64` flag tells conda to use x86 packages instead of arm64 packages, and `conda config --env --set subdir osx-64` ensures this setting persists for the environment.
+
+Installing Additional Dependencies
+---------------------------------
+
+`SQDMetal` and `palace` are optional dependencies that can be used with `SQuADDS` for additional simulation capabilities.
+
+Installing `SQDMetal`
+~~~~~~~~~~~~~~~~~~~~~
+
+Once you have `SQuADDS` and `qiskit-metal` installed, you can install `SQDMetal` by:
+
+.. code-block:: bash
+
+   git clone https://github.com/sqdlab/SQDMetal.git
+   cd SQDMetal
+   pip install .
+
+Installing `palace`
+~~~~~~~~~~~~~~~~~~~
+
+`Palace` is a powerful open source electromagnetic simulation tool that can be used with `SQuADDS`. For detailed installation instructions, please refer to our `Palace Installation Guide <https://lfl-lab.github.io/SQuADDS/source/resources/palace.html>`_.
 
 .. admonition:: Questions?
 
