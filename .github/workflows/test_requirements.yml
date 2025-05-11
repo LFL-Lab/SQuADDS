@@ -29,50 +29,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: ${{ matrix.python-version }}
           auto-activate-base: false
 
-      - name: Check for required files
-        run: |
-          echo "Checking for required files..."
-          [ -f requirements-core.txt ] && echo "✅ Found requirements-core.txt" || (echo "❌ Missing requirements-core.txt" && exit 1)
-          [ -f requirements-optional.txt ] && echo "✅ Found requirements-optional.txt" || (echo "❌ Missing requirements-optional.txt" && exit 1)
-          [ -f requirements-dev.txt ] && echo "✅ Found requirements-dev.txt" || (echo "❌ Missing requirements-dev.txt" && exit 1)
-          [ -f setup.py ] && echo "✅ Found setup.py" || (echo "❌ Missing setup.py" && exit 1)
-
-      - name: Create test environment
+      - name: Create fresh test environment
         shell: bash -l {0}
         run: |
-          ENV_NAME="squadds-test"
-          echo "Creating fresh conda environment: $ENV_NAME"
-          conda create -y -n $ENV_NAME python=${{ matrix.python-version }}
-          conda activate $ENV_NAME
+          echo "Creating fresh conda environment..."
+          conda create -y -n squadds-test python=${{ matrix.python-version }}
+          conda activate squadds-test
           python --version
 
-      - name: Install dependencies
+      - name: Install SQuADDS
         shell: bash -l {0}
         run: |
           conda activate squadds-test
           pip install --upgrade pip
-
-          echo "Installing core dependencies..."
-          pip install -r requirements-core.txt
-
-          echo "Installing optional dependencies..."
-          pip install -r requirements-optional.txt
-
-          echo "Installing development dependencies..."
-          pip install -r requirements-dev.txt
-
-          echo "Installing SQuADDS in editable mode..."
           pip install -e .
 
       - name: Test core dependencies
