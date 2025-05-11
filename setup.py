@@ -8,7 +8,6 @@ def read_requirements(filename):
 # Read requirements from files
 core_requirements = read_requirements('requirements-core.txt')
 optional_requirements = read_requirements('requirements-optional.txt')
-dev_requirements = read_requirements('requirements-dev.txt')
 
 setup(
     name='SQuADDS',
@@ -24,8 +23,7 @@ setup(
     install_requires=core_requirements,
     extras_require={
         'optional': optional_requirements,
-        'dev': dev_requirements,
-        'all': core_requirements + optional_requirements + dev_requirements
+        'all': core_requirements + optional_requirements
     },
     classifiers=[
         'Programming Language :: Python :: 3',
