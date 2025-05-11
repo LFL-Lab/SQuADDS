@@ -145,18 +145,15 @@ Once the environment is active, you can run **SQuADDS** by executing your Python
 
 The following tutorials are available to help you get started with `SQuADDS`:
 
+- [Tutorial 0: Using the SQuADDS WebUI](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-0_Using_the_SQuADDS_WebUI.html)
 - [Tutorial 1: Getting Started with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html)
 - [Tutorial 2: Simulating Interpolated Designs](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html)
 - [Tutorial 3: Contributing Experimentally-Validated Simulation Data to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html)
 - [Tutorial 4: Contributing Measured Devices' Data to the SQuADDS Database](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html)
 - [Tutorial 5: Designing a "fab-ready" chip with SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.html)
+- [Tutorial 6: Adding Airbridges](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-6_Adding_Airbridges.html)
 - [Tutorial 7: Simulate designs with palace](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-7_Simulate_designs_with_palace.html)
 - [Tutorial 8: ML Interpolation in SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-8_ML_interpolation_in_SQuADDS.html)
-
-Tutorials compatible with master branch but not with the latest release (`v0.3.6`):
-
-- [Tutorial 0: Using the SQuADDS WebUI](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-0_Using_the_SQuADDS_WebUI.html)
-- [Tutorial 6: Adding Airbridges](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-6_Adding_Airbridges.html)
 
 ---
 
@@ -190,32 +187,32 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 
 ## Contributors
 
-
-| Name                  | Institution                        | Contribution                         |
-|:----------------------|:-----------------------------------|:-------------------------------------|
-| Clark Miyamoto        | New York University                | Code contributor                     |
-| Madison Howard        | California Institute of Technology | Bug Hunter                           |
-| Evangelos Vlachos     | University of Southern California  | Code contributor                     |
-| Kaveh Pezeshki        | Stanford University                | Documentation contributor            |
-| Anne Whelan           | US Navy                            | Documentation contributor            |
-| Jenny Huang           | Columbia University                | Documentation contributor            |
-| Connie Miao           | Stanford University                | Data Contributor                     |
-| Malida Hecht          | University of Southern California  | Data contributor                     |
-| Daria Kowsari, PhD    | University of Southern California  | Data contributor                     |
-| Vivek Maurya          | University of Southern California  | Data contributor                     |
-| Haimeng Zhang, PhD    | IBM                                | Data contributor                     |
-| Elizabeth Kunz        | University of Southern California  | Documentation  and  Code contributor |
-| Adhish Chakravorty    | University of Southern California  | Documentation  and  Code contributor |
-| Ethan Zheng           | University of Southern California  | Data contributor  and Bug Hunter     |
-| Sara Sussman, PhD     | Fermilab                           | Bug Hunter                           |
-| Priyangshu Chatterjee | IIT Kharagpur                      | Documentation contributor            |
+| Name                  | Institution                        | Contribution                       |
+| :-------------------- | :--------------------------------- | :--------------------------------- |
+| Clark Miyamoto        | New York University                | Code contributor                   |
+| Madison Howard        | California Institute of Technology | Bug Hunter                         |
+| Evangelos Vlachos     | University of Southern California  | Code contributor                   |
+| Kaveh Pezeshki        | Stanford University                | Documentation contributor          |
+| Anne Whelan           | US Navy                            | Documentation contributor          |
+| Jenny Huang           | Columbia University                | Documentation contributor          |
+| Connie Miao           | Stanford University                | Data Contributor                   |
+| Malida Hecht          | University of Southern California  | Data contributor                   |
+| Daria Kowsari, PhD    | University of Southern California  | Data contributor                   |
+| Vivek Maurya          | University of Southern California  | Data contributor                   |
+| Haimeng Zhang, PhD    | IBM                                | Data contributor                   |
+| Elizabeth Kunz        | University of Southern California  | Documentation and Code contributor |
+| Adhish Chakravorty    | University of Southern California  | Documentation and Code contributor |
+| Ethan Zheng           | University of Southern California  | Data contributor and Bug Hunter    |
+| Sara Sussman, PhD     | Fermilab                           | Bug Hunter                         |
+| Priyangshu Chatterjee | IIT Kharagpur                      | Documentation contributor          |
 
 ## Developers
+
 - [shanto268](https://github.com/shanto268) - 374 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
 - [LFL-Lab](https://github.com/LFL-Lab) - 7 contributions
 - [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
 - [PCodeShark25](https://github.com/PCodeShark25) - 1 contributions
----
 
+---

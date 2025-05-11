@@ -1,6 +1,48 @@
 Release Notes
 =============
 
+Version 0.3.7 (2024-03-19)
+--------------------------
+
+* **Alpha Version 0.3.7**
+
+**New Features**
+
+- Added automated version bumping workflow
+- Added Palace tutorial with EPR calculations
+- Added ML interpolation notebook
+- Added SQuADDS WebUI tutorial
+- Added GDS post-processing files for DVK foundry
+- Added support for airbridges
+- Added DeepWiki integration for codebase chat
+- Added contribution portal integration
+
+**Documentation**
+
+- Updated Tutorial 7 with EPR calculations and improved formatting
+- Updated Tutorial 8 with ML interpolation examples
+- Added Apple Silicon installation instructions
+- Fixed broken links in tutorials
+- Added Qiskit Metal Fall Fest ML interpolation tutorial link
+- Updated contribution guidelines and documentation
+- Added issue templates and improved issue management
+
+**Bug Fixes**
+
+- Fixed branch name inconsistency in Docker workflow
+- Updated outdated GitHub Actions versions
+- Fixed GUI/design bug in Tutorial 7 leading to 4 ports on TL
+- Fixed KLayout version compatibility issues
+- Fixed broken links in documentation
+
+**Infrastructure**
+
+- Added automated contributor list updates
+- Improved CI/CD pipeline with version bumping
+- Added automated release notes generation
+
+---
+
 Version 0.3.6 (2024-10-13)
 --------------------------
 
