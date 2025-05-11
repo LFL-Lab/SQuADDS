@@ -18,16 +18,18 @@ SQuADDS is built on top of `qiskit-metal`, which is a crucial dependency. The in
 If you already have `qiskit-metal` installed and running in your environment, you can install SQuADDS in two ways:
 
 a) Using pip:
-   .. code-block:: bash
 
-      pip install SQuADDS
+.. code-block:: bash
+
+   pip install SQuADDS
 
 b) From source:
-   .. code-block:: bash
 
-      git clone https://github.com/LFL-Lab/SQuADDS.git
-      cd SQuADDS
-      pip install -e .
+.. code-block:: bash
+
+   git clone https://github.com/LFL-Lab/SQuADDS.git
+   cd SQuADDS
+   pip install -e .
 
 2. Installing SQuADDS on a Fresh Environment
 -------------------------------------------
@@ -73,11 +75,13 @@ Installing SQuADDS on Apple Silicon
 `qiskit-metal` currently lacks full native support for Apple Silicon due to `PySide` compatibility issues. However, you can run SQuADDS on Apple Silicon by emulating the `x86` architecture with Rosetta 2.
 
 First, ensure Rosetta 2 is installed:
+
 .. code-block:: bash
 
    softwareupdate --install-rosetta
 
 Then, create a new conda environment configured to emulate `x86`:
+
 .. code-block:: bash
 
    # Create environment with x86 emulation
@@ -135,7 +139,7 @@ Once you have `SQuADDS` and `qiskit-metal` installed, you can install `SQDMetal`
 Installing `palace`
 ~~~~~~~~~~~~~~~~~~~
 
-`Palace` is a powerful open source electromagnetic simulation tool that can be used with `SQuADDS`. For detailed installation instructions, please refer to our `Palace Installation Guide <https://lfl-lab.github.io/SQuADDS/source/resources/palace.html>`_.
+`Palace` is a powerful open source electromagnetic simulation tool that can be used with `SQuADDS`. For detailed installation instructions, please refer to our :doc:`Palace Installation Guide <resources/palace>`.
 
 .. admonition:: Questions?
 
@@ -215,7 +219,6 @@ You can set these fields via the SQuADDS API.
 **A:** The ``.env`` file should be automatically created at the right place within the root directory of the ``SQuADDS`` package. If the ``.env`` file is not automatically created upon installation, you will need to manually create it at this specific location for ``SQuADDS`` to function properly.
 
 To determine the installation root of ``SQuADDS``, and subsequently place or find the ``.env`` file, use the following approach:
-
 
 .. code-block:: python
 
