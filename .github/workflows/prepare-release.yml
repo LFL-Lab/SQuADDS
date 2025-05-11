@@ -1,0 +1,75 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      new_version:
+        description: 'New version number (e.g., 0.3.7)'
+        required: true
+        type: string
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+
+      - name: Verify version consistency
+        run: |
+          # Check setup.py
+          setup_version=$(grep "version=" setup.py | cut -d"'" -f2)
+          echo "Version in setup.py: $setup_version"
+
+          # Check conf.py
+          conf_version=$(grep "version = " docs/conf.py | cut -d"'" -f2)
+          echo "Version in conf.py: $conf_version"
+
+          # Check if versions match
+          if [ "$setup_version" != "$conf_version" ]; then
+            echo "Warning: Versions in setup.py and conf.py do not match!"
+            exit 1
+          fi
+
+          # Check if version matches input
+          if [ "$setup_version" != "${{ github.event.inputs.new_version }}" ]; then
+            echo "Warning: Current version ($setup_version) does not match input version (${{ github.event.inputs.new_version }})"
+            exit 1
+          fi
+
+      - name: Check for uncommitted changes
+        run: |
+          if [[ -n $(git status -s) ]]; then
+            echo "Warning: There are uncommitted changes in the repository"
+            git status
+            exit 1
+          fi
+
+      - name: Verify release notes
+        run: |
+          # Check if release notes exist for the new version
+          if ! grep -q "Version ${{ github.event.inputs.new_version }}" docs/source/release_notes.rst; then
+            echo "Warning: Release notes for version ${{ github.event.inputs.new_version }} not found"
+            exit 1
+          fi
+
+      - name: Create release preparation summary
+        run: |
+          echo "Release Preparation Summary for version ${{ github.event.inputs.new_version }}"
+          echo "================================================"
+          echo "1. Version consistency check: ✅"
+          echo "2. Uncommitted changes check: ✅"
+          echo "3. Release notes verification: ✅"
+          echo ""
+          echo "Next steps:"
+          echo "1. Create a new release on GitHub with tag v${{ github.event.inputs.new_version }}"
+          echo "2. Verify the release notes on GitHub"
+          echo "3. Monitor the CI/CD pipelines for the release"
