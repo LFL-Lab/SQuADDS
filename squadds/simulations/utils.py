@@ -12,10 +12,10 @@ from datetime import datetime
 import numpy as np
 import qiskit_metal as metal
 import scqubits as scq
-from ansys.aedt.core import Hfss
 from matplotlib import pyplot as plt
 from pandas import DataFrame
 from prettytable import PrettyTable
+from pyaedt import Hfss
 from qiskit_metal import Dict, MetalGUI, designs, draw
 from qiskit_metal.qlibrary.core import QComponent
 from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import \
