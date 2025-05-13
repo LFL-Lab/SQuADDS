@@ -259,59 +259,192 @@ If no errors are encountered, your installation is likely successful.
 Installation of Palace on Windows Systems
 =========================================
 
-Palace is not officially supported on Windows. However, it is possible to compile Palace on Windows using Visual Studio. The following is a guide to compile Palace on Windows inspired by https://welsim.com/.
+Using a Prebuilt Executable (Recommended)
+-----------------------------------------
 
-Compilation Method
-------------------
+If you want to avoid the complex compilation process, you can use a **prebuilt Palace executable** provided by **WELSIM**. The WELSIM company has built and open-sourced **Palace v1.11.0** as part of their simulation software suite.
 
-Palace provides the Superbuild compilation method with CMake, which automatically downloads all required libraries and compiles them completely. It compiles effortlessly on Linux. However, on Windows, many core libraries such as ``PETSc, SLEPc, libCEED, MUMPS``, and others require manual compilation. Therefore, the Superbuild mode provided officially cannot compile as smoothly on Windows. Users need to apply the manual method of establishing Visual Studio projects to complete the building.
+1. Download the installer from the official GitHub release:
 
-System and Dependency Libraries
--------------------------------
+   - https://github.com/WelSimLLC/WelSim-Apps/releases/download/3.1/WelSim31Setup.exe
+   - Full release page: https://github.com/WelSimLLC/WelSim-Apps/releases/tag/3.1
 
-- **Operating System**: Windows 10, 64-bit
-- **Compiler**: Visual Studio 2022 Community, C++17. Intel Fortran Compiler 2022.
-- **Palace Version**: 0.11.2
+2. Run ``WelSim31Setup.exe`` and follow the installation instructions.
 
-**Dependency Libraries**:
+3. Once installed, the ``palace.exe`` binary will be located in the installation directory, e.g.:
 
-- **Intel MKL**: A popular linear algebra solver, using oneAPI 2022.2.0, consistent with the version of Fortran compiler.
-- **METIS**: A mesh partitioning tool for parallel computing, version 5.3.
-- **Hypre**: A computational library, version 2.52.
-- **nlhmann/json**: Modern C++-based JSON read-write package.
-- **{fmt}**: Formatting tool for input-output streams in C/C++.
-- **Eigen**: A well-known C++ numerical computing package, has no need for compilation; supports direct header file invocation.
-- **libCEED**: A linear algebra computation management terminal that supports parallel computing on various CPUs, GPUs, and clusters.
-- **SuperLU_DIST**: The parallel version of SuperLU, a sparse direct linear algebra solver library.
-- **STRUMPACK**: An open-source software library for large-scale sparse matrix computing.
-- **MUMPS**: An open-source software library from France for solving large-scale sparse linear systems.
-- **SLEPc**: A complex number linear algebra solver for eigenvalue problems, based on PETSc.
-- **ARPACK-NG**: A complex number linear algebra solver for eigenvalue problems, programmed using Fortran 77 language.
-- **GSLIB**: An interpolation solver for high-order spectral elements, optional.
+   .. code-block:: sh
 
-Among these, at least one of the three optional linear solvers ``SuperLU_DIST, STRUMPACK, MUMPS`` must be present. This article uses ``MUMPS``. Additionally, out of the two complex solvers, ``SLEPc`` and ``ARPACK``, at least one is required. Without them, eigenvalue-related computing cannot be performed. This article uses ``ARPACK``.
+      C:\Program Files\WELSIM\v3.1\palace.exe
 
-Visual Studio Projects
-----------------------
+**Note**: This version is Palace **v1.11.0**, which is older than the current upstream version, but it should be sufficient for most simulations.
 
-Establish two projects, namely the static library project ``libpalace``, and the executable file project ``palace``. ``libpalace`` contains all header and source files. ``palace`` is the final generated executable file, containing only a ``main.cpp`` file. This is shown in the figure.
+Building Palace on Windows (Not Recommended for Beginners)
+----------------------------------------------------------
 
-**Project libpalace**
+The installation process involves:
 
-Set the external header file directories.
+1. Installing necessary compilers and tools
+2. Manually downloading and building each dependency
+3. Setting up a Visual Studio solution with two projects
+4. Linking everything and building
 
-Add preprocessor macros:
+Step 1: Install Tools and Compilers
+-----------------------------------
 
-- ``CEED_SKIP_VISIBILITY``
-- ``PALACE_WITH_ARPACK``
-- ``_CRT_SECURE_NO_WARNINGS``
+Visual Studio 2022
+~~~~~~~~~~~~~~~~~~
 
-**Project palace**
+1. Download Visual Studio 2022 Community from: https://visualstudio.microsoft.com/vs/community/
+2. During installation, ensure the following components are selected:
+   - Desktop development with C++
+   - MSVC v14.x
+   - C++ CMake tools
+   - Windows SDK
 
-The method to add external header files and preprocessor macros is essentially the same as ``libpalace``, so it will not be repeated here. Compiling the executable program requires linking all dependent libraries. The added linked libraries are as follows,
+Intel oneAPI Base & HPC Toolkit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-After building, place all dependent dynamic libraries (``*.dll`` files) together with the ``palace.exe`` to run Palace. Test the executable program by running it on the Windows console.
+1. Download from: https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html
+2. Select both **Base Toolkit** and **HPC Toolkit**.
+3. After installation, run:
 
-We have open-sourced the building files for Palace, shared at `https://github.com/WelSimLLC/palace <https://github.com/WelSimLLC/palace>`_, and provided the compiled ``palace.exe`` executable file for users to use directly.
+   ::
 
-You may need to ``C:\Program Files\Microsoft Visual Studio\{Year}\{Licence}\VC\Redist\MSVC\v{version}\vc_redist.x64.exe`` to run the executable program and restart the program.
+      "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
+
+Step 2: Build Dependencies
+--------------------------
+
+METIS 5.1.0
+~~~~~~~~~~~
+
+1. Download from: https://github.com/CIBC-Internal/metis-4.0.3
+2. Build:
+
+   ::
+
+      mkdir build && cd build
+      cmake .. -G "Visual Studio 17 2022" -A x64
+      cmake --build . --config Release
+
+   Output: ``libmetis.lib``, headers in ``include/``
+
+HYPRE 2.25.0
+~~~~~~~~~~~~
+
+1. Download from: https://github.com/hypre-space/hypre
+2. Build:
+
+   ::
+
+      mkdir build && cd build
+      cmake .. -G "Visual Studio 17 2022" -A x64 -DHYPRE_WITH_MPI=OFF
+      cmake --build . --config Release
+
+   Output: ``libHYPRE.lib``, headers in ``src/``
+
+libCEED
+~~~~~~~
+
+1. Clone the repository:
+
+   ::
+
+      git clone https://github.com/CEED/libCEED
+      cd libCEED
+      mkdir build && cd build
+      cmake .. -G "Visual Studio 17 2022" -A x64
+      cmake --build . --config Release
+
+SuperLU_DIST
+~~~~~~~~~~~~
+
+1. Clone the repository:
+
+   ::
+
+      git clone https://github.com/xiaoyeli/superlu_dist
+      cd superlu_dist
+      mkdir build && cd build
+      cmake .. -G "Visual Studio 17 2022" -A x64 -DTPL_BLAS_LIBRARIES="path_to_mkl.lib"
+      cmake --build . --config Release
+
+STRUMPACK
+~~~~~~~~~
+
+1. Clone the repository:
+
+   ::
+
+      git clone https://github.com/pghysels/STRUMPACK
+      cd STRUMPACK
+      mkdir build && cd build
+      cmake .. -G "Visual Studio 17 2022" -A x64
+      cmake --build . --config Release
+
+MUMPS
+~~~~~
+
+- Building MUMPS on Windows is challenging. If needed, follow the guide at:
+  https://github.com/scivision/mumps-builder
+
+SLEPc and PETSc
+~~~~~~~~~~~~~~~
+
+- These are difficult to build on Windows.
+- Consider using Windows Subsystem for Linux (WSL) or prebuilt binaries.
+- Alternatively, remove ``PALACE_WITH_ARPACK`` to skip SLEPc.
+
+Header-only Libraries
+~~~~~~~~~~~~~~~~~~~~~
+
+- Download and extract:
+  - https://github.com/nlohmann/json
+  - https://github.com/fmtlib/fmt
+  - https://gitlab.com/libeigen/eigen
+
+Step 3: Set Up Visual Studio Projects
+-------------------------------------
+
+1. Create a new **Empty Solution** called ``PalaceVS``
+2. Add two projects:
+   - ``libpalace``: Static library
+   - ``palace``: Console Application
+3. Clone Palace repository: https://github.com/awslabs/palace
+4. Add files:
+   - Put ``src/`` and ``fem/`` into ``libpalace``
+   - Put ``main.cpp`` into ``palace``
+
+Step 4: Configure Build Settings
+--------------------------------
+
+For both projects:
+
+1. Configuration → C++ → General → Additional Include Directories:
+   - Add paths to headers from METIS, HYPRE, libCEED, etc.
+   - Add paths to header-only libraries
+
+2. Linker → Input → Additional Dependencies:
+   - Add: ``metis.lib;hypre.lib;ceed.lib;superlu.lib;...``
+
+3. Preprocessor Definitions (for libpalace):
+   - ``CEED_SKIP_VISIBILITY``
+   - ``PALACE_WITH_ARPACK``
+   - ``_CRT_SECURE_NO_WARNINGS``
+
+Step 5: Build and Run
+---------------------
+
+1. Build ``libpalace`` (Release x64)
+2. Build ``palace``
+3. Copy required ``.dll`` files into the output folder
+4. Run ``palace.exe`` from command line
+
+**Note**: You may need to install the Visual C++ Redistributable package from:
+
+::
+
+   C:\Program Files\Microsoft Visual Studio\{Year}\{Edition}\VC\Redist\MSVC\v{version}\vc_redist.x64.exe
+
+to run the final ``palace.exe`` binary.

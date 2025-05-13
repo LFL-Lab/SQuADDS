@@ -812,52 +812,199 @@ make<span class="w"> </span>-j
 </section>
 <section id="installation-of-palace-on-windows-systems">
 <h1>Installation of Palace on Windows Systems<a class="headerlink" href="#installation-of-palace-on-windows-systems" title="Link to this heading">#</a></h1>
-<p>Palace is not officially supported on Windows. However, it is possible to compile Palace on Windows using Visual Studio. The following is a guide to compile Palace on Windows inspired by <a class="reference external" href="https://welsim.com/">https://welsim.com/</a>.</p>
-<section id="compilation-method">
-<h2>Compilation Method<a class="headerlink" href="#compilation-method" title="Link to this heading">#</a></h2>
-<p>Palace provides the Superbuild compilation method with CMake, which automatically downloads all required libraries and compiles them completely. It compiles effortlessly on Linux. However, on Windows, many core libraries such as <code class="docutils literal notranslate"><span class="pre">PETSc,</span> <span class="pre">SLEPc,</span> <span class="pre">libCEED,</span> <span class="pre">MUMPS</span></code>, and others require manual compilation. Therefore, the Superbuild mode provided officially cannot compile as smoothly on Windows. Users need to apply the manual method of establishing Visual Studio projects to complete the building.</p>
+<section id="using-a-prebuilt-executable-recommended">
+<h2>Using a Prebuilt Executable (Recommended)<a class="headerlink" href="#using-a-prebuilt-executable-recommended" title="Link to this heading">#</a></h2>
+<p>If you want to avoid the complex compilation process, you can use a <strong>prebuilt Palace executable</strong> provided by <strong>WELSIM</strong>. The WELSIM company has built and open-sourced <strong>Palace v1.11.0</strong> as part of their simulation software suite.</p>
+<ol class="arabic">
+<li><p>Download the installer from the official GitHub release:</p>
+<ul class="simple">
+<li><p><a class="github reference external" href="https://github.com/WelSimLLC/WelSim-Apps/releases/download/3.1/WelSim31Setup.exe">WelSimLLC/WelSim-Apps</a></p></li>
+<li><p>Full release page: <a class="github reference external" href="https://github.com/WelSimLLC/WelSim-Apps/releases/tag/3.1">WelSimLLC/WelSim-Apps</a></p></li>
+</ul>
+</li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">WelSim31Setup.exe</span></code> and follow the installation instructions.</p></li>
+<li><p>Once installed, the <code class="docutils literal notranslate"><span class="pre">palace.exe</span></code> binary will be located in the installation directory, e.g.:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>C:<span class="se">\P</span>rogram<span class="w"> </span>Files<span class="se">\W</span>ELSIM<span class="se">\v</span><span class="m">3</span>.1<span class="se">\p</span>alace.exe
+</pre></div>
+</div>
+</li>
+</ol>
+<p><strong>Note</strong>: This version is Palace <strong>v1.11.0</strong>, which is older than the current upstream version, but it should be sufficient for most simulations.</p>
 </section>
-<section id="system-and-dependency-libraries">
-<h2>System and Dependency Libraries<a class="headerlink" href="#system-and-dependency-libraries" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p><strong>Operating System</strong>: Windows 10, 64-bit</p></li>
-<li><p><strong>Compiler</strong>: Visual Studio 2022 Community, C++17. Intel Fortran Compiler 2022.</p></li>
-<li><p><strong>Palace Version</strong>: 0.11.2</p></li>
-</ul>
-<p><strong>Dependency Libraries</strong>:</p>
-<ul class="simple">
-<li><p><strong>Intel MKL</strong>: A popular linear algebra solver, using oneAPI 2022.2.0, consistent with the version of Fortran compiler.</p></li>
-<li><p><strong>METIS</strong>: A mesh partitioning tool for parallel computing, version 5.3.</p></li>
-<li><p><strong>Hypre</strong>: A computational library, version 2.52.</p></li>
-<li><p><strong>nlhmann/json</strong>: Modern C++-based JSON read-write package.</p></li>
-<li><p><strong>{fmt}</strong>: Formatting tool for input-output streams in C/C++.</p></li>
-<li><p><strong>Eigen</strong>: A well-known C++ numerical computing package, has no need for compilation; supports direct header file invocation.</p></li>
-<li><p><strong>libCEED</strong>: A linear algebra computation management terminal that supports parallel computing on various CPUs, GPUs, and clusters.</p></li>
-<li><p><strong>SuperLU_DIST</strong>: The parallel version of SuperLU, a sparse direct linear algebra solver library.</p></li>
-<li><p><strong>STRUMPACK</strong>: An open-source software library for large-scale sparse matrix computing.</p></li>
-<li><p><strong>MUMPS</strong>: An open-source software library from France for solving large-scale sparse linear systems.</p></li>
-<li><p><strong>SLEPc</strong>: A complex number linear algebra solver for eigenvalue problems, based on PETSc.</p></li>
-<li><p><strong>ARPACK-NG</strong>: A complex number linear algebra solver for eigenvalue problems, programmed using Fortran 77 language.</p></li>
-<li><p><strong>GSLIB</strong>: An interpolation solver for high-order spectral elements, optional.</p></li>
-</ul>
-<p>Among these, at least one of the three optional linear solvers <code class="docutils literal notranslate"><span class="pre">SuperLU_DIST,</span> <span class="pre">STRUMPACK,</span> <span class="pre">MUMPS</span></code> must be present. This article uses <code class="docutils literal notranslate"><span class="pre">MUMPS</span></code>. Additionally, out of the two complex solvers, <code class="docutils literal notranslate"><span class="pre">SLEPc</span></code> and <code class="docutils literal notranslate"><span class="pre">ARPACK</span></code>, at least one is required. Without them, eigenvalue-related computing cannot be performed. This article uses <code class="docutils literal notranslate"><span class="pre">ARPACK</span></code>.</p>
+<section id="building-palace-on-windows-not-recommended-for-beginners">
+<h2>Building Palace on Windows (Not Recommended for Beginners)<a class="headerlink" href="#building-palace-on-windows-not-recommended-for-beginners" title="Link to this heading">#</a></h2>
+<p>The installation process involves:</p>
+<ol class="arabic simple">
+<li><p>Installing necessary compilers and tools</p></li>
+<li><p>Manually downloading and building each dependency</p></li>
+<li><p>Setting up a Visual Studio solution with two projects</p></li>
+<li><p>Linking everything and building</p></li>
+</ol>
 </section>
-<section id="visual-studio-projects">
-<h2>Visual Studio Projects<a class="headerlink" href="#visual-studio-projects" title="Link to this heading">#</a></h2>
-<p>Establish two projects, namely the static library project <code class="docutils literal notranslate"><span class="pre">libpalace</span></code>, and the executable file project <code class="docutils literal notranslate"><span class="pre">palace</span></code>. <code class="docutils literal notranslate"><span class="pre">libpalace</span></code> contains all header and source files. <code class="docutils literal notranslate"><span class="pre">palace</span></code> is the final generated executable file, containing only a <code class="docutils literal notranslate"><span class="pre">main.cpp</span></code> file. This is shown in the figure.</p>
-<p><strong>Project libpalace</strong></p>
-<p>Set the external header file directories.</p>
-<p>Add preprocessor macros:</p>
+<section id="step-1-install-tools-and-compilers">
+<h2>Step 1: Install Tools and Compilers<a class="headerlink" href="#step-1-install-tools-and-compilers" title="Link to this heading">#</a></h2>
+<section id="visual-studio-2022">
+<h3>Visual Studio 2022<a class="headerlink" href="#visual-studio-2022" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Download Visual Studio 2022 Community from: <a class="reference external" href="https://visualstudio.microsoft.com/vs/community/">https://visualstudio.microsoft.com/vs/community/</a></p></li>
+<li><p>During installation, ensure the following components are selected:
+- Desktop development with C++
+- MSVC v14.x
+- C++ CMake tools
+- Windows SDK</p></li>
+</ol>
+</section>
+<section id="intel-oneapi-base-hpc-toolkit">
+<h3>Intel oneAPI Base &amp; HPC Toolkit<a class="headerlink" href="#intel-oneapi-base-hpc-toolkit" title="Link to this heading">#</a></h3>
+<ol class="arabic">
+<li><p>Download from: <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html">https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html</a></p></li>
+<li><p>Select both <strong>Base Toolkit</strong> and <strong>HPC Toolkit</strong>.</p></li>
+<li><p>After installation, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;C:\Program Files (x86)\Intel\oneAPI\setvars.bat&quot;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<section id="step-2-build-dependencies">
+<h2>Step 2: Build Dependencies<a class="headerlink" href="#step-2-build-dependencies" title="Link to this heading">#</a></h2>
+<section id="metis-5-1-0">
+<h3>METIS 5.1.0<a class="headerlink" href="#metis-5-1-0" title="Link to this heading">#</a></h3>
+<ol class="arabic">
+<li><p>Download from: <a class="github reference external" href="https://github.com/CIBC-Internal/metis-4.0.3">CIBC-Internal/metis-4.0.3</a></p></li>
+<li><p>Build:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">build</span> <span class="o">&amp;&amp;</span> <span class="n">cd</span> <span class="n">build</span>
+<span class="n">cmake</span> <span class="o">..</span> <span class="o">-</span><span class="n">G</span> <span class="s2">&quot;Visual Studio 17 2022&quot;</span> <span class="o">-</span><span class="n">A</span> <span class="n">x64</span>
+<span class="n">cmake</span> <span class="o">--</span><span class="n">build</span> <span class="o">.</span> <span class="o">--</span><span class="n">config</span> <span class="n">Release</span>
+</pre></div>
+</div>
+<p>Output: <code class="docutils literal notranslate"><span class="pre">libmetis.lib</span></code>, headers in <code class="docutils literal notranslate"><span class="pre">include/</span></code></p>
+</li>
+</ol>
+</section>
+<section id="hypre-2-25-0">
+<h3>HYPRE 2.25.0<a class="headerlink" href="#hypre-2-25-0" title="Link to this heading">#</a></h3>
+<ol class="arabic">
+<li><p>Download from: <a class="github reference external" href="https://github.com/hypre-space/hypre">hypre-space/hypre</a></p></li>
+<li><p>Build:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">build</span> <span class="o">&amp;&amp;</span> <span class="n">cd</span> <span class="n">build</span>
+<span class="n">cmake</span> <span class="o">..</span> <span class="o">-</span><span class="n">G</span> <span class="s2">&quot;Visual Studio 17 2022&quot;</span> <span class="o">-</span><span class="n">A</span> <span class="n">x64</span> <span class="o">-</span><span class="n">DHYPRE_WITH_MPI</span><span class="o">=</span><span class="n">OFF</span>
+<span class="n">cmake</span> <span class="o">--</span><span class="n">build</span> <span class="o">.</span> <span class="o">--</span><span class="n">config</span> <span class="n">Release</span>
+</pre></div>
+</div>
+<p>Output: <code class="docutils literal notranslate"><span class="pre">libHYPRE.lib</span></code>, headers in <code class="docutils literal notranslate"><span class="pre">src/</span></code></p>
+</li>
+</ol>
+</section>
+<section id="libceed">
+<h3>libCEED<a class="headerlink" href="#libceed" title="Link to this heading">#</a></h3>
+<ol class="arabic">
+<li><p>Clone the repository:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">CEED</span><span class="o">/</span><span class="n">libCEED</span>
+<span class="n">cd</span> <span class="n">libCEED</span>
+<span class="n">mkdir</span> <span class="n">build</span> <span class="o">&amp;&amp;</span> <span class="n">cd</span> <span class="n">build</span>
+<span class="n">cmake</span> <span class="o">..</span> <span class="o">-</span><span class="n">G</span> <span class="s2">&quot;Visual Studio 17 2022&quot;</span> <span class="o">-</span><span class="n">A</span> <span class="n">x64</span>
+<span class="n">cmake</span> <span class="o">--</span><span class="n">build</span> <span class="o">.</span> <span class="o">--</span><span class="n">config</span> <span class="n">Release</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="superlu-dist">
+<h3>SuperLU_DIST<a class="headerlink" href="#superlu-dist" title="Link to this heading">#</a></h3>
+<ol class="arabic">
+<li><p>Clone the repository:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">xiaoyeli</span><span class="o">/</span><span class="n">superlu_dist</span>
+<span class="n">cd</span> <span class="n">superlu_dist</span>
+<span class="n">mkdir</span> <span class="n">build</span> <span class="o">&amp;&amp;</span> <span class="n">cd</span> <span class="n">build</span>
+<span class="n">cmake</span> <span class="o">..</span> <span class="o">-</span><span class="n">G</span> <span class="s2">&quot;Visual Studio 17 2022&quot;</span> <span class="o">-</span><span class="n">A</span> <span class="n">x64</span> <span class="o">-</span><span class="n">DTPL_BLAS_LIBRARIES</span><span class="o">=</span><span class="s2">&quot;path_to_mkl.lib&quot;</span>
+<span class="n">cmake</span> <span class="o">--</span><span class="n">build</span> <span class="o">.</span> <span class="o">--</span><span class="n">config</span> <span class="n">Release</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="strumpack">
+<h3>STRUMPACK<a class="headerlink" href="#strumpack" title="Link to this heading">#</a></h3>
+<ol class="arabic">
+<li><p>Clone the repository:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">pghysels</span><span class="o">/</span><span class="n">STRUMPACK</span>
+<span class="n">cd</span> <span class="n">STRUMPACK</span>
+<span class="n">mkdir</span> <span class="n">build</span> <span class="o">&amp;&amp;</span> <span class="n">cd</span> <span class="n">build</span>
+<span class="n">cmake</span> <span class="o">..</span> <span class="o">-</span><span class="n">G</span> <span class="s2">&quot;Visual Studio 17 2022&quot;</span> <span class="o">-</span><span class="n">A</span> <span class="n">x64</span>
+<span class="n">cmake</span> <span class="o">--</span><span class="n">build</span> <span class="o">.</span> <span class="o">--</span><span class="n">config</span> <span class="n">Release</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="mumps">
+<h3>MUMPS<a class="headerlink" href="#mumps" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">CEED_SKIP_VISIBILITY</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">PALACE_WITH_ARPACK</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">_CRT_SECURE_NO_WARNINGS</span></code></p></li>
+<li><p>Building MUMPS on Windows is challenging. If needed, follow the guide at:
+<a class="github reference external" href="https://github.com/scivision/mumps-builder">scivision/mumps-builder</a></p></li>
 </ul>
-<p><strong>Project palace</strong></p>
-<p>The method to add external header files and preprocessor macros is essentially the same as <code class="docutils literal notranslate"><span class="pre">libpalace</span></code>, so it will not be repeated here. Compiling the executable program requires linking all dependent libraries. The added linked libraries are as follows,</p>
-<p>After building, place all dependent dynamic libraries (<code class="docutils literal notranslate"><span class="pre">*.dll</span></code> files) together with the <code class="docutils literal notranslate"><span class="pre">palace.exe</span></code> to run Palace. Test the executable program by running it on the Windows console.</p>
-<p>We have open-sourced the building files for Palace, shared at <a class="github reference external" href="https://github.com/WelSimLLC/palace">WelSimLLC/palace</a>, and provided the compiled <code class="docutils literal notranslate"><span class="pre">palace.exe</span></code> executable file for users to use directly.</p>
-<p>You may need to <code class="docutils literal notranslate"><span class="pre">C:\Program</span> <span class="pre">Files\Microsoft</span> <span class="pre">Visual</span> <span class="pre">Studio\{Year}\{Licence}\VC\Redist\MSVC\v{version}\vc_redist.x64.exe</span></code> to run the executable program and restart the program.</p>
+</section>
+<section id="slepc-and-petsc">
+<h3>SLEPc and PETSc<a class="headerlink" href="#slepc-and-petsc" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>These are difficult to build on Windows.</p></li>
+<li><p>Consider using Windows Subsystem for Linux (WSL) or prebuilt binaries.</p></li>
+<li><p>Alternatively, remove <code class="docutils literal notranslate"><span class="pre">PALACE_WITH_ARPACK</span></code> to skip SLEPc.</p></li>
+</ul>
+</section>
+<section id="header-only-libraries">
+<h3>Header-only Libraries<a class="headerlink" href="#header-only-libraries" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Download and extract:
+- <a class="github reference external" href="https://github.com/nlohmann/json">nlohmann/json</a>
+- <a class="github reference external" href="https://github.com/fmtlib/fmt">fmtlib/fmt</a>
+- <a class="gitlab reference external" href="https://gitlab.com/libeigen/eigen">libeigen/eigen</a></p></li>
+</ul>
+</section>
+</section>
+<section id="step-3-set-up-visual-studio-projects">
+<h2>Step 3: Set Up Visual Studio Projects<a class="headerlink" href="#step-3-set-up-visual-studio-projects" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Create a new <strong>Empty Solution</strong> called <code class="docutils literal notranslate"><span class="pre">PalaceVS</span></code></p></li>
+<li><p>Add two projects:
+- <code class="docutils literal notranslate"><span class="pre">libpalace</span></code>: Static library
+- <code class="docutils literal notranslate"><span class="pre">palace</span></code>: Console Application</p></li>
+<li><p>Clone Palace repository: <a class="github reference external" href="https://github.com/awslabs/palace">awslabs/palace</a></p></li>
+<li><p>Add files:
+- Put <code class="docutils literal notranslate"><span class="pre">src/</span></code> and <code class="docutils literal notranslate"><span class="pre">fem/</span></code> into <code class="docutils literal notranslate"><span class="pre">libpalace</span></code>
+- Put <code class="docutils literal notranslate"><span class="pre">main.cpp</span></code> into <code class="docutils literal notranslate"><span class="pre">palace</span></code></p></li>
+</ol>
+</section>
+<section id="step-4-configure-build-settings">
+<h2>Step 4: Configure Build Settings<a class="headerlink" href="#step-4-configure-build-settings" title="Link to this heading">#</a></h2>
+<p>For both projects:</p>
+<ol class="arabic simple">
+<li><p>Configuration → C++ → General → Additional Include Directories:
+- Add paths to headers from METIS, HYPRE, libCEED, etc.
+- Add paths to header-only libraries</p></li>
+<li><p>Linker → Input → Additional Dependencies:
+- Add: <code class="docutils literal notranslate"><span class="pre">metis.lib;hypre.lib;ceed.lib;superlu.lib;...</span></code></p></li>
+<li><p>Preprocessor Definitions (for libpalace):
+- <code class="docutils literal notranslate"><span class="pre">CEED_SKIP_VISIBILITY</span></code>
+- <code class="docutils literal notranslate"><span class="pre">PALACE_WITH_ARPACK</span></code>
+- <code class="docutils literal notranslate"><span class="pre">_CRT_SECURE_NO_WARNINGS</span></code></p></li>
+</ol>
+</section>
+<section id="step-5-build-and-run">
+<h2>Step 5: Build and Run<a class="headerlink" href="#step-5-build-and-run" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Build <code class="docutils literal notranslate"><span class="pre">libpalace</span></code> (Release x64)</p></li>
+<li><p>Build <code class="docutils literal notranslate"><span class="pre">palace</span></code></p></li>
+<li><p>Copy required <code class="docutils literal notranslate"><span class="pre">.dll</span></code> files into the output folder</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">palace.exe</span></code> from command line</p></li>
+</ol>
+<p><strong>Note</strong>: You may need to install the Visual C++ Redistributable package from:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">:</span>\<span class="n">Program</span> <span class="n">Files</span>\<span class="n">Microsoft</span> <span class="n">Visual</span> <span class="n">Studio</span>\<span class="p">{</span><span class="n">Year</span><span class="p">}</span>\<span class="p">{</span><span class="n">Edition</span><span class="p">}</span>\<span class="n">VC</span>\<span class="n">Redist</span>\<span class="n">MSVC</span>\<span class="n">v</span><span class="p">{</span><span class="n">version</span><span class="p">}</span>\<span class="n">vc_redist</span><span class="o">.</span><span class="n">x64</span><span class="o">.</span><span class="n">exe</span>
+</pre></div>
+</div>
+<p>to run the final <code class="docutils literal notranslate"><span class="pre">palace.exe</span></code> binary.</p>
 </section>
 </section>
 
@@ -905,9 +1052,27 @@ make<span class="w"> </span>-j
 </ul>
 </li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-of-palace-on-windows-systems">Installation of Palace on Windows Systems</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compilation-method">Compilation Method</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#system-and-dependency-libraries">System and Dependency Libraries</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visual-studio-projects">Visual Studio Projects</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-a-prebuilt-executable-recommended">Using a Prebuilt Executable (Recommended)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-palace-on-windows-not-recommended-for-beginners">Building Palace on Windows (Not Recommended for Beginners)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-tools-and-compilers">Step 1: Install Tools and Compilers</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#visual-studio-2022">Visual Studio 2022</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#intel-oneapi-base-hpc-toolkit">Intel oneAPI Base &amp; HPC Toolkit</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-build-dependencies">Step 2: Build Dependencies</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#metis-5-1-0">METIS 5.1.0</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hypre-2-25-0">HYPRE 2.25.0</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#libceed">libCEED</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#superlu-dist">SuperLU_DIST</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strumpack">STRUMPACK</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mumps">MUMPS</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#slepc-and-petsc">SLEPc and PETSc</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#header-only-libraries">Header-only Libraries</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-set-up-visual-studio-projects">Step 3: Set Up Visual Studio Projects</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-configure-build-settings">Step 4: Configure Build Settings</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-build-and-run">Step 5: Build and Run</a></li>
 </ul>
 </li>
 </ul>
