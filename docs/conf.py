@@ -1,14 +1,12 @@
 import os
 import sys
 
-from recommonmark.parser import CommonMarkParser
-
 # Set the path to the root of the project
 sys.path.insert(0, os.path.abspath('../..'))
 
 # Project information
 project = 'SQuADDS'
-copyright = '2024, Sadman Ahmed Shanto & Eli Levenson-Falk'
+copyright = '2025, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
 release = "0.3.7"
 
@@ -30,25 +28,30 @@ extensions = [
     'qiskit_sphinx_theme',
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
-    "sphinx.ext.mathjax",
+    "sphinx.ext.mathjax",  # Use only mathjax for math rendering
     "sphinx.ext.viewcode",
     "jupyter_sphinx",
     "sphinx_copybutton",
     "sphinx_design",
     "sphinx.ext.intersphinx",
-    "sphinxcontrib.katex",
     "reno.sphinxext",
-    'recommonmark', # Add this for Markdown support
+    'myst_parser',  # Use MyST-Parser for Markdown support
 ]
 
-# Add source suffix and parser configuration
+# MyST-Parser configuration (optional, but can be extended)
+myst_enable_extensions = [
+    "amsmath",
+    "dollarmath",
+    "colon_fence",
+    "deflist",
+    "html_admonition",
+    "html_image",
+]
+
+# Let Sphinx autodetect .rst and .md
 source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
-}
-
-source_parsers = {
-    '.md': CommonMarkParser,
 }
 
 # Templates path
