@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Tutorial 9: Learning the Inverse Design Map – from :math:`hat{H}` to Geometry &#8212; SQuADDS v0.3.7</title>
+    <title>Tutorial 9: Learning the Inverse Design Map &#8212; SQuADDS v0.3.7</title>
   
   
   
@@ -35,8 +35,6 @@
     <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/katex-math.css?v=91adb8b6" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
   <!-- So that users can add custom icons -->
@@ -53,10 +51,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
-    <script src="../../_static/katex.min.js?v=be8ff15f"></script>
-    <script src="../../_static/auto-render.min.js?v=ad136472"></script>
-    <script src="../../_static/katex_autorenderer.js?v=bebc588a"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"equationNumbers": {"autoNumber": "AMS", "useLabelIds": true}}, "tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area", "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}})</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -546,7 +544,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-6_Adding_Airbridges.html">Tutorial 6: Adding Airbridges</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-7_Simulate_designs_with_palace.html">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-8_ML_interpolation_in_SQuADDS.html">Tutorial 8: Machine Learning with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial 9: Learning the Inverse Design Map – <em>from :math:`hat{H}` to Geometry</em></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial 9: Learning the Inverse Design Map</a></li>
 </ul>
 </div>
 </nav></div>
@@ -590,7 +588,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">Tutorials</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial 9: Learning the Inverse Design Map – <em>from :math:`hat{H}` to Geometry</em></span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial 9: Learning the Inverse Design Map</span></li>
   </ul>
 </nav>
 </div>
@@ -607,8 +605,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="Tutorial-9:-Learning-the-Inverse-Design-Map-–-from-:math:`hat{H}`-to-Geometry">
-<h1>Tutorial 9: Learning the Inverse Design Map – <em>from :math:`hat{H}` to Geometry</em><a class="headerlink" href="#Tutorial-9:-Learning-the-Inverse-Design-Map-–-from-:math:`hat{H}`-to-Geometry" title="Link to this heading">#</a></h1>
+  <section id="Tutorial-9:-Learning-the-Inverse-Design-Map">
+<h1>Tutorial 9: Learning the Inverse Design Map<a class="headerlink" href="#Tutorial-9:-Learning-the-Inverse-Design-Map" title="Link to this heading">#</a></h1>
 <p>In this tutorial, we explore how to infer device geometry from Hamiltonian parameters by learning the inverse design map. We introduce a custom machine learning architecture tailored to capture the underlying physics of this mapping. Specifically, we aim to answer:</p>
 <ol class="arabic simple">
 <li><p>Which design space parameters most significantly influence a given set of Hamiltonian parameters?</p></li>
@@ -642,11 +640,11 @@
 </section>
 <section id="Design-Relevance-Encoder">
 <h3>Design-Relevance Encoder<a class="headerlink" href="#Design-Relevance-Encoder" title="Link to this heading">#</a></h3>
-<p>The <strong>Design-Relevance Encoder</strong> identifies which geometric parameters <span class="math">\(\boldsymbol{\xi}\)</span> most influence each target Hamiltonian parameter <span class="math">\(\hat{\mathcal{H}}\)</span>. To do this, we train an interpretable model — <strong>Lasso regression</strong> — to predict each Hamiltonian component from the full set of geometric inputs.</p>
+<p>The <strong>Design-Relevance Encoder</strong> identifies which geometric parameters <span class="math notranslate nohighlight">\(\boldsymbol{\xi}\)</span> most influence each target Hamiltonian parameter <span class="math notranslate nohighlight">\(\hat{\mathcal{H}}\)</span>. To do this, we train an interpretable model — <strong>Lasso regression</strong> — to predict each Hamiltonian component from the full set of geometric inputs.</p>
 <ul class="simple">
 <li><p><strong>Lasso (Least Absolute Shrinkage and Selection Operator)</strong> selects relevant features via coefficient shrinkage, automatically zeroing out irrelevant ones.</p></li>
 </ul>
-<p>By using this model’s outputs we construct a relevance mask that tells us which subset of design parameters significantly affect each <span class="math">\(\hat{\mathcal{H}}\)</span>. This subset is then used as input to symbolic regression (e.g. KAN) to extract compact, human-readable expressions.</p>
+<p>By using this model’s outputs we construct a relevance mask that tells us which subset of design parameters significantly affect each <span class="math notranslate nohighlight">\(\hat{\mathcal{H}}\)</span>. This subset is then used as input to symbolic regression (e.g. KAN) to extract compact, human-readable expressions.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -1043,7 +1041,7 @@ design geometry affect the Hamiltonian parameters</p>
 </section>
 <section id="Example:-Selecting-Features-and-Target-for-KAN">
 <h2>Example: Selecting Features and Target for KAN<a class="headerlink" href="#Example:-Selecting-Features-and-Target-for-KAN" title="Link to this heading">#</a></h2>
-<p>In this example flow, we demonstrate how to set up the KAN model for inverse design. First, we select the Hamiltonian parameter to model—in this case, the cavity frequency <span class="math">\(f_{cav}\)</span> (in GHz). Next, using the results from the Design-Relevance Encoder, we identify <strong>``total_length``</strong> and <strong>``claw_length``</strong> as the two most influential design parameters for predicting <code class="docutils literal notranslate"><span class="pre">cavity_frequency</span></code>.</p>
+<p>In this example flow, we demonstrate how to set up the KAN model for inverse design. First, we select the Hamiltonian parameter to model—in this case, the cavity frequency <span class="math notranslate nohighlight">\(f_{cav}\)</span> (in GHz). Next, using the results from the Design-Relevance Encoder, we identify <strong>``total_length``</strong> and <strong>``claw_length``</strong> as the two most influential design parameters for predicting <code class="docutils literal notranslate"><span class="pre">cavity_frequency</span></code>.</p>
 <p>We then proceed to extract and process the relevant features from the training dataset to prepare for model training.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -1101,7 +1099,7 @@ design geometry affect the Hamiltonian parameters</p>
 </section>
 <section id="KAN-Model-Setup">
 <h2>KAN Model Setup<a class="headerlink" href="#KAN-Model-Setup" title="Link to this heading">#</a></h2>
-<p>We now define and initialize the Kolmogorov–Arnold Network (KAN) model to learn a symbolic expression for the Hamiltonian parameter <span class="math">\(f_{cav}\)</span>. The chosen architecture <code class="docutils literal notranslate"><span class="pre">KAN(width=[2,</span> <span class="pre">2,</span> <span class="pre">1],</span> <span class="pre">grid=5,</span> <span class="pre">k=3)</span></code> reflects:</p>
+<p>We now define and initialize the Kolmogorov–Arnold Network (KAN) model to learn a symbolic expression for the Hamiltonian parameter <span class="math notranslate nohighlight">\(f_{cav}\)</span>. The chosen architecture <code class="docutils literal notranslate"><span class="pre">KAN(width=[2,</span> <span class="pre">2,</span> <span class="pre">1],</span> <span class="pre">grid=5,</span> <span class="pre">k=3)</span></code> reflects:</p>
 <ul class="simple">
 <li><p><strong>Input layer</strong> with 2 neurons for the two most relevant geometric features: <code class="docutils literal notranslate"><span class="pre">total_length</span></code> and <code class="docutils literal notranslate"><span class="pre">claw_length</span></code>.</p></li>
 <li><p><strong>One hidden layer</strong> with 2 units, each equipped with a set of grid-based basis functions.</p></li>
@@ -1303,7 +1301,7 @@ saving model version 0.3
 </div>
 </div>
 <p>Finally, we define a library of candidate symbolic functions (polynomials, sinusoids, logs, etc.). KAN fits the learned internal structure to combinations of these and then extracts the final symbolic formula representing:</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[{f_{cav}} = f(\text{cross\_length}, \text{claw\_length})\]</div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
@@ -1452,44 +1450,44 @@ saving model version 0.4
 </div>
 </div>
 <p>The symbolic expression returned by the KAN model is:</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[f_{cav}(x_1, x_2) = a_1 x_1 + a_2 x_2 + a_3 \sin(b_1 x_2 + b_2) + a_4\]</div>
 <p>with the following numerical values:</p>
 <ul class="simple">
-<li><p><span class="math">\(a_1 = -1.694 \times 10^{-3}\)</span></p></li>
-<li><p><span class="math">\(a_2 = -5.35 \times 10^{-12}\)</span></p></li>
-<li><p><span class="math">\(a_3 = -5.43 \times 10^{-6}\)</span></p></li>
-<li><p><span class="math">\(b_1 = 9.40\)</span>, <span class="math">\(b_2 = -9.61\)</span></p></li>
-<li><p><span class="math">\(a_4 = 13.285\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(a_1 = -1.694 \times 10^{-3}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(a_2 = -5.35 \times 10^{-12}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(a_3 = -5.43 \times 10^{-6}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(b_1 = 9.40\)</span>, <span class="math notranslate nohighlight">\(b_2 = -9.61\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(a_4 = 13.285\)</span></p></li>
 </ul>
 </section>
 <section id="Dimensional-Analysis-and-Simplification">
 <h2>Dimensional Analysis and Simplification<a class="headerlink" href="#Dimensional-Analysis-and-Simplification" title="Link to this heading">#</a></h2>
 <p>In our dataset:</p>
 <ul class="simple">
-<li><p><span class="math">\(x_1 \in [2000, 5000] \, \mu\text{m}\)</span></p></li>
-<li><p><span class="math">\(x_2 \in [100, 400] \, \mu\text{m}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(x_1 \in [2000, 5000] \, \mu\text{m}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(x_2 \in [100, 400] \, \mu\text{m}\)</span></p></li>
 </ul>
 <p>We can estimate the magnitude of each term:</p>
 <ul class="simple">
-<li><p><span class="math">\(a_1 x_1 \sim - 3.5\)</span> — dominant term</p></li>
-<li><p><span class="math">\(a_2 x_2 \sim 10^{-9}\)</span> — negligible</p></li>
-<li><p><span class="math">\(a_3 \sin(\cdot) \sim 10^{-6}\)</span> — negligible</p></li>
-<li><p><span class="math">\(a_4 \sim 13.3\)</span> — dominant constant offset</p></li>
+<li><p><span class="math notranslate nohighlight">\(a_1 x_1 \sim - 3.5\)</span> — dominant term</p></li>
+<li><p><span class="math notranslate nohighlight">\(a_2 x_2 \sim 10^{-9}\)</span> — negligible</p></li>
+<li><p><span class="math notranslate nohighlight">\(a_3 \sin(\cdot) \sim 10^{-6}\)</span> — negligible</p></li>
+<li><p><span class="math notranslate nohighlight">\(a_4 \sim 13.3\)</span> — dominant constant offset</p></li>
 </ul>
 <p>Thus, to leading order, the model simplifies to:</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[f_{cav}(x_1, x_2) \approx a_1 x_1 + a_4\]</div>
 </section>
 <section id="Interpretation">
 <h2>Interpretation<a class="headerlink" href="#Interpretation" title="Link to this heading">#</a></h2>
-<p>In summary, the model shows that total meander length <span class="math">\(x_1\)</span> is the dominant factor affecting cavity frequency, with other terms (including those involving claw length <span class="math">\(x_2\)</span>) being negligible. This matches physical expectations and demonstrates that the symbolic formula found by KAN is both accurate and interpretable, serving as a reliable and efficient surrogate for more complex simulations.</p>
+<p>In summary, the model shows that total meander length <span class="math notranslate nohighlight">\(x_1\)</span> is the dominant factor affecting cavity frequency, with other terms (including those involving claw length <span class="math notranslate nohighlight">\(x_2\)</span>) being negligible. This matches physical expectations and demonstrates that the symbolic formula found by KAN is both accurate and interpretable, serving as a reliable and efficient surrogate for more complex simulations.</p>
 <p><strong>Note:</strong> KAN model outcomes are probabilistic—if you do not set a deterministic random seed, you may not obtain the exact same symbolic model or results each time you run this notebook. Additionally, the hyperparameters used here are not fully optimized; further tuning will certainly yield improved performance and interpretability at the cost of training time.</p>
 <hr class="docutils" />
 <section id="Task-1:-Symbolic-Discovery-with-KANs-Using-Design-Relevance-Insights">
 <h3>Task 1: Symbolic Discovery with KANs Using Design-Relevance Insights<a class="headerlink" href="#Task-1:-Symbolic-Discovery-with-KANs-Using-Design-Relevance-Insights" title="Link to this heading">#</a></h3>
 <p>Your goal is to explore <strong>symbolic relationships between Hamiltonian parameters and the most relevant design variables</strong> using a KAN model</p>
-<p>Start by choosing a Hamiltonian parameter of interest (e.g., <span class="math">\(g\)</span>, <span class="math">\(\alpha_q\)</span>) and use the <strong>design-relevance encoder</strong> outputs to identify which geometry parameters matter most for that target.</p>
+<p>Start by choosing a Hamiltonian parameter of interest (e.g., <span class="math notranslate nohighlight">\(g\)</span>, <span class="math notranslate nohighlight">\(\alpha_q\)</span>) and use the <strong>design-relevance encoder</strong> outputs to identify which geometry parameters matter most for that target.</p>
 <p>Then:</p>
 <ul class="simple">
 <li><p>Use those selected design variables as inputs to the KAN model.</p></li>
@@ -1524,20 +1522,20 @@ saving model version 0.4
 </section>
 <section id="Task-2:">
 <h3>Task 2:<a class="headerlink" href="#Task-2:" title="Link to this heading">#</a></h3>
-<p>I had a similar-ish model (no hyperparameter tuning) for that predicted the following for the coupling strength, <span class="math">\(g\)</span>:</p>
-<div class="math">
+<p>I had a similar-ish model (no hyperparameter tuning) for that predicted the following for the coupling strength, <span class="math notranslate nohighlight">\(g\)</span>:</p>
+<div class="math notranslate nohighlight">
 \[g(x_1, x_2) = 1.2306 \cdot x_1 + 0.6623 \cdot x_2 - 848.14 \cdot \sqrt{0.00559 \cdot x_1 + 0.00134 \cdot x_2 + 1} + 1016.44\]</div>
 <p>Writing it without the constants:</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[g(x_1, x_2) = a_1 x_1 + a_2 x_2 - b \cdot \sqrt{c_1 x_1 + c_2 x_2 + 1} + d\]</div>
 <p>Where:</p>
 <ul class="simple">
-<li><p><span class="math">\(x_1\)</span>: cross length (in microns)</p></li>
-<li><p><span class="math">\(x_2\)</span>: claw length (in microns)</p></li>
-<li><p><span class="math">\(a_1, a_2\)</span>: linear gain coefficients</p></li>
-<li><p><span class="math">\(b\)</span>: scale of nonlinear saturation</p></li>
-<li><p><span class="math">\(c_1, c_2\)</span>: coupling weightings inside the square root</p></li>
-<li><p><span class="math">\(d\)</span>: baseline offset</p></li>
+<li><p><span class="math notranslate nohighlight">\(x_1\)</span>: cross length (in microns)</p></li>
+<li><p><span class="math notranslate nohighlight">\(x_2\)</span>: claw length (in microns)</p></li>
+<li><p><span class="math notranslate nohighlight">\(a_1, a_2\)</span>: linear gain coefficients</p></li>
+<li><p><span class="math notranslate nohighlight">\(b\)</span>: scale of nonlinear saturation</p></li>
+<li><p><span class="math notranslate nohighlight">\(c_1, c_2\)</span>: coupling weightings inside the square root</p></li>
+<li><p><span class="math notranslate nohighlight">\(d\)</span>: baseline offset</p></li>
 </ul>
 <p>It seems to have fitted our data very well.</p>
 <div style="display: flex; justify-content: space-between; margin: 20px 0;"><div style="flex: 1; margin: 0 10px;"><h3><p>Reference plot from the SQuADDS paper</p>
@@ -1660,7 +1658,7 @@ saving model version 0.4
 
   <p class="copyright">
     
-      © Copyright 2024, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      © Copyright 2025, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
       <br/>
     
   </p>
