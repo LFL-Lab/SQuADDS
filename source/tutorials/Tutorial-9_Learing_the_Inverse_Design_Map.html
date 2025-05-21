@@ -1,0 +1,1653 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tutorial 9: Learning the Inverse Design Map – from :math:`hat{H}` to Geometry &#8212; SQuADDS v0.3.7</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/katex-math.css?v=91adb8b6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/katex.min.js?v=be8ff15f"></script>
+    <script src="../../_static/auto-render.min.js?v=ad136472"></script>
+    <script src="../../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Read our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+     
+  
+
+<a class="navbar-brand logo" href="https://lfl-lab.github.io/SQuADDS/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/squadds_logo_light_name.png" class="logo__image only-light" alt="SQuADDS Logo"/>
+    <img src="../../_static/squadds_logo_dark_name.png" class="logo__image only-dark pst-js-only" alt="SQuADDS Logo"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="DeepWiki" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-robot fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">DeepWiki</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/contribute.html">
+    Contributions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/simulations.html">
+    Simulation Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../resources/concepts.html">
+    Workflows
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../release_notes.html">
+    Release Logs
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../references/index.html">
+    References
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/lfl-lab/SQuADDS">
+    GitHub
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://arxiv.org/pdf/2312.13483.pdf">
+    Paper
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://dornsife.usc.edu/lfl/">
+    LFL Lab ✌️
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/SQuADDS/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB" title="HuggingFace" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-face-smile fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">HuggingFace</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="DeepWiki" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-robot fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">DeepWiki</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial 9: Learning the Inverse Design Map – <em>from :math:`hat{H}` to Geometry</em></span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Tutorial-9:-Learning-the-Inverse-Design-Map-–-from-:math:`hat{H}`-to-Geometry">
+<h1>Tutorial 9: Learning the Inverse Design Map – <em>from :math:`hat{H}` to Geometry</em><a class="headerlink" href="#Tutorial-9:-Learning-the-Inverse-Design-Map-–-from-:math:`hat{H}`-to-Geometry" title="Link to this heading">#</a></h1>
+<p>In this tutorial, we explore how to infer device geometry from Hamiltonian parameters by learning the inverse design map. We introduce a custom machine learning architecture tailored to capture the underlying physics of this mapping. Specifically, we aim to answer:</p>
+<ol class="arabic simple">
+<li><p>Which design space parameters most significantly influence a given set of Hamiltonian parameters?</p></li>
+<li><p>How does each Hamiltonian parameter quantitatively depend on these key design variables?</p></li>
+</ol>
+<p><strong>Note: This tutorial was originally created for the</strong><a class="reference external" href="https://qdw-ucla.squarespace.com/">Quantum Device Workshop</a><strong>, and includes some optional “tasks” for workshop participants. Feel free to skip these if you’re just interested in the main content.</strong></p>
+<section id="Environment-Setup-Recommendation">
+<h2>Environment Setup Recommendation<a class="headerlink" href="#Environment-Setup-Recommendation" title="Link to this heading">#</a></h2>
+<p><strong>We strongly recommend creating a separate Python environment for this notebook to ensure all dependencies are installed and to avoid conflicts with your base environment.</strong></p>
+<div class="line-block">
+<div class="line">Please follow the setup instructions here:</div>
+<div class="line"><a class="github reference external" href="https://github.com/LFL-Lab/QDW2025/blob/main/notebooks/advance-track/setup_instructions.md">LFL-Lab/QDW2025</a></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<section id="Our-Model:">
+<h3>Our Model:<a class="headerlink" href="#Our-Model:" title="Link to this heading">#</a></h3>
+<p>We propose a two-model architecture to understand the physics of the Hamiltonian-Design space mapping.</p>
+<ol class="arabic simple">
+<li><p><strong>Design-Relevance Encoder</strong> The first stage is a lightweight model (e.g., Random Forest or Lasso) that <strong>identifies the subset of geometric design parameters most relevant</strong> to each Hamiltonian parameter. This compresses the full design space into a minimal, interpretable feature subset for each target Hamiltonian.</p></li>
+<li><p><strong>KAN-based Symbolic Decoder</strong> The second model, a <strong>Kolmogorov–Arnold Network (KAN)</strong> is trained to <strong>symbolically model the Hamiltonian parameter</strong> as a function of only its relevant design variables. The KAN outputs a closed-form symbolic expression, enabling direct interpretation of the underlying physics-driven dependency.</p></li>
+</ol>
+</section>
+<section id="Design-Relevance-Encoder">
+<h3>Design-Relevance Encoder<a class="headerlink" href="#Design-Relevance-Encoder" title="Link to this heading">#</a></h3>
+<p>The <strong>Design-Relevance Encoder</strong> identifies which geometric parameters <span class="math">\(\boldsymbol{\xi}\)</span> most influence each target Hamiltonian parameter <span class="math">\(\hat{\mathcal{H}}\)</span>. To do this, we train an interpretable model — <strong>Lasso regression</strong> — to predict each Hamiltonian component from the full set of geometric inputs.</p>
+<ul class="simple">
+<li><p><strong>Lasso (Least Absolute Shrinkage and Selection Operator)</strong> selects relevant features via coefficient shrinkage, automatically zeroing out irrelevant ones.</p></li>
+</ul>
+<p>By using this model’s outputs we construct a relevance mask that tells us which subset of design parameters significantly affect each <span class="math">\(\hat{\mathcal{H}}\)</span>. This subset is then used as input to symbolic regression (e.g. KAN) to extract compact, human-readable expressions.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiTaskLassoCV</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_tree</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s use the training dataset we generated in <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-8_ML_interpolation_in_SQuADDS.html">Tutorial 7</a></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">training_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">&quot;data/training_data.parquet&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hamiltonian_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;qubit_frequency_GHz&#39;</span><span class="p">,</span> <span class="s1">&#39;anharmonicity_MHz&#39;</span><span class="p">,</span> <span class="s1">&#39;cavity_frequency_GHz&#39;</span><span class="p">,</span> <span class="s1">&#39;kappa_kHz&#39;</span><span class="p">,</span> <span class="s1">&#39;g_MHz&#39;</span><span class="p">]</span>
+<span class="n">design_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cross_length&#39;</span><span class="p">,</span> <span class="s1">&#39;claw_length&#39;</span><span class="p">,</span><span class="s1">&#39;coupling_length&#39;</span><span class="p">,</span> <span class="s1">&#39;total_length&#39;</span><span class="p">,</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Y_hamiltonian</span> <span class="o">=</span> <span class="n">training_df</span><span class="p">[</span><span class="n">hamiltonian_parameters</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="c1"># Hamiltonian parameters</span>
+<span class="n">X_design</span> <span class="o">=</span> <span class="n">training_df</span><span class="p">[</span><span class="n">design_parameters</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="c1"># Design parameters</span>
+</pre></div>
+</div>
+</div>
+<p>The following object implemets the <code class="docutils literal notranslate"><span class="pre">LASSO</span></code> model to serve as the Design-Relevance Encoder</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DesignRelevanceEncoder</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_design</span><span class="p">,</span> <span class="n">Y_hamiltonian</span><span class="p">,</span> <span class="n">design_labels</span><span class="p">,</span> <span class="n">hamiltonian_labels</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the analyzer with design inputs and Hamiltonian outputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_raw</span> <span class="o">=</span> <span class="n">X_design</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y_raw</span> <span class="o">=</span> <span class="n">Y_hamiltonian</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design_labels</span> <span class="o">=</span> <span class="n">design_labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hamiltonian_labels</span> <span class="o">=</span> <span class="n">hamiltonian_labels</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler_X</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler_Y</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler_X</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_raw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler_Y</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y_raw</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_random_forest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trains a random forest for each Hamiltonian parameter.</span>
+<span class="sd">        Stores and returns a feature importance DataFrame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">importance_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">h_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hamiltonian_labels</span><span class="p">):</span>
+            <span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="n">n_estimators</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+            <span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">importance_matrix</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">feature_importances_</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rf_importance_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">importance_matrix</span><span class="p">,</span>
+                                             <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design_labels</span><span class="p">,</span>
+                                             <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hamiltonian_labels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rf_importance_df</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_multitask_lasso</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha_grid</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">)):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trains a multi-task Lasso model.</span>
+<span class="sd">        Stores and returns the coefficient matrix as DataFrame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">MultiTaskLassoCV</span><span class="p">(</span><span class="n">alphas</span><span class="o">=</span><span class="n">alpha_grid</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">coef_matrix</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># (n_design, n_hamiltonian)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lasso_coef_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">coef_matrix</span><span class="p">,</span>
+                                          <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design_labels</span><span class="p">,</span>
+                                          <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hamiltonian_labels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lasso_coef_df</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_heatmaps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots side-by-side heatmaps of RF and Lasso results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rf_importance_df</span><span class="p">,</span>
+                    <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;YlOrRd&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;Feature Importance&#39;</span><span class="p">})</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Random Forest: Design Parameter Importance&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Hamiltonian Parameter&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Design Parameter&quot;</span><span class="p">)</span>
+
+        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lasso_coef_df</span><span class="p">,</span>
+                    <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;Coefficient Value&#39;</span><span class="p">})</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Multi-Task Lasso: Design Influence&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Hamiltonian Parameter&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Design Parameter&quot;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_dependency_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints top-k most important design variables per Hamiltonian parameter</span>
+<span class="sd">        from both Random Forest and Lasso results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Top Influencers from Random Forest ===&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hamiltonian_labels</span><span class="p">:</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rf_importance_df</span><span class="p">[</span><span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- </span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">top_k</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    • </span><span class="si">{</span><span class="n">top</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2"> → importance = </span><span class="si">{</span><span class="n">top</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Top Influencers from Lasso (with direction) ===&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hamiltonian_labels</span><span class="p">:</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lasso_coef_df</span><span class="p">[</span><span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- </span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">top_k</span><span class="p">):</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="n">top</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">coef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lasso_coef_df</span><span class="p">[</span><span class="n">h</span><span class="p">][</span><span class="n">param</span><span class="p">]</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    • </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2"> → coef = </span><span class="si">{</span><span class="n">coef</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="s1">&#39;↑&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">coef</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;↓&#39;</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_heatmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots a single heatmap depending on which model was run.</span>
+<span class="sd">        If both are run, plots both side by side.</span>
+<span class="sd">        If only one is run, plots only that one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">has_rf</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;rf_importance_df&#39;</span><span class="p">)</span>
+        <span class="n">has_lasso</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;lasso_coef_df&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">has_rf</span> <span class="ow">and</span> <span class="n">has_lasso</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_heatmaps</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">has_rf</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rf_importance_df</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;YlOrRd&quot;</span><span class="p">,</span> <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;Feature Importance&#39;</span><span class="p">})</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Random Forest: Design Parameter Importance&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Hamiltonian Parameter&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Design Parameter&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">has_lasso</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lasso_coef_df</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;Coefficient Value&#39;</span><span class="p">})</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Multi-Task Lasso: Design Influence&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Hamiltonian Parameter&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Design Parameter&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Neither Random Forest nor Lasso results are available. Run one of the analysis methods first.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_dependency_summary_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">pretty_print</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a JSON-like dict of top design parameters (and their scores) for each Hamiltonian parameter.</span>
+<span class="sd">        Only includes parameters with absolute score above the threshold.</span>
+<span class="sd">        If both models are run, returns both. Otherwise, returns only the available one.</span>
+<span class="sd">        If pretty_print is True, also prints the summary in a human-readable format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;rf_importance_df&#39;</span><span class="p">):</span>
+            <span class="n">rf_summary</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hamiltonian_labels</span><span class="p">:</span>
+                <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rf_importance_df</span><span class="p">[</span><span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">filtered</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="s2">&quot;parameter&quot;</span><span class="p">:</span> <span class="n">top</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;importance&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">top</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">])}</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">top</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">top</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">threshold</span>
+                <span class="p">][:</span><span class="n">top_k</span><span class="p">]</span>
+                <span class="n">rf_summary</span><span class="p">[</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered</span>
+            <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;random_forest&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rf_summary</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;lasso_coef_df&#39;</span><span class="p">):</span>
+            <span class="n">lasso_summary</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hamiltonian_labels</span><span class="p">:</span>
+                <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lasso_coef_df</span><span class="p">[</span><span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">filtered</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;parameter&quot;</span><span class="p">:</span> <span class="n">top</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="s2">&quot;coef&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lasso_coef_df</span><span class="p">[</span><span class="n">h</span><span class="p">][</span><span class="n">top</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+                    <span class="p">}</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">top</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">top</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">threshold</span>
+                <span class="p">][:</span><span class="n">top_k</span><span class="p">]</span>
+                <span class="n">lasso_summary</span><span class="p">[</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered</span>
+            <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;lasso&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lasso_summary</span>
+
+        <span class="k">if</span> <span class="n">pretty_print</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Dependency Summary (Top </span><span class="si">{}</span><span class="s2"> per Hamiltonian parameter, threshold=</span><span class="si">{}</span><span class="s2">) ===&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">top_k</span><span class="p">,</span> <span class="n">threshold</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">summary</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ml_analyzer</span> <span class="o">=</span> <span class="n">DesignRelevanceEncoder</span><span class="p">(</span>
+    <span class="n">X_design</span><span class="p">,</span>
+    <span class="n">Y_hamiltonian</span><span class="p">,</span>
+    <span class="n">design_labels</span><span class="o">=</span><span class="n">design_parameters</span><span class="p">,</span>
+    <span class="n">hamiltonian_labels</span><span class="o">=</span><span class="n">hamiltonian_parameters</span>
+<span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ml_analyzer</span><span class="o">.</span><span class="n">run_multitask_lasso</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>cavity_frequency_GHz</th>
+      <th>kappa_kHz</th>
+      <th>g_MHz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>cross_length</th>
+      <td>-0.956645</td>
+      <td>0.904895</td>
+      <td>0.000207</td>
+      <td>0.000060</td>
+      <td>-0.574872</td>
+    </tr>
+    <tr>
+      <th>claw_length</th>
+      <td>-0.005958</td>
+      <td>0.007807</td>
+      <td>-0.220192</td>
+      <td>-0.141799</td>
+      <td>0.932547</td>
+    </tr>
+    <tr>
+      <th>coupling_length</th>
+      <td>-0.000277</td>
+      <td>0.000236</td>
+      <td>-0.153045</td>
+      <td>0.877849</td>
+      <td>-0.073914</td>
+    </tr>
+    <tr>
+      <th>total_length</th>
+      <td>0.000482</td>
+      <td>-0.000646</td>
+      <td>-0.924025</td>
+      <td>-0.484510</td>
+      <td>-0.394851</td>
+    </tr>
+    <tr>
+      <th>ground_spacing</th>
+      <td>-0.001715</td>
+      <td>0.002270</td>
+      <td>0.000009</td>
+      <td>0.000282</td>
+      <td>-0.350630</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ml_analyzer</span><span class="o">.</span><span class="n">plot_heatmap</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_13_0.png" src="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_13_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dependency_summary</span> <span class="o">=</span> <span class="n">ml_analyzer</span><span class="o">.</span><span class="n">get_dependency_summary_json</span><span class="p">(</span><span class="n">top_k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+=== Dependency Summary (Top 2 per Hamiltonian parameter, threshold=0.1) ===
+{
+    &#34;lasso&#34;: {
+        &#34;qubit_frequency_GHz&#34;: [
+            {
+                &#34;parameter&#34;: &#34;cross_length&#34;,
+                &#34;coef&#34;: -0.9566450702946909
+            }
+        ],
+        &#34;anharmonicity_MHz&#34;: [
+            {
+                &#34;parameter&#34;: &#34;cross_length&#34;,
+                &#34;coef&#34;: 0.9048951896956229
+            }
+        ],
+        &#34;cavity_frequency_GHz&#34;: [
+            {
+                &#34;parameter&#34;: &#34;total_length&#34;,
+                &#34;coef&#34;: -0.9240245095002161
+            },
+            {
+                &#34;parameter&#34;: &#34;claw_length&#34;,
+                &#34;coef&#34;: -0.22019159774679983
+            }
+        ],
+        &#34;kappa_kHz&#34;: [
+            {
+                &#34;parameter&#34;: &#34;coupling_length&#34;,
+                &#34;coef&#34;: 0.8778486103719524
+            },
+            {
+                &#34;parameter&#34;: &#34;total_length&#34;,
+                &#34;coef&#34;: -0.48451014050957547
+            }
+        ],
+        &#34;g_MHz&#34;: [
+            {
+                &#34;parameter&#34;: &#34;claw_length&#34;,
+                &#34;coef&#34;: 0.932547254832365
+            },
+            {
+                &#34;parameter&#34;: &#34;cross_length&#34;,
+                &#34;coef&#34;: -0.5748717548177499
+            }
+        ]
+    }
+}
+</pre></div></div>
+</div>
+</section>
+<section id="KAN-Decoder">
+<h3>KAN Decoder<a class="headerlink" href="#KAN-Decoder" title="Link to this heading">#</a></h3>
+<p>The KAN (Kolmogorov–Arnold Network) decoder learns a compact symbolic expression for a Hamiltonian parameter based on a subset of relevant geometric features. Unlike traditional neural networks, KAN explicitly fits interpretable functional forms using trainable basis functions, revealing the underlying physics in closed-form expressions. After training, the network can be pruned and symbolic expressions extracted using a user-defined library of functions, yielding formulas that capture how
+design geometry affect the Hamiltonian parameters</p>
+</section>
+</section>
+<section id="Example:-Selecting-Features-and-Target-for-KAN">
+<h2>Example: Selecting Features and Target for KAN<a class="headerlink" href="#Example:-Selecting-Features-and-Target-for-KAN" title="Link to this heading">#</a></h2>
+<p>In this example flow, we demonstrate how to set up the KAN model for inverse design. First, we select the Hamiltonian parameter to model—in this case, the cavity frequency <span class="math">\(f_{cav}\)</span> (in GHz). Next, using the results from the Design-Relevance Encoder, we identify <strong>``total_length``</strong> and <strong>``claw_length``</strong> as the two most influential design parameters for predicting <code class="docutils literal notranslate"><span class="pre">cavity_frequency</span></code>.</p>
+<p>We then proceed to extract and process the relevant features from the training dataset to prepare for model training.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_feature</span> <span class="o">=</span> <span class="s1">&#39;cavity_frequency_GHz&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">input_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;parameter&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">dependency_summary</span><span class="p">[</span><span class="s2">&quot;lasso&quot;</span><span class="p">][</span><span class="n">target_feature</span><span class="p">]]</span>
+<span class="n">input_features</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;total_length&#39;, &#39;claw_length&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">training_df</span><span class="p">[</span><span class="n">input_features</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">training_df</span><span class="p">[</span><span class="n">target_feature</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Split into train/val</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+
+<span class="c1"># Convert to PyTorch tensors</span>
+<span class="n">train_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">test_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">train_label</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">test_label</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+<span class="c1"># Final dataset dict for pykan</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;train_input&quot;</span><span class="p">:</span> <span class="n">train_input</span><span class="p">,</span>
+    <span class="s2">&quot;test_input&quot;</span><span class="p">:</span> <span class="n">test_input</span><span class="p">,</span>
+    <span class="s2">&quot;train_label&quot;</span><span class="p">:</span> <span class="n">train_label</span><span class="p">,</span>
+    <span class="s2">&quot;test_label&quot;</span><span class="p">:</span> <span class="n">test_label</span>
+<span class="p">}</span>
+<br/></pre></div>
+</div>
+</div>
+</section>
+<section id="KAN-Model-Setup">
+<h2>KAN Model Setup<a class="headerlink" href="#KAN-Model-Setup" title="Link to this heading">#</a></h2>
+<p>We now define and initialize the Kolmogorov–Arnold Network (KAN) model to learn a symbolic expression for the Hamiltonian parameter <span class="math">\(f_{cav}\)</span>. The chosen architecture <code class="docutils literal notranslate"><span class="pre">KAN(width=[2,</span> <span class="pre">2,</span> <span class="pre">1],</span> <span class="pre">grid=5,</span> <span class="pre">k=3)</span></code> reflects:</p>
+<ul class="simple">
+<li><p><strong>Input layer</strong> with 2 neurons for the two most relevant geometric features: <code class="docutils literal notranslate"><span class="pre">total_length</span></code> and <code class="docutils literal notranslate"><span class="pre">claw_length</span></code>.</p></li>
+<li><p><strong>One hidden layer</strong> with 2 units, each equipped with a set of grid-based basis functions.</p></li>
+<li><p><strong>Output layer</strong> producing a single scalar value corresponding to <code class="docutils literal notranslate"><span class="pre">cavity_frequency_GHz</span></code>.</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">grid</span></code> parameter sets how many grid points each neuron’s nonlinear activation uses: increasing <code class="docutils literal notranslate"><span class="pre">grid</span></code> allows the model to capture more complex, detailed functions, but may reduce smoothness and interpretability; decreasing it makes the model simpler and smoother, but less expressive. The <code class="docutils literal notranslate"><span class="pre">k</span></code> parameter controls local smoothing by determining how many nearby grid points influence each output: higher <code class="docutils literal notranslate"><span class="pre">k</span></code> values produce smoother, more robust functions, while lower <code class="docutils literal notranslate"><span class="pre">k</span></code> values allow for
+sharper, more localized changes in the learned function.</p>
+<p>Setting random seed to 0 to ensure reproducibility 🤞🏽</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">kan</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">KAN</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">model</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;train_input&#39;</span><span class="p">]);</span>
+<span class="n">model</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+checkpoint directory created: ./model
+saving model version 0.0
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_24_1.png" src="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_24_1.png" />
+</div>
+</div>
+<p>This plot shows the untrained KAN model for predicting cavity frequency from <code class="docutils literal notranslate"><span class="pre">total_length</span></code> and <code class="docutils literal notranslate"><span class="pre">claw_length</span></code>. Each black dot represents an input, which is passed through learnable univariate function blocks (squares) that apply symbolic transformations (e.g., <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">x²</span></code>, <code class="docutils literal notranslate"><span class="pre">sin</span></code>). These transformed features are summed (white “+” nodes) to build the output. At this stage, all functions are uninitialized (linear ramps), and the structure reflects the model’s capacity to discover symbolic
+patterns through training.</p>
+</section>
+<section id="Encouraging-Symbolic-Simplicity">
+<h2>Encouraging Symbolic Simplicity<a class="headerlink" href="#Encouraging-Symbolic-Simplicity" title="Link to this heading">#</a></h2>
+<p>Before training, we configure two key regularization terms that guide the KAN model toward interpretable symbolic solutions:</p>
+<ul class="simple">
+<li><p><strong>``lamb`` (L2 sparsity penalty):</strong> This term encourages the weights of the model to be small, reducing model complexity. A higher value forces the network to use fewer basis functions and promotes sparsity in the learned representation.</p></li>
+<li><p><strong>``lamb_entropy`` (functional entropy penalty):</strong> This term penalizes overly complex or chaotic nonlinear transformations by minimizing the entropy of the learned functional basis. It nudges the network to favor smooth, low-entropy functions like polynomials, sinusoids, or exponentials.</p></li>
+</ul>
+<p>Together, these regularizers bias the training process toward compact, human-readable formulas instead of overfitted black-box predictions.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metrics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">lamb</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">lamb_entropy</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+| train_loss: 3.28e-01 | test_loss: 3.30e-01 | reg: 5.57e+00 | : 100%|█| 100/100 [02:39&lt;00:00,  1.60
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+saving model version 0.1
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">axs</span> <span class="o">=</span> <span class="p">[</span><span class="n">axs</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Step&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_28_0.png" src="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_28_0.png" />
+</div>
+</div>
+<p>Lets visualize the trained KAN model.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_30_0.png" src="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_30_0.png" />
+</div>
+</div>
+<p>After training, the model has learned to rely primarily on the total meander length input, passing it through two distinct nonlinear transformations before summing their outputs to predict the target. The claw length input remains disconnected, indicating it was not found to be predictive by the network during optimization.</p>
+<p>As a best practice, we prune the model at this stage to remove redundant or low-contribution paths. This step simplifies the learned symbolic equation, making it more interpretable by eliminating unnecessary neurons and connections that do not significantly impact the prediction. Pruning refines the model architecture before further fine-tuning.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">prune</span><span class="p">()</span>
+<span class="n">model</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;train_input&#39;</span><span class="p">])</span>
+<span class="n">model</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+saving model version 0.2
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_33_1.png" src="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_33_1.png" />
+</div>
+</div>
+<p>The updated architecture clearly shows that the model now relies on distinct nonlinear transformations of both inputs (total meander length and claw length), though one transformation from claw length is weak and de-emphasized.</p>
+<p>We retrain after pruning to slightly adjust the remaining functions for better accuracy.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error plotting model&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+| train_loss: 3.27e-01 | test_loss: 3.30e-01 | reg: 1.66e+00 | : 100%|█| 50/50 [00:39&lt;00:00,  1.27it
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+saving model version 0.3
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_36_2.png" src="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_36_2.png" />
+</div>
+</div>
+<p>Finally, we define a library of candidate symbolic functions (polynomials, sinusoids, logs, etc.). KAN fits the learned internal structure to combinations of these and then extracts the final symbolic formula representing:</p>
+<div class="math">
+\[{f_{cav}} = f(\text{cross\_length}, \text{claw\_length})\]</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lib</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;x^2&#39;</span><span class="p">,</span><span class="s1">&#39;x^3&#39;</span><span class="p">,</span><span class="s1">&#39;x^4&#39;</span><span class="p">,</span><span class="s1">&#39;exp&#39;</span><span class="p">,</span><span class="s1">&#39;log&#39;</span><span class="p">,</span><span class="s1">&#39;sqrt&#39;</span><span class="p">,</span><span class="s1">&#39;tanh&#39;</span><span class="p">,</span><span class="s1">&#39;sin&#39;</span><span class="p">,</span><span class="s1">&#39;abs&#39;</span><span class="p">]</span>
+<span class="n">model</span><span class="o">.</span><span class="n">auto_symbolic</span><span class="p">(</span><span class="n">lib</span><span class="o">=</span><span class="n">lib</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+fixing (0,0,0) with x, r2=1.0000005960464478, c=1
+fixing (0,1,0) with 0
+fixing (1,0,0) with x, r2=0.9552730917930603, c=1
+saving model version 0.4
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[95]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">symbolic_formula</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[95]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+([-0.00169442449984271*x_1 - 5.35003944827876e-12*x_2 - 5.43009030583892e-6*sin(9.40023994445801*x_2 - 9.61199951171875) + 13.2851943596568],
+ [x_1, x_2])
+</pre></div></div>
+</div>
+<p>Lets visually interpret the symbolic model and compare it to the data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_symbolic_surface</span><span class="p">(</span><span class="n">f_sym</span><span class="p">,</span> <span class="n">x1_range</span><span class="p">,</span> <span class="n">x2_range</span><span class="p">,</span> <span class="n">x1_label</span><span class="p">,</span> <span class="n">x2_label</span><span class="p">,</span> <span class="n">z_label</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;plasma&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots a 2D surface of a symbolic model f_sym(x1, x2) over the specified ranges.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X2</span><span class="p">,</span> <span class="n">X1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x2_range</span><span class="p">,</span> <span class="n">x1_range</span><span class="p">)</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">f_sym</span><span class="p">(</span><span class="n">X1</span><span class="p">,</span> <span class="n">X2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x2_range</span><span class="p">,</span> <span class="n">x1_range</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">x2_label</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">x1_label</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">z_label</span><span class="p">)</span>
+    <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_symbolic_vs_data</span><span class="p">(</span><span class="n">f_sym</span><span class="p">,</span> <span class="n">x1_vals</span><span class="p">,</span> <span class="n">fixed_x2</span><span class="p">,</span> <span class="n">real_X</span><span class="p">,</span> <span class="n">real_y</span><span class="p">,</span> <span class="n">x1_col</span><span class="p">,</span> <span class="n">x2_col</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">x1_label</span><span class="p">,</span> <span class="n">x2_label</span><span class="p">,</span> <span class="n">y_label</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots the symbolic model prediction vs. real data for a fixed x2 value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f_pred</span> <span class="o">=</span> <span class="n">f_sym</span><span class="p">(</span><span class="n">x1_vals</span><span class="p">,</span> <span class="n">fixed_x2</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">real_X</span><span class="p">[:,</span> <span class="n">x2_col</span><span class="p">]</span> <span class="o">-</span> <span class="n">fixed_x2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span>
+    <span class="n">x1_real</span> <span class="o">=</span> <span class="n">real_X</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">x1_col</span><span class="p">]</span>
+    <span class="n">y_real</span> <span class="o">=</span> <span class="n">real_y</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1_vals</span><span class="p">,</span> <span class="n">f_pred</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Symbolic Model (fixed </span><span class="si">{</span><span class="n">x2_label</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">fixed_x2</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C0&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x1_real</span><span class="p">,</span> <span class="n">y_real</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Real Data (fixed </span><span class="si">{</span><span class="n">x2_label</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">fixed_x2</span><span class="si">}</span><span class="s1">±</span><span class="si">{</span><span class="n">tol</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">x1_label</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">y_label</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define symbolic model</span>
+<span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;x_1 x_2&#39;</span><span class="p">)</span>
+<span class="n">expr</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.00169442449984271</span><span class="o">*</span><span class="n">x1</span> <span class="o">-</span> <span class="mf">5.35003944827876e-12</span><span class="o">*</span><span class="n">x2</span> <span class="o">-</span> <span class="mf">5.43009030583892e-6</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">9.40023994445801</span><span class="o">*</span><span class="n">x2</span> <span class="o">-</span> <span class="mf">9.61199951171875</span><span class="p">)</span> <span class="o">+</span> <span class="mf">13.2851943596568</span><span class="p">)</span>
+<span class="n">f_sym</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">lambdify</span><span class="p">((</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">),</span> <span class="n">expr</span><span class="p">,</span> <span class="n">modules</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+
+<span class="c1"># 1. Surface plot</span>
+<span class="n">claw_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>       <span class="c1"># x2: claw length [µm]</span>
+<span class="n">meander_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="c1"># x1: total meander length [µm]</span>
+<span class="n">plot_symbolic_surface</span><span class="p">(</span>
+    <span class="n">f_sym</span><span class="p">,</span>
+    <span class="n">x1_range</span><span class="o">=</span><span class="n">meander_vals</span><span class="p">,</span>
+    <span class="n">x2_range</span><span class="o">=</span><span class="n">claw_vals</span><span class="p">,</span>
+    <span class="n">x1_label</span><span class="o">=</span><span class="s1">&#39;Total Meander Length (µm)&#39;</span><span class="p">,</span>
+    <span class="n">x2_label</span><span class="o">=</span><span class="s1">&#39;Claw Length (µm)&#39;</span><span class="p">,</span>
+    <span class="n">z_label</span><span class="o">=</span><span class="s1">&#39;Cavity Frequency (GHz)&#39;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Symbolic Model: $f_{\mathrm</span><span class="si">{cav}</span><span class="s1">}(x_1, x_2)$&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># 2. Symbolic vs. data plot</span>
+<span class="n">fixed_claw</span> <span class="o">=</span> <span class="mi">300</span>
+<span class="n">x1_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">2500</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">input_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;total_length&#39;</span><span class="p">,</span> <span class="s1">&#39;claw_length&#39;</span><span class="p">]</span>
+<span class="n">target_feature</span> <span class="o">=</span> <span class="s1">&#39;cavity_frequency_GHz&#39;</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">training_df</span><span class="p">[</span><span class="n">input_features</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">training_df</span><span class="p">[</span><span class="n">target_feature</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">tol</span> <span class="o">=</span> <span class="mf">5.0</span>  <span class="c1"># microns</span>
+
+<span class="c1"># x1_col=0 (total_length), x2_col=1 (claw_length)</span>
+<span class="n">plot_symbolic_vs_data</span><span class="p">(</span>
+    <span class="n">f_sym</span><span class="p">,</span>
+    <span class="n">x1_vals</span><span class="o">=</span><span class="n">x1_vals</span><span class="p">,</span>
+    <span class="n">fixed_x2</span><span class="o">=</span><span class="n">fixed_claw</span><span class="p">,</span>
+    <span class="n">real_X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">real_y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+    <span class="n">x1_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">x2_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+    <span class="n">x1_label</span><span class="o">=</span><span class="s1">&#39;Total Meander Length (µm)&#39;</span><span class="p">,</span>
+    <span class="n">x2_label</span><span class="o">=</span><span class="s1">&#39;Claw Length (µm)&#39;</span><span class="p">,</span>
+    <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;Cavity Frequency (GHz)&#39;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Cavity Frequency vs. Meander Length (Claw Length = </span><span class="si">{</span><span class="n">fixed_claw</span><span class="si">}</span><span class="s1"> µm)&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_42_0.png" src="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_42_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_42_1.png" src="../../_images/source_tutorials_Tutorial-9_Learing_the_Inverse_Design_Map_42_1.png" />
+</div>
+</div>
+<p>The symbolic expression returned by the KAN model is:</p>
+<div class="math">
+\[f_{cav}(x_1, x_2) = a_1 x_1 + a_2 x_2 + a_3 \sin(b_1 x_2 + b_2) + a_4\]</div>
+<p>with the following numerical values:</p>
+<ul class="simple">
+<li><p><span class="math">\(a_1 = -1.694 \times 10^{-3}\)</span></p></li>
+<li><p><span class="math">\(a_2 = -5.35 \times 10^{-12}\)</span></p></li>
+<li><p><span class="math">\(a_3 = -5.43 \times 10^{-6}\)</span></p></li>
+<li><p><span class="math">\(b_1 = 9.40\)</span>, <span class="math">\(b_2 = -9.61\)</span></p></li>
+<li><p><span class="math">\(a_4 = 13.285\)</span></p></li>
+</ul>
+</section>
+<section id="Dimensional-Analysis-and-Simplification">
+<h2>Dimensional Analysis and Simplification<a class="headerlink" href="#Dimensional-Analysis-and-Simplification" title="Link to this heading">#</a></h2>
+<p>In our dataset:</p>
+<ul class="simple">
+<li><p><span class="math">\(x_1 \in [2000, 5000] \, \mu\text{m}\)</span></p></li>
+<li><p><span class="math">\(x_2 \in [100, 400] \, \mu\text{m}\)</span></p></li>
+</ul>
+<p>We can estimate the magnitude of each term:</p>
+<ul class="simple">
+<li><p><span class="math">\(a_1 x_1 \sim - 3.5\)</span> — dominant term</p></li>
+<li><p><span class="math">\(a_2 x_2 \sim 10^{-9}\)</span> — negligible</p></li>
+<li><p><span class="math">\(a_3 \sin(\cdot) \sim 10^{-6}\)</span> — negligible</p></li>
+<li><p><span class="math">\(a_4 \sim 13.3\)</span> — dominant constant offset</p></li>
+</ul>
+<p>Thus, to leading order, the model simplifies to:</p>
+<div class="math">
+\[f_{cav}(x_1, x_2) \approx a_1 x_1 + a_4\]</div>
+</section>
+<section id="Interpretation">
+<h2>Interpretation<a class="headerlink" href="#Interpretation" title="Link to this heading">#</a></h2>
+<p>In summary, the model shows that total meander length <span class="math">\(x_1\)</span> is the dominant factor affecting cavity frequency, with other terms (including those involving claw length <span class="math">\(x_2\)</span>) being negligible. This matches physical expectations and demonstrates that the symbolic formula found by KAN is both accurate and interpretable, serving as a reliable and efficient surrogate for more complex simulations.</p>
+<p><strong>Note:</strong> KAN model outcomes are probabilistic—if you do not set a deterministic random seed, you may not obtain the exact same symbolic model or results each time you run this notebook. Additionally, the hyperparameters used here are not fully optimized; further tuning will certainly yield improved performance and interpretability at the cost of training time.</p>
+<hr class="docutils" />
+<section id="Task-1:-Symbolic-Discovery-with-KANs-Using-Design-Relevance-Insights">
+<h3>Task 1: Symbolic Discovery with KANs Using Design-Relevance Insights<a class="headerlink" href="#Task-1:-Symbolic-Discovery-with-KANs-Using-Design-Relevance-Insights" title="Link to this heading">#</a></h3>
+<p>Your goal is to explore <strong>symbolic relationships between Hamiltonian parameters and the most relevant design variables</strong> using a KAN model</p>
+<p>Start by choosing a Hamiltonian parameter of interest (e.g., <span class="math">\(g\)</span>, <span class="math">\(\alpha_q\)</span>) and use the <strong>design-relevance encoder</strong> outputs to identify which geometry parameters matter most for that target.</p>
+<p>Then:</p>
+<ul class="simple">
+<li><p>Use those selected design variables as inputs to the KAN model.</p></li>
+<li><p>Train KAN to <strong>learn an interpretable symbolic mapping</strong> from geometry to the Hamiltonian parameter.</p></li>
+</ul>
+<p>Try different architectures, libraries of functions, and pruning thresholds to extract concise and meaningful symbolic expressions. The goal is to gain <strong>physical insight</strong> into how specific design features influence device behavior — not just predict, but understand.</p>
+<p>If your symbolic model makes sense and teaches us something cool, shoot us an <a class="reference external" href="mailto:shanto&#37;&#52;&#48;usc&#46;edu">email</a>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ------------------------------</span>
+<span class="c1"># Helpful to fix the random seed</span>
+<span class="c1"># ------------------------------</span>
+<span class="n">SEED</span> <span class="o">=</span><span class="mi">5212025</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">SEED</span><span class="p">)</span>
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">SEED</span><span class="p">)</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">SEED</span><span class="p">)</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># your code here</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Task-2:">
+<h3>Task 2:<a class="headerlink" href="#Task-2:" title="Link to this heading">#</a></h3>
+<p>I had a similar-ish model (no hyperparameter tuning) for that predicted the following for the coupling strength, <span class="math">\(g\)</span>:</p>
+<div class="math">
+\[g(x_1, x_2) = 1.2306 \cdot x_1 + 0.6623 \cdot x_2 - 848.14 \cdot \sqrt{0.00559 \cdot x_1 + 0.00134 \cdot x_2 + 1} + 1016.44\]</div>
+<p>Writing it without the constants:</p>
+<div class="math">
+\[g(x_1, x_2) = a_1 x_1 + a_2 x_2 - b \cdot \sqrt{c_1 x_1 + c_2 x_2 + 1} + d\]</div>
+<p>Where:</p>
+<ul class="simple">
+<li><p><span class="math">\(x_1\)</span>: cross length (in microns)</p></li>
+<li><p><span class="math">\(x_2\)</span>: claw length (in microns)</p></li>
+<li><p><span class="math">\(a_1, a_2\)</span>: linear gain coefficients</p></li>
+<li><p><span class="math">\(b\)</span>: scale of nonlinear saturation</p></li>
+<li><p><span class="math">\(c_1, c_2\)</span>: coupling weightings inside the square root</p></li>
+<li><p><span class="math">\(d\)</span>: baseline offset</p></li>
+</ul>
+<p>It seems to have fitted our data very well.</p>
+<div style="display: flex; justify-content: space-between; margin: 20px 0;"><div style="flex: 1; margin: 0 10px;"><h3><p>Reference plot from the SQuADDS paper</p>
+</h3><p><img alt="Plot 1" src="../../_images/paper-plot.png" /></p>
+</div><div style="flex: 1; margin: 0 10px;"><h3><p>Comparision plot to the SQuADDS paper from the model</p>
+</h3><p><img alt="Plot 2" src="../../_images/g_plot.png" /></p>
+</div><div style="flex: 1; margin: 0 10px;"><h3><p>Model prediction</p>
+</h3><p><img alt="Plot 3" src="../../_images/g_pred.png" /></p>
+</div></div><p>Discuss amongst yourselves to see if this expression is physically meaningful or not.</p>
+</section>
+<section id="License">
+<h3>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h3>
+<div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>This tutorial is written by Sadman Ahmed Shanto</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2025.</p>
+</p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Environment-Setup-Recommendation">Environment Setup Recommendation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Our-Model:">Our Model:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Design-Relevance-Encoder">Design-Relevance Encoder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#KAN-Decoder">KAN Decoder</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Example:-Selecting-Features-and-Target-for-KAN">Example: Selecting Features and Target for KAN</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#KAN-Model-Setup">KAN Model Setup</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Encouraging-Symbolic-Simplicity">Encouraging Symbolic Simplicity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Dimensional-Analysis-and-Simplification">Dimensional Analysis and Simplification</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Interpretation">Interpretation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Task-1:-Symbolic-Discovery-with-KANs-Using-Design-Relevance-Insights">Task 1: Symbolic Discovery with KANs Using Design-Relevance Insights</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Task-2:">Task 2:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#License">License</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/source/tutorials/Tutorial-9_Learing_the_Inverse_Design_Map.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
