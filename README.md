@@ -83,7 +83,6 @@ git clone https://github.com/LFL-Lab/SQuADDS.git
 ```bash
 conda activate <YOUR-ENV>
 cd SQuADDS
-pip install -r requirements.txt
 pip install -e .
 ```
 
