@@ -22,7 +22,7 @@ ENV PATH="/root/.local/bin:$PATH"
 WORKDIR /usr/src/app
 
 # Copy dependency files first for better caching
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md LICENSE ./
 
 # Install dependencies
 RUN uv sync --frozen --no-dev
