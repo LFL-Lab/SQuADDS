@@ -3,7 +3,49 @@
 Developer Notes
 ===============
 
-Everyone is welcome to contribute to SQuADDS. Please see review the following section for more information or contact us!
+Everyone is welcome to contribute to SQuADDS. Please review the following section for more information or contact us!
+
+Development Setup
+-----------------
+
+SQuADDS uses `uv <https://docs.astral.sh/uv/>`_ for fast, reliable Python package management.
+
+**Prerequisites:**
+
+Install ``uv``:
+
+.. code-block:: bash
+
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+**Clone and Setup:**
+
+.. code-block:: bash
+
+   git clone https://github.com/LFL-Lab/SQuADDS.git
+   cd SQuADDS
+   uv sync --extra dev
+
+**Running Tests:**
+
+.. code-block:: bash
+
+   uv run pytest tests/ -v
+
+**Running Linter:**
+
+.. code-block:: bash
+
+   uv run ruff check .
+   uv run ruff format --check .
+
+**Building Documentation:**
+
+.. code-block:: bash
+
+   uv sync --extra docs
+   cd docs
+   uv run make html
 
 Contribution Items
 ------------------
@@ -23,6 +65,27 @@ Please see our `Contributing Guidelines <https://github.com/LFL-Lab/SQuADDS/blob
 .. note::
 
    If at any point you are convinced that something is wrong but the documentation/code says otherwise, you may **absolutely be right**. Please open an issue on GitHub and we will address it as soon as possible.
+
+Project Structure
+-----------------
+
+.. code-block:: text
+
+   SQuADDS/
+   ├── squadds/           # Main package source code
+   │   ├── calcs/         # Calculation modules
+   │   ├── components/    # Qiskit Metal component definitions
+   │   ├── core/          # Core functionality (db, analysis, utils)
+   │   ├── database/      # HuggingFace integration
+   │   ├── gds/           # GDS processing utilities
+   │   ├── interpolations/# Interpolation algorithms
+   │   ├── simulations/   # ANSYS/Palace simulation interfaces
+   │   └── ui/            # Streamlit web interface
+   ├── tests/             # Test suite
+   ├── docs/              # Sphinx documentation
+   ├── tutorials/         # Jupyter notebook tutorials
+   ├── pyproject.toml     # Project configuration (PEP 621)
+   └── uv.lock            # Dependency lock file
 
 Developers
 ----------

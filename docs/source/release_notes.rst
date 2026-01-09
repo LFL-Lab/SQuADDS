@@ -1,6 +1,65 @@
 Release Notes
 =============
 
+Version 0.4.0 (2025-01-09)
+--------------------------
+
+* **Alpha Version 0.4.0 [MAJOR INFRASTRUCTURE RELEASE]**
+
+**Breaking Changes**
+
+- Migrated from ``setup.py`` to modern ``pyproject.toml`` (PEP 621)
+- Switched from ``qiskit-metal`` to ``quantum-metal>=0.5.0`` (ARM64 compatible)
+- Removed Conda-based installation; now uses ``uv`` for package management
+- Python 3.10+ required (dropped 3.9 support)
+- NumPy pinned to ``<2.0`` for quantum-metal compatibility
+
+**New Features**
+
+- Full native Apple Silicon (ARM64) support via quantum-metal
+- Modern ``uv`` package management for faster, more reliable installs
+- Added ``ruff`` linting to development dependencies
+- Added PySide6 for modern Qt GUI support
+- Cross-platform CI/CD testing on Python 3.10, 3.11, 3.12
+
+**Infrastructure**
+
+- Replaced all CI/CD workflows with ``astral-sh/setup-uv`` action
+- Added ``uv.lock`` for reproducible builds
+- Updated Docker image to use uv instead of Conda
+- Modernized PyPI publishing with trusted publishing (OIDC)
+- Added ruff configuration in pyproject.toml
+
+**Dependencies Removed (Bloatware)**
+
+- ``memory_profiler`` (unused)
+- ``addict`` (unused)
+- ``dask`` (transitive)
+- ``pyarrow`` (transitive)
+- ``cython`` (build-time only)
+- ``qutip`` (transitive via scqubits)
+
+**Dependencies Added**
+
+- ``matplotlib`` (was missing)
+- ``shapely`` (was missing)
+- ``pyside6`` (for quantum-metal)
+- ``ruff`` (dev dependency)
+
+**Documentation**
+
+- Completely rewrote installation instructions for uv workflow
+- Updated developer notes with new development setup
+- Simplified getting started guide
+- Removed all Conda/environment.yml references
+
+**Bug Fixes**
+
+- Fixed deprecated ``HfFolder`` import (replaced with ``get_token()``)
+- Fixed version consistency checks in prepare-release workflow
+
+---
+
 Version 0.3.7 (2024-03-19)
 --------------------------
 
