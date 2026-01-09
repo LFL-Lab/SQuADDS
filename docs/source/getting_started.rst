@@ -115,7 +115,7 @@ Accessing the Database
 
 **A:** If you encounter errors upon instantiating the `SQuADDS_DB` class, there may be a caching issue. Delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
 
-``.env`` File 
+``.env`` File
 -------------
 
 **Q: Why is the** ``.env`` **file needed?**

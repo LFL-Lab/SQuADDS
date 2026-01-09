@@ -3,15 +3,15 @@ import os
 import matplotlib as mpl
 
 # Check if a display is available
-if os.environ.get('DISPLAY', '') == '':
-    print('No display found. Running in headless mode.')
-    mpl.use('Agg')  # Set the matplotlib backend to Agg (headless)
-    os.environ['QISKIT_METAL_HEADLESS'] = '1'  # Set Qiskit Metal to headless mode
+if os.environ.get("DISPLAY", "") == "":
+    print("No display found. Running in headless mode.")
+    mpl.use("Agg")  # Set the matplotlib backend to Agg (headless)
+    os.environ["QISKIT_METAL_HEADLESS"] = "1"  # Set Qiskit Metal to headless mode
 else:
-    print('Display found. Running with GUI support.')
+    print("Display found. Running with GUI support.")
     # You can let matplotlib choose the default backend (Qt5Agg, TkAgg, etc.)
-    if 'QISKIT_METAL_HEADLESS' in os.environ:
-        del os.environ['QISKIT_METAL_HEADLESS']  # Remove the headless flag if GUI is available
+    if "QISKIT_METAL_HEADLESS" in os.environ:
+        del os.environ["QISKIT_METAL_HEADLESS"]  # Remove the headless flag if GUI is available
 
 
 from squadds import Analyzer, SQuADDS_DB
@@ -26,7 +26,7 @@ db.see_dataset(component="qubit", component_name="TransmonCross", data_type="cap
 db.view_all_contributors()
 
 db.unselect_all()
-db.select_system(["qubit","cavity_claw"])
+db.select_system(["qubit", "cavity_claw"])
 db.select_qubit("TransmonCross")
 db.select_cavity_claw("RouteMeander")
 db.select_resonator_type("quarter")
@@ -37,17 +37,15 @@ print(merged_df)
 analyzer = Analyzer(db)
 
 target_params = {
-                "qubit_frequency_GHz": 4,
-                "cavity_frequency_GHz": 6.2,
-                "kappa_kHz": 120,
-                "resonator_type":"quarter",
-                "anharmonicity_MHz": -200,
-                "g_MHz": 70}
+    "qubit_frequency_GHz": 4,
+    "cavity_frequency_GHz": 6.2,
+    "kappa_kHz": 120,
+    "resonator_type": "quarter",
+    "anharmonicity_MHz": -200,
+    "g_MHz": 70,
+}
 
-results = analyzer.find_closest(target_params=target_params,
-                                        num_top=1,
-                                        metric="Euclidean",
-                                        display=True)
+results = analyzer.find_closest(target_params=target_params, num_top=1, metric="Euclidean", display=True)
 print(results)
 
 interpolator = ScalingInterpolator(analyzer, target_params)

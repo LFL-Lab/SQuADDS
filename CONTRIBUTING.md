@@ -15,10 +15,13 @@ git clone https://github.com/LFL-Lab/SQuADDS.git
 cd SQuADDS
 uv sync --extra dev
 
+# Install pre-commit hooks (recommended - auto-formats on commit)
+uv run pre-commit install
+
 # Run tests
 uv run pytest tests/ -v
 
-# Run linter
+# Run linter manually
 uv run ruff check .
 uv run ruff format --check .
 ```

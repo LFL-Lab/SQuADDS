@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 
 class QubitHamiltonian(ABC):
-    #TODO: make method names more general
+    # TODO: make method names more general
     def __init__(self, analysis):
         self.analysis = analysis
         self.db = self.analysis.db
@@ -59,7 +59,7 @@ class QubitHamiltonian(ABC):
     @abstractmethod
     def EJ_and_LJ(self, f_q, alpha):
         """
-        Calculate the Josephson energy (EJ) and the Josephson inductance (LJ) 
+        Calculate the Josephson energy (EJ) and the Josephson inductance (LJ)
         for a given qubit frequency (f_q) and anharmonicity (alpha).
 
         Args:

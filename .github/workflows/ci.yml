@@ -50,14 +50,14 @@ jobs:
 
       - name: Move tutorials to docs/source/tutorials
         run: |
-          cp tutorials/Tutorial*.ipynb docs/source/tutorials
-          cp tutorials/*.png docs/source/tutorials
+          cp tutorials/Tutorial*.ipynb docs/source/tutorials || true
+          cp tutorials/*.png docs/source/tutorials || true
 
       - name: Build documentation
         run: |
           cd docs
-          uv run make clean
-          uv run make html
+          make clean
+          uv run sphinx-build -b html . build/html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

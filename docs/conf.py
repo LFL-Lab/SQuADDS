@@ -100,7 +100,7 @@ html_theme_options = {
 html_context = {
     "theme_announcement": "Read our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a>",
     "expandable_sidebar": True,
-    "google_analytics_id": "G-R5QKJDWM2W", 
+    "google_analytics_id": "G-R5QKJDWM2W",
     "footer": "_footer.html",  # Add this line to reference your custom footer
 }
 

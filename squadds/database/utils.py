@@ -1,10 +1,10 @@
 """Utilities for the database package."""
+
 import glob
 import hashlib
 import json
 import os
 import shutil
-from pathlib import Path
 
 from dotenv import dotenv_values, set_key
 
@@ -31,12 +31,13 @@ def copy_files_to_new_location(data_path, new_path):
         # copy file to new location
         location = os.path.dirname(new_path)
         new_file = os.path.join(location, new_name)
-        new_names.append(new_file) 
+        new_names.append(new_file)
         shutil.copy(file, new_file)
     # alert if there are duplicates and show the files
     if len(new_names) != len(set(new_names)):
-        print('There are duplicates!')
+        print("There are duplicates!")
         print(new_names)
+
 
 def generate_file_name(data_file):
     """
@@ -49,14 +50,15 @@ def generate_file_name(data_file):
         str: The generated file name.
 
     """
-    with open(data_file, 'r') as file:
+    with open(data_file) as file:
         data = json.load(file)
-    grp = data['contributor']['group']
-    inst = data['contributor']['institution']
-    dc = data["contributor"]['date_created']
+    grp = data["contributor"]["group"]
+    inst = data["contributor"]["institution"]
+    data["contributor"]["date_created"]
     # create hash based on data
     hash_fn = hashlib.sha256(json.dumps(data).encode()).hexdigest()[:16]
     return f"{grp}_{inst}_{hash_fn}.json"
+
 
 def create_contributor_info():
     """

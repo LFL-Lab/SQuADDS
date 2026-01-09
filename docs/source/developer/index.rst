@@ -32,12 +32,26 @@ Install ``uv``:
 
    uv run pytest tests/ -v
 
-**Running Linter:**
+**Setting Up Pre-commit Hooks (Recommended):**
+
+.. code-block:: bash
+
+   uv run pre-commit install
+
+This will automatically run formatting and linting every time you commit.
+
+**Running Linter Manually:**
 
 .. code-block:: bash
 
    uv run ruff check .
    uv run ruff format --check .
+
+**Running All Pre-commit Hooks:**
+
+.. code-block:: bash
+
+   uv run pre-commit run --all-files
 
 **Building Documentation:**
 

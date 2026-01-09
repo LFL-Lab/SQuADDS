@@ -8,11 +8,12 @@ from tabulate import tabulate
 def strip_unicode(text):
     """
     Remove Unicode characters from the given text.
-    
+
     Args:
         text (str): The input text to remove Unicode characters from.
     """
-    return text.encode('ascii', errors='ignore').decode('ascii')
+    return text.encode("ascii", errors="ignore").decode("ascii")
+
 
 def view_contributors_from_rst(rst_file_path):
     """
@@ -27,14 +28,14 @@ def view_contributors_from_rst(rst_file_path):
 
     contributors_data = []
 
-    with open(rst_file_path, 'r', encoding='utf-8') as file:
+    with open(rst_file_path, encoding="utf-8") as file:
         content = file.read()
 
         # Remove Unicode characters from content
         content_ascii = strip_unicode(content)
 
         # Find the Contributors section
-        contributors_match = re.search(r'Contributors\s+-{3,}\s+(.*?)(\n\n|$)', content_ascii, re.S)
+        contributors_match = re.search(r"Contributors\s+-{3,}\s+(.*?)(\n\n|$)", content_ascii, re.S)
         if contributors_match:
             contributors_section = contributors_match.group(1).strip()
 
@@ -44,7 +45,7 @@ def view_contributors_from_rst(rst_file_path):
             for entry in contributor_entries:
                 if entry.strip():
                     # Extract name, institution, and contribution
-                    match = re.match(r'\*\*(.*?)\*\* \((.*?)\) - (.*)', entry.strip())
+                    match = re.match(r"\*\*(.*?)\*\* \((.*?)\) - (.*)", entry.strip())
                     if match:
                         name = strip_unicode(match.group(1))
                         institution = strip_unicode(match.group(2))
@@ -59,6 +60,7 @@ def view_contributors_from_rst(rst_file_path):
         return f"\n\n{markdown_table_ascii}\n"
     else:
         return "\n"
+
 
 def fetch_github_contributors():
     """
@@ -81,20 +83,18 @@ def fetch_github_contributors():
 
     # Process the contributors
     for contributor in contributors:
-        login = contributor.get('login', '')
-        html_url = contributor.get('html_url', '')
-        contributions = contributor.get('contributions', 0)
-        
-        if login in ['shanto268', 'actions-user', 'github-actions[bot]']:
+        login = contributor.get("login", "")
+        html_url = contributor.get("html_url", "")
+        contributions = contributor.get("contributions", 0)
+
+        if login in ["shanto268", "actions-user", "github-actions[bot]"]:
             shanto_contributions += contributions
         else:
             # Remove Unicode characters from login and html_url
             login_ascii = strip_unicode(login)
             html_url_ascii = strip_unicode(html_url)
             contributions_ascii = strip_unicode(str(contributions))
-            other_contributors.append(
-                f"- [{login_ascii}]({html_url_ascii}) - {contributions_ascii} contributions"
-            )
+            other_contributors.append(f"- [{login_ascii}]({html_url_ascii}) - {contributions_ascii} contributions")
 
     # Prepare the final output
     contributors_output = [
@@ -106,6 +106,7 @@ def fetch_github_contributors():
     final_output_ascii = strip_unicode(final_output)
 
     return final_output_ascii
+
 
 def update_readme(readme_path, rst_file_path):
     """
@@ -125,11 +126,11 @@ def update_readme(readme_path, rst_file_path):
     rst_contributors = view_contributors_from_rst(rst_file_path)
 
     # Combine both sections
-    header = "## Contributors\n" 
+    header = "## Contributors\n"
     combined_contributors = header + rst_contributors + "\n" + "## Developers\n" + github_contributors + "\n---"
 
     # Read the existing README.md content
-    with open(readme_path, "r") as file:
+    with open(readme_path) as file:
         content = file.read()
 
     # Replace the Contributors and Developers sections
@@ -137,7 +138,7 @@ def update_readme(readme_path, rst_file_path):
         r"## Contributors.*?## Developers.*?(\n---|\Z)",  # Match from '## Contributors' to the '## Developers' section and its end
         combined_contributors + "\n",  # Replace with the updated Contributors and Developers sections
         content,
-        flags=re.DOTALL  # Enable matching across multiple lines
+        flags=re.DOTALL,  # Enable matching across multiple lines
     )
 
     # Write the updated content back to README.md
@@ -147,8 +148,9 @@ def update_readme(readme_path, rst_file_path):
     # Optionally, print the output for verification
     print(new_content)
 
+
 # Example usage:
 # Assuming your README.md is located in the root of your project and the index.rst file is in the `docs` directory
 readme_path = "README.md"
-rst_file_path = os.path.join(os.getcwd(), 'docs/source/developer/index.rst')
+rst_file_path = os.path.join(os.getcwd(), "docs/source/developer/index.rst")
 update_readme(readme_path, rst_file_path)

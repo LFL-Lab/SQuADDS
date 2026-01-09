@@ -70,6 +70,7 @@ docs = [
     "sphinxcontrib-katex>=0.9",
 ]
 dev = [
+    "pre-commit>=4.5.1",
     "pytest>=8.0",
     "pytest-cov>=4.0",
     "ruff>=0.14.11",
@@ -99,6 +100,14 @@ include = [
 [tool.ruff]
 line-length = 120
 target-version = "py310"
+exclude = [
+    "docs/",
+    "tutorials/",
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+]
 
 [tool.ruff.lint]
 select = [
@@ -121,3 +130,7 @@ known-first-party = ["squadds"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
+
+[tool.bandit]
+exclude_dirs = ["tests", "docs", "tutorials"]
+skips = ["B101", "B311"]  # Skip assert and random warnings

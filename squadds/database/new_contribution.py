@@ -1,5 +1,4 @@
 class ConfigMaker:
-
     def __init__(self, component, component_name, data_type):
         self.component = component
         self.component_name = component_name
@@ -7,7 +6,7 @@ class ConfigMaker:
         self.config_name = f"{self.component}_{self.component_name}_{self.data_type}"
         self.metadata = None
 
-    def set_schema(self, ref_file = None, interactive=True):
+    def set_schema(self, ref_file=None, interactive=True):
         """
         # TODO: Implement create_metadata method (both interactive and non-interactive) for required fields
         if interactive:
@@ -24,12 +23,9 @@ class ConfigMaker:
         raise NotImplementedError
 
     def submit(self, results):
-        package = {
-            "data": results,
-            "metadata": self.metadata,
-        }
         raise NotImplementedError
-        
+
+
 """
 MARKDOWN INFO:
 

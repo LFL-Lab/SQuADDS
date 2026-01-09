@@ -25,6 +25,13 @@ jobs:
       - name: Build package
         run: uv build
 
+      - name: Verify build artifacts
+        run: |
+          ls -la dist/
+          # Check that we have both sdist and wheel
+          test -f dist/*.tar.gz
+          test -f dist/*.whl
+
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:
@@ -48,8 +55,11 @@ jobs:
           name: python-package-distributions
           path: dist/
 
-      - name: Publish to PyPI
+      - name: Publish to PyPI (Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
+        # Note: If trusted publishing is not configured, use PYPI_API_TOKEN secret instead:
+        # with:
+        #   password: ${{ secrets.PYPI_API_TOKEN }}
 
   draft-release-notes:
     name: Draft Release Notes

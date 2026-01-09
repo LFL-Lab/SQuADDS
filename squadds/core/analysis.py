@@ -1,6 +1,5 @@
-import multiprocessing
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import datashader as ds
 import datashader.transfer_functions as tf
@@ -14,7 +13,7 @@ from matplotlib.patches import Patch
 
 from squadds.calcs.transmon_cross import TransmonCrossHamiltonian
 from squadds.core.metrics import *
-from squadds.core.processing import merge_dfs, unify_columns
+from squadds.core.processing import merge_dfs
 from squadds.core.utils import create_unified_design_options
 
 """
@@ -22,6 +21,8 @@ from squadds.core.utils import create_unified_design_options
 HELPER FUNCTIONS
 =====================================================================================
 """
+
+
 # Helper function to scale values with 'um' in them
 def scale_value(value, ratio):
     """
@@ -34,7 +35,7 @@ def scale_value(value, ratio):
     Returns:
         scaled_value (str): The scaled value in the format 'Xum' where X is the scaled number.
     """
-    scaled_value = str(float(value.replace('um', '')) * ratio) + 'um'
+    scaled_value = str(float(value.replace("um", "")) * ratio) + "um"
     return scaled_value
 
 
@@ -43,6 +44,8 @@ def scale_value(value, ratio):
 Analyzer
 =====================================================================================
 """
+
+
 class Analyzer:
     """
     The Analyzer class is responsible for analyzing designs and finding the closest designs based on target parameters.
@@ -59,8 +62,8 @@ class Analyzer:
         get_design(df): Extracts the design parameters from the dataframe and returns a dict.
     """
 
-    __supported_metrics__ = ['Euclidean', 'Manhattan', 'Chebyshev', 'Weighted Euclidean' , 'Custom']
-    __supported_estimation_methods__ = ['Interpolation']
+    __supported_metrics__ = ["Euclidean", "Manhattan", "Chebyshev", "Weighted Euclidean", "Custom"]
+    __supported_estimation_methods__ = ["Interpolation"]
 
     def __init__(self, db=None):
         """
@@ -93,6 +96,7 @@ class Analyzer:
             - H_param_keys: The H parameter keys.
         """
         from squadds.core.db import SQuADDS_DB
+
         self.db = db if db is not None else SQuADDS_DB()
         self.reload_db()
 
@@ -124,7 +128,7 @@ class Analyzer:
         self.custom_metric_func = None
         self.metric_weights = None
         self.target_params = None
-        
+
         self.H_param_keys = self._get_H_param_keys()
 
     def reload_db(self):
@@ -132,7 +136,7 @@ class Analyzer:
         Reload the Analyzer with the current singleton SQuADDS_DB object.
         """
         self._initialize_attributes()
-        
+
     def _add_target_params_columns(self):
         """
         Adds target parameter columns to the dataframe based on the selected system.
@@ -151,22 +155,22 @@ class Analyzer:
         if self.selected_system == "qubit":
             qubit_H = TransmonCrossHamiltonian(self)
             qubit_H.add_qubit_H_params()
-            self.df = qubit_H.df 
+            self.df = qubit_H.df
         elif self.selected_system == "cavity_claw":
             self._fix_cavity_claw_df()
         elif self.selected_system == "coupler":
             pass
-        elif (self.selected_system == ["qubit","cavity_claw"]) or (self.selected_system == ["cavity_claw","qubit"]):
+        elif (self.selected_system == ["qubit", "cavity_claw"]) or (self.selected_system == ["cavity_claw", "qubit"]):
             self._fix_cavity_claw_df()
             qubit_H = TransmonCrossHamiltonian(self)
             start = time.time()
             qubit_H.add_cavity_coupled_H_params()
             end = time.time()
-            print(f"Time taken to add the coupled H params: {end-start} seconds")
-            self.df = qubit_H.df 
+            print(f"Time taken to add the coupled H params: {end - start} seconds")
+            self.df = qubit_H.df
         else:
             raise ValueError("Invalid system.")
-    
+
     def _fix_cavity_claw_df(self):
         """
         Fix the cavity claw DataFrame by renaming columns and updating values.
@@ -188,18 +192,18 @@ class Analyzer:
             # drop the units column in place
             try:
                 self.df.drop(columns=["units"], inplace=True)
-            except Exception as e:
+            except Exception:
                 pass
         else:
             pass
-    
+
     def _get_H_param_keys(self):
         """
         Get the parameter keys for the Hamiltonian (H) based on the selected system.
 
         Returns:
             list: A list of parameter keys for the Hamiltonian.
-        
+
         Raises:
             ValueError: If the selected system is invalid.
         """
@@ -211,8 +215,15 @@ class Analyzer:
             self.H_param_keys = ["resonator_type", "cavity_frequency_GHz", "kappa_kHz"]
         elif self.selected_system == "coupler":
             pass
-        elif (self.selected_system == ["qubit","cavity_claw"]) or (self.selected_system == ["cavity_claw","qubit"]):
-            self.H_param_keys = ["qubit_frequency_GHz", "anharmonicity_MHz", "resonator_type", "cavity_frequency_GHz", "kappa_kHz", "g_MHz"]
+        elif (self.selected_system == ["qubit", "cavity_claw"]) or (self.selected_system == ["cavity_claw", "qubit"]):
+            self.H_param_keys = [
+                "qubit_frequency_GHz",
+                "anharmonicity_MHz",
+                "resonator_type",
+                "cavity_frequency_GHz",
+                "kappa_kHz",
+                "g_MHz",
+            ]
         else:
             raise ValueError("Invalid system.")
         return self.H_param_keys
@@ -235,7 +246,7 @@ class Analyzer:
             ValueError: If the specified metric is not supported.
         """
 
-        self.metric_strategy = strategy 
+        self.metric_strategy = strategy
 
     def _outside_bounds(self, df: pd.DataFrame, params: dict, display=True) -> bool:
         """
@@ -243,7 +254,7 @@ class Analyzer:
         Args:
             df (pd.DataFrame): Dataframe to give warning.
             params (dict): Keys are column names of `df`. Values are values to check for bounds.
-        
+
         Returns:
             bool: True if any value is outside of bounds. False if all values are inside bounds.
         """
@@ -258,7 +269,9 @@ class Analyzer:
             if isinstance(value, (int, float)):
                 if value < df[param].min() or value > df[param].max():
                     if display:
-                        logging.info(f"\033[1mNOTE TO USER:\033[0m the value \033[1m{value} for {param}\033[0m is outside the bounds of our library.\nIf you find a geometry which corresponds to these values, please consider contributing it! 😁🙏\n")
+                        logging.info(
+                            f"\033[1mNOTE TO USER:\033[0m the value \033[1m{value} for {param}\033[0m is outside the bounds of our library.\nIf you find a geometry which corresponds to these values, please consider contributing it! 😁🙏\n"
+                        )
                     outside_bounds = True
 
             elif isinstance(value, str):
@@ -270,15 +283,14 @@ class Analyzer:
         if filtered_df.empty:
             categorical_params = {key: value for key, value in params.items() if isinstance(value, str)}
             if display and categorical_params:
-                logging.info(f"\033[1mNOTE TO USER:\033[0m There are no geometries with the specified categorical parameters - \033[1m{categorical_params}\033[0m.\nIf you find a geometry which corresponds to these values, please consider contributing it! 😁🙏\n")
+                logging.info(
+                    f"\033[1mNOTE TO USER:\033[0m There are no geometries with the specified categorical parameters - \033[1m{categorical_params}\033[0m.\nIf you find a geometry which corresponds to these values, please consider contributing it! 😁🙏\n"
+                )
             outside_bounds = True
 
         return outside_bounds
 
-    def get_complete_df(self,
-                         target_params: dict,
-                         metric: str = 'Euclidean',
-                         display: bool = True):
+    def get_complete_df(self, target_params: dict, metric: str = "Euclidean", display: bool = True):
         """
         Returns the complete DataFrame (design + Hamiltonian parameters) sourced using the target parameters.
 
@@ -297,7 +309,7 @@ class Analyzer:
         ### Checks
         # Check for supported metric
         if metric not in self.__supported_metrics__:
-            raise ValueError(f'`metric` must be one of the following: {self.__supported_metrics__}')
+            raise ValueError(f"`metric` must be one of the following: {self.__supported_metrics__}")
 
         self.target_params = target_params
 
@@ -309,17 +321,19 @@ class Analyzer:
             self._add_target_params_columns()
         else:
             print("Target parameters have already been computed.")
-            
+
         return self.df
 
-    def find_closest(self,
-                         target_params: dict,
-                         num_top: int,
-                         metric: str = 'Euclidean',
-                         display: bool = True,
-                         parallel: bool = False,
-                         num_cpu: str ="auto",
-                         skip_df_gen: bool = False):
+    def find_closest(
+        self,
+        target_params: dict,
+        num_top: int,
+        metric: str = "Euclidean",
+        display: bool = True,
+        parallel: bool = False,
+        num_cpu: str = "auto",
+        skip_df_gen: bool = False,
+    ):
         """
         Find the closest designs in the library based on the target parameters.
 
@@ -342,7 +356,7 @@ class Analyzer:
         ### Checks
         # Check for supported metric
         if metric not in self.__supported_metrics__:
-            raise ValueError(f'`metric` must be one of the following: {self.__supported_metrics__}')
+            raise ValueError(f"`metric` must be one of the following: {self.__supported_metrics__}")
 
         self.target_params = target_params
 
@@ -357,22 +371,24 @@ class Analyzer:
         elif self.selected_resonator_type == "quarter":
             pass
         else:
-            print("Either `skip_df_gen` flag is set to True or all target params have been precomputed at an earlier step. Using `df` from memory.\nPlease set this to False if `target_parameters` have changed.")
-            
+            print(
+                "Either `skip_df_gen` flag is set to True or all target params have been precomputed at an earlier step. Using `df` from memory.\nPlease set this to False if `target_parameters` have changed."
+            )
+
         target_params_list = list(self.target_params.keys())
-        filtered_df = self.df[target_params_list]  
+        filtered_df = self.df[target_params_list]
         self._outside_bounds(df=filtered_df, params=target_params, display=display)
 
         # Set strategy dynamically based on the metric parameter
-        if metric == 'Euclidean':
+        if metric == "Euclidean":
             self.set_metric_strategy(EuclideanMetric())
-        elif metric == 'Manhattan':
+        elif metric == "Manhattan":
             self.set_metric_strategy(ManhattanMetric())
-        elif metric == 'Chebyshev':
+        elif metric == "Chebyshev":
             self.set_metric_strategy(ChebyshevMetric())
-        elif metric == 'Weighted Euclidean':
+        elif metric == "Weighted Euclidean":
             self.set_metric_strategy(WeightedEuclideanMetric(self.metric_weights))
-        elif metric == 'Custom':
+        elif metric == "Custom":
             self.set_metric_strategy(CustomMetric(self.custom_metric_func))
 
         if not self.metric_strategy:
@@ -385,10 +401,11 @@ class Analyzer:
             if isinstance(value, str):
                 filtered_df = filtered_df[filtered_df[param] == value]
 
-
         # if the filtered_df is empty, raise a User input error
         if filtered_df.empty:
-            raise ValueError(f"No geometries found with the specified parameters:\n{target_params}\nPlease double-check your targets (especially ``resonator_type``) and try again.")
+            raise ValueError(
+                f"No geometries found with the specified parameters:\n{target_params}\nPlease double-check your targets (especially ``resonator_type``) and try again."
+            )
 
         # Calculate distances
         if not parallel:
@@ -415,11 +432,11 @@ class Analyzer:
         self.closest_design_found = True
 
         if self.selected_resonator_type == "quarter":
-            # store the best design 
+            # store the best design
             self.closest_df_entry = self.closest_df.iloc[0]
             self.closest_design = self.closest_df.iloc[0]["design_options"]
 
-            if len(self.selected_system) == 2: #! TODO: make this more general
+            if len(self.selected_system) == 2:  #! TODO: make this more general
                 self.presimmed_closest_cpw_design = self.closest_df_entry["design_options_cavity_claw"]
                 self.presimmed_closest_qubit_design = self.closest_df_entry["design_options_qubit"]
 
@@ -430,20 +447,24 @@ class Analyzer:
             self.closest_cavity = self.get_closest_cavity()
 
             for merger_term in self.db.claw_merger_terms:
-                self.closest_qubit[merger_term] = self.closest_qubit['design_options'].map(lambda x: x['connection_pads']['readout'].get(merger_term))
+                self.closest_qubit[merger_term] = self.closest_qubit["design_options"].map(
+                    lambda x: x["connection_pads"]["readout"].get(merger_term)
+                )
 
             # Create a unified design options column
             merged_df = merge_dfs(self.closest_qubit, self.closest_cavity, self.db.claw_merger_terms)
-            
+
             # Add a temporary key column for cross join
-            self.closest_df['_temp_key'] = 1
-            merged_df['_temp_key'] = 1
+            self.closest_df["_temp_key"] = 1
+            merged_df["_temp_key"] = 1
 
             # Perform the cross join
-            self.closest_df = pd.merge(self.closest_df, merged_df, on='_temp_key', how="inner", suffixes=('_closest', '_merged')).drop('_temp_key', axis=1)
+            self.closest_df = pd.merge(
+                self.closest_df, merged_df, on="_temp_key", how="inner", suffixes=("_closest", "_merged")
+            ).drop("_temp_key", axis=1)
 
             # Create the unified design options column
-            self.closest_df['design_options'] = self.closest_df.apply(create_unified_design_options, axis=1)
+            self.closest_df["design_options"] = self.closest_df.apply(create_unified_design_options, axis=1)
             self.closest_df_entry = self.closest_df.iloc[0]
 
         return self.closest_df
@@ -461,8 +482,8 @@ class Analyzer:
 
         # Use np.where for fast boolean indexing
         mask = np.where(
-            (self.cavity_df['index_cc'].values == closest_index_cc) & 
-            (self.cavity_df['index_cplr'].values == closest_index_cplr)
+            (self.cavity_df["index_cc"].values == closest_index_cc)
+            & (self.cavity_df["index_cplr"].values == closest_index_cplr)
         )[0]
 
         # Get the index from the DataFrame
@@ -472,14 +493,9 @@ class Analyzer:
     def compute_metric_distances(self, row):
         return self.metric_strategy.calculate(self.target_params, row)
 
-    def get_interpolated_design(self,
-                     target_params: dict,
-                     metric: str = 'Euclidean',
-                     display: bool = True):
-        """
-        """
+    def get_interpolated_design(self, target_params: dict, metric: str = "Euclidean", display: bool = True):
+        """ """
         raise NotImplementedError
-    
 
     def get_design(self, df):
         """
@@ -496,7 +512,6 @@ class Analyzer:
         """
         raise NotImplementedError
 
-
     def closest_design_in_H_space(self):
         """Plots a scatter plot of the closest design in the H-space.
 
@@ -510,8 +525,8 @@ class Analyzer:
         sns.set_context("paper", font_scale=1.4)
 
         # Create a colormap for the scatter plot points
-        viridis_cmap = plt.cm.get_cmap('viridis')
-        color_sim = viridis_cmap(0.2)
+        viridis_cmap = plt.cm.get_cmap("viridis")
+        viridis_cmap(0.2)
         color_presim = viridis_cmap(0.9)
         color_database = viridis_cmap(0.6)
 
@@ -519,128 +534,173 @@ class Analyzer:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
 
         if self.selected_resonator_type == "quarter":
-
             # First subplot: kappa_kHz vs fres
-            ax1.scatter(x=self.df['cavity_frequency_GHz'], y=self.df['kappa_kHz'], color=color_presim, marker=".", s=50, label="Pre-Simulated")
-            ax1.scatter(x=self.target_params["cavity_frequency_GHz"], y=self.target_params["kappa_kHz"], color='red', s=100, marker='x', label='Target')
+            ax1.scatter(
+                x=self.df["cavity_frequency_GHz"],
+                y=self.df["kappa_kHz"],
+                color=color_presim,
+                marker=".",
+                s=50,
+                label="Pre-Simulated",
+            )
+            ax1.scatter(
+                x=self.target_params["cavity_frequency_GHz"],
+                y=self.target_params["kappa_kHz"],
+                color="red",
+                s=100,
+                marker="x",
+                label="Target",
+            )
             closest_fres = self.closest_df_entry["cavity_frequency_GHz"]
             closest_kappa_kHz = self.closest_df_entry["kappa_kHz"]
-            ax1.scatter(closest_fres, closest_kappa_kHz, color=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
-            ax1.set_xlabel(r'$f_{res}$ (GHz)', fontweight='bold', fontsize=24)
-            ax1.set_ylabel(r'$\kappa / 2 \pi$ (kHz)', fontweight='bold', fontsize=24)
-            ax1.tick_params(axis='both', which='major', labelsize=20)
+            ax1.scatter(
+                closest_fres, closest_kappa_kHz, color=[color_database], s=100, marker="s", alpha=0.7, label="Closest"
+            )
+            ax1.set_xlabel(r"$f_{res}$ (GHz)", fontweight="bold", fontsize=24)
+            ax1.set_ylabel(r"$\kappa / 2 \pi$ (kHz)", fontweight="bold", fontsize=24)
+            ax1.tick_params(axis="both", which="major", labelsize=20)
 
             # Second subplot: g vs alpha
-            ax2.scatter(x=self.df['anharmonicity_MHz'], y=self.df['g_MHz'], color=color_presim, marker=".", s=50, label="Pre-Simulated")
-            ax2.scatter(x=self.target_params["anharmonicity_MHz"], y=self.target_params["g_MHz"], color='red', s=100, marker='x', label='Target')
+            ax2.scatter(
+                x=self.df["anharmonicity_MHz"],
+                y=self.df["g_MHz"],
+                color=color_presim,
+                marker=".",
+                s=50,
+                label="Pre-Simulated",
+            )
+            ax2.scatter(
+                x=self.target_params["anharmonicity_MHz"],
+                y=self.target_params["g_MHz"],
+                color="red",
+                s=100,
+                marker="x",
+                label="Target",
+            )
             closest_alpha = [self.closest_df_entry["anharmonicity_MHz"]]
             closest_g = [self.closest_df_entry["g_MHz"]]
-            ax2.scatter(closest_alpha, closest_g, color=[color_database], s=100, marker='s', alpha=0.7, label='Closest')
-            ax2.set_xlabel(r'$\alpha / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
-            ax2.set_ylabel(r'$g / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
-            ax2.tick_params(axis='both', which='major', labelsize=20)
+            ax2.scatter(closest_alpha, closest_g, color=[color_database], s=100, marker="s", alpha=0.7, label="Closest")
+            ax2.set_xlabel(r"$\alpha / 2 \pi$ (MHz)", fontweight="bold", fontsize=24)
+            ax2.set_ylabel(r"$g / 2 \pi$ (MHz)", fontweight="bold", fontsize=24)
+            ax2.tick_params(axis="both", which="major", labelsize=20)
 
         elif self.selected_resonator_type == "half":
             # set up canvas objects
-            x1_range = (self.df['cavity_frequency_GHz'].min(), self.df['cavity_frequency_GHz'].max())
-            y1_range = (self.df['kappa_kHz'].min(), self.df['kappa_kHz'].max())
+            x1_range = (self.df["cavity_frequency_GHz"].min(), self.df["cavity_frequency_GHz"].max())
+            y1_range = (self.df["kappa_kHz"].min(), self.df["kappa_kHz"].max())
 
-            x2_range = (self.df['anharmonicity_MHz'].min(), self.df['anharmonicity_MHz'].max())
-            y2_range = (self.df['g_MHz'].min(), self.df['g_MHz'].max())
-            
+            x2_range = (self.df["anharmonicity_MHz"].min(), self.df["anharmonicity_MHz"].max())
+            y2_range = (self.df["g_MHz"].min(), self.df["g_MHz"].max())
+
             canvas1 = ds.Canvas(plot_width=800, plot_height=600, x_range=x1_range, y_range=y1_range)
             canvas2 = ds.Canvas(plot_width=800, plot_height=600, x_range=x2_range, y_range=y2_range)
-            agg1 = canvas1.points(self.df, 'cavity_frequency_GHz', 'kappa_kHz')
-            agg2 = canvas2.points(self.df, 'anharmonicity_MHz', 'g_MHz')
+            agg1 = canvas1.points(self.df, "cavity_frequency_GHz", "kappa_kHz")
+            agg2 = canvas2.points(self.df, "anharmonicity_MHz", "g_MHz")
 
             # Create the image using a list of colors from the 'Blues' colormap
-            cmap = cm.get_cmap('Blues')
+            cmap = cm.get_cmap("Blues")
             colors = [cmap(i) for i in range(cmap.N)]
-            hex_colors = [f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}" for r, g, b, _ in colors]
+            hex_colors = [f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}" for r, g, b, _ in colors]
             img1 = tf.shade(agg1, cmap=hex_colors)
             img2 = tf.shade(agg2, cmap=hex_colors)
 
             # Plot the first subplot
-            ax1.imshow(img1.to_pil(), aspect='auto', extent=[*x1_range, *y1_range])
-            ax1.set_xlabel(r'$f_{res}$ (GHz)', fontweight='bold', fontsize=24)
-            ax1.set_ylabel(r'$\kappa / 2 \pi$ (Hz)', fontweight='bold', fontsize=24)
-            ax1.tick_params(axis='both', which='major', labelsize=20)
+            ax1.imshow(img1.to_pil(), aspect="auto", extent=[*x1_range, *y1_range])
+            ax1.set_xlabel(r"$f_{res}$ (GHz)", fontweight="bold", fontsize=24)
+            ax1.set_ylabel(r"$\kappa / 2 \pi$ (Hz)", fontweight="bold", fontsize=24)
+            ax1.tick_params(axis="both", which="major", labelsize=20)
 
             # !TODO: add legend
-            pre_simulated_patch = Patch(facecolor=color_presim, edgecolor='none', label='Pre-Simulated')
+            Patch(facecolor=color_presim, edgecolor="none", label="Pre-Simulated")
 
             # Plot the second subplot
-            ax2.imshow(img2.to_pil(), aspect='auto', extent=[*x2_range, *y2_range])
-            ax2.set_xlabel(r'$\alpha / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
-            ax2.set_ylabel(r'$g / 2 \pi$ (MHz)', fontweight='bold', fontsize=24)
-            ax2.tick_params(axis='both', which='major', labelsize=20)
-            
+            ax2.imshow(img2.to_pil(), aspect="auto", extent=[*x2_range, *y2_range])
+            ax2.set_xlabel(r"$\alpha / 2 \pi$ (MHz)", fontweight="bold", fontsize=24)
+            ax2.set_ylabel(r"$g / 2 \pi$ (MHz)", fontweight="bold", fontsize=24)
+            ax2.tick_params(axis="both", which="major", labelsize=20)
+
             # Plot the target points
-            ax1.plot(self.target_params["cavity_frequency_GHz"], self.target_params["kappa_kHz"]*1e3, 'rx', label='Target')
-            ax2.plot(self.target_params["anharmonicity_MHz"], self.target_params["g_MHz"], 'ro', label='Target')
-            
+            ax1.plot(
+                self.target_params["cavity_frequency_GHz"], self.target_params["kappa_kHz"] * 1e3, "rx", label="Target"
+            )
+            ax2.plot(self.target_params["anharmonicity_MHz"], self.target_params["g_MHz"], "ro", label="Target")
+
             # Plot the closest design point
-            ax1.plot(self.closest_df_entry["cavity_frequency_GHz"], self.closest_df_entry["kappa"], 'bs', alpha=1, label='Closest')
-            ax2.plot(self.closest_df_entry["anharmonicity_MHz"], self.closest_df_entry["g_MHz"], 'bs', alpha=0.7, label='Closest')
+            ax1.plot(
+                self.closest_df_entry["cavity_frequency_GHz"],
+                self.closest_df_entry["kappa"],
+                "bs",
+                alpha=1,
+                label="Closest",
+            )
+            ax2.plot(
+                self.closest_df_entry["anharmonicity_MHz"],
+                self.closest_df_entry["g_MHz"],
+                "bs",
+                alpha=0.7,
+                label="Closest",
+            )
         else:
-            raise ValueError(f"Your chosen resonator type - {self.selected_resonator_type} - is not supported. Please use \"quarter\" or \"half\"")
+            raise ValueError(
+                f'Your chosen resonator type - {self.selected_resonator_type} - is not supported. Please use "quarter" or "half"'
+            )
 
-        legend1 = ax1.legend(loc='upper left', fontsize=16)
+        legend1 = ax1.legend(loc="upper left", fontsize=16)
         for text in legend1.get_texts():
-            text.set_fontweight('bold')
+            text.set_fontweight("bold")
 
-        legend2 = ax2.legend(loc='lower left', fontsize=16)
+        legend2 = ax2.legend(loc="lower left", fontsize=16)
         for text in legend2.get_texts():
-            text.set_fontweight('bold')
+            text.set_fontweight("bold")
 
         plt.tight_layout()
         plt.show()
 
-    def get_qubit_options(self, df: pd.DataFrame) -> Dict[str, List[Any]]:
+    def get_qubit_options(self, df: pd.DataFrame) -> dict[str, list[Any]]:
         """
         Extracts qubit design options from the dataframe.
-        
+
         Parameters:
         df (pd.DataFrame): The dataframe containing design options.
-        
+
         Returns:
         Dict[str, List[Any]]: A dictionary containing lists of the extracted qubit options.
         """
         qubit_options_dict = {
-            'claw_gap': [],
-            'claw_length': [],
-            'claw_width': [],
-            'ground_spacing': [],
-            'cross_gap': [],
-            'cross_length': [],
-            'cross_width': []
+            "claw_gap": [],
+            "claw_length": [],
+            "claw_width": [],
+            "ground_spacing": [],
+            "cross_gap": [],
+            "cross_length": [],
+            "cross_width": [],
         }
 
         for idx, row in df.iterrows():
             try:
-                design_options = row.get('design_options', None)
+                design_options = row.get("design_options", None)
                 if design_options is None:
                     raise ValueError(f"Row {idx} has no 'design_options'.")
-                qubit_options = design_options.get('qubit_options', {})
+                qubit_options = design_options.get("qubit_options", {})
 
-                claw_gap = qubit_options.get('connection_pads', {}).get('readout', {}).get('claw_gap')
-                claw_length = qubit_options.get('connection_pads', {}).get('readout', {}).get('claw_length')
-                claw_width = qubit_options.get('connection_pads', {}).get('readout', {}).get('claw_width')
-                ground_spacing = qubit_options.get('connection_pads', {}).get('readout', {}).get('ground_spacing')
-                cross_gap = qubit_options.get('cross_gap')
-                cross_length = qubit_options.get('cross_length')
-                cross_width = qubit_options.get('cross_width')
+                claw_gap = qubit_options.get("connection_pads", {}).get("readout", {}).get("claw_gap")
+                claw_length = qubit_options.get("connection_pads", {}).get("readout", {}).get("claw_length")
+                claw_width = qubit_options.get("connection_pads", {}).get("readout", {}).get("claw_width")
+                ground_spacing = qubit_options.get("connection_pads", {}).get("readout", {}).get("ground_spacing")
+                cross_gap = qubit_options.get("cross_gap")
+                cross_length = qubit_options.get("cross_length")
+                cross_width = qubit_options.get("cross_width")
 
                 if None in [claw_gap, claw_length, claw_width, ground_spacing, cross_gap, cross_length, cross_width]:
                     raise ValueError(f"Row {idx} has missing qubit parameter(s).")
 
-                qubit_options_dict['claw_gap'].append(claw_gap)
-                qubit_options_dict['claw_length'].append(claw_length)
-                qubit_options_dict['claw_width'].append(claw_width)
-                qubit_options_dict['ground_spacing'].append(ground_spacing)
-                qubit_options_dict['cross_gap'].append(cross_gap)
-                qubit_options_dict['cross_length'].append(cross_length)
-                qubit_options_dict['cross_width'].append(cross_width)
+                qubit_options_dict["claw_gap"].append(claw_gap)
+                qubit_options_dict["claw_length"].append(claw_length)
+                qubit_options_dict["claw_width"].append(claw_width)
+                qubit_options_dict["ground_spacing"].append(ground_spacing)
+                qubit_options_dict["cross_gap"].append(cross_gap)
+                qubit_options_dict["cross_length"].append(cross_length)
+                qubit_options_dict["cross_width"].append(cross_width)
 
             except Exception as e:
                 print(f"Error processing row {idx}: {str(e)}")
@@ -649,40 +709,35 @@ class Analyzer:
 
         return {key: np.array(value) for key, value in qubit_options_dict.items()}
 
-
-    def get_cpw_options(self, df: pd.DataFrame) -> Dict[str, List[Any]]:
+    def get_cpw_options(self, df: pd.DataFrame) -> dict[str, list[Any]]:
         """
         Extracts CPW options from the dataframe.
-        
+
         Parameters:
         df (pd.DataFrame): The dataframe containing design options.
-        
+
         Returns:
         Dict[str, List[Any]]: A dictionary containing lists of the extracted CPW options.
         """
-        cpw_options_dict = {
-            'total_length': [],
-            'trace_gap': [],
-            'trace_width': []
-        }
+        cpw_options_dict = {"total_length": [], "trace_gap": [], "trace_width": []}
 
         for idx, row in df.iterrows():
             try:
-                design_options = row.get('design_options', None)
+                design_options = row.get("design_options", None)
                 if design_options is None:
                     raise ValueError(f"Row {idx} has no 'design_options'.")
-                cpw_opts = design_options.get('cavity_claw_options', {}).get('cpw_opts', {}).get('left_options', {})
+                cpw_opts = design_options.get("cavity_claw_options", {}).get("cpw_opts", {}).get("left_options", {})
 
-                total_length = cpw_opts.get('total_length')
-                trace_gap = cpw_opts.get('trace_gap')
-                trace_width = cpw_opts.get('trace_width')
+                total_length = cpw_opts.get("total_length")
+                trace_gap = cpw_opts.get("trace_gap")
+                trace_width = cpw_opts.get("trace_width")
 
                 if None in [total_length, trace_gap, trace_width]:
                     raise ValueError(f"Row {idx} has missing CPW parameter(s).")
 
-                cpw_options_dict['total_length'].append(total_length)
-                cpw_options_dict['trace_gap'].append(trace_gap)
-                cpw_options_dict['trace_width'].append(trace_width)
+                cpw_options_dict["total_length"].append(total_length)
+                cpw_options_dict["trace_gap"].append(trace_gap)
+                cpw_options_dict["trace_width"].append(trace_width)
 
             except Exception as e:
                 print(f"Error processing row {idx}: {str(e)}")
@@ -691,64 +746,63 @@ class Analyzer:
 
         return {key: np.array(value) for key, value in cpw_options_dict.items()}
 
-
-    def get_coupler_options(self, df: pd.DataFrame) -> Dict[str, List[Any]]:
+    def get_coupler_options(self, df: pd.DataFrame) -> dict[str, list[Any]]:
         """
         Extracts coupler options from the dataframe.
-        
+
         Parameters:
         df (pd.DataFrame): The dataframe containing design options.
-        
+
         Returns:
         Dict[str, List[Any]]: A dictionary containing lists of the extracted coupler options.
         """
         coupler_options_dict = {
-            'coupling_length': [],
-            'coupling_space': [],
-            'down_length': [],
-            'orientation': [],
-            'prime_gap': [],
-            'prime_width': [],
-            'second_gap': [],
-            'second_width': [],
-            'cap_distance': [],
-            'cap_gap': [],
-            'cap_gap_ground': [],
-            'cap_width': [],
-            'finger_count': [],
-            'finger_length': []
+            "coupling_length": [],
+            "coupling_space": [],
+            "down_length": [],
+            "orientation": [],
+            "prime_gap": [],
+            "prime_width": [],
+            "second_gap": [],
+            "second_width": [],
+            "cap_distance": [],
+            "cap_gap": [],
+            "cap_gap_ground": [],
+            "cap_width": [],
+            "finger_count": [],
+            "finger_length": [],
         }
 
         for idx, row in df.iterrows():
             try:
-                design_options = row.get('design_options', None)
+                design_options = row.get("design_options", None)
                 if design_options is None:
                     raise ValueError(f"Row {idx} has no 'design_options'.")
-                cavity_claw_options = design_options.get('cavity_claw_options', {})
-                coupler_type = cavity_claw_options.get('coupler_type')
+                cavity_claw_options = design_options.get("cavity_claw_options", {})
+                coupler_type = cavity_claw_options.get("coupler_type")
 
-                if coupler_type == 'CLT':
-                    coupler_options = cavity_claw_options.get('coupler_options', {})
+                if coupler_type == "CLT":
+                    coupler_options = cavity_claw_options.get("coupler_options", {})
                     extracted_options = {
-                        'coupling_length': coupler_options.get('coupling_length'),
-                        'coupling_space': coupler_options.get('coupling_space'),
-                        'down_length': coupler_options.get('down_length'),
-                        'orientation': coupler_options.get('orientation'),
-                        'prime_gap': coupler_options.get('prime_gap'),
-                        'prime_width': coupler_options.get('prime_width'),
-                        'second_gap': coupler_options.get('second_gap'),
-                        'second_width': coupler_options.get('second_width')
+                        "coupling_length": coupler_options.get("coupling_length"),
+                        "coupling_space": coupler_options.get("coupling_space"),
+                        "down_length": coupler_options.get("down_length"),
+                        "orientation": coupler_options.get("orientation"),
+                        "prime_gap": coupler_options.get("prime_gap"),
+                        "prime_width": coupler_options.get("prime_width"),
+                        "second_gap": coupler_options.get("second_gap"),
+                        "second_width": coupler_options.get("second_width"),
                     }
-                elif coupler_type in ['NCap', 'CapNInterdigital']:
-                    coupler_options = cavity_claw_options.get('coupler_options', {})
+                elif coupler_type in ["NCap", "CapNInterdigital"]:
+                    coupler_options = cavity_claw_options.get("coupler_options", {})
                     extracted_options = {
-                        'cap_distance': coupler_options.get('cap_distance'),
-                        'cap_gap': coupler_options.get('cap_gap'),
-                        'cap_gap_ground': coupler_options.get('cap_gap_ground'),
-                        'cap_width': coupler_options.get('cap_width'),
-                        'finger_count': coupler_options.get('finger_count'),
-                        'finger_length': coupler_options.get('finger_length'),
-                        'orientation': coupler_options.get('orientation')
+                        "cap_distance": coupler_options.get("cap_distance"),
+                        "cap_gap": coupler_options.get("cap_gap"),
+                        "cap_gap_ground": coupler_options.get("cap_gap_ground"),
+                        "cap_width": coupler_options.get("cap_width"),
+                        "finger_count": coupler_options.get("finger_count"),
+                        "finger_length": coupler_options.get("finger_length"),
+                        "orientation": coupler_options.get("orientation"),
                     }
                 else:
                     raise ValueError(f"Row {idx} has an unsupported coupler_type: {coupler_type}")
@@ -763,25 +817,22 @@ class Analyzer:
 
         return {key: np.array(value) for key, value in coupler_options_dict.items()}
 
-        
     def get_Ljs(self, df: pd.DataFrame):
         """
         Extracts the EJ values from the dataframe. Converts them to Josephson inductance values using pyEPR
-        
+
         Parameters:
-        df (pd.DataFrame): The dataframe containing design options. 
-        
+        df (pd.DataFrame): The dataframe containing design options.
+
         Returns:
         np.array: An array of Josephson inductance values.
         """
         from pyEPR.calcs import Convert
 
         # EJ values are stored in a column named 'EJ' in GHz
-        EJ_values = df['EJ'].values
-        
+        EJ_values = df["EJ"].values
+
         # Convert EJ (in MHz) to Josephson inductance (Lj) in nH
-        Ljs = np.array([Convert.Lj_from_Ej(Ej, units_in='GHz', units_out='nH') for Ej in EJ_values])
-        
+        Ljs = np.array([Convert.Lj_from_Ej(Ej, units_in="GHz", units_out="nH") for Ej in EJ_values])
+
         return Ljs
-        
-        
