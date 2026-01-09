@@ -886,6 +886,12 @@ for a given qubit frequency (f_q) and anharmonicity (alpha).</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="squadds.calcs.transmon_cross.EC_numba_vectorized">
+<span class="sig-prename descclassname"><span class="pre">squadds.calcs.transmon_cross.</span></span><span class="sig-name descname"><span class="pre">EC_numba_vectorized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cross_to_claw_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cross_to_ground_arr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#EC_numba_vectorized"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.EC_numba_vectorized" title="Link to this definition">#</a></dt>
+<dd><p>Vectorized EC calculation for arrays - much faster than loop.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="squadds.calcs.transmon_cross.Ec_from_Cs">
 <span class="sig-prename descclassname"><span class="pre">squadds.calcs.transmon_cross.</span></span><span class="sig-name descname"><span class="pre">Ec_from_Cs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Cs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#Ec_from_Cs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.Ec_from_Cs" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the charging energy (Ec) in GHz from the capacitance (Cs) in fF.</p>
@@ -907,6 +913,7 @@ for a given qubit frequency (f_q) and anharmonicity (alpha).</p>
 <dt class="sig sig-object py" id="squadds.calcs.transmon_cross.TransmonCrossHamiltonian.E01">
 <span class="sig-name descname"><span class="pre">E01</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">EJ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#TransmonCrossHamiltonian.E01"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.E01" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the energy of the first excited state (E01) of a transmon qubit.</p>
+<p>Uses cached calculations when ng=0 for significant speedup.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -932,6 +939,7 @@ for a given qubit frequency (f_q) and anharmonicity (alpha).</p>
 <dt class="sig sig-object py" id="squadds.calcs.transmon_cross.TransmonCrossHamiltonian.E01_and_anharmonicity">
 <span class="sig-name descname"><span class="pre">E01_and_anharmonicity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">EJ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#TransmonCrossHamiltonian.E01_and_anharmonicity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.E01_and_anharmonicity" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the energy of the first excited state (E01) and the anharmonicity (alpha) of a transmon qubit.</p>
+<p>Uses cached calculations when ng=0 for significant speedup on large datasets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1030,6 +1038,8 @@ for a given qubit frequency (f_q) and anharmonicity (alpha).</p>
 <dd><p>Add cavity-coupled Hamiltonian parameters to the dataframe.</p>
 <p>This method calculates the coupling strength ‘g_MHz’ between the transmon qubit and the cavity,
 based on the capacitance matrix, transmon parameters, cavity frequency, resonator type, and characteristic impedance.</p>
+<p>Optimization: Pre-computes all unique transmon parameters in the main process before
+parallel processing, avoiding redundant matrix diagonalizations across workers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1087,7 +1097,10 @@ to the DataFrame.</p>
 <dt class="sig sig-object py" id="squadds.calcs.transmon_cross.TransmonCrossHamiltonian.add_qubit_H_params_chunk">
 <span class="sig-name descname"><span class="pre">add_qubit_H_params_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#TransmonCrossHamiltonian.add_qubit_H_params_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.add_qubit_H_params_chunk" title="Link to this definition">#</a></dt>
 <dd><p>Add qubit Hamiltonian parameters to the DataFrame chunk.</p>
-<p>This method calculates and adds the qubit Hamiltonian parameters, such as EC, EJ, and EJEC,</p>
+<p>This method calculates and adds the qubit Hamiltonian parameters, such as EC, EJ, and EJEC.</p>
+<p>Optimization: Since EJ is constant for all rows, we only compute E01/anharmonicity
+for unique EC values (rounded to reduce count), then map results back. This avoids
+redundant Transmon instantiations and matrix diagonalizations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>df</strong> (<em>-</em>) – The DataFrame chunk to which the parameters will be added.</p>
@@ -1296,6 +1309,14 @@ based on the capacitance matrix.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="squadds.calcs.transmon_cross.TransmonCrossHamiltonian.parallel_process_g_only">
+<span class="sig-name descname"><span class="pre">parallel_process_g_only</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_chunks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z_0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#TransmonCrossHamiltonian.parallel_process_g_only"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.parallel_process_g_only" title="Link to this definition">#</a></dt>
+<dd><p>Parallel process only the g calculation (qubit params already computed).</p>
+<p>This optimized method is used when EC, EJ, qubit_frequency_GHz, and
+anharmonicity_MHz are already computed in the main process.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="squadds.calcs.transmon_cross.TransmonCrossHamiltonian.plot_data">
 <span class="sig-name descname"><span class="pre">plot_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#TransmonCrossHamiltonian.plot_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.plot_data" title="Link to this definition">#</a></dt>
 <dd><p>Plot the data from the given DataFrame.</p>
@@ -1309,17 +1330,33 @@ based on the capacitance matrix.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="squadds.calcs.transmon_cross.clear_transmon_cache">
+<span class="sig-prename descclassname"><span class="pre">squadds.calcs.transmon_cross.</span></span><span class="sig-name descname"><span class="pre">clear_transmon_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#clear_transmon_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.clear_transmon_cache" title="Link to this definition">#</a></dt>
+<dd><p>Clear the transmon calculation cache.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="squadds.calcs.transmon_cross.g_from_cap_matrix_numba">
 <span class="sig-prename descclassname"><span class="pre">squadds.calcs.transmon_cross.</span></span><span class="sig-name descname"><span class="pre">g_from_cap_matrix_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EJ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#g_from_cap_matrix_numba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.g_from_cap_matrix_numba" title="Link to this definition">#</a></dt>
 <dd><p>!TODO: resolve the error : “The keyword argument ‘parallel=True’ was specified but no transformation for parallel execution was possible.” for this method</p>
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="squadds.calcs.transmon_cross.0">
-<span class="sig-prename descclassname"><span class="pre">squadds.calcs.transmon_cross.</span></span><span class="sig-name descname"><span class="pre">φ0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3.2910597847545335e-16</span></em><a class="headerlink" href="#squadds.calcs.transmon_cross.0" title="Link to this definition">#</a></dt>
-<dd><section id="numba-decorated-methods">
-<h3>Numba decorated methods<a class="headerlink" href="#numba-decorated-methods" title="Link to this heading">#</a></h3>
-</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="squadds.calcs.transmon_cross.get_transmon_E01_alpha">
+<span class="sig-prename descclassname"><span class="pre">squadds.calcs.transmon_cross.</span></span><span class="sig-name descname"><span class="pre">get_transmon_E01_alpha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">EJ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#get_transmon_E01_alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.get_transmon_E01_alpha" title="Link to this definition">#</a></dt>
+<dd><p>Get E01 and anharmonicity with caching.</p>
+<p>Rounds values to increase cache hit rate while maintaining accuracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="squadds.calcs.transmon_cross.get_transmon_cache_info">
+<span class="sig-prename descclassname"><span class="pre">squadds.calcs.transmon_cross.</span></span><span class="sig-name descname"><span class="pre">get_transmon_cache_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#get_transmon_cache_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.get_transmon_cache_info" title="Link to this definition">#</a></dt>
+<dd><p>Get cache statistics.</p>
 </dd></dl>
 
 </section>
@@ -1398,6 +1435,7 @@ based on the capacitance matrix.</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-squadds.calcs.transmon_cross">squadds.calcs.transmon_cross module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.EC_numba"><code class="docutils literal notranslate"><span class="pre">EC_numba()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.EC_numba_vectorized"><code class="docutils literal notranslate"><span class="pre">EC_numba_vectorized()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.Ec_from_Cs"><code class="docutils literal notranslate"><span class="pre">Ec_from_Cs()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian"><code class="docutils literal notranslate"><span class="pre">TransmonCrossHamiltonian</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.E01"><code class="docutils literal notranslate"><span class="pre">TransmonCrossHamiltonian.E01()</span></code></a></li>
@@ -1416,11 +1454,14 @@ based on the capacitance matrix.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.g_from_cap_matrix"><code class="docutils literal notranslate"><span class="pre">TransmonCrossHamiltonian.g_from_cap_matrix()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.get_freq_alpha_fixed_LJ"><code class="docutils literal notranslate"><span class="pre">TransmonCrossHamiltonian.get_freq_alpha_fixed_LJ()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.parallel_process_dataframe"><code class="docutils literal notranslate"><span class="pre">TransmonCrossHamiltonian.parallel_process_dataframe()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.parallel_process_g_only"><code class="docutils literal notranslate"><span class="pre">TransmonCrossHamiltonian.parallel_process_g_only()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.plot_data"><code class="docutils literal notranslate"><span class="pre">TransmonCrossHamiltonian.plot_data()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.clear_transmon_cache"><code class="docutils literal notranslate"><span class="pre">clear_transmon_cache()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.g_from_cap_matrix_numba"><code class="docutils literal notranslate"><span class="pre">g_from_cap_matrix_numba()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.0"><code class="docutils literal notranslate"><span class="pre">φ0</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.get_transmon_E01_alpha"><code class="docutils literal notranslate"><span class="pre">get_transmon_E01_alpha()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.calcs.transmon_cross.get_transmon_cache_info"><code class="docutils literal notranslate"><span class="pre">get_transmon_cache_info()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-squadds.calcs">Module contents</a></li>
