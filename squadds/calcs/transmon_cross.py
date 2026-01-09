@@ -489,12 +489,11 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
             print(f"Using {num_chunks} chunks for parallel processing")
             self.df = self.parallel_process_dataframe(self.df, num_chunks)
 
-            # Print cache statistics
+            # Print cache statistics (cache is per-process, so main process may show 0)
             cache_info = get_transmon_cache_info()
-            print(
-                f"Transmon cache stats: hits={cache_info.hits}, misses={cache_info.misses}, "
-                f"hit_rate={cache_info.hits / (cache_info.hits + cache_info.misses) * 100:.1f}%"
-            )
+            total_calls = cache_info.hits + cache_info.misses
+            hit_rate = (cache_info.hits / total_calls * 100) if total_calls > 0 else 0.0
+            print(f"Transmon cache stats: hits={cache_info.hits}, misses={cache_info.misses}, hit_rate={hit_rate:.1f}%")
         else:
             self.add_qubit_H_params()
             self.df["g_MHz"] = self.df.apply(
