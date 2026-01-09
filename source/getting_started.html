@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Getting Started with SQuADDS &#8212; SQuADDS v0.3.7</title>
+    <title>Getting Started with SQuADDS &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -593,114 +593,56 @@
 </section>
 <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> is built on top of <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code>, which is a crucial dependency. The installation process depends on whether you already have <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> installed in your environment or not.</p>
-<p>For detailed installation instructions and troubleshooting for <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code>, please refer to:
-- <a class="reference external" href="https://qiskit-community.github.io/qiskit-metal/installation.html">Qiskit Metal Installation Guide</a>
-- <a class="reference external" href="https://github.com/OJB-Quantum/Qiskit-Metal-to-Litho/blob/main/Installing%20Qiskit%20Metal%20Using%20Git%2BURL_by%20Onri%20Jay%20Benally.pdf">Qiskit Metal Installation PDF Guide</a>
-- <a class="reference external" href="https://www.youtube.com/watch?v=hs0tzZpH0xQ">Qiskit Metal Installation Video Tutorial 1</a>
-- <a class="reference external" href="https://www.youtube.com/watch?v=rLAH1RZHgtM">Qiskit Metal Installation Video Tutorial 2</a></p>
-<section id="installing-squadds-with-existing-qiskit-metal">
-<h2>1. Installing <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> with Existing <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code><a class="headerlink" href="#installing-squadds-with-existing-qiskit-metal" title="Link to this heading">#</a></h2>
-<p id="id1">If you already have <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> installed and running in your environment, you can install <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> in two ways:</p>
-<ol class="loweralpha simple">
-<li><p>Using pip:</p></li>
-</ol>
+<p><code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> uses <a class="reference external" href="https://docs.astral.sh/uv/">uv</a> for fast, reliable Python package management.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">#</a></h2>
+<p>Install <code class="docutils literal notranslate"><span class="pre">uv</span></code> (if you don’t have it already):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</pre></div>
+</div>
+</section>
+<section id="install-from-source-recommended">
+<h2>Install from Source (Recommended)<a class="headerlink" href="#install-from-source-recommended" title="Link to this heading">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/LFL-Lab/SQuADDS.git
+<span class="nb">cd</span><span class="w"> </span>SQuADDS
+uv<span class="w"> </span>sync
+</pre></div>
+</div>
+<p>Verify the installation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import squadds; print(squadds.__file__)&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="install-using-pip">
+<h2>Install using pip<a class="headerlink" href="#install-using-pip" title="Link to this heading">#</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>SQuADDS
 </pre></div>
 </div>
-<ol class="loweralpha simple" start="2">
-<li><p>From source:</p></li>
-</ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/LFL-Lab/SQuADDS.git
-<span class="nb">cd</span><span class="w"> </span>SQuADDS
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</section>
+<section id="optional-dependencies">
+<h2>Optional Dependencies<a class="headerlink" href="#optional-dependencies" title="Link to this heading">#</a></h2>
+<p>Install GDS processing tools:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>gds
+</pre></div>
+</div>
+<p>Install documentation tools:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>docs
+</pre></div>
+</div>
+<p>Install development tools:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>dev
+</pre></div>
+</div>
+<p>Install all optional dependencies:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--all-extras
 </pre></div>
 </div>
 </section>
-<section id="installing-squadds-on-a-fresh-environment">
-<h2>2. Installing <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> on a Fresh Environment<a class="headerlink" href="#installing-squadds-on-a-fresh-environment" title="Link to this heading">#</a></h2>
-<p id="id2">If you don’t have <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> installed, you’ll need to set up a new environment first. We provide a shell script that:</p>
-<ul class="simple">
-<li><p>Creates a new conda environment with Python 3.10</p></li>
-<li><p>Installs <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> and its dependencies</p></li>
-<li><p>Sets up the environment for <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></p></li>
-</ul>
-<p>Run the following script:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
-
-<span class="c1"># Ensure script fails if any command fails</span>
-<span class="nb">set</span><span class="w"> </span>-e
-
-<span class="c1"># Step 1: Download environment.yml from Qiskit-Metal repository</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Downloading environment.yml...&quot;</span>
-curl<span class="w"> </span>-O<span class="w"> </span>https://raw.githubusercontent.com/Qiskit/qiskit-metal/main/environment.yml
-
-<span class="c1"># Step 2: Set up Miniconda environment</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Setting up Conda environment...&quot;</span>
-conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>&lt;env_name&gt;<span class="w"> </span>-f<span class="w"> </span>environment.yml
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Conda environment created.&quot;</span>
-
-<span class="c1"># Activate the Conda environment</span>
-<span class="nb">source</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>conda<span class="w"> </span>info<span class="w"> </span>--base<span class="k">)</span><span class="s2">/etc/profile.d/conda.sh&quot;</span>
-conda<span class="w"> </span>activate<span class="w"> </span>&lt;env_name&gt;
-
-<span class="c1"># Step 3: Install Qiskit-Metal</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Installing Qiskit-Metal...&quot;</span>
-python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-deps<span class="w"> </span>-e<span class="w"> </span>git+https://github.com/Qiskit/qiskit-metal.git#egg<span class="o">=</span>qiskit-metal
-</pre></div>
-</div>
-<p>After running this script, you’ll have a working <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> environment. You can then follow the instructions in <span class="xref std std-ref">installing-squadds-with-existing-qiskit-metal</span> to install <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code>.</p>
-</section>
-<section id="installing-squadds-on-apple-silicon">
-<h2>Installing <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> on Apple Silicon<a class="headerlink" href="#installing-squadds-on-apple-silicon" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> currently lacks full native support for Apple Silicon due to <cite>PySide</cite> compatibility issues. However, you can run <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> on Apple Silicon by emulating the <cite>x86</cite> architecture with Rosetta 2.</p>
-<p>First, ensure Rosetta 2 is installed:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>softwareupdate<span class="w"> </span>--install-rosetta
-</pre></div>
-</div>
-<p>Then, create a new conda environment configured to emulate <cite>x86</cite>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create environment with x86 emulation</span>
-<span class="nv">CONDA_SUBDIR</span><span class="o">=</span>osx-64<span class="w"> </span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>&lt;env_name&gt;<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
-conda<span class="w"> </span>activate<span class="w"> </span>&lt;env_name&gt;
-conda<span class="w"> </span>config<span class="w"> </span>--env<span class="w"> </span>--set<span class="w"> </span>subdir<span class="w"> </span>osx-64
-</pre></div>
-</div>
-<p>This environment will now use Rosetta 2 to run x86 applications. You can then follow the same principles as in <span class="xref std std-ref">installing-squadds-on-a-fresh-environment</span> to set up <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> in this environment.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
-
-<span class="c1"># Ensure script fails if any command fails</span>
-<span class="nb">set</span><span class="w"> </span>-e
-
-<span class="c1"># Step 1: Download environment.yml from Qiskit-Metal repository</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Downloading environment.yml...&quot;</span>
-curl<span class="w"> </span>-O<span class="w"> </span>https://raw.githubusercontent.com/Qiskit/qiskit-metal/main/environment.yml
-
-<span class="c1"># Step 2: Update the existing conda environment</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Updating Conda environment...&quot;</span>
-conda<span class="w"> </span>env<span class="w"> </span>update<span class="w"> </span>-n<span class="w"> </span>&lt;env_name&gt;<span class="w"> </span>-f<span class="w"> </span>environment.yml
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Conda environment updated.&quot;</span>
-
-<span class="c1"># Activate the Conda environment</span>
-<span class="nb">source</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>conda<span class="w"> </span>info<span class="w"> </span>--base<span class="k">)</span><span class="s2">/etc/profile.d/conda.sh&quot;</span>
-conda<span class="w"> </span>activate<span class="w"> </span>&lt;env_name&gt;
-
-<span class="c1"># Step 3: Install Qiskit-Metal</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Installing Qiskit-Metal...&quot;</span>
-python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-deps<span class="w"> </span>-e<span class="w"> </span>git+https://github.com/Qiskit/qiskit-metal.git#egg<span class="o">=</span>qiskit-metal
-</pre></div>
-</div>
-<p>Now, for installing <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code>, follow the same principles as in <span class="xref std std-ref">installing-squadds-with-existing-qiskit-metal</span>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The <cite>CONDA_SUBDIR=osx-64</cite> flag tells conda to use x86 packages instead of arm64 packages, and <cite>conda config –env –set subdir osx-64</cite> ensures this setting persists for the environment.</p>
-</div>
-</section>
-<section id="installing-additional-dependencies">
-<h2>Installing Additional Dependencies<a class="headerlink" href="#installing-additional-dependencies" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code> and <code class="docutils literal notranslate"><span class="pre">palace</span></code> are optional dependencies that can be used with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> for additional simulation capabilities.</p>
+<section id="installing-additional-tools">
+<h2>Installing Additional Tools<a class="headerlink" href="#installing-additional-tools" title="Link to this heading">#</a></h2>
 <section id="installing-sqdmetal">
 <h3>Installing <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code><a class="headerlink" href="#installing-sqdmetal" title="Link to this heading">#</a></h3>
-<p>Once you have <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> and <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code> installed, you can install <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code> by:</p>
+<p>Once you have <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> installed, you can install <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code> by:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/sqdlab/SQDMetal.git
 <span class="nb">cd</span><span class="w"> </span>SQDMetal
 pip<span class="w"> </span>install<span class="w"> </span>.
@@ -722,23 +664,15 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <p>We have compiled answers to common questions and issues. If you can’t find what you’re looking for, feel free to reach out.</p>
 <section id="installation-issues">
 <h2>Installation Issues<a class="headerlink" href="#installation-issues" title="Link to this heading">#</a></h2>
-<p><strong>Q: Getting</strong> <code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError:</span> <span class="pre">No</span> <span class="pre">module</span> <span class="pre">named</span> <span class="pre">'squadds'</span></code> <strong>after running</strong> <cite>pip install SQuADDS</cite> <strong>in Jupyter Notebook. How can I fix this?</strong></p>
+<p><strong>Q: Getting</strong> <code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError:</span> <span class="pre">No</span> <span class="pre">module</span> <span class="pre">named</span> <span class="pre">'squadds'</span></code> <strong>after installation in Jupyter Notebook. How can I fix this?</strong></p>
 <p><strong>A:</strong> You may need to restart the kernel after installing <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code>. To do this, go to the <cite>Kernel</cite> menu in Jupyter Notebook and select <cite>Restart</cite>.</p>
 <p><strong>Q: Getting</strong> <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">Failed</span> <span class="pre">building</span> <span class="pre">wheel</span> <span class="pre">for</span> <span class="pre">klayout</span></code> <strong>while building from GitHub in Windows</strong></p>
-<p><strong>A:</strong> This problem can be solved simply by installing KLayout independently from the website <a class="reference external" href="https://www.klayout.de/build.html">here</a>, and commenting out the <code class="docutils literal notranslate"><span class="pre">klayout==0.29.0</span></code> in the <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file.
-The <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file can found in the cloned repository. Then re-run the commands.</p>
+<p><strong>A:</strong> Install KLayout independently from the website <a class="reference external" href="https://www.klayout.de/build.html">here</a>, then install SQuADDS without the gds extra.</p>
 </section>
 <section id="accessing-the-database">
 <h2>Accessing the Database<a class="headerlink" href="#accessing-the-database" title="Link to this heading">#</a></h2>
-<p><strong>Q: I am getting the error</strong> <code class="docutils literal notranslate"><span class="pre">Generating</span> <span class="pre">train</span> <span class="pre">split:</span> <span class="pre">0</span> <span class="pre">examples</span> <span class="pre">[00:00,</span> <span class="pre">?</span> <span class="pre">examples/s]</span> <span class="pre">An</span> <span class="pre">error</span> <span class="pre">occurred</span> <span class="pre">while</span> <span class="pre">loading</span> <span class="pre">the</span> <span class="pre">dataset:</span> <span class="pre">An</span> <span class="pre">error</span> <span class="pre">occurred</span> <span class="pre">while</span> <span class="pre">generating</span> <span class="pre">the</span> <span class="pre">dataset</span></code> <strong>for various</strong> <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB()</span></code> <strong>methods (e.g.</strong> <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB().create_system_df()</span></code> <strong>).</strong></p>
-<p><strong>A:</strong> This is an error we have seen only happening on Windows systems for <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library version <code class="docutils literal notranslate"><span class="pre">2.20.0</span></code>. Downgrading to any versions between <code class="docutils literal notranslate"><span class="pre">2.17.0</span></code> and <code class="docutils literal notranslate"><span class="pre">2.19.2</span></code> should fix the issue. To downgrade, run the following command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">datasets</span><span class="o">==</span><span class="m">2</span>.19.2
-</pre></div>
-</div>
-<p><strong>Q: I am getting the error</strong> <code class="docutils literal notranslate"><span class="pre">KeyError:</span> <span class="pre">&quot;Column</span> <span class="pre">contributor</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">dataset.</span> <span class="pre">Current</span> <span class="pre">columns</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">dataset:</span> <span class="pre">['image',</span> <span class="pre">'measured_results',</span> <span class="pre">'contrib_info',</span> <span class="pre">'design_code',</span> <span class="pre">'notes',</span> <span class="pre">'sim_results',</span> <span class="pre">'paper_link']&quot;</span></code> <strong>for various</strong> <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB()</span></code> <strong>methods (e.g.</strong> <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB().view_all_contributors()</span></code> <strong>). Everything was working fine just the other day.</strong></p>
-<p><strong>A:</strong> This error is due to new datasets (configs) added to <code class="docutils literal notranslate"><span class="pre">SQuADDS/SQuADDS_DB</span></code> dataset on 07/04/2024 (🇺🇸 🦅 🎆). To fix this issue please upgrade <code class="docutils literal notranslate"><span class="pre">squadds</span></code> to its latest version (or any version greater than or equal to <code class="docutils literal notranslate"><span class="pre">0.2.35</span></code>).</p>
-<p><strong>Q: If there are errors upon instantiating the</strong> <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> <strong>class, what should I do?</strong></p>
-<p><strong>A:</strong> If you encounter errors upon instantiating the <cite>SQuADDS_DB</cite> class, chances are there is an issue with caching. To fix this, please delete the <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> dataset from the huggingface cache directory on your local machine. The cache directory is typically located at <code class="docutils literal notranslate"><span class="pre">~/.cache/huggingface/datasets/</span></code>.</p>
+<p><strong>Q: I am getting errors while loading the dataset. What should I do?</strong></p>
+<p><strong>A:</strong> If you encounter errors upon instantiating the <cite>SQuADDS_DB</cite> class, there may be a caching issue. Delete the <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> dataset from the huggingface cache directory on your local machine. The cache directory is typically located at <code class="docutils literal notranslate"><span class="pre">~/.cache/huggingface/datasets/</span></code>.</p>
 </section>
 <section id="env-file">
 <h2><code class="docutils literal notranslate"><span class="pre">.env</span></code> File<a class="headerlink" href="#env-file" title="Link to this heading">#</a></h2>
@@ -842,10 +776,11 @@ The <code class="docutils literal notranslate"><span class="pre">requirements.tx
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Getting Started with SQuADDS</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-squadds-with-existing-qiskit-metal">1. Installing <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> with Existing <code class="docutils literal notranslate"><span class="pre">qiskit-metal</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-squadds-on-a-fresh-environment">2. Installing <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> on a Fresh Environment</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-squadds-on-apple-silicon">Installing <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> on Apple Silicon</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-additional-dependencies">Installing Additional Dependencies</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-from-source-recommended">Install from Source (Recommended)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-using-pip">Install using pip</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optional-dependencies">Optional Dependencies</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-additional-tools">Installing Additional Tools</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-sqdmetal">Installing <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-palace">Installing <code class="docutils literal notranslate"><span class="pre">palace</span></code></a></li>
 </ul>
@@ -905,7 +840,7 @@ The <code class="docutils literal notranslate"><span class="pre">requirements.tx
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.components.jjs &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.components.jjs &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -579,19 +579,19 @@
                 <article class="bd-article">
                   
   <h1>Source code for squadds.components.jjs</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">draw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.core.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">QComponent</span>
 
 <span class="c1">#!TODO: make JJ_length a parameter</span>
 
+
 <div class="viewcode-block" id="JjDolan">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.jjs.JjDolan">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">JjDolan</span><span class="p">(</span><span class="n">QComponent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The base &quot;JjDolan&quot; inherits the &quot;QComponent&quot; class.</span>
-<span class="sd">    </span>
+
 <span class="sd">    NOTE TO USER: Please be aware that when designing with this</span>
 <span class="sd">    qcomponent, one must take care in accounting for the junction</span>
 <span class="sd">    qgeometry when exporting to to GDS and/or to a simulator. This</span>
@@ -599,103 +599,96 @@
 
 <span class="sd">    This creates a &quot;Dolan&quot;-style Josephson Junction consisting</span>
 <span class="sd">    a single junction slightly separated, adhearing to LFL&#39;s prefererances.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Default Options:</span>
 <span class="sd">        * bridge_length: &#39;28um&#39; -- lenght between pads</span>
 <span class="sd">        * JJ_width:   &#39;0.188um&#39; -- Josephson Junction width</span>
 <span class="sd">        * bridge_layer:       1 -- GDS layer for bridge, make sure it&#39;s different from qubit + JJs</span>
-<span class="sd">        * JJ_layer:           2 -- GDS layer for JJ, make sure it&#39;s different from qubit + bridge        </span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    
-    <span class="n">default_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
-        <span class="n">bridge_length</span> <span class="o">=</span> <span class="s1">&#39;28um&#39;</span><span class="p">,</span>
-        <span class="n">JJ_width</span>      <span class="o">=</span> <span class="s1">&#39;0.188um&#39;</span><span class="p">,</span>
-        <span class="n">bridge_layer</span>  <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
-        <span class="n">JJ_layer</span>      <span class="o">=</span> <span class="mi">60</span><span class="p">)</span>
+<span class="sd">        * JJ_layer:           2 -- GDS layer for JJ, make sure it&#39;s different from qubit + bridge</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">default_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">bridge_length</span><span class="o">=</span><span class="s2">&quot;28um&quot;</span><span class="p">,</span> <span class="n">JJ_width</span><span class="o">=</span><span class="s2">&quot;0.188um&quot;</span><span class="p">,</span> <span class="n">bridge_layer</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">JJ_layer</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Default options.&quot;&quot;&quot;</span>
-    
-    <span class="n">component_metadata</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">short_name</span><span class="o">=</span><span class="s1">&#39;Cross&#39;</span><span class="p">,</span>
-                              <span class="n">_qgeometry_table_poly</span><span class="o">=</span><span class="s1">&#39;True&#39;</span><span class="p">,</span>
-                              <span class="n">_qgeometry_table_junction</span><span class="o">=</span><span class="s1">&#39;True&#39;</span><span class="p">)</span>
+
+    <span class="n">component_metadata</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">short_name</span><span class="o">=</span><span class="s2">&quot;Cross&quot;</span><span class="p">,</span> <span class="n">_qgeometry_table_poly</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="n">_qgeometry_table_junction</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Component metadata&quot;&quot;&quot;</span>
 
     <span class="n">TOOLTIP</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Josephson Junctions used at LFL&quot;&quot;&quot;</span>
-    
+
 <div class="viewcode-block" id="JjDolan.make">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.jjs.JjDolan.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">pad_length</span> <span class="o">=</span> <span class="mf">0.007</span> <span class="c1">#mm</span>
-        <span class="n">pad_width</span> <span class="o">=</span> <span class="mf">0.010</span> <span class="c1">#mm</span>
-        <span class="n">triangle_width</span> <span class="o">=</span> <span class="mf">0.006</span> <span class="c1">#mm</span>
-        <span class="n">triangle_height</span> <span class="o">=</span> <span class="mf">0.003</span> <span class="c1">#mm</span>
-        <span class="n">bridge_width</span> <span class="o">=</span> <span class="mf">0.002</span> <span class="c1">#mm</span>
-        
-        <span class="c1">#Here&#39;s our user defined variables</span>
+        <span class="n">pad_length</span> <span class="o">=</span> <span class="mf">0.007</span>  <span class="c1"># mm</span>
+        <span class="n">pad_width</span> <span class="o">=</span> <span class="mf">0.010</span>  <span class="c1"># mm</span>
+        <span class="n">triangle_width</span> <span class="o">=</span> <span class="mf">0.006</span>  <span class="c1"># mm</span>
+        <span class="n">triangle_height</span> <span class="o">=</span> <span class="mf">0.003</span>  <span class="c1"># mm</span>
+        <span class="n">bridge_width</span> <span class="o">=</span> <span class="mf">0.002</span>  <span class="c1"># mm</span>
+
+        <span class="c1"># Here&#39;s our user defined variables</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_options</span><span class="p">()</span>
-        
+
         <span class="c1">### Bridge Layer</span>
         <span class="c1"># Bottom pad</span>
-        <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">pad_width</span><span class="p">,</span><span class="n">pad_length</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">triangle</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">triangle_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                                 <span class="p">(</span><span class="n">triangle_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                                 <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">triangle_height</span><span class="p">)])</span>
-        <span class="n">triangle</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">triangle</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pad_length</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">pad_width</span><span class="p">,</span> <span class="n">pad_length</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">triangle</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">triangle_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">triangle_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">triangle_height</span><span class="p">)])</span>
+        <span class="n">triangle</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">triangle</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pad_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">triangle</span><span class="p">)</span>
-        <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">bridge_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">pad_length</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-        
+        <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">bridge_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">pad_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
         <span class="c1"># Top pad</span>
-        <span class="n">t_pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">t_pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
         <span class="c1"># Bridge</span>
         <span class="n">bridge</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">bridge_width</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">bridge_length</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        
+
         <span class="c1"># Final bridge</span>
         <span class="n">bridge</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">bridge</span><span class="p">,</span> <span class="n">pad</span><span class="p">,</span> <span class="n">t_pad</span><span class="p">)</span>
-        
-        
-        <span class="c1">### JJ Layer </span>
-        <span class="n">jjl2</span> <span class="o">=</span> <span class="mf">0.002</span> <span class="c1">#2.0um</span>
-        <span class="n">finger_length</span> <span class="o">=</span> <span class="mf">0.00136</span> <span class="c1">#1.36um</span>
-        <span class="n">JJ_taper</span> <span class="o">=</span> <span class="n">jjl2</span> <span class="o">-</span> <span class="n">finger_length</span> <span class="c1">#0.5um</span>
-        <span class="n">jj1_gap</span> <span class="o">=</span> <span class="mf">0.000140</span> <span class="c1">#140nm</span>
-        
-        
+
+        <span class="c1">### JJ Layer</span>
+        <span class="n">jjl2</span> <span class="o">=</span> <span class="mf">0.002</span>  <span class="c1"># 2.0um</span>
+        <span class="n">finger_length</span> <span class="o">=</span> <span class="mf">0.00136</span>  <span class="c1"># 1.36um</span>
+        <span class="n">JJ_taper</span> <span class="o">=</span> <span class="n">jjl2</span> <span class="o">-</span> <span class="n">finger_length</span>  <span class="c1"># 0.5um</span>
+        <span class="n">jj1_gap</span> <span class="o">=</span> <span class="mf">0.000140</span>  <span class="c1"># 140nm</span>
+
         <span class="c1"># Make cutout on the bridge</span>
-        <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">bridge_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                           <span class="p">(</span><span class="n">bridge_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="mi">0</span><span class="p">),</span>
-                           <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
-                           <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">jj1_gap</span><span class="p">),</span>
-                           <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">jj1_gap</span><span class="p">),</span>
-                           <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">)</span>
-                          <span class="p">])</span>
-        <span class="n">cutout</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">bridge_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                               <span class="p">(</span><span class="n">bridge_width</span><span class="o">/</span><span class="mi">2</span> <span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                               <span class="p">(</span><span class="n">bridge_width</span><span class="o">/</span><span class="mi">2</span> <span class="p">,</span> <span class="n">jjl2</span><span class="p">),</span>
-                               <span class="p">(</span><span class="o">-</span><span class="n">bridge_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">jjl2</span><span class="p">)])</span>
-        
+        <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">bridge_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">bridge_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">jj1_gap</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">jj1_gap</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">cutout</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[(</span><span class="o">-</span><span class="n">bridge_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">bridge_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">bridge_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">jjl2</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">bridge_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">jjl2</span><span class="p">)]</span>
+        <span class="p">)</span>
+
         <span class="n">cutout</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">cutout</span><span class="p">,</span> <span class="n">JJ</span><span class="p">)</span>
         <span class="n">bridge</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">bridge</span><span class="p">,</span> <span class="n">cutout</span><span class="p">)</span>
-        
+
         <span class="c1"># Now you can draw your JJ</span>
-        <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">bridge_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                           <span class="p">(</span><span class="n">bridge_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="mi">0</span><span class="p">),</span>
-                           <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
-                           <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
-                           <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
-                           <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">)</span>
-                          <span class="p">])</span>
-        
-        
+        <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">bridge_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">bridge_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
         <span class="n">polys</span> <span class="o">=</span> <span class="p">[</span><span class="n">bridge</span><span class="p">,</span> <span class="n">JJ</span><span class="p">]</span>
         <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span><span class="p">)</span>
 
         <span class="n">bridge</span><span class="p">,</span> <span class="n">JJ</span> <span class="o">=</span> <span class="n">polys</span>
-        
-        
+
         <span class="c1">### Add everything to QGeometry</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;bridge&#39;</span><span class="p">:</span> <span class="n">bridge</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">bridge_layer</span><span class="p">,</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;JJ&#39;</span><span class="p">:</span> <span class="n">JJ</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">,</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;bridge&quot;</span><span class="p">:</span> <span class="n">bridge</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">bridge_layer</span><span class="p">,</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;JJ&quot;</span><span class="p">:</span> <span class="n">JJ</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">,</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Add a LineString for the junction</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">JJ</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
@@ -703,16 +696,17 @@
         <span class="n">mid1</span> <span class="o">=</span> <span class="p">((</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">mid2</span> <span class="o">=</span> <span class="p">((</span><span class="n">coords</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">ls</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">LineString</span><span class="p">([</span><span class="n">mid1</span><span class="p">,</span> <span class="n">mid2</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;junction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;design&#39;</span><span class="p">:</span> <span class="n">ls</span><span class="p">},</span> <span class="n">width</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;junction&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="n">ls</span><span class="p">},</span> <span class="n">width</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">)</span></div>
 </div>
+
 
 
 <div class="viewcode-block" id="SquidLoopDolan">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.jjs.SquidLoopDolan">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SquidLoopDolan</span><span class="p">(</span><span class="n">QComponent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The base &quot;SquidLoopDolan&quot; inherits the &quot;QComponent&quot; class.</span>
-<span class="sd">    </span>
+
 <span class="sd">    NOTE TO USER: Please be aware that when designing with this</span>
 <span class="sd">    qcomponent, one must take care in accounting for the junction</span>
 <span class="sd">    qgeometry when exporting to to GDS and/or to a simulator. This</span>
@@ -720,7 +714,7 @@
 
 <span class="sd">    This creates a &quot;Dolan&quot;-style SQUID loop consisting</span>
 <span class="sd">    of a slightly separated loop with 2 symmetrical JJs on each side.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Default Options:</span>
 <span class="sd">        * SQUID_width: &#39;63um&#39; -- inner width (x-axis) of SQUID loop</span>
 <span class="sd">        * SQUID_length: &#39;9um&#39; -- inner length (y-axis) of SQUID loop</span>
@@ -733,217 +727,241 @@
 <span class="sd">        * mirror:           0 -- input 0 or 1, want to mirror about the x-axis?</span>
 <span class="sd">        * SQUID_layer:      1 -- GDS layer for loop, make sure it&#39;s different from qubit + JJs</span>
 <span class="sd">        * JJ_layer:         2 -- GDS layer for JJs, make sure it&#39;s different from qubit + loop</span>
-<span class="sd">        </span>
-<span class="sd">        </span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># Default drawing options</span>
-    <span class="n">default_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">SQUID_width</span>  <span class="o">=</span> <span class="s1">&#39;63um&#39;</span><span class="p">,</span>
-                           <span class="n">SQUID_length</span> <span class="o">=</span> <span class="s1">&#39;9um&#39;</span><span class="p">,</span>
-                           <span class="n">SQUID_thickness</span> <span class="o">=</span> <span class="s1">&#39;2um&#39;</span><span class="p">,</span>
-                           <span class="n">stem1_length</span> <span class="o">=</span> <span class="s1">&#39;7um&#39;</span><span class="p">,</span>
-                           <span class="n">stem2_length</span> <span class="o">=</span> <span class="s1">&#39;7um&#39;</span><span class="p">,</span>
-                           <span class="n">stem1_offset</span> <span class="o">=</span> <span class="s1">&#39;0um&#39;</span><span class="p">,</span>
-                           <span class="n">stem2_offset</span> <span class="o">=</span> <span class="s1">&#39;0um&#39;</span><span class="p">,</span>
-                           <span class="n">JJ_width</span>  <span class="o">=</span> <span class="s1">&#39;0.3um&#39;</span><span class="p">,</span>
-                           <span class="n">JJ_offset</span> <span class="o">=</span> <span class="s1">&#39;0um&#39;</span><span class="p">,</span>
-                           <span class="n">JJ_flip</span>   <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                           <span class="n">mirror</span>    <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                           <span class="n">SQUID_layer</span>  <span class="o">=</span>  <span class="mi">20</span><span class="p">,</span>
-                           <span class="n">JJ_layer</span>     <span class="o">=</span>  <span class="mi">60</span><span class="p">)</span>
+    <span class="n">default_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+        <span class="n">SQUID_width</span><span class="o">=</span><span class="s2">&quot;63um&quot;</span><span class="p">,</span>
+        <span class="n">SQUID_length</span><span class="o">=</span><span class="s2">&quot;9um&quot;</span><span class="p">,</span>
+        <span class="n">SQUID_thickness</span><span class="o">=</span><span class="s2">&quot;2um&quot;</span><span class="p">,</span>
+        <span class="n">stem1_length</span><span class="o">=</span><span class="s2">&quot;7um&quot;</span><span class="p">,</span>
+        <span class="n">stem2_length</span><span class="o">=</span><span class="s2">&quot;7um&quot;</span><span class="p">,</span>
+        <span class="n">stem1_offset</span><span class="o">=</span><span class="s2">&quot;0um&quot;</span><span class="p">,</span>
+        <span class="n">stem2_offset</span><span class="o">=</span><span class="s2">&quot;0um&quot;</span><span class="p">,</span>
+        <span class="n">JJ_width</span><span class="o">=</span><span class="s2">&quot;0.3um&quot;</span><span class="p">,</span>
+        <span class="n">JJ_offset</span><span class="o">=</span><span class="s2">&quot;0um&quot;</span><span class="p">,</span>
+        <span class="n">JJ_flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">mirror</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">SQUID_layer</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">JJ_layer</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Default drawing options&quot;&quot;&quot;</span>
 
     <span class="c1"># Name prefix of component, if user doesn&#39;t provide name</span>
-    <span class="n">component_metadata</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">short_name</span><span class="o">=</span><span class="s1">&#39;component&#39;</span><span class="p">)</span>
+    <span class="n">component_metadata</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">short_name</span><span class="o">=</span><span class="s2">&quot;component&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Component metadata&quot;&quot;&quot;</span>
-    
-    
+
 <div class="viewcode-block" id="SquidLoopDolan.make">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.jjs.SquidLoopDolan.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_loop</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_junction</span><span class="p">()</span></div>
 
-    
+
 <div class="viewcode-block" id="SquidLoopDolan.make_loop">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.jjs.SquidLoopDolan.make_loop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Makes the SQUID loop structure</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_options</span><span class="p">()</span>
-        
+
         <span class="c1">### Make first pad</span>
-        <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-                            <span class="p">(</span><span class="mf">0.010</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-                            <span class="p">(</span><span class="mf">0.010</span><span class="p">,</span><span class="mf">0.016</span><span class="p">),</span>
-                            <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.016</span><span class="p">)])</span>
-        <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.005</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        
+        <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.010</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.010</span><span class="p">,</span> <span class="mf">0.016</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.016</span><span class="p">)])</span>
+        <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.005</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
         <span class="c1">### Make first tappered structure</span>
-        <span class="n">tapper</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="mf">0.0062</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="mf">0.0062</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                               <span class="p">(</span>     <span class="mi">0</span><span class="p">,</span> <span class="mf">0.003125</span><span class="p">)])</span>
-        
-        <span class="n">stem1</span>  <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span><span class="p">),</span>
-                               <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span><span class="p">)])</span>
+        <span class="n">tapper</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="mf">0.0062</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.0062</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.003125</span><span class="p">)])</span>
+
+        <span class="n">stem1</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
         <span class="n">tapper</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">tapper</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.016</span><span class="p">)</span>
-        <span class="n">stem1</span>  <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">stem1</span> <span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.016</span><span class="p">)</span>
+        <span class="n">stem1</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">stem1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.016</span><span class="p">)</span>
         <span class="n">tappered_stem</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">stem1</span><span class="p">,</span> <span class="n">tapper</span><span class="p">)</span>
-            
-        
+
         <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">tappered_stem</span><span class="p">,</span> <span class="n">pad</span><span class="p">)</span>
 
-
         <span class="c1">### make loop by subtracting inner rectangle from outter rectangle</span>
-        <span class="n">outter</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">),</span>
-                               <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">,</span>  <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">,</span>  <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">)])</span>
-        <span class="n">inner</span>  <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
-                               <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span><span class="p">)])</span>
-        
+        <span class="n">outter</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">inner</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
         <span class="n">loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">outter</span><span class="p">,</span> <span class="n">inner</span><span class="p">)</span>
-        <span class="n">loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">+</span> <span class="mf">0.016</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span><span class="p">)</span>
-        
+        <span class="n">loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">+</span> <span class="mf">0.016</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span><span class="p">)</span>
+
         <span class="c1">### Checkpoint, let&#39;s prep to make the 2nd and final stem</span>
-        
+
         <span class="n">total</span> <span class="o">=</span> <span class="p">[</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">loop</span><span class="p">]</span>
-        <span class="n">total</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-        <span class="n">total</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mf">0.016</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="p">)</span>
-        
+        <span class="n">total</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span>
+            <span class="n">total</span><span class="p">,</span>
+            <span class="mf">0.016</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="n">checkpoint</span><span class="p">,</span> <span class="n">loop</span> <span class="o">=</span> <span class="n">total</span>
-        
+
         <span class="c1">### Make the 2nd stemp</span>
-        
-        <span class="n">stem2</span>  <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem2_length</span><span class="p">),</span>
-                               <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem2_length</span><span class="p">)])</span>
-        <span class="n">stem2</span>  <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">stem2</span> <span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mf">0.016</span><span class="p">)</span>
-        <span class="n">tapper</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">tapper</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
-        
+
+        <span class="n">stem2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem2_length</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem2_length</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">stem2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">stem2</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="mf">0.016</span><span class="p">)</span>
+        <span class="n">tapper</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">tapper</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">pad</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+
         <span class="n">checkpoint2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">stem2</span><span class="p">,</span> <span class="n">tapper</span><span class="p">,</span> <span class="n">pad</span><span class="p">)</span>
         <span class="n">checkpoint2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">checkpoint2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">stem2_length</span> <span class="o">-</span> <span class="mf">0.016</span><span class="p">)</span>
-        
+
         <span class="c1">### Choose offsets for pads</span>
-        
-        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_offset</span><span class="p">)</span>
-        
+
+        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_offset</span><span class="p">)</span>
+
         <span class="n">checkpoint2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">checkpoint2</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">stem2_offset</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        
+
         <span class="c1">### We the general structure, we just need to remove</span>
         <span class="c1">### part of the loop for the JJs. Centering middle of loop.</span>
-        
+
         <span class="n">final_loop</span> <span class="o">=</span> <span class="p">[</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">checkpoint2</span><span class="p">,</span> <span class="n">loop</span><span class="p">]</span>
-        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="mf">0.016</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span><span class="o">-</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">)</span> <span class="p">)</span>
-        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-        
+        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span>
+            <span class="n">final_loop</span><span class="p">,</span>
+            <span class="o">-</span><span class="p">(</span><span class="mf">0.016</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
         <span class="n">checkpoint</span><span class="p">,</span> <span class="n">checkpoint2</span><span class="p">,</span> <span class="n">loop</span> <span class="o">=</span> <span class="n">final_loop</span>
-        
+
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">mirror</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">checkpoint2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">checkpoint2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-            
-        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">checkpoint2</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span> 
-        
-        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="mf">0.016</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-        
+            <span class="n">checkpoint2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">checkpoint2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">checkpoint2</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
+
+        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="mf">0.016</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">stem1_length</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
         <span class="c1">### Subtract pocket for JJs</span>
-        
-        <span class="n">JJ_taper</span> <span class="o">=</span> <span class="mf">0.002</span> <span class="o">-</span> <span class="mf">0.00136</span> <span class="c1">#0.5um</span>
-        <span class="n">finger_length</span> <span class="o">=</span> <span class="mf">0.00136</span> <span class="c1">#1.36um</span>
-        <span class="n">x_gap</span> <span class="o">=</span> <span class="mf">0.00015</span> <span class="c1"># 0.14um</span>
-        
-        
-        <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                           <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="mi">0</span><span class="p">),</span>
-                           <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
-                           <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">),</span>
-                           <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">),</span>
-                           <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">)</span>
-                          <span class="p">])</span>
-        
+
+        <span class="n">JJ_taper</span> <span class="o">=</span> <span class="mf">0.002</span> <span class="o">-</span> <span class="mf">0.00136</span>  <span class="c1"># 0.5um</span>
+        <span class="n">finger_length</span> <span class="o">=</span> <span class="mf">0.00136</span>  <span class="c1"># 1.36um</span>
+        <span class="n">x_gap</span> <span class="o">=</span> <span class="mf">0.00015</span>  <span class="c1"># 0.14um</span>
+
+        <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
         <span class="c1"># I added this x_gap as buffer to fully subtract part of &#39;final_loop&#39;,</span>
         <span class="c1"># I noticed that when i set &#39;JJ_flip = True&#39;, it would leave some residual loop</span>
         <span class="c1"># Scuffed fix, but will have to suffice for now</span>
-        <span class="n">pocket</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x_gap</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                               <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x_gap</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
-                               <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">)</span>
-                              <span class="p">])</span>
-        
+        <span class="n">pocket</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x_gap</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x_gap</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
         <span class="n">pocket</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">pocket</span><span class="p">,</span> <span class="n">JJ</span><span class="p">)</span>
-        
-        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_flip</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
-            <span class="n">pocket</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">pocket</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-        
-        <span class="n">pocket2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pocket</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">pocket</span>  <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pocket</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="o">-</span><span class="p">(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> 
-        
+
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">JJ_flip</span><span class="p">:</span>
+            <span class="n">pocket</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">pocket</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">pocket2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pocket</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">pocket</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pocket</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="o">-</span><span class="p">(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
         <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="n">pocket2</span><span class="p">)</span>
         <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="n">pocket</span><span class="p">)</span>
-        
-        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span><span class="p">)</span>
-        
-        
-        <span class="c1">### Add to QGeometry!</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;final_loop&#39;</span><span class="p">:</span> <span class="n">final_loop</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_layer</span><span class="p">,</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
-       
-    
+        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">final_loop</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">final_loop</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span><span class="p">)</span>
+
+        <span class="c1">### Add to QGeometry!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;final_loop&quot;</span><span class="p">:</span> <span class="n">final_loop</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_layer</span><span class="p">,</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="SquidLoopDolan.make_junction">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.jjs.SquidLoopDolan.make_junction">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_junction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;Makes the JJs&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Makes the JJs&quot;&quot;&quot;</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_options</span><span class="p">()</span>
-        <span class="c1">#These are some parameters given by LFL&#39;s design prefererances</span>
-        <span class="n">JJ_taper</span> <span class="o">=</span> <span class="mf">0.002</span> <span class="o">-</span> <span class="mf">0.00136</span> <span class="c1">#0.5um</span>
-        <span class="n">finger_length</span> <span class="o">=</span> <span class="mf">0.00136</span> <span class="c1">#1.36um</span>
-        <span class="n">x_gap</span> <span class="o">=</span> <span class="mf">0.00015</span> <span class="c1"># 0.14um</span>
-        
-        <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                           <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="mi">0</span><span class="p">),</span>
-                           <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
-                           <span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
-                           <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
-                           <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">)</span>
-                          <span class="p">])</span>
-        
-        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_flip</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
-            <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">JJ</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-        
-        <span class="n">JJ2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">JJ</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">JJ</span>  <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">JJ</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="o">-</span><span class="p">(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-        
+        <span class="c1"># These are some parameters given by LFL&#39;s design prefererances</span>
+        <span class="n">JJ_taper</span> <span class="o">=</span> <span class="mf">0.002</span> <span class="o">-</span> <span class="mf">0.00136</span>  <span class="c1"># 0.5um</span>
+        <span class="n">finger_length</span> <span class="o">=</span> <span class="mf">0.00136</span>  <span class="c1"># 1.36um</span>
+        <span class="n">x_gap</span> <span class="o">=</span> <span class="mf">0.00015</span>  <span class="c1"># 0.14um</span>
+
+        <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">JJ_taper</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">JJ_flip</span><span class="p">:</span>
+            <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">JJ</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span> <span class="o">-</span> <span class="n">x_gap</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">JJ2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">JJ</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">JJ</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">JJ</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="o">-</span><span class="p">(</span><span class="n">JJ_taper</span> <span class="o">+</span> <span class="n">finger_length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
         <span class="n">final_design</span> <span class="o">=</span> <span class="p">[</span><span class="n">JJ</span><span class="p">,</span> <span class="n">JJ2</span><span class="p">]</span>
-        
-        <span class="n">final_design</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">final_design</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">final_design</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">final_design</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="n">final_design</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">final_design</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span><span class="p">)</span>
-        
+
         <span class="n">JJ</span><span class="p">,</span> <span class="n">JJ2</span> <span class="o">=</span> <span class="n">final_design</span>
-        
+
         <span class="c1">### Add to QGeometry</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;JJ&#39;</span><span class="p">:</span> <span class="n">JJ</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">,</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;JJ2&quot;</span><span class="p">:</span><span class="n">JJ2</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">,</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;JJ&quot;</span><span class="p">:</span> <span class="n">JJ</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">,</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;JJ2&quot;</span><span class="p">:</span> <span class="n">JJ2</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">,</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Add LineStrings for both junctions</span>
         <span class="n">coords1</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">JJ</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
         <span class="n">mid1a</span> <span class="o">=</span> <span class="p">((</span><span class="n">coords1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">coords1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">mid1b</span> <span class="o">=</span> <span class="p">((</span><span class="n">coords1</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords1</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">coords1</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords1</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">ls1</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">LineString</span><span class="p">([</span><span class="n">mid1a</span><span class="p">,</span> <span class="n">mid1b</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;junction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;JJ&#39;</span><span class="p">:</span> <span class="n">ls1</span><span class="p">},</span> <span class="n">width</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;junction&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;JJ&quot;</span><span class="p">:</span> <span class="n">ls1</span><span class="p">},</span> <span class="n">width</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">)</span>
 
         <span class="n">coords2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">JJ2</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
         <span class="n">mid2a</span> <span class="o">=</span> <span class="p">((</span><span class="n">coords2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords2</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">coords2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords2</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">mid2b</span> <span class="o">=</span> <span class="p">((</span><span class="n">coords2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">coords2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">coords2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">ls2</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">LineString</span><span class="p">([</span><span class="n">mid2a</span><span class="p">,</span> <span class="n">mid2b</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;junction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;JJ2&#39;</span><span class="p">:</span> <span class="n">ls2</span><span class="p">},</span> <span class="n">width</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;junction&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;JJ2&quot;</span><span class="p">:</span> <span class="n">ls2</span><span class="p">},</span> <span class="n">width</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_width</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">JJ_layer</span><span class="p">)</span></div>
 </div>
 
 </pre></div>
@@ -996,7 +1014,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

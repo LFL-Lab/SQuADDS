@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.ui.utils_query &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.ui.utils_query &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -579,13 +579,10 @@
                 <article class="bd-article">
                   
   <h1>Source code for squadds.ui.utils_query</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">streamlit</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">st</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analyzer</span><span class="p">,</span> <span class="n">SQuADDS_DB</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.interpolations.physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScalingInterpolator</span>
 
 
 <div class="viewcode-block" id="convert_numpy_to_list">
@@ -601,10 +598,13 @@
         <span class="k">return</span> <span class="n">obj</span></div>
 
 
+
 <div class="viewcode-block" id="find_closest_cached">
 <a class="viewcode-back" href="../../../source/squadds.ui.html#squadds.ui.utils_query.find_closest_cached">[docs]</a>
 <span class="nd">@st</span><span class="o">.</span><span class="n">cache_data</span><span class="p">(</span><span class="n">show_spinner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">find_closest_cached</span><span class="p">(</span><span class="n">system_type</span><span class="p">,</span> <span class="n">qubit_type</span><span class="p">,</span> <span class="n">cavity_type</span><span class="p">,</span> <span class="n">resonator_type</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">num_results</span><span class="p">,</span> <span class="n">num_cpu</span><span class="p">,</span> <span class="n">skip_df_gen</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_closest_cached</span><span class="p">(</span>
+    <span class="n">system_type</span><span class="p">,</span> <span class="n">qubit_type</span><span class="p">,</span> <span class="n">cavity_type</span><span class="p">,</span> <span class="n">resonator_type</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">num_results</span><span class="p">,</span> <span class="n">num_cpu</span><span class="p">,</span> <span class="n">skip_df_gen</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cached design search. If skip_df_gen is True, will not regenerate the DataFrame if config is unchanged.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -631,16 +631,14 @@
             <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span>
             <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">num_cpu</span><span class="o">=</span><span class="n">num_cpu</span><span class="p">,</span>
-            <span class="n">skip_df_gen</span><span class="o">=</span><span class="n">skip_df_gen</span>
+            <span class="n">skip_df_gen</span><span class="o">=</span><span class="n">skip_df_gen</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span>
-            <span class="n">target_params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
-            <span class="n">num_top</span><span class="o">=</span><span class="n">num_results</span><span class="p">,</span>
-            <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span>
-            <span class="n">skip_df_gen</span><span class="o">=</span><span class="n">skip_df_gen</span>
+            <span class="n">target_params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">num_top</span><span class="o">=</span><span class="n">num_results</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span> <span class="n">skip_df_gen</span><span class="o">=</span><span class="n">skip_df_gen</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">results</span><span class="p">,</span> <span class="n">analyzer</span></div>
+
 
 
 <span class="c1"># Utility functions for extracting design parameters (can be expanded as needed)</span>
@@ -648,25 +646,40 @@
 <a class="viewcode-back" href="../../../source/squadds.ui.html#squadds.ui.utils_query.extract_cavity_only_params">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_cavity_only_params</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
     <span class="n">cpw_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;claw_gap&quot;</span><span class="p">,</span> <span class="s2">&quot;claw_length&quot;</span><span class="p">,</span> <span class="s2">&quot;claw_width&quot;</span><span class="p">,</span> <span class="s2">&quot;ground_spacing&quot;</span><span class="p">,</span> <span class="s2">&quot;claw_cpw_length&quot;</span><span class="p">,</span> <span class="s2">&quot;claw_cpw_width&quot;</span><span class="p">]</span>
-    <span class="n">coupler_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;coupling_length&quot;</span><span class="p">,</span> <span class="s2">&quot;coupling_space&quot;</span><span class="p">,</span> <span class="s2">&quot;down_length&quot;</span><span class="p">,</span> <span class="s2">&quot;orientation&quot;</span><span class="p">,</span> <span class="s2">&quot;prime_gap&quot;</span><span class="p">,</span> <span class="s2">&quot;prime_width&quot;</span><span class="p">,</span> <span class="s2">&quot;second_gap&quot;</span><span class="p">,</span> <span class="s2">&quot;second_width&quot;</span><span class="p">,</span> <span class="s2">&quot;cap_distance&quot;</span><span class="p">,</span> <span class="s2">&quot;cap_gap&quot;</span><span class="p">,</span> <span class="s2">&quot;cap_gap_ground&quot;</span><span class="p">,</span> <span class="s2">&quot;cap_width&quot;</span><span class="p">,</span> <span class="s2">&quot;finger_count&quot;</span><span class="p">,</span> <span class="s2">&quot;finger_length&quot;</span><span class="p">]</span>
+    <span class="n">coupler_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;coupling_length&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;coupling_space&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;down_length&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;orientation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prime_gap&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prime_width&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;second_gap&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;second_width&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cap_distance&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cap_gap&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cap_gap_ground&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cap_width&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;finger_count&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;finger_length&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
     <span class="n">cpw_vals</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cpw_keys</span><span class="p">}</span>
     <span class="n">coupler_vals</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">coupler_keys</span><span class="p">}</span>
-    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-        <span class="n">opts</span> <span class="o">=</span> <span class="n">convert_numpy_to_list</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">_idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="n">convert_numpy_to_list</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">])</span>
         <span class="c1"># CPW: from claw_opts[&#39;connection_pads&#39;][&#39;readout&#39;]</span>
-        <span class="n">claw_opts</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="n">readout</span> <span class="o">=</span> <span class="n">claw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;readout&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">claw_opts</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">readout</span> <span class="o">=</span> <span class="n">claw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;readout&quot;</span><span class="p">,</span> <span class="p">{})</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cpw_keys</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">readout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">cpw_vals</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="c1"># Coupler: from cplr_opts</span>
-        <span class="n">cplr_opts</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cplr_opts&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">cplr_opts</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">,</span> <span class="p">{})</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">coupler_keys</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">cplr_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">coupler_vals</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">cpw_vals</span><span class="p">,</span> <span class="n">coupler_vals</span> </div>
+    <span class="k">return</span> <span class="n">cpw_vals</span><span class="p">,</span> <span class="n">coupler_vals</span></div>
 
 </pre></div>
 
@@ -718,7 +731,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

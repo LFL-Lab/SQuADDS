@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.database.HuggingFace &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.database.HuggingFace &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -583,7 +583,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">concatenate_datasets</span><span class="p">,</span> <span class="n">load_dataset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">HfApi</span><span class="p">,</span> <span class="n">Repository</span><span class="p">,</span> <span class="n">login</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">HfApi</span><span class="p">,</span> <span class="n">login</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.globals</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
@@ -593,13 +593,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">fork_dataset</span><span class="p">(</span><span class="n">repo_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_dataset_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">private</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fork a dataset from Hugging Face Hub.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        repo_id (str): The repo ID (namespace/repo) of the dataset to fork.</span>
 <span class="sd">        dataset_name (str): Name of the dataset to fork.</span>
 <span class="sd">        new_dataset_name (str): Name of the new dataset.</span>
 <span class="sd">        private (bool): Whether the new dataset should be private or public.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -608,36 +608,38 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Forked dataset &#39;</span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2">&#39; to &#39;</span><span class="si">{</span><span class="n">new_dataset_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span></div>
 
 
+
 <div class="viewcode-block" id="create_PR">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.HuggingFace.create_PR">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_PR</span><span class="p">(</span><span class="n">repo_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">branch_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a Pull Request (PR) on Hugging Face Hub.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        repo_id (str): The repo ID (namespace/repo) where the PR will be created.</span>
 <span class="sd">        branch_name (str): The branch name where the changes are made.</span>
 <span class="sd">        title (str): The title of the PR.</span>
 <span class="sd">        description (str): A description of the changes made in the PR.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Information about the created PR.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">api</span> <span class="o">=</span> <span class="n">HfApi</span><span class="p">()</span>
-    
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">pr_info</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_pull_request</span><span class="p">(</span>
             <span class="n">repo_id</span><span class="o">=</span><span class="n">repo_id</span><span class="p">,</span>
             <span class="n">head</span><span class="o">=</span><span class="n">branch_name</span><span class="p">,</span>  <span class="c1"># The branch with your changes</span>
             <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
-            <span class="n">body</span><span class="o">=</span><span class="n">description</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created PR &#39;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&#39; on repo &#39;</span><span class="si">{</span><span class="n">repo_id</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pr_info</span>
-    
+
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create PR: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">raise</span></div>
+
 
 
 <span class="c1"># Make sure you are logged in to Hugging Face</span>
@@ -649,10 +651,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">load_dotenv</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">)</span>  <span class="c1"># Load environment variables from .env file</span>
     <span class="n">token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;HUGGINGFACE_API_KEY&quot;</span><span class="p">)</span>  <span class="c1"># Retrieve the token from environment variables</span>
-    
+
     <span class="k">if</span> <span class="n">token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Hugging Face API token not found in environment variables.&quot;</span><span class="p">)</span>
-    
+
     <span class="n">login</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Successfully logged in to Hugging Face&quot;</span><span class="p">)</span></div>
 
@@ -664,19 +666,20 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">load_hf_dataset</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load a dataset from Hugging Face Hub.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset_name (str): The name or path of the dataset on the Hugging Face Hub.</span>
 <span class="sd">        config (str): Specific configuration or version of the dataset.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Dataset or DatasetDict: Loaded dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-    
+
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded dataset: </span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dataset</span></div>
+
 
 
 <span class="c1"># Add a new column to the dataset</span>
@@ -685,12 +688,12 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">add_column_to_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add a new column to a dataset.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (Dataset): Hugging Face dataset to which you want to add a column.</span>
 <span class="sd">        column_name (str): Name of the new column.</span>
 <span class="sd">        column_data (list): Data for the new column.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Dataset: Dataset with the new column.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -699,17 +702,18 @@
     <span class="k">return</span> <span class="n">new_dataset</span></div>
 
 
+
 <span class="c1"># Remove a column from the dataset</span>
 <div class="viewcode-block" id="remove_column_from_dataset">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.HuggingFace.remove_column_from_dataset">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">remove_column_from_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Remove a column from a dataset.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (Dataset): Hugging Face dataset from which you want to remove a column.</span>
 <span class="sd">        column_name (str): Name of the column to remove.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Dataset: Dataset with the column removed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -718,17 +722,18 @@
     <span class="k">return</span> <span class="n">new_dataset</span></div>
 
 
+
 <span class="c1"># View a specific column in the dataset</span>
 <div class="viewcode-block" id="view_column_in_dataset">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.HuggingFace.view_column_in_dataset">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">view_column_in_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">num_values</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    View a specific column in the dataset by its name.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (Dataset): Hugging Face dataset.</span>
 <span class="sd">        column_name (str): Name of the column to view.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        list: Data from the specified column.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -741,30 +746,34 @@
     <span class="k">return</span> <span class="n">column_data</span></div>
 
 
+
 <span class="c1"># Update a specific column in the dataset</span>
 <div class="viewcode-block" id="update_column_in_dataset">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.HuggingFace.update_column_in_dataset">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">update_column_in_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_column_data</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Update a specific column in the dataset.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (Dataset): Hugging Face dataset to update.</span>
 <span class="sd">        column_name (str): Name of the column to update.</span>
 <span class="sd">        new_column_data (list): List of new data to replace the existing column.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Dataset: Updated dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">column_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2">&#39; not found in the dataset.&quot;</span><span class="p">)</span>
-    
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_column_data</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The new data length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_column_data</span><span class="p">)</span><span class="si">}</span><span class="s2">) does not match the dataset length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
-    
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The new data length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_column_data</span><span class="p">)</span><span class="si">}</span><span class="s2">) does not match the dataset length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="si">}</span><span class="s2">).&quot;</span>
+        <span class="p">)</span>
+
     <span class="n">updated_dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="p">{</span><span class="n">column_name</span><span class="p">:</span> <span class="n">new_column_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]},</span> <span class="n">with_indices</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updated column &#39;</span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2">&#39; in the dataset.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">updated_dataset</span></div>
+
 
 
 <span class="c1"># Add a new row to the dataset</span>
@@ -773,11 +782,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">add_row_to_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">row_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add a new row to a dataset.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (Dataset): The Hugging Face dataset to which you want to add a row.</span>
 <span class="sd">        row_data (dict): The row data in dictionary format.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Dataset: Dataset with the new row added.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -794,11 +803,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">remove_row_from_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">row_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Remove a row from a dataset by index.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (Dataset): Hugging Face dataset from which you want to remove a row.</span>
 <span class="sd">        row_index (int): Index of the row to remove.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Dataset: Dataset with the row removed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -814,20 +823,20 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">update_row_in_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">row_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">new_row_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Update an existing row in a dataset by index.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (Dataset): Hugging Face dataset to update.</span>
 <span class="sd">        row_index (int): Index of the row to update.</span>
 <span class="sd">        new_row_data (dict): The new data for the row.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Dataset: Updated dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">updated_rows</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-    
+
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">new_row_data</span><span class="p">:</span>
         <span class="n">updated_rows</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">row_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_row_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-    
+
     <span class="n">updated_dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">updated_rows</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updated row at index </span><span class="si">{</span><span class="n">row_index</span><span class="si">}</span><span class="s2"> in the dataset.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">updated_dataset</span></div>
@@ -840,11 +849,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">view_row_in_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">row_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    View a specific row in the dataset by index.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (Dataset): Hugging Face dataset.</span>
 <span class="sd">        row_index (int): Index of the row to view.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Data for the specified row.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -853,17 +862,18 @@
     <span class="k">return</span> <span class="n">row_data</span></div>
 
 
+
 <span class="c1"># Merge two datasets</span>
 <div class="viewcode-block" id="merge_datasets">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.HuggingFace.merge_datasets">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">merge_datasets</span><span class="p">(</span><span class="n">dataset1</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">dataset2</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Merge two datasets into one.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset1 (Dataset): First dataset.</span>
 <span class="sd">        dataset2 (Dataset): Second dataset.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Dataset: Merged dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -872,24 +882,26 @@
     <span class="k">return</span> <span class="n">merged_dataset</span></div>
 
 
+
 <span class="c1"># Save the dataset to Hugging Face Hub</span>
 <div class="viewcode-block" id="save_dataset_to_hf">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.HuggingFace.save_dataset_to_hf">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">save_dataset_to_hf</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">repo_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">private</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Push a dataset to Hugging Face Hub.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (Dataset): The dataset to push to Hugging Face Hub.</span>
 <span class="sd">        repo_id (str): The repo ID (namespace/repo) on Hugging Face Hub.</span>
 <span class="sd">        dataset_name (str): Name of the dataset on Hugging Face Hub.</span>
 <span class="sd">        private (bool): Whether the dataset should be private or public.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dataset</span><span class="o">.</span><span class="n">push_to_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">private</span><span class="o">=</span><span class="n">private</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset &#39;</span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2">&#39; saved to Hugging Face Hub.&quot;</span><span class="p">)</span></div>
+
 
 
 <span class="c1"># Filter the dataset based on a condition</span>
@@ -898,17 +910,18 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">filter_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">filter_fn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Filter a dataset based on a custom condition.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (Dataset): Hugging Face dataset to filter.</span>
 <span class="sd">        filter_fn (function): Function that returns True or False for filtering.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Dataset: Filtered dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">filtered_dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filter_fn</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filtered dataset based on condition.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">filtered_dataset</span></div>
+
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
@@ -967,7 +980,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

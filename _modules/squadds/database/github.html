@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.database.github &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.database.github &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -582,13 +582,11 @@
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">git</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">github</span><span class="w"> </span><span class="kn">import</span> <span class="n">Github</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">github.Auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">Auth</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">github.GithubException</span><span class="w"> </span><span class="kn">import</span> <span class="n">GithubException</span>
 
 
 <div class="viewcode-block" id="login_to_github">
@@ -600,6 +598,7 @@
     <span class="k">if</span> <span class="n">github_token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;GitHub token not found in environment variables.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Github</span><span class="p">(</span><span class="n">github_token</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="clone_repository">
@@ -625,14 +624,15 @@
     <span class="k">return</span> <span class="n">repo</span></div>
 
 
+
 <div class="viewcode-block" id="fork_repository">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.github.fork_repository">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">fork_repository</span><span class="p">(</span><span class="n">github_token</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Forks the specified GitHub repository to the authenticated user&#39;s account.</span>
-<span class="sd">    </span>
+
 <span class="sd">    - github_token (str): GitHub Personal Access Token with appropriate permissions.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">    - str: URL of the forked repository if successful, None otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -640,24 +640,25 @@
     <span class="n">original_repo_name</span> <span class="o">=</span> <span class="s2">&quot;LFL-Lab/SQuADDS_DB&quot;</span>
     <span class="c1"># Authenticate with GitHub</span>
     <span class="n">g</span> <span class="o">=</span> <span class="n">Github</span><span class="p">(</span><span class="n">github_token</span><span class="p">)</span>
-    
+
     <span class="c1"># Get the authenticated user</span>
     <span class="n">user</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">get_user</span><span class="p">()</span>
-    
+
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Get the original repository</span>
         <span class="n">original_repo</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">get_repo</span><span class="p">(</span><span class="n">original_repo_name</span><span class="p">)</span>
-        
+
         <span class="c1"># Fork the repository to the authenticated user&#39;s account</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Forking the repository: </span><span class="si">{</span><span class="n">original_repo_name</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">login</span><span class="si">}</span><span class="s2">&#39;s account...&quot;</span><span class="p">)</span>
         <span class="n">forked_repo</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">create_fork</span><span class="p">(</span><span class="n">original_repo</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Repository forked successfully: </span><span class="si">{</span><span class="n">forked_repo</span><span class="o">.</span><span class="n">html_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        
+
         <span class="k">return</span> <span class="n">forked_repo</span><span class="o">.</span><span class="n">html_url</span>
-    
+
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error forking repository: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
+
 
 
 <div class="viewcode-block" id="read_json_file">
@@ -676,9 +677,10 @@
         <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File not found: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading JSON file from </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
+
 
 
 <div class="viewcode-block" id="append_to_json">
@@ -699,6 +701,7 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
+
 <div class="viewcode-block" id="save_json_file">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.github.save_json_file">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">save_json_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -710,8 +713,9 @@
 <span class="sd">    - data (dict): Updated JSON data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving updated JSON data to </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
         <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="commit_changes">
@@ -735,9 +739,10 @@
     <span class="k">return</span> <span class="n">commit</span><span class="o">.</span><span class="n">hexsha</span></div>
 
 
+
 <div class="viewcode-block" id="push_changes">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.github.push_changes">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">push_changes</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">branch_name</span><span class="o">=</span><span class="s1">&#39;main&#39;</span><span class="p">,</span> <span class="n">github_token</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">push_changes</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">branch_name</span><span class="o">=</span><span class="s2">&quot;main&quot;</span><span class="p">,</span> <span class="n">github_token</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Push the committed changes to the remote repository.</span>
 
@@ -758,13 +763,13 @@
                 <span class="n">repo_name</span> <span class="o">=</span> <span class="n">remote_url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;github.com/&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">authenticated_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://</span><span class="si">{</span><span class="n">github_token</span><span class="si">}</span><span class="s2">@github.com/</span><span class="si">{</span><span class="n">repo_name</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">repo</span><span class="o">.</span><span class="n">remotes</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">set_url</span><span class="p">(</span><span class="n">authenticated_url</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updated remote URL with token for authentication&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updated remote URL with token for authentication&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Remote URL is not HTTPS, cannot update with token.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Push changes to the remote repository</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pushing changes to the remote </span><span class="si">{</span><span class="n">branch_name</span><span class="si">}</span><span class="s2"> branch...&quot;</span><span class="p">)</span>
-        <span class="n">push_result</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;origin&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">refspec</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">branch_name</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">branch_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;origin&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">refspec</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">branch_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">branch_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Push successful.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -772,9 +777,14 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <div class="viewcode-block" id="contribute_measured_data">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.github.contribute_measured_data">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">contribute_measured_data</span><span class="p">(</span><span class="n">new_entry</span><span class="p">,</span> <span class="n">pr_title</span><span class="o">=</span><span class="s2">&quot;PR For Contributing New Data&quot;</span><span class="p">,</span> <span class="n">pr_body</span><span class="o">=</span><span class="s2">&quot;This PR is for contributing new data to the SQuADDS Measured Devices Database.&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">contribute_measured_data</span><span class="p">(</span>
+    <span class="n">new_entry</span><span class="p">,</span>
+    <span class="n">pr_title</span><span class="o">=</span><span class="s2">&quot;PR For Contributing New Data&quot;</span><span class="p">,</span>
+    <span class="n">pr_body</span><span class="o">=</span><span class="s2">&quot;This PR is for contributing new data to the SQuADDS Measured Devices Database.&quot;</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Update the JSON file in the given repository by appending a new entry and committing the changes.</span>
 
@@ -782,15 +792,14 @@
 <span class="sd">    - new_entry (dict): New entry to append to the JSON file.</span>
 <span class="sd">    - pr_title (str): The title of the pull request.</span>
 <span class="sd">    - pr_body (str): The body description of the pull request.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">    - str: Commit hash if successful, None otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Variable setup</span>
-    <span class="n">original_repo_name</span> <span class="o">=</span> <span class="s2">&quot;LFL-Lab/SQuADDS_DB&quot;</span>
     <span class="n">TEMP_CLONE_DIR</span> <span class="o">=</span> <span class="s2">&quot;./temp_forked_repo&quot;</span>
-    <span class="n">json_file_path</span> <span class="o">=</span> <span class="s2">&quot;measured_device_database.json&quot;</span> 
-    <span class="n">load_dotenv</span><span class="p">()</span>  
+    <span class="n">json_file_path</span> <span class="o">=</span> <span class="s2">&quot;measured_device_database.json&quot;</span>
+    <span class="n">load_dotenv</span><span class="p">()</span>
     <span class="n">github_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;GITHUB_TOKEN&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">github_token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;GitHub token not found in environment variables.&quot;</span><span class="p">)</span>
@@ -806,7 +815,7 @@
 
     <span class="c1"># Step 2: Check out the main branch</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking out the main branch...&quot;</span><span class="p">)</span>
-    <span class="n">repo</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="s1">&#39;main&#39;</span><span class="p">)</span>
+    <span class="n">repo</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
 
     <span class="c1"># Step 3: Read the JSON file</span>
     <span class="n">full_json_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TEMP_CLONE_DIR</span><span class="p">,</span> <span class="n">json_file_path</span><span class="p">)</span>
@@ -820,20 +829,21 @@
 
     <span class="c1"># Step 6: Commit the changes with a unique datetime-based message</span>
     <span class="n">commit_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Update JSON dataset with new entry - </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="n">commit_hash</span> <span class="o">=</span> <span class="n">commit_changes</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">json_file_path</span><span class="p">,</span> <span class="n">commit_message</span><span class="p">)</span>
+    <span class="n">commit_changes</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">json_file_path</span><span class="p">,</span> <span class="n">commit_message</span><span class="p">)</span>
 
     <span class="c1"># Step 7: Push the changes to the remote repository</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">push_changes</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="s2">&quot;main&quot;</span><span class="p">,</span> <span class="n">github_token</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">push_changes</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="s2">&quot;main&quot;</span><span class="p">,</span> <span class="n">github_token</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Successfully pushed changes to the remote repository.&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to push changes to the remote repository.&quot;</span><span class="p">)</span>
         <span class="k">return</span>
-    
+
     <span class="c1"># Step 8: Create a Pull Request on GitHub</span>
     <span class="n">pr_url</span> <span class="o">=</span> <span class="n">create_pull_request</span><span class="p">(</span><span class="n">forked_repo_name</span><span class="p">,</span> <span class="n">branch_name</span><span class="p">,</span> <span class="n">pr_title</span><span class="p">,</span> <span class="n">pr_body</span><span class="p">,</span> <span class="n">github_token</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pull request URL: </span><span class="si">{</span><span class="n">pr_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-    
+
+
 <div class="viewcode-block" id="create_pull_request">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.github.create_pull_request">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_pull_request</span><span class="p">(</span><span class="n">forked_repo_name</span><span class="p">,</span> <span class="n">branch_name</span><span class="p">,</span> <span class="n">pr_title</span><span class="p">,</span> <span class="n">pr_body</span><span class="p">,</span> <span class="n">github_token</span><span class="p">):</span>
@@ -867,7 +877,7 @@
             <span class="n">title</span><span class="o">=</span><span class="n">pr_title</span><span class="p">,</span>
             <span class="n">body</span><span class="o">=</span><span class="n">pr_body</span><span class="p">,</span>
             <span class="n">head</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">login</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">branch_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="c1"># Forked repository and branch</span>
-            <span class="n">base</span><span class="o">=</span><span class="s2">&quot;main&quot;</span>  <span class="c1"># Target branch in the original repository</span>
+            <span class="n">base</span><span class="o">=</span><span class="s2">&quot;main&quot;</span><span class="p">,</span>  <span class="c1"># Target branch in the original repository</span>
         <span class="p">)</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Pull request created successfully&quot;</span><span class="p">)</span>
@@ -876,6 +886,7 @@
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating pull request: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
+
 
 
 <div class="viewcode-block" id="get_github_username">
@@ -893,10 +904,10 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Authenticate with GitHub using the token</span>
         <span class="n">g</span> <span class="o">=</span> <span class="n">Github</span><span class="p">(</span><span class="n">github_token</span><span class="p">)</span>
-        
+
         <span class="c1"># Get the authenticated user</span>
         <span class="n">user</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">get_user</span><span class="p">()</span>
-        
+
         <span class="c1"># Return the username</span>
         <span class="k">return</span> <span class="n">user</span><span class="o">.</span><span class="n">login</span>
 
@@ -954,7 +965,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

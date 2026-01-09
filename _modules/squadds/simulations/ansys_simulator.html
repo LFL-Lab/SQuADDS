@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.simulations.ansys_simulator &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.simulations.ansys_simulator &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -581,12 +581,12 @@
   <h1>Source code for squadds.simulations.ansys_simulator</h1><div class="highlight"><pre>
 <span></span><span class="c1"># from utils import *</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
 <span class="c1"># warn using `warnings` if os is mac that this is not supported</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">metal</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">MetalGUI</span><span class="p">,</span> <span class="n">designs</span><span class="p">,</span> <span class="n">draw</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.toolbox_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">math_and_overrides</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.objects</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
@@ -624,37 +624,37 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">default_eigenmode_options</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;basis_order&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="s1">&#39;max_delta_f&#39;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
-                <span class="s1">&#39;max_passes&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-                <span class="s1">&#39;min_converged&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="s1">&#39;min_converged_passes&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="s1">&#39;min_freq_ghz&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="s1">&#39;min_passes&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="s1">&#39;n_modes&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;default_eigenmode_setup&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;pct_refinement&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-                <span class="s1">&#39;reuse_selected_design&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;reuse_setup&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;vars&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;Cj&#39;</span><span class="p">:</span> <span class="s1">&#39;0fF&#39;</span><span class="p">,</span> <span class="s1">&#39;Lj&#39;</span><span class="p">:</span> <span class="s1">&#39;0nH&#39;</span><span class="p">}</span>
+                <span class="s2">&quot;basis_order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;max_delta_f&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+                <span class="s2">&quot;max_passes&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">&quot;min_converged&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;min_converged_passes&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="s2">&quot;min_freq_ghz&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;min_passes&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;n_modes&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;default_eigenmode_setup&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;pct_refinement&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">&quot;reuse_selected_design&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;reuse_setup&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;vars&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Cj&quot;</span><span class="p">:</span> <span class="s2">&quot;0fF&quot;</span><span class="p">,</span> <span class="s2">&quot;Lj&quot;</span><span class="p">:</span> <span class="s2">&quot;0nH&quot;</span><span class="p">},</span>
             <span class="p">}</span>
         <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_lom_options</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;default_LOM_setup&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;reuse_selected_design&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;reuse_setup&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;freq_ghz&#39;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>
-                <span class="s1">&#39;save_fields&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;max_passes&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-                <span class="s1">&#39;min_passes&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="s1">&#39;min_converged_passes&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="s1">&#39;percent_error&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
-                <span class="s1">&#39;percent_refinement&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-                <span class="s1">&#39;auto_increase_solution_order&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;solution_order&#39;</span><span class="p">:</span> <span class="s1">&#39;High&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;solver_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Iterative&#39;</span><span class="p">,</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;default_LOM_setup&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;reuse_selected_design&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;reuse_setup&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;freq_ghz&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>
+                <span class="s2">&quot;save_fields&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;max_passes&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">&quot;min_passes&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="s2">&quot;min_converged_passes&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;percent_error&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                <span class="s2">&quot;percent_refinement&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">&quot;auto_increase_solution_order&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;solution_order&quot;</span><span class="p">:</span> <span class="s2">&quot;High&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;solver_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Iterative&quot;</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="p">}</span>
 
@@ -667,14 +667,17 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;selected system: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_warnings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Displays a warning message if the operating system is macOS.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays a warning message if the operating system is macOS.</span>
 
-<span class="sd">            Raises:</span>
-<span class="sd">                UserWarning: If the operating system is macOS, a warning is raised indicating that `AnsysSimulator` is not supported on MacOS.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>  <span class="c1"># Checks if the operating system is macOS</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;`AnsysSimulator` is not supported on MacOS since Ansys does not have a Mac App. Please use Windows or Linux for simulations.&quot;</span><span class="p">)</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            UserWarning: If the operating system is macOS, a warning is raised indicating that `AnsysSimulator` is not supported on MacOS.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>  <span class="c1"># Checks if the operating system is macOS</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;`AnsysSimulator` is not supported on MacOS since Ansys does not have a Mac App. Please use Windows or Linux for simulations.&quot;</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
 
 <div class="viewcode-block" id="AnsysSimulator.get_design_screenshot">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.get_design_screenshot">[docs]</a>
@@ -706,10 +709,10 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">emode_setup</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">emode_setup</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_eigenmode_options</span>
-        <span class="k">if</span> <span class="n">lom_setup</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">lom_setup</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_lom_options</span>
+        <span class="k">if</span> <span class="n">emode_setup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">emode_setup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_eigenmode_options</span>
+        <span class="k">if</span> <span class="n">lom_setup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lom_setup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_lom_options</span>
 
         <span class="c1"># run_sweep(self.design, sweep_dict, emode_setup, lom_setup)</span>
         <span class="c1"># print(sweep_dict)</span>
@@ -737,22 +740,27 @@
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">return_df</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="c1"># have a qubit_cavity object</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>  <span class="c1"># have a qubit_cavity object</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
-                <span class="n">qubit_geoms</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">],</span>
-                <span class="n">cavity_geoms</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span>
+                <span class="n">qubit_geoms</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">],</span> <span class="n">cavity_geoms</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
-                <span class="n">qubit_setup</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_qubit&quot;</span><span class="p">],</span>
-                <span class="n">cavity_setup</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">]</span>
+                <span class="n">qubit_setup</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_qubit&quot;</span><span class="p">],</span> <span class="n">cavity_setup</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">]</span>
             <span class="p">)</span>
-            <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_whole_device</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">qubit_setup</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">cavity_setup</span><span class="p">)</span>
+            <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_whole_device</span><span class="p">(</span>
+                <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
+                <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span>
+                <span class="n">LOM_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">qubit_setup</span><span class="p">,</span>
+                <span class="n">eigenmode_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">cavity_setup</span><span class="p">,</span>
+            <span class="p">)</span>
 
-        <span class="k">else</span><span class="p">:</span> <span class="c1"># have a non-qubit_cavity object</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># have a non-qubit_cavity object</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]</span>
-            <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span> <span class="n">lom_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="p">)</span>
-        
+            <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_single_design</span><span class="p">(</span>
+                <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span> <span class="n">lom_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span>
+            <span class="p">)</span>
+
         <span class="k">return</span> <span class="n">return_df</span></div>
 
 
@@ -770,7 +778,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span></div>
 
-    
+
 <div class="viewcode-block" id="AnsysSimulator.get_xmon_info">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.get_xmon_info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_xmon_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xmon_dict</span><span class="p">):</span>
@@ -786,7 +794,9 @@
         <span class="c1"># data = xmon_dict[&quot;sim_results&quot;]</span>
         <span class="n">cross2cpw</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">xmon_dict</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;cross_to_claw&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-15</span>
         <span class="n">cross2ground</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">xmon_dict</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;cross_to_ground&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-15</span>
-        <span class="n">Lj</span> <span class="o">=</span> <span class="n">xmon_dict</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">][</span><span class="s2">&quot;aedt_q3d_inductance&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">xmon_dict</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">][</span><span class="s2">&quot;aedt_q3d_inductance&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">1e-9</span> <span class="k">else</span> <span class="mf">1e-9</span><span class="p">)</span>
+        <span class="n">Lj</span> <span class="o">=</span> <span class="n">xmon_dict</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">][</span><span class="s2">&quot;aedt_q3d_inductance&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="mi">1</span> <span class="k">if</span> <span class="n">xmon_dict</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">][</span><span class="s2">&quot;aedt_q3d_inductance&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">1e-9</span> <span class="k">else</span> <span class="mf">1e-9</span>
+        <span class="p">)</span>
         <span class="n">a</span><span class="p">,</span> <span class="n">fq</span> <span class="o">=</span> <span class="n">find_a_fq</span><span class="p">(</span><span class="n">cross2cpw</span><span class="p">,</span> <span class="n">cross2ground</span><span class="p">,</span> <span class="n">Lj</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;qubit anharmonicity = </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">}</span><span class="s2"> MHz </span><span class="se">\n</span><span class="s2">qubit frequency = </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">fq</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> GHz&quot;</span><span class="p">)</span>
         <span class="c1"># return a json object</span>
@@ -808,7 +818,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="n">metal</span><span class="o">.</span><span class="n">MetalGUI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">delete_all_components</span><span class="p">()</span>
         <span class="k">if</span> <span class="s2">&quot;g&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]:</span>
-            <span class="n">qc</span> <span class="o">=</span> <span class="n">QubitCavity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;qubit_cavity&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">])</span>
+            <span class="n">QubitCavity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;qubit_cavity&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">autoscale</span><span class="p">()</span>
@@ -817,25 +827,25 @@
 
 <div class="viewcode-block" id="AnsysSimulator.sweep_qubit_cavity">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.sweep_qubit_cavity">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sweep_qubit_cavity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_setup</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lom_setup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sweep_qubit_cavity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_setup</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lom_setup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sweeps a single geometric parameter of the qubit and cavity system based on the provided sweep dictionary.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            device_dict (dict): A dictionary containing the device design options and setup.</span>
 <span class="sd">            emode_setup (dict): A dictionary containing the eigenmode setup options.</span>
 <span class="sd">            lom_setup (dict): A dictionary containing the LOM setup options.</span>
-<span class="sd">            </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            results: The sweep results.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">emode_setup</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">emode_setup</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_eigenmode_options</span>
-        <span class="k">if</span> <span class="n">lom_setup</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">lom_setup</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_lom_options</span>
+        <span class="k">if</span> <span class="n">emode_setup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">emode_setup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_eigenmode_options</span>
+        <span class="k">if</span> <span class="n">lom_setup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lom_setup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_lom_options</span>
 
-        <span class="n">results</span> <span class="o">=</span> <span class="n">run_qubit_cavity_sweep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_setup</span><span class="p">,</span> <span class="n">lom_setup</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;qubit_cavity_sweep&quot;</span><span class="p">)</span></div>
+        <span class="n">run_qubit_cavity_sweep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_setup</span><span class="p">,</span> <span class="n">lom_setup</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;qubit_cavity_sweep&quot;</span><span class="p">)</span></div>
 </div>
 
 </pre></div>
@@ -888,7 +898,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

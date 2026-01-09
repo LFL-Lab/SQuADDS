@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.core.processing &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.core.processing &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -579,9 +579,7 @@
                 <article class="bd-article">
                   
   <h1>Source code for squadds.core.processing</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pool</span><span class="p">,</span> <span class="n">cpu_count</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 
@@ -589,41 +587,43 @@
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.processing.unify_columns">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">unify_columns</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="c1"># Find all columns with _x and _y suffixes</span>
-    <span class="n">x_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_x&#39;</span><span class="p">)]</span>
-    <span class="n">y_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_y&#39;</span><span class="p">)]</span>
-    
+    <span class="n">x_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_x&quot;</span><span class="p">)]</span>
+    <span class="n">y_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_y&quot;</span><span class="p">)]</span>
+
     <span class="c1"># Create a mapping of columns without suffixes to pairs of _x and _y columns</span>
-    <span class="n">columns_to_unify</span> <span class="o">=</span> <span class="p">{</span><span class="n">col</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]:</span> <span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">col</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_y&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">x_columns</span> <span class="k">if</span> <span class="n">col</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_y&#39;</span> <span class="ow">in</span> <span class="n">y_columns</span><span class="p">}</span>
+    <span class="n">columns_to_unify</span> <span class="o">=</span> <span class="p">{</span><span class="n">col</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]:</span> <span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">col</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_y&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">x_columns</span> <span class="k">if</span> <span class="n">col</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_y&quot;</span> <span class="ow">in</span> <span class="n">y_columns</span><span class="p">}</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Columns identified for unification:&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">columns_to_unify</span><span class="p">)</span>
-    
+
     <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">x_col</span><span class="p">,</span> <span class="n">y_col</span><span class="p">)</span> <span class="ow">in</span> <span class="n">columns_to_unify</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing columns: </span><span class="si">{</span><span class="n">x_col</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">y_col</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">x_col</span><span class="p">]</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">y_col</span><span class="p">]):</span>
             <span class="c1"># If the columns are the same, keep only one and rename it to remove the suffix</span>
             <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">x_col</span><span class="p">]</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Columns </span><span class="si">{</span><span class="n">x_col</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">y_col</span><span class="si">}</span><span class="s2"> are identical. Keeping </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> and dropping both suffixes.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># If the columns are different, keep both</span>
-            <span class="n">df</span><span class="p">[</span><span class="n">col</span> <span class="o">+</span> <span class="s1">&#39;_x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">x_col</span><span class="p">]</span>
-            <span class="n">df</span><span class="p">[</span><span class="n">col</span> <span class="o">+</span> <span class="s1">&#39;_y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">y_col</span><span class="p">]</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">col</span> <span class="o">+</span> <span class="s2">&quot;_x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">x_col</span><span class="p">]</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">col</span> <span class="o">+</span> <span class="s2">&quot;_y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">y_col</span><span class="p">]</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Columns </span><span class="si">{</span><span class="n">x_col</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">y_col</span><span class="si">}</span><span class="s2"> differ. Keeping both.&quot;</span><span class="p">)</span>
-        
+
         <span class="c1"># Drop the original _x and _y columns</span>
         <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">x_col</span><span class="p">,</span> <span class="n">y_col</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dropped columns: </span><span class="si">{</span><span class="n">x_col</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">y_col</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    
+
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Final columns after unification:&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span></div>
 
 
+
 <div class="viewcode-block" id="merge_dfs">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.processing.merge_dfs">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">merge_dfs</span><span class="p">(</span><span class="n">qubit_df_split</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">qubit_df_split</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">merger_terms</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;_qubit&#39;</span><span class="p">,</span> <span class="s1">&#39;_cavity_claw&#39;</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">qubit_df_split</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">merger_terms</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;_qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;_cavity_claw&quot;</span><span class="p">))</span></div>
+
 
 
 <div class="viewcode-block" id="update_ncap_parameters">
@@ -633,18 +633,21 @@
 <span class="sd">    Updates the kappa and frequency of the cavity based on the results of the CapNInterdigitalTee simulations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">merger_terms</span><span class="p">:</span>
-        <span class="n">cavity_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;temp_</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cavity_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;cplr_opts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">term</span><span class="p">))</span>
-        <span class="n">ncap_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;temp_</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ncap_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">term</span><span class="p">))</span>
-    
+        <span class="n">cavity_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;temp_</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cavity_df</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">term</span><span class="p">))</span>
+        <span class="n">ncap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;temp_</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ncap_df</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">term</span><span class="p">))</span>
+
     <span class="c1"># Add index columns to cavity_df and ncap_df</span>
-    <span class="n">cavity_df</span> <span class="o">=</span> <span class="n">cavity_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;index_cc&#39;</span><span class="p">})</span>
-    <span class="n">ncap_df</span> <span class="o">=</span> <span class="n">ncap_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;index_cplr&#39;</span><span class="p">})</span>
+    <span class="n">cavity_df</span> <span class="o">=</span> <span class="n">cavity_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;index_cc&quot;</span><span class="p">})</span>
+    <span class="n">ncap_df</span> <span class="o">=</span> <span class="n">ncap_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;index_cplr&quot;</span><span class="p">})</span>
 
     <span class="c1"># Perform the merge on the specific common terms</span>
-    <span class="n">merged_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">cavity_df</span><span class="p">,</span> <span class="n">ncap_df</span><span class="p">,</span> 
-                         <span class="n">left_on</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;temp_</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">merger_terms</span><span class="p">],</span> 
-                         <span class="n">right_on</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;temp_</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">merger_terms</span><span class="p">],</span>
-                         <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;_cavity_claw&#39;</span><span class="p">,</span> <span class="s1">&#39;_ncap&#39;</span><span class="p">))</span>
+    <span class="n">merged_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+        <span class="n">cavity_df</span><span class="p">,</span>
+        <span class="n">ncap_df</span><span class="p">,</span>
+        <span class="n">left_on</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;temp_</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">merger_terms</span><span class="p">],</span>
+        <span class="n">right_on</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;temp_</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">merger_terms</span><span class="p">],</span>
+        <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;_cavity_claw&quot;</span><span class="p">,</span> <span class="s2">&quot;_ncap&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
 
     <span class="c1"># Update the cavity resonator frequency and kappa</span>
     <span class="n">cavity_frequency_updated</span><span class="p">,</span> <span class="n">kappa</span> <span class="o">=</span> <span class="n">update_cavity_frequency_and_kappa</span><span class="p">(</span><span class="n">merged_df</span><span class="p">)</span>
@@ -662,18 +665,19 @@
         <span class="k">return</span> <span class="n">updated_cplr_opts</span>
 
     <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-        <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">],</span> <span class="s2">&quot;cplr_opts&quot;</span><span class="p">:</span> <span class="n">update_cpw_cplr_opts</span><span class="p">(</span><span class="n">row</span><span class="p">)},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">],</span> <span class="s2">&quot;cplr_opts&quot;</span><span class="p">:</span> <span class="n">update_cpw_cplr_opts</span><span class="p">(</span><span class="n">row</span><span class="p">)},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
 
     <span class="c1"># Remove the temporary columns</span>
-    <span class="n">merged_df</span> <span class="o">=</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;temp_</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">merger_terms</span><span class="p">])</span>
-    
+    <span class="n">merged_df</span> <span class="o">=</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;temp_</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">merger_terms</span><span class="p">])</span>
+
     <span class="c1"># Remove all the columns with &quot;_ncap&quot; suffix except &#39;index_cplr&#39;</span>
-    <span class="n">columns_to_drop</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_ncap&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">col</span> <span class="o">!=</span> <span class="s1">&#39;index_cplr&#39;</span><span class="p">]</span>
+    <span class="n">columns_to_drop</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_ncap&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">col</span> <span class="o">!=</span> <span class="s2">&quot;index_cplr&quot;</span><span class="p">]</span>
     <span class="n">merged_df</span> <span class="o">=</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns_to_drop</span><span class="p">)</span>
 
     <span class="c1"># Remove all the columns with ncap_sim_cols</span>
     <span class="n">merged_df</span> <span class="o">=</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">ncap_sim_cols</span><span class="p">)</span>
-    
+
     <span class="c1"># Rename the columns with &quot;_cavity_claw&quot; suffix to remove the suffix</span>
     <span class="n">merged_df</span> <span class="o">=</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">col</span><span class="p">:</span> <span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_cavity_claw&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">columns</span><span class="p">})</span>
 
@@ -697,25 +701,25 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Constants</span>
     <span class="n">pi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-    
-    <span class="c1"># Extract the necessary simulation results from merged_df</span>
-    <span class="n">omega_rough</span> <span class="o">=</span> <span class="n">merged_df</span><span class="p">[</span><span class="s1">&#39;cavity_frequency&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span>  <span class="c1"># Convert from Hz to rad/s</span>
 
-    <span class="n">C_tg</span> <span class="o">=</span> <span class="n">merged_df</span><span class="p">[</span><span class="s1">&#39;top_to_ground&#39;</span><span class="p">]</span>   <span class="c1"># fF</span>
-    <span class="n">C_tb</span> <span class="o">=</span> <span class="n">merged_df</span><span class="p">[</span><span class="s1">&#39;top_to_bottom&#39;</span><span class="p">]</span>   <span class="c1"># fF</span>
-    
+    <span class="c1"># Extract the necessary simulation results from merged_df</span>
+    <span class="n">omega_rough</span> <span class="o">=</span> <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;cavity_frequency&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span>  <span class="c1"># Convert from Hz to rad/s</span>
+
+    <span class="n">C_tg</span> <span class="o">=</span> <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;top_to_ground&quot;</span><span class="p">]</span>  <span class="c1"># fF</span>
+    <span class="n">C_tb</span> <span class="o">=</span> <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;top_to_bottom&quot;</span><span class="p">]</span>  <span class="c1"># fF</span>
+
     <span class="c1"># Calculate the resonator capacitance C_res from the rough resonant frequency omega_rough</span>
-    <span class="n">C_res</span> <span class="o">=</span> <span class="p">(</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">omega_rough</span> <span class="o">*</span> <span class="n">Z0</span><span class="p">)</span> <span class="p">)</span> <span class="o">*</span> <span class="mf">1e15</span>  <span class="c1"># fF</span>
-    
+    <span class="n">C_res</span> <span class="o">=</span> <span class="p">(</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">omega_rough</span> <span class="o">*</span> <span class="n">Z0</span><span class="p">))</span> <span class="o">*</span> <span class="mf">1e15</span>  <span class="c1"># fF</span>
+
     <span class="c1"># Compute the new resonant frequency estimate omega_est</span>
     <span class="n">omega_est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">C_res</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_res</span> <span class="o">+</span> <span class="n">C_tg</span> <span class="o">+</span> <span class="n">C_tb</span><span class="p">))</span> <span class="o">*</span> <span class="n">omega_rough</span>
-    
+
     <span class="c1"># Calculate kappa (assuming the units for the frequencies are consistent)</span>
     <span class="n">kappa</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">Z0</span> <span class="o">*</span> <span class="p">(</span><span class="n">omega_est</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_tb</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_res</span> <span class="o">+</span> <span class="n">C_tg</span> <span class="o">+</span> <span class="n">C_tb</span><span class="p">))</span> <span class="o">*</span> <span class="mf">1e-15</span>  <span class="c1"># Hz</span>
-    
+
     <span class="c1"># Convert omega_est from rad/s back to Hz for cavity_frequency</span>
     <span class="n">cavity_frequency_updated</span> <span class="o">=</span> <span class="n">omega_est</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span>
-    
+
     <span class="c1"># Return the updated cavity frequency and kappa</span>
     <span class="k">return</span> <span class="n">cavity_frequency_updated</span><span class="p">,</span> <span class="n">kappa</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span></div>
 
@@ -769,7 +773,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

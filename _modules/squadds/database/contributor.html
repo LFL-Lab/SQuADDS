@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.database.contributor &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.database.contributor &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -589,15 +589,21 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.globals</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">compare_schemas</span><span class="p">,</span> <span class="n">delete_HF_cache</span><span class="p">,</span>
-                                <span class="n">get_config_schema</span><span class="p">,</span> <span class="n">get_entire_schema</span><span class="p">,</span> <span class="n">get_type</span><span class="p">,</span>
-                                <span class="n">is_float</span><span class="p">,</span> <span class="n">validate_types</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">compare_schemas</span><span class="p">,</span>
+    <span class="n">delete_HF_cache</span><span class="p">,</span>
+    <span class="n">get_config_schema</span><span class="p">,</span>
+    <span class="n">get_entire_schema</span><span class="p">,</span>
+    <span class="n">get_type</span><span class="p">,</span>
+    <span class="n">validate_types</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">! TODO:</span>
 <span class="sd">* Inputs the config/system data</span>
 <span class="sd">* required schema generated based on the config/system data</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
 
 <div class="viewcode-block" id="ExistingConfigData">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData">[docs]</a>
@@ -639,16 +645,17 @@
 <span class="sd">        _validate_types(): Validates the types of the data.</span>
 <span class="sd">        _validate_content_v0(): Validates the content of the contribution against the dataset schema.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span> <span class="o">=</span> <span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_config_name</span><span class="p">()</span>
-        <span class="n">load_dotenv</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">)</span> 
+        <span class="n">load_dotenv</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;design_tool&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="p">{}}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;simulator&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="p">{}</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ref_entry</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__set_contributor_info</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
@@ -659,17 +666,17 @@
 <div class="viewcode-block" id="ExistingConfigData._validate_config_name">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData._validate_config_name">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_config_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Validates the config name against the supported config names.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validates the config name against the supported config names.</span>
 
-<span class="sd">            Raises:</span>
-<span class="sd">                ValueError: If the config name is invalid.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="n">configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_supported_config_names</span><span class="p">()</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">configs</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid config name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">. Supported config names: </span><span class="si">{</span><span class="n">configs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the config name is invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_supported_config_names</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">configs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid config name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">. Supported config names: </span><span class="si">{</span><span class="n">configs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-        
+
 <div class="viewcode-block" id="ExistingConfigData.get_config_schema">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.get_config_schema">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_config_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -681,7 +688,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># get the first entry</span>
         <span class="n">config_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
-        <span class="n">entry</span> <span class="o">=</span> <span class="n">config_dataset</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">config_dataset</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ref_entry</span> <span class="o">=</span> <span class="n">entry</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="n">get_config_schema</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">schema</span>  <span class="c1"># Return the schema as a dictionary</span></div>
@@ -698,10 +705,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># get the first entry</span>
         <span class="n">config_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
-        <span class="n">entry</span> <span class="o">=</span> <span class="n">config_dataset</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">config_dataset</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="n">get_config_schema</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span></div>
-
 
 
 <div class="viewcode-block" id="ExistingConfigData._supported_config_names">
@@ -714,7 +720,7 @@
 <span class="sd">            A list of supported configuration names.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">delete_HF_cache</span><span class="p">()</span>
-        <span class="n">configs</span> <span class="o">=</span> <span class="n">get_dataset_config_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="p">,</span> <span class="n">download_mode</span><span class="o">=</span><span class="s1">&#39;force_redownload&#39;</span><span class="p">)</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="n">get_dataset_config_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="p">,</span> <span class="n">download_mode</span><span class="o">=</span><span class="s2">&quot;force_redownload&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">configs</span></div>
 
 
@@ -734,15 +740,15 @@
         <span class="c1"># pretty print the contribution data</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span></div>
 
-        
+
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_contributor_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;GROUP_NAME&#39;</span><span class="p">),</span>
-            <span class="s2">&quot;PI&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PI_NAME&#39;</span><span class="p">),</span>
-            <span class="s2">&quot;institution&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;INSTITUTION&#39;</span><span class="p">),</span>
-            <span class="s2">&quot;uploader&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;USER_NAME&#39;</span><span class="p">),</span>
-            <span class="s2">&quot;misc&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;CONTRIB_MISC&#39;</span><span class="p">),</span>
-            <span class="s2">&quot;date_created&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">)</span>
+            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;GROUP_NAME&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;PI&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PI_NAME&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;institution&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;INSTITUTION&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;uploader&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;USER_NAME&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;misc&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;CONTRIB_MISC&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;date_created&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">),</span>
         <span class="p">}</span>
 
 <div class="viewcode-block" id="ExistingConfigData.get_contributor_info">
@@ -789,16 +795,16 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_config_schema</span><span class="p">()</span>
 
         <span class="c1"># Validate the provided simulation setup options against the schema</span>
-        <span class="n">sim_setup_schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sim_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">sim_setup_schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sim_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sim_setup</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Simulation setup options must be provided as a dictionary.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Simulation setup options must be provided as a dictionary.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Check if all keys are present and have correct types</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">expected_type</span> <span class="ow">in</span> <span class="n">sim_setup_schema</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sim_setup</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Missing required simulation setup option: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required simulation setup option: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">get_type</span><span class="p">(</span><span class="n">sim_setup</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">!=</span> <span class="n">expected_type</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect type for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">. Expected </span><span class="si">{</span><span class="n">expected_type</span><span class="si">}</span><span class="s1">, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">sim_setup</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incorrect type for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">. Expected </span><span class="si">{</span><span class="n">expected_type</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">sim_setup</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
         <span class="c1"># All checks passed, add the simulation setup options</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sim_setup</span><span class="p">)</span></div>
@@ -818,17 +824,19 @@
 
         <span class="c1"># Validate the provided design against the schema</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Design must be provided as a dictionary.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Design must be provided as a dictionary.&quot;</span><span class="p">)</span>
 
-        <span class="n">design_options</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="n">design_tool</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_tool&#39;</span><span class="p">)</span>
+        <span class="n">design_options</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">design_tool</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_tool&quot;</span><span class="p">)</span>
 
         <span class="c1"># Validate design options and design tool</span>
-        <span class="n">design_options_schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">design_options_schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
         <span class="k">if</span> <span class="n">get_type</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span> <span class="o">!=</span> <span class="n">design_options_schema</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incorrect type for design options. Expected </span><span class="si">{</span><span class="n">design_options_schema</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Incorrect type for design options. Expected </span><span class="si">{</span><span class="n">design_options_schema</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">design_tool</span> <span class="ow">and</span> <span class="n">get_type</span><span class="p">(</span><span class="n">design_tool</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">design_tool</span> <span class="ow">and</span> <span class="n">get_type</span><span class="p">(</span><span class="n">design_tool</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incorrect type for design tool. Expected &#39;str&#39;, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">design_tool</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
         <span class="c1"># All checks passed, add the design options and tool</span>
@@ -849,24 +857,26 @@
 
         <span class="c1"># Validate the provided design against the schema</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Design must be provided as a dictionary.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Design must be provided as a dictionary.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Extract design options and design tool from the input dictionary</span>
-        <span class="n">design_options</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_options&#39;</span><span class="p">)</span>
-        <span class="n">design_tool</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_tool&#39;</span><span class="p">)</span>
+        <span class="n">design_options</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">)</span>
+        <span class="n">design_tool</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_tool&quot;</span><span class="p">)</span>
 
         <span class="c1"># Validate design options and design tool</span>
-        <span class="n">design_options_schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">design_options_schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
         <span class="k">if</span> <span class="n">get_type</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span> <span class="o">!=</span> <span class="n">design_options_schema</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incorrect type for design options. Expected </span><span class="si">{</span><span class="n">design_options_schema</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Incorrect type for design options. Expected </span><span class="si">{</span><span class="n">design_options_schema</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">get_type</span><span class="p">(</span><span class="n">design_tool</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">get_type</span><span class="p">(</span><span class="n">design_tool</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incorrect type for design tool. Expected &#39;str&#39;, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">design_tool</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
         <span class="c1"># All checks passed, add the design options and tool</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">design</span><span class="p">)</span></div>
 
-    
+
 <div class="viewcode-block" id="ExistingConfigData.to_dict">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -879,17 +889,17 @@
         <span class="c1"># Check if all units are the same</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">common_unit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  <span class="c1"># Get the common unit</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">common_unit</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">common_unit</span>
             <span class="c1"># Remove individual unit keys</span>
             <span class="k">for</span> <span class="n">result_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-                <span class="k">if</span> <span class="s1">&#39;_unit&#39;</span> <span class="ow">in</span> <span class="n">result_name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;_unit&quot;</span> <span class="ow">in</span> <span class="n">result_name</span><span class="p">:</span>
                     <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">[</span><span class="n">result_name</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
             <span class="s2">&quot;sim_options&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span><span class="p">,</span>
             <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">,</span>
             <span class="s2">&quot;contributor&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span><span class="p">,</span>
-            <span class="s2">&quot;notes&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes</span>
+            <span class="s2">&quot;notes&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">,</span>
         <span class="p">}</span></div>
 
 
@@ -909,15 +919,17 @@
 
 <div class="viewcode-block" id="ExistingConfigData.add_notes">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.add_notes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_notes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_notes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds notes to the contribution.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            notes (dict): A dictionary containing notes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">notes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">notes</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">notes</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Notes must be provided as a dictionary.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Notes must be provided as a dictionary.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Merge new notes with existing ones</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">notes</span><span class="p">)</span></div>
@@ -1007,10 +1019,10 @@
         <span class="c1"># print data and ref nicely json</span>
         <span class="c1"># print(f&quot;Data: {json.dumps(data, indent=2)}&quot;)</span>
         <span class="c1"># print(f&quot;Ref: {json.dumps(ref, indent=2)}&quot;)</span>
-        
+
         <span class="c1"># Validate &#39;sim_options.setup&#39; and &#39;design.design_options&#39;</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;design&#39;</span><span class="p">,</span> <span class="s1">&#39;sim_options&#39;</span><span class="p">]:</span>
-            <span class="n">sub_key</span> <span class="o">=</span> <span class="s1">&#39;setup&#39;</span> <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;sim_options&#39;</span> <span class="k">else</span> <span class="s1">&#39;design_options&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="s2">&quot;sim_options&quot;</span><span class="p">]:</span>
+            <span class="n">sub_key</span> <span class="o">=</span> <span class="s2">&quot;setup&quot;</span> <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;sim_options&quot;</span> <span class="k">else</span> <span class="s2">&quot;design_options&quot;</span>
             <span class="n">data_schema</span> <span class="o">=</span> <span class="n">get_entire_schema</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">sub_key</span><span class="p">])</span>
             <span class="n">expected_schema</span> <span class="o">=</span> <span class="n">get_entire_schema</span><span class="p">(</span><span class="n">ref</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">sub_key</span><span class="p">])</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">, Sub-key: </span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1018,7 +1030,9 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected schema: </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">expected_schema</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">data_schema</span> <span class="o">!=</span> <span class="n">expected_schema</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Structure mismatch in &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&#39;. Expected: </span><span class="si">{</span><span class="n">expected_schema</span><span class="si">}</span><span class="s2">, Got: </span><span class="si">{</span><span class="n">data_schema</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Structure mismatch in &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&#39;. Expected: </span><span class="si">{</span><span class="n">expected_schema</span><span class="si">}</span><span class="s2">, Got: </span><span class="si">{</span><span class="n">data_schema</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ExistingConfigData.validate_content">
@@ -1029,17 +1043,16 @@
 <span class="sd">            data (dict): The data to be validated.</span>
 <span class="sd">        Validates the content of the contribution against the dataset schema.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_entry</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">get_nested</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span>
                     <span class="n">dictionary</span> <span class="o">=</span> <span class="n">dictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">return</span> <span class="kc">None</span>
             <span class="k">return</span> <span class="n">dictionary</span></div>
 
-    
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the content of the contribution against the dataset schema.</span>
@@ -1048,7 +1061,7 @@
         <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_entry</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">get_nested</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span>
                     <span class="n">dictionary</span> <span class="o">=</span> <span class="n">dictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -1075,14 +1088,18 @@
                 <span class="k">yield</span> <span class="n">new_path</span><span class="p">,</span> <span class="kc">None</span>
 
         <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">find_common_keys</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ref</span><span class="p">))</span>
-        <span class="n">common_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
         <span class="n">mismatched_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">]</span>
         <span class="n">missing_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">mismatched_keys</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Mismatched keys found. These keys are present in both dictionaries but have values of different types:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Mismatched keys found. These keys are present in both dictionaries but have values of different types:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mismatched_keys</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">, data type in &#39;data&#39;: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">get_nested</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">))</span><span class="si">}</span><span class="s2">, data type in &#39;ref&#39;: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">get_nested</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">, data type in &#39;data&#39;: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">get_nested</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">))</span><span class="si">}</span><span class="s2">, data type in &#39;ref&#39;: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">get_nested</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">missing_keys</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Missing keys found. These keys are present in one dictionary but not the other:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1100,9 +1117,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_entry</span>
-        
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;design&#39;</span><span class="p">,</span> <span class="s1">&#39;sim_options&#39;</span><span class="p">]:</span>
-            <span class="n">sub_key</span> <span class="o">=</span> <span class="s1">&#39;setup&#39;</span> <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;sim_options&#39;</span> <span class="k">else</span> <span class="s1">&#39;design_options&#39;</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="s2">&quot;sim_options&quot;</span><span class="p">]:</span>
+            <span class="n">sub_key</span> <span class="o">=</span> <span class="s2">&quot;setup&quot;</span> <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;sim_options&quot;</span> <span class="k">else</span> <span class="s2">&quot;design_options&quot;</span>
             <span class="n">data_schema</span> <span class="o">=</span> <span class="n">get_entire_schema</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">sub_key</span><span class="p">])</span>
             <span class="n">expected_schema</span> <span class="o">=</span> <span class="n">get_entire_schema</span><span class="p">(</span><span class="n">ref</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">sub_key</span><span class="p">])</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">, Sub-key: </span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1152,11 +1169,11 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_validated</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validating entry </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">)</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span> 
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validating entry </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">)</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">validate_structure</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">validate_types</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">validate_content</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Entry </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> validated successfully.&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Entry </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> validated successfully.&quot;</span><span class="p">)</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--------------------------------------------------&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__isValidated</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -1195,9 +1212,9 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_to_repo</span><span class="p">):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path_to_repo</span><span class="p">)</span>
             <span class="c1"># Check if the repo exists by looking for .git file in the path_to_repo + &quot;SQuADDS_DB&quot; directory</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_to_repo</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_to_repo</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
                 <span class="c1"># Pull the latest changes</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path_to_repo</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path_to_repo</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;pull&quot;</span><span class="p">],</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cloning dataset repository from to </span><span class="si">{</span><span class="n">path_to_repo</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
@@ -1205,8 +1222,17 @@
                 <span class="n">dataset_endpoint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;git@hf.co:datasets/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="c1"># Clone the repo</span>
                 <span class="c1"># subprocess.run([&quot;git&quot;, &quot;clone&quot;, dataset_endpoint], check=True)</span>
-                <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;core.sshCommand=ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no&quot;</span><span class="p">,</span> <span class="s2">&quot;clone&quot;</span><span class="p">,</span> <span class="n">dataset_endpoint</span><span class="p">],</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            
+                <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="s2">&quot;git&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;-c&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;core.sshCommand=ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;clone&quot;</span><span class="p">,</span>
+                        <span class="n">dataset_endpoint</span><span class="p">,</span>
+                    <span class="p">],</span>
+                    <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+
             <span class="c1"># Create a new branch and checkout to it</span>
             <span class="c1"># uploader_name = self.contributor[&#39;uploader&#39;].replace(&quot; &quot;, &quot;&quot;)</span>
             <span class="c1"># uid = self.contributor[&#39;date_created&#39;].replace(&quot; &quot;, &quot;&quot;)</span>
@@ -1233,7 +1259,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_validated</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data must be validated before updating the repository.&quot;</span><span class="p">)</span>
             <span class="c1"># update the local repo</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path_to_repo</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path_to_repo</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">dataset_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">.json&quot;</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dataset_file</span><span class="p">,</span> <span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
@@ -1245,7 +1271,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_validated</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data must be validated before updating the repository.&quot;</span><span class="p">)</span>
             <span class="c1"># update the local repo</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path_to_repo</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path_to_repo</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">dataset_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">.json&quot;</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dataset_file</span><span class="p">,</span> <span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
@@ -1255,7 +1281,7 @@
                 <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data added to </span><span class="si">{</span><span class="n">dataset_file</span><span class="si">}</span><span class="s2"> successfully.&quot;</span><span class="p">)</span></div>
 
-            
+
 <div class="viewcode-block" id="ExistingConfigData.upload_to_HF">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.upload_to_HF">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">upload_to_HF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_repo</span><span class="p">):</span>
@@ -1275,11 +1301,11 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_validated</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data must be validated before updating the repository.&quot;</span><span class="p">)</span>
         <span class="c1"># navigate to the repo</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path_to_repo</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path_to_repo</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="c1"># create a commit message based on the contributor info</span>
         <span class="n">commit_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Add </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2"> data from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">contributor</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> group by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">contributor</span><span class="p">[</span><span class="s1">&#39;uploader&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">contributor</span><span class="p">[</span><span class="s1">&#39;date_created&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">uploader_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span><span class="p">[</span><span class="s1">&#39;uploader&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">uid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span><span class="p">[</span><span class="s1">&#39;date_created&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">uploader_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span><span class="p">[</span><span class="s2">&quot;uploader&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span><span class="p">[</span><span class="s2">&quot;date_created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">branch_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;add_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">uploader_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">uid</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -1292,7 +1318,7 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># create upstream branch</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GITHUB_TOKEN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;GITHUB_TOKEN&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;GITHUB_TOKEN&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;GITHUB_TOKEN&quot;</span><span class="p">)</span>
             <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;push&quot;</span><span class="p">,</span> <span class="s2">&quot;--set-upstream&quot;</span><span class="p">,</span> <span class="s2">&quot;origin&quot;</span><span class="p">,</span> <span class="n">branch_name</span><span class="p">],</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create upstream branch for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">.json&quot;</span><span class="p">)</span>
@@ -1318,42 +1344,41 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_sweep</span><span class="p">:</span>
             <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
-            
+
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File not found: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;design&#39;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;sim_options&#39;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;sim_results&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__set_contributor_info</span><span class="p">()</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;notes&#39;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span>
                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                     <span class="k">pass</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Contribution loaded successfully.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            
-            <span class="n">json_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">json_file</span><span class="o">+</span><span class="s2">&quot;*.json&quot;</span><span class="p">))</span>
+            <span class="n">json_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">json_file</span> <span class="o">+</span> <span class="s2">&quot;*.json&quot;</span><span class="p">))</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">json_files</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Files not found: </span><span class="si">{</span><span class="n">json_files</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> 
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Files not found: </span><span class="si">{</span><span class="n">json_files</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">json_files</span><span class="p">:</span>
                 <span class="n">entry</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;design&#39;</span><span class="p">]</span>
-                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;sim_options&#39;</span><span class="p">]</span>
-                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;sim_results&#39;</span><span class="p">]</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">]</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">]</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
                     <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;contributor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_contributor_info</span><span class="p">()</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;notes&#39;</span><span class="p">]</span>
+                        <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span>
                     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                         <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-            
+
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sweep data loaded successfully.&quot;</span><span class="p">)</span></div>
 
 
@@ -1387,14 +1412,14 @@
         <span class="c1"># self.upload_to_HF(path_to_repo)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Contribution ready for PR&quot;</span><span class="p">)</span></div>
 
-    
+
 <div class="viewcode-block" id="ExistingConfigData.submit">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.submit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sends the data and the config name to a remote server.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span>  </div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 </div>
 
 </pre></div>
@@ -1447,7 +1472,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

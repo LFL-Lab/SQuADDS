@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.components.qubits &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.components.qubits &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -579,12 +579,11 @@
                 <article class="bd-article">
                   
   <h1>Source code for squadds.components.qubits</h1><div class="highlight"><pre>
-<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">draw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseQubit</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.jjs</span><span class="w"> </span><span class="kn">import</span> <span class="n">JjDolan</span><span class="p">,</span> <span class="n">SquidLoopDolan</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.jjs</span><span class="w"> </span><span class="kn">import</span> <span class="n">JjDolan</span>
 
 
 <div class="viewcode-block" id="TransmonCross">
@@ -638,7 +637,7 @@
 <span class="sd">            * claw_width: &#39;10um&#39; -- The width of the CPW center trace making up the claw/gap connector</span>
 <span class="sd">            * claw_gap: &#39;6um&#39; -- The gap of the CPW center trace making up the claw/gap connector</span>
 <span class="sd">            * connector_location: &#39;0&#39; -- 0 =&gt; &#39;west&#39; arm, 90 =&gt; &#39;north&#39; arm, 180 =&gt; &#39;east&#39; arm</span>
-<span class="sd">       * style: &#39;default&#39; -- Change the Josephson Junction style. </span>
+<span class="sd">       * style: &#39;default&#39; -- Change the Josephson Junction style.</span>
 <span class="sd">                             NOTE TO USER: Non-default choices shouldn&#39;t be rendered for simulation. They are for GDS rendering.</span>
 <span class="sd">                             Choose from the following:</span>
 <span class="sd">                             * &#39;default&#39; -- Used for simulation in Ansys</span>
@@ -653,39 +652,32 @@
 <span class="sd">       * Dolan_JJ: Dict</span>
 <span class="sd">           * JJ_width: &#39;150nm&#39; -- Josephson Junction width. Governs Lj.</span>
 <span class="sd">           * JJ_flip: False -- Switch the direction of the Josephson Junctions.</span>
-<span class="sd">       </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">default_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
-        <span class="n">cross_width</span><span class="o">=</span><span class="s1">&#39;20um&#39;</span><span class="p">,</span>
-        <span class="n">cross_length</span><span class="o">=</span><span class="s1">&#39;200um&#39;</span><span class="p">,</span>
-        <span class="n">cross_gap</span><span class="o">=</span><span class="s1">&#39;20um&#39;</span><span class="p">,</span>
-        <span class="n">chip</span><span class="o">=</span><span class="s1">&#39;main&#39;</span><span class="p">,</span>
+        <span class="n">cross_width</span><span class="o">=</span><span class="s2">&quot;20um&quot;</span><span class="p">,</span>
+        <span class="n">cross_length</span><span class="o">=</span><span class="s2">&quot;200um&quot;</span><span class="p">,</span>
+        <span class="n">cross_gap</span><span class="o">=</span><span class="s2">&quot;20um&quot;</span><span class="p">,</span>
+        <span class="n">chip</span><span class="o">=</span><span class="s2">&quot;main&quot;</span><span class="p">,</span>
         <span class="n">_default_connection_pads</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
-            <span class="n">connector_type</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span>  <span class="c1"># 0 = Claw type, 1 = gap type</span>
-            <span class="n">claw_length</span><span class="o">=</span><span class="s1">&#39;30um&#39;</span><span class="p">,</span>
-            <span class="n">ground_spacing</span><span class="o">=</span><span class="s1">&#39;5um&#39;</span><span class="p">,</span>
-            <span class="n">claw_width</span><span class="o">=</span><span class="s1">&#39;10um&#39;</span><span class="p">,</span>
-            <span class="n">claw_gap</span><span class="o">=</span><span class="s1">&#39;6um&#39;</span><span class="p">,</span>
-            <span class="n">claw_cpw_length</span><span class="o">=</span><span class="s1">&#39;40um&#39;</span><span class="p">,</span>
-            <span class="n">claw_cpw_width</span><span class="o">=</span><span class="s1">&#39;10um&#39;</span><span class="p">,</span>
-            <span class="n">connector_location</span><span class="o">=</span>
-            <span class="s1">&#39;0&#39;</span>  <span class="c1"># 0 =&gt; &#39;west&#39; arm, 90 =&gt; &#39;north&#39; arm, 180 =&gt; &#39;east&#39; arm</span>
+            <span class="n">connector_type</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>  <span class="c1"># 0 = Claw type, 1 = gap type</span>
+            <span class="n">claw_length</span><span class="o">=</span><span class="s2">&quot;30um&quot;</span><span class="p">,</span>
+            <span class="n">ground_spacing</span><span class="o">=</span><span class="s2">&quot;5um&quot;</span><span class="p">,</span>
+            <span class="n">claw_width</span><span class="o">=</span><span class="s2">&quot;10um&quot;</span><span class="p">,</span>
+            <span class="n">claw_gap</span><span class="o">=</span><span class="s2">&quot;6um&quot;</span><span class="p">,</span>
+            <span class="n">claw_cpw_length</span><span class="o">=</span><span class="s2">&quot;40um&quot;</span><span class="p">,</span>
+            <span class="n">claw_cpw_width</span><span class="o">=</span><span class="s2">&quot;10um&quot;</span><span class="p">,</span>
+            <span class="n">connector_location</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>  <span class="c1"># 0 =&gt; &#39;west&#39; arm, 90 =&gt; &#39;north&#39; arm, 180 =&gt; &#39;east&#39; arm</span>
         <span class="p">),</span>
-        <span class="n">SQUID_LOOP</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">SQUID_width</span>  <span class="o">=</span> <span class="s1">&#39;40um&#39;</span><span class="p">,</span>
-                          <span class="n">SQUID_length</span> <span class="o">=</span> <span class="s1">&#39;5um&#39;</span><span class="p">,</span>
-                          <span class="n">SQUID_offset</span> <span class="o">=</span> <span class="s1">&#39;5um&#39;</span><span class="p">,</span>
-                          <span class="n">JJ_width</span> <span class="o">=</span> <span class="s1">&#39;150nm&#39;</span><span class="p">,</span>
-                          <span class="n">JJ_flip</span> <span class="o">=</span> <span class="kc">False</span><span class="p">),</span>
-        <span class="n">Dolan_JJ</span>  <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">JJ_width</span> <span class="o">=</span> <span class="s1">&#39;150nm&#39;</span><span class="p">,</span>
-                          <span class="n">JJ_flip</span>  <span class="o">=</span> <span class="kc">False</span><span class="p">),</span>
-        <span class="n">style</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span>
-        <span class="n">layer</span><span class="o">=</span><span class="s1">&#39;5&#39;</span><span class="p">)</span>
+        <span class="n">SQUID_LOOP</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">SQUID_width</span><span class="o">=</span><span class="s2">&quot;40um&quot;</span><span class="p">,</span> <span class="n">SQUID_length</span><span class="o">=</span><span class="s2">&quot;5um&quot;</span><span class="p">,</span> <span class="n">SQUID_offset</span><span class="o">=</span><span class="s2">&quot;5um&quot;</span><span class="p">,</span> <span class="n">JJ_width</span><span class="o">=</span><span class="s2">&quot;150nm&quot;</span><span class="p">,</span> <span class="n">JJ_flip</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="n">Dolan_JJ</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">JJ_width</span><span class="o">=</span><span class="s2">&quot;150nm&quot;</span><span class="p">,</span> <span class="n">JJ_flip</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="n">style</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;5&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Default options.&quot;&quot;&quot;</span>
 
-    <span class="n">component_metadata</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">short_name</span><span class="o">=</span><span class="s1">&#39;Cross&#39;</span><span class="p">,</span>
-                              <span class="n">_qgeometry_table_poly</span><span class="o">=</span><span class="s1">&#39;True&#39;</span><span class="p">,</span>
-                              <span class="n">_qgeometry_table_junction</span><span class="o">=</span><span class="s1">&#39;True&#39;</span><span class="p">)</span>
+    <span class="n">component_metadata</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">short_name</span><span class="o">=</span><span class="s2">&quot;Cross&quot;</span><span class="p">,</span> <span class="n">_qgeometry_table_poly</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="n">_qgeometry_table_junction</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Component metadata&quot;&quot;&quot;</span>
 
     <span class="n">TOOLTIP</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Simple Metal Transmon Cross used at LFL&quot;&quot;&quot;</span>
@@ -701,7 +693,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">make_connection_pads</span><span class="p">()</span></div>
 
 
-<span class="c1">###################################TRANSMON#############################################################</span>
+    <span class="c1">###################################TRANSMON#############################################################</span>
 
 <div class="viewcode-block" id="TransmonCross.make_pocket">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.qubits.TransmonCross.make_pocket">[docs]</a>
@@ -719,143 +711,145 @@
         <span class="n">chip</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">chip</span>
 
         <span class="c1"># Creates the cross and the etch equivalent.</span>
-        <span class="n">cross_line</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">shapely</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">unary_union</span><span class="p">([</span>
-            <span class="n">draw</span><span class="o">.</span><span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cross_length</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cross_length</span><span class="p">)]),</span>
-            <span class="n">draw</span><span class="o">.</span><span class="n">LineString</span><span class="p">([(</span><span class="n">cross_length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">cross_length</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
-        <span class="p">])</span>
+        <span class="n">cross_line</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">shapely</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">unary_union</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">draw</span><span class="o">.</span><span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cross_length</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cross_length</span><span class="p">)]),</span>
+                <span class="n">draw</span><span class="o">.</span><span class="n">LineString</span><span class="p">([(</span><span class="n">cross_length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">cross_length</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="n">cross</span> <span class="o">=</span> <span class="n">cross_line</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">cross_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">cap_style</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">cross_etch</span> <span class="o">=</span> <span class="n">cross</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">cross_gap</span><span class="p">,</span> <span class="n">cap_style</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">join_style</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-        
         <span class="c1">### Choose JJ / SQUID Style ###</span>
-        
+
         <span class="c1"># If we&#39;re working with a default style</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">):</span>
-            
-            <span class="n">jj</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cross_length</span><span class="p">),</span>
-                                  <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cross_length</span> <span class="o">-</span> <span class="n">cross_gap</span><span class="p">)])</span>
-            
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+            <span class="n">jj</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cross_length</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cross_length</span> <span class="o">-</span> <span class="n">cross_gap</span><span class="p">)])</span>
+
             <span class="n">rect_jj</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">jj</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
             <span class="n">rect_jj</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">jj</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span><span class="p">)</span>
-            
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;junction&#39;</span><span class="p">,</span>
-                           <span class="nb">dict</span><span class="p">(</span><span class="n">rect_jj</span><span class="o">=</span><span class="n">rect_jj</span><span class="p">),</span>
-                           <span class="n">width</span><span class="o">=</span><span class="n">cross_width</span><span class="p">,</span>
-                           <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
-            
-            
-        <span class="k">elif</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;SQUID_LOOP_Dolan&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;JJ_Dolan&#39;</span><span class="p">):</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;junction&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">rect_jj</span><span class="o">=</span><span class="n">rect_jj</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">cross_width</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="s2">&quot;SQUID_LOOP_Dolan&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="s2">&quot;JJ_Dolan&quot;</span><span class="p">):</span>
             <span class="c1"># LFL Standard Parameters</span>
-            <span class="n">pad_width</span> <span class="o">=</span> <span class="mf">0.010</span> <span class="c1">#mm</span>
-            <span class="n">SQUID_thickness</span> <span class="o">=</span> <span class="mf">0.002</span> <span class="c1">#mm</span>
-            <span class="n">jj1_pad04</span> <span class="o">=</span> <span class="mf">0.0005</span> <span class="c1"># Pad should extend 5um past base</span>
-            
+            <span class="n">pad_width</span> <span class="o">=</span> <span class="mf">0.010</span>  <span class="c1"># mm</span>
+            <span class="n">SQUID_thickness</span> <span class="o">=</span> <span class="mf">0.002</span>  <span class="c1"># mm</span>
+            <span class="n">jj1_pad04</span> <span class="o">=</span> <span class="mf">0.0005</span>  <span class="c1"># Pad should extend 5um past base</span>
+
             <span class="c1"># Cut out pin structures from qubit</span>
-            <span class="n">T_pin</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-                                  <span class="p">(</span><span class="mf">0.001</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-                                  <span class="p">(</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.002</span><span class="p">),</span>
-                                  <span class="p">(</span><span class="mf">0.003</span><span class="p">,</span><span class="mf">0.002</span><span class="p">),</span>
-                                  <span class="p">(</span><span class="mf">0.003</span><span class="p">,</span><span class="mf">0.004</span><span class="p">),</span>
-                                  <span class="p">(</span><span class="o">-</span><span class="mf">0.003</span><span class="p">,</span><span class="mf">0.004</span><span class="p">),</span>
-                                  <span class="p">(</span><span class="o">-</span><span class="mf">0.003</span><span class="p">,</span><span class="mf">0.002</span><span class="p">),</span>
-                                  <span class="p">(</span><span class="o">-</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.002</span><span class="p">),</span>
-                                  <span class="p">(</span><span class="o">-</span><span class="mf">0.001</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-                                 <span class="p">])</span>
+            <span class="n">T_pin</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                    <span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                    <span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">),</span>
+                    <span class="p">(</span><span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">),</span>
+                    <span class="p">(</span><span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.004</span><span class="p">),</span>
+                    <span class="p">(</span><span class="o">-</span><span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.004</span><span class="p">),</span>
+                    <span class="p">(</span><span class="o">-</span><span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">),</span>
+                    <span class="p">(</span><span class="o">-</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">),</span>
+                    <span class="p">(</span><span class="o">-</span><span class="mf">0.001</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
             <span class="n">T_pin</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">T_pin</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cross_length</span><span class="p">)</span>
             <span class="n">cross</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">cross</span><span class="p">,</span> <span class="n">T_pin</span><span class="p">)</span>
-            
+
             <span class="c1">## If we&#39;re working w/ SQUID_LOOP_Dolan style</span>
-            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;SQUID_LOOP_Dolan&#39;</span><span class="p">:</span>
-                
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="s2">&quot;SQUID_LOOP_Dolan&quot;</span><span class="p">:</span>
                 <span class="c1"># SQUID Parameters</span>
-                <span class="n">sl</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_LOOP</span> 
-                
+                <span class="n">sl</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">SQUID_LOOP</span>
+
                 <span class="c1"># Make the other T pin, goes on the outside</span>
                 <span class="n">T_pin2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">T_pin</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cross_length</span><span class="p">))</span>
-                <span class="n">T_pin2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">T_pin2</span><span class="p">,</span> <span class="n">cross_gap</span> <span class="o">+</span> <span class="n">cross_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">cross_gap</span> <span class="o">+</span> <span class="n">pad_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span>  <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_offset</span><span class="p">)</span>
-                
-                
+                <span class="n">T_pin2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span>
+                    <span class="n">T_pin2</span><span class="p">,</span> <span class="n">cross_gap</span> <span class="o">+</span> <span class="n">cross_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">cross_gap</span> <span class="o">+</span> <span class="n">pad_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_offset</span>
+                <span class="p">)</span>
+
                 <span class="c1"># Rotate and translate the JJ</span>
-                <span class="n">jjy</span> <span class="o">=</span> <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">cross_length</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">cross_gap</span> <span class="o">+</span>  <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pad_width</span> <span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_offset</span>
-                
+                <span class="n">jjy</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="o">-</span><span class="n">p</span><span class="o">.</span><span class="n">cross_length</span>
+                    <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">cross_gap</span>
+                    <span class="o">+</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="o">+</span> <span class="n">SQUID_thickness</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="o">+</span> <span class="n">pad_width</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="o">+</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_offset</span>
+                <span class="p">)</span>
+
                 <span class="n">jjxprime</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">))</span> <span class="o">*</span> <span class="n">jjy</span>
                 <span class="n">jjyprime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">))</span> <span class="o">*</span> <span class="n">jjy</span>
-                
+
                 <span class="c1"># Make the JJ auto generate to the TransmonCross</span>
-                <span class="n">jj_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pos_x</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span> <span class="o">+</span> <span class="n">jjxprime</span><span class="p">,</span>
-                                  <span class="n">pos_y</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span> <span class="o">+</span> <span class="n">jjyprime</span><span class="p">,</span>  
-                                  <span class="n">orientation</span> <span class="o">=</span> <span class="mi">180</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
-                                  <span class="n">SQUID_length</span> <span class="o">=</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_length</span><span class="p">,</span>
-                                  <span class="n">SQUID_width</span> <span class="o">=</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_width</span><span class="p">,</span>
-                                  <span class="n">stem1_length</span> <span class="o">=</span> <span class="n">cross_gap</span> <span class="o">-</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_offset</span> <span class="o">-</span> <span class="n">pad_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">SQUID_thickness</span> <span class="o">-</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_length</span> <span class="o">-</span> <span class="n">jj1_pad04</span><span class="p">,</span>
-                                  <span class="n">stem2_length</span> <span class="o">=</span> <span class="n">cross_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cross_gap</span> <span class="o">-</span> <span class="n">jj1_pad04</span> <span class="o">-</span> <span class="n">SQUID_thickness</span> <span class="o">-</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
-                                  <span class="n">JJ_flip</span> <span class="o">=</span> <span class="n">sl</span><span class="o">.</span><span class="n">JJ_flip</span><span class="p">,</span>
-                                  <span class="n">JJ_width</span> <span class="o">=</span> <span class="n">sl</span><span class="o">.</span><span class="n">JJ_width</span><span class="p">)</span>
-                
-                <span class="n">SQUID_LOOP_Dolan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> 
-                                  <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_SQUID_LOOP_Dolan&#39;</span><span class="p">,</span> 
-                                  <span class="n">options</span><span class="o">=</span><span class="n">jj_options</span><span class="p">)</span>
-                
+                <span class="n">jj_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">pos_x</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">pos_x</span> <span class="o">+</span> <span class="n">jjxprime</span><span class="p">,</span>
+                    <span class="n">pos_y</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">pos_y</span> <span class="o">+</span> <span class="n">jjyprime</span><span class="p">,</span>
+                    <span class="n">orientation</span><span class="o">=</span><span class="mi">180</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
+                    <span class="n">SQUID_length</span><span class="o">=</span><span class="n">sl</span><span class="o">.</span><span class="n">SQUID_length</span><span class="p">,</span>
+                    <span class="n">SQUID_width</span><span class="o">=</span><span class="n">sl</span><span class="o">.</span><span class="n">SQUID_width</span><span class="p">,</span>
+                    <span class="n">stem1_length</span><span class="o">=</span><span class="n">cross_gap</span>
+                    <span class="o">-</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_offset</span>
+                    <span class="o">-</span> <span class="n">pad_width</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="o">-</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">SQUID_thickness</span>
+                    <span class="o">-</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_length</span>
+                    <span class="o">-</span> <span class="n">jj1_pad04</span><span class="p">,</span>
+                    <span class="n">stem2_length</span><span class="o">=</span><span class="n">cross_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">cross_gap</span> <span class="o">-</span> <span class="n">jj1_pad04</span> <span class="o">-</span> <span class="n">SQUID_thickness</span> <span class="o">-</span> <span class="n">sl</span><span class="o">.</span><span class="n">SQUID_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">JJ_flip</span><span class="o">=</span><span class="n">sl</span><span class="o">.</span><span class="n">JJ_flip</span><span class="p">,</span>
+                    <span class="n">JJ_width</span><span class="o">=</span><span class="n">sl</span><span class="o">.</span><span class="n">JJ_width</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">SQUID_LOOP_Dolan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_SQUID_LOOP_Dolan&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">jj_options</span><span class="p">)</span>
+
                 <span class="c1">### Add to QGeometry</span>
                 <span class="n">polys</span> <span class="o">=</span> <span class="n">T_pin2</span>
                 <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
                 <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span><span class="p">)</span>
                 <span class="n">T_pin2</span> <span class="o">=</span> <span class="n">polys</span>
-                
-                <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span>
-                           <span class="nb">dict</span><span class="p">(</span><span class="n">T_pin2</span><span class="o">=</span><span class="n">T_pin2</span><span class="p">),</span>
-                           <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
-            
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">T_pin2</span><span class="o">=</span><span class="n">T_pin2</span><span class="p">),</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
+
             <span class="c1">## If we&#39;re working w/ a JJ_Dolan Style</span>
             <span class="k">else</span><span class="p">:</span>
-                
                 <span class="c1"># JJ Parameters</span>
                 <span class="n">pj</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">Dolan_JJ</span>
-                
+
                 <span class="c1"># Make the 2nd T shaped pin</span>
-                <span class="n">T_pin2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">T_pin</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">cross_length</span> <span class="o">+</span> <span class="n">cross_gap</span><span class="o">/</span><span class="mi">2</span><span class="p">)))</span>
-                
-                
+                <span class="n">T_pin2</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">T_pin</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">cross_length</span> <span class="o">+</span> <span class="n">cross_gap</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)))</span>
+
                 <span class="c1"># Rotate and translate the JJ</span>
-                <span class="n">jjy</span> <span class="o">=</span> <span class="o">-</span><span class="n">cross_gap</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">cross_length</span>
-                
+                <span class="n">jjy</span> <span class="o">=</span> <span class="o">-</span><span class="n">cross_gap</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">cross_length</span>
+
                 <span class="n">jjxprime</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">))</span> <span class="o">*</span> <span class="n">jjy</span>
                 <span class="n">jjyprime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">))</span> <span class="o">*</span> <span class="n">jjy</span>
-                
+
                 <span class="c1"># Make the JJ auto generate to the TransmonCross</span>
-                <span class="n">jj_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">pos_x</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span> <span class="o">+</span> <span class="n">jjxprime</span><span class="p">,</span>
-                                  <span class="n">pos_y</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span> <span class="o">+</span> <span class="n">jjyprime</span><span class="p">,</span>  
-                                  <span class="n">orientation</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
-                                  <span class="n">bridge_length</span> <span class="o">=</span> <span class="n">cross_gap</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">jj1_pad04</span><span class="p">,</span>
-                                  <span class="n">JJ_width</span> <span class="o">=</span> <span class="n">pj</span><span class="o">.</span><span class="n">JJ_width</span><span class="p">)</span>
-                
-                <span class="k">if</span> <span class="p">(</span><span class="n">pj</span><span class="o">.</span><span class="n">JJ_flip</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="n">jj_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+                    <span class="n">pos_x</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">pos_x</span> <span class="o">+</span> <span class="n">jjxprime</span><span class="p">,</span>
+                    <span class="n">pos_y</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">pos_y</span> <span class="o">+</span> <span class="n">jjyprime</span><span class="p">,</span>
+                    <span class="n">orientation</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
+                    <span class="n">bridge_length</span><span class="o">=</span><span class="n">cross_gap</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">jj1_pad04</span><span class="p">,</span>
+                    <span class="n">JJ_width</span><span class="o">=</span><span class="n">pj</span><span class="o">.</span><span class="n">JJ_width</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">pj</span><span class="o">.</span><span class="n">JJ_flip</span><span class="p">:</span>
                     <span class="n">jj_options</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span> <span class="o">+</span> <span class="mi">180</span>
 
-                <span class="n">JjDolan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> 
-                          <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_JJ_Dolan&#39;</span><span class="p">,</span> 
-                          <span class="n">options</span><span class="o">=</span><span class="n">jj_options</span><span class="p">)</span>
-                
-                
-                
+                <span class="n">JjDolan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_JJ_Dolan&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">jj_options</span><span class="p">)</span>
+
                 <span class="c1">### Add QGeometries</span>
                 <span class="n">polys</span> <span class="o">=</span> <span class="n">T_pin2</span>
                 <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
                 <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span><span class="p">)</span>
                 <span class="n">T_pin2</span> <span class="o">=</span> <span class="n">polys</span>
-                
-                <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span>
-                           <span class="nb">dict</span><span class="p">(</span><span class="n">T_pin2</span><span class="o">=</span><span class="n">T_pin2</span><span class="p">),</span>
-                           <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
-        
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">T_pin2</span><span class="o">=</span><span class="n">T_pin2</span><span class="p">),</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
+
         <span class="c1"># Handling for future styles??!</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You entered an invalid &#39;options.style&#39;. Choose from &#39;default&#39;, &#39;SQUID_LOOP_Dolan&#39;, or &#39;JJ_Dolan&#39;&quot;</span><span class="p">)</span>
-        
-        <span class="c1">#rotate and translate</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;You entered an invalid &#39;options.style&#39;. Choose from &#39;default&#39;, &#39;SQUID_LOOP_Dolan&#39;, or &#39;JJ_Dolan&#39;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># rotate and translate</span>
         <span class="n">polys</span> <span class="o">=</span> <span class="p">[</span><span class="n">cross</span><span class="p">,</span> <span class="n">cross_etch</span><span class="p">]</span>
         <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span><span class="p">)</span>
@@ -863,15 +857,11 @@
         <span class="p">[</span><span class="n">cross</span><span class="p">,</span> <span class="n">cross_etch</span><span class="p">]</span> <span class="o">=</span> <span class="n">polys</span>
 
         <span class="c1"># generate qgeometry</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cross</span><span class="o">=</span><span class="n">cross</span><span class="p">),</span> <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span>
-                           <span class="nb">dict</span><span class="p">(</span><span class="n">cross_etch</span><span class="o">=</span><span class="n">cross_etch</span><span class="p">),</span>
-                           <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cross</span><span class="o">=</span><span class="n">cross</span><span class="p">),</span> <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cross_etch</span><span class="o">=</span><span class="n">cross_etch</span><span class="p">),</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span></div>
 
 
-
-<span class="c1">############################CONNECTORS##################################################################################################</span>
+    <span class="c1">############################CONNECTORS##################################################################################################</span>
 
 <div class="viewcode-block" id="TransmonCross.make_connection_pads">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.qubits.TransmonCross.make_connection_pads">[docs]</a>
@@ -911,13 +901,10 @@
         <span class="n">claw_cpw</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">box</span><span class="p">(</span><span class="o">-</span><span class="n">c_w</span><span class="p">,</span> <span class="o">-</span><span class="n">c_c_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">c_c_l</span> <span class="o">-</span> <span class="n">c_w</span><span class="p">,</span> <span class="n">c_c_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">pc</span><span class="o">.</span><span class="n">connector_type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Claw connector</span>
-            <span class="n">t_claw_height</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">c_g</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">c_w</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">g_s</span> <span class="o">+</span> \
-                <span class="mi">2</span><span class="o">*</span><span class="n">cross_gap</span> <span class="o">+</span> <span class="n">cross_width</span>  <span class="c1"># temp value</span>
+            <span class="n">t_claw_height</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">c_g</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">c_w</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">g_s</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">cross_gap</span> <span class="o">+</span> <span class="n">cross_width</span>  <span class="c1"># temp value</span>
 
-            <span class="n">claw_base</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">box</span><span class="p">(</span><span class="o">-</span><span class="n">c_w</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">t_claw_height</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c_l</span><span class="p">,</span>
-                                 <span class="n">t_claw_height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="n">claw_subtract</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">t_claw_height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">c_w</span><span class="p">,</span> <span class="n">c_l</span><span class="p">,</span>
-                                     <span class="n">t_claw_height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">c_w</span><span class="p">)</span>
+            <span class="n">claw_base</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">box</span><span class="p">(</span><span class="o">-</span><span class="n">c_w</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">t_claw_height</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c_l</span><span class="p">,</span> <span class="n">t_claw_height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">claw_subtract</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">t_claw_height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">c_w</span><span class="p">,</span> <span class="n">c_l</span><span class="p">,</span> <span class="n">t_claw_height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">c_w</span><span class="p">)</span>
             <span class="n">claw_base</span> <span class="o">=</span> <span class="n">claw_base</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">claw_subtract</span><span class="p">)</span>
 
             <span class="n">connector_arm</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">shapely</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">unary_union</span><span class="p">([</span><span class="n">claw_base</span><span class="p">,</span> <span class="n">claw_cpw</span><span class="p">])</span>
@@ -930,8 +917,7 @@
         <span class="c1"># Done here so as to have the same translations and rotations as the connector. Could</span>
         <span class="c1"># extract from the connector later, but since allowing different connector types,</span>
         <span class="c1"># this seems more straightforward.</span>
-        <span class="n">port_line</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">LineString</span><span class="p">([(</span><span class="o">-</span><span class="n">c_c_l</span> <span class="o">-</span> <span class="n">c_w</span><span class="p">,</span> <span class="o">-</span><span class="n">c_c_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
-                                     <span class="p">(</span><span class="o">-</span><span class="n">c_c_l</span> <span class="o">-</span> <span class="n">c_w</span><span class="p">,</span> <span class="n">c_c_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)])</span>
+        <span class="n">port_line</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">LineString</span><span class="p">([(</span><span class="o">-</span><span class="n">c_c_l</span> <span class="o">-</span> <span class="n">c_w</span><span class="p">,</span> <span class="o">-</span><span class="n">c_c_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">c_c_l</span> <span class="o">-</span> <span class="n">c_w</span><span class="p">,</span> <span class="n">c_c_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)])</span>
 
         <span class="n">claw_rotate</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">con_loc</span> <span class="o">&gt;</span> <span class="mi">135</span><span class="p">:</span>
@@ -941,23 +927,19 @@
 
         <span class="c1"># Rotates and translates the connector polygons (and temporary port_line)</span>
         <span class="n">polys</span> <span class="o">=</span> <span class="p">[</span><span class="n">connector_arm</span><span class="p">,</span> <span class="n">connector_etcher</span><span class="p">,</span> <span class="n">port_line</span><span class="p">]</span>
-        <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">cross_length</span> <span class="o">+</span> <span class="n">cross_gap</span> <span class="o">+</span> <span class="n">g_s</span> <span class="o">+</span> <span class="n">c_g</span><span class="p">),</span>
-                               <span class="mi">0</span><span class="p">)</span>
+        <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">cross_length</span> <span class="o">+</span> <span class="n">cross_gap</span> <span class="o">+</span> <span class="n">g_s</span> <span class="o">+</span> <span class="n">c_g</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">claw_rotate</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="n">polys</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span><span class="p">)</span>
         <span class="p">[</span><span class="n">connector_arm</span><span class="p">,</span> <span class="n">connector_etcher</span><span class="p">,</span> <span class="n">port_line</span><span class="p">]</span> <span class="o">=</span> <span class="n">polys</span>
 
         <span class="c1"># Generates qgeometry for the connector pads</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_connector_arm&#39;</span><span class="p">:</span> <span class="n">connector_arm</span><span class="p">},</span>
-                           <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span>
-                           <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_connector_etcher&#39;</span><span class="p">:</span> <span class="n">connector_etcher</span><span class="p">},</span>
-                           <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_connector_arm&quot;</span><span class="p">:</span> <span class="n">connector_arm</span><span class="p">},</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_connector_etcher&quot;</span><span class="p">:</span> <span class="n">connector_etcher</span><span class="p">},</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">add_pin</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">port_line</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">c_c_w</span><span class="p">)</span></div>
 </div>
+
 
 
 <div class="viewcode-block" id="TransmonCrossFL">
@@ -999,37 +981,35 @@
 <span class="sd">                * t_hanger_perp_length    length of hanger which moves along the y-axis</span>
 <span class="sd">                * t_hanger_perp_width     width of hanger which moves along the y-axis</span>
 <span class="sd">                * t_hanger_perp_gap       dielectric gap of the y-axis hanger</span>
-<span class="sd">                       </span>
+
 <span class="sd">    .. image::</span>
 <span class="sd">        transmon_cross_fl.png</span>
 <span class="sd">    .. meta::</span>
 <span class="sd">        Transmon Cross Flux Line</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">component_metadata</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">short_name</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span>
-                              <span class="n">_qgeometry_table_poly</span><span class="o">=</span><span class="s1">&#39;True&#39;</span><span class="p">,</span>
-                              <span class="n">_qgeometry_table_path</span><span class="o">=</span><span class="s1">&#39;True&#39;</span><span class="p">)</span>
+    <span class="n">component_metadata</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">short_name</span><span class="o">=</span><span class="s2">&quot;Q&quot;</span><span class="p">,</span> <span class="n">_qgeometry_table_poly</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="n">_qgeometry_table_path</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Component metadata&quot;&quot;&quot;</span>
 
-    <span class="n">default_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">make_fl</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">fl_style</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span>
-                           <span class="n">fl_options</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">t_top</span><span class="o">=</span><span class="s1">&#39;15um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_offset</span><span class="o">=</span><span class="s1">&#39;0um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_inductive_gap</span><span class="o">=</span><span class="s1">&#39;3um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_width</span><span class="o">=</span><span class="s1">&#39;5um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_gap</span><span class="o">=</span><span class="s1">&#39;3um&#39;</span><span class="p">),</span>
-                           <span class="n">LFL_options</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">t_width_i</span><span class="o">=</span><span class="s1">&#39;10um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_width_f</span><span class="o">=</span><span class="s1">&#39;4.25um&#39;</span><span class="p">,</span> 
-                                           <span class="n">t_length</span><span class="o">=</span><span class="s1">&#39;90um&#39;</span><span class="p">,</span> 
-                                           <span class="n">t_gap_i</span> <span class="o">=</span><span class="s1">&#39;6um&#39;</span><span class="p">,</span> 
-                                           <span class="n">t_gap_f</span> <span class="o">=</span><span class="s1">&#39;2.5um&#39;</span><span class="p">,</span> 
-                                           <span class="n">t_punch_through</span> <span class="o">=</span> <span class="s1">&#39;5um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_hanger_para_length</span><span class="o">=</span><span class="s1">&#39;40um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_hanger_para_width</span><span class="o">=</span><span class="s1">&#39;2.5um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_hanger_para_gap</span> <span class="o">=</span> <span class="s1">&#39;2.5um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_hanger_perp_length</span><span class="o">=</span><span class="s1">&#39;55um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_hanger_perp_width</span><span class="o">=</span><span class="s1">&#39;2.7um&#39;</span><span class="p">,</span>
-                                           <span class="n">t_hanger_perp_gap</span> <span class="o">=</span> <span class="s1">&#39;3.2um&#39;</span><span class="p">))</span>
+    <span class="n">default_options</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+        <span class="n">make_fl</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">fl_style</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="n">fl_options</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">t_top</span><span class="o">=</span><span class="s2">&quot;15um&quot;</span><span class="p">,</span> <span class="n">t_offset</span><span class="o">=</span><span class="s2">&quot;0um&quot;</span><span class="p">,</span> <span class="n">t_inductive_gap</span><span class="o">=</span><span class="s2">&quot;3um&quot;</span><span class="p">,</span> <span class="n">t_width</span><span class="o">=</span><span class="s2">&quot;5um&quot;</span><span class="p">,</span> <span class="n">t_gap</span><span class="o">=</span><span class="s2">&quot;3um&quot;</span><span class="p">),</span>
+        <span class="n">LFL_options</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span>
+            <span class="n">t_width_i</span><span class="o">=</span><span class="s2">&quot;10um&quot;</span><span class="p">,</span>
+            <span class="n">t_width_f</span><span class="o">=</span><span class="s2">&quot;4.25um&quot;</span><span class="p">,</span>
+            <span class="n">t_length</span><span class="o">=</span><span class="s2">&quot;90um&quot;</span><span class="p">,</span>
+            <span class="n">t_gap_i</span><span class="o">=</span><span class="s2">&quot;6um&quot;</span><span class="p">,</span>
+            <span class="n">t_gap_f</span><span class="o">=</span><span class="s2">&quot;2.5um&quot;</span><span class="p">,</span>
+            <span class="n">t_punch_through</span><span class="o">=</span><span class="s2">&quot;5um&quot;</span><span class="p">,</span>
+            <span class="n">t_hanger_para_length</span><span class="o">=</span><span class="s2">&quot;40um&quot;</span><span class="p">,</span>
+            <span class="n">t_hanger_para_width</span><span class="o">=</span><span class="s2">&quot;2.5um&quot;</span><span class="p">,</span>
+            <span class="n">t_hanger_para_gap</span><span class="o">=</span><span class="s2">&quot;2.5um&quot;</span><span class="p">,</span>
+            <span class="n">t_hanger_perp_length</span><span class="o">=</span><span class="s2">&quot;55um&quot;</span><span class="p">,</span>
+            <span class="n">t_hanger_perp_width</span><span class="o">=</span><span class="s2">&quot;2.7um&quot;</span><span class="p">,</span>
+            <span class="n">t_hanger_perp_gap</span><span class="o">=</span><span class="s2">&quot;3.2um&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Default drawing options&quot;&quot;&quot;</span>
 
     <span class="n">TOOLTIP</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;The base `TransmonCrossFL` class.&quot;&quot;&quot;</span>
@@ -1040,8 +1020,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Define the way the options are turned into QGeometry.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">make</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">make_fl</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">fl_style</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">fl_style</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">make_fl</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">fl_style</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">fl_style</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">make_flux_line</span><span class="p">()</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">fl_style</span> <span class="o">==</span> <span class="s2">&quot;tapered&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">make_flux_line_tapered</span><span class="p">()</span>
@@ -1049,22 +1029,21 @@
                 <span class="k">pass</span></div>
 
 
-
-<span class="c1">#####################################################################</span>
+    <span class="c1">#####################################################################</span>
 
 <div class="viewcode-block" id="TransmonCrossFL.make_flux_line">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.qubits.TransmonCrossFL.make_flux_line">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_flux_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates the charge line if the user has charge line option to</span>
 <span class="sd">        TRUE.</span>
-<span class="sd">        </span>
+
 <span class="sd">        This is Qiskit Metal&#39;s default.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Grab option values</span>
         <span class="n">pf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">fl_options</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
-        <span class="c1">#Make the T flux line</span>
+        <span class="c1"># Make the T flux line</span>
         <span class="n">h_line</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">LineString</span><span class="p">([(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_top</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_top</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
         <span class="n">v_line</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">LineString</span><span class="p">([(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_offset</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_offset</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.03</span><span class="p">)])</span>
 
@@ -1072,8 +1051,8 @@
 
         <span class="c1"># Move the flux line down to the SQUID</span>
         <span class="n">parts</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span>
-            <span class="n">parts</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">cross_length</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">cross_gap</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_inductive_gap</span> <span class="o">+</span>
-                        <span class="n">pf</span><span class="o">.</span><span class="n">t_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap</span><span class="p">))</span>
+            <span class="n">parts</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">cross_length</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">cross_gap</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_inductive_gap</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># Rotate and translate based on crossmon location</span>
         <span class="n">parts</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">parts</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
@@ -1082,38 +1061,29 @@
         <span class="p">[</span><span class="n">h_line</span><span class="p">,</span> <span class="n">v_line</span><span class="p">]</span> <span class="o">=</span> <span class="n">parts</span>
 
         <span class="c1"># Adding to qgeometry table</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="p">{</span>
-            <span class="s1">&#39;h_line&#39;</span><span class="p">:</span> <span class="n">h_line</span><span class="p">,</span>
-            <span class="s1">&#39;v_line&#39;</span><span class="p">:</span> <span class="n">v_line</span>
-        <span class="p">},</span>
-                           <span class="n">width</span><span class="o">=</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width</span><span class="p">,</span>
-                           <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;h_line&quot;</span><span class="p">:</span> <span class="n">h_line</span><span class="p">,</span> <span class="s2">&quot;v_line&quot;</span><span class="p">:</span> <span class="n">v_line</span><span class="p">},</span> <span class="n">width</span><span class="o">=</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="p">{</span>
-            <span class="s1">&#39;h_line_sub&#39;</span><span class="p">:</span> <span class="n">h_line</span><span class="p">,</span>
-            <span class="s1">&#39;v_line_sub&#39;</span><span class="p">:</span> <span class="n">v_line</span>
-        <span class="p">},</span>
-                           <span class="n">width</span><span class="o">=</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap</span><span class="p">,</span>
-                           <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span>
+            <span class="s2">&quot;path&quot;</span><span class="p">,</span>
+            <span class="p">{</span><span class="s2">&quot;h_line_sub&quot;</span><span class="p">:</span> <span class="n">h_line</span><span class="p">,</span> <span class="s2">&quot;v_line_sub&quot;</span><span class="p">:</span> <span class="n">v_line</span><span class="p">},</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap</span><span class="p">,</span>
+            <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Generating pin</span>
         <span class="n">pin_line</span> <span class="o">=</span> <span class="n">v_line</span><span class="o">.</span><span class="n">coords</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_pin</span><span class="p">(</span><span class="s2">&quot;flux_line&quot;</span><span class="p">,</span>
-                     <span class="n">points</span><span class="o">=</span><span class="n">pin_line</span><span class="p">,</span>
-                     <span class="n">width</span><span class="o">=</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width</span><span class="p">,</span>
-                     <span class="n">gap</span><span class="o">=</span><span class="n">pf</span><span class="o">.</span><span class="n">t_gap</span><span class="p">,</span>
-                     <span class="n">input_as_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_pin</span><span class="p">(</span><span class="s2">&quot;flux_line&quot;</span><span class="p">,</span> <span class="n">points</span><span class="o">=</span><span class="n">pin_line</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="n">pf</span><span class="o">.</span><span class="n">t_gap</span><span class="p">,</span> <span class="n">input_as_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<span class="c1">#####################################################################</span>
-        
+    <span class="c1">#####################################################################</span>
+
 <div class="viewcode-block" id="TransmonCrossFL.make_flux_line_tapered">
 <a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.qubits.TransmonCrossFL.make_flux_line_tapered">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_flux_line_tapered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the charge line which is taper w/ a hanging bar.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Activates when all of these conditions are met:</span>
 <span class="sd">        - self.options.make_fl == True</span>
 <span class="sd">        - self.options.fl_options.lfl_style == &quot;tapered&quot;</span>
@@ -1121,49 +1091,80 @@
         <span class="c1"># Grab option values</span>
         <span class="n">pf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">LFL_options</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
-        
-        
+
         <span class="c1">##### Fast Flux Line Element #####</span>
         <span class="c1"># Make tappered FF Line</span>
-        <span class="n">tapper</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
-                               <span class="p">(</span><span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
-                               <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span><span class="p">),</span> 
-                               <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span><span class="p">),</span>
-                               <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_length</span><span class="p">),</span>
-                               <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_width</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_length</span><span class="p">),</span>
-                               <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_width</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span><span class="p">),</span>
-                               <span class="p">((</span><span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span><span class="p">)</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span><span class="p">)])</span>
-        
-        <span class="c1"># Make subtraction      </span>
-        <span class="n">sub_tapper</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
-                                   <span class="p">(</span><span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
-                                   <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_f</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">),</span> 
-                                   <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_gap</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">),</span>
-                                   <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_gap</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_length</span><span class="p">),</span>
-                                   <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_width</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_gap</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_length</span><span class="p">),</span>
-                                   <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_width</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_gap</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">),</span>
-                                   <span class="p">((</span><span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_f</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_i</span><span class="p">))</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_i</span><span class="p">,</span><span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">)])</span>
-        
-        <span class="c1"># Translate all the parts to the edge of the </span>
+        <span class="n">tapper</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_length</span><span class="p">),</span>
+                <span class="p">(</span>
+                    <span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_width</span><span class="p">,</span>
+                    <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_length</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="p">(</span>
+                    <span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_width</span><span class="p">,</span>
+                    <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="p">(</span>
+                    <span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make subtraction</span>
+        <span class="n">sub_tapper</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_f</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">),</span>
+                <span class="p">(</span>
+                    <span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_gap</span><span class="p">,</span>
+                    <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="p">(</span>
+                    <span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_gap</span><span class="p">,</span>
+                    <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_length</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="p">(</span>
+                    <span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_width</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_gap</span><span class="p">,</span>
+                    <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_length</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="p">(</span>
+                    <span class="o">-</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_width</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_perp_gap</span><span class="p">,</span>
+                    <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="p">(</span>
+                    <span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">)</span>
+                    <span class="o">/</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">)</span>
+                        <span class="o">/</span> <span class="p">((</span><span class="n">pf</span><span class="o">.</span><span class="n">t_width_f</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_f</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_i</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_width_i</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_gap_i</span><span class="p">,</span>
+                    <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_width</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_hanger_para_gap</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Translate all the parts to the edge of the</span>
         <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">tapper</span><span class="p">,</span> <span class="n">sub_tapper</span><span class="p">]</span>
-    
-        <span class="n">parts</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span>
-            <span class="n">parts</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">cross_length</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">cross_gap</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_punch_through</span><span class="p">))</span>
+
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">parts</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">cross_length</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">cross_gap</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_length</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">t_punch_through</span><span class="p">))</span>
         <span class="n">parts</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">parts</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="n">parts</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">parts</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">pos_y</span><span class="p">)</span>
-        
-        <span class="n">tapper</span><span class="p">,</span> <span class="n">sub_tapper</span> <span class="o">=</span> <span class="n">parts</span>
-        
-        
-        
-        <span class="c1">##### Adding to qgeometry table #####</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">tapper</span><span class="o">=</span><span class="n">tapper</span><span class="p">),</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> 
-                           <span class="nb">dict</span><span class="p">(</span><span class="n">sub_tapper</span><span class="o">=</span><span class="n">sub_tapper</span><span class="p">),</span> 
-                           <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
-                           <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span></div>
-</div>
 
+        <span class="n">tapper</span><span class="p">,</span> <span class="n">sub_tapper</span> <span class="o">=</span> <span class="n">parts</span>
+
+        <span class="c1">##### Adding to qgeometry table #####</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">tapper</span><span class="o">=</span><span class="n">tapper</span><span class="p">),</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_qgeometry</span><span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">sub_tapper</span><span class="o">=</span><span class="n">sub_tapper</span><span class="p">),</span> <span class="n">subtract</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span></div>
+</div>
 
 </pre></div>
 
@@ -1215,7 +1216,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

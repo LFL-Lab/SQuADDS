@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.core.utils &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.core.utils &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -590,9 +590,10 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">HfApi</span><span class="p">,</span> <span class="n">HfFolder</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.globals</span><span class="w"> </span><span class="kn">import</span> <span class="n">ENV_FILE_PATH</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">HfApi</span><span class="p">,</span> <span class="n">get_token</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tabulate</span><span class="w"> </span><span class="kn">import</span> <span class="n">tabulate</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.globals</span><span class="w"> </span><span class="kn">import</span> <span class="n">ENV_FILE_PATH</span>
 
 
 <div class="viewcode-block" id="float_to_string">
@@ -611,6 +612,7 @@
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
 
+
 <div class="viewcode-block" id="string_to_float">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.string_to_float">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">string_to_float</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
@@ -624,6 +626,7 @@
 <span class="sd">        float: The converted float value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">string</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span></div>
+
 
 
 <div class="viewcode-block" id="view_contributors_from_rst">
@@ -643,12 +646,12 @@
 
     <span class="c1"># Fetch the .rst file from the URL</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">rst_url</span><span class="p">)</span>
-    
+
     <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
         <span class="n">content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
 
         <span class="c1"># Find the Contributors section</span>
-        <span class="n">contributors_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Contributors\s+-{3,}\s+(.*?)(\n\n|$)&#39;</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">S</span><span class="p">)</span>
+        <span class="n">contributors_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Contributors\s+-{3,}\s+(.*?)(\n\n|$)&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">S</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">contributors_match</span><span class="p">:</span>
             <span class="n">contributors_section</span> <span class="o">=</span> <span class="n">contributors_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
@@ -658,7 +661,7 @@
             <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">contributor_entries</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
                     <span class="c1"># Extract name, institution, and contribution</span>
-                    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\*\*(.*?)\*\* \((.*?)\) - (.*)&#39;</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\*\*(.*?)\*\* \((.*?)\) - (.*)&quot;</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
                     <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
                         <span class="n">name</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
                         <span class="n">institution</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -689,6 +692,7 @@
     <span class="n">df</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">file_idx</span><span class="si">}</span><span class="s2">.parquet&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
+
 <div class="viewcode-block" id="set_github_token">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.set_github_token">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">set_github_token</span><span class="p">():</span>
@@ -699,29 +703,31 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check if token already exists</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">existing_keys</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="k">if</span> <span class="s1">&#39;GITHUB_TOKEN=&#39;</span> <span class="ow">in</span> <span class="n">existing_keys</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Token already exists in .env file.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;GITHUB_TOKEN=&quot;</span> <span class="ow">in</span> <span class="n">existing_keys</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Token already exists in .env file.&quot;</span><span class="p">)</span>
                 <span class="k">return</span>
 
     <span class="c1"># Ask for the new token</span>
     <span class="n">token</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="s2">&quot;Enter your GitHub PAT token (with at least repo scope): &quot;</span><span class="p">)</span>
     <span class="c1"># Append the new token to the .env file</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">GITHUB_TOKEN=</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Token added to .env file.&#39;</span><span class="p">)</span></div>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">GITHUB_TOKEN=</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Token added to .env file.&quot;</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="get_type">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.get_type">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_type</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;dict&#39;</span>
+        <span class="k">return</span> <span class="s2">&quot;dict&quot;</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;list&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="k">else</span> <span class="n">get_type</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="s2">&quot;list&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="k">else</span> <span class="n">get_type</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
+
 
 
 <span class="c1"># Recursive function to validate types</span>
@@ -750,6 +756,7 @@
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid type for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">. Expected </span><span class="si">{</span><span class="n">expected_type</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">actual_type</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
 
+
 <div class="viewcode-block" id="get_config_schema">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.get_config_schema">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_config_schema</span><span class="p">(</span><span class="n">entry</span><span class="p">):</span>
@@ -757,28 +764,30 @@
 <span class="sd">    Generates the schema for the given entry with specific rules.</span>
 <span class="sd">    The &#39;sim_results&#39; are fully expanded, while others are expanded to the first level.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">get_type</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
         <span class="c1"># Return the type as a string representation</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">return</span> <span class="s1">&#39;dict&#39;</span>
+            <span class="k">return</span> <span class="s2">&quot;dict&quot;</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="c1"># Check the type of the first item if the list is not empty</span>
-            <span class="k">return</span> <span class="s1">&#39;list&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="k">else</span> <span class="n">get_type</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">return</span> <span class="s2">&quot;list&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="k">else</span> <span class="n">get_type</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
     <span class="n">schema</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;sim_results&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span>
             <span class="c1"># Fully expand &#39;sim_results&#39;</span>
             <span class="n">schema</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">get_type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sim_options&#39;</span><span class="p">,</span> <span class="s1">&#39;design&#39;</span><span class="p">,</span> <span class="s1">&#39;notes&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">,</span> <span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="s2">&quot;notes&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="c1"># Expand to the first level for &#39;sim_options&#39;, &#39;design&#39;, and &#39;notes&#39;</span>
             <span class="n">schema</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">get_type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">schema</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">schema</span></div>
+
 
 
 <div class="viewcode-block" id="get_schema">
@@ -800,12 +809,13 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="s1">&#39;dict&#39;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">get_schema</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;contributor&#39;</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="s2">&quot;dict&quot;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">get_schema</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;contributor&quot;</span><span class="p">}</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="c1"># If the list contains dictionaries, just return &#39;dict&#39;, else get the type of the first element</span>
-        <span class="k">return</span> <span class="s1">&#39;dict&#39;</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span> <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">return</span> <span class="s2">&quot;dict&quot;</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span> <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="vm">__name__</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span></div>
+
 
 
 <div class="viewcode-block" id="is_float">
@@ -818,9 +828,10 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <div class="viewcode-block" id="compare_schemas">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.compare_schemas">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compare_schemas</span><span class="p">(</span><span class="n">data_schema</span><span class="p">,</span> <span class="n">expected_schema</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compare_schemas</span><span class="p">(</span><span class="n">data_schema</span><span class="p">,</span> <span class="n">expected_schema</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compare two schemas and raise an error if there are any mismatches.</span>
 
@@ -845,15 +856,18 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expected_type</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type mismatch for &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;. Expected a dict, Got: </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">compare_schemas</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">expected_type</span><span class="p">,</span> <span class="n">path</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="n">compare_schemas</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">expected_type</span><span class="p">,</span> <span class="n">path</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Compare types for simple fields</span>
             <span class="k">if</span> <span class="n">get_type</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected_type</span><span class="p">:</span>
                 <span class="c1">#! TODO: fix this:: if float is expected but got str then ignore</span>
-                <span class="k">if</span> <span class="n">expected_type</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span> <span class="ow">and</span> <span class="n">get_type</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">expected_type</span> <span class="o">==</span> <span class="s2">&quot;float&quot;</span> <span class="ow">and</span> <span class="n">get_type</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type mismatch for &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;. Expected: </span><span class="si">{</span><span class="n">expected_type</span><span class="si">}</span><span class="s2">, Got: </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Type mismatch for &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;. Expected: </span><span class="si">{</span><span class="n">expected_type</span><span class="si">}</span><span class="s2">, Got: </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="convert_to_numeric">
@@ -876,9 +890,10 @@
     <span class="k">return</span> <span class="n">value</span></div>
 
 
+
 <div class="viewcode-block" id="convert_to_str">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.convert_to_str">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">convert_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the given value to a string with the given units.</span>
 <span class="sd">    Args:</span>
@@ -888,6 +903,7 @@
 <span class="sd">        str: The value as a string with the units.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
 
 
 <div class="viewcode-block" id="convert_list_to_str">
@@ -904,6 +920,7 @@
     <span class="k">return</span> <span class="p">[</span><span class="n">convert_to_str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]</span></div>
 
 
+
 <div class="viewcode-block" id="get_entire_schema">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.get_entire_schema">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_entire_schema</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
@@ -917,11 +934,12 @@
 <span class="sd">        The schema representation of the object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">get_entire_schema</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;contributor&#39;</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">get_entire_schema</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;contributor&quot;</span><span class="p">}</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">get_entire_schema</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">obj</span> <span class="k">else</span> <span class="p">[]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span></div>
+
 
 
 <div class="viewcode-block" id="delete_HF_cache">
@@ -956,6 +974,7 @@
         <span class="k">pass</span></div>
 
 
+
 <div class="viewcode-block" id="get_sim_results_keys">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.get_sim_results_keys">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_sim_results_keys</span><span class="p">(</span><span class="n">dataframes</span><span class="p">):</span>
@@ -978,9 +997,9 @@
     <span class="c1"># Iterate over each dataframe</span>
     <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">dataframes</span><span class="p">:</span>
         <span class="c1"># Check if &#39;sim_results&#39; column exists in the dataframe</span>
-        <span class="k">if</span> <span class="s1">&#39;sim_results&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;sim_results&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="c1"># Extract keys from each row&#39;s &#39;sim_results&#39; and add them to the list</span>
-            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;sim_results&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>  <span class="c1"># Ensure the row is a dictionary</span>
                     <span class="n">all_keys</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
@@ -988,6 +1007,7 @@
     <span class="n">unique_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_keys</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">unique_keys</span></div>
+
 
 
 <div class="viewcode-block" id="convert_numpy">
@@ -1012,6 +1032,7 @@
     <span class="k">return</span> <span class="n">obj</span></div>
 
 
+
 <span class="c1"># Function to create a unified design_options dictionary</span>
 <div class="viewcode-block" id="create_unified_design_options">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.create_unified_design_options">[docs]</a>
@@ -1032,32 +1053,34 @@
     <span class="n">qubit_dict</span> <span class="o">=</span> <span class="n">convert_numpy</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">])</span>
 
     <span class="c1"># setting the `claw_cpw_*` params to zero</span>
-    <span class="n">qubit_dict</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
-    <span class="n">qubit_dict</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
-    <span class="n">cavity_dict</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
-    <span class="n">cavity_dict</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">qubit_dict</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_cpw_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">qubit_dict</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_cpw_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_cpw_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_cpw_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
 
     <span class="c1"># replacing the ground spacing of the cavity by that of the qubit</span>
-    <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">qubit_dict</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">]</span>
+    <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">qubit_dict</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span>
+        <span class="s2">&quot;ground_spacing&quot;</span>
+    <span class="p">]</span>
 
     <span class="c1"># setting the `claw_cpw_*` params to zero</span>
-    <span class="n">qubit_dict</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
-    <span class="n">qubit_dict</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
-    <span class="n">cavity_dict</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
-    <span class="n">cavity_dict</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_cpw_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">qubit_dict</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_cpw_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">qubit_dict</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_cpw_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_cpw_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
+    <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_cpw_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
 
     <span class="c1"># replacing the ground spacing of the cavity by that of the qubit</span>
-    <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">qubit_dict</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">]</span>
+    <span class="n">cavity_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">qubit_dict</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span>
+        <span class="s2">&quot;ground_spacing&quot;</span>
+    <span class="p">]</span>
 
     <span class="n">device_dict</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="n">coupler_type</span><span class="p">,</span>
             <span class="s2">&quot;coupler_options&quot;</span><span class="p">:</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">,</span> <span class="p">{}),</span>
-            <span class="s2">&quot;cpw_opts&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;left_options&quot;</span><span class="p">:</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">,</span> <span class="p">{})</span>
-            <span class="p">}</span>
+            <span class="s2">&quot;cpw_opts&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;left_options&quot;</span><span class="p">:</span> <span class="n">cavity_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">,</span> <span class="p">{})},</span>
         <span class="p">},</span>
-        <span class="s2">&quot;qubit_options&quot;</span><span class="p">:</span> <span class="n">qubit_dict</span>
+        <span class="s2">&quot;qubit_options&quot;</span><span class="p">:</span> <span class="n">qubit_dict</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">device_dict</span></div>
@@ -1095,6 +1118,7 @@
     <span class="k">return</span> <span class="n">new_df</span></div>
 
 
+
 <div class="viewcode-block" id="filter_df_by_conditions">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.filter_df_by_conditions">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">filter_df_by_conditions</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">conditions</span><span class="p">):</span>
@@ -1125,13 +1149,13 @@
         <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="p">[</span><span class="n">filtered_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">]</span>
 
-
     <span class="c1"># Check if the filtered DataFrame is empty</span>
     <span class="k">if</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No rows match the given conditions. Returning the original DataFrame.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">filtered_df</span></div>
+
 
 
 <div class="viewcode-block" id="set_huggingface_api_key">
@@ -1144,21 +1168,21 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check if API key already exists</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">existing_keys</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="k">if</span> <span class="s1">&#39;HUGGINGFACE_API_KEY=&#39;</span> <span class="ow">in</span> <span class="n">existing_keys</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;API key already exists in .env file.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;HUGGINGFACE_API_KEY=&quot;</span> <span class="ow">in</span> <span class="n">existing_keys</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;API key already exists in .env file.&quot;</span><span class="p">)</span>
                 <span class="k">return</span>
 
     <span class="c1"># Ask for the new API key</span>
     <span class="n">api_key</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="s2">&quot;Enter your Hugging Face API key: &quot;</span><span class="p">)</span>
     <span class="c1"># Append the new API key to the .env file</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">HUGGINGFACE_API_KEY=</span><span class="si">{</span><span class="n">api_key</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;API key added to </span><span class="si">{</span><span class="n">ENV_FILE_PATH</span><span class="si">}</span><span class="s1"> file.&#39;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">HUGGINGFACE_API_KEY=</span><span class="si">{</span><span class="n">api_key</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;API key added to </span><span class="si">{</span><span class="n">ENV_FILE_PATH</span><span class="si">}</span><span class="s2"> file.&quot;</span><span class="p">)</span>
 
-    <span class="n">api</span> <span class="o">=</span> <span class="n">HfApi</span><span class="p">()</span>
-    <span class="n">token</span> <span class="o">=</span> <span class="n">HfFolder</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
+    <span class="n">HfApi</span><span class="p">()</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">get_token</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Hugging Face token not found. Please log in using `huggingface-cli login`.&quot;</span><span class="p">)</span></div>
 
@@ -1187,7 +1211,7 @@
     <span class="n">mailto_link</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mailto:</span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">recipients</span><span class="p">)</span><span class="si">}</span><span class="s2">?subject=</span><span class="si">{</span><span class="n">subject_encoded</span><span class="si">}</span><span class="s2">&amp;body=</span><span class="si">{</span><span class="n">body_encoded</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="c1"># Replace &#39;+&#39; with &#39;%20&#39; for proper space encoding</span>
-    <span class="n">mailto_link</span> <span class="o">=</span> <span class="n">mailto_link</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;%20&#39;</span><span class="p">)</span>
+    <span class="n">mailto_link</span> <span class="o">=</span> <span class="n">mailto_link</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;%20&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mailto_link</span></div>
 
 
@@ -1216,6 +1240,7 @@
     <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">mailto_link</span><span class="p">)</span></div>
 
 
+
 <div class="viewcode-block" id="compute_memory_usage">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.compute_memory_usage">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_memory_usage</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
@@ -1228,9 +1253,10 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        float: The memory usage of the DataFrame in megabytes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">mem</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">mem</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">2</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Memory usage: </span><span class="si">{</span><span class="n">mem</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mem</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">print_column_types</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
@@ -1240,17 +1266,18 @@
 <span class="sd">    Parameters:</span>
 <span class="sd">    - df: DataFrame to analyze.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">float_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;float&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="n">int_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;int&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="n">object_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;object&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="n">datetime_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="n">string_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;string&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    
+    <span class="n">float_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;float&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">int_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;int&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">object_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">datetime_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">string_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;string&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Columns with float types:&quot;</span><span class="p">,</span> <span class="n">float_cols</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Columns with int types:&quot;</span><span class="p">,</span> <span class="n">int_cols</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Columns with object types:&quot;</span><span class="p">,</span> <span class="n">object_cols</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Columns with datetime types:&quot;</span><span class="p">,</span> <span class="n">datetime_cols</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Columns with string types:&quot;</span><span class="p">,</span> <span class="n">string_cols</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="can_be_categorical">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.can_be_categorical">[docs]</a>
@@ -1269,6 +1296,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <div class="viewcode-block" id="optimize_dataframe">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.optimize_dataframe">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">optimize_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
@@ -1283,38 +1311,38 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">df_optimized</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    
+
     <span class="c1"># Calculate initial memory usage</span>
     <span class="n">initial_memory_usage</span> <span class="o">=</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-    
+
     <span class="c1"># Memory usage before optimization</span>
     <span class="n">memory_before_floats</span> <span class="o">=</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-    
+
     <span class="c1"># Optimize float columns</span>
-    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;float&#39;</span><span class="p">]):</span>
-        <span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
-    
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;float&quot;</span><span class="p">]):</span>
+        <span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+
     <span class="c1"># Memory usage after optimizing floats</span>
     <span class="n">memory_after_floats</span> <span class="o">=</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-    
+
     <span class="c1"># Optimize integer columns</span>
-    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;int&#39;</span><span class="p">]):</span>
-        <span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s1">&#39;unsigned&#39;</span><span class="p">)</span>
-    
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;int&quot;</span><span class="p">]):</span>
+        <span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;unsigned&quot;</span><span class="p">)</span>
+
     <span class="c1"># Memory usage after optimizing integers</span>
     <span class="n">memory_after_ints</span> <span class="o">=</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-    
+
     <span class="c1"># Memory usage before optimizing object columns</span>
     <span class="n">memory_before_objects</span> <span class="o">=</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-    
+
     <span class="c1"># Optimize object columns</span>
-    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;object&#39;</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">]):</span>
         <span class="k">if</span> <span class="n">can_be_categorical</span><span class="p">(</span><span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]):</span>
-            <span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;category&#39;</span><span class="p">)</span>
-    
+            <span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_optimized</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+
     <span class="c1"># Memory usage after optimizing object columns</span>
     <span class="n">memory_after_objects</span> <span class="o">=</span> <span class="n">df_optimized</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-    
+
     <span class="c1"># Calculate memory savings and percentages</span>
     <span class="n">float_savings</span> <span class="o">=</span> <span class="n">memory_before_floats</span> <span class="o">-</span> <span class="n">memory_after_floats</span>
     <span class="n">int_savings</span> <span class="o">=</span> <span class="n">memory_after_floats</span> <span class="o">-</span> <span class="n">memory_after_ints</span>
@@ -1337,7 +1365,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Memory saved by object optimization: </span><span class="si">{</span><span class="n">object_savings</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB (</span><span class="si">{</span><span class="n">object_savings_percentage</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total memory saved: </span><span class="si">{</span><span class="n">total_savings</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Memory efficiency: </span><span class="si">{</span><span class="n">percentage_saved</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
-    
+
     <span class="k">return</span> <span class="n">df_optimized</span></div>
 
 
@@ -1347,38 +1375,60 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">process_design_options</span><span class="p">(</span><span class="n">merged_df</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Processes the &#39;design_options&#39; column in merged_df, appends new columns, converts values, and drops &#39;design_options&#39;.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters:</span>
 <span class="sd">    - merged_df: DataFrame containing the &#39;design_options&#39; column.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">    - merged_df: Modified DataFrame with new columns added and &#39;design_options&#39; dropped.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">convert_value</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">value</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;um&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float16</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-    
+
     <span class="n">design_options</span> <span class="o">=</span> <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
 
-    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;finger_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">][</span><span class="s2">&quot;finger_count&quot;</span><span class="p">]))</span>
-    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;finger_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">][</span><span class="s2">&quot;finger_length&quot;</span><span class="p">]))</span>
-    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;cap_gap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">][</span><span class="s2">&quot;cap_gap&quot;</span><span class="p">]))</span>
-    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;cap_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">][</span><span class="s2">&quot;cap_width&quot;</span><span class="p">]))</span>
-    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;total_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;left_options&quot;</span><span class="p">][</span><span class="s2">&quot;total_length&quot;</span><span class="p">]))</span>
-    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;meander_spacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;left_options&quot;</span><span class="p">][</span><span class="s2">&quot;meander&quot;</span><span class="p">][</span><span class="s2">&quot;spacing&quot;</span><span class="p">]))</span>
-    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;meander_asymmetry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;left_options&quot;</span><span class="p">][</span><span class="s2">&quot;meander&quot;</span><span class="p">][</span><span class="s2">&quot;asymmetry&quot;</span><span class="p">]))</span>
-    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;claw_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;qubit_options&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_length&quot;</span><span class="p">]))</span>
-    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;claw_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;qubit_options&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_width&quot;</span><span class="p">]))</span>
-    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;qubit_options&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">]))</span>
+    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;finger_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">][</span><span class="s2">&quot;finger_count&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;finger_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">][</span><span class="s2">&quot;finger_length&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;cap_gap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">][</span><span class="s2">&quot;cap_gap&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;cap_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">][</span><span class="s2">&quot;cap_width&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;total_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;left_options&quot;</span><span class="p">][</span><span class="s2">&quot;total_length&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;meander_spacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;left_options&quot;</span><span class="p">][</span><span class="s2">&quot;meander&quot;</span><span class="p">][</span><span class="s2">&quot;spacing&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;meander_asymmetry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">][</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;left_options&quot;</span><span class="p">][</span><span class="s2">&quot;meander&quot;</span><span class="p">][</span><span class="s2">&quot;asymmetry&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;claw_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;qubit_options&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_length&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;claw_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;qubit_options&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_width&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;qubit_options&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
     <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;cross_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">convert_value</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;qubit_options&quot;</span><span class="p">][</span><span class="s2">&quot;cross_length&quot;</span><span class="p">]))</span>
 
     <span class="c1"># Drop the &#39;design_options&#39; column</span>
     <span class="n">merged_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    
+
     <span class="k">return</span> <span class="n">merged_df</span></div>
+
 
 
 <div class="viewcode-block" id="print_column_types">
@@ -1395,6 +1445,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column: </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">, Data Type: </span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
+
 <div class="viewcode-block" id="delete_object_columns">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.delete_object_columns">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">delete_object_columns</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
@@ -1408,11 +1459,11 @@
 <span class="sd">    - df: DataFrame with &#39;object&#39; columns removed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Select columns that are of type &#39;object&#39;</span>
-    <span class="n">object_columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;object&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">object_columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span>
 
     <span class="c1"># Drop the selected columns</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">object_columns</span><span class="p">)</span>
-    
+
     <span class="k">return</span> <span class="n">df</span></div>
 
 
@@ -1430,22 +1481,25 @@
 <span class="sd">    - mem_usage_df: DataFrame with columns &#39;Column&#39;, &#39;Memory Usage (MB)&#39;, and &#39;Percentage of Total Memory Usage&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Calculate the memory usage for each column</span>
-    <span class="n">mem_usage</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Convert to MB</span>
-    
+    <span class="n">mem_usage</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># Convert to MB</span>
+
     <span class="c1"># Calculate total memory usage</span>
     <span class="n">total_mem_usage</span> <span class="o">=</span> <span class="n">mem_usage</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    
+
     <span class="c1"># Create a DataFrame with memory usage and percentage of total memory usage</span>
-    <span class="n">mem_usage_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-        <span class="s1">&#39;Column&#39;</span><span class="p">:</span> <span class="n">mem_usage</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-        <span class="s1">&#39;Memory Usage (MB)&#39;</span><span class="p">:</span> <span class="n">mem_usage</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-        <span class="s1">&#39;Percentage of Total Memory Usage&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">mem_usage</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">total_mem_usage</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
-    <span class="p">})</span>
-    
+    <span class="n">mem_usage_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;Column&quot;</span><span class="p">:</span> <span class="n">mem_usage</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+            <span class="s2">&quot;Memory Usage (MB)&quot;</span><span class="p">:</span> <span class="n">mem_usage</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="s2">&quot;Percentage of Total Memory Usage&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">mem_usage</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">total_mem_usage</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
     <span class="c1"># Sort the DataFrame by memory usage in descending order</span>
-    <span class="n">mem_usage_df</span> <span class="o">=</span> <span class="n">mem_usage_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;Memory Usage (MB)&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    
+    <span class="n">mem_usage_df</span> <span class="o">=</span> <span class="n">mem_usage_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;Memory Usage (MB)&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">mem_usage_df</span></div>
+
 
 
 <span class="c1"># drop all categorical columns</span>
@@ -1462,12 +1516,12 @@
 <span class="sd">    - df: DataFrame with &#39;category&#39; columns removed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Select columns that are of type &#39;category&#39;</span>
-    <span class="n">category_columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;category&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">category_columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span>
 
     <span class="c1"># Drop the selected columns</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">category_columns</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">df</span> </div>
+    <span class="k">return</span> <span class="n">df</span></div>
 
 </pre></div>
 
@@ -1519,7 +1573,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

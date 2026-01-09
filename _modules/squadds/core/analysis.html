@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.core.analysis &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.core.analysis &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -579,9 +579,8 @@
                 <article class="bd-article">
                   
   <h1>Source code for squadds.core.analysis</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datashader</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ds</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datashader.transfer_functions</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
@@ -595,7 +594,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.calcs.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCrossHamiltonian</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">merge_dfs</span><span class="p">,</span> <span class="n">unify_columns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">merge_dfs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_unified_design_options</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
@@ -603,9 +602,11 @@
 <span class="sd">HELPER FUNCTIONS</span>
 <span class="sd">=====================================================================================</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
+
 <span class="c1"># Helper function to scale values with &#39;um&#39; in them</span>
 <div class="viewcode-block" id="scale_value">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.scale_value">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.scale_value">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">scale_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ratio</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Scales the given value by the specified ratio.</span>
@@ -617,7 +618,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        scaled_value (str): The scaled value in the format &#39;Xum&#39; where X is the scaled number.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">scaled_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;um&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;um&#39;</span>
+    <span class="n">scaled_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;um&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;um&quot;</span>
     <span class="k">return</span> <span class="n">scaled_value</span></div>
 
 
@@ -627,8 +628,10 @@
 <span class="sd">Analyzer</span>
 <span class="sd">=====================================================================================</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
+
 <div class="viewcode-block" id="Analyzer">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Analyzer</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Analyzer class is responsible for analyzing designs and finding the closest designs based on target parameters.</span>
@@ -645,8 +648,8 @@
 <span class="sd">        get_design(df): Extracts the design parameters from the dataframe and returns a dict.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">__supported_metrics__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Euclidean&#39;</span><span class="p">,</span> <span class="s1">&#39;Manhattan&#39;</span><span class="p">,</span> <span class="s1">&#39;Chebyshev&#39;</span><span class="p">,</span> <span class="s1">&#39;Weighted Euclidean&#39;</span> <span class="p">,</span> <span class="s1">&#39;Custom&#39;</span><span class="p">]</span>
-    <span class="n">__supported_estimation_methods__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Interpolation&#39;</span><span class="p">]</span>
+    <span class="n">__supported_metrics__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span> <span class="s2">&quot;Manhattan&quot;</span><span class="p">,</span> <span class="s2">&quot;Chebyshev&quot;</span><span class="p">,</span> <span class="s2">&quot;Weighted Euclidean&quot;</span><span class="p">,</span> <span class="s2">&quot;Custom&quot;</span><span class="p">]</span>
+    <span class="n">__supported_estimation_methods__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Interpolation&quot;</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -679,6 +682,7 @@
 <span class="sd">            - H_param_keys: The H parameter keys.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQuADDS_DB</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">db</span> <span class="k">if</span> <span class="n">db</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reload_db</span><span class="p">()</span>
 
@@ -710,20 +714,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">custom_metric_func</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metric_weights</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_params</span> <span class="o">=</span> <span class="kc">None</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">H_param_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_H_param_keys</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Analyzer.reload_db">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.reload_db">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.reload_db">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reload_db</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reload the Analyzer with the current singleton SQuADDS_DB object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_attributes</span><span class="p">()</span></div>
 
-        
+
 <div class="viewcode-block" id="Analyzer._add_target_params_columns">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer._add_target_params_columns">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer._add_target_params_columns">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_add_target_params_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds target parameter columns to the dataframe based on the selected system.</span>
@@ -742,25 +746,25 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="s2">&quot;qubit&quot;</span><span class="p">:</span>
             <span class="n">qubit_H</span> <span class="o">=</span> <span class="n">TransmonCrossHamiltonian</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="n">qubit_H</span><span class="o">.</span><span class="n">add_qubit_H_params</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">qubit_H</span><span class="o">.</span><span class="n">df</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">qubit_H</span><span class="o">.</span><span class="n">df</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="s2">&quot;cavity_claw&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fix_cavity_claw_df</span><span class="p">()</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="s2">&quot;coupler&quot;</span><span class="p">:</span>
             <span class="k">pass</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span><span class="s2">&quot;qubit&quot;</span><span class="p">]):</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="s2">&quot;qubit&quot;</span><span class="p">]):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fix_cavity_claw_df</span><span class="p">()</span>
             <span class="n">qubit_H</span> <span class="o">=</span> <span class="n">TransmonCrossHamiltonian</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
             <span class="n">qubit_H</span><span class="o">.</span><span class="n">add_cavity_coupled_H_params</span><span class="p">()</span>
             <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time taken to add the coupled H params: </span><span class="si">{</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">qubit_H</span><span class="o">.</span><span class="n">df</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time taken to add the coupled H params: </span><span class="si">{</span><span class="n">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">qubit_H</span><span class="o">.</span><span class="n">df</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid system.&quot;</span><span class="p">)</span></div>
 
-    
+
 <div class="viewcode-block" id="Analyzer._fix_cavity_claw_df">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer._fix_cavity_claw_df">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer._fix_cavity_claw_df">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_fix_cavity_claw_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fix the cavity claw DataFrame by renaming columns and updating values.</span>
@@ -782,21 +786,21 @@
             <span class="c1"># drop the units column in place</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">pass</span></div>
 
-    
+
 <div class="viewcode-block" id="Analyzer._get_H_param_keys">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer._get_H_param_keys">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer._get_H_param_keys">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_H_param_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the parameter keys for the Hamiltonian (H) based on the selected system.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: A list of parameter keys for the Hamiltonian.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If the selected system is invalid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -808,15 +812,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">H_param_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;resonator_type&quot;</span><span class="p">,</span> <span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">,</span> <span class="s2">&quot;kappa_kHz&quot;</span><span class="p">]</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="s2">&quot;coupler&quot;</span><span class="p">:</span>
             <span class="k">pass</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span><span class="s2">&quot;qubit&quot;</span><span class="p">]):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">H_param_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">,</span> <span class="s2">&quot;resonator_type&quot;</span><span class="p">,</span> <span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">,</span> <span class="s2">&quot;kappa_kHz&quot;</span><span class="p">,</span> <span class="s2">&quot;g_MHz&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="s2">&quot;qubit&quot;</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">H_param_keys</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;resonator_type&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;kappa_kHz&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;g_MHz&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid system.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">H_param_keys</span></div>
 
 
 <div class="viewcode-block" id="Analyzer.target_param_keys">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.target_param_keys">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.target_param_keys">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">target_param_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
@@ -826,7 +837,7 @@
 
 
 <div class="viewcode-block" id="Analyzer.set_metric_strategy">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.set_metric_strategy">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.set_metric_strategy">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_metric_strategy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">MetricStrategy</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the metric strategy to use for calculating the distance metric.</span>
@@ -838,7 +849,7 @@
 <span class="sd">            ValueError: If the specified metric is not supported.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">metric_strategy</span> <span class="o">=</span> <span class="n">strategy</span> </div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric_strategy</span> <span class="o">=</span> <span class="n">strategy</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_outside_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -847,7 +858,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            df (pd.DataFrame): Dataframe to give warning.</span>
 <span class="sd">            params (dict): Keys are column names of `df`. Values are values to check for bounds.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if any value is outside of bounds. False if all values are inside bounds.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -862,7 +873,9 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">df</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="n">df</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">display</span><span class="p">:</span>
-                        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1mNOTE TO USER:</span><span class="se">\033</span><span class="s2">[0m the value </span><span class="se">\033</span><span class="s2">[1m</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m is outside the bounds of our library.</span><span class="se">\n</span><span class="s2">If you find a geometry which corresponds to these values, please consider contributing it! 😁🙏</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1mNOTE TO USER:</span><span class="se">\033</span><span class="s2">[0m the value </span><span class="se">\033</span><span class="s2">[1m</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m is outside the bounds of our library.</span><span class="se">\n</span><span class="s2">If you find a geometry which corresponds to these values, please consider contributing it! 😁🙏</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
                     <span class="n">outside_bounds</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -874,17 +887,16 @@
         <span class="k">if</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="n">categorical_params</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)}</span>
             <span class="k">if</span> <span class="n">display</span> <span class="ow">and</span> <span class="n">categorical_params</span><span class="p">:</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1mNOTE TO USER:</span><span class="se">\033</span><span class="s2">[0m There are no geometries with the specified categorical parameters - </span><span class="se">\033</span><span class="s2">[1m</span><span class="si">{</span><span class="n">categorical_params</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m.</span><span class="se">\n</span><span class="s2">If you find a geometry which corresponds to these values, please consider contributing it! 😁🙏</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1mNOTE TO USER:</span><span class="se">\033</span><span class="s2">[0m There are no geometries with the specified categorical parameters - </span><span class="se">\033</span><span class="s2">[1m</span><span class="si">{</span><span class="n">categorical_params</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m.</span><span class="se">\n</span><span class="s2">If you find a geometry which corresponds to these values, please consider contributing it! 😁🙏</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
             <span class="n">outside_bounds</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">return</span> <span class="n">outside_bounds</span>
 
 <div class="viewcode-block" id="Analyzer.get_complete_df">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_complete_df">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_complete_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                         <span class="n">target_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                         <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Euclidean&#39;</span><span class="p">,</span>
-                         <span class="n">display</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.get_complete_df">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_complete_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span> <span class="n">display</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the complete DataFrame (design + Hamiltonian parameters) sourced using the target parameters.</span>
 
@@ -903,7 +915,7 @@
         <span class="c1">### Checks</span>
         <span class="c1"># Check for supported metric</span>
         <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__supported_metrics__</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;`metric` must be one of the following: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__supported_metrics__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`metric` must be one of the following: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__supported_metrics__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">target_params</span> <span class="o">=</span> <span class="n">target_params</span>
 
@@ -915,20 +927,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_add_target_params_columns</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Target parameters have already been computed.&quot;</span><span class="p">)</span>
-            
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span></div>
 
 
 <div class="viewcode-block" id="Analyzer.find_closest">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.find_closest">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">find_closest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                         <span class="n">target_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                         <span class="n">num_top</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                         <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Euclidean&#39;</span><span class="p">,</span>
-                         <span class="n">display</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                         <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                         <span class="n">num_cpu</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-                         <span class="n">skip_df_gen</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.find_closest">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_closest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">num_top</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span>
+        <span class="n">display</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">num_cpu</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">skip_df_gen</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the closest designs in the library based on the target parameters.</span>
 
@@ -951,7 +965,7 @@
         <span class="c1">### Checks</span>
         <span class="c1"># Check for supported metric</span>
         <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__supported_metrics__</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;`metric` must be one of the following: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__supported_metrics__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`metric` must be one of the following: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__supported_metrics__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">target_params</span> <span class="o">=</span> <span class="n">target_params</span>
 
@@ -966,22 +980,24 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="o">==</span> <span class="s2">&quot;quarter&quot;</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Either `skip_df_gen` flag is set to True or all target params have been precomputed at an earlier step. Using `df` from memory.</span><span class="se">\n</span><span class="s2">Please set this to False if `target_parameters` have changed.&quot;</span><span class="p">)</span>
-            
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Either `skip_df_gen` flag is set to True or all target params have been precomputed at an earlier step. Using `df` from memory.</span><span class="se">\n</span><span class="s2">Please set this to False if `target_parameters` have changed.&quot;</span>
+            <span class="p">)</span>
+
         <span class="n">target_params_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="n">filtered_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">target_params_list</span><span class="p">]</span>  
+        <span class="n">filtered_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">target_params_list</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_outside_bounds</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">filtered_df</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="n">display</span><span class="p">)</span>
 
         <span class="c1"># Set strategy dynamically based on the metric parameter</span>
-        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;Euclidean&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;Euclidean&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_metric_strategy</span><span class="p">(</span><span class="n">EuclideanMetric</span><span class="p">())</span>
-        <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;Manhattan&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;Manhattan&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_metric_strategy</span><span class="p">(</span><span class="n">ManhattanMetric</span><span class="p">())</span>
-        <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;Chebyshev&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;Chebyshev&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_metric_strategy</span><span class="p">(</span><span class="n">ChebyshevMetric</span><span class="p">())</span>
-        <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;Weighted Euclidean&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;Weighted Euclidean&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_metric_strategy</span><span class="p">(</span><span class="n">WeightedEuclideanMetric</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_weights</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;Custom&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;Custom&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_metric_strategy</span><span class="p">(</span><span class="n">CustomMetric</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">custom_metric_func</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_strategy</span><span class="p">:</span>
@@ -994,10 +1010,11 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="p">[</span><span class="n">filtered_df</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">]</span>
 
-
         <span class="c1"># if the filtered_df is empty, raise a User input error</span>
         <span class="k">if</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No geometries found with the specified parameters:</span><span class="se">\n</span><span class="si">{</span><span class="n">target_params</span><span class="si">}</span><span class="se">\n</span><span class="s2">Please double-check your targets (especially ``resonator_type``) and try again.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No geometries found with the specified parameters:</span><span class="se">\n</span><span class="si">{</span><span class="n">target_params</span><span class="si">}</span><span class="se">\n</span><span class="s2">Please double-check your targets (especially ``resonator_type``) and try again.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Calculate distances</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">parallel</span><span class="p">:</span>
@@ -1024,11 +1041,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">closest_design_found</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="o">==</span> <span class="s2">&quot;quarter&quot;</span><span class="p">:</span>
-            <span class="c1"># store the best design </span>
+            <span class="c1"># store the best design</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">closest_design</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
 
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="c1">#! TODO: make this more general</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_system</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1">#! TODO: make this more general</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">presimmed_closest_cpw_design</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">presimmed_closest_qubit_design</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">]</span>
 
@@ -1039,27 +1056,31 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">closest_cavity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_closest_cavity</span><span class="p">()</span>
 
             <span class="k">for</span> <span class="n">merger_term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">claw_merger_terms</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">closest_qubit</span><span class="p">[</span><span class="n">merger_term</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_qubit</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">merger_term</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">closest_qubit</span><span class="p">[</span><span class="n">merger_term</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_qubit</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">merger_term</span><span class="p">)</span>
+                <span class="p">)</span>
 
             <span class="c1"># Create a unified design options column</span>
             <span class="n">merged_df</span> <span class="o">=</span> <span class="n">merge_dfs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closest_qubit</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_cavity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">claw_merger_terms</span><span class="p">)</span>
-            
+
             <span class="c1"># Add a temporary key column for cross join</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="p">[</span><span class="s1">&#39;_temp_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">merged_df</span><span class="p">[</span><span class="s1">&#39;_temp_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="p">[</span><span class="s2">&quot;_temp_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;_temp_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
             <span class="c1"># Perform the cross join</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="p">,</span> <span class="n">merged_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;_temp_key&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;_closest&#39;</span><span class="p">,</span> <span class="s1">&#39;_merged&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;_temp_key&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="p">,</span> <span class="n">merged_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;_temp_key&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;_closest&quot;</span><span class="p">,</span> <span class="s2">&quot;_merged&quot;</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;_temp_key&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># Create the unified design options column</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="p">[</span><span class="s1">&#39;design_options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">create_unified_design_options</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">create_unified_design_options</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df</span></div>
 
 
 <div class="viewcode-block" id="Analyzer.get_closest_cavity">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_closest_cavity">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.get_closest_cavity">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_closest_cavity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the closest cavity design.</span>
@@ -1073,8 +1094,8 @@
 
         <span class="c1"># Use np.where for fast boolean indexing</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cavity_df</span><span class="p">[</span><span class="s1">&#39;index_cc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">closest_index_cc</span><span class="p">)</span> <span class="o">&amp;</span> 
-            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cavity_df</span><span class="p">[</span><span class="s1">&#39;index_cplr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">closest_index_cplr</span><span class="p">)</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cavity_df</span><span class="p">[</span><span class="s2">&quot;index_cc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">closest_index_cc</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cavity_df</span><span class="p">[</span><span class="s2">&quot;index_cplr&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">closest_index_cplr</span><span class="p">)</span>
         <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># Get the index from the DataFrame</span>
@@ -1083,25 +1104,20 @@
 
 
 <div class="viewcode-block" id="Analyzer.compute_metric_distances">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.compute_metric_distances">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.compute_metric_distances">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_metric_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_strategy</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Analyzer.get_interpolated_design">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_interpolated_design">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_interpolated_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                     <span class="n">target_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                     <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Euclidean&#39;</span><span class="p">,</span>
-                     <span class="n">display</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.get_interpolated_design">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_interpolated_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span> <span class="n">display</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
-    
 
 <div class="viewcode-block" id="Analyzer.get_design">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_design">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.get_design">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts the design parameters from the dataframe and returns a dict.</span>
@@ -1113,7 +1129,7 @@
 
 
 <div class="viewcode-block" id="Analyzer.get_param">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_param">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.get_param">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts a specific parameter from the design dict.</span>
@@ -1121,9 +1137,8 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
-
 <div class="viewcode-block" id="Analyzer.closest_design_in_H_space">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.closest_design_in_H_space">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.closest_design_in_H_space">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">closest_design_in_H_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots a scatter plot of the closest design in the H-space.</span>
 
@@ -1137,8 +1152,8 @@
         <span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="s2">&quot;paper&quot;</span><span class="p">,</span> <span class="n">font_scale</span><span class="o">=</span><span class="mf">1.4</span><span class="p">)</span>
 
         <span class="c1"># Create a colormap for the scatter plot points</span>
-        <span class="n">viridis_cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;viridis&#39;</span><span class="p">)</span>
-        <span class="n">color_sim</span> <span class="o">=</span> <span class="n">viridis_cmap</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">viridis_cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+        <span class="n">viridis_cmap</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
         <span class="n">color_presim</span> <span class="o">=</span> <span class="n">viridis_cmap</span><span class="p">(</span><span class="mf">0.9</span><span class="p">)</span>
         <span class="n">color_database</span> <span class="o">=</span> <span class="n">viridis_cmap</span><span class="p">(</span><span class="mf">0.6</span><span class="p">)</span>
 
@@ -1146,131 +1161,176 @@
         <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="o">==</span> <span class="s2">&quot;quarter&quot;</span><span class="p">:</span>
-
             <span class="c1"># First subplot: kappa_kHz vs fres</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;cavity_frequency_GHz&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;kappa_kHz&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color_presim</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Pre-Simulated&quot;</span><span class="p">)</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;kappa_kHz&quot;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Target&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;kappa_kHz&quot;</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color_presim</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Pre-Simulated&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;kappa_kHz&quot;</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Target&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">closest_fres</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span>
             <span class="n">closest_kappa_kHz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;kappa_kHz&quot;</span><span class="p">]</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">closest_fres</span><span class="p">,</span> <span class="n">closest_kappa_kHz</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="n">color_database</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Closest&#39;</span><span class="p">)</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$f_</span><span class="si">{res}</span><span class="s1">$ (GHz)&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\kappa / 2 \pi$ (kHz)&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">closest_fres</span><span class="p">,</span> <span class="n">closest_kappa_kHz</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="n">color_database</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Closest&quot;</span>
+            <span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$f_</span><span class="si">{res}</span><span class="s2">$ (GHz)&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\kappa / 2 \pi$ (kHz)&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
             <span class="c1"># Second subplot: g vs alpha</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;anharmonicity_MHz&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;g_MHz&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color_presim</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Pre-Simulated&quot;</span><span class="p">)</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Target&#39;</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color_presim</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Pre-Simulated&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Target&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">closest_alpha</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">]]</span>
             <span class="n">closest_g</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">]]</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">closest_alpha</span><span class="p">,</span> <span class="n">closest_g</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="n">color_database</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Closest&#39;</span><span class="p">)</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\alpha / 2 \pi$ (MHz)&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$g / 2 \pi$ (MHz)&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">closest_alpha</span><span class="p">,</span> <span class="n">closest_g</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="n">color_database</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Closest&quot;</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\alpha / 2 \pi$ (MHz)&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$g / 2 \pi$ (MHz)&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="o">==</span> <span class="s2">&quot;half&quot;</span><span class="p">:</span>
             <span class="c1"># set up canvas objects</span>
-            <span class="n">x1_range</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;cavity_frequency_GHz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;cavity_frequency_GHz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-            <span class="n">y1_range</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;kappa_kHz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;kappa_kHz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="n">x1_range</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="n">y1_range</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;kappa_kHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;kappa_kHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
 
-            <span class="n">x2_range</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;anharmonicity_MHz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;anharmonicity_MHz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-            <span class="n">y2_range</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;g_MHz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;g_MHz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-            
+            <span class="n">x2_range</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="n">y2_range</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
             <span class="n">canvas1</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">Canvas</span><span class="p">(</span><span class="n">plot_width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">plot_height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">x_range</span><span class="o">=</span><span class="n">x1_range</span><span class="p">,</span> <span class="n">y_range</span><span class="o">=</span><span class="n">y1_range</span><span class="p">)</span>
             <span class="n">canvas2</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">Canvas</span><span class="p">(</span><span class="n">plot_width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">plot_height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">x_range</span><span class="o">=</span><span class="n">x2_range</span><span class="p">,</span> <span class="n">y_range</span><span class="o">=</span><span class="n">y2_range</span><span class="p">)</span>
-            <span class="n">agg1</span> <span class="o">=</span> <span class="n">canvas1</span><span class="o">.</span><span class="n">points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;cavity_frequency_GHz&#39;</span><span class="p">,</span> <span class="s1">&#39;kappa_kHz&#39;</span><span class="p">)</span>
-            <span class="n">agg2</span> <span class="o">=</span> <span class="n">canvas2</span><span class="o">.</span><span class="n">points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;anharmonicity_MHz&#39;</span><span class="p">,</span> <span class="s1">&#39;g_MHz&#39;</span><span class="p">)</span>
+            <span class="n">agg1</span> <span class="o">=</span> <span class="n">canvas1</span><span class="o">.</span><span class="n">points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">,</span> <span class="s2">&quot;kappa_kHz&quot;</span><span class="p">)</span>
+            <span class="n">agg2</span> <span class="o">=</span> <span class="n">canvas2</span><span class="o">.</span><span class="n">points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">,</span> <span class="s2">&quot;g_MHz&quot;</span><span class="p">)</span>
 
             <span class="c1"># Create the image using a list of colors from the &#39;Blues&#39; colormap</span>
-            <span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;Blues&#39;</span><span class="p">)</span>
+            <span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;Blues&quot;</span><span class="p">)</span>
             <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">cmap</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cmap</span><span class="o">.</span><span class="n">N</span><span class="p">)]</span>
-            <span class="n">hex_colors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">*</span><span class="mi">255</span><span class="p">)</span><span class="si">:</span><span class="s2">02x</span><span class="si">}{</span><span class="nb">int</span><span class="p">(</span><span class="n">g</span><span class="o">*</span><span class="mi">255</span><span class="p">)</span><span class="si">:</span><span class="s2">02x</span><span class="si">}{</span><span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="o">*</span><span class="mi">255</span><span class="p">)</span><span class="si">:</span><span class="s2">02x</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">colors</span><span class="p">]</span>
+            <span class="n">hex_colors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">255</span><span class="p">)</span><span class="si">:</span><span class="s2">02x</span><span class="si">}{</span><span class="nb">int</span><span class="p">(</span><span class="n">g</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">255</span><span class="p">)</span><span class="si">:</span><span class="s2">02x</span><span class="si">}{</span><span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">255</span><span class="p">)</span><span class="si">:</span><span class="s2">02x</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">colors</span><span class="p">]</span>
             <span class="n">img1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shade</span><span class="p">(</span><span class="n">agg1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">hex_colors</span><span class="p">)</span>
             <span class="n">img2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shade</span><span class="p">(</span><span class="n">agg2</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">hex_colors</span><span class="p">)</span>
 
             <span class="c1"># Plot the first subplot</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img1</span><span class="o">.</span><span class="n">to_pil</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">x1_range</span><span class="p">,</span> <span class="o">*</span><span class="n">y1_range</span><span class="p">])</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$f_</span><span class="si">{res}</span><span class="s1">$ (GHz)&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\kappa / 2 \pi$ (Hz)&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img1</span><span class="o">.</span><span class="n">to_pil</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">x1_range</span><span class="p">,</span> <span class="o">*</span><span class="n">y1_range</span><span class="p">])</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$f_</span><span class="si">{res}</span><span class="s2">$ (GHz)&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\kappa / 2 \pi$ (Hz)&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
             <span class="c1"># !TODO: add legend</span>
-            <span class="n">pre_simulated_patch</span> <span class="o">=</span> <span class="n">Patch</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="n">color_presim</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Pre-Simulated&#39;</span><span class="p">)</span>
+            <span class="n">Patch</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="n">color_presim</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Pre-Simulated&quot;</span><span class="p">)</span>
 
             <span class="c1"># Plot the second subplot</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img2</span><span class="o">.</span><span class="n">to_pil</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">x2_range</span><span class="p">,</span> <span class="o">*</span><span class="n">y2_range</span><span class="p">])</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\alpha / 2 \pi$ (MHz)&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$g / 2 \pi$ (MHz)&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-            
+            <span class="n">ax2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img2</span><span class="o">.</span><span class="n">to_pil</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">x2_range</span><span class="p">,</span> <span class="o">*</span><span class="n">y2_range</span><span class="p">])</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\alpha / 2 \pi$ (MHz)&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$g / 2 \pi$ (MHz)&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
             <span class="c1"># Plot the target points</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;kappa_kHz&quot;</span><span class="p">]</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span> <span class="s1">&#39;rx&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Target&#39;</span><span class="p">)</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">],</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Target&#39;</span><span class="p">)</span>
-            
+            <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;kappa_kHz&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e3</span><span class="p">,</span> <span class="s2">&quot;rx&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Target&quot;</span>
+            <span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">],</span> <span class="s2">&quot;ro&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Target&quot;</span><span class="p">)</span>
+
             <span class="c1"># Plot the closest design point</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;kappa&quot;</span><span class="p">],</span> <span class="s1">&#39;bs&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Closest&#39;</span><span class="p">)</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">],</span> <span class="s1">&#39;bs&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Closest&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;kappa&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;bs&quot;</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Closest&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">closest_df_entry</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;bs&quot;</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Closest&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Your chosen resonator type - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span><span class="si">}</span><span class="s2"> - is not supported. Please use </span><span class="se">\&quot;</span><span class="s2">quarter</span><span class="se">\&quot;</span><span class="s2"> or </span><span class="se">\&quot;</span><span class="s2">half</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Your chosen resonator type - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span><span class="si">}</span><span class="s1"> - is not supported. Please use &quot;quarter&quot; or &quot;half&quot;&#39;</span>
+            <span class="p">)</span>
 
-        <span class="n">legend1</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">legend1</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">legend1</span><span class="o">.</span><span class="n">get_texts</span><span class="p">():</span>
-            <span class="n">text</span><span class="o">.</span><span class="n">set_fontweight</span><span class="p">(</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+            <span class="n">text</span><span class="o">.</span><span class="n">set_fontweight</span><span class="p">(</span><span class="s2">&quot;bold&quot;</span><span class="p">)</span>
 
-        <span class="n">legend2</span> <span class="o">=</span> <span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower left&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">legend2</span> <span class="o">=</span> <span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">legend2</span><span class="o">.</span><span class="n">get_texts</span><span class="p">():</span>
-            <span class="n">text</span><span class="o">.</span><span class="n">set_fontweight</span><span class="p">(</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+            <span class="n">text</span><span class="o">.</span><span class="n">set_fontweight</span><span class="p">(</span><span class="s2">&quot;bold&quot;</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Analyzer.get_qubit_options">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_qubit_options">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_qubit_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.get_qubit_options">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_qubit_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts qubit design options from the dataframe.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters:</span>
 <span class="sd">        df (pd.DataFrame): The dataframe containing design options.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">        Dict[str, List[Any]]: A dictionary containing lists of the extracted qubit options.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">qubit_options_dict</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;claw_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;claw_length&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;claw_width&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;ground_spacing&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;cross_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;cross_length&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;cross_width&#39;</span><span class="p">:</span> <span class="p">[]</span>
+            <span class="s2">&quot;claw_gap&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;claw_length&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;claw_width&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;ground_spacing&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;cross_gap&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;cross_length&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;cross_width&quot;</span><span class="p">:</span> <span class="p">[],</span>
         <span class="p">}</span>
 
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">design_options</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_options&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">design_options</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">design_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has no &#39;design_options&#39;.&quot;</span><span class="p">)</span>
-                <span class="n">qubit_options</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;qubit_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">qubit_options</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;qubit_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
 
-                <span class="n">claw_gap</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;readout&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;claw_gap&#39;</span><span class="p">)</span>
-                <span class="n">claw_length</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;readout&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;claw_length&#39;</span><span class="p">)</span>
-                <span class="n">claw_width</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;readout&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;claw_width&#39;</span><span class="p">)</span>
-                <span class="n">ground_spacing</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;readout&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">)</span>
-                <span class="n">cross_gap</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">)</span>
-                <span class="n">cross_length</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cross_length&#39;</span><span class="p">)</span>
-                <span class="n">cross_width</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cross_width&#39;</span><span class="p">)</span>
+                <span class="n">claw_gap</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;readout&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;claw_gap&quot;</span><span class="p">)</span>
+                <span class="n">claw_length</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;readout&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;claw_length&quot;</span><span class="p">)</span>
+                <span class="n">claw_width</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;readout&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;claw_width&quot;</span><span class="p">)</span>
+                <span class="n">ground_spacing</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;readout&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">)</span>
+                <span class="n">cross_gap</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cross_gap&quot;</span><span class="p">)</span>
+                <span class="n">cross_length</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cross_length&quot;</span><span class="p">)</span>
+                <span class="n">cross_width</span> <span class="o">=</span> <span class="n">qubit_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cross_width&quot;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="p">[</span><span class="n">claw_gap</span><span class="p">,</span> <span class="n">claw_length</span><span class="p">,</span> <span class="n">claw_width</span><span class="p">,</span> <span class="n">ground_spacing</span><span class="p">,</span> <span class="n">cross_gap</span><span class="p">,</span> <span class="n">cross_length</span><span class="p">,</span> <span class="n">cross_width</span><span class="p">]:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has missing qubit parameter(s).&quot;</span><span class="p">)</span>
 
-                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;claw_gap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claw_gap</span><span class="p">)</span>
-                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;claw_length&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claw_length</span><span class="p">)</span>
-                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;claw_width&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claw_width</span><span class="p">)</span>
-                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ground_spacing</span><span class="p">)</span>
-                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_gap</span><span class="p">)</span>
-                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;cross_length&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_length</span><span class="p">)</span>
-                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s1">&#39;cross_width&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_width</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s2">&quot;claw_gap&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claw_gap</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s2">&quot;claw_length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claw_length</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s2">&quot;claw_width&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claw_width</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ground_spacing</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s2">&quot;cross_gap&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_gap</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s2">&quot;cross_length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_length</span><span class="p">)</span>
+                <span class="n">qubit_options_dict</span><span class="p">[</span><span class="s2">&quot;cross_width&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_width</span><span class="p">)</span>
 
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1280,42 +1340,37 @@
         <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">qubit_options_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
 
 
-
 <div class="viewcode-block" id="Analyzer.get_cpw_options">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_cpw_options">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_cpw_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.get_cpw_options">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cpw_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts CPW options from the dataframe.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters:</span>
 <span class="sd">        df (pd.DataFrame): The dataframe containing design options.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">        Dict[str, List[Any]]: A dictionary containing lists of the extracted CPW options.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cpw_options_dict</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;total_length&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;trace_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;trace_width&#39;</span><span class="p">:</span> <span class="p">[]</span>
-        <span class="p">}</span>
+        <span class="n">cpw_options_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;total_length&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;trace_gap&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;trace_width&quot;</span><span class="p">:</span> <span class="p">[]}</span>
 
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">design_options</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_options&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">design_options</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">design_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has no &#39;design_options&#39;.&quot;</span><span class="p">)</span>
-                <span class="n">cpw_opts</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cavity_claw_options&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cpw_opts&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;left_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">cpw_opts</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;left_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
 
-                <span class="n">total_length</span> <span class="o">=</span> <span class="n">cpw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;total_length&#39;</span><span class="p">)</span>
-                <span class="n">trace_gap</span> <span class="o">=</span> <span class="n">cpw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;trace_gap&#39;</span><span class="p">)</span>
-                <span class="n">trace_width</span> <span class="o">=</span> <span class="n">cpw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;trace_width&#39;</span><span class="p">)</span>
+                <span class="n">total_length</span> <span class="o">=</span> <span class="n">cpw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;total_length&quot;</span><span class="p">)</span>
+                <span class="n">trace_gap</span> <span class="o">=</span> <span class="n">cpw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trace_gap&quot;</span><span class="p">)</span>
+                <span class="n">trace_width</span> <span class="o">=</span> <span class="n">cpw_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trace_width&quot;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="p">[</span><span class="n">total_length</span><span class="p">,</span> <span class="n">trace_gap</span><span class="p">,</span> <span class="n">trace_width</span><span class="p">]:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has missing CPW parameter(s).&quot;</span><span class="p">)</span>
 
-                <span class="n">cpw_options_dict</span><span class="p">[</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total_length</span><span class="p">)</span>
-                <span class="n">cpw_options_dict</span><span class="p">[</span><span class="s1">&#39;trace_gap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace_gap</span><span class="p">)</span>
-                <span class="n">cpw_options_dict</span><span class="p">[</span><span class="s1">&#39;trace_width&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace_width</span><span class="p">)</span>
+                <span class="n">cpw_options_dict</span><span class="p">[</span><span class="s2">&quot;total_length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total_length</span><span class="p">)</span>
+                <span class="n">cpw_options_dict</span><span class="p">[</span><span class="s2">&quot;trace_gap&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace_gap</span><span class="p">)</span>
+                <span class="n">cpw_options_dict</span><span class="p">[</span><span class="s2">&quot;trace_width&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace_width</span><span class="p">)</span>
 
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1325,66 +1380,65 @@
         <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">cpw_options_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
 
 
-
 <div class="viewcode-block" id="Analyzer.get_coupler_options">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_coupler_options">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_coupler_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.get_coupler_options">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_coupler_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts coupler options from the dataframe.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters:</span>
 <span class="sd">        df (pd.DataFrame): The dataframe containing design options.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">        Dict[str, List[Any]]: A dictionary containing lists of the extracted coupler options.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">coupler_options_dict</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;coupling_length&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;coupling_space&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;down_length&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;orientation&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;prime_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;prime_width&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;second_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;second_width&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;cap_distance&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;cap_gap&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;cap_gap_ground&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;cap_width&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;finger_count&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;finger_length&#39;</span><span class="p">:</span> <span class="p">[]</span>
+            <span class="s2">&quot;coupling_length&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;coupling_space&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;down_length&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;orientation&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;prime_gap&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;prime_width&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;second_gap&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;second_width&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;cap_distance&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;cap_gap&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;cap_gap_ground&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;cap_width&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;finger_count&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;finger_length&quot;</span><span class="p">:</span> <span class="p">[],</span>
         <span class="p">}</span>
 
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">design_options</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;design_options&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">design_options</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">design_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has no &#39;design_options&#39;.&quot;</span><span class="p">)</span>
-                <span class="n">cavity_claw_options</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cavity_claw_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
-                <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">cavity_claw_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coupler_type&#39;</span><span class="p">)</span>
+                <span class="n">cavity_claw_options</span> <span class="o">=</span> <span class="n">design_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cavity_claw_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">cavity_claw_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">coupler_type</span> <span class="o">==</span> <span class="s1">&#39;CLT&#39;</span><span class="p">:</span>
-                    <span class="n">coupler_options</span> <span class="o">=</span> <span class="n">cavity_claw_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coupler_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">if</span> <span class="n">coupler_type</span> <span class="o">==</span> <span class="s2">&quot;CLT&quot;</span><span class="p">:</span>
+                    <span class="n">coupler_options</span> <span class="o">=</span> <span class="n">cavity_claw_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
                     <span class="n">extracted_options</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s1">&#39;coupling_length&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coupling_length&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;coupling_space&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coupling_space&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;down_length&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;down_length&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;orientation&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;orientation&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;prime_gap&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;prime_gap&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;prime_width&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;prime_width&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;second_gap&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;second_gap&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;second_width&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;second_width&#39;</span><span class="p">)</span>
+                        <span class="s2">&quot;coupling_length&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;coupling_length&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;coupling_space&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;coupling_space&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;down_length&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;down_length&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;orientation&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;orientation&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;prime_gap&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prime_gap&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;prime_width&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prime_width&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;second_gap&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;second_gap&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;second_width&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;second_width&quot;</span><span class="p">),</span>
                     <span class="p">}</span>
-                <span class="k">elif</span> <span class="n">coupler_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;NCap&#39;</span><span class="p">,</span> <span class="s1">&#39;CapNInterdigital&#39;</span><span class="p">]:</span>
-                    <span class="n">coupler_options</span> <span class="o">=</span> <span class="n">cavity_claw_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coupler_options&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">elif</span> <span class="n">coupler_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NCap&quot;</span><span class="p">,</span> <span class="s2">&quot;CapNInterdigital&quot;</span><span class="p">]:</span>
+                    <span class="n">coupler_options</span> <span class="o">=</span> <span class="n">cavity_claw_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
                     <span class="n">extracted_options</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s1">&#39;cap_distance&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cap_distance&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;cap_gap&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cap_gap&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;cap_gap_ground&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cap_gap_ground&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;cap_width&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cap_width&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;finger_count&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;finger_count&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;finger_length&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;finger_length&#39;</span><span class="p">),</span>
-                        <span class="s1">&#39;orientation&#39;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;orientation&#39;</span><span class="p">)</span>
+                        <span class="s2">&quot;cap_distance&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cap_distance&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;cap_gap&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cap_gap&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;cap_gap_ground&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cap_gap_ground&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;cap_width&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cap_width&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;finger_count&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;finger_count&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;finger_length&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;finger_length&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;orientation&quot;</span><span class="p">:</span> <span class="n">coupler_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;orientation&quot;</span><span class="p">),</span>
                     <span class="p">}</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Row </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> has an unsupported coupler_type: </span><span class="si">{</span><span class="n">coupler_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1400,32 +1454,29 @@
         <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">coupler_options_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
 
 
-        
 <div class="viewcode-block" id="Analyzer.get_Ljs">
-<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.analysis.Analyzer.get_Ljs">[docs]</a>
+<a class="viewcode-back" href="../../../source/squadds.core.html#squadds.Analyzer.get_Ljs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_Ljs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts the EJ values from the dataframe. Converts them to Josephson inductance values using pyEPR</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters:</span>
-<span class="sd">        df (pd.DataFrame): The dataframe containing design options. </span>
-<span class="sd">        </span>
+<span class="sd">        df (pd.DataFrame): The dataframe containing design options.</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">        np.array: An array of Josephson inductance values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyEPR.calcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convert</span>
 
         <span class="c1"># EJ values are stored in a column named &#39;EJ&#39; in GHz</span>
-        <span class="n">EJ_values</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;EJ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        
+        <span class="n">EJ_values</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;EJ&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
         <span class="c1"># Convert EJ (in MHz) to Josephson inductance (Lj) in nH</span>
-        <span class="n">Ljs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Convert</span><span class="o">.</span><span class="n">Lj_from_Ej</span><span class="p">(</span><span class="n">Ej</span><span class="p">,</span> <span class="n">units_in</span><span class="o">=</span><span class="s1">&#39;GHz&#39;</span><span class="p">,</span> <span class="n">units_out</span><span class="o">=</span><span class="s1">&#39;nH&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">Ej</span> <span class="ow">in</span> <span class="n">EJ_values</span><span class="p">])</span>
-        
+        <span class="n">Ljs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Convert</span><span class="o">.</span><span class="n">Lj_from_Ej</span><span class="p">(</span><span class="n">Ej</span><span class="p">,</span> <span class="n">units_in</span><span class="o">=</span><span class="s2">&quot;GHz&quot;</span><span class="p">,</span> <span class="n">units_out</span><span class="o">=</span><span class="s2">&quot;nH&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">Ej</span> <span class="ow">in</span> <span class="n">EJ_values</span><span class="p">])</span>
+
         <span class="k">return</span> <span class="n">Ljs</span></div>
 </div>
 
-        
-        
 </pre></div>
 
                 </article>
@@ -1476,7 +1527,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

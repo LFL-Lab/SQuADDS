@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.simulations.utils &#8212; SQuADDS v0.3.7</title>
+    <title>squadds.simulations.utils &#8212; SQuADDS v0.4.0</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=29d04658"></script>
+    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -584,34 +584,20 @@
 <span class="sd">This file contains utility functions for the simulation.</span>
 <span class="sd">========================================================================================================================</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">metal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scqubits</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scq</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">prettytable</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrettyTable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyaedt</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hfss</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">MetalGUI</span><span class="p">,</span> <span class="n">designs</span><span class="p">,</span> <span class="n">draw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">QComponent</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee</span><span class="w"> </span><span class="kn">import</span> \
-    <span class="n">CapNInterdigitalTee</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapNInterdigitalTee</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoupledLineTee</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineTee</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.qubits.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCross</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.launchpad_wb</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaunchpadWirebond</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.open_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenToGround</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.terminations.short_to_ground</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShortToGround</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.anchored_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteAnchors</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.meandered</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMeander</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.mixed_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMixed</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.straight_path</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteStraight</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.toolbox_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">math_and_overrides</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.claw_coupler</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonClaw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.coupled_systems</span><span class="w"> </span><span class="kn">import</span> <span class="n">QubitCavity</span>
@@ -628,7 +614,7 @@
             <span class="n">cplr_opts_key</span> <span class="o">=</span> <span class="n">key</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
-    
+
     <span class="k">return</span> <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span></div>
 
 
@@ -666,6 +652,7 @@
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 
+
 <div class="viewcode-block" id="generate_bbox">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.generate_bbox">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">generate_bbox</span><span class="p">(</span><span class="n">component</span><span class="p">:</span> <span class="n">QComponent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
@@ -679,18 +666,14 @@
 <span class="sd">    Dict[str, float]: A dictionary representing the bounding box with keys &#39;min_x&#39;, &#39;max_x&#39;, &#39;min_y&#39;, &#39;max_y&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">bounds</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">qgeometry_bounds</span><span class="p">()</span>
-    <span class="n">bbox</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;min_x&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s1">&#39;max_x&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-        <span class="s1">&#39;min_y&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-        <span class="s1">&#39;max_y&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-    <span class="p">}</span>
+    <span class="n">bbox</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;min_x&quot;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;max_x&quot;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s2">&quot;min_y&quot;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;max_y&quot;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]}</span>
     <span class="k">return</span> <span class="n">bbox</span></div>
+
 
 
 <div class="viewcode-block" id="setMaterialProperties">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.setMaterialProperties">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">setMaterialProperties</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span><span class="n">designname</span><span class="p">,</span><span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setMaterialProperties</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="n">designname</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interfaces with ANSYS via pyEPR for more custom automation.</span>
 <span class="sd">    1. Connects to ANSYS.</span>
@@ -703,17 +686,19 @@
 <span class="sd">        solutiontype (str, optional): The type of solution. Defaults to &quot;Eigenmode&quot;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">aedt</span> <span class="o">=</span> <span class="n">Hfss</span><span class="p">(</span><span class="n">projectname</span><span class="o">=</span><span class="n">projectname</span><span class="p">,</span> 
-                <span class="n">designname</span><span class="o">=</span><span class="n">designname</span><span class="p">,</span> 
-                <span class="n">solution_type</span><span class="o">=</span><span class="n">solutiontype</span><span class="p">,</span>
-                <span class="n">new_desktop_session</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-                <span class="n">close_on_exit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
+    <span class="n">aedt</span> <span class="o">=</span> <span class="n">Hfss</span><span class="p">(</span>
+        <span class="n">projectname</span><span class="o">=</span><span class="n">projectname</span><span class="p">,</span>
+        <span class="n">designname</span><span class="o">=</span><span class="n">designname</span><span class="p">,</span>
+        <span class="n">solution_type</span><span class="o">=</span><span class="n">solutiontype</span><span class="p">,</span>
+        <span class="n">new_desktop_session</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">close_on_exit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">ultra_cold_silicon</span><span class="p">(</span><span class="n">aedt</span><span class="p">)</span>
     <span class="n">delete_old_setups</span><span class="p">(</span><span class="n">aedt</span><span class="p">)</span>
 
     <span class="n">aedt</span><span class="o">.</span><span class="n">release_desktop</span><span class="p">(</span><span class="n">close_projects</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">close_desktop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="ultra_cold_silicon">
@@ -725,9 +710,10 @@
 <span class="sd">        aedt (pyAEDT Desktop obj)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">materials</span> <span class="o">=</span> <span class="n">aedt</span><span class="o">.</span><span class="n">materials</span>
-    <span class="n">silicon</span> <span class="o">=</span> <span class="n">materials</span><span class="o">.</span><span class="n">checkifmaterialexists</span><span class="p">(</span><span class="s1">&#39;silicon&#39;</span><span class="p">)</span>
+    <span class="n">silicon</span> <span class="o">=</span> <span class="n">materials</span><span class="o">.</span><span class="n">checkifmaterialexists</span><span class="p">(</span><span class="s2">&quot;silicon&quot;</span><span class="p">)</span>
     <span class="n">silicon</span><span class="o">.</span><span class="n">permittivity</span> <span class="o">=</span> <span class="mf">11.45</span>
-    <span class="n">silicon</span><span class="o">.</span><span class="n">dielectric_loss_tangent</span> <span class="o">=</span> <span class="mf">1E-7</span></div>
+    <span class="n">silicon</span><span class="o">.</span><span class="n">dielectric_loss_tangent</span> <span class="o">=</span> <span class="mf">1e-7</span></div>
+
 
 
 <div class="viewcode-block" id="delete_old_setups">
@@ -743,6 +729,7 @@
         <span class="n">aedt</span><span class="o">.</span><span class="n">setups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
 
 
+
 <div class="viewcode-block" id="calculate_center_and_dimensions">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.calculate_center_and_dimensions">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_center_and_dimensions</span><span class="p">(</span><span class="n">bbox</span><span class="p">):</span>
@@ -752,15 +739,16 @@
 <span class="sd">    :param bbox: The bounding box dictionary with keys &#39;min_x&#39;, &#39;max_x&#39;, &#39;min_y&#39;, &#39;max_y&#39;.</span>
 <span class="sd">    :return: A tuple containing the center coordinates and dimensions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">center_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">bbox</span><span class="p">[</span><span class="s1">&#39;min_x&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[</span><span class="s1">&#39;max_x&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> 
-    <span class="n">center_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bbox</span><span class="p">[</span><span class="s1">&#39;min_y&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[</span><span class="s1">&#39;max_y&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> 
+    <span class="n">center_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">bbox</span><span class="p">[</span><span class="s2">&quot;min_x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[</span><span class="s2">&quot;max_x&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">center_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bbox</span><span class="p">[</span><span class="s2">&quot;min_y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[</span><span class="s2">&quot;max_y&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
     <span class="n">center_z</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">x_size</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="s1">&#39;max_x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">bbox</span><span class="p">[</span><span class="s1">&#39;min_x&#39;</span><span class="p">]</span>  
-    <span class="n">y_size</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="s1">&#39;max_y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">bbox</span><span class="p">[</span><span class="s1">&#39;min_y&#39;</span><span class="p">]</span>
+    <span class="n">x_size</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="s2">&quot;max_x&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">bbox</span><span class="p">[</span><span class="s2">&quot;min_x&quot;</span><span class="p">]</span>
+    <span class="n">y_size</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="s2">&quot;max_y&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">bbox</span><span class="p">[</span><span class="s2">&quot;min_y&quot;</span><span class="p">]</span>
     <span class="n">z_size</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">center_x</span><span class="p">,</span> <span class="n">center_y</span><span class="p">,</span> <span class="n">center_z</span><span class="p">),</span> <span class="p">(</span><span class="n">x_size</span><span class="p">,</span> <span class="n">y_size</span><span class="p">,</span> <span class="n">z_size</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="get_freq">
@@ -780,15 +768,16 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_convergences</span><span class="p">()</span>
         <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_fields</span><span class="p">(</span><span class="s1">&#39;main&#39;</span><span class="p">)</span>
+        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_fields</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
         <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;couldn&#39;t generate plots.&quot;</span><span class="p">)</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">epra</span><span class="o">.</span><span class="n">get_frequencies</span><span class="p">()</span>
 
     <span class="n">freq</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e9</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;freq = </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">freq</span><span class="o">/</span><span class="mf">1e9</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> GHz&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;freq = </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">freq</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> GHz&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">freq</span></div>
+
 
 
 <div class="viewcode-block" id="get_freq_Q_kappa">
@@ -808,7 +797,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_convergences</span><span class="p">()</span>
         <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_fields</span><span class="p">(</span><span class="s1">&#39;main&#39;</span><span class="p">)</span>
+        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_fields</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
         <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;couldn&#39;t generate plots.&quot;</span><span class="p">)</span>
@@ -816,10 +805,11 @@
     <span class="n">freq</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e9</span>
     <span class="n">Q</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">kappa</span> <span class="o">=</span> <span class="n">freq</span> <span class="o">/</span> <span class="n">Q</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;freq = </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">freq</span><span class="o">/</span><span class="mf">1e9</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> GHz&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;freq = </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">freq</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> GHz&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q = </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;kappa = </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">kappa</span><span class="o">/</span><span class="mf">1e6</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> MHz&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;kappa = </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">kappa</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e6</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> MHz&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">freq</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">kappa</span></div>
+
 
 
 <div class="viewcode-block" id="mesh_objects">
@@ -836,7 +826,8 @@
 <span class="sd">    :param mesh_lengths: Dictionary containing mesh names, associated objects, and MaxLength values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">mesh_name</span><span class="p">,</span> <span class="n">mesh_info</span> <span class="ow">in</span> <span class="n">mesh_lengths</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">modeler</span><span class="o">.</span><span class="n">mesh_length</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">,</span> <span class="n">mesh_info</span><span class="p">[</span><span class="s1">&#39;objects&#39;</span><span class="p">],</span> <span class="n">MaxLength</span><span class="o">=</span><span class="n">mesh_info</span><span class="p">[</span><span class="s1">&#39;MaxLength&#39;</span><span class="p">])</span></div>
+        <span class="n">modeler</span><span class="o">.</span><span class="n">mesh_length</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">,</span> <span class="n">mesh_info</span><span class="p">[</span><span class="s2">&quot;objects&quot;</span><span class="p">],</span> <span class="n">MaxLength</span><span class="o">=</span><span class="n">mesh_info</span><span class="p">[</span><span class="s2">&quot;MaxLength&quot;</span><span class="p">])</span></div>
+
 
 
 <div class="viewcode-block" id="add_ground_strip_and_mesh">
@@ -854,22 +845,23 @@
 <span class="sd">    :param mesh_lengths: Dictionary containing mesh names, associated objects, and MaxLength values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">bounds</span> <span class="o">=</span> <span class="n">coupler</span><span class="o">.</span><span class="n">qgeometry_bounds</span><span class="p">()</span>
-    <span class="n">bbox</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;min_x&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;max_x&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;min_y&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;max_y&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]}</span>
+    <span class="n">bbox</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;min_x&quot;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;max_x&quot;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s2">&quot;min_y&quot;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;max_y&quot;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]}</span>
     <span class="n">center</span><span class="p">,</span> <span class="n">dimensions</span> <span class="o">=</span> <span class="n">calculate_center_and_dimensions</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
-    <span class="n">gs</span> <span class="o">=</span> <span class="n">modeler</span><span class="o">.</span><span class="n">draw_rect_center</span><span class="p">(</span>
+    <span class="n">modeler</span><span class="o">.</span><span class="n">draw_rect_center</span><span class="p">(</span>
         <span class="p">[</span><span class="n">coord</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">center</span><span class="p">],</span>
         <span class="n">x_size</span><span class="o">=</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e-3</span><span class="p">,</span>
         <span class="n">y_size</span><span class="o">=</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e-3</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ground_strip&#39;</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ground_strip&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">modeler</span><span class="o">.</span><span class="n">intersect</span><span class="p">([</span><span class="s2">&quot;ground_strip&quot;</span><span class="p">,</span> <span class="s2">&quot;ground_main_plane&quot;</span><span class="p">],</span> <span class="kc">True</span><span class="p">)</span>
     <span class="n">modeler</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="s2">&quot;ground_main_plane&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;ground_strip&quot;</span><span class="p">],</span> <span class="kc">True</span><span class="p">)</span>
     <span class="n">modeler</span><span class="o">.</span><span class="n">assign_perfect_E</span><span class="p">([</span><span class="s2">&quot;ground_strip&quot;</span><span class="p">])</span>
-    <span class="n">mesh_lengths</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;mesh_ground_strip&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;objects&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ground_strip&quot;</span><span class="p">],</span> <span class="s2">&quot;MaxLength&quot;</span><span class="p">:</span> <span class="s1">&#39;4um&#39;</span><span class="p">}})</span>
+    <span class="n">mesh_lengths</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;mesh_ground_strip&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;objects&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ground_strip&quot;</span><span class="p">],</span> <span class="s2">&quot;MaxLength&quot;</span><span class="p">:</span> <span class="s2">&quot;4um&quot;</span><span class="p">}})</span>
 
     <span class="k">for</span> <span class="n">mesh_name</span><span class="p">,</span> <span class="n">mesh_info</span> <span class="ow">in</span> <span class="n">mesh_lengths</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">modeler</span><span class="o">.</span><span class="n">mesh_length</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">,</span> <span class="n">mesh_info</span><span class="p">[</span><span class="s1">&#39;objects&#39;</span><span class="p">],</span> <span class="n">MaxLength</span><span class="o">=</span><span class="n">mesh_info</span><span class="p">[</span><span class="s1">&#39;MaxLength&#39;</span><span class="p">])</span></div>
+        <span class="n">modeler</span><span class="o">.</span><span class="n">mesh_length</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">,</span> <span class="n">mesh_info</span><span class="p">[</span><span class="s2">&quot;objects&quot;</span><span class="p">],</span> <span class="n">MaxLength</span><span class="o">=</span><span class="n">mesh_info</span><span class="p">[</span><span class="s2">&quot;MaxLength&quot;</span><span class="p">])</span></div>
+
 
 
 <div class="viewcode-block" id="create_qubitcavity">
@@ -889,6 +881,7 @@
     <span class="k">return</span> <span class="n">qubitcavity</span></div>
 
 
+
 <div class="viewcode-block" id="create_claw">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_claw">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_claw</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">cpw_length</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
@@ -905,8 +898,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-90&quot;</span>
     <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;pos_x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-1500um&quot;</span> <span class="k">if</span> <span class="n">cpw_length</span> <span class="o">&gt;</span> <span class="mi">2500</span> <span class="k">else</span> <span class="s2">&quot;-1000um&quot;</span>
-    <span class="n">claw</span> <span class="o">=</span> <span class="n">TransmonClaw</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;claw&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span>
+    <span class="n">claw</span> <span class="o">=</span> <span class="n">TransmonClaw</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;claw&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">claw</span></div>
+
 
 
 <div class="viewcode-block" id="create_ncap_coupler">
@@ -923,8 +917,9 @@
 <span class="sd">        The created coupler object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-90&quot;</span>
-    <span class="n">cplr</span> <span class="o">=</span> <span class="n">CapNInterdigitalTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;cplr&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">opts</span><span class="p">)</span>
+    <span class="n">cplr</span> <span class="o">=</span> <span class="n">CapNInterdigitalTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;cplr&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cplr</span></div>
+
 
 
 <div class="viewcode-block" id="create_clt_coupler">
@@ -941,8 +936,9 @@
 <span class="sd">        The created coupler object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-90&quot;</span>
-    <span class="n">cplr</span> <span class="o">=</span> <span class="n">CoupledLineTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;cplr&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">opts</span><span class="p">)</span>
+    <span class="n">cplr</span> <span class="o">=</span> <span class="n">CoupledLineTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;cplr&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cplr</span></div>
+
 
 
 <div class="viewcode-block" id="create_cpw">
@@ -959,29 +955,43 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        RouteMeander: The created coplanar waveguide (CPW).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">adj_distance</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="s2">&quot;finger_count&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cplr</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
-        <span class="n">adj_distance</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">,</span> <span class="n">cplr</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;coupling_length&quot;</span><span class="p">])))</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">,</span> <span class="n">cplr</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;coupling_length&quot;</span><span class="p">])))</span> <span class="o">&gt;</span> <span class="mi">150</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">,</span> <span class="n">cplr</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;coupling_length&quot;</span><span class="p">])))</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">,</span> <span class="n">cplr</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;coupling_length&quot;</span><span class="p">])))</span> <span class="o">&gt;</span> <span class="mi">150</span>
+            <span class="k">else</span> <span class="mi">0</span>
+        <span class="p">)</span>
 
     <span class="c1"># adj_distance = int(&quot;&quot;.join(filter(str.isdigit, cplr.options[&quot;coupling_length&quot;]))) if int(&quot;&quot;.join(filter(str.isdigit, cplr.options[&quot;coupling_length&quot;]))) &gt; 150 else 0</span>
     <span class="c1"># jogs = OrderedDict()</span>
     <span class="c1"># jogs[0] = [&quot;R90&quot;, f&#39;{adj_distance/(1.5)}um&#39;]</span>
-    <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;lead&quot;</span> <span class="p">:</span> <span class="n">Dict</span><span class="p">(</span>
-                            <span class="n">start_straight</span> <span class="o">=</span> <span class="s2">&quot;50um&quot;</span><span class="p">,</span>
-                            <span class="n">end_straight</span> <span class="o">=</span> <span class="s2">&quot;50um&quot;</span><span class="p">,</span>
-                            
-                            <span class="c1"># start_jogged_extension = jogs</span>
-                            <span class="p">)})</span>
-    <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;pin_inputs&quot;</span> <span class="p">:</span> <span class="n">Dict</span><span class="p">(</span><span class="n">start_pin</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">component</span> <span class="o">=</span> <span class="n">cplr</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                                                    <span class="n">pin</span> <span class="o">=</span> <span class="s1">&#39;second_end&#39;</span><span class="p">),</span>
-                                   <span class="n">end_pin</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">component</span> <span class="o">=</span> <span class="s1">&#39;claw&#39;</span><span class="p">,</span>
-                                                  <span class="n">pin</span> <span class="o">=</span> <span class="s1">&#39;readout&#39;</span><span class="p">))})</span>
-    <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;meander&quot;</span> <span class="p">:</span> <span class="n">Dict</span><span class="p">(</span>
-                                <span class="n">spacing</span> <span class="o">=</span> <span class="s2">&quot;100um&quot;</span><span class="p">,</span>
-                                <span class="c1"># asymmetry = f&#39;{adj_distance/(3)}um&#39; # need this to make CPW asymmetry half of the coupling length</span>
-                                <span class="p">)})</span>                                 <span class="c1"># if not, sharp kinks occur in CPW :(</span>
-    <span class="n">cpw</span> <span class="o">=</span> <span class="n">RouteMeander</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;cpw&#39;</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">opts</span><span class="p">)</span>
+    <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;lead&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span>
+                <span class="n">start_straight</span><span class="o">=</span><span class="s2">&quot;50um&quot;</span><span class="p">,</span>
+                <span class="n">end_straight</span><span class="o">=</span><span class="s2">&quot;50um&quot;</span><span class="p">,</span>
+                <span class="c1"># start_jogged_extension = jogs</span>
+            <span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;pin_inputs&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span>
+                <span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">cplr</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s2">&quot;second_end&quot;</span><span class="p">),</span> <span class="n">end_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;claw&quot;</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s2">&quot;readout&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;meander&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span>
+                <span class="n">spacing</span><span class="o">=</span><span class="s2">&quot;100um&quot;</span><span class="p">,</span>
+                <span class="c1"># asymmetry = f&#39;{adj_distance/(3)}um&#39; # need this to make CPW asymmetry half of the coupling length</span>
+            <span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">)</span>  <span class="c1"># if not, sharp kinks occur in CPW :(</span>
+    <span class="n">cpw</span> <span class="o">=</span> <span class="n">RouteMeander</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;cpw&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cpw</span></div>
+
 
 
 <div class="viewcode-block" id="make_table">
@@ -997,21 +1007,32 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str: The formatted table as a string.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;qubit&#39;</span><span class="p">:</span>
-        <span class="n">pars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cross_width&#39;</span><span class="p">,</span><span class="s1">&#39;cross_length&#39;</span><span class="p">,</span><span class="s1">&#39;cross_gap&#39;</span><span class="p">,</span><span class="s1">&#39;claw_cpw_length&#39;</span><span class="p">,</span><span class="s1">&#39;claw_cpw_width&#39;</span><span class="p">,</span><span class="s1">&#39;claw_gap&#39;</span><span class="p">,</span><span class="s1">&#39;claw_length&#39;</span><span class="p">,</span><span class="s1">&#39;claw_width&#39;</span><span class="p">,</span><span class="s1">&#39;ground_spacing&#39;</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;cavity&#39;</span><span class="p">:</span>
-        <span class="n">pars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;coupler&#39;</span><span class="p">:</span>
-        <span class="n">pars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;coupling_length&#39;</span><span class="p">,</span><span class="s1">&#39;coupling_space&#39;</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;purcell_filter&#39;</span><span class="p">:</span>
-        <span class="n">pars</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;total_length&#39;</span><span class="p">,</span><span class="s1">&#39;cap_gap_ground&#39;</span><span class="p">,</span><span class="s1">&#39;finger_length&#39;</span><span class="p">,</span><span class="s1">&#39;cap_width&#39;</span><span class="p">,</span><span class="s1">&#39;cap_gap&#39;</span><span class="p">]</span>
-    
+    <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="s2">&quot;qubit&quot;</span><span class="p">:</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;cross_width&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;cross_length&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;cross_gap&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;claw_cpw_length&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;claw_cpw_width&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;claw_gap&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;claw_length&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;claw_width&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ground_spacing&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="k">elif</span> <span class="n">title</span> <span class="o">==</span> <span class="s2">&quot;cavity&quot;</span><span class="p">:</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;total_length&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">title</span> <span class="o">==</span> <span class="s2">&quot;coupler&quot;</span><span class="p">:</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;coupling_length&quot;</span><span class="p">,</span> <span class="s2">&quot;coupling_space&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">title</span> <span class="o">==</span> <span class="s2">&quot;purcell_filter&quot;</span><span class="p">:</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;total_length&quot;</span><span class="p">,</span> <span class="s2">&quot;cap_gap_ground&quot;</span><span class="p">,</span> <span class="s2">&quot;finger_length&quot;</span><span class="p">,</span> <span class="s2">&quot;cap_width&quot;</span><span class="p">,</span> <span class="s2">&quot;cap_gap&quot;</span><span class="p">]</span>
+
     <span class="n">table</span> <span class="o">=</span> <span class="n">PrettyTable</span><span class="p">()</span>
     <span class="n">table</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
-    <span class="n">table</span><span class="o">.</span><span class="n">field_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;param&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">:</span>   
-        <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">([</span><span class="n">key</span><span class="p">,</span><span class="n">extract_value</span><span class="p">(</span><span class="n">dictionary</span><span class="o">=</span><span class="n">data</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)])</span>
+    <span class="n">table</span><span class="o">.</span><span class="n">field_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;param&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">:</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">([</span><span class="n">key</span><span class="p">,</span> <span class="n">extract_value</span><span class="p">(</span><span class="n">dictionary</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)])</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="save_simulation_data_to_json">
@@ -1028,9 +1049,10 @@
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">.json&quot;</span>
-    
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
         <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="chunk_sweep_options">
@@ -1049,8 +1071,8 @@
     <span class="c1"># Extract claw_lengths and total_lengths from sweep_opts</span>
     <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span> <span class="o">=</span> <span class="n">get_cavity_claw_options_keys</span><span class="p">(</span><span class="n">sweep_opts</span><span class="p">)</span>
 
-    <span class="n">claw_lengths</span> <span class="o">=</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_length&#39;</span><span class="p">]</span>
-    <span class="n">total_lengths</span> <span class="o">=</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">][</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span>
+    <span class="n">claw_lengths</span> <span class="o">=</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_length&quot;</span><span class="p">]</span>
+    <span class="n">total_lengths</span> <span class="o">=</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">][</span><span class="s2">&quot;total_length&quot;</span><span class="p">]</span>
 
     <span class="c1"># Determine the number of claw_lengths to be assigned to each chunk</span>
     <span class="n">base_chunk_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">claw_lengths</span><span class="p">)</span> <span class="o">//</span> <span class="n">N</span>
@@ -1063,21 +1085,17 @@
         <span class="n">chunk_size</span> <span class="o">=</span> <span class="n">base_chunk_size</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">remainder</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># Slice the claw_lengths for this chunk</span>
-        <span class="n">claw_length_chunk</span> <span class="o">=</span> <span class="n">claw_lengths</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">start_idx</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span>
+        <span class="n">claw_length_chunk</span> <span class="o">=</span> <span class="n">claw_lengths</span><span class="p">[</span><span class="n">start_idx</span> <span class="p">:</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span>
 
         <span class="c1"># Each chunk gets a copy of the full total_lengths list</span>
         <span class="n">new_sweep_opts</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;claw_opts&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;connection_pads&#39;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s1">&#39;readout&#39;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="p">}</span>
-            <span class="p">},</span>
-            <span class="s1">&#39;cpw_opts&#39;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-            <span class="s1">&#39;cplr_opts&#39;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="n">cplr_opts_key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="s2">&quot;claw_opts&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;readout&quot;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()}},</span>
+            <span class="s2">&quot;cpw_opts&quot;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="s2">&quot;cplr_opts&quot;</span><span class="p">:</span> <span class="n">sweep_opts</span><span class="p">[</span><span class="n">cplr_opts_key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
         <span class="p">}</span>
 
-        <span class="n">new_sweep_opts</span><span class="p">[</span><span class="s1">&#39;claw_opts&#39;</span><span class="p">][</span><span class="s1">&#39;connection_pads&#39;</span><span class="p">][</span><span class="s1">&#39;readout&#39;</span><span class="p">][</span><span class="s1">&#39;claw_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">claw_length_chunk</span>
-        <span class="n">new_sweep_opts</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">][</span><span class="s1">&#39;total_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_lengths</span>
+        <span class="n">new_sweep_opts</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">][</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">claw_length_chunk</span>
+        <span class="n">new_sweep_opts</span><span class="p">[</span><span class="n">cpw_opts_key</span><span class="p">][</span><span class="s2">&quot;total_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_lengths</span>
 
         <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_sweep_opts</span><span class="p">)</span>
 
@@ -1085,6 +1103,7 @@
         <span class="n">start_idx</span> <span class="o">+=</span> <span class="n">chunk_size</span>
 
     <span class="k">return</span> <span class="n">chunks</span></div>
+
 
 
 <div class="viewcode-block" id="find_a_fq">
@@ -1104,22 +1123,19 @@
     <span class="c1"># Constants</span>
     <span class="n">e</span> <span class="o">=</span> <span class="mf">1.602e-19</span>  <span class="c1"># elementary charge in C</span>
     <span class="n">hbar</span> <span class="o">=</span> <span class="mf">1.054e-34</span>  <span class="c1"># reduced Planck constant in Js</span>
-    <span class="n">Z_0</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># in Ohms</span>
 
-    <span class="n">C_Sigma</span> <span class="o">=</span> <span class="n">C_g</span> <span class="o">+</span> <span class="n">C_B</span> <span class="c1"># + 1.5e-15</span>
-    <span class="n">EJ</span> <span class="o">=</span> <span class="p">((</span><span class="n">hbar</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">e</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lj</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.5092e24</span><span class="p">)</span> <span class="c1"># 1J = 1.5092e24 GHz</span>
-    <span class="n">EC</span> <span class="o">=</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">C_Sigma</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.5092e24</span><span class="p">)</span> <span class="c1"># 1J = 1.5092e24 GHz</span>
+    <span class="n">C_Sigma</span> <span class="o">=</span> <span class="n">C_g</span> <span class="o">+</span> <span class="n">C_B</span>  <span class="c1"># + 1.5e-15</span>
+    <span class="n">EJ</span> <span class="o">=</span> <span class="p">((</span><span class="n">hbar</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">e</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lj</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.5092e24</span><span class="p">)</span>  <span class="c1"># 1J = 1.5092e24 GHz</span>
+    <span class="n">EC</span> <span class="o">=</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">C_Sigma</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.5092e24</span><span class="p">)</span>  <span class="c1"># 1J = 1.5092e24 GHz</span>
 
-    <span class="n">transmon</span> <span class="o">=</span> <span class="n">scq</span><span class="o">.</span><span class="n">Transmon</span><span class="p">(</span><span class="n">EJ</span><span class="o">=</span><span class="n">EJ</span><span class="p">,</span>
-                            <span class="n">EC</span><span class="o">=</span><span class="n">EC</span><span class="p">,</span>
-                            <span class="n">ng</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                            <span class="n">ncut</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>
+    <span class="n">transmon</span> <span class="o">=</span> <span class="n">scq</span><span class="o">.</span><span class="n">Transmon</span><span class="p">(</span><span class="n">EJ</span><span class="o">=</span><span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="o">=</span><span class="n">EC</span><span class="p">,</span> <span class="n">ng</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncut</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 
-    <span class="n">a</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">anharmonicity</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span> <span class="c1"># linear MHz</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">anharmonicity</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span>  <span class="c1"># linear MHz</span>
     <span class="c1"># g = ((C_g / C_Sigma) * omega_r * np.sqrt(N * Z_0 * e**2 / (hbar * np.pi) )* (EJ/(8*EC))**(1/4)) / 1E6 / (2 * np.pi) # linear MHz</span>
-    <span class="n">f_q</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">E01</span><span class="p">()</span> <span class="c1"># Linear GHz</span>
-    
+    <span class="n">f_q</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">E01</span><span class="p">()</span>  <span class="c1"># Linear GHz</span>
+
     <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">f_q</span></div>
+
 
 
 <div class="viewcode-block" id="find_g_a_fq">
@@ -1146,21 +1162,23 @@
     <span class="n">hbar</span> <span class="o">=</span> <span class="mf">1.054e-34</span>  <span class="c1"># reduced Planck constant in Js</span>
     <span class="n">Z_0</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># in Ohms</span>
 
-    <span class="n">C_Sigma</span> <span class="o">=</span> <span class="n">C_g</span> <span class="o">+</span> <span class="n">C_B</span> <span class="c1"># + 1.5e-15</span>
+    <span class="n">C_Sigma</span> <span class="o">=</span> <span class="n">C_g</span> <span class="o">+</span> <span class="n">C_B</span>  <span class="c1"># + 1.5e-15</span>
     <span class="n">omega_r</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f_r</span>
-    <span class="n">EJ</span> <span class="o">=</span> <span class="p">((</span><span class="n">hbar</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">e</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lj</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.5092e24</span><span class="p">)</span> <span class="c1"># 1J = 1.5092e24 GHz</span>
-    <span class="n">EC</span> <span class="o">=</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">C_Sigma</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.5092e24</span><span class="p">)</span> <span class="c1"># 1J = 1.5092e24 GHz</span>
+    <span class="n">EJ</span> <span class="o">=</span> <span class="p">((</span><span class="n">hbar</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">e</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lj</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.5092e24</span><span class="p">)</span>  <span class="c1"># 1J = 1.5092e24 GHz</span>
+    <span class="n">EC</span> <span class="o">=</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">C_Sigma</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.5092e24</span><span class="p">)</span>  <span class="c1"># 1J = 1.5092e24 GHz</span>
 
-    <span class="n">transmon</span> <span class="o">=</span> <span class="n">scq</span><span class="o">.</span><span class="n">Transmon</span><span class="p">(</span><span class="n">EJ</span><span class="o">=</span><span class="n">EJ</span><span class="p">,</span>
-                            <span class="n">EC</span><span class="o">=</span><span class="n">EC</span><span class="p">,</span>
-                            <span class="n">ng</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                            <span class="n">ncut</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>
+    <span class="n">transmon</span> <span class="o">=</span> <span class="n">scq</span><span class="o">.</span><span class="n">Transmon</span><span class="p">(</span><span class="n">EJ</span><span class="o">=</span><span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="o">=</span><span class="n">EC</span><span class="p">,</span> <span class="n">ng</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncut</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 
-    <span class="n">a</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">anharmonicity</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span> <span class="c1"># linear MHz</span>
-    <span class="n">g</span> <span class="o">=</span> <span class="p">((</span><span class="n">C_g</span> <span class="o">/</span> <span class="n">C_Sigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">omega_r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">Z_0</span> <span class="o">*</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">hbar</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="p">)</span><span class="o">*</span> <span class="p">(</span><span class="n">EJ</span><span class="o">/</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">EC</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span> <span class="o">/</span> <span class="mf">1E6</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="c1"># linear MHz</span>
-    <span class="n">f_q</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">E01</span><span class="p">()</span> <span class="c1"># Linear GHz</span>
-    
+    <span class="n">a</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">anharmonicity</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span>  <span class="c1"># linear MHz</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">((</span><span class="n">C_g</span> <span class="o">/</span> <span class="n">C_Sigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">omega_r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">Z_0</span> <span class="o">*</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">hbar</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">EJ</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">EC</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="o">/</span> <span class="mf">1e6</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="p">)</span>  <span class="c1"># linear MHz</span>
+    <span class="n">f_q</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">E01</span><span class="p">()</span>  <span class="c1"># Linear GHz</span>
+
     <span class="k">return</span> <span class="n">g</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">f_q</span></div>
+
 
 
 <div class="viewcode-block" id="find_kappa">
@@ -1168,7 +1186,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">find_kappa</span><span class="p">(</span><span class="n">f_rough</span><span class="p">,</span> <span class="n">C_tg</span><span class="p">,</span> <span class="n">C_tb</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the cavity linewidth (kappa) using the rough frequency and capacitances.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        f_rough (float): The rough frequency of the cavity in GHz.</span>
 <span class="sd">        C_tg (float): The total capacitance of the ground in Farads.</span>
@@ -1177,13 +1195,13 @@
 <span class="sd">        float: The cavity linewidth (kappa) in kHz.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Z0</span> <span class="o">=</span> <span class="mi">50</span>
-    <span class="n">w_rough</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">f_rough</span>
+    <span class="n">w_rough</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f_rough</span>
 
-    <span class="n">C_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">w_rough</span><span class="o">*</span><span class="n">Z0</span><span class="p">)</span><span class="o">*</span><span class="mf">1e15</span>
+    <span class="n">C_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w_rough</span> <span class="o">*</span> <span class="n">Z0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e15</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">C_res</span><span class="p">)</span>
-    <span class="n">w_est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">C_res</span><span class="o">/</span><span class="p">(</span><span class="n">C_res</span> <span class="o">+</span> <span class="n">C_tg</span> <span class="o">+</span> <span class="n">C_tb</span><span class="p">))</span> <span class="o">*</span> <span class="n">w_rough</span>
+    <span class="n">w_est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">C_res</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_res</span> <span class="o">+</span> <span class="n">C_tg</span> <span class="o">+</span> <span class="n">C_tb</span><span class="p">))</span> <span class="o">*</span> <span class="n">w_rough</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Z0</span> <span class="o">*</span> <span class="p">(</span><span class="n">w_est</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_tb</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">C_res</span> <span class="o">+</span> <span class="n">C_tg</span> <span class="o">+</span> <span class="n">C_tb</span><span class="p">))</span><span class="o">*</span><span class="mf">1e-15</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Z0</span> <span class="o">*</span> <span class="p">(</span><span class="n">w_est</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_tb</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_res</span> <span class="o">+</span> <span class="n">C_tg</span> <span class="o">+</span> <span class="n">C_tb</span><span class="p">))</span> <span class="o">*</span> <span class="mf">1e-15</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span></div>
 
 
 
@@ -1198,7 +1216,7 @@
 <span class="sd">        - f_q (float): Resonant frequency of the transmon qubit in linear units.</span>
 <span class="sd">        - g (float): The coupling strength between the qubit and the cavity.</span>
 <span class="sd">        - f_r (float): The resonant frequency of the cavity in linear units.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        - (float): The full dispersive shift of the cavity</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1209,8 +1227,9 @@
     <span class="n">alpha</span> <span class="o">*=</span> <span class="mf">1e6</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
     <span class="n">delta</span> <span class="o">=</span> <span class="n">omega_r</span> <span class="o">-</span> <span class="n">omega_q</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">omega_r</span> <span class="o">+</span> <span class="n">omega_q</span>
-    
-    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">g</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">/</span><span class="p">(</span><span class="n">delta</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">))</span><span class="o">-</span> <span class="n">alpha</span><span class="o">/</span><span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)))</span> <span class="o">*</span> <span class="mf">1e-6</span></div>
+
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">g</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">/</span> <span class="p">(</span><span class="n">delta</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">))</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)))</span> <span class="o">*</span> <span class="mf">1e-6</span></div>
+
 
 
 <div class="viewcode-block" id="read_json_files">
@@ -1225,14 +1244,15 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        list: A list of dictionaries, each containing the data from a JSON file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">json_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.json&#39;</span><span class="p">)]</span>
+    <span class="n">json_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">)]</span>
     <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">json_files</span><span class="p">:</span>
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
             <span class="n">json_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
             <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json_data</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
+
 
 
 <div class="viewcode-block" id="extract_value">
@@ -1251,7 +1271,7 @@
     <span class="c1"># Check if the key is present in the dictionary</span>
     <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">dictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-    
+
     <span class="c1"># Iterate over the values in the dictionary</span>
     <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="c1"># If the value is a dictionary, recursively call the function</span>
@@ -1260,9 +1280,10 @@
             <span class="c1"># If the key is found in the nested dictionary, return the value</span>
             <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">result</span>
-    
+
     <span class="c1"># If the key is not found, return None</span>
     <span class="k">return</span> <span class="kc">None</span></div>
+
 
 
 <div class="viewcode-block" id="convert_str_to_float">
@@ -1270,14 +1291,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">convert_str_to_float</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    COnvert value from str to float</span>
-<span class="sd">    </span>
+
 <span class="sd">    :param value: The value to convert</span>
 <span class="sd">    :return: The value as a float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span></div>
 
-    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span></div>
 
 
 <div class="viewcode-block" id="extract_number">
@@ -1294,11 +1314,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^\d.]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">))</span></div>
 
-    
+
 
 <div class="viewcode-block" id="unpack">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.unpack">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="n">parent_value</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="n">parent_value</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A function to unpack one level of nesting in a python dictionary</span>
 <span class="sd">    :param parent_key: The key in the parent dictionary being flattened</span>
@@ -1310,23 +1330,18 @@
     <span class="c1"># If the parent_value is a dict, unpack it</span>
     <span class="c1">#</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span>
-            <span class="p">(</span><span class="n">parent_key</span> <span class="o">+</span> <span class="n">delimiter</span> <span class="o">+</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span>
-            <span class="ow">in</span> <span class="n">parent_value</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">]</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">parent_key</span> <span class="o">+</span> <span class="n">delimiter</span> <span class="o">+</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parent_value</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
     <span class="c1">#</span>
     <span class="c1"># If the If the parent_value is a not dict leave it be</span>
     <span class="c1">#</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span>
-            <span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="n">parent_value</span><span class="p">)</span>
-        <span class="p">]</span></div>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">parent_key</span><span class="p">,</span> <span class="n">parent_value</span><span class="p">)]</span></div>
+
 
 
 <div class="viewcode-block" id="flatten_dict">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.flatten_dict">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">flatten_dict</span><span class="p">(</span><span class="n">dictionary_</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">flatten_dict</span><span class="p">(</span><span class="n">dictionary_</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A function to flatten a nested dictionary</span>
 <span class="sd">    :param dictionary_: The dictionary to be flattened</span>
@@ -1341,20 +1356,12 @@
         <span class="c1"># Loop over the dictionary, unpacking one level. Then reduce the dimension one level</span>
         <span class="c1">#</span>
         <span class="n">dictionary_</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">ii</span>
-            <span class="k">for</span> <span class="n">i</span>
-            <span class="ow">in</span> <span class="p">[</span><span class="n">unpack</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dictionary_</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
-            <span class="k">for</span> <span class="n">ii</span>
-            <span class="ow">in</span> <span class="n">i</span>
+            <span class="n">ii</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="n">unpack</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dictionary_</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">i</span>
         <span class="p">)</span>
         <span class="c1">#</span>
         <span class="c1"># Break when there is no more unpacking to do</span>
         <span class="c1">#</span>
-        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span>
-            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">value</span>
-            <span class="ow">in</span> <span class="n">dictionary_</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-        <span class="p">]):</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dictionary_</span><span class="o">.</span><span class="n">values</span><span class="p">()]):</span>
             <span class="k">break</span>
 
     <span class="k">return</span> <span class="n">dictionary_</span></div>
@@ -1409,7 +1416,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>
