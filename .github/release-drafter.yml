@@ -1,38 +1,61 @@
-name-template: 'v$NEXT_PATCH_VERSION'
-tag-template: 'v$NEXT_PATCH_VERSION'
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
 categories:
-  - title: '🚀 New Features'
+  - title: '🚀 Features'
     labels:
       - 'feature'
       - 'feat'
+      - 'enhancement'
   - title: '🐛 Bug Fixes'
     labels:
       - 'bug'
+      - 'bugfix'
+      - 'fix'
+  - title: '📚 Documentation'
+    labels:
+      - 'docs'
+      - 'documentation'
   - title: '🧹 Maintenance'
     labels:
       - 'chore'
       - 'refactor'
-      - 'fix'
-      - 'docs'
+      - 'ci'
+      - 'dependencies'
   - title: '💥 Breaking Changes'
     labels:
       - 'breaking'
       - 'major'
-      - 'break'
 
-change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
-no-changes-template: 'No significant changes.'
+version-resolver:
+  major:
+    labels:
+      - 'major'
+      - 'breaking'
+  minor:
+    labels:
+      - 'feature'
+      - 'feat'
+      - 'enhancement'
+  patch:
+    labels:
+      - 'bug'
+      - 'bugfix'
+      - 'fix'
+      - 'chore'
+      - 'docs'
+  default: patch
+
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&'
+no-changes-template: 'No changes since last release.'
+
 template: |
   ## What's Changed
 
   $CHANGES
 
-  ## Commits
-  $COMMITS
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 
   ### Contributors
-  Thanks to these amazing contributors:
-
   $CONTRIBUTORS
-
-commit-template: '- $MESSAGE ([$SHA]($URL))'
