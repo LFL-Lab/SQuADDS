@@ -22,6 +22,15 @@ Version 0.4.0 (2025-01-09)
 - Added PySide6 for modern Qt GUI support
 - Cross-platform CI/CD testing on Python 3.10, 3.11, 3.12
 
+**Performance Improvements**
+
+- **~7x speedup** for half-wave cavity Hamiltonian parameter calculations
+- Added LRU caching for transmon E01/anharmonicity calculations
+- Pre-compute unique EC values before parallel processing to avoid redundant matrix diagonalizations
+- Vectorized EC calculation using numba for array processing
+- Optimized value mapping using numpy ``searchsorted`` (O(log n) instead of O(n))
+- Reduced transmon calculations from ~16.5M to ~1934 unique values for typical datasets
+
 **Infrastructure**
 
 - Replaced all CI/CD workflows with ``astral-sh/setup-uv`` action
