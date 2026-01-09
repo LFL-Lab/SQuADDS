@@ -93,6 +93,17 @@ def EC_numba(cross_to_claw, cross_to_ground):
     return EC
 
 
+@jit(nopython=True)
+def EC_numba_vectorized(cross_to_claw_arr, cross_to_ground_arr):
+    """Vectorized EC calculation for arrays - much faster than loop."""
+    n = len(cross_to_claw_arr)
+    result = np.empty(n, dtype=np.float32)
+    for i in range(n):
+        C_eff_fF = np.abs(cross_to_ground_arr[i]) + np.abs(cross_to_claw_arr[i])
+        result[i] = Ec_from_Cs(C_eff_fF)
+    return result
+
+
 @jit(nopython=True, parallel=True)
 def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
     """
@@ -431,7 +442,11 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Add qubit Hamiltonian parameters to the DataFrame chunk.
 
-        This method calculates and adds the qubit Hamiltonian parameters, such as EC, EJ, and EJEC,
+        This method calculates and adds the qubit Hamiltonian parameters, such as EC, EJ, and EJEC.
+
+        Optimization: Since EJ is constant for all rows, we only compute E01/anharmonicity
+        for unique EC values (rounded to reduce count), then map results back. This avoids
+        redundant Transmon instantiations and matrix diagonalizations.
 
         Args:
             - df: The DataFrame chunk to which the parameters will be added.
@@ -440,22 +455,32 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
             - df: The DataFrame chunk with the added parameters
         """
         EJ_target = self.EJ(self.target_params["qubit_frequency_GHz"], self.target_params["anharmonicity_MHz"] * 1e-3)
-        EJ_target = np.float32(EJ_target)  # Ensure memory-efficient data type
+        EJ_target = np.float32(EJ_target)
 
-        cross_to_claw_values = df["cross_to_claw"].values
-        cross_to_ground_values = df["cross_to_ground"].values
-        EC_values = np.array(
-            [EC_numba(claw, ground) for claw, ground in zip(cross_to_claw_values, cross_to_ground_values)],
-            dtype=np.float32,
-        )
+        cross_to_claw_values = df["cross_to_claw"].values.astype(np.float64)
+        cross_to_ground_values = df["cross_to_ground"].values.astype(np.float64)
+        EC_values = EC_numba_vectorized(cross_to_claw_values, cross_to_ground_values)
 
         df["EC"] = EC_values
         df["EJ"] = EJ_target
-        df["qubit_frequency_GHz"], df["anharmonicity_MHz"] = np.vectorize(self.E01_and_anharmonicity)(
-            df["EJ"].values, df["EC"].values
-        )
-        df["qubit_frequency_GHz"] = df["qubit_frequency_GHz"].astype(np.float32)
-        df["anharmonicity_MHz"] = df["anharmonicity_MHz"].astype(np.float32)
+
+        # Optimization: compute only for unique EC values, then map back
+        # Round EC to reduce unique count while maintaining accuracy
+        EC_rounded = np.round(EC_values, _TRANSMON_CACHE_PRECISION)
+        unique_ECs = np.unique(EC_rounded)
+
+        # Pre-compute E01 and alpha for all unique EC values
+        unique_results = {}
+        for ec in unique_ECs:
+            E01, alpha = get_transmon_E01_alpha(float(EJ_target), float(ec))
+            unique_results[ec] = (E01, alpha)
+
+        # Map results back to full array
+        freq_values = np.array([unique_results[ec][0] for ec in EC_rounded], dtype=np.float32)
+        alpha_values = np.array([unique_results[ec][1] for ec in EC_rounded], dtype=np.float32)
+
+        df["qubit_frequency_GHz"] = freq_values
+        df["anharmonicity_MHz"] = alpha_values
 
         return df
 
@@ -466,7 +491,8 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         This method calculates the coupling strength 'g_MHz' between the transmon qubit and the cavity,
         based on the capacitance matrix, transmon parameters, cavity frequency, resonator type, and characteristic impedance.
 
-        Uses cached transmon calculations for significant speedup on large datasets.
+        Optimization: Pre-computes all unique transmon parameters in the main process before
+        parallel processing, avoiding redundant matrix diagonalizations across workers.
 
         Args:
             - num_chunks: The number of chunks to split the DataFrame into for parallel processing. Default is "auto" which sets the number of chunks to the number of logical CPUs.
@@ -475,9 +501,6 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         Returns:
             None
         """
-        # Clear cache at start for fresh calculations
-        clear_transmon_cache()
-
         if self.selected_resonator_type == "half":
             if num_chunks == "auto":
                 num_chunks = os.cpu_count() or 4
@@ -487,13 +510,49 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
                 num_chunks = 2
                 raise UserWarning("`num_chunk`s must be an integer greater than 0. Defaulting to 2.")
             print(f"Using {num_chunks} chunks for parallel processing")
-            self.df = self.parallel_process_dataframe(self.df, num_chunks)
 
-            # Print cache statistics (cache is per-process, so main process may show 0)
-            cache_info = get_transmon_cache_info()
-            total_calls = cache_info.hits + cache_info.misses
-            hit_rate = (cache_info.hits / total_calls * 100) if total_calls > 0 else 0.0
-            print(f"Transmon cache stats: hits={cache_info.hits}, misses={cache_info.misses}, hit_rate={hit_rate:.1f}%")
+            # === OPTIMIZATION: Pre-compute all transmon values in main process ===
+            # Step 1: Calculate EJ (constant for all rows)
+            EJ_target = self.EJ(
+                self.target_params["qubit_frequency_GHz"], self.target_params["anharmonicity_MHz"] * 1e-3
+            )
+            EJ_target = float(EJ_target)
+
+            # Step 2: Calculate all EC values (vectorized, fast)
+            cross_to_claw = self.df["cross_to_claw"].values.astype(np.float64)
+            cross_to_ground = self.df["cross_to_ground"].values.astype(np.float64)
+            EC_all = EC_numba_vectorized(cross_to_claw, cross_to_ground)
+
+            # Step 3: Find unique EC values (rounded for efficiency)
+            EC_rounded = np.round(EC_all, _TRANSMON_CACHE_PRECISION)
+            unique_ECs = np.unique(EC_rounded)
+
+            # Step 4: Pre-compute E01 and alpha for all unique ECs
+            print(f"Computing transmon params for {len(unique_ECs)} unique EC values...", flush=True)
+            unique_E01 = np.empty(len(unique_ECs), dtype=np.float32)
+            unique_alpha = np.empty(len(unique_ECs), dtype=np.float32)
+            for i, ec in enumerate(unique_ECs):
+                E01, alpha = get_transmon_E01_alpha(EJ_target, float(ec))
+                unique_E01[i] = E01
+                unique_alpha[i] = alpha
+            print(f"Pre-computed {len(unique_ECs)} unique transmon states")
+
+            # Step 5: Create lookup arrays using numpy searchsorted for O(log n) lookup
+            # This is MUCH faster than a Python loop over 16.5M values
+            indices = np.searchsorted(unique_ECs, EC_rounded)
+
+            # Step 6: Vectorized mapping (fast numpy indexing)
+            freq_values = unique_E01[indices]
+            alpha_values = unique_alpha[indices]
+
+            # Step 7: Store in dataframe
+            self.df["EC"] = EC_all
+            self.df["EJ"] = np.float32(EJ_target)
+            self.df["qubit_frequency_GHz"] = freq_values
+            self.df["anharmonicity_MHz"] = alpha_values
+
+            # Step 8: Now parallel process only the g calculation
+            self.df = self.parallel_process_g_only(self.df, num_chunks, Z_0)
         else:
             self.add_qubit_H_params()
             self.df["g_MHz"] = self.df.apply(
@@ -561,6 +620,39 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
 
         with Parallel(n_jobs=num_chunks) as parallel:
             results = parallel(delayed(self.add_cavity_coupled_H_params_chunk)(chunk, Z_0) for chunk in chunks)
+
+        return pd.concat(results)
+
+    def _calculate_g_chunk(self, chunk, Z_0=50):
+        """Calculate g values for a chunk (EC, EJ, freq, alpha already computed)."""
+        cross_to_ground_values = chunk["cross_to_ground"].values
+        cross_to_claw_values = chunk["cross_to_claw"].values
+        EJ_values = chunk["EJ"].values
+        cavity_frequency_values = chunk["cavity_frequency_GHz"].values
+
+        g_values = np.array(
+            [
+                g_from_cap_matrix_numba(ground, claw, ej, freq, "half", Z_0)
+                for ground, claw, ej, freq in zip(
+                    cross_to_ground_values, cross_to_claw_values, EJ_values, cavity_frequency_values
+                )
+            ],
+            dtype=np.float32,
+        )
+        chunk["g_MHz"] = g_values
+        return chunk
+
+    def parallel_process_g_only(self, df, num_chunks, Z_0=50):
+        """
+        Parallel process only the g calculation (qubit params already computed).
+
+        This optimized method is used when EC, EJ, qubit_frequency_GHz, and
+        anharmonicity_MHz are already computed in the main process.
+        """
+        chunks = np.array_split(df, num_chunks)
+
+        with Parallel(n_jobs=num_chunks) as parallel:
+            results = parallel(delayed(self._calculate_g_chunk)(chunk, Z_0) for chunk in chunks)
 
         return pd.concat(results)
 
