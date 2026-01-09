@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for Cross-Platform Checks
+name: CI/CD Pipeline for Cross-Platform Tests
 
 on:
   push:
@@ -6,69 +6,76 @@ on:
       - master
     paths:
       - 'squadds/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
-  cross-platform-test:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.10']
+        python-version: ['3.10', '3.11', '3.12']
     env:
       MPLBACKEND: Agg
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Download environment.yml from Qiskit-Metal repository
-        run: curl -O https://raw.githubusercontent.com/Qiskit/qiskit-metal/main/environment.yml
-
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: ${{ matrix.python-version }}
-          auto-activate-base: false
+          enable-cache: true
 
-      - name: Remove existing Conda environment if it exists
-        shell: bash -l {0}
-        run: |
-          conda env list
-          conda remove --name qiskit-metal-env --all --yes || true
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
 
-      - name: Create Qiskit-Metal Conda environment
-        shell: bash -l {0}
-        run: |
-          conda env create -n qiskit-metal-env -f environment.yml
-
-      - name: Install Qiskit-Metal
-        shell: bash -l {0}
-        run: |
-          conda activate qiskit-metal-env
-          python -m pip install --no-deps -e git+https://github.com/Qiskit/qiskit-metal.git#egg=qiskit-metal
-
-      - name: Install SQuADDS and its dependencies
-        shell: bash -l {0}
-        run: |
-          conda activate qiskit-metal-env
-          python -m pip install --upgrade pip
-          pip install datasets
-          pip install pyEPR-quantum
-          pip install pyaedt
-          pip install -r requirements.txt
-          pip install -e .
+      - name: Install dependencies
+        run: uv sync --extra dev
 
       - name: Set up environment file
         run: |
           echo "HUGGINGFACE_API_KEY=${{ secrets.HUGGINGFACE_API_KEY }}" > .env
-          set -a
-          source .env
-          set +a
         shell: bash
 
-      - name: Run Tests
-        shell: bash -l {0}
-        run: |
-          conda activate qiskit-metal-env
-          python tests/imports_test.py
-          python tests/mvp_test.py
+      - name: Run import tests
+        run: uv run python tests/imports_test.py
+
+      - name: Run MVP tests
+        run: uv run python tests/mvp_test.py
+
+      - name: Run pytest
+        run: uv run pytest tests/ -v --tb=short
+        continue-on-error: true
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Run Ruff linter
+        run: uv run ruff check .
+        continue-on-error: true
+
+      - name: Run Ruff formatter check
+        run: uv run ruff format --check .
+        continue-on-error: true

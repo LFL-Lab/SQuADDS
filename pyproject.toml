@@ -72,6 +72,7 @@ docs = [
 dev = [
     "pytest>=8.0",
     "pytest-cov>=4.0",
+    "ruff>=0.14.11",
 ]
 all = ["SQuADDS[gds,docs,dev]"]
 
@@ -94,3 +95,29 @@ include = [
     "README.md",
     "LICENSE",
 ]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # function call in default argument
+    "B905",  # zip without strict parameter
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["squadds"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]

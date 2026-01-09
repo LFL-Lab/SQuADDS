@@ -1,11 +1,10 @@
 name: Update Contributors List
 
-# Triggers the workflow on pull requests to the squadds or docs directories and on manual trigger
 on:
   push:
     branches:
       - master
-  workflow_dispatch: # Allows manual triggering of the workflow
+  workflow_dispatch:
 
 jobs:
   update-readme:
@@ -13,27 +12,28 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
 
       - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.x'
+        run: uv python install 3.11
 
       - name: Install dependencies
-        run: |
-          pip install requests
-          pip install tabulate
+        run: uv pip install requests tabulate
 
       - name: Run Update Script
-        run: python scripts/update_contributors.py
+        run: uv run python scripts/update_contributors.py
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "Automatically update README.md with latest contributors- $(date)"
+          git diff --staged --quiet || git commit -m "Automatically update README.md with latest contributors - $(date)"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
