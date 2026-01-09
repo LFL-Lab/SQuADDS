@@ -1,3 +1,4 @@
+import os
 import time
 from typing import Any
 
@@ -7,7 +8,6 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import psutil
 import seaborn as sns
 from matplotlib.patches import Patch
 
@@ -413,9 +413,9 @@ class Analyzer:
             sorted_indices = distances.nsmallest(num_top).index
         else:
             if num_cpu == "auto":
-                num_cpu = psutil.cpu_count(logical=True)
-            elif int(num_cpu) > psutil.cpu_count(logical=True):
-                raise ValueError(f"num_cpu must be less than or equal to {psutil.cpu_count(logical=True)}")
+                num_cpu = os.cpu_count() or 4
+            elif int(num_cpu) > (os.cpu_count() or 4):
+                raise ValueError(f"num_cpu must be less than or equal to {os.cpu_count() or 4}")
             else:
                 num_cpu = 2
                 raise UserWarning("`num_chunk`s must be an integer greater than 0. Defaulting to 2.")

@@ -109,6 +109,12 @@ Install development tools:
 uv sync --extra dev
 ```
 
+Install contribution tools (for contributing data to SQuADDS):
+
+```bash
+uv sync --extra contrib
+```
+
 Install all optional dependencies:
 
 ```bash
@@ -240,4 +246,3 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
 - [PCodeShark25](https://github.com/PCodeShark25) - 1 contributions
 ---
-

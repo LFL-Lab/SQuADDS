@@ -3,13 +3,29 @@ import os
 import shutil
 from datetime import datetime
 
-import git
 from dotenv import load_dotenv
-from github import Github
+
+try:
+    import git
+    from github import Github
+
+    _CONTRIB_AVAILABLE = True
+except ImportError:
+    _CONTRIB_AVAILABLE = False
+
+
+def _check_contrib_deps():
+    """Check if contribution dependencies are installed."""
+    if not _CONTRIB_AVAILABLE:
+        raise ImportError(
+            "GitHub contribution features require additional dependencies. "
+            "Install them with: pip install 'SQuADDS[contrib]' or uv add 'SQuADDS[contrib]'"
+        )
 
 
 def login_to_github():
     """Logs in to GitHub using a token stored in environment variables."""
+    _check_contrib_deps()
     load_dotenv()  # Load environment variables
     github_token = os.getenv("GITHUB_TOKEN")
     if github_token is None:
@@ -28,6 +44,7 @@ def clone_repository(repo_url, clone_dir):
     Returns:
     - git.Repo: The cloned Git repository object.
     """
+    _check_contrib_deps()
     # Remove the directory if it exists
     if os.path.exists(clone_dir):
         shutil.rmtree(clone_dir)
@@ -47,7 +64,7 @@ def fork_repository(github_token):
     Returns:
     - str: URL of the forked repository if successful, None otherwise.
     """
-
+    _check_contrib_deps()
     original_repo_name = "LFL-Lab/SQuADDS_DB"
     # Authenticate with GitHub
     g = Github(github_token)
