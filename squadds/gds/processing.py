@@ -31,10 +31,10 @@ def merge_shapes_in_layer(gds_file, output_gds_file, layer_number):
         # If there are shapes, merge them together using boolean union
         if not shapes.is_empty():
             print(f"Merging shapes in layer {layer_number} in cell: {cell.name}")
-            
+
             # Create a region for the shapes on this layer
             region = kdb.Region(shapes)
-            
+
             # Perform the boolean union to merge shapes
             merged_shapes = region.merged()
 
@@ -48,6 +48,7 @@ def merge_shapes_in_layer(gds_file, output_gds_file, layer_number):
     layout.write(output_gds_file)
 
     print(f"Merged shapes in layer {layer_number} and saved to {output_gds_file}")
+
 
 def crop_top_left_rectangle(gds_file, width=300, height=100, layer_number=5, datatype=0):
     """
@@ -86,8 +87,7 @@ def crop_top_left_rectangle(gds_file, width=300, height=100, layer_number=5, dat
         rect_height = height / layout.dbu  # Convert um to database units
 
         # Create the 300 x 100 um rectangle
-        rect_top_left = kdb.Box(top_left_x, top_left_y - rect_height,
-                                top_left_x + rect_width, top_left_y)
+        rect_top_left = kdb.Box(top_left_x, top_left_y - rect_height, top_left_x + rect_width, top_left_y)
 
         # Remove the 300 x 100 um rectangle from the 5/0 layer
         cropped_shapes = region_5_0 - kdb.Region(rect_top_left)
@@ -101,8 +101,11 @@ def crop_top_left_rectangle(gds_file, width=300, height=100, layer_number=5, dat
     # Write the modified layout to the GDS file
     layout.write(gds_file)
 
-    print(f"{width} x {height} um rectangle removed from the top left of the {layer_number}/{datatype} rectangle successfully.")
+    print(
+        f"{width} x {height} um rectangle removed from the top left of the {layer_number}/{datatype} rectangle successfully."
+    )
     print(f"Output file: {gds_file}")
+
 
 def apply_fixes(gds_file, datatype=0):
     """
@@ -125,10 +128,10 @@ def apply_fixes(gds_file, datatype=0):
     modify_gds_datatypes(gds_file, datatype)
 
     # Call the method to delete layers with non-zero datatypes
-    delete_non_zero_datatype_layers(gds_file.replace('.gds', '_final.gds'))
+    delete_non_zero_datatype_layers(gds_file.replace(".gds", "_final.gds"))
 
     # Merge all metal layers
-    merge_shapes_in_layer(gds_file.replace('.gds', '_final.gds'), gds_file.replace('.gds', '_final.gds'), 5)
+    merge_shapes_in_layer(gds_file.replace(".gds", "_final.gds"), gds_file.replace(".gds", "_final.gds"), 5)
 
 
 def modify_gds_datatypes(gds_file, datatype=0):
@@ -159,7 +162,6 @@ def modify_gds_datatypes(gds_file, datatype=0):
             # Get the layer number and datatype
             layer_info = layout.get_info(layer_index)
             layer_number = layer_info.layer
-            layer_datatype = layer_info.datatype
 
             # Retrieve the shapes in the current layer for the cell
             shapes = cell.shapes(layer_index)
@@ -191,13 +193,14 @@ def modify_gds_datatypes(gds_file, datatype=0):
                 cell.clear(layer_index)
 
     # Write the modified layout to the GDS file
-    file_name = gds_file.replace('.gds', '_final.gds')
+    file_name = gds_file.replace(".gds", "_final.gds")
     layout.write(file_name)
 
     print("Merged all redundant layers successfully.")
     print(f"Output file: {file_name}")
 
     # delete_non_zero_datatype_layers(file_name)
+
 
 def delete_non_zero_datatype_layers(gds_file):
     """
@@ -233,6 +236,7 @@ def delete_non_zero_datatype_layers(gds_file):
 
     # Call the method to add a 703 layer datatype 0 rectangle covering the 5/0 layer
     # add_703_layer(gds_file.replace('_modified.gds', '_final.gds'))
+
 
 def add_703_layer(gds_file):
     """
@@ -273,6 +277,7 @@ def add_703_layer(gds_file):
     print("703 layer datatype 0 rectangle added successfully.")
     print(f"Output file: {gds_file}")
 
+
 def get_all_layer_numbers(gds_file):
     """
     Retrieves all unique layer numbers present in the GDS file.
@@ -301,8 +306,9 @@ def get_all_layer_numbers(gds_file):
     return sorted_layers
 
 
-
-def add_squares_to_layer(input_gds, output_gds, selected_layer, selected_datatype, square_size=5, spacing=10, keepout=5):
+def add_squares_to_layer(
+    input_gds, output_gds, selected_layer, selected_datatype, square_size=5, spacing=10, keepout=5
+):
     """
     Adds squares to a specific layer in a GDS file.
 
@@ -322,10 +328,10 @@ def add_squares_to_layer(input_gds, output_gds, selected_layer, selected_datatyp
     gdsii_new = gdspy.GdsLibrary()
 
     # Adjust spacing
-    spacing = spacing*2
+    spacing = spacing * 2
 
     # Copy all cells from the input GDS to the output GDS
-    for cell_name, cell in gdsii.cells.items():
+    for _cell_name, cell in gdsii.cells.items():
         gdsii_new.add(cell)
 
         # Select the layer and datatype
@@ -355,22 +361,31 @@ def add_squares_to_layer(input_gds, output_gds, selected_layer, selected_datatyp
                     y = min_y
                     while y <= max_y:
                         square = gdspy.Rectangle(
-                            (x, y), (x + square_size, y + square_size),
-                            layer=new_layer, datatype=new_datatype
+                            (x, y), (x + square_size, y + square_size), layer=new_layer, datatype=new_datatype
                         )
                         # Check if the square points and the keepout area are within the existing polygon
-                        square_points = [(x, y), (x + square_size, y), (x + square_size, y + square_size), (x, y + square_size)]
-                        keepout_points = [
-                            (x - keepout, y - keepout), (x + square_size + keepout, y - keepout),
-                            (x + square_size + keepout, y + square_size + keepout), (x - keepout, y + square_size + keepout)
+                        square_points = [
+                            (x, y),
+                            (x + square_size, y),
+                            (x + square_size, y + square_size),
+                            (x, y + square_size),
                         ]
-                        if np.all(gdspy.inside(square_points, [shape])) and np.all(gdspy.inside(keepout_points, [shape])):
+                        keepout_points = [
+                            (x - keepout, y - keepout),
+                            (x + square_size + keepout, y - keepout),
+                            (x + square_size + keepout, y + square_size + keepout),
+                            (x - keepout, y + square_size + keepout),
+                        ]
+                        if np.all(gdspy.inside(square_points, [shape])) and np.all(
+                            gdspy.inside(keepout_points, [shape])
+                        ):
                             cell.add(square)
                         y += spacing
                     x += spacing
 
     # Write the new GDS file
     gdsii_new.write_gds(output_gds)
+
 
 def create_cheesing_effect(input_gds, output_gds, selected_layer, selected_datatype):
     """
@@ -410,6 +425,7 @@ def create_cheesing_effect(input_gds, output_gds, selected_layer, selected_datat
 
     # Write the new GDS file
     layout.write(output_gds)
+
 
 def bias_gds_features(input_gds, output_gds, bias, layer_number, datatype_number=None):
     """
@@ -457,6 +473,7 @@ def bias_gds_features(input_gds, output_gds, bias, layer_number, datatype_number
     # Write the biased GDS file
     layout.write(output_gds)
 
+
 def flatten_to_top_cell(gds_file, output_gds_file=None, prune=True):
     """
     Flattens all hierarchical cells in the input GDS file into the top cell.
@@ -482,27 +499,27 @@ def flatten_to_top_cell(gds_file, output_gds_file=None, prune=True):
         # Load the GDS file using KLayout's API.
         layout = kdb.Layout()
         layout.read(gds_file)
-        
+
         # Get the top cell of the layout.
         top_cell = layout.top_cell()
         if top_cell is None:
             raise ValueError("No top cell found in the layout. Cannot flatten without a top cell.")
-        
+
         # Flatten the top cell.
         # Here, 'prune' determines if empty cells should be pruned after flattening.
         top_cell.flatten(prune)
-        
+
         # Determine the output file name if not provided.
         if output_gds_file is None:
-            if gds_file.lower().endswith('.gds'):
-                output_gds_file = gds_file[:-4] + '_flattened.gds'
+            if gds_file.lower().endswith(".gds"):
+                output_gds_file = gds_file[:-4] + "_flattened.gds"
             else:
-                output_gds_file = gds_file + '_flattened.gds'
-        
+                output_gds_file = gds_file + "_flattened.gds"
+
         # Write the flattened layout to the output file.
         layout.write(output_gds_file)
         print(f"Flattened layout successfully written to {output_gds_file}")
-    
+
     except Exception as e:
         print(f"Error flattening the GDS file '{gds_file}': {e}")
 
@@ -554,10 +571,10 @@ def invert_layer(gds_file, layer_number, datatype, output_gds_file=None):
 
         # Determine the output file name if not provided
         if output_gds_file is None:
-            if gds_file.lower().endswith('.gds'):
-                output_gds_file = gds_file[:-4] + '_inverted.gds'
+            if gds_file.lower().endswith(".gds"):
+                output_gds_file = gds_file[:-4] + "_inverted.gds"
             else:
-                output_gds_file = gds_file + '_inverted.gds'
+                output_gds_file = gds_file + "_inverted.gds"
 
         # Write the modified layout to the output GDS file
         layout.write(output_gds_file)
@@ -567,12 +584,10 @@ def invert_layer(gds_file, layer_number, datatype, output_gds_file=None):
     except Exception as e:
         print(f"Error processing GDS file '{gds_file}': {e}")
 
-def add_square_border_to_gds(input_gds_file,
-                                      output_gds_file,
-                                      size_um=5000,
-                                      thickness_um=23,
-                                      layer_number=1,
-                                      datatype=0):
+
+def add_square_border_to_gds(
+    input_gds_file, output_gds_file, size_um=5000, thickness_um=23, layer_number=1, datatype=0
+):
     """
     Adds a centered square border to the TOP cell of an existing GDS file.
 
@@ -587,8 +602,8 @@ def add_square_border_to_gds(input_gds_file,
     Returns:
         None
     """
-    thickness_um = thickness_um*1e3
-    size_um = size_um*1e3
+    thickness_um = thickness_um * 1e3
+    size_um = size_um * 1e3
     try:
         # Load the input GDS file
         layout = kdb.Layout()
@@ -624,15 +639,14 @@ def add_square_border_to_gds(input_gds_file,
         half_inner_size = half_size - thickness_um
 
         # Outer square (full-size), centered
-        outer_square = kdb.Box(
-            center_x - half_size, center_y - half_size,
-            center_x + half_size, center_y + half_size
-        )
+        outer_square = kdb.Box(center_x - half_size, center_y - half_size, center_x + half_size, center_y + half_size)
 
         # Inner square (cut-out for border thickness), centered
         inner_square = kdb.Box(
-            center_x - half_inner_size, center_y - half_inner_size,
-            center_x + half_inner_size, center_y + half_inner_size
+            center_x - half_inner_size,
+            center_y - half_inner_size,
+            center_x + half_inner_size,
+            center_y + half_inner_size,
         )
 
         # Create regions for the outer and inner squares
@@ -653,19 +667,21 @@ def add_square_border_to_gds(input_gds_file,
         print(f"Error processing GDS file: {e}")
 
 
-def create_marker_blocks(input_gds_file,
-                         output_gds_file,
-                         marker_size_um=8,
-                         marker_distance_um=52,
-                         border_thickness_um=23,
-                         layer_number=1,
-                         datatype=0,
-                         additional_marker_size_um=5,
-                         additional_layer_number=7,
-                         additional_datatype=0):
+def create_marker_blocks(
+    input_gds_file,
+    output_gds_file,
+    marker_size_um=8,
+    marker_distance_um=52,
+    border_thickness_um=23,
+    layer_number=1,
+    datatype=0,
+    additional_marker_size_um=5,
+    additional_layer_number=7,
+    additional_datatype=0,
+):
     """
-    Creates marker blocks (squares) of a given size at a specified distance 
-    from the corners of the border in the TOP cell of an existing GDS file, 
+    Creates marker blocks (squares) of a given size at a specified distance
+    from the corners of the border in the TOP cell of an existing GDS file,
     and an additional set of smaller squares on a different layer/datatype.
 
     Args:
@@ -724,24 +740,34 @@ def create_marker_blocks(input_gds_file,
         # Adjust placement to ensure the marker is exactly `marker_distance_um` from the border edges
         marker_positions = [
             (bbox.left + marker_distance + half_marker_size, bbox.top - marker_distance - half_marker_size),  # Top-left
-            (bbox.right - marker_distance - half_marker_size, bbox.top - marker_distance - half_marker_size),  # Top-right
-            (bbox.left + marker_distance + half_marker_size, bbox.bottom + marker_distance + half_marker_size),  # Bottom-left
-            (bbox.right - marker_distance - half_marker_size, bbox.bottom + marker_distance + half_marker_size),  # Bottom-right
+            (
+                bbox.right - marker_distance - half_marker_size,
+                bbox.top - marker_distance - half_marker_size,
+            ),  # Top-right
+            (
+                bbox.left + marker_distance + half_marker_size,
+                bbox.bottom + marker_distance + half_marker_size,
+            ),  # Bottom-left
+            (
+                bbox.right - marker_distance - half_marker_size,
+                bbox.bottom + marker_distance + half_marker_size,
+            ),  # Bottom-right
         ]
 
         # Create and insert the main marker blocks
         for x, y in marker_positions:
             # Main marker block
             main_marker_square = kdb.Box(
-                x - half_marker_size, y - half_marker_size,
-                x + half_marker_size, y + half_marker_size
+                x - half_marker_size, y - half_marker_size, x + half_marker_size, y + half_marker_size
             )
             top_cell.shapes(layer_index_main).insert(main_marker_square)
 
             # Additional smaller marker block at the same position
             additional_marker_square = kdb.Box(
-                x - half_additional_marker_size, y - half_additional_marker_size,
-                x + half_additional_marker_size, y + half_additional_marker_size
+                x - half_additional_marker_size,
+                y - half_additional_marker_size,
+                x + half_additional_marker_size,
+                y + half_additional_marker_size,
             )
             top_cell.shapes(layer_index_additional).insert(additional_marker_square)
 

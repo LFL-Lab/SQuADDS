@@ -1,6 +1,3 @@
-import sys
-
-
 def test_import(module_name):
     try:
         __import__(module_name)
@@ -9,6 +6,7 @@ def test_import(module_name):
         print(f"Failed to import {module_name}: {e}")
     except Exception as e:
         print(f"Error while importing {module_name}: {e}")
+
 
 def main():
     # Test import of main package
@@ -26,13 +24,14 @@ def main():
         "squadds.database.utils",
         "squadds.interpolations.interpolator",
         "squadds.calcs.qubit",
-        "squadds.calcs.transmon_cross"
+        "squadds.calcs.transmon_cross",
     ]
 
     for submodule in submodules:
         test_import(submodule)
 
     print("Imports test passed")
+
 
 if __name__ == "__main__":
     main()

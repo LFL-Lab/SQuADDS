@@ -251,10 +251,10 @@ Installation Steps
 After running these scripts, you should be able to launch Palace by running:
 
 .. code-block:: sh
-   
+
    $ palace
 
-If no errors are encountered, your installation is likely successful. 
+If no errors are encountered, your installation is likely successful.
 
 Installation of Palace on Windows Systems
 =========================================

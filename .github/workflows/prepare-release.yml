@@ -13,35 +13,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: '3.10'
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.11
 
       - name: Verify version consistency
         run: |
-          # Check setup.py
-          setup_version=$(grep "version=" setup.py | cut -d"'" -f2)
-          echo "Version in setup.py: $setup_version"
+          # Check pyproject.toml
+          pyproject_version=$(grep 'version = ' pyproject.toml | head -1 | cut -d'"' -f2)
+          echo "Version in pyproject.toml: $pyproject_version"
 
           # Check conf.py
           conf_version=$(grep "version = " docs/conf.py | cut -d"'" -f2)
           echo "Version in conf.py: $conf_version"
 
+          # Check __init__.py
+          init_version=$(grep "__version__" squadds/__init__.py | cut -d"'" -f2)
+          echo "Version in __init__.py: $init_version"
+
           # Check if versions match
-          if [ "$setup_version" != "$conf_version" ]; then
-            echo "Warning: Versions in setup.py and conf.py do not match!"
+          if [ "$pyproject_version" != "$conf_version" ]; then
+            echo "Warning: Versions in pyproject.toml and conf.py do not match!"
+            exit 1
+          fi
+
+          if [ "$pyproject_version" != "$init_version" ]; then
+            echo "Warning: Versions in pyproject.toml and __init__.py do not match!"
             exit 1
           fi
 
           # Check if version matches input
-          if [ "$setup_version" != "${{ github.event.inputs.new_version }}" ]; then
-            echo "Warning: Current version ($setup_version) does not match input version (${{ github.event.inputs.new_version }})"
+          if [ "$pyproject_version" != "${{ github.event.inputs.new_version }}" ]; then
+            echo "Warning: Current version ($pyproject_version) does not match input version (${{ github.event.inputs.new_version }})"
             exit 1
           fi
 

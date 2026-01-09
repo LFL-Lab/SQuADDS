@@ -1,13 +1,11 @@
 import json
 import os
 import shutil
-from datetime import date, datetime
+from datetime import datetime
 
 import git
 from dotenv import load_dotenv
 from github import Github
-from github.Auth import Auth
-from github.GithubException import GithubException
 
 
 def login_to_github():
@@ -17,6 +15,7 @@ def login_to_github():
     if github_token is None:
         raise ValueError("GitHub token not found in environment variables.")
     return Github(github_token)
+
 
 def clone_repository(repo_url, clone_dir):
     """
@@ -38,12 +37,13 @@ def clone_repository(repo_url, clone_dir):
     repo = git.Repo.clone_from(repo_url, clone_dir)
     return repo
 
+
 def fork_repository(github_token):
     """
     Forks the specified GitHub repository to the authenticated user's account.
-    
+
     - github_token (str): GitHub Personal Access Token with appropriate permissions.
-    
+
     Returns:
     - str: URL of the forked repository if successful, None otherwise.
     """
@@ -51,24 +51,25 @@ def fork_repository(github_token):
     original_repo_name = "LFL-Lab/SQuADDS_DB"
     # Authenticate with GitHub
     g = Github(github_token)
-    
+
     # Get the authenticated user
     user = g.get_user()
-    
+
     try:
         # Get the original repository
         original_repo = g.get_repo(original_repo_name)
-        
+
         # Fork the repository to the authenticated user's account
         print(f"Forking the repository: {original_repo_name} to {user.login}'s account...")
         forked_repo = user.create_fork(original_repo)
         print(f"Repository forked successfully: {forked_repo.html_url}")
-        
+
         return forked_repo.html_url
-    
+
     except Exception as e:
         print(f"Error forking repository: {e}")
         return None
+
 
 def read_json_file(file_path):
     """
@@ -84,9 +85,10 @@ def read_json_file(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
 
     print(f"Reading JSON file from {file_path}...")
-    with open(file_path, 'r') as file:
+    with open(file_path) as file:
         data = json.load(file)
     return data
+
 
 def append_to_json(data, new_entry):
     """
@@ -103,6 +105,7 @@ def append_to_json(data, new_entry):
     data.append(new_entry)
     return data
 
+
 def save_json_file(file_path, data):
     """
     Save the updated data back to the JSON file.
@@ -112,8 +115,9 @@ def save_json_file(file_path, data):
     - data (dict): Updated JSON data.
     """
     print(f"Saving updated JSON data to {file_path}...")
-    with open(file_path, 'w') as file:
+    with open(file_path, "w") as file:
         json.dump(data, file, indent=4)
+
 
 def commit_changes(repo, file_path, commit_message):
     """
@@ -133,7 +137,8 @@ def commit_changes(repo, file_path, commit_message):
     print(f"Commit successful with message: {commit_message}")
     return commit.hexsha
 
-def push_changes(repo, branch_name='main', github_token=None):
+
+def push_changes(repo, branch_name="main", github_token=None):
     """
     Push the committed changes to the remote repository.
 
@@ -154,20 +159,25 @@ def push_changes(repo, branch_name='main', github_token=None):
                 repo_name = remote_url.split("github.com/")[1]
                 authenticated_url = f"https://{github_token}@github.com/{repo_name}"
                 repo.remotes.origin.set_url(authenticated_url)
-                print(f"Updated remote URL with token for authentication")
+                print("Updated remote URL with token for authentication")
             else:
                 print("Remote URL is not HTTPS, cannot update with token.")
 
         # Push changes to the remote repository
         print(f"Pushing changes to the remote {branch_name} branch...")
-        push_result = repo.remote(name='origin').push(refspec=f'{branch_name}:{branch_name}')
+        repo.remote(name="origin").push(refspec=f"{branch_name}:{branch_name}")
         print("Push successful.")
         return True
     except Exception as e:
         print(f"Push failed: {e}")
         return False
 
-def contribute_measured_data(new_entry, pr_title="PR For Contributing New Data", pr_body="This PR is for contributing new data to the SQuADDS Measured Devices Database."):
+
+def contribute_measured_data(
+    new_entry,
+    pr_title="PR For Contributing New Data",
+    pr_body="This PR is for contributing new data to the SQuADDS Measured Devices Database.",
+):
     """
     Update the JSON file in the given repository by appending a new entry and committing the changes.
 
@@ -175,15 +185,14 @@ def contribute_measured_data(new_entry, pr_title="PR For Contributing New Data",
     - new_entry (dict): New entry to append to the JSON file.
     - pr_title (str): The title of the pull request.
     - pr_body (str): The body description of the pull request.
-    
+
     Returns:
     - str: Commit hash if successful, None otherwise.
     """
     # Variable setup
-    original_repo_name = "LFL-Lab/SQuADDS_DB"
     TEMP_CLONE_DIR = "./temp_forked_repo"
-    json_file_path = "measured_device_database.json" 
-    load_dotenv()  
+    json_file_path = "measured_device_database.json"
+    load_dotenv()
     github_token = os.getenv("GITHUB_TOKEN")
     if github_token is None:
         raise ValueError("GitHub token not found in environment variables.")
@@ -199,7 +208,7 @@ def contribute_measured_data(new_entry, pr_title="PR For Contributing New Data",
 
     # Step 2: Check out the main branch
     print("Checking out the main branch...")
-    repo.git.checkout('main')
+    repo.git.checkout("main")
 
     # Step 3: Read the JSON file
     full_json_file_path = os.path.join(TEMP_CLONE_DIR, json_file_path)
@@ -213,19 +222,20 @@ def contribute_measured_data(new_entry, pr_title="PR For Contributing New Data",
 
     # Step 6: Commit the changes with a unique datetime-based message
     commit_message = f"Update JSON dataset with new entry - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    commit_hash = commit_changes(repo, json_file_path, commit_message)
+    commit_changes(repo, json_file_path, commit_message)
 
     # Step 7: Push the changes to the remote repository
-    if (push_changes(repo, "main", github_token)):
+    if push_changes(repo, "main", github_token):
         print("Successfully pushed changes to the remote repository.")
     else:
         print("Failed to push changes to the remote repository.")
         return
-    
+
     # Step 8: Create a Pull Request on GitHub
     pr_url = create_pull_request(forked_repo_name, branch_name, pr_title, pr_body, github_token)
     print(f"Pull request URL: {pr_url}")
-    
+
+
 def create_pull_request(forked_repo_name, branch_name, pr_title, pr_body, github_token):
     """
     Creates a pull request from the specified branch in the forked repository to the original repository.
@@ -257,7 +267,7 @@ def create_pull_request(forked_repo_name, branch_name, pr_title, pr_body, github
             title=pr_title,
             body=pr_body,
             head=f"{user.login}:{branch_name}",  # Forked repository and branch
-            base="main"  # Target branch in the original repository
+            base="main",  # Target branch in the original repository
         )
 
         print("Pull request created successfully")
@@ -266,6 +276,7 @@ def create_pull_request(forked_repo_name, branch_name, pr_title, pr_body, github
     except Exception as e:
         print(f"Error creating pull request: {e}")
         return None
+
 
 def get_github_username(github_token):
     """
@@ -280,10 +291,10 @@ def get_github_username(github_token):
     try:
         # Authenticate with GitHub using the token
         g = Github(github_token)
-        
+
         # Get the authenticated user
         user = g.get_user()
-        
+
         # Return the username
         return user.login
 

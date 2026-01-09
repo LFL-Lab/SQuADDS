@@ -2,11 +2,38 @@
 
 Thank you for your interest in contributing to SQuADDS! Here are some guidelines to help you get started.
 
+## Development Setup
+
+SQuADDS uses [uv](https://docs.astral.sh/uv/) for package management.
+
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone and setup
+git clone https://github.com/LFL-Lab/SQuADDS.git
+cd SQuADDS
+uv sync --extra dev
+
+# Install pre-commit hooks (recommended - auto-formats on commit)
+uv run pre-commit install
+
+# Run tests
+uv run pytest tests/ -v
+
+# Run linter manually
+uv run ruff check .
+uv run ruff format --check .
+```
+
+## Making Contributions
+
 If you have improvements or additions to the database, please follow these steps:
 
 - Fork the repository.
-- Create a new branch for your contribution.
-- Add your contributions.
+- Create a new branch for your contribution (`git checkout -b feature/your-feature-name`).
+- Make your changes and ensure tests pass.
+- Run the linter: `uv run ruff check . && uv run ruff format .`
 - Submit a pull request with the following commit message guidelines.
 
 ---

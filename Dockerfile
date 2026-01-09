@@ -1,5 +1,5 @@
-# Use the official Miniconda3 image
-FROM continuumio/miniconda3
+# Use official Python image
+FROM python:3.11-slim
 
 # Install required build tools and GUI dependencies
 RUN apt-get update && apt-get install -y \
@@ -10,28 +10,27 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libxkbcommon-x11-0 \
     libfontconfig1 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy the environment.yml from your repo into the container
-COPY environment.yml .
+# Copy dependency files first for better caching
+COPY pyproject.toml uv.lock ./
 
-# Create the conda environment from the environment.yml file
-RUN conda env create -f environment.yml
-
-# Activate the conda environment and set it as the default
-SHELL ["conda", "run", "-n", "squadds-env", "/bin/bash", "-c"]
+# Install dependencies
+RUN uv sync --frozen --no-dev
 
 # Copy the rest of your repo into the container
 COPY . .
 
-# Install SQuADDS from the local source (your repo)
-RUN python -m pip install --upgrade pip && pip install -e .
+# Install the package in editable mode
+RUN uv sync --frozen --no-dev
 
-# Install Qiskit Metal from their GitHub repository
-RUN python -m pip install --no-deps -e git+https://github.com/Qiskit/qiskit-metal.git#egg=qiskit-metal
-
-# Set the entry point for the Docker container, adjust this to how you run your package
-CMD ["conda", "run", "-n", "squadds-env", "python", "-m", "squadds"]
+# Set the entry point for the Docker container
+CMD ["uv", "run", "python", "-c", "import squadds; print('SQuADDS ready!')"]

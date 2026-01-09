@@ -8,6 +8,7 @@ from numpy import linalg as LA
 
 logging.basicConfig(level=logging.INFO)
 
+
 class MetricStrategy(ABC):
     """Abstract class for metric strategies."""
 
@@ -36,11 +37,9 @@ class MetricStrategy(ABC):
             pd.Series: Series of calculated distances.
         """
         chunk_size = int(np.ceil(len(df) / num_jobs))
-        chunks = [df.iloc[i:i + chunk_size] for i in range(0, len(df), chunk_size)]
+        chunks = [df.iloc[i : i + chunk_size] for i in range(0, len(df), chunk_size)]
 
-        distances = Parallel(n_jobs=num_jobs)(
-            delayed(self._calculate_chunk)(target_params, chunk) for chunk in chunks
-        )
+        distances = Parallel(n_jobs=num_jobs)(delayed(self._calculate_chunk)(target_params, chunk) for chunk in chunks)
 
         return pd.concat(distances)
 
@@ -68,8 +67,9 @@ class EuclideanMetric(MetricStrategy):
         distance = 0.0
         for column, target_value in target_params.items():
             if isinstance(target_value, (int, float)):  # Only numerical columns
-                distance += ((df_row[column] - target_value)**2 / target_value**2)
+                distance += (df_row[column] - target_value) ** 2 / target_value**2
         return np.sqrt(distance)
+
 
 class ManhattanMetric(MetricStrategy):
     """Implements the Manhattan metric strategy."""
@@ -130,7 +130,9 @@ class WeightedEuclideanMetric(MetricStrategy):
         """
         if self.weights is None:
             self.weights = {key: 1 for key in target_params.keys()}
-            logging.info(f"\033[1mNOTE TO USER:\033[0m No metric weights provided. Using default weights of 1 for all parameters.")
+            logging.info(
+                "\033[1mNOTE TO USER:\033[0m No metric weights provided. Using default weights of 1 for all parameters."
+            )
         distance = 0
         for param, target_value in target_params.items():
             if isinstance(target_value, (int, float)):
@@ -138,6 +140,7 @@ class WeightedEuclideanMetric(MetricStrategy):
                 weight = self.weights.get(param, 1)
                 distance += weight * ((target_value - simulated_value) ** 2) / target_value**2
         return distance
+
 
 class CustomMetric(MetricStrategy):
     """Implements a custom metric strategy using a user-defined function.
@@ -161,7 +164,7 @@ class CustomMetric(MetricStrategy):
                                           The function should take two dictionaries as arguments and return a float.
         """
         if custom_metric_func is None:
-            raise ValueError('Must provide a custom metric function.')
+            raise ValueError("Must provide a custom metric function.")
         self.custom_metric_func = custom_metric_func
 
     def calculate(self, target_params, df_row):

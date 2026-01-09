@@ -9,9 +9,10 @@ import webbrowser
 import numpy as np
 import pandas as pd
 import requests
-from huggingface_hub import HfApi, HfFolder
-from squadds.core.globals import ENV_FILE_PATH
+from huggingface_hub import HfApi, get_token
 from tabulate import tabulate
+
+from squadds.core.globals import ENV_FILE_PATH
 
 
 def float_to_string(value, units):
@@ -27,6 +28,7 @@ def float_to_string(value, units):
     """
     return f"{value}{units}"
 
+
 def string_to_float(string):
     """
     Converts a string representation of a number to a float.
@@ -38,6 +40,7 @@ def string_to_float(string):
         float: The converted float value.
     """
     return float(string[:-2])
+
 
 def view_contributors_from_rst(rst_url):
     """
@@ -54,12 +57,12 @@ def view_contributors_from_rst(rst_url):
 
     # Fetch the .rst file from the URL
     response = requests.get(rst_url)
-    
+
     if response.status_code == 200:
         content = response.text
 
         # Find the Contributors section
-        contributors_match = re.search(r'Contributors\s+-{3,}\s+(.*?)(\n\n|$)', content, re.S)
+        contributors_match = re.search(r"Contributors\s+-{3,}\s+(.*?)(\n\n|$)", content, re.S)
         if contributors_match:
             contributors_section = contributors_match.group(1).strip()
 
@@ -69,7 +72,7 @@ def view_contributors_from_rst(rst_url):
             for entry in contributor_entries:
                 if entry.strip():
                     # Extract name, institution, and contribution
-                    match = re.match(r'\*\*(.*?)\*\* \((.*?)\) - (.*)', entry.strip())
+                    match = re.match(r"\*\*(.*?)\*\* \((.*?)\) - (.*)", entry.strip())
                     if match:
                         name = match.group(1)
                         institution = match.group(2)
@@ -96,6 +99,7 @@ def save_intermediate_df(df, filename, file_idx):
     """
     df.to_parquet(f"{filename}_{file_idx}.parquet", index=False)
 
+
 def set_github_token():
     """
     Sets the GitHub token by appending it to the .env file.
@@ -104,26 +108,28 @@ def set_github_token():
     """
     # Check if token already exists
     if os.path.exists(ENV_FILE_PATH):
-        with open(ENV_FILE_PATH, 'r') as file:
+        with open(ENV_FILE_PATH) as file:
             existing_keys = file.read()
-            if 'GITHUB_TOKEN=' in existing_keys:
-                print('Token already exists in .env file.')
+            if "GITHUB_TOKEN=" in existing_keys:
+                print("Token already exists in .env file.")
                 return
 
     # Ask for the new token
     token = getpass.getpass("Enter your GitHub PAT token (with at least repo scope): ")
     # Append the new token to the .env file
-    with open(ENV_FILE_PATH, 'a') as file:
-        file.write(f'\nGITHUB_TOKEN={token}\n')
-        print('Token added to .env file.')
+    with open(ENV_FILE_PATH, "a") as file:
+        file.write(f"\nGITHUB_TOKEN={token}\n")
+        print("Token added to .env file.")
+
 
 def get_type(value):
     if isinstance(value, dict):
-        return 'dict'
+        return "dict"
     elif isinstance(value, list):
-        return 'list' if not value else get_type(value[0])
+        return "list" if not value else get_type(value[0])
     else:
         return type(value).__name__.lower()
+
 
 # Recursive function to validate types
 def validate_types(data_part, schema_part):
@@ -148,33 +154,36 @@ def validate_types(data_part, schema_part):
             if actual_type != expected_type:
                 raise TypeError(f"Invalid type for {key}. Expected {expected_type}, got {actual_type}.")
 
+
 def get_config_schema(entry):
     """
     Generates the schema for the given entry with specific rules.
     The 'sim_results' are fully expanded, while others are expanded to the first level.
     """
+
     def get_type(value):
         # Return the type as a string representation
         if isinstance(value, dict):
-            return 'dict'
+            return "dict"
         elif isinstance(value, list):
             # Check the type of the first item if the list is not empty
-            return 'list' if not value else get_type(value[0])
+            return "list" if not value else get_type(value[0])
         else:
             return type(value).__name__.lower()
 
     schema = {}
     for key, value in entry.items():
-        if key == 'sim_results':
+        if key == "sim_results":
             # Fully expand 'sim_results'
             schema[key] = {k: get_type(v) for k, v in value.items()}
-        elif key in ['sim_options', 'design', 'notes'] and isinstance(value, dict):
+        elif key in ["sim_options", "design", "notes"] and isinstance(value, dict):
             # Expand to the first level for 'sim_options', 'design', and 'notes'
             schema[key] = {k: get_type(v) for k, v in value.items()}
         else:
             schema[key] = get_type(value)
 
     return schema
+
 
 def get_schema(obj):
     """
@@ -193,12 +202,13 @@ def get_schema(obj):
 
     """
     if isinstance(obj, dict):
-        return {k: 'dict' if isinstance(v, dict) else get_schema(v) for k, v in obj.items() if k != 'contributor'}
+        return {k: "dict" if isinstance(v, dict) else get_schema(v) for k, v in obj.items() if k != "contributor"}
     elif isinstance(obj, list):
         # If the list contains dictionaries, just return 'dict', else get the type of the first element
-        return 'dict' if any(isinstance(elem, dict) for elem in obj) else type(obj[0]).__name__
+        return "dict" if any(isinstance(elem, dict) for elem in obj) else type(obj[0]).__name__
     else:
         return type(obj).__name__
+
 
 def is_float(value):
     try:
@@ -207,7 +217,8 @@ def is_float(value):
     except ValueError:
         return False
 
-def compare_schemas(data_schema, expected_schema, path=''):
+
+def compare_schemas(data_schema, expected_schema, path=""):
     """
     Compare two schemas and raise an error if there are any mismatches.
 
@@ -232,15 +243,18 @@ def compare_schemas(data_schema, expected_schema, path=''):
         if isinstance(expected_type, dict):
             if not isinstance(data_type, dict):
                 raise ValueError(f"Type mismatch for '{path}{key}'. Expected a dict, Got: {get_type(data_type)}")
-            compare_schemas(data_type, expected_type, path + key + '.')
+            compare_schemas(data_type, expected_type, path + key + ".")
         else:
             # Compare types for simple fields
             if get_type(data_type) != expected_type:
                 #! TODO: fix this:: if float is expected but got str then ignore
-                if expected_type == 'float' and get_type(data_type) == "str":
+                if expected_type == "float" and get_type(data_type) == "str":
                     continue
                 else:
-                    raise ValueError(f"Type mismatch for '{path}{key}'. Expected: {expected_type}, Got: {get_type(data_type)}")
+                    raise ValueError(
+                        f"Type mismatch for '{path}{key}'. Expected: {expected_type}, Got: {get_type(data_type)}"
+                    )
+
 
 def convert_to_numeric(value):
     """
@@ -259,7 +273,8 @@ def convert_to_numeric(value):
             return float(value)
     return value
 
-def convert_to_str(value:float, units: str):
+
+def convert_to_str(value: float, units: str):
     """
     Converts the given value to a string with the given units.
     Args:
@@ -269,6 +284,7 @@ def convert_to_str(value:float, units: str):
         str: The value as a string with the units.
     """
     return f"{value} {units}"
+
 
 def convert_list_to_str(lst):
     """
@@ -281,6 +297,7 @@ def convert_list_to_str(lst):
 
     return [convert_to_str(item) for item in lst]
 
+
 def get_entire_schema(obj):
     """
     Recursively traverses the given object and returns a schema representation.
@@ -292,11 +309,12 @@ def get_entire_schema(obj):
         The schema representation of the object.
     """
     if isinstance(obj, dict):
-        return {k: get_entire_schema(v) for k, v in obj.items() if k != 'contributor'}
+        return {k: get_entire_schema(v) for k, v in obj.items() if k != "contributor"}
     elif isinstance(obj, list):
         return [get_entire_schema(o) for o in obj][0] if obj else []
     else:
         return type(obj).__name__
+
 
 def delete_HF_cache():
     """
@@ -327,6 +345,7 @@ def delete_HF_cache():
     else:
         pass
 
+
 def get_sim_results_keys(dataframes):
     """
     Get the unique keys from the 'sim_results' column of the given dataframes.
@@ -347,9 +366,9 @@ def get_sim_results_keys(dataframes):
     # Iterate over each dataframe
     for df in dataframes:
         # Check if 'sim_results' column exists in the dataframe
-        if 'sim_results' in df.columns:
+        if "sim_results" in df.columns:
             # Extract keys from each row's 'sim_results' and add them to the list
-            for row in df['sim_results']:
+            for row in df["sim_results"]:
                 if isinstance(row, dict):  # Ensure the row is a dictionary
                     all_keys.extend(row.keys())
 
@@ -357,6 +376,7 @@ def get_sim_results_keys(dataframes):
     unique_keys = list(set(all_keys))
 
     return unique_keys
+
 
 def convert_numpy(obj):
     """
@@ -377,6 +397,7 @@ def convert_numpy(obj):
         return [convert_numpy(v) for v in obj]
     return obj
 
+
 # Function to create a unified design_options dictionary
 def create_unified_design_options(row):
     # TODO: no hardcoding
@@ -395,32 +416,34 @@ def create_unified_design_options(row):
     qubit_dict = convert_numpy(row["design_options_qubit"])
 
     # setting the `claw_cpw_*` params to zero
-    qubit_dict['connection_pads']['readout']['claw_cpw_width'] = "0um"
-    qubit_dict['connection_pads']['readout']['claw_cpw_length'] = "0um"
-    cavity_dict['claw_opts']['connection_pads']['readout']['claw_cpw_width'] = "0um"
-    cavity_dict['claw_opts']['connection_pads']['readout']['claw_cpw_length'] = "0um"
+    qubit_dict["connection_pads"]["readout"]["claw_cpw_width"] = "0um"
+    qubit_dict["connection_pads"]["readout"]["claw_cpw_length"] = "0um"
+    cavity_dict["claw_opts"]["connection_pads"]["readout"]["claw_cpw_width"] = "0um"
+    cavity_dict["claw_opts"]["connection_pads"]["readout"]["claw_cpw_length"] = "0um"
 
     # replacing the ground spacing of the cavity by that of the qubit
-    cavity_dict["claw_opts"]['connection_pads']["readout"]["ground_spacing"] = qubit_dict['connection_pads']['readout']['ground_spacing']
+    cavity_dict["claw_opts"]["connection_pads"]["readout"]["ground_spacing"] = qubit_dict["connection_pads"]["readout"][
+        "ground_spacing"
+    ]
 
     # setting the `claw_cpw_*` params to zero
-    qubit_dict['connection_pads']['readout']['claw_cpw_width'] = "0um"
-    qubit_dict['connection_pads']['readout']['claw_cpw_length'] = "0um"
-    cavity_dict['claw_opts']['connection_pads']['readout']['claw_cpw_width'] = "0um"
-    cavity_dict['claw_opts']['connection_pads']['readout']['claw_cpw_length'] = "0um"
+    qubit_dict["connection_pads"]["readout"]["claw_cpw_width"] = "0um"
+    qubit_dict["connection_pads"]["readout"]["claw_cpw_length"] = "0um"
+    cavity_dict["claw_opts"]["connection_pads"]["readout"]["claw_cpw_width"] = "0um"
+    cavity_dict["claw_opts"]["connection_pads"]["readout"]["claw_cpw_length"] = "0um"
 
     # replacing the ground spacing of the cavity by that of the qubit
-    cavity_dict["claw_opts"]['connection_pads']["readout"]["ground_spacing"] = qubit_dict['connection_pads']['readout']['ground_spacing']
+    cavity_dict["claw_opts"]["connection_pads"]["readout"]["ground_spacing"] = qubit_dict["connection_pads"]["readout"][
+        "ground_spacing"
+    ]
 
     device_dict = {
         "cavity_claw_options": {
             "coupler_type": coupler_type,
             "coupler_options": cavity_dict.get("cplr_opts", {}),
-            "cpw_opts": {
-                "left_options": cavity_dict.get("cpw_opts", {})
-            }
+            "cpw_opts": {"left_options": cavity_dict.get("cpw_opts", {})},
         },
-        "qubit_options": qubit_dict
+        "qubit_options": qubit_dict,
     }
 
     return device_dict
@@ -454,6 +477,7 @@ def flatten_df_second_level(df):
     new_df = pd.DataFrame(flattened_data)
     return new_df
 
+
 def filter_df_by_conditions(df, conditions):
     """
     Filter a DataFrame based on given conditions.
@@ -482,13 +506,13 @@ def filter_df_by_conditions(df, conditions):
         if column in filtered_df.columns:
             filtered_df = filtered_df[filtered_df[column] == value]
 
-
     # Check if the filtered DataFrame is empty
     if filtered_df.empty:
         print("Warning: No rows match the given conditions. Returning the original DataFrame.")
         return df
     else:
         return filtered_df
+
 
 def set_huggingface_api_key():
     """
@@ -498,21 +522,21 @@ def set_huggingface_api_key():
     """
     # Check if API key already exists
     if os.path.exists(ENV_FILE_PATH):
-        with open(ENV_FILE_PATH, 'r') as file:
+        with open(ENV_FILE_PATH) as file:
             existing_keys = file.read()
-            if 'HUGGINGFACE_API_KEY=' in existing_keys:
-                print('API key already exists in .env file.')
+            if "HUGGINGFACE_API_KEY=" in existing_keys:
+                print("API key already exists in .env file.")
                 return
 
     # Ask for the new API key
     api_key = getpass.getpass("Enter your Hugging Face API key: ")
     # Append the new API key to the .env file
-    with open(ENV_FILE_PATH, 'a') as file:
-        file.write(f'\nHUGGINGFACE_API_KEY={api_key}\n')
-        print(f'API key added to {ENV_FILE_PATH} file.')
+    with open(ENV_FILE_PATH, "a") as file:
+        file.write(f"\nHUGGINGFACE_API_KEY={api_key}\n")
+        print(f"API key added to {ENV_FILE_PATH} file.")
 
-    api = HfApi()
-    token = HfFolder.get_token()
+    HfApi()
+    token = get_token()
     if token is None:
         raise ValueError("Hugging Face token not found. Please log in using `huggingface-cli login`.")
 
@@ -538,7 +562,7 @@ def create_mailto_link(recipients, subject, body):
     mailto_link = f"mailto:{','.join(recipients)}?subject={subject_encoded}&body={body_encoded}"
 
     # Replace '+' with '%20' for proper space encoding
-    mailto_link = mailto_link.replace('+', '%20')
+    mailto_link = mailto_link.replace("+", "%20")
     return mailto_link
 
 
@@ -563,6 +587,7 @@ def send_email_via_client(dataset_name, institute, pi_name, date, dataset_link):
     mailto_link = create_mailto_link(recipients, subject, body)
     webbrowser.open(mailto_link)
 
+
 def compute_memory_usage(df):
     """
     Compute the memory usage of the given DataFrame.
@@ -573,9 +598,10 @@ def compute_memory_usage(df):
     Returns:
         float: The memory usage of the DataFrame in megabytes.
     """
-    mem = df.memory_usage(deep=True).sum() / 1024 ** 2
+    mem = df.memory_usage(deep=True).sum() / 1024**2
     print(f"Memory usage: {mem} MB")
     return mem
+
 
 def print_column_types(df):
     """
@@ -584,17 +610,18 @@ def print_column_types(df):
     Parameters:
     - df: DataFrame to analyze.
     """
-    float_cols = df.select_dtypes(include=['float']).columns.tolist()
-    int_cols = df.select_dtypes(include=['int']).columns.tolist()
-    object_cols = df.select_dtypes(include=['object']).columns.tolist()
-    datetime_cols = df.select_dtypes(include=['datetime']).columns.tolist()
-    string_cols = df.select_dtypes(include=['string']).columns.tolist()
-    
+    float_cols = df.select_dtypes(include=["float"]).columns.tolist()
+    int_cols = df.select_dtypes(include=["int"]).columns.tolist()
+    object_cols = df.select_dtypes(include=["object"]).columns.tolist()
+    datetime_cols = df.select_dtypes(include=["datetime"]).columns.tolist()
+    string_cols = df.select_dtypes(include=["string"]).columns.tolist()
+
     print("Columns with float types:", float_cols)
     print("Columns with int types:", int_cols)
     print("Columns with object types:", object_cols)
     print("Columns with datetime types:", datetime_cols)
     print("Columns with string types:", string_cols)
+
 
 def can_be_categorical(column):
     """
@@ -610,6 +637,7 @@ def can_be_categorical(column):
     except TypeError:
         return False
 
+
 def optimize_dataframe(df):
     """
     Optimize the memory usage of a pandas DataFrame by downcasting data types.
@@ -622,38 +650,38 @@ def optimize_dataframe(df):
 
     """
     df_optimized = df.copy()
-    
+
     # Calculate initial memory usage
     initial_memory_usage = df_optimized.memory_usage(deep=True).sum() / (1024**2)
-    
+
     # Memory usage before optimization
     memory_before_floats = df_optimized.memory_usage(deep=True).sum() / (1024**2)
-    
+
     # Optimize float columns
-    for col in df_optimized.select_dtypes(include=['float']):
-        df_optimized[col] = df_optimized[col].astype('float32')
-    
+    for col in df_optimized.select_dtypes(include=["float"]):
+        df_optimized[col] = df_optimized[col].astype("float32")
+
     # Memory usage after optimizing floats
     memory_after_floats = df_optimized.memory_usage(deep=True).sum() / (1024**2)
-    
+
     # Optimize integer columns
-    for col in df_optimized.select_dtypes(include=['int']):
-        df_optimized[col] = pd.to_numeric(df_optimized[col], downcast='unsigned')
-    
+    for col in df_optimized.select_dtypes(include=["int"]):
+        df_optimized[col] = pd.to_numeric(df_optimized[col], downcast="unsigned")
+
     # Memory usage after optimizing integers
     memory_after_ints = df_optimized.memory_usage(deep=True).sum() / (1024**2)
-    
+
     # Memory usage before optimizing object columns
     memory_before_objects = df_optimized.memory_usage(deep=True).sum() / (1024**2)
-    
+
     # Optimize object columns
-    for col in df_optimized.select_dtypes(include=['object']):
+    for col in df_optimized.select_dtypes(include=["object"]):
         if can_be_categorical(df_optimized[col]):
-            df_optimized[col] = df_optimized[col].astype('category')
-    
+            df_optimized[col] = df_optimized[col].astype("category")
+
     # Memory usage after optimizing object columns
     memory_after_objects = df_optimized.memory_usage(deep=True).sum() / (1024**2)
-    
+
     # Calculate memory savings and percentages
     float_savings = memory_before_floats - memory_after_floats
     int_savings = memory_after_floats - memory_after_ints
@@ -676,45 +704,67 @@ def optimize_dataframe(df):
     print(f"Memory saved by object optimization: {object_savings:.2f} MB ({object_savings_percentage:.2f}%)")
     print(f"Total memory saved: {total_savings:.2f} MB")
     print(f"Memory efficiency: {percentage_saved:.2f}%")
-    
+
     return df_optimized
 
 
 def process_design_options(merged_df):
     """
     Processes the 'design_options' column in merged_df, appends new columns, converts values, and drops 'design_options'.
-    
+
     Parameters:
     - merged_df: DataFrame containing the 'design_options' column.
-    
+
     Returns:
     - merged_df: Modified DataFrame with new columns added and 'design_options' dropped.
     """
+
     def convert_value(value):
         if value is None:
             return value
         if isinstance(value, str) and value.endswith("um"):
             return np.float16(value[:-2])
         return np.int16(value)
-    
+
     design_options = merged_df["design_options"]
 
-    merged_df["finger_count"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["finger_count"]))
-    merged_df["finger_length"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["finger_length"]))
-    merged_df["cap_gap"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["cap_gap"]))
-    merged_df["cap_width"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["cap_width"]))
-    merged_df["total_length"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["cpw_opts"]["left_options"]["total_length"]))
-    merged_df["meander_spacing"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["cpw_opts"]["left_options"]["meander"]["spacing"]))
-    merged_df["meander_asymmetry"] = design_options.apply(lambda x: convert_value(x["cavity_claw_options"]["cpw_opts"]["left_options"]["meander"]["asymmetry"]))
-    merged_df["claw_length"] = design_options.apply(lambda x: convert_value(x["qubit_options"]["connection_pads"]["readout"]["claw_length"]))
-    merged_df["claw_width"] = design_options.apply(lambda x: convert_value(x["qubit_options"]["connection_pads"]["readout"]["claw_width"]))
-    merged_df["ground_spacing"] = design_options.apply(lambda x: convert_value(x["qubit_options"]["connection_pads"]["readout"]["ground_spacing"]))
+    merged_df["finger_count"] = design_options.apply(
+        lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["finger_count"])
+    )
+    merged_df["finger_length"] = design_options.apply(
+        lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["finger_length"])
+    )
+    merged_df["cap_gap"] = design_options.apply(
+        lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["cap_gap"])
+    )
+    merged_df["cap_width"] = design_options.apply(
+        lambda x: convert_value(x["cavity_claw_options"]["coupler_options"]["cap_width"])
+    )
+    merged_df["total_length"] = design_options.apply(
+        lambda x: convert_value(x["cavity_claw_options"]["cpw_opts"]["left_options"]["total_length"])
+    )
+    merged_df["meander_spacing"] = design_options.apply(
+        lambda x: convert_value(x["cavity_claw_options"]["cpw_opts"]["left_options"]["meander"]["spacing"])
+    )
+    merged_df["meander_asymmetry"] = design_options.apply(
+        lambda x: convert_value(x["cavity_claw_options"]["cpw_opts"]["left_options"]["meander"]["asymmetry"])
+    )
+    merged_df["claw_length"] = design_options.apply(
+        lambda x: convert_value(x["qubit_options"]["connection_pads"]["readout"]["claw_length"])
+    )
+    merged_df["claw_width"] = design_options.apply(
+        lambda x: convert_value(x["qubit_options"]["connection_pads"]["readout"]["claw_width"])
+    )
+    merged_df["ground_spacing"] = design_options.apply(
+        lambda x: convert_value(x["qubit_options"]["connection_pads"]["readout"]["ground_spacing"])
+    )
     merged_df["cross_length"] = design_options.apply(lambda x: convert_value(x["qubit_options"]["cross_length"]))
 
     # Drop the 'design_options' column
     merged_df.drop(columns=["design_options"], inplace=True)
-    
+
     return merged_df
+
 
 def print_column_types(df):
     """
@@ -727,6 +777,7 @@ def print_column_types(df):
     for col, dtype in column_types.items():
         print(f"Column: {col}, Data Type: {dtype}")
 
+
 def delete_object_columns(df):
     """
     Deletes all columns of type 'object' from the DataFrame.
@@ -738,11 +789,11 @@ def delete_object_columns(df):
     - df: DataFrame with 'object' columns removed.
     """
     # Select columns that are of type 'object'
-    object_columns = df.select_dtypes(include=['object']).columns
+    object_columns = df.select_dtypes(include=["object"]).columns
 
     # Drop the selected columns
     df = df.drop(columns=object_columns)
-    
+
     return df
 
 
@@ -757,22 +808,25 @@ def columns_memory_usage(df):
     - mem_usage_df: DataFrame with columns 'Column', 'Memory Usage (MB)', and 'Percentage of Total Memory Usage'.
     """
     # Calculate the memory usage for each column
-    mem_usage = df.memory_usage(deep=True) / (1024 ** 2)  # Convert to MB
-    
+    mem_usage = df.memory_usage(deep=True) / (1024**2)  # Convert to MB
+
     # Calculate total memory usage
     total_mem_usage = mem_usage.sum()
-    
+
     # Create a DataFrame with memory usage and percentage of total memory usage
-    mem_usage_df = pd.DataFrame({
-        'Column': mem_usage.index,
-        'Memory Usage (MB)': mem_usage.values,
-        'Percentage of Total Memory Usage': (mem_usage.values / total_mem_usage) * 100
-    })
-    
+    mem_usage_df = pd.DataFrame(
+        {
+            "Column": mem_usage.index,
+            "Memory Usage (MB)": mem_usage.values,
+            "Percentage of Total Memory Usage": (mem_usage.values / total_mem_usage) * 100,
+        }
+    )
+
     # Sort the DataFrame by memory usage in descending order
-    mem_usage_df = mem_usage_df.sort_values(by='Memory Usage (MB)', ascending=False).reset_index(drop=True)
-    
+    mem_usage_df = mem_usage_df.sort_values(by="Memory Usage (MB)", ascending=False).reset_index(drop=True)
+
     return mem_usage_df
+
 
 # drop all categorical columns
 def delete_categorical_columns(df):
@@ -786,9 +840,9 @@ def delete_categorical_columns(df):
     - df: DataFrame with 'category' columns removed.
     """
     # Select columns that are of type 'category'
-    category_columns = df.select_dtypes(include=['category']).columns
+    category_columns = df.select_dtypes(include=["category"]).columns
 
     # Drop the selected columns
     df = df.drop(columns=category_columns)
 
-    return df 
+    return df

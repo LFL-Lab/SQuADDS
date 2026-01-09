@@ -22,8 +22,8 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 
 - [Citation](#citation)
 - [Installation](#installation)
+  - [Install from Source](#install-from-source-recommended-for-development)
   - [Install using pip](#install-using-pip)
-  - [Install from GitHub](#install-from-source)
   - [Run using Docker](#run-using-docker)
 - [Tutorials](#tutorials)
 - [Contributing](#contributing)
@@ -57,39 +57,63 @@ If you use SQuADDS in your research, please cite the following paper:
 
 ---
 
-## Installation:
+## Installation
 
-More installation instructions can be found in the [docs](https://lfl-lab.github.io/SQuADDS/source/getting_started.html).
+SQuADDS uses [uv](https://docs.astral.sh/uv/) for fast, reliable Python package management.
 
-### Install using pip:
+### Prerequisites
+
+Install `uv` (if you don't have it already):
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### Install from Source (Recommended for Development)
+
+```bash
+git clone https://github.com/LFL-Lab/SQuADDS.git
+cd SQuADDS
+uv sync
+```
+
+Verify the installation:
+
+```bash
+uv run python -c "import squadds; print(squadds.__file__)"
+```
+
+### Install using pip
 
 ```bash
 pip install SQuADDS
 ```
 
-### Install from source:
+### Optional Dependencies
 
-1. Clone Repository:
-   Navigate to your chosen directory and clone the repository.
-
-```bash
-cd <REPO-PATH>
-git clone https://github.com/LFL-Lab/SQuADDS.git
-```
-
-2. Install Dependencies:
-   Activate a clean conda environment (with qiskit-metal) and install dependencies.
+Install GDS processing tools:
 
 ```bash
-conda activate <YOUR-ENV>
-cd SQuADDS
-pip install -r requirements.txt
-pip install -e .
+uv sync --extra gds
 ```
 
-#### Install on a fresh Mac/Linux system:
+Install documentation tools:
 
-Read more on [here](docs/installation/unix_install.md)
+```bash
+uv sync --extra docs
+```
+
+Install development tools:
+
+```bash
+uv sync --extra dev
+```
+
+Install all optional dependencies:
+
+```bash
+uv sync --all-extras
+```
 
 ### Run using Docker:
 
@@ -216,12 +240,3 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
 - [PCodeShark25](https://github.com/PCodeShark25) - 1 contributions
 ---
-
-
-
-
-
-
-
-
-

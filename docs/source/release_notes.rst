@@ -1,6 +1,65 @@
 Release Notes
 =============
 
+Version 0.4.0 (2025-01-09)
+--------------------------
+
+* **Alpha Version 0.4.0 [MAJOR INFRASTRUCTURE RELEASE]**
+
+**Breaking Changes**
+
+- Migrated from ``setup.py`` to modern ``pyproject.toml`` (PEP 621)
+- Switched from ``qiskit-metal`` to ``quantum-metal>=0.5.0`` (ARM64 compatible)
+- Removed Conda-based installation; now uses ``uv`` for package management
+- Python 3.10+ required (dropped 3.9 support)
+- NumPy pinned to ``<2.0`` for quantum-metal compatibility
+
+**New Features**
+
+- Full native Apple Silicon (ARM64) support via quantum-metal
+- Modern ``uv`` package management for faster, more reliable installs
+- Added ``ruff`` linting to development dependencies
+- Added PySide6 for modern Qt GUI support
+- Cross-platform CI/CD testing on Python 3.10, 3.11, 3.12
+
+**Infrastructure**
+
+- Replaced all CI/CD workflows with ``astral-sh/setup-uv`` action
+- Added ``uv.lock`` for reproducible builds
+- Updated Docker image to use uv instead of Conda
+- Modernized PyPI publishing with trusted publishing (OIDC)
+- Added ruff configuration in pyproject.toml
+
+**Dependencies Removed (Bloatware)**
+
+- ``memory_profiler`` (unused)
+- ``addict`` (unused)
+- ``dask`` (transitive)
+- ``pyarrow`` (transitive)
+- ``cython`` (build-time only)
+- ``qutip`` (transitive via scqubits)
+
+**Dependencies Added**
+
+- ``matplotlib`` (was missing)
+- ``shapely`` (was missing)
+- ``pyside6`` (for quantum-metal)
+- ``ruff`` (dev dependency)
+
+**Documentation**
+
+- Completely rewrote installation instructions for uv workflow
+- Updated developer notes with new development setup
+- Simplified getting started guide
+- Removed all Conda/environment.yml references
+
+**Bug Fixes**
+
+- Fixed deprecated ``HfFolder`` import (replaced with ``get_token()``)
+- Fixed version consistency checks in prepare-release workflow
+
+---
+
 Version 0.3.7 (2024-03-19)
 --------------------------
 
@@ -157,7 +216,7 @@ Version 0.2.36 (2024-07-06)
 **Improvements**
 
 - Added `chi` as a query parameter
-- Better and more intuitive API 
+- Better and more intuitive API
 - "hot reload" of `Analyzer` object
 - Updated documentation and tutorials
 - Added `release-drafter` for automated release notes
@@ -205,7 +264,7 @@ Version 0.2.33 (2024-03-14)
 * **Alpha Version 0.2.33**
 
 - Bug fixes in ansys_simulator code for whole device `sweep` functionality
-- Added multiple helper/utility methods for ansys simulations 
+- Added multiple helper/utility methods for ansys simulations
 - Methods added to clulate chi, full dispersive shift of the cavity
 - Updated `requirements.txt` and documentation
 - Added method to set `GITHUB_TOKEN`
@@ -240,7 +299,7 @@ Version 0.2.3 (2024-01-17)
 - Added functionality for adding to existing configurations
 
 - Completed Tutorial 3
-  
+
 
 Version 0.2.2 (2024-01-10)
 --------------------------
@@ -298,7 +357,5 @@ Version 0.1.6 (2023-12-20)
   - Interpolation logic based on our `paper <https://arxiv.org/>`_
 
   - Tutorials on basic usage, contribution, and simulation added
-  
+
   - pypi package created
-
-

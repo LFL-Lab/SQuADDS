@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'SQuADDS'
 copyright = '2025, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
-release = "0.3.7"
+release = "0.4.0"
 
 # General configuration
 exclude_patterns = [
@@ -100,7 +100,7 @@ html_theme_options = {
 html_context = {
     "theme_announcement": "Read our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a>",
     "expandable_sidebar": True,
-    "google_analytics_id": "G-R5QKJDWM2W", 
+    "google_analytics_id": "G-R5QKJDWM2W",
     "footer": "_footer.html",  # Add this line to reference your custom footer
 }
 

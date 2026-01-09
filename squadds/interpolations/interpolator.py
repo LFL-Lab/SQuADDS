@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
-from squadds import Analyzer
+
 import pandas as pd
+
+from squadds import Analyzer
+
 
 class Interpolator(ABC):
     """Abstract class for interpolators."""

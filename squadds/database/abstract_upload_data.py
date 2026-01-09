@@ -4,11 +4,10 @@ from datetime import datetime
 
 
 class AbstractUploadData(ABC):
-
     def __init__(self, config_name):
         self.config_name = config_name
         self._set_contributor_info()
-    
+
     @abstractmethod
     def _validate_config_name(self):
         pass
@@ -50,7 +49,7 @@ class AbstractUploadData(ABC):
         pass
 
     @abstractmethod
-    def add_notes(self, notes={}):
+    def add_notes(self, notes=None):
         pass
 
     @abstractmethod
@@ -80,10 +79,10 @@ class AbstractUploadData(ABC):
     @abstractmethod
     def _set_contributor_info(self):
         self.contributor = {
-            "group": os.getenv('GROUP_NAME'),
-            "PI": os.getenv('PI_NAME'),
-            "institution": os.getenv('INSTITUTION'),
-            "uploader": os.getenv('USER_NAME'),
-            "misc": os.getenv('CONTRIB_MISC'),
-            "date_created": datetime.now().strftime("%Y-%m-%d %H%M%S")
+            "group": os.getenv("GROUP_NAME"),
+            "PI": os.getenv("PI_NAME"),
+            "institution": os.getenv("INSTITUTION"),
+            "uploader": os.getenv("USER_NAME"),
+            "misc": os.getenv("CONTRIB_MISC"),
+            "date_created": datetime.now().strftime("%Y-%m-%d %H%M%S"),
         }

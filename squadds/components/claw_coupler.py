@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2021.
@@ -12,7 +10,6 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-import numpy as np
 from qiskit_metal import Dict, draw
 from qiskit_metal.qlibrary.core import BaseQubit
 
@@ -58,26 +55,24 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
     """
 
     default_options = Dict(
-        cross_width='20um',
-        cross_length='200um',
-        cross_gap='20um',
-        chip='main',
+        cross_width="20um",
+        cross_length="200um",
+        cross_gap="20um",
+        chip="main",
         _default_connection_pads=Dict(
-            connector_type='0',  # 0 = Claw type, 1 = gap type
-            claw_length='30um',
-            ground_spacing='5um',
-            claw_width='10um',
-            claw_gap='6um',
-            claw_cpw_length='40um',
-            claw_cpw_width='10um',
-            connector_location=
-            '0'  # 0 => 'west' arm, 90 => 'north' arm, 180 => 'east' arm
-        ))
+            connector_type="0",  # 0 = Claw type, 1 = gap type
+            claw_length="30um",
+            ground_spacing="5um",
+            claw_width="10um",
+            claw_gap="6um",
+            claw_cpw_length="40um",
+            claw_cpw_width="10um",
+            connector_location="0",  # 0 => 'west' arm, 90 => 'north' arm, 180 => 'east' arm
+        ),
+    )
     """Default options."""
 
-    component_metadata = Dict(short_name='Cross',
-                              _qgeometry_table_poly='True',
-                              _qgeometry_table_junction='True')
+    component_metadata = Dict(short_name="Cross", _qgeometry_table_poly="True", _qgeometry_table_junction="True")
     """Component metadata"""
 
     TOOLTIP = """Simple Metal Transmon Cross."""
@@ -89,7 +84,7 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
         component."""
         self.make_connection_pads()
 
-###################################TRANSMON#############################################################
+    ###################################TRANSMON#############################################################
 
     def make_pocket(self):
         """
@@ -105,17 +100,10 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
             None
         """
         # self.p allows us to directly access parsed values (string -> numbers) form the user option
-        p = self.p
-
-        cross_width = p.cross_width
-        cross_length = p.cross_length
-        cross_gap = p.cross_gap
 
         # access to chip name
-        chip = p.chip
 
-
-############################CONNECTORS##################################################################################################
+    ############################CONNECTORS##################################################################################################
 
     def make_connection_pads(self):
         """Goes through connector pads and makes each one."""
@@ -150,13 +138,10 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
         claw_cpw = draw.box(-c_w, -c_c_w / 2, -c_c_l - c_w, c_c_w / 2)
 
         if pc.connector_type == 0:  # Claw connector
-            t_claw_height = 2*c_g + 2 * c_w + 2*g_s + \
-                2*cross_gap + cross_width  # temp value
+            t_claw_height = 2 * c_g + 2 * c_w + 2 * g_s + 2 * cross_gap + cross_width  # temp value
 
-            claw_base = draw.box(-c_w, -(t_claw_height) / 2, c_l,
-                                 t_claw_height / 2)
-            claw_subtract = draw.box(0, -t_claw_height / 2 + c_w, c_l,
-                                     t_claw_height / 2 - c_w)
+            claw_base = draw.box(-c_w, -(t_claw_height) / 2, c_l, t_claw_height / 2)
+            claw_subtract = draw.box(0, -t_claw_height / 2 + c_w, c_l, t_claw_height / 2 - c_w)
             claw_base = claw_base.difference(claw_subtract)
 
             connector_arm = draw.shapely.ops.unary_union([claw_base, claw_cpw])
@@ -169,8 +154,7 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
         # Done here so as to have the same translations and rotations as the connector. Could
         # extract from the connector later, but since allowing different connector types,
         # this seems more straightforward.
-        port_line = draw.LineString([(-c_c_l - c_w, -c_c_w / 2),
-                                     (-c_c_l - c_w, c_c_w / 2)])
+        port_line = draw.LineString([(-c_c_l - c_w, -c_c_w / 2), (-c_c_l - c_w, c_c_w / 2)])
 
         claw_rotate = 0
         if con_loc > 135:
@@ -180,19 +164,14 @@ class TransmonClaw(BaseQubit):  # pylint: disable=invalid-name
 
         # Rotates and translates the connector polygons (and temporary port_line)
         polys = [connector_arm, connector_etcher, port_line]
-        polys = draw.translate(polys, -(cross_length + cross_gap + g_s + c_g),
-                               0)
+        polys = draw.translate(polys, -(cross_length + cross_gap + g_s + c_g), 0)
         polys = draw.rotate(polys, claw_rotate, origin=(0, 0))
         polys = draw.rotate(polys, p.orientation, origin=(0, 0))
         polys = draw.translate(polys, p.pos_x, p.pos_y)
         [connector_arm, connector_etcher, port_line] = polys
 
         # Generates qgeometry for the connector pads
-        self.add_qgeometry('poly', {f'{name}_connector_arm': connector_arm},
-                           chip=chip)
-        self.add_qgeometry('poly',
-                           {f'{name}_connector_etcher': connector_etcher},
-                           subtract=True,
-                           chip=chip)
+        self.add_qgeometry("poly", {f"{name}_connector_arm": connector_arm}, chip=chip)
+        self.add_qgeometry("poly", {f"{name}_connector_etcher": connector_etcher}, subtract=True, chip=chip)
 
         self.add_pin(name, port_line.coords, c_c_w)

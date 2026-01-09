@@ -9,132 +9,73 @@ This guide helps you get started with ``SQuADDS``
 Installation
 ============
 
-``SQuADDS`` is built on top of ``qiskit-metal``, which is a crucial dependency. The installation process depends on whether you already have ``qiskit-metal`` installed in your environment or not.
+``SQuADDS`` uses `uv <https://docs.astral.sh/uv/>`_ for fast, reliable Python package management.
 
-For detailed installation instructions and troubleshooting for ``qiskit-metal``, please refer to:
-- `Qiskit Metal Installation Guide <https://qiskit-community.github.io/qiskit-metal/installation.html>`_
-- `Qiskit Metal Installation PDF Guide <https://github.com/OJB-Quantum/Qiskit-Metal-to-Litho/blob/main/Installing%20Qiskit%20Metal%20Using%20Git%2BURL_by%20Onri%20Jay%20Benally.pdf>`_
-- `Qiskit Metal Installation Video Tutorial 1 <https://www.youtube.com/watch?v=hs0tzZpH0xQ>`_
-- `Qiskit Metal Installation Video Tutorial 2 <https://www.youtube.com/watch?v=rLAH1RZHgtM>`_
+Prerequisites
+-------------
 
-1. Installing ``SQuADDS`` with Existing ``qiskit-metal``
-----------------------------------------------------
-.. _installing-squadds-with-existing-qiskit-metal:
-
-If you already have ``qiskit-metal`` installed and running in your environment, you can install ``SQuADDS`` in two ways:
-
-a) Using pip:
+Install ``uv`` (if you don't have it already):
 
 .. code-block:: bash
 
-   pip install SQuADDS
+   curl -LsSf https://astral.sh/uv/install.sh | sh
 
-b) From source:
+Install from Source (Recommended)
+---------------------------------
 
 .. code-block:: bash
 
    git clone https://github.com/LFL-Lab/SQuADDS.git
    cd SQuADDS
-   pip install -e .
+   uv sync
 
-2. Installing ``SQuADDS`` on a Fresh Environment
--------------------------------------------
-.. _installing-squadds-on-a-fresh-environment:
-
-If you don't have ``qiskit-metal`` installed, you'll need to set up a new environment first. We provide a shell script that:
-
-- Creates a new conda environment with Python 3.10
-- Installs ``qiskit-metal`` and its dependencies
-- Sets up the environment for ``SQuADDS``
-
-Run the following script:
+Verify the installation:
 
 .. code-block:: bash
 
-   #!/bin/bash
+   uv run python -c "import squadds; print(squadds.__file__)"
 
-   # Ensure script fails if any command fails
-   set -e
-
-   # Step 1: Download environment.yml from Qiskit-Metal repository
-   echo "Downloading environment.yml..."
-   curl -O https://raw.githubusercontent.com/Qiskit/qiskit-metal/main/environment.yml
-
-   # Step 2: Set up Miniconda environment
-   echo "Setting up Conda environment..."
-   conda env create -n <env_name> -f environment.yml
-   echo "Conda environment created."
-
-   # Activate the Conda environment
-   source "$(conda info --base)/etc/profile.d/conda.sh"
-   conda activate <env_name>
-
-   # Step 3: Install Qiskit-Metal
-   echo "Installing Qiskit-Metal..."
-   python -m pip install --no-deps -e git+https://github.com/Qiskit/qiskit-metal.git#egg=qiskit-metal
-
-After running this script, you'll have a working ``qiskit-metal`` environment. You can then follow the instructions in :ref:`installing-squadds-with-existing-qiskit-metal` to install ``SQuADDS``.
-
-Installing ``SQuADDS`` on Apple Silicon
------------------------------------
-
-``qiskit-metal`` currently lacks full native support for Apple Silicon due to `PySide` compatibility issues. However, you can run ``SQuADDS`` on Apple Silicon by emulating the `x86` architecture with Rosetta 2.
-
-First, ensure Rosetta 2 is installed:
+Install using pip
+-----------------
 
 .. code-block:: bash
 
-   softwareupdate --install-rosetta
+   pip install SQuADDS
 
-Then, create a new conda environment configured to emulate `x86`:
+Optional Dependencies
+---------------------
 
-.. code-block:: bash
-
-   # Create environment with x86 emulation
-   CONDA_SUBDIR=osx-64 conda create -n <env_name> python=3.10
-   conda activate <env_name>
-   conda config --env --set subdir osx-64
-
-This environment will now use Rosetta 2 to run x86 applications. You can then follow the same principles as in :ref:`installing-squadds-on-a-fresh-environment` to set up ``qiskit-metal`` in this environment.
+Install GDS processing tools:
 
 .. code-block:: bash
 
-   #!/bin/bash
+   uv sync --extra gds
 
-   # Ensure script fails if any command fails
-   set -e
+Install documentation tools:
 
-   # Step 1: Download environment.yml from Qiskit-Metal repository
-   echo "Downloading environment.yml..."
-   curl -O https://raw.githubusercontent.com/Qiskit/qiskit-metal/main/environment.yml
+.. code-block:: bash
 
-   # Step 2: Update the existing conda environment
-   echo "Updating Conda environment..."
-   conda env update -n <env_name> -f environment.yml
-   echo "Conda environment updated."
+   uv sync --extra docs
 
-   # Activate the Conda environment
-   source "$(conda info --base)/etc/profile.d/conda.sh"
-   conda activate <env_name>
+Install development tools:
 
-   # Step 3: Install Qiskit-Metal
-   echo "Installing Qiskit-Metal..."
-   python -m pip install --no-deps -e git+https://github.com/Qiskit/qiskit-metal.git#egg=qiskit-metal
+.. code-block:: bash
 
-Now, for installing ``SQuADDS``, follow the same principles as in :ref:`installing-squadds-with-existing-qiskit-metal`.
+   uv sync --extra dev
 
-.. note::
-   The `CONDA_SUBDIR=osx-64` flag tells conda to use x86 packages instead of arm64 packages, and `conda config --env --set subdir osx-64` ensures this setting persists for the environment.
+Install all optional dependencies:
 
-Installing Additional Dependencies
----------------------------------
+.. code-block:: bash
 
-``SQDMetal`` and ``palace`` are optional dependencies that can be used with ``SQuADDS`` for additional simulation capabilities.
+   uv sync --all-extras
+
+Installing Additional Tools
+---------------------------
 
 Installing ``SQDMetal``
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Once you have ``SQuADDS`` and ``qiskit-metal`` installed, you can install ``SQDMetal`` by:
+Once you have ``SQuADDS`` installed, you can install ``SQDMetal`` by:
 
 .. code-block:: bash
 
@@ -143,7 +84,7 @@ Once you have ``SQuADDS`` and ``qiskit-metal`` installed, you can install ``SQDM
    pip install .
 
 Installing ``palace``
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 ``palace`` is a powerful open source electromagnetic simulation tool that can be used with ``SQuADDS``. For detailed installation instructions, please refer to our :doc:`Palace Installation Guide <resources/palace>`.
 
@@ -159,36 +100,22 @@ We have compiled answers to common questions and issues. If you can't find what 
 Installation Issues
 -------------------
 
-**Q: Getting** ``ModuleNotFoundError: No module named 'squadds'`` **after running** `pip install SQuADDS` **in Jupyter Notebook. How can I fix this?**
+**Q: Getting** ``ModuleNotFoundError: No module named 'squadds'`` **after installation in Jupyter Notebook. How can I fix this?**
 
 **A:** You may need to restart the kernel after installing ``SQuADDS``. To do this, go to the `Kernel` menu in Jupyter Notebook and select `Restart`.
 
 **Q: Getting** ``ERROR: Failed building wheel for klayout`` **while building from GitHub in Windows**
 
-**A:** This problem can be solved simply by installing KLayout independently from the website `here <https://www.klayout.de/build.html>`_, and commenting out the ``klayout==0.29.0`` in the ``requirements.txt`` file.
-The ``requirements.txt`` file can found in the cloned repository. Then re-run the commands. 
+**A:** Install KLayout independently from the website `here <https://www.klayout.de/build.html>`_, then install SQuADDS without the gds extra.
 
 Accessing the Database
 -----------------------
 
-**Q: I am getting the error** ``Generating train split: 0 examples [00:00, ? examples/s] An error occurred while loading the dataset: An error occurred while generating the dataset`` **for various** ``SQuADDS_DB()`` **methods (e.g.** ``SQuADDS_DB().create_system_df()`` **).**
- 
-**A:** This is an error we have seen only happening on Windows systems for ``datasets`` library version ``2.20.0``. Downgrading to any versions between ``2.17.0`` and ``2.19.2`` should fix the issue. To downgrade, run the following command:
+**Q: I am getting errors while loading the dataset. What should I do?**
 
-.. code-block:: bash
+**A:** If you encounter errors upon instantiating the `SQuADDS_DB` class, there may be a caching issue. Delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
 
-   pip install datasets==2.19.2
-
-
-**Q: I am getting the error** ``KeyError: "Column contributor not in the dataset. Current columns in the dataset: ['image', 'measured_results', 'contrib_info', 'design_code', 'notes', 'sim_results', 'paper_link']"`` **for various** ``SQuADDS_DB()`` **methods (e.g.** ``SQuADDS_DB().view_all_contributors()`` **). Everything was working fine just the other day.**
-
-**A:** This error is due to new datasets (configs) added to ``SQuADDS/SQuADDS_DB`` dataset on 07/04/2024 (🇺🇸 🦅 🎆). To fix this issue please upgrade ``squadds`` to its latest version (or any version greater than or equal to ``0.2.35``).
-
-**Q: If there are errors upon instantiating the** ``SQuADDS_DB`` **class, what should I do?**
-
-**A:** If you encounter errors upon instantiating the `SQuADDS_DB` class, chances are there is an issue with caching. To fix this, please delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
-
-``.env`` File 
+``.env`` File
 -------------
 
 **Q: Why is the** ``.env`` **file needed?**
@@ -251,6 +178,3 @@ To determine the installation root of ``SQuADDS``, and subsequently place or fin
       print(f"To function properly, create a .env file at: {squadds_root}")
 
 .. |SQuADDS| replace:: SQuADDS
-.. |qiskit-metal| replace:: qiskit-metal
-.. |SQDMetal| replace:: SQDMetal
-.. |palace| replace:: palace
