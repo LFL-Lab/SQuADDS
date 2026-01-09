@@ -38,6 +38,24 @@ Install all optional dependencies:
 uv sync --all-extras
 ```
 
+## Setting up Jupyter Notebook
+
+To use SQuADDS in Jupyter notebooks (including VS Code, Cursor, or JupyterLab), you need to register the virtual environment as a Jupyter kernel:
+
+```bash
+# Install ipykernel (included in dev dependencies)
+uv sync --extra dev
+
+# Register the kernel
+uv run python -m ipykernel install --user --name squadds --display-name "SQuADDS (uv)"
+```
+
+After running these commands:
+
+1. **In VS Code/Cursor**: Open a `.ipynb` file, click on the kernel selector (top-right), and select **"SQuADDS (uv)"**
+2. **In JupyterLab/Notebook**: Select **"SQuADDS (uv)"** from the kernel dropdown
+3. **From command line**: Run notebooks with `uv run jupyter notebook` or `uv run jupyter lab`
+
 ## Environment Configuration
 
 Create a `.env` file at the root of SQuADDS with the following content (required for contributing to the database):
