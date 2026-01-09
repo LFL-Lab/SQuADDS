@@ -2,10 +2,11 @@
 #!TODO: Generalize the half-wave cavity method usage
 """
 
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import psutil
 from joblib import Parallel, delayed
 from numba import jit
 from pyEPR.calcs import Convert
@@ -416,9 +417,9 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         if self.selected_resonator_type == "half":
             if num_chunks == "auto":
-                num_chunks = psutil.cpu_count(logical=True)
-            elif num_chunks > psutil.cpu_count(logical=True):
-                raise ValueError(f"num_chunks must be less than or equal to {psutil.cpu_count(logical=True)}")
+                num_chunks = os.cpu_count() or 4
+            elif num_chunks > (os.cpu_count() or 4):
+                raise ValueError(f"num_chunks must be less than or equal to {os.cpu_count() or 4}")
             else:
                 num_chunks = 2
                 raise UserWarning("`num_chunk`s must be an integer greater than 0. Defaulting to 2.")
