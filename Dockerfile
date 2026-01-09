@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     make \
-    libgl1-mesa-glx \
+    libgl1 \
+    libegl1 \
     libxkbcommon-x11-0 \
     libfontconfig1 \
     curl \
