@@ -3,6 +3,7 @@
 """
 
 import os
+from functools import lru_cache
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,6 +23,49 @@ Constants
 """
 # constants
 ϕ0 = hbar / (2 * e)  # Flux quantum (Weber)
+
+# Cache for transmon calculations - significantly speeds up repeated calculations
+# Round to 6 decimal places to increase cache hits for similar values
+_TRANSMON_CACHE_PRECISION = 6
+
+
+@lru_cache(maxsize=50000)
+def _cached_transmon_E01_alpha(EJ_rounded: float, EC_rounded: float, ncut: int = 30) -> tuple[float, float]:
+    """
+    Cached calculation of E01 and anharmonicity for a transmon.
+
+    Uses rounded EJ/EC values as cache keys to increase hit rate.
+    Cache can hold up to 50,000 unique (EJ, EC) pairs.
+
+    Returns:
+        tuple: (E01 in GHz, anharmonicity in MHz)
+    """
+    transmon = Transmon(EJ=EJ_rounded, EC=EC_rounded, ng=0, ncut=ncut)
+    E01 = transmon.E01()
+    alpha = transmon.anharmonicity() * 1e3  # MHz
+    return E01, alpha
+
+
+def get_transmon_E01_alpha(EJ: float, EC: float, ncut: int = 30) -> tuple[float, float]:
+    """
+    Get E01 and anharmonicity with caching.
+
+    Rounds values to increase cache hit rate while maintaining accuracy.
+    """
+    EJ_rounded = round(EJ, _TRANSMON_CACHE_PRECISION)
+    EC_rounded = round(EC, _TRANSMON_CACHE_PRECISION)
+    return _cached_transmon_E01_alpha(EJ_rounded, EC_rounded, ncut)
+
+
+def clear_transmon_cache():
+    """Clear the transmon calculation cache."""
+    _cached_transmon_E01_alpha.cache_clear()
+
+
+def get_transmon_cache_info():
+    """Get cache statistics."""
+    return _cached_transmon_E01_alpha.cache_info()
+
 
 """
 ========================================================
@@ -317,6 +361,8 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the energy of the first excited state (E01) and the anharmonicity (alpha) of a transmon qubit.
 
+        Uses cached calculations when ng=0 for significant speedup on large datasets.
+
         Args:
             - EJ (float): Josephson energy of the transmon qubit.
             - EC (float): Charging energy of the transmon qubit.
@@ -327,6 +373,11 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
             - E01 (float): Energy of the first excited state (E01) in GHz.
             - alpha (float): Anharmonicity (alpha) in MHz.
         """
+        # Use cached version for ng=0 (the common case)
+        if ng == 0:
+            return get_transmon_E01_alpha(EJ, EC, ncut)
+
+        # Fall back to direct calculation for non-zero ng
         transmon = Transmon(EJ=EJ, EC=EC, ng=ng, ncut=ncut)
         E01 = transmon.E01()
         alpha = transmon.anharmonicity() * 1e3  # MHz
@@ -335,6 +386,8 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
     def E01(self, EJ, EC, ng=0, ncut=30):
         """
         Calculate the energy of the first excited state (E01) of a transmon qubit.
+
+        Uses cached calculations when ng=0 for significant speedup.
 
         Args:
             - EJ (float): Josephson energy of the transmon qubit.
@@ -345,6 +398,11 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         Returns:
             - E01 (float): Energy of the first excited state (E01) of the transmon qubit.
         """
+        # Use cached version for ng=0
+        if ng == 0:
+            E01, _ = get_transmon_E01_alpha(EJ, EC, ncut)
+            return E01
+
         transmon = Transmon(EJ=EJ, EC=EC, ng=ng, ncut=ncut)
         E01 = transmon.E01()
         return E01
@@ -408,6 +466,8 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         This method calculates the coupling strength 'g_MHz' between the transmon qubit and the cavity,
         based on the capacitance matrix, transmon parameters, cavity frequency, resonator type, and characteristic impedance.
 
+        Uses cached transmon calculations for significant speedup on large datasets.
+
         Args:
             - num_chunks: The number of chunks to split the DataFrame into for parallel processing. Default is "auto" which sets the number of chunks to the number of logical CPUs.
             - Z_0: The characteristic impedance of the transmission line. Default is 50 ohms.
@@ -415,6 +475,9 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         Returns:
             None
         """
+        # Clear cache at start for fresh calculations
+        clear_transmon_cache()
+
         if self.selected_resonator_type == "half":
             if num_chunks == "auto":
                 num_chunks = os.cpu_count() or 4
@@ -425,6 +488,13 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
                 raise UserWarning("`num_chunk`s must be an integer greater than 0. Defaulting to 2.")
             print(f"Using {num_chunks} chunks for parallel processing")
             self.df = self.parallel_process_dataframe(self.df, num_chunks)
+
+            # Print cache statistics
+            cache_info = get_transmon_cache_info()
+            print(
+                f"Transmon cache stats: hits={cache_info.hits}, misses={cache_info.misses}, "
+                f"hit_rate={cache_info.hits / (cache_info.hits + cache_info.misses) * 100:.1f}%"
+            )
         else:
             self.add_qubit_H_params()
             self.df["g_MHz"] = self.df.apply(
