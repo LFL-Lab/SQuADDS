@@ -584,15 +584,31 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">git</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">github</span><span class="w"> </span><span class="kn">import</span> <span class="n">Github</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">git</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">github</span><span class="w"> </span><span class="kn">import</span> <span class="n">Github</span>
+
+    <span class="n">_CONTRIB_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">_CONTRIB_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_contrib_deps</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if contribution dependencies are installed.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_CONTRIB_AVAILABLE</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;GitHub contribution features require additional dependencies. &quot;</span>
+            <span class="s2">&quot;Install them with: pip install &#39;SQuADDS[contrib]&#39; or uv add &#39;SQuADDS[contrib]&#39;&quot;</span>
+        <span class="p">)</span>
 
 
 <div class="viewcode-block" id="login_to_github">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.github.login_to_github">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">login_to_github</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Logs in to GitHub using a token stored in environment variables.&quot;&quot;&quot;</span>
+    <span class="n">_check_contrib_deps</span><span class="p">()</span>
     <span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># Load environment variables</span>
     <span class="n">github_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;GITHUB_TOKEN&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">github_token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -614,6 +630,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">    - git.Repo: The cloned Git repository object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_contrib_deps</span><span class="p">()</span>
     <span class="c1"># Remove the directory if it exists</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">clone_dir</span><span class="p">):</span>
         <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">clone_dir</span><span class="p">)</span>
@@ -636,7 +653,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">    - str: URL of the forked repository if successful, None otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="n">_check_contrib_deps</span><span class="p">()</span>
     <span class="n">original_repo_name</span> <span class="o">=</span> <span class="s2">&quot;LFL-Lab/SQuADDS_DB&quot;</span>
     <span class="c1"># Authenticate with GitHub</span>
     <span class="n">g</span> <span class="o">=</span> <span class="n">Github</span><span class="p">(</span><span class="n">github_token</span><span class="p">)</span>
