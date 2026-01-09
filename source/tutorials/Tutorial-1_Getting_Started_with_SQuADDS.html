@@ -632,15 +632,24 @@
 <p>Follow the instructions here - <a class="reference external" href="https://huggingface.co/join">HuggingFace: Sign Up</a> - to create an account.</p>
 <p>Once you have created an account, you can get your API key from the <a class="reference external" href="https://huggingface.co/settings/token">settings page</a>.</p>
 <p>Please update the <code class="docutils literal notranslate"><span class="pre">HUGGINGFACE_API_KEY</span></code> variable in the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file with your API key <strong>OR</strong> execute the following code to set the environment variable.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_huggingface_api_key</span>
 
-<span class="n">set_huggingface_api_key</span><span class="p">()</span>
+<span class="c1">#set_huggingface_api_key()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/tqdm/auto.py: 21
+</pre></div></div>
 </div>
 </section>
 <section id="Login">
@@ -657,8 +666,8 @@
 <section id="Accessing-the-SQuADDS-Database-using-the-HuggingFace-API">
 <h3>Accessing the SQuADDS Database using the HuggingFace API<a class="headerlink" href="#Accessing-the-SQuADDS-Database-using-the-HuggingFace-API" title="Link to this heading">#</a></h3>
 <p>The SQuADDS Database is hosted on HuggingFace. You can access the database using the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library from HuggingFace.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_dataset_config_names</span><span class="p">,</span> <span class="n">load_dataset</span>
@@ -667,29 +676,47 @@
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/datasets/SQuADDS/SQuADDS_DB/revision/6b4001554a05a484bcbb5faa7363f9c3097d5174 &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/datasets/SQuADDS/SQuADDS_DB/tree/6b4001554a05a484bcbb5faa7363f9c3097d5174?recursive=false&amp;expand=false &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+</pre></div></div>
+</div>
 <p>You can navigate the database using HuggingFace API. For example, you can access the qubit database using the following code:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_data</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span><span class="p">,</span> <span class="n">configs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "61c8651e5503436ea28aa534d4db7171", "version_major": 2, "version_minor": 0}</script></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "8844d543a2e54035b5fe3902340fbf41", "version_major": 2, "version_minor": 0}</script></div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_data</span>
@@ -697,14 +724,14 @@
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 DatasetDict({
     train: Dataset({
-        features: [&#39;sim_options&#39;, &#39;sim_results&#39;, &#39;notes&#39;, &#39;design&#39;, &#39;contributor&#39;],
+        features: [&#39;sim_results&#39;, &#39;sim_options&#39;, &#39;design&#39;, &#39;notes&#39;, &#39;contributor&#39;],
         num_rows: 1934
     })
 })
@@ -717,7 +744,7 @@ DatasetDict({
 <p>where <code class="docutils literal notranslate"><span class="pre">component</span></code> is the name of the component, <code class="docutils literal notranslate"><span class="pre">component_name</span></code> is the name of the component (in Qiskit Metal), and <code class="docutils literal notranslate"><span class="pre">data_type</span></code> is the type of simulation data that has been contributed.</p>
 <p>Lets check what the <code class="docutils literal notranslate"><span class="pre">config</span></code> string looks like for our database:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
@@ -756,7 +783,7 @@ DatasetDict({
 <p>While it is possible to directly access the SQuADDS Database using the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library, we have created a simple API to make it easier to query the database.</p>
 <p>The main object we use to access the database is the <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> class.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQuADDS_DB</span>
@@ -768,12 +795,20 @@ DatasetDict({
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3224eeaf5bba421ea538d17e29eeed95", "version_major": 2, "version_minor": 0}</script></div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+</pre></div></div>
 </div>
 <p>You can get a summary of the datasets by running.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_datasets</span><span class="p">()</span>
@@ -790,25 +825,17 @@ DatasetDict({
 +=============+=====================+==================+============================================================================================+
 | qubit       | TransmonCross       | cap_matrix       | https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/TransmonCross.png       |
 +-------------+---------------------+------------------+--------------------------------------------------------------------------------------------+
-| qubit       | TransmonCross       | cap_matrix       | https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/TransmonCross.png       |
-+-------------+---------------------+------------------+--------------------------------------------------------------------------------------------+
-| cavity_claw | RouteMeander        | eigenmode        | https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/RouteMeander.png        |
-+-------------+---------------------+------------------+--------------------------------------------------------------------------------------------+
-| cavity_claw | RouteMeander        | eigenmode        | https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/RouteMeander.png        |
-+-------------+---------------------+------------------+--------------------------------------------------------------------------------------------+
-| coupler     | NCap                | cap_matrix       | https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/NCap.png                |
-+-------------+---------------------+------------------+--------------------------------------------------------------------------------------------+
 | coupler     | NCap                | cap_matrix       | https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/NCap.png                |
 +-------------+---------------------+------------------+--------------------------------------------------------------------------------------------+
 | coupler     | CapNInterdigitalTee | cap_matrix       | https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/CapNInterdigitalTee.png |
 +-------------+---------------------+------------------+--------------------------------------------------------------------------------------------+
-| coupler     | CapNInterdigitalTee | cap_matrix       | https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/CapNInterdigitalTee.png |
+| cavity_claw | RouteMeander        | eigenmode        | https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/RouteMeander.png        |
 +-------------+---------------------+------------------+--------------------------------------------------------------------------------------------+
 </pre></div></div>
 </div>
 <p>To check for the <code class="docutils literal notranslate"><span class="pre">config</span></code> names</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_configs</span><span class="p">()</span>
@@ -829,7 +856,7 @@ DatasetDict({
 <p><strong>NOTE: ``’coupler-NCap-cap_matrix’`` and ``’’coupler-CapNInterdigitalTee-cap_matrix’`` are the same datasets. We will support them both since future releases will deprecate the term ``NCap`` and replace it with ``CapNInterdigitalTee``.</strong></p>
 <p>If you are interested to learn more about each configuration, you can do so by using the <code class="docutils literal notranslate"><span class="pre">get_dataset_info</span></code> method.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_dataset_info</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
@@ -839,34 +866,42 @@ DatasetDict({
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a87acda16c844b6983693b62cf722216", "version_major": 2, "version_minor": 0}</script></div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+Generating train split: 1934 examples [00:00, 10125.97 examples/s]
+</pre></div></div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 ================================================================================
 Dataset Features:
-{&#39;contributor&#39;: {&#39;PI&#39;: Value(dtype=&#39;string&#39;, id=None),
-                 &#39;date_created&#39;: Value(dtype=&#39;string&#39;, id=None),
-                 &#39;group&#39;: Value(dtype=&#39;string&#39;, id=None),
-                 &#39;institution&#39;: Value(dtype=&#39;string&#39;, id=None),
-                 &#39;uploader&#39;: Value(dtype=&#39;string&#39;, id=None)},
- &#39;design&#39;: {&#39;design_options&#39;: {...},
-            &#39;design_tool&#39;: Value(dtype=&#39;string&#39;, id=None)},
+{&#39;contributor&#39;: {&#39;PI&#39;: Value(&#39;string&#39;),
+                 &#39;date_created&#39;: Value(&#39;string&#39;),
+                 &#39;group&#39;: Value(&#39;string&#39;),
+                 &#39;institution&#39;: Value(&#39;string&#39;),
+                 &#39;uploader&#39;: Value(&#39;string&#39;)},
+ &#39;design&#39;: {&#39;design_options&#39;: {...}, &#39;design_tool&#39;: Value(&#39;string&#39;)},
  &#39;notes&#39;: {},
  &#39;sim_options&#39;: {&#39;renderer_options&#39;: {...},
                  &#39;setup&#39;: {...},
-                 &#39;simulator&#39;: Value(dtype=&#39;string&#39;, id=None)},
- &#39;sim_results&#39;: {&#39;claw_to_claw&#39;: Value(dtype=&#39;float64&#39;, id=None),
-                 &#39;claw_to_ground&#39;: Value(dtype=&#39;float64&#39;, id=None),
-                 &#39;cross_to_claw&#39;: Value(dtype=&#39;float64&#39;, id=None),
-                 &#39;cross_to_cross&#39;: Value(dtype=&#39;float64&#39;, id=None),
-                 &#39;cross_to_ground&#39;: Value(dtype=&#39;float64&#39;, id=None),
-                 &#39;ground_to_ground&#39;: Value(dtype=&#39;float64&#39;, id=None),
-                 &#39;units&#39;: Value(dtype=&#39;string&#39;, id=None)}}
+                 &#39;simulator&#39;: Value(&#39;string&#39;)},
+ &#39;sim_results&#39;: {&#39;claw_to_claw&#39;: Value(&#39;float64&#39;),
+                 &#39;claw_to_ground&#39;: Value(&#39;float64&#39;),
+                 &#39;cross_to_claw&#39;: Value(&#39;float64&#39;),
+                 &#39;cross_to_cross&#39;: Value(&#39;float64&#39;),
+                 &#39;cross_to_ground&#39;: Value(&#39;float64&#39;),
+                 &#39;ground_to_ground&#39;: Value(&#39;float64&#39;),
+                 &#39;units&#39;: Value(&#39;string&#39;)}}
 
 Dataset Description:
 
@@ -885,8 +920,16 @@ Dataset Size in Bytes:
 ================================================================================
 </pre></div></div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_dataset_info</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eigenmode&quot;</span><span class="p">)</span>
@@ -896,39 +939,42 @@ Dataset Size in Bytes:
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "41ce54b2526042d1af663413cea3d3ac", "version_major": 2, "version_minor": 0}</script></div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+Generating train split: 1216 examples [00:00, 27667.90 examples/s]
+</pre></div></div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "7394393ba866418f82357fd441cec5e2", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 ================================================================================
 Dataset Features:
-{&#39;contributor&#39;: {&#39;PI&#39;: Value(dtype=&#39;string&#39;, id=None),
-                 &#39;date_created&#39;: Value(dtype=&#39;string&#39;, id=None),
-                 &#39;group&#39;: Value(dtype=&#39;string&#39;, id=None),
-                 &#39;institution&#39;: Value(dtype=&#39;string&#39;, id=None),
-                 &#39;misc&#39;: Value(dtype=&#39;string&#39;, id=None),
-                 &#39;uploader&#39;: Value(dtype=&#39;string&#39;, id=None)},
- &#39;design&#39;: {&#39;coupler_type&#39;: Value(dtype=&#39;string&#39;, id=None),
+{&#39;contributor&#39;: {&#39;PI&#39;: Value(&#39;string&#39;),
+                 &#39;date_created&#39;: Value(&#39;string&#39;),
+                 &#39;group&#39;: Value(&#39;string&#39;),
+                 &#39;institution&#39;: Value(&#39;string&#39;),
+                 &#39;misc&#39;: Value(&#39;string&#39;),
+                 &#39;uploader&#39;: Value(&#39;string&#39;)},
+ &#39;design&#39;: {&#39;coupler_type&#39;: Value(&#39;string&#39;),
             &#39;design_options&#39;: {...},
-            &#39;design_tool&#39;: Value(dtype=&#39;string&#39;, id=None),
-            &#39;resonator_type&#39;: Value(dtype=&#39;string&#39;, id=None)},
+            &#39;design_tool&#39;: Value(&#39;string&#39;),
+            &#39;resonator_type&#39;: Value(&#39;string&#39;)},
  &#39;notes&#39;: {},
  &#39;sim_options&#39;: {&#39;renderer_options&#39;: {...},
                  &#39;setup&#39;: {...},
-                 &#39;simulator&#39;: Value(dtype=&#39;string&#39;, id=None)},
- &#39;sim_results&#39;: {&#39;cavity_frequency&#39;: Value(dtype=&#39;float64&#39;, id=None),
-                 &#39;kappa&#39;: Value(dtype=&#39;float64&#39;, id=None),
-                 &#39;units&#39;: Value(dtype=&#39;string&#39;, id=None)}}
+                 &#39;simulator&#39;: Value(&#39;string&#39;)},
+ &#39;sim_results&#39;: {&#39;cavity_frequency&#39;: Value(&#39;float64&#39;),
+                 &#39;kappa&#39;: Value(&#39;float64&#39;),
+                 &#39;units&#39;: Value(&#39;string&#39;)}}
 
 Dataset Description:
 
@@ -947,17 +993,39 @@ Dataset Size in Bytes:
 ================================================================================
 </pre></div></div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
 <p>You can get the entire dataset as a Pandas DataFrame by using the <code class="docutils literal notranslate"><span class="pre">get_dataset</span></code> method.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">see_dataset</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -979,9 +1047,6 @@ Dataset Size in Bytes:
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>renderer_options</th>
-      <th>setup</th>
-      <th>simulator</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
@@ -989,6 +1054,9 @@ Dataset Size in Bytes:
       <th>cross_to_ground</th>
       <th>ground_to_ground</th>
       <th>units</th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
       <th>design_options</th>
       <th>design_tool</th>
       <th>PI</th>
@@ -1001,9 +1069,6 @@ Dataset Size in Bytes:
   <tbody>
     <tr>
       <th>0</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
@@ -1011,6 +1076,9 @@ Dataset Size in Bytes:
       <td>158.40783</td>
       <td>311.25590</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1021,9 +1089,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>82.44280</td>
       <td>79.19378</td>
       <td>2.93820</td>
@@ -1031,6 +1096,9 @@ Dataset Size in Bytes:
       <td>188.15089</td>
       <td>333.52997</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1041,9 +1109,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>2</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>83.76412</td>
       <td>80.18130</td>
       <td>3.16131</td>
@@ -1051,6 +1116,9 @@ Dataset Size in Bytes:
       <td>104.35340</td>
       <td>237.02548</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1061,9 +1129,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>3</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>103.37057</td>
       <td>97.22405</td>
       <td>5.77590</td>
@@ -1071,6 +1136,9 @@ Dataset Size in Bytes:
       <td>174.13928</td>
       <td>335.31609</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1081,9 +1149,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>4</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>68.92854</td>
       <td>65.68607</td>
       <td>2.87375</td>
@@ -1091,6 +1156,9 @@ Dataset Size in Bytes:
       <td>120.03923</td>
       <td>240.34085</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1121,9 +1189,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1929</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>106.43025</td>
       <td>101.53197</td>
       <td>4.45645</td>
@@ -1131,6 +1196,9 @@ Dataset Size in Bytes:
       <td>174.46380</td>
       <td>340.62919</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1141,9 +1209,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1930</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>121.10943</td>
       <td>112.62570</td>
       <td>7.95178</td>
@@ -1151,6 +1216,9 @@ Dataset Size in Bytes:
       <td>187.43537</td>
       <td>367.34003</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1161,9 +1229,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1931</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>144.56289</td>
       <td>136.36810</td>
       <td>7.65968</td>
@@ -1171,6 +1236,9 @@ Dataset Size in Bytes:
       <td>172.14561</td>
       <td>372.39970</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1181,9 +1249,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1932</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>68.76413</td>
       <td>65.78116</td>
       <td>2.48795</td>
@@ -1191,6 +1256,9 @@ Dataset Size in Bytes:
       <td>56.75230</td>
       <td>166.57383</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1201,9 +1269,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1933</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>58.45749</td>
       <td>55.50796</td>
       <td>2.54396</td>
@@ -1211,6 +1276,9 @@ Dataset Size in Bytes:
       <td>62.01000</td>
       <td>162.42140</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1226,7 +1294,7 @@ Dataset Size in Bytes:
 </div>
 <p>You can also learn more about the measured device that generated this dataset:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_reference_device_of</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
@@ -1236,8 +1304,17 @@ Dataset Size in Bytes:
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a66a33e49f864071813b18d5dfb787a2", "version_major": 2, "version_minor": 0}</script></div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+Generating train split: 3 examples [00:00, 62.15 examples/s]
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -1273,7 +1350,7 @@ Dataset Size in Bytes:
 </div>
 <p>You can also learn more about the other measured devices that are available in SQuADDS</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_measured_devices</span><span class="p">()</span>
@@ -1283,11 +1360,19 @@ Dataset Size in Bytes:
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a790db88448847c0bf52e520bef7bc4a", "version_major": 2, "version_minor": 0}</script></div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1363,14 +1448,23 @@ Dataset Size in Bytes:
 </div>
 <p>If you want to learn about the who contributed the simulation data, you can use the following methods:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_contributors_of</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span> <span class="s2">&quot;cap_matrix&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -1378,6 +1472,27 @@ Dataset Size in Bytes:
 ================================================================================
                         Measured Device Contributor(s):
 ================================================================================
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 +-----------------------+-------------------------------------------------------+
 | Foundry               | N/A                                                   |
 +-----------------------+-------------------------------------------------------+
@@ -1396,6 +1511,25 @@ Dataset Size in Bytes:
 ================================================================================
                         Simulation Data Contributor(s):
 ================================================================================
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 +------------+------------------------+---------+---------------+
 | uploader   | PI                     | group   | institution   |
 +============+========================+=========+===============+
@@ -1405,7 +1539,7 @@ Dataset Size in Bytes:
 </div>
 <p>To see the list of all the contributors, you can use the following method:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">view_all_contributors</span><span class="p">()</span>
@@ -1417,33 +1551,41 @@ Dataset Size in Bytes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-+--------------------+------------------------------------+---------------------------------------+
-| Name               | Institution                        | Contribution                          |
-+====================+====================================+=======================================+
-| Clark Miyamoto     | New York University                | Code contributor 💻                   |
-+--------------------+------------------------------------+---------------------------------------+
-| Madison Howard     | California Institute of Technology | Bug Hunter 🐛                         |
-+--------------------+------------------------------------+---------------------------------------+
-| Malida Hecht       | University of Southern California  | Data contributor 📀                   |
-+--------------------+------------------------------------+---------------------------------------+
-| Evangelos Vlachos  | University of Southern California  | Code contributor 💻 and Bug Hunter 🐛 |
-+--------------------+------------------------------------+---------------------------------------+
-| Anne Whelan        | US Navy                            | Documentation contributor 📄          |
-+--------------------+------------------------------------+---------------------------------------+
-| Jenny Huang        | Columbia University                | Documentation contributor 📄          |
-+--------------------+------------------------------------+---------------------------------------+
-| Connie Miao        | Stanford University                | Data Contributor 📀                   |
-+--------------------+------------------------------------+---------------------------------------+
-| Daria Kowsari, PhD | University of Southern California  | Data contributor 📀                   |
-+--------------------+------------------------------------+---------------------------------------+
-| Vivek Maurya       | University of Southern California  | Data contributor 📀                   |
-+--------------------+------------------------------------+---------------------------------------+
-| Haimeng Zhang, PhD | IBM                                | Data contributor 📀                   |
-+--------------------+------------------------------------+---------------------------------------+
-| Ethan Zheng        | University of Southern California  | Data contributor 📀                   |
-+--------------------+------------------------------------+---------------------------------------+
-| Sara Sussman, PhD  | Fermilab                           | Bug Hunter 🐛                         |
-+--------------------+------------------------------------+---------------------------------------+
++-----------------------+------------------------------------+-------------------------------------------+
+| Name                  | Institution                        | Contribution                              |
++=======================+====================================+===========================================+
+| Clark Miyamoto        | New York University                | Code contributor 💻                       |
++-----------------------+------------------------------------+-------------------------------------------+
+| Madison Howard        | California Institute of Technology | Bug Hunter 🐛                             |
++-----------------------+------------------------------------+-------------------------------------------+
+| Evangelos Vlachos     | University of Southern California  | Code contributor 💻                       |
++-----------------------+------------------------------------+-------------------------------------------+
+| Kaveh Pezeshki        | Stanford University                | Documentation contributor 📄              |
++-----------------------+------------------------------------+-------------------------------------------+
+| Anne Whelan           | US Navy                            | Documentation contributor 📄              |
++-----------------------+------------------------------------+-------------------------------------------+
+| Jenny Huang           | Columbia University                | Documentation contributor 📄              |
++-----------------------+------------------------------------+-------------------------------------------+
+| Connie Miao           | Stanford University                | Data Contributor 📀                       |
++-----------------------+------------------------------------+-------------------------------------------+
+| Malida Hecht          | University of Southern California  | Data contributor 📀                       |
++-----------------------+------------------------------------+-------------------------------------------+
+| Daria Kowsari, PhD    | University of Southern California  | Data contributor 📀                       |
++-----------------------+------------------------------------+-------------------------------------------+
+| Vivek Maurya          | University of Southern California  | Data contributor 📀                       |
++-----------------------+------------------------------------+-------------------------------------------+
+| Haimeng Zhang, PhD    | IBM                                | Data contributor 📀                       |
++-----------------------+------------------------------------+-------------------------------------------+
+| Elizabeth Kunz        | University of Southern California  | Documentation 📄 and  Code contributor 💻 |
++-----------------------+------------------------------------+-------------------------------------------+
+| Adhish Chakravorty    | University of Southern California  | Documentation 📄 and  Code contributor 💻 |
++-----------------------+------------------------------------+-------------------------------------------+
+| Ethan Zheng           | University of Southern California  | Data contributor 📀 and Bug Hunter 🐛     |
++-----------------------+------------------------------------+-------------------------------------------+
+| Sara Sussman, PhD     | Fermilab                           | Bug Hunter 🐛                             |
++-----------------------+------------------------------------+-------------------------------------------+
+| Priyangshu Chatterjee | IIT Kharagpur                      | Documentation contributor 📄              |
++-----------------------+------------------------------------+-------------------------------------------+
 </pre></div></div>
 </div>
 <p>As the SQuADDS_DB dataset updates, so will all the information we have queried automatically.</p>
@@ -1458,7 +1600,7 @@ Dataset Size in Bytes:
 <p>Let’s say you know the Hamiltonian parameters of a qubit you want to use. You can use the SQuADDS API to query for the closest design to your target qubit.</p>
 <p>We first need to select our sytem of interest.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">)</span>
@@ -1467,7 +1609,7 @@ Dataset Size in Bytes:
 </div>
 <p>Now, we need to specify to SQuADDS what type of <code class="docutils literal notranslate"><span class="pre">qubit</span></code> our system is. We can do this by using the <code class="docutils literal notranslate"><span class="pre">select_qubit</span></code> method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
@@ -1476,7 +1618,7 @@ Dataset Size in Bytes:
 </div>
 <p>We now create the system dataframe so that we can query for the design parameters we are interested in.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
@@ -1484,8 +1626,22 @@ Dataset Size in Bytes:
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1507,9 +1663,6 @@ Dataset Size in Bytes:
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>renderer_options</th>
-      <th>setup</th>
-      <th>simulator</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
@@ -1517,6 +1670,9 @@ Dataset Size in Bytes:
       <th>cross_to_ground</th>
       <th>ground_to_ground</th>
       <th>units</th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
       <th>design_options</th>
       <th>design_tool</th>
       <th>PI</th>
@@ -1529,9 +1685,6 @@ Dataset Size in Bytes:
   <tbody>
     <tr>
       <th>0</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
@@ -1539,6 +1692,9 @@ Dataset Size in Bytes:
       <td>158.40783</td>
       <td>311.25590</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1549,9 +1705,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>82.44280</td>
       <td>79.19378</td>
       <td>2.93820</td>
@@ -1559,6 +1712,9 @@ Dataset Size in Bytes:
       <td>188.15089</td>
       <td>333.52997</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1569,9 +1725,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>2</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>83.76412</td>
       <td>80.18130</td>
       <td>3.16131</td>
@@ -1579,6 +1732,9 @@ Dataset Size in Bytes:
       <td>104.35340</td>
       <td>237.02548</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1589,9 +1745,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>3</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>103.37057</td>
       <td>97.22405</td>
       <td>5.77590</td>
@@ -1599,6 +1752,9 @@ Dataset Size in Bytes:
       <td>174.13928</td>
       <td>335.31609</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1609,9 +1765,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>4</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>68.92854</td>
       <td>65.68607</td>
       <td>2.87375</td>
@@ -1619,6 +1772,9 @@ Dataset Size in Bytes:
       <td>120.03923</td>
       <td>240.34085</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1649,9 +1805,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1929</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>106.43025</td>
       <td>101.53197</td>
       <td>4.45645</td>
@@ -1659,6 +1812,9 @@ Dataset Size in Bytes:
       <td>174.46380</td>
       <td>340.62919</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1669,9 +1825,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1930</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>121.10943</td>
       <td>112.62570</td>
       <td>7.95178</td>
@@ -1679,6 +1832,9 @@ Dataset Size in Bytes:
       <td>187.43537</td>
       <td>367.34003</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1689,9 +1845,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1931</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>144.56289</td>
       <td>136.36810</td>
       <td>7.65968</td>
@@ -1699,6 +1852,9 @@ Dataset Size in Bytes:
       <td>172.14561</td>
       <td>372.39970</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1709,9 +1865,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1932</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>68.76413</td>
       <td>65.78116</td>
       <td>2.48795</td>
@@ -1719,6 +1872,9 @@ Dataset Size in Bytes:
       <td>56.75230</td>
       <td>166.57383</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1729,9 +1885,6 @@ Dataset Size in Bytes:
     </tr>
     <tr>
       <th>1933</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>58.45749</td>
       <td>55.50796</td>
       <td>2.54396</td>
@@ -1739,6 +1892,9 @@ Dataset Size in Bytes:
       <td>62.01000</td>
       <td>162.42140</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>{'aedt_hfss_capacitance': 0, 'aedt_hfss_induct...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1754,7 +1910,7 @@ Dataset Size in Bytes:
 </div>
 <p>Now that we have created our system dataframe, we can query for the closest design to our target qubit parameters. To do this we need to call the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analyzer</span>
@@ -1763,7 +1919,7 @@ Dataset Size in Bytes:
 </div>
 <p>We instatantaite the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object by passing in the <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> instance we created earlier.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
@@ -1772,7 +1928,7 @@ Dataset Size in Bytes:
 </div>
 <p>We can now check for what type of Hamiltonian parameters are available for our chosen system</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">target_param_keys</span><span class="p">()</span>
@@ -1780,7 +1936,7 @@ Dataset Size in Bytes:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1813,7 +1969,7 @@ Raises:
 </div>
 <p>You are given the choice of the following metrics.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">__supported_metrics__</span>
@@ -1821,7 +1977,7 @@ Raises:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1831,7 +1987,7 @@ Raises:
 </div>
 <p>Define your Hamiltonian parameters that you want to use for your qubit</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">200</span><span class="p">}</span>
@@ -1839,7 +1995,7 @@ Raises:
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
@@ -1851,7 +2007,7 @@ Raises:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1873,9 +2029,6 @@ Raises:
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>renderer_options</th>
-      <th>setup</th>
-      <th>simulator</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
@@ -1883,6 +2036,9 @@ Raises:
       <th>cross_to_ground</th>
       <th>ground_to_ground</th>
       <th>units</th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
       <th>...</th>
       <th>design_tool</th>
       <th>PI</th>
@@ -1899,9 +2055,6 @@ Raises:
   <tbody>
     <tr>
       <th>643</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>106.91739</td>
       <td>101.13161</td>
       <td>5.25204</td>
@@ -1909,6 +2062,9 @@ Raises:
       <td>102.49025</td>
       <td>255.94708</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1919,13 +2075,10 @@ Raises:
       <td>0.179783</td>
       <td>12.278081</td>
       <td>4.013772</td>
-      <td>-201.551532</td>
+      <td>-201.551563</td>
     </tr>
     <tr>
       <th>1862</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>80.01554</td>
       <td>76.72741</td>
       <td>2.89095</td>
@@ -1933,6 +2086,9 @@ Raises:
       <td>104.64079</td>
       <td>233.88902</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1943,13 +2099,10 @@ Raises:
       <td>0.180135</td>
       <td>12.278081</td>
       <td>4.017505</td>
-      <td>-201.973598</td>
+      <td>-201.973606</td>
     </tr>
     <tr>
       <th>1714</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>76.27207</td>
       <td>73.26136</td>
       <td>2.62986</td>
@@ -1957,6 +2110,9 @@ Raises:
       <td>104.89818</td>
       <td>230.69451</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -1966,8 +2122,8 @@ Raises:
       <td>Andre Kuo</td>
       <td>0.180141</td>
       <td>12.278081</td>
-      <td>4.017570</td>
-      <td>-201.981031</td>
+      <td>4.017568</td>
+      <td>-201.980800</td>
     </tr>
   </tbody>
 </table>
@@ -1979,7 +2135,7 @@ Raises:
 <h4>Using Custom Metrics<a class="headerlink" href="#Using-Custom-Metrics" title="Link to this heading">#</a></h4>
 <p>To use a custom metric first define the function. For example, lets say we want the manhattan metric</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">manhattan_distance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">simulated</span><span class="p">):</span>
@@ -1988,7 +2144,7 @@ Raises:
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">custom_metric_func</span> <span class="o">=</span> <span class="n">manhattan_distance</span>
@@ -1996,7 +2152,7 @@ Raises:
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
@@ -2016,7 +2172,7 @@ Please set this to False if `target_parameters` have changed.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2038,9 +2194,6 @@ Please set this to False if `target_parameters` have changed.
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>renderer_options</th>
-      <th>setup</th>
-      <th>simulator</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
@@ -2048,6 +2201,9 @@ Please set this to False if `target_parameters` have changed.
       <th>cross_to_ground</th>
       <th>ground_to_ground</th>
       <th>units</th>
+      <th>renderer_options</th>
+      <th>setup</th>
+      <th>simulator</th>
       <th>...</th>
       <th>design_tool</th>
       <th>PI</th>
@@ -2064,9 +2220,6 @@ Please set this to False if `target_parameters` have changed.
   <tbody>
     <tr>
       <th>643</th>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>106.91739</td>
       <td>101.13161</td>
       <td>5.25204</td>
@@ -2074,6 +2227,9 @@ Please set this to False if `target_parameters` have changed.
       <td>102.49025</td>
       <td>255.94708</td>
       <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>Ansys HFSS</td>
       <td>...</td>
       <td>qiskit-metal</td>
       <td>Eli Levenson-Falk, PhD</td>
@@ -2084,7 +2240,7 @@ Please set this to False if `target_parameters` have changed.
       <td>0.179783</td>
       <td>12.278081</td>
       <td>4.013772</td>
-      <td>-201.551532</td>
+      <td>-201.551563</td>
     </tr>
   </tbody>
 </table>
@@ -2092,7 +2248,7 @@ Please set this to False if `target_parameters` have changed.
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best_options</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
@@ -2101,7 +2257,7 @@ Please set this to False if `target_parameters` have changed.
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -2139,7 +2295,7 @@ Please set this to False if `target_parameters` have changed.
 </div>
 <p>You can pass in the <code class="docutils literal notranslate"><span class="pre">design_options</span></code> from the closest design to the <code class="docutils literal notranslate"><span class="pre">options</span></code> argument of your selected qubit and render it in qiskit metal.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Qiskit Metal imports</span>
@@ -2150,8 +2306,8 @@ Please set this to False if `target_parameters` have changed.
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design</span> <span class="o">=</span> <span class="n">MultiPlanar</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="p">{},</span>
@@ -2160,17 +2316,8 @@ Please set this to False if `target_parameters` have changed.
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-01:14PM 50s CRITICAL [_qt_message_handler]: line: 0, func: None(), file: None  WARNING: Populating font family aliases took 371 ms. Replace uses of missing font family &#34;Courier&#34; with one that exists to avoid this cost.
-
-</pre></div></div>
-</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">TransmonCross</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;transmon&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">best_options</span><span class="p">)</span>
@@ -2181,11 +2328,22 @@ Please set this to False if `target_parameters` have changed.
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:py.warnings:FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/qgeometries/qgeometries_handler.py: 528
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 281
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_63_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_63_0.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_63_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_63_1.png" style="width: 500px;" />
 </div>
 </div>
 </section>
@@ -2195,7 +2353,7 @@ Please set this to False if `target_parameters` have changed.
 <p>The same workflow can be used to query for a target cavity design.</p>
 <p>While it is not necessary, it may be a good idea to <code class="docutils literal notranslate"><span class="pre">unselect_all()</span></code> before creating a new system.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">unselect_all</span><span class="p">()</span>
@@ -2204,7 +2362,7 @@ Please set this to False if `target_parameters` have changed.
 </div>
 <p>Proceed with selecting the system of interest</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">)</span>
@@ -2212,7 +2370,7 @@ Please set this to False if `target_parameters` have changed.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
@@ -2220,7 +2378,7 @@ Please set this to False if `target_parameters` have changed.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
@@ -2229,7 +2387,7 @@ Please set this to False if `target_parameters` have changed.
 </div>
 <p>It’s always a good idea to check that the system you have selected is correct.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">show_selections</span><span class="p">()</span>
@@ -2250,16 +2408,30 @@ Selected resonator type:  quarter
 </pre></div></div>
 </div>
 <p>Great! lets create the system dataframe and analyze it.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+</pre></div></div>
+</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
@@ -2267,7 +2439,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">target_param_keys</span><span class="p">()</span>
@@ -2275,7 +2447,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -2285,7 +2457,7 @@ Selected resonator type:  quarter
 </div>
 <p>Select the Hamiltonian parameters you want to use for your cavity and search for the closest designs.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">6.9</span><span class="p">,</span>
@@ -2295,7 +2467,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
@@ -2307,7 +2479,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2450,7 +2622,7 @@ Selected resonator type:  quarter
 <p>Here ( w_i ) are weights which default to 1 if not user-defined.</p>
 <p>Note: The default metric for <code class="docutils literal notranslate"><span class="pre">find_closest</span></code> is <code class="docutils literal notranslate"><span class="pre">Euclidean</span></code> when not user-defined.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up the weights</span>
@@ -2459,7 +2631,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
@@ -2471,7 +2643,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2575,7 +2747,7 @@ Selected resonator type:  quarter
 <h3>Querying for a target qubit-cavity design<a class="headerlink" href="#Querying-for-a-target-qubit-cavity-design" title="Link to this heading">#</a></h3>
 <p>Again, we follow the same procedure as before.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
@@ -2583,7 +2755,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
@@ -2593,7 +2765,7 @@ Selected resonator type:  quarter
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">show_selections</span><span class="p">()</span>
@@ -2612,16 +2784,37 @@ Selected resonator type:  quarter
 Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </pre></div></div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">merged_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+</pre></div></div>
+</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">merged_df</span>
@@ -2629,7 +2822,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2652,15 +2845,15 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
     <tr style="text-align: right;">
       <th></th>
       <th>index_qc</th>
-      <th>renderer_options_qubit</th>
-      <th>setup_qubit</th>
-      <th>simulator_qubit</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
       <th>cross_to_cross</th>
       <th>cross_to_ground</th>
       <th>ground_to_ground</th>
+      <th>units_qubit</th>
+      <th>renderer_options_qubit</th>
+      <th>setup_qubit</th>
       <th>...</th>
       <th>design_options_cavity_claw</th>
       <th>design_tool_cavity_claw</th>
@@ -2678,15 +2871,15 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
     <tr>
       <th>0</th>
       <td>0</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
       <td>158.40783</td>
       <td>158.40783</td>
-      <td>311.25590</td>
+      <td>311.2559</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
       <td>...</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
@@ -2702,15 +2895,15 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
     <tr>
       <th>1</th>
       <td>0</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
       <td>158.40783</td>
       <td>158.40783</td>
-      <td>311.25590</td>
+      <td>311.2559</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
       <td>...</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
@@ -2726,15 +2919,15 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
     <tr>
       <th>2</th>
       <td>0</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
       <td>158.40783</td>
       <td>158.40783</td>
-      <td>311.25590</td>
+      <td>311.2559</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
       <td>...</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
@@ -2750,15 +2943,15 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
     <tr>
       <th>3</th>
       <td>0</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
       <td>158.40783</td>
       <td>158.40783</td>
-      <td>311.25590</td>
+      <td>311.2559</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
       <td>...</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
@@ -2774,15 +2967,15 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
     <tr>
       <th>4</th>
       <td>0</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>94.97421</td>
       <td>90.86585</td>
       <td>3.73363</td>
       <td>158.40783</td>
       <td>158.40783</td>
-      <td>311.25590</td>
+      <td>311.2559</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
       <td>...</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
@@ -2821,16 +3014,112 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
     </tr>
     <tr>
       <th>22191</th>
-      <td>1642</td>
+      <td>1933</td>
+      <td>58.45749</td>
+      <td>55.50796</td>
+      <td>2.54396</td>
+      <td>62.01000</td>
+      <td>62.01000</td>
+      <td>162.4214</td>
+      <td>fF</td>
       <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
       <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
-      <td>183.80802</td>
-      <td>168.04023</td>
-      <td>15.11184</td>
-      <td>214.45993</td>
-      <td>214.45993</td>
-      <td>454.60312</td>
+      <td>...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2023-12-09-204334</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td>None</td>
+      <td>Andre Kuo</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+    <tr>
+      <th>22192</th>
+      <td>1933</td>
+      <td>58.45749</td>
+      <td>55.50796</td>
+      <td>2.54396</td>
+      <td>62.01000</td>
+      <td>62.01000</td>
+      <td>162.4214</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2024-01-24-130550</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td></td>
+      <td>Andre Kuo</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+    <tr>
+      <th>22193</th>
+      <td>1933</td>
+      <td>58.45749</td>
+      <td>55.50796</td>
+      <td>2.54396</td>
+      <td>62.01000</td>
+      <td>62.01000</td>
+      <td>162.4214</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2024-01-24-133017</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td></td>
+      <td>Andre Kuo</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+    <tr>
+      <th>22194</th>
+      <td>1933</td>
+      <td>58.45749</td>
+      <td>55.50796</td>
+      <td>2.54396</td>
+      <td>62.01000</td>
+      <td>62.01000</td>
+      <td>162.4214</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
+      <td>...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>qiskit-metal</td>
+      <td>quarter</td>
+      <td>Eli Levenson-Falk, PhD</td>
+      <td>2024-01-24-135008</td>
+      <td>LFL</td>
+      <td>USC</td>
+      <td></td>
+      <td>Andre Kuo</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+    <tr>
+      <th>22195</th>
+      <td>1933</td>
+      <td>58.45749</td>
+      <td>55.50796</td>
+      <td>2.54396</td>
+      <td>62.01000</td>
+      <td>62.01000</td>
+      <td>162.4214</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
       <td>...</td>
       <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
       <td>qiskit-metal</td>
@@ -2843,102 +3132,6 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
       <td>Andre Kuo</td>
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
     </tr>
-    <tr>
-      <th>22192</th>
-      <td>1642</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
-      <td>183.80802</td>
-      <td>168.04023</td>
-      <td>15.11184</td>
-      <td>214.45993</td>
-      <td>214.45993</td>
-      <td>454.60312</td>
-      <td>...</td>
-      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
-      <td>qiskit-metal</td>
-      <td>quarter</td>
-      <td>Eli Levenson-Falk, PhD</td>
-      <td>2024-07-12-141659</td>
-      <td>LFL</td>
-      <td>USC</td>
-      <td>None</td>
-      <td>Ethan Zheng</td>
-      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
-    </tr>
-    <tr>
-      <th>22193</th>
-      <td>1642</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
-      <td>183.80802</td>
-      <td>168.04023</td>
-      <td>15.11184</td>
-      <td>214.45993</td>
-      <td>214.45993</td>
-      <td>454.60312</td>
-      <td>...</td>
-      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
-      <td>qiskit-metal</td>
-      <td>quarter</td>
-      <td>Eli Levenson-Falk, PhD</td>
-      <td>2024-07-24-230000</td>
-      <td>LFL</td>
-      <td>USC</td>
-      <td>None</td>
-      <td>Ethan Zheng</td>
-      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
-    </tr>
-    <tr>
-      <th>22194</th>
-      <td>1642</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
-      <td>183.80802</td>
-      <td>168.04023</td>
-      <td>15.11184</td>
-      <td>214.45993</td>
-      <td>214.45993</td>
-      <td>454.60312</td>
-      <td>...</td>
-      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
-      <td>qiskit-metal</td>
-      <td>quarter</td>
-      <td>Eli Levenson-Falk, PhD</td>
-      <td>2024-07-24-230000</td>
-      <td>LFL</td>
-      <td>USC</td>
-      <td>None</td>
-      <td>Ethan Zheng</td>
-      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
-    </tr>
-    <tr>
-      <th>22195</th>
-      <td>1642</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
-      <td>183.80802</td>
-      <td>168.04023</td>
-      <td>15.11184</td>
-      <td>214.45993</td>
-      <td>214.45993</td>
-      <td>454.60312</td>
-      <td>...</td>
-      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
-      <td>qiskit-metal</td>
-      <td>quarter</td>
-      <td>Eli Levenson-Falk, PhD</td>
-      <td>2024-07-29-154147</td>
-      <td>LFL</td>
-      <td>USC</td>
-      <td>None</td>
-      <td>Ethan Zheng</td>
-      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
-    </tr>
   </tbody>
 </table>
 <p>22196 rows × 36 columns</p>
@@ -2946,7 +3139,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Pass the <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> instance to the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
@@ -2955,7 +3148,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Always good to check whether the system you have selected is correct.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">selected_system</span>
@@ -2963,7 +3156,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -2972,7 +3165,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span>
@@ -2980,7 +3173,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -2990,7 +3183,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Define the <code class="docutils literal notranslate"><span class="pre">target_params</span></code> for your qubit-cavity system.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -3004,7 +3197,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span>
@@ -3020,11 +3213,11 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Time taken to add the coupled H params: 4.033527135848999 seconds
+Time taken to add the coupled H params: 0.5193672180175781 seconds
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -3047,15 +3240,15 @@ Time taken to add the coupled H params: 4.033527135848999 seconds
     <tr style="text-align: right;">
       <th></th>
       <th>index_qc</th>
-      <th>renderer_options_qubit</th>
-      <th>setup_qubit</th>
-      <th>simulator_qubit</th>
       <th>claw_to_claw</th>
       <th>claw_to_ground</th>
       <th>cross_to_claw</th>
       <th>cross_to_cross</th>
       <th>cross_to_ground</th>
       <th>ground_to_ground</th>
+      <th>units_qubit</th>
+      <th>renderer_options_qubit</th>
+      <th>setup_qubit</th>
       <th>...</th>
       <th>group_cavity_claw</th>
       <th>institution_cavity_claw</th>
@@ -3071,17 +3264,17 @@ Time taken to add the coupled H params: 4.033527135848999 seconds
   </thead>
   <tbody>
     <tr>
-      <th>17659</th>
+      <th>16535</th>
       <td>1441</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>113.99245</td>
       <td>107.65111</td>
       <td>5.75841</td>
       <td>112.70740</td>
       <td>112.70740</td>
       <td>274.49373</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
       <td>...</td>
       <td>LFL</td>
       <td>USC</td>
@@ -3091,21 +3284,21 @@ Time taken to add the coupled H params: 4.033527135848999 seconds
       <td>0.163509</td>
       <td>12.278081</td>
       <td>3.836546</td>
-      <td>-182.146843</td>
+      <td>-182.146811</td>
       <td>68.095121</td>
     </tr>
     <tr>
-      <th>3022</th>
+      <th>9252</th>
       <td>812</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>105.76081</td>
       <td>99.80185</td>
       <td>5.38260</td>
       <td>100.41444</td>
       <td>100.41444</td>
       <td>251.82560</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
       <td>...</td>
       <td>LFL</td>
       <td>USC</td>
@@ -3114,22 +3307,22 @@ Time taken to add the coupled H params: 4.033527135848999 seconds
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
       <td>0.183089</td>
       <td>12.278081</td>
-      <td>4.048670</td>
-      <td>-205.518797</td>
+      <td>4.048674</td>
+      <td>-205.519307</td>
       <td>70.226899</td>
     </tr>
     <tr>
-      <th>12116</th>
+      <th>13522</th>
       <td>1180</td>
-      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
-      <td>{'auto_increase_solution_order': True, 'enable...</td>
-      <td>Ansys HFSS</td>
       <td>109.80541</td>
       <td>103.57639</td>
       <td>5.68548</td>
       <td>105.83609</td>
       <td>105.83609</td>
       <td>261.84982</td>
+      <td>fF</td>
+      <td>{'Cj': 0, 'Lj': '10nH', '_Rj': 0, 'design_name...</td>
+      <td>{'auto_increase_solution_order': True, 'enable...</td>
       <td>...</td>
       <td>LFL</td>
       <td>USC</td>
@@ -3138,8 +3331,8 @@ Time taken to add the coupled H params: 4.033527135848999 seconds
       <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
       <td>0.173690</td>
       <td>12.278081</td>
-      <td>3.948506</td>
-      <td>-194.262295</td>
+      <td>3.948501</td>
+      <td>-194.261783</td>
       <td>70.978895</td>
     </tr>
   </tbody>
@@ -3149,7 +3342,7 @@ Time taken to add the coupled H params: 4.033527135848999 seconds
 </div>
 <p>Awesome! we have some designs for our qubit-cavity system. To see where the closest design lies in the Hamiltonian parameter space, we can use the <code class="docutils literal notranslate"><span class="pre">closest_design_in_H_space</span></code> method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
@@ -3157,7 +3350,7 @@ Time taken to add the coupled H params: 4.033527135848999 seconds
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">closest_design_in_H_space</span><span class="p">()</span>
@@ -3174,7 +3367,7 @@ Time taken to add the coupled H params: 4.033527135848999 seconds
 <p>Similarly, we can query for the best-guess design for our qubit-cavity system with a half-wave resonator.</p>
 <p>Lets start by selecting the system of interest and creating the system dataframe.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">unselect_all</span><span class="p">()</span>
@@ -3190,6 +3383,15 @@ Time taken to add the coupled H params: 4.033527135848999 seconds
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Selected qubit:  TransmonCross
@@ -3199,17 +3401,32 @@ Selected resonator type:  half
 Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </pre></div></div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "55e5aa4edaf540b989f330204c328873", "version_major": 2, "version_minor": 0}</script></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b7d2dc4329584206af970f6b28f52b73", "version_major": 2, "version_minor": 0}</script></div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/6b4001554a05a484bcbb5faa7363f9c3097d5174/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/6b4001554a05a484bcbb5faa7363f9c3097d5174/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+Generating train split: 430 examples [00:00, 8998.63 examples/s]
+</pre></div></div>
 </div>
 <p>Now, lets pass on our new system info to the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object. We can either re-instantiate the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> object like before.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer_hdf</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
@@ -3217,7 +3434,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Or we can just update the <code class="docutils literal notranslate"><span class="pre">analyzer</span></code> object with the new system info using the following method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">reload_db</span><span class="p">()</span>
@@ -3226,7 +3443,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Doing a sanity check to see if the system we have selected is correct.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">show_selections</span><span class="p">()</span>
@@ -3247,7 +3464,7 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 </div>
 <p>Great! Now lets query for the best-guess design for our system.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[60]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -3268,6 +3485,8 @@ Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Using 10 chunks for parallel processing
+Computing transmon params for 1299 unique EC values...
+Pre-computed 1299 unique transmon states
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -3275,116 +3494,109 @@ Using 10 chunks for parallel processing
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
+WARNING:py.warnings:FutureWarning: &#39;DataFrame.swapaxes&#39; is deprecated and will be removed in a future version. Please use &#39;DataFrame.transpose&#39; instead.
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numpy/core/fromnumeric.py: 59
+NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
 </span><span class="ansi-bold">
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+File &#34;../squadds/calcs/transmon_cross.py&#34;, line 108:</span>
 <span class="ansi-bold">@jit(nopython=True, parallel=True)
 </span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </span><span class="ansi-bold">^</span>
 
- /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numba/core/typed_passes.py: 338NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
 </span><span class="ansi-bold">
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+File &#34;../squadds/calcs/transmon_cross.py&#34;, line 108:</span>
 <span class="ansi-bold">@jit(nopython=True, parallel=True)
 </span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </span><span class="ansi-bold">^</span>
 
- /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numba/core/typed_passes.py: 338NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
 </span><span class="ansi-bold">
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+File &#34;../squadds/calcs/transmon_cross.py&#34;, line 108:</span>
 <span class="ansi-bold">@jit(nopython=True, parallel=True)
 </span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </span><span class="ansi-bold">^</span>
 
- /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numba/core/typed_passes.py: 338NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
 </span><span class="ansi-bold">
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+File &#34;../squadds/calcs/transmon_cross.py&#34;, line 108:</span>
 <span class="ansi-bold">@jit(nopython=True, parallel=True)
 </span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </span><span class="ansi-bold">^</span>
 
- /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numba/core/typed_passes.py: 338NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
 </span><span class="ansi-bold">
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+File &#34;../squadds/calcs/transmon_cross.py&#34;, line 108:</span>
 <span class="ansi-bold">@jit(nopython=True, parallel=True)
 </span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </span><span class="ansi-bold">^</span>
 
- /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numba/core/typed_passes.py: 338NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
 </span><span class="ansi-bold">
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+File &#34;../squadds/calcs/transmon_cross.py&#34;, line 108:</span>
 <span class="ansi-bold">@jit(nopython=True, parallel=True)
 </span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </span><span class="ansi-bold">^</span>
 
- /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numba/core/typed_passes.py: 338NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
 </span><span class="ansi-bold">
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+File &#34;../squadds/calcs/transmon_cross.py&#34;, line 108:</span>
 <span class="ansi-bold">@jit(nopython=True, parallel=True)
 </span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </span><span class="ansi-bold">^</span>
 
- /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numba/core/typed_passes.py: 338NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
 </span><span class="ansi-bold">
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+File &#34;../squadds/calcs/transmon_cross.py&#34;, line 108:</span>
 <span class="ansi-bold">@jit(nopython=True, parallel=True)
 </span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </span><span class="ansi-bold">^</span>
 
- /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numba/core/typed_passes.py: 338NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
 </span><span class="ansi-bold">
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+File &#34;../squadds/calcs/transmon_cross.py&#34;, line 108:</span>
 <span class="ansi-bold">@jit(nopython=True, parallel=True)
 </span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </span><span class="ansi-bold">^</span>
 
- /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
-WARNING:py.warnings:NumbaPerformanceWarning: <span class="ansi-bold">
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numba/core/typed_passes.py: 338NumbaPerformanceWarning: <span class="ansi-bold">
 The keyword argument &#39;parallel=True&#39; was specified but no transformation for parallel execution was possible.
 
 To find out why, try turning on parallel diagnostics, see https://numba.readthedocs.io/en/stable/user/parallel.html#diagnostics for help.
 </span><span class="ansi-bold">
-File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
+File &#34;../squadds/calcs/transmon_cross.py&#34;, line 108:</span>
 <span class="ansi-bold">@jit(nopython=True, parallel=True)
 </span><span class="ansi-bold">def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 </span><span class="ansi-bold">^</span>
 
- /Users/shanto/miniconda3/envs/qiskit-metal-env/lib/python3.11/site-packages/numba/core/typed_passes.py: 336
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/numba/core/typed_passes.py: 338
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -3392,7 +3604,7 @@ File &#34;../squadds/calcs/transmon_cross.py&#34;, line 48:</span>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Time taken to add the coupled H params: 391.506459236145 seconds
+Time taken to add the coupled H params: 85.03790092468262 seconds
 Using 10 CPUs for parallel processing
 </pre></div></div>
 </div>
@@ -3406,12 +3618,12 @@ A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
- /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 432
+ /Users/shanto/LFL/SQuADDS_Refactor/squadds/core/analysis.py: 450
 </pre></div></div>
 </div>
 <p><strong>Note:</strong> We had used the flags - <code class="docutils literal notranslate"><span class="pre">parallel=True</span></code> and <code class="docutils literal notranslate"><span class="pre">num_cpu=&quot;auto&quot;</span></code> to speed up the process since we have very fine coverage in this dataset.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[60]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
@@ -3419,7 +3631,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span><span class="o">.</span><span class="n">closest_design_in_H_space</span><span class="p">()</span>
@@ -3438,7 +3650,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 <p>Even though the <code class="docutils literal notranslate"><span class="pre">closest_design</span></code> will become better as more validated pre-simulated points are added to the database, it is still a good idea to interpolate to get the best designs.</p>
 <p>We use the physics inspired interpolation algorithm described in our <a class="reference external" href="https://arxiv.org/pdf/2312.13483.pdf">paper</a> - <code class="docutils literal notranslate"><span class="pre">ScalingInterpolator</span></code> class to interpolate the best designs.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.interpolations.physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScalingInterpolator</span>
@@ -3447,7 +3659,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 <p>We pass the <code class="docutils literal notranslate"><span class="pre">Analzyer</span></code> object and the <code class="docutils literal notranslate"><span class="pre">target_params</span></code> dict to the <code class="docutils literal notranslate"><span class="pre">ScalingInterpolator</span></code> class.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create an instance of ScalingInterpolator</span>
@@ -3477,7 +3689,7 @@ A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
- /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 432
+ /Users/shanto/LFL/SQuADDS_Refactor/squadds/core/analysis.py: 450
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -3500,7 +3712,7 @@ A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
- /Users/shanto/LFL/SQuADDS/SQuADDS/squadds/core/analysis.py: 432
+ /Users/shanto/LFL/SQuADDS_Refactor/squadds/core/analysis.py: 450
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -3511,14 +3723,14 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 ==================================================
 Kappa scaling: 0.9974902538805511
 g scaling: 1.000220775604248
-alpha scaling: 1.0098679065704346
+alpha scaling: 1.0098680257797241
 resonator scaling: 0.9813371948573901
 ==================================================
 </pre></div></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">design_df</span></code> contains the various <code class="docutils literal notranslate"><span class="pre">design_options</span></code> for the best designs and also the <code class="docutils literal notranslate"><span class="pre">sim_options</span></code> needed to simulate them.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design_df</span>
@@ -3526,7 +3738,7 @@ resonator scaling: 0.9813371948573901
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -3572,7 +3784,7 @@ resonator scaling: 0.9813371948573901
 </div>
 <p>Let’s use this interpolated deisgn to generate a <code class="docutils literal notranslate"><span class="pre">.gds</span></code> file.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetalGUI</span>
@@ -3590,11 +3802,47 @@ resonator scaling: 0.9813371948573901
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:py.warnings:FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/qgeometries/qgeometries_handler.py: 528
+WARNING:py.warnings:FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/qgeometries/qgeometries_handler.py: 528
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 469
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 470
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 469
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 470
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 281
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+There might be &#34;kinks&#34; in the CPW, which is a known issue in `qiskit-metal`.
+To resolve this, try adjusting the `start_straight` or `end_straight` parameters.
+For more details and resolution tips, check out this guide:
+https://qiskit-community.github.io/qiskit-metal/tut/2-From-components-to-chip/2.12-Simple-Meander.html
+There might be &#34;kinks&#34; in the CPW, which is a known issue in `qiskit-metal`.
+To resolve this, try adjusting the `start_straight` or `end_straight` parameters.
+For more details and resolution tips, check out this guide:
+https://qiskit-community.github.io/qiskit-metal/tut/2-From-components-to-chip/2.12-Simple-Meander.html
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_119_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_119_0.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_119_2.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_119_2.png" style="width: 500px;" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -3608,16 +3856,36 @@ resonator scaling: 0.9813371948573901
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 469
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 470
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 469
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 470
+WARNING:py.warnings:FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_mpl/mpl_renderer.py: 281
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;pos_x&#39;: &#39;0.0um&#39;, &#39;pos_y&#39;: &#39;0.0um&#39;, &#39;orientation&#39;: -90.0, &#39;chip&#39;: &#39;main&#39;, &#39;layer&#39;: &#39;1&#39;, &#39;prime_width&#39;: 0.0117, &#39;prime_gap&#39;: 0.0050999999999999995, &#39;second_width&#39;: 0.0117, &#39;second_gap&#39;: 0.0050999999999999995, &#39;cap_gap&#39;: 0.0040999999999999995, &#39;cap_width&#39;: 0.004900000000000001, &#39;finger_length&#39;: 0.026000000000000002, &#39;finger_count&#39;: 2.0, &#39;cap_distance&#39;: 0.0509, &#39;hfss_wire_bonds&#39;: False, &#39;q3d_wire_bonds&#39;: False, &#39;aedt_q3d_wire_bonds&#39;: False, &#39;aedt_hfss_wire_bonds&#39;: False, &#39;coupling_length&#39;: None, &#39;cap_gap_ground&#39;: 0.0050999999999999995, &#39;coupling_space&#39;: None, &#39;down_length&#39;: None, &#39;open_termination&#39;: None}
+There might be &#34;kinks&#34; in the CPW, which is a known issue in `qiskit-metal`.
+To resolve this, try adjusting the `start_straight` or `end_straight` parameters.
+For more details and resolution tips, check out this guide:
+https://qiskit-community.github.io/qiskit-metal/tut/2-From-components-to-chip/2.12-Simple-Meander.html
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_120_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_120_1.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_120_2.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-1_Getting_Started_with_SQuADDS_120_2.png" style="width: 500px;" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -3633,7 +3901,11 @@ resonator scaling: 0.9813371948573901
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-01:25PM 57s WARNING [_import_junction_gds_file]: Not able to find file:&#34;../resources/Fake_Junctions.GDS&#34;.  Not used to replace junction. Checked directory:&#34;/Users/shanto/LFL/SQuADDS/SQuADDS/resources&#34;.
+WARNING:py.warnings:FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_gds/gds_renderer.py: 688
+WARNING:py.warnings:FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+ /Users/shanto/LFL/SQuADDS_Refactor/.venv/lib/python3.11/site-packages/qiskit_metal/renderers/renderer_gds/gds_renderer.py: 692
+01:49PM 07s WARNING [import_junction_gds_file]: Not able to find file:&#34;../resources/Fake_Junctions.GDS&#34;.  Not used to replace junction. Checked directory:&#34;/Users/shanto/LFL/SQuADDS_Refactor/resources&#34;.
 </pre></div></div>
 </div>
 <p>Congrats for making it to the end of this tutorial! 🤗🎉 You have now learned how to use the SQuADDS API to query for closest and “best-guess” interpolated device designs for your chosen Hamiltonian parameters.</p>
