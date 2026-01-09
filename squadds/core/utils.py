@@ -9,7 +9,7 @@ import webbrowser
 import numpy as np
 import pandas as pd
 import requests
-from huggingface_hub import HfApi, HfFolder
+from huggingface_hub import HfApi, get_token
 from squadds.core.globals import ENV_FILE_PATH
 from tabulate import tabulate
 
@@ -512,7 +512,7 @@ def set_huggingface_api_key():
         print(f'API key added to {ENV_FILE_PATH} file.')
 
     api = HfApi()
-    token = HfFolder.get_token()
+    token = get_token()
     if token is None:
         raise ValueError("Hugging Face token not found. Please log in using `huggingface-cli login`.")
 

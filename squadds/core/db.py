@@ -10,7 +10,7 @@ import warnings
 import pandas as pd
 import requests
 from datasets import get_dataset_config_names, load_dataset
-from huggingface_hub import login
+from huggingface_hub import get_token, login
 from tabulate import tabulate
 from tqdm import tqdm
 
@@ -96,7 +96,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         Checks if the user is logged in to Hugging Face.
         """
-        token = HfFolder.get_token()
+        token = get_token()
         if not token:
             print("You are not logged in. Please login to Hugging Face.")
             login()  # This will prompt the user to login

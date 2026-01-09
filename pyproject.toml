@@ -1,0 +1,96 @@
+[project]
+name = "SQuADDS"
+version = "0.3.7"
+description = "Open-source database of programmatically generated and experimentally validated superconducting quantum device designs, accessible through a user-friendly interface."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Sadman Ahmed Shanto", email = "shanto@usc.edu" }]
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+
+dependencies = [
+    # === Data & HuggingFace ===
+    "datasets>=2.19",
+    "huggingface-hub>=0.21",
+    # === Scientific Computing ===
+    "numpy>=1.16.6,<2.0",
+    "pandas>=1.5",
+    "scipy>=1.10",
+    "numba>=0.60",
+    "scqubits>=4.0",
+    "pyepr-quantum>=0.8.5",
+    # === Visualization ===
+    "matplotlib>=3.7",
+    "seaborn>=0.12",
+    "datashader>=0.16",
+    "plotly>=5.0",
+    # === Utilities ===
+    "python-dotenv>=1.0",
+    "requests>=2.32",
+    "tqdm>=4.0",
+    "tabulate>=0.9",
+    "prettytable>=3.0",
+    "joblib>=1.3",
+    "psutil>=5.9",
+    "shapely>=2.0",
+    # === GitHub Integration ===
+    "pygithub>=2.4",
+    "gitpython>=3.1",
+    # === ANSYS/Simulation ===
+    "pyaedt>=0.6.46",
+    # === Web UI ===
+    "streamlit>=1.45",
+    "quantum-metal>=0.5.0",
+    "pyside6>=6.10.1",
+]
+
+[project.optional-dependencies]
+gds = [
+    "klayout>=0.29",
+    "gdspy>=1.6",
+]
+docs = [
+    "sphinx>=7.0",
+    "qiskit-sphinx-theme",
+    "nbsphinx>=0.9",
+    "jupyter-sphinx>=0.5",
+    "sphinx-copybutton>=0.5",
+    "sphinx-design>=0.5",
+    "reno>=4.0",
+    "sphinxcontrib-katex>=0.9",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.0",
+]
+all = ["SQuADDS[gds,docs,dev]"]
+
+[project.urls]
+Homepage = "https://github.com/LFL-Lab/SQuADDS"
+Documentation = "https://lfl-lab.github.io/SQuADDS/"
+Repository = "https://github.com/LFL-Lab/SQuADDS"
+Issues = "https://github.com/LFL-Lab/SQuADDS/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["squadds"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "squadds/",
+    "README.md",
+    "LICENSE",
+]

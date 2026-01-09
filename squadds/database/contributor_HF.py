@@ -6,7 +6,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from squadds.core.utils import *
 from squadds.database.checker import Checker
-from huggingface_hub import HfApi, HfFolder, login
+from huggingface_hub import HfApi, get_token, login
 
 load_dotenv(ENV_FILE_PATH)
 
@@ -54,7 +54,7 @@ class Contribute:
             ValueError: If Hugging Face token is not found.
         """
         api = HfApi()
-        token = HfFolder.get_token()
+        token = get_token()
         if token is None:
             raise ValueError("Hugging Face token not found. Please log in using `huggingface-cli login`.")
         else:
