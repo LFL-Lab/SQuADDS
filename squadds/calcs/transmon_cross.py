@@ -12,6 +12,7 @@ from joblib import Parallel, delayed
 from numba import jit
 from pyEPR.calcs import Convert
 from scipy.constants import Planck, e, hbar
+from scipy.optimize import brentq
 from scqubits.core.transmon import Transmon
 
 from squadds.calcs.qubit import QubitHamiltonian
@@ -107,25 +108,56 @@ def EC_numba_vectorized(cross_to_claw_arr, cross_to_ground_arr):
 @jit(nopython=True, parallel=True)
 def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
     """
-    !TODO: resolve the error : \"The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.\" for this method
+    Calculate coupling strength 'g' using the capacitance matrix formalism (numba-accelerated).
+
+    Uses the formula:
+        g = (C_g / sqrt(C_Q + C_g)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C,Q))^(1/4)
+
+    where det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2
+
+    Args:
+        - C (float): Qubit self-capacitance to ground, C_Q (in fF).
+        - C_c (float): Coupling capacitance, C_g (in fF).
+        - EJ (float): Josephson energy (in GHz).
+        - f_r (float): Resonator frequency (in GHz).
+        - res_type (str): 'half' or 'quarter' wave resonator.
+        - Z0 (float): Characteristic impedance (ohms). Default 50.
+
+    Returns:
+        - g (float): Coupling strength in MHz.
     """
-    C = np.abs(C)
-    C_c = np.abs(C_c)
-    C_q = C_c + C  # fF
+    # Keep capacitances in fF (as per original convention), convert to F only where needed
+    C_Q_fF = np.abs(C)  # Qubit self-capacitance to ground (fF)
+    C_g_fF = np.abs(C_c)  # Coupling capacitance (fF)
+    C_q_fF = C_Q_fF + C_g_fF  # Total qubit capacitance (fF)
 
-    omega_r = 2 * np.pi * f_r * 1e9
+    # Convert to SI units (F) for the formula
+    C_Q = C_Q_fF * 1e-15  # F
+    C_g = C_g_fF * 1e-15  # F
+    C_q_total = C_Q + C_g  # F
 
-    EC = Ec_from_Cs(C_q)
+    # Angular resonator frequency
+    omega_r = 2 * np.pi * f_r * 1e9  # rad/s
 
+    # Charging energy from total qubit capacitance
+    EC = Ec_from_Cs(C_q_fF)  # Ec_from_Cs expects fF, returns GHz
+
+    # Resonator type factor: N=2 for half-wave, N=4 for quarter-wave
     res_type_factor = 2 if res_type == "half" else 4 if res_type == "quarter" else 1
 
-    g = (
-        (np.abs(C_c) / C_q)
-        * omega_r
-        * np.sqrt(res_type_factor * Z0 * e**2 / (hbar * np.pi))
-        * (EJ / (8 * EC)) ** (1 / 4)
-    )
-    return (g * 1e-6) / (2 * np.pi)  # MHz
+    # Resonator capacitance from transmission line model: C_r = pi / (N * omega_r * Z0)
+    C_r = np.pi / (res_type_factor * omega_r * Z0)  # F
+
+    # Capacitance matrix determinant: det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2
+    det_C = C_q_total * (C_r + C_g) - C_g**2
+
+    # Coupling strength using capacitance matrix formula
+    # g [J] = (C_g / sqrt(C_Sigma)) * sqrt(hbar * omega_r * e^2 / det(C)) * (EJ / (8 * EC))^(1/4)
+    # Note: This formula gives g in energy units (Joules), need to divide by hbar to get rad/s
+    g_J = (C_g / np.sqrt(C_q_total)) * np.sqrt(hbar * omega_r * e**2 / det_C) * (EJ / (8 * EC)) ** (1 / 4)
+
+    # Convert from Joules to MHz: g_MHz = g_J / hbar / (2*pi) / 1e6
+    return (g_J / hbar) * 1e-6 / (2 * np.pi)  # MHz
 
 
 class TransmonCrossHamiltonian(QubitHamiltonian):
@@ -231,36 +263,79 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         Calculate the target quantities (C_q, C_c, EJ, EC, EJ_EC_ratio) based on the given parameters.
 
+        Uses the capacitance matrix formula to solve for C_c numerically:
+            g = (C_g / sqrt(C_Sigma)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C))^(1/4)
+
         Args:
-            - f_res: The resonator frequency.
-            - alpha: The anharmonicity of the qubit.
-            - g: The coupling strength between the qubit and the resonator.
-            - w_q: The qubit frequency.
-            - res_type: The type of resonator.
-            - Z_0: The characteristic impedance of the resonator.
+            - f_res: The resonator frequency (in GHz).
+            - alpha: The anharmonicity of the qubit (in GHz).
+            - g: The coupling strength between the qubit and the resonator (in MHz).
+            - w_q: The qubit frequency (in GHz).
+            - res_type: The type of resonator ('half' or 'quarter').
+            - Z_0: The characteristic impedance of the resonator (in ohms). Default is 50.
 
         Returns:
-            - C_q: The total capacitance of the qubit.
-            - C_c: The coupling capacitance between the qubit and the resonator.
-            - EJ: The Josephson energy of the qubit.
-            - EC: The charging energy of the qubit.
+            - C_q: The total capacitance of the qubit (in fF).
+            - C_c: The coupling capacitance between the qubit and the resonator (in fF).
+            - EJ: The Josephson energy of the qubit (in GHz).
+            - EC: The charging energy of the qubit (in GHz).
             - EJ_EC_ratio: The ratio of EJ to EC.
         """
         EJ, EC = Transmon.find_EJ_EC(w_q, alpha)
-        C_q = Convert.Cs_from_Ec(EC, units_in="GHz", units_out="fF")
-        omega_r = 2 * np.pi * f_res
-        if res_type == "half":
-            res_type = 2
-        elif res_type == "quarter":
-            res_type = 4
+        C_q_fF = Convert.Cs_from_Ec(EC, units_in="GHz", units_out="fF")  # Total qubit capacitance in fF
+        C_Sigma = C_q_fF * 1e-15  # Total qubit capacitance in F
+
+        omega_r = 2 * np.pi * f_res * 1e9  # Angular frequency in rad/s
+
+        # Resonator type factor
+        if res_type == "half" or res_type == 2:
+            res_type_factor = 2
+        elif res_type == "quarter" or res_type == 4:
+            res_type_factor = 4
         else:
-            raise ValueError("res_type must be either 'half' or 'quarter'")
-        prefactor = np.sqrt(res_type * Z_0 * e**2 / (hbar * np.pi)) * (EJ / (8 * EC)) ** (1 / 4)
-        denominator = omega_r * prefactor
-        numerator = g * C_q
-        C_c = numerator / denominator
+            raise ValueError("res_type must be 'half', 'quarter', 2, or 4")
+
+        # Resonator capacitance: C_r = pi / (N * omega_r * Z_0)
+        C_r = np.pi / (res_type_factor * omega_r * Z_0)  # in F
+
+        # Common factor in the g formula (gives g in Joules)
+        common_factor = np.sqrt(hbar * omega_r * e**2) * (EJ / (8 * EC)) ** (1 / 4)
+
+        # Target g in SI units (Joules)
+        # g_MHz -> g_Hz -> g_rad/s -> g_J
+        g_target_J = g * 1e6 * 2 * np.pi * hbar  # Convert from MHz (linear) to Joules
+
+        def g_residual(C_g):
+            """Residual function: g_calculated - g_target = 0"""
+            if C_g <= 0 or C_g >= C_Sigma:
+                return float('inf')
+            # Determinant: det(C) = C_Sigma * (C_r + C_g) - C_g^2
+            det_C = C_Sigma * (C_r + C_g) - C_g**2
+            if det_C <= 0:
+                return float('inf')
+            # g_calc is in Joules
+            g_calc_J = (C_g / np.sqrt(C_Sigma)) * (common_factor / np.sqrt(det_C))
+            return g_calc_J - g_target_J
+
+        # Solve for C_g numerically using Brent's method
+        # C_g must be positive and less than C_Sigma
+        C_g_min = 1e-18  # Small positive value
+        C_g_max = C_Sigma * 0.99  # Less than total capacitance
+
+        try:
+            C_c_F = brentq(g_residual, C_g_min, C_g_max, xtol=1e-20)
+        except ValueError:
+            # If brentq fails, fall back to a reasonable estimate
+            # This can happen if the target g is not achievable with the given parameters
+            raise ValueError(
+                f"Could not find a valid coupling capacitance for target g={g} MHz. "
+                f"The target coupling may be outside the achievable range for the given qubit parameters."
+            )
+
+        C_c_fF = C_c_F * 1e15  # Convert to fF
         EJ_EC_ratio = EJ / EC
-        return C_q, C_c, EJ, EC, EJ_EC_ratio
+
+        return C_q_fF, C_c_fF, EJ, EC, EJ_EC_ratio
 
     def g_and_alpha(self, C, C_c, f_q, EJ, f_r, res_type, Z0=50):
         """
@@ -322,11 +397,19 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
     def g_from_cap_matrix(self, C, C_c, EJ, f_r, res_type, Z0=50):
         """
         Calculate the coupling strength 'g' between a transmon qubit and a resonator
-        based on the capacitance matrix.
+        based on the capacitance matrix formalism.
+
+        Uses the formula:
+            g = (C_g / sqrt(C_Q + C_g)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C,Q))^(1/4)
+
+        where det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2 is the determinant of the
+        capacitance matrix:
+            C = [[C_Q + C_g,    -C_g    ],
+                 [   -C_g,    C_r + C_g]]
 
         Args:
-            - C (float): Capacitance between the qubit and the resonator (in femtofarads, fF).
-            - C_c (float): Coupling capacitance of the resonator (in femtofarads, fF).
+            - C (float): Qubit self-capacitance to ground, C_Q (in femtofarads, fF).
+            - C_c (float): Coupling capacitance between qubit and resonator, C_g (in femtofarads, fF).
             - EJ (float): Josephson energy of the qubit (in GHz).
             - f_r (float): Resonator frequency (in GHz).
             - res_type (str): Type of resonator. Can be 'half' or 'quarter'.
@@ -335,19 +418,40 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         Returns:
             - g (float): Coupling strength 'g' between the qubit and the resonator (in MHz).
         """
-        C = abs(C) * 1e-15  # F
-        C_c = abs(C_c) * 1e-15  # F
-        C_q = C_c + C
-        omega_r = 2 * np.pi * f_r * 1e9
-        EC = Convert.Ec_from_Cs(C_q, units_in="F", units_out="GHz")
+        # Convert capacitances from fF to F
+        C_Q = abs(C) * 1e-15  # Qubit self-capacitance to ground (F)
+        C_g = abs(C_c) * 1e-15  # Coupling capacitance (F)
 
-        if res_type == "half":
-            res_type = 2
-        elif res_type == "quarter":
-            res_type = 4
+        # Total qubit capacitance
+        C_q_total = C_Q + C_g
 
-        g = (abs(C_c) / C_q) * omega_r * np.sqrt(res_type * Z0 * e**2 / (hbar * np.pi)) * (EJ / (8 * EC)) ** (1 / 4)
-        return (g * 1e-6) / (2 * np.pi)  # MHz
+        # Angular resonator frequency
+        omega_r = 2 * np.pi * f_r * 1e9  # rad/s
+
+        # Charging energy from total qubit capacitance
+        EC = Convert.Ec_from_Cs(C_q_total, units_in="F", units_out="GHz")
+
+        # Resonator capacitance derived from transmission line model
+        # C_r = pi / (N * omega_r * Z0) where N=2 for half-wave, N=4 for quarter-wave
+        if res_type == "half" or res_type == 2:
+            res_type_factor = 2
+        elif res_type == "quarter" or res_type == 4:
+            res_type_factor = 4
+        else:
+            raise ValueError("res_type must be 'half', 'quarter', 2, or 4")
+
+        C_r = np.pi / (res_type_factor * omega_r * Z0)  # Resonator capacitance (F)
+
+        # Capacitance matrix determinant: det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2
+        det_C = (C_q_total) * (C_r + C_g) - C_g**2
+
+        # Coupling strength using capacitance matrix formula
+        # g [J] = (C_g / sqrt(C_Q + C_g)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C,Q))^(1/4)
+        # Note: This formula gives g in energy units (Joules), need to divide by hbar to get rad/s
+        g_J = (C_g / np.sqrt(C_q_total)) * np.sqrt(hbar * omega_r * e**2 / det_C) * (EJ / (8 * EC)) ** (1 / 4)
+
+        # Convert from Joules to MHz: g_MHz = g_J / hbar / (2*pi) / 1e6
+        return (g_J / hbar) * 1e-6 / (2 * np.pi)  # MHz
 
     def get_freq_alpha_fixed_LJ(self, fig4_df, LJ_target):
         """
