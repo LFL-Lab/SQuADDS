@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # Project information
 project = 'SQuADDS'
-copyright = '2025, Sadman Ahmed Shanto & Eli Levenson-Falk'
+copyright = '2026, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
 release = "0.4.0"
 
