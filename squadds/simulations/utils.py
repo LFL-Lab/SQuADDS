@@ -496,14 +496,19 @@ def find_a_fq(C_g, C_B, Lj):
 
 def find_g_a_fq(C_g, C_B, f_r, Lj, N):
     """
-    Calculate the values of g, a, and f_q for a transmon qubit.
+    Calculate the values of g, a, and f_q for a transmon qubit using the capacitance matrix formalism.
+
+    Uses the formula:
+        g = (C_g / sqrt(C_Q + C_g)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C,Q))^(1/4)
+
+    where det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2 is the determinant of the capacitance matrix.
 
     Args:
-        C_g (float): Capacitance of the gate in Farads.
-        C_B (float): Capacitance of the bias in Farads.
+        C_g (float): Coupling capacitance between qubit and resonator in Farads.
+        C_B (float): Qubit self-capacitance to ground (C_Q) in Farads.
         f_r (float): Resonance frequency of the resonator in Hz.
         Lj (float): Josephson inductance in Henries.
-        N (int): Number of photons in the resonator.
+        N (int): Resonator type factor (N=2 for half-wave, N=4 for quarter-wave).
 
     Returns:
         tuple: A tuple containing the values of g, a, and f_q.
@@ -516,19 +521,34 @@ def find_g_a_fq(C_g, C_B, f_r, Lj, N):
     hbar = 1.054e-34  # reduced Planck constant in Js
     Z_0 = 50  # in Ohms
 
-    C_Sigma = C_g + C_B  # + 1.5e-15
-    omega_r = 2 * np.pi * f_r
+    # C_g is coupling capacitance, C_B is qubit self-cap to ground (C_Q)
+    C_Q = C_B  # Qubit self-capacitance to ground
+    C_Sigma = C_g + C_Q  # Total qubit capacitance
+
+    omega_r = 2 * np.pi * f_r  # Angular resonator frequency (rad/s)
+
+    # Josephson energy and charging energy
     EJ = ((hbar / 2 / e) ** 2) / Lj * (1.5092e24)  # 1J = 1.5092e24 GHz
     EC = e**2 / (2 * C_Sigma) * (1.5092e24)  # 1J = 1.5092e24 GHz
+
+    # Resonator capacitance: C_r = pi / (N * omega_r * Z_0)
+    C_r = np.pi / (N * omega_r * Z_0)
+
+    # Capacitance matrix determinant: det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2
+    det_C = C_Sigma * (C_r + C_g) - C_g**2
 
     transmon = scq.Transmon(EJ=EJ, EC=EC, ng=0, ncut=30)
 
     a = transmon.anharmonicity() * 1000  # linear MHz
-    g = (
-        ((C_g / C_Sigma) * omega_r * np.sqrt(N * Z_0 * e**2 / (hbar * np.pi)) * (EJ / (8 * EC)) ** (1 / 4))
-        / 1e6
-        / (2 * np.pi)
-    )  # linear MHz
+
+    # Coupling strength using capacitance matrix formula
+    # g [J] = (C_g / sqrt(C_Sigma)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C))^(1/4)
+    # Note: This formula gives g in energy units (Joules), need to divide by hbar to get rad/s
+    g_J = (C_g / np.sqrt(C_Sigma)) * np.sqrt(hbar * omega_r * e**2 / det_C) * (EJ / (8 * EC)) ** (1 / 4)
+
+    # Convert from Joules to MHz: g_MHz = g_J / hbar / (2*pi) / 1e6
+    g = (g_J / hbar) / 1e6 / (2 * np.pi)  # linear MHz
+
     f_q = transmon.E01()  # Linear GHz
 
     return g, a, f_q
