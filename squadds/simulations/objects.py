@@ -317,72 +317,67 @@ def run_eigenmode(design, geometry_dict, sim_options, **kwargs):
     cpw = create_cpw(geometry_dict[cpw_opts_key], coupler, design)
     config = SimulationConfig(min_converged_passes=3)
 
-    try:
-        epra, hfss = start_simulation(design, config)
-        hfss.clean_active_design()
-        # setup = set_simulation_hyperparameters(epra, config)
-        # ["setup"]
-        epra.sim.setup = Dict(sim_options)
-        epra.sim.setup.name = "test_setup"
-        epra.sim.renderer.options.max_mesh_length_port = "7um"
-        setup = epra.sim.setup
-        # print(setup)
-        # print(type(setup))
-        # print(type(sim_options["setup"]))
+    epra, hfss = start_simulation(design, config)
+    hfss.clean_active_design()
+    # setup = set_simulation_hyperparameters(epra, config)
+    # ["setup"]
+    epra.sim.setup = Dict(sim_options)
+    epra.sim.setup.name = "test_setup"
+    epra.sim.renderer.options.max_mesh_length_port = "7um"
+    setup = epra.sim.setup
+    # print(setup)
+    # print(type(setup))
+    # print(type(sim_options["setup"]))
 
-        mesh_lengths = {}
-        coupler_type = "CLT"
-        # "finger_count" in geometry_dict["cplr_opts"]
-        if geometry_dict[cplr_opts_key].get("finger_count") is not None:
-            coupler_type = "NCap"
-            render_simulation_no_ports(epra, [cpw, claw], [(cpw.name, "start")], config.design_name, setup.vars)
-            mesh_lengths = {
-                "mesh1": {"objects": [f"trace_{cpw.name}", f"readout_connector_arm_{claw.name}"], "MaxLength": "4um"}
-            }
-        else:
-            render_simulation_with_ports(epra, config.design_name, setup.vars, coupler)
-            mesh_lengths = {
-                "mesh1": {
-                    "objects": [
-                        f"prime_cpw_{coupler.name}",
-                        f"second_cpw_{coupler.name}",
-                        f"trace_{cpw.name}",
-                        f"readout_connector_arm_{claw.name}",
-                    ],
-                    "MaxLength": "7um",
-                }
-            }
-
-        modeler = hfss.pinfo.design.modeler
-
-        # add_ground_strip_and_mesh(modeler, coupler, mesh_lengths=mesh_lengths)
-        print(mesh_lengths)
-        mesh_objects(modeler, mesh_lengths)
-        f_rough, Q, kappa = get_freq_Q_kappa(epra, hfss)
-
-        data = epra.get_data()
-
-        data_df = {
-            "design": {"coupler_type": coupler_type, "design_options": geometry_dict, "design_tool": "Qiskit Metal"},
-            "sim_options": {
-                "sim_type": "epr",
-                "setup": setup,
-                "renderer_options": epra.sim.renderer.options,
-                "simulator": "Ansys HFSS",
-            },
-            "sim_results": {
-                "cavity_frequency": f_rough,
-                "cavity_frequency_unit": "GHz",
-                "Q": Q,
-                "kappa": kappa,
-                "kappa_unit": "kHz",
-            },
-            "misc": data,
+    mesh_lengths = {}
+    coupler_type = "CLT"
+    # "finger_count" in geometry_dict["cplr_opts"]
+    if geometry_dict[cplr_opts_key].get("finger_count") is not None:
+        coupler_type = "NCap"
+        render_simulation_no_ports(epra, [cpw, claw], [(cpw.name, "start")], config.design_name, setup.vars)
+        mesh_lengths = {
+            "mesh1": {"objects": [f"trace_{cpw.name}", f"readout_connector_arm_{claw.name}"], "MaxLength": "4um"}
         }
-    except:
-        # raise OS warning
-        print("Ansys HFSS simulation failed. Are you sure the Ansys HFSS is installed?")
-        return None, None
+    else:
+        render_simulation_with_ports(epra, config.design_name, setup.vars, coupler)
+        mesh_lengths = {
+            "mesh1": {
+                "objects": [
+                    f"prime_cpw_{coupler.name}",
+                    f"second_cpw_{coupler.name}",
+                    f"trace_{cpw.name}",
+                    f"readout_connector_arm_{claw.name}",
+                ],
+                "MaxLength": "7um",
+            }
+        }
+
+    modeler = hfss.pinfo.design.modeler
+
+    # add_ground_strip_and_mesh(modeler, coupler, mesh_lengths=mesh_lengths)
+    print(mesh_lengths)
+    mesh_objects(modeler, mesh_lengths)
+    f_rough, Q, kappa = get_freq_Q_kappa(epra, hfss)
+
+    data = epra.get_data()
+
+    data_df = {
+        "design": {"coupler_type": coupler_type, "design_options": geometry_dict, "design_tool": "Qiskit Metal"},
+        "sim_options": {
+            "sim_type": "epr",
+            "setup": setup,
+            "renderer_options": epra.sim.renderer.options,
+            "simulator": "Ansys HFSS",
+        },
+        "sim_results": {
+            "cavity_frequency": f_rough,
+            "cavity_frequency_unit": "GHz",
+            "Q": Q,
+            "kappa": kappa,
+            "kappa_unit": "kHz",
+        },
+        "misc": data,
+    }
 
     return data_df, epra
 
