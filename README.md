@@ -249,7 +249,7 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 | Sara Sussman, PhD     | Fermilab                                               | Bug Hunter                           |
 | Priyangshu Chatterjee | IIT Kharagpur                                          | Documentation contributor            |
 | Abhishek Chakraborty  | Chapman University/University of Rochester and Riggeti | Code contributor                     |
-| Saikat Das            | USC                                                    | Reviewer                             |
+| Saikat Das            | University of Southern California                      | Reviewer                             |
 | Firas Abouzahr        | Northwestern                                           | Bug Hunter                           |
 
 ## Developers
