@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.simulations.objects &#8212; SQuADDS v0.4.0</title>
+    <title>squadds.simulations.objects &#8212; SQuADDS v0.4.1</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=6c02275b"></script>
+    <script src="../../../_static/documentation_options.js?v=c87aa342"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -587,12 +587,28 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">metal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.analyses.quantization</span><span class="w"> </span><span class="kn">import</span> <span class="n">EPRanalysis</span><span class="p">,</span> <span class="n">LOManalysis</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.qubits</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCross</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.sweeper_helperfunctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_QSweep_parameters</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">create_claw</span><span class="p">,</span>
+    <span class="n">create_clt_coupler</span><span class="p">,</span>
+    <span class="n">create_cpw</span><span class="p">,</span>
+    <span class="n">create_ncap_coupler</span><span class="p">,</span>
+    <span class="n">create_qubitcavity</span><span class="p">,</span>
+    <span class="n">find_g_a_fq</span><span class="p">,</span>
+    <span class="n">find_kappa</span><span class="p">,</span>
+    <span class="n">get_cavity_claw_options_keys</span><span class="p">,</span>
+    <span class="n">get_freq_Q_kappa</span><span class="p">,</span>
+    <span class="n">mesh_objects</span><span class="p">,</span>
+    <span class="n">save_simulation_data_to_json</span><span class="p">,</span>
+    <span class="n">string_to_float</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="SimulationConfig">
@@ -680,7 +696,7 @@
         <span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cross_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">get_sim_results</span><span class="p">(</span><span class="n">emode_df</span><span class="o">=</span><span class="n">emode_df</span><span class="p">,</span> <span class="n">lom_df</span><span class="o">=</span><span class="n">lom_df</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
     <span class="k">elif</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;ncap&quot;</span><span class="p">:</span>
@@ -1117,8 +1133,8 @@
             <span class="p">},</span>
         <span class="p">}</span>
         <span class="c1"># save_simulation_data_to_json(data, filename = f&quot;qubitonly_num{i}_{comp_id}_v{version}&quot;)</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ansys HFSS simulation failed. Are you sure the Ansys HFSS is installed?&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ansys HFSS simulation failed. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Are you sure the Ansys HFSS is installed?&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">c1</span></div>
 
@@ -1303,7 +1319,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
+      © Copyright 2026, Sadman Ahmed Shanto &amp; Eli Levenson-Falk.
       <br/>
     
   </p>

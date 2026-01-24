@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.4.1 (2026-01-23)
+--------------------------
+
+* **Alpha Version 0.4.1**
+
+**Improvements**
+
+- A more accurate coupling strength calculation, see :download:`g_derivation.pdf <resources/g_derivation.pdf>`
+
+**Bug Fixes**
+
+- Fixed a critical issue in Ansys simulations by pinning the ``pyaedt`` dependency to a compatible version (0.23).
+
+---
+
 Version 0.4.0 (2025-01-09)
 --------------------------
 
