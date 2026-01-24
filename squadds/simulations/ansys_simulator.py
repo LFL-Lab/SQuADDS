@@ -42,10 +42,10 @@ class AnsysSimulator:
         self.default_eigenmode_options = {
             "setup": {
                 "basis_order": 1,
-                "max_delta_f": 0.05,
+                "max_delta_f": 0.02,
                 "max_passes": 30,
-                "min_converged": 1,
-                "min_converged_passes": 2,
+                "min_converged": 3,
+                "min_converged_passes": 3,
                 "min_freq_ghz": 1,
                 "min_passes": 1,
                 "n_modes": 1,
