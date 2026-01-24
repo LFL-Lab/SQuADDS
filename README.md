@@ -250,7 +250,6 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 | Priyangshu Chatterjee | IIT Kharagpur                      | Documentation contributor            |
 
 ## Developers
-
 - [shanto268](https://github.com/shanto268) - 418 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
 - [LFL-Lab](https://github.com/LFL-Lab) - 9 contributions
@@ -258,6 +257,7 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
 - [PCodeShark25](https://github.com/PCodeShark25) - 1 contributions
 ---
+
 
 
 
