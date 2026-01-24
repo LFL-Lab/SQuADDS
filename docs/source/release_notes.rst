@@ -12,7 +12,7 @@ Version 0.4.1 (2026-01-23)
 
 **Bug Fixes**
 
-- **Ansys Simulations:** Fixed a critical issue in Ansys simulations by pinning the ``pyaedt`` dependency to a compatible version (0.23), restoring the functionality of the simulation workflows.
+- Fixed a critical issue in Ansys simulations by pinning the ``pyaedt`` dependency to a compatible version (0.23).
 
 ---
 
