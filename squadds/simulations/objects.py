@@ -6,12 +6,28 @@ SimulationConfig
 
 from datetime import datetime
 
+import numpy as np
+import qiskit_metal as metal
+from qiskit_metal import Dict
 from qiskit_metal.analyses.quantization import EPRanalysis, LOManalysis
 
 from squadds.components.qubits import TransmonCross
 
 from .sweeper_helperfunctions import extract_QSweep_parameters
-from .utils import *
+from .utils import (
+    create_claw,
+    create_clt_coupler,
+    create_cpw,
+    create_ncap_coupler,
+    create_qubitcavity,
+    find_g_a_fq,
+    find_kappa,
+    get_cavity_claw_options_keys,
+    get_freq_Q_kappa,
+    mesh_objects,
+    save_simulation_data_to_json,
+    string_to_float,
+)
 
 
 class SimulationConfig:
@@ -94,7 +110,7 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
         try:
             data = get_sim_results(emode_df=emode_df, lom_df=lom_df)
-        except:
+        except Exception:
             return None, None, None
 
     elif device_dict["coupler_type"].lower() == "ncap":
@@ -516,8 +532,8 @@ def run_xmon_LOM(design, cross_dict, sim_options):
             },
         }
         # save_simulation_data_to_json(data, filename = f"qubitonly_num{i}_{comp_id}_v{version}")
-    except:
-        print("Ansys HFSS simulation failed. Are you sure the Ansys HFSS is installed?")
+    except Exception as e:
+        print(f"Ansys HFSS simulation failed. Error: {e}. Are you sure the Ansys HFSS is installed?")
         return None, None
     return data, c1
 
