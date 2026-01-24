@@ -10,8 +10,8 @@ import re
 
 import numpy as np
 import scqubits as scq
+from ansys.aedt.core import Hfss
 from prettytable import PrettyTable
-from pyaedt import Hfss
 from qiskit_metal import Dict
 from qiskit_metal.qlibrary.core import QComponent
 from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import CapNInterdigitalTee
@@ -163,7 +163,7 @@ def get_freq(epra, test_hfss):
         epra.sim.save_screenshot()
         epra.sim.plot_fields("main")
         epra.sim.save_screenshot()
-    except:
+    except Exception:
         print("couldn't generate plots.")
     f = epra.get_frequencies()
 
@@ -189,7 +189,7 @@ def get_freq_Q_kappa(epra, test_hfss):
         epra.sim.save_screenshot()
         epra.sim.plot_fields("main")
         epra.sim.save_screenshot()
-    except:
+    except Exception:
         print("couldn't generate plots.")
     f = epra.get_frequencies()
     freq = f.values[0][0] * 1e9
