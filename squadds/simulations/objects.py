@@ -8,6 +8,8 @@ from datetime import datetime
 
 from qiskit_metal.analyses.quantization import EPRanalysis, LOManalysis
 
+from squadds.components.qubits import TransmonCross
+
 from .sweeper_helperfunctions import extract_QSweep_parameters
 from .utils import *
 
