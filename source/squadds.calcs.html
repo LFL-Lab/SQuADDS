@@ -1121,22 +1121,26 @@ redundant Transmon instantiations and matrix diagonalizations.</p>
 <dt class="sig sig-object py" id="squadds.calcs.transmon_cross.TransmonCrossHamiltonian.calculate_target_quantities">
 <span class="sig-name descname"><span class="pre">calculate_target_quantities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z_0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#TransmonCrossHamiltonian.calculate_target_quantities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.calculate_target_quantities" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the target quantities (C_q, C_c, EJ, EC, EJ_EC_ratio) based on the given parameters.</p>
+<dl class="simple">
+<dt>Uses the capacitance matrix formula to solve for C_c numerically:</dt><dd><p>g = (C_g / sqrt(C_Sigma)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C))^(1/4)</p>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>f_res</strong> (<em>-</em>) – The resonator frequency.</p></li>
-<li><p><strong>alpha</strong> (<em>-</em>) – The anharmonicity of the qubit.</p></li>
-<li><p><strong>g</strong> (<em>-</em>) – The coupling strength between the qubit and the resonator.</p></li>
-<li><p><strong>w_q</strong> (<em>-</em>) – The qubit frequency.</p></li>
-<li><p><strong>res_type</strong> (<em>-</em>) – The type of resonator.</p></li>
-<li><p><strong>Z_0</strong> (<em>-</em>) – The characteristic impedance of the resonator.</p></li>
+<li><p><strong>f_res</strong> (<em>-</em>) – The resonator frequency (in GHz).</p></li>
+<li><p><strong>alpha</strong> (<em>-</em>) – The anharmonicity of the qubit (in GHz).</p></li>
+<li><p><strong>g</strong> (<em>-</em>) – The coupling strength between the qubit and the resonator (in MHz).</p></li>
+<li><p><strong>w_q</strong> (<em>-</em>) – The qubit frequency (in GHz).</p></li>
+<li><p><strong>res_type</strong> (<em>-</em>) – The type of resonator (‘half’ or ‘quarter’).</p></li>
+<li><p><strong>Z_0</strong> (<em>-</em>) – The characteristic impedance of the resonator (in ohms). Default is 50.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The total capacitance of the qubit.
-- C_c: The coupling capacitance between the qubit and the resonator.
-- EJ: The Josephson energy of the qubit.
-- EC: The charging energy of the qubit.
+<dd class="field-even"><p>The total capacitance of the qubit (in fF).
+- C_c: The coupling capacitance between the qubit and the resonator (in fF).
+- EJ: The Josephson energy of the qubit (in GHz).
+- EC: The charging energy of the qubit (in GHz).
 - EJ_EC_ratio: The ratio of EJ to EC.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -1235,12 +1239,24 @@ redundant Transmon instantiations and matrix diagonalizations.</p>
 <dt class="sig sig-object py" id="squadds.calcs.transmon_cross.TransmonCrossHamiltonian.g_from_cap_matrix">
 <span class="sig-name descname"><span class="pre">g_from_cap_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EJ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#TransmonCrossHamiltonian.g_from_cap_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.g_from_cap_matrix" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the coupling strength ‘g’ between a transmon qubit and a resonator
-based on the capacitance matrix.</p>
+based on the capacitance matrix formalism.</p>
+<dl class="simple">
+<dt>Uses the formula:</dt><dd><p>g = (C_g / sqrt(C_Q + C_g)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C,Q))^(1/4)</p>
+</dd>
+</dl>
+<p>where det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2 is the determinant of the
+capacitance matrix:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>C = [[C_Q + C_g,    -C_g    ],</dt><dd><p>[   -C_g,    C_r + C_g]]</p>
+</dd>
+</dl>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>C</strong> (<em>-</em>) – Capacitance between the qubit and the resonator (in femtofarads, fF).</p></li>
-<li><p><strong>C_c</strong> (<em>-</em>) – Coupling capacitance of the resonator (in femtofarads, fF).</p></li>
+<li><p><strong>C</strong> (<em>-</em>) – Qubit self-capacitance to ground, C_Q (in femtofarads, fF).</p></li>
+<li><p><strong>C_c</strong> (<em>-</em>) – Coupling capacitance between qubit and resonator, C_g (in femtofarads, fF).</p></li>
 <li><p><strong>EJ</strong> (<em>-</em>) – Josephson energy of the qubit (in GHz).</p></li>
 <li><p><strong>f_r</strong> (<em>-</em>) – Resonator frequency (in GHz).</p></li>
 <li><p><strong>res_type</strong> (<em>-</em>) – Type of resonator. Can be ‘half’ or ‘quarter’.</p></li>
@@ -1338,7 +1354,33 @@ anharmonicity_MHz are already computed in the main process.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.calcs.transmon_cross.g_from_cap_matrix_numba">
 <span class="sig-prename descclassname"><span class="pre">squadds.calcs.transmon_cross.</span></span><span class="sig-name descname"><span class="pre">g_from_cap_matrix_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EJ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/calcs/transmon_cross.html#g_from_cap_matrix_numba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.calcs.transmon_cross.g_from_cap_matrix_numba" title="Link to this definition">#</a></dt>
-<dd><p>!TODO: resolve the error : “The keyword argument ‘parallel=True’ was specified but no transformation for parallel execution was possible.” for this method</p>
+<dd><p>Calculate coupling strength ‘g’ using the capacitance matrix formalism (numba-accelerated).</p>
+<dl class="simple">
+<dt>Uses the formula:</dt><dd><p>g = (C_g / sqrt(C_Q + C_g)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C,Q))^(1/4)</p>
+</dd>
+</dl>
+<p>where det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>C</strong> (<em>-</em>) – Qubit self-capacitance to ground, C_Q (in fF).</p></li>
+<li><p><strong>C_c</strong> (<em>-</em>) – Coupling capacitance, C_g (in fF).</p></li>
+<li><p><strong>EJ</strong> (<em>-</em>) – Josephson energy (in GHz).</p></li>
+<li><p><strong>f_r</strong> (<em>-</em>) – Resonator frequency (in GHz).</p></li>
+<li><p><strong>res_type</strong> (<em>-</em>) – ‘half’ or ‘quarter’ wave resonator.</p></li>
+<li><p><strong>Z0</strong> (<em>-</em>) – Characteristic impedance (ohms). Default 50.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Coupling strength in MHz.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>g (float)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

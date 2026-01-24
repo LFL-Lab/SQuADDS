@@ -1142,14 +1142,19 @@
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.find_g_a_fq">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">find_g_a_fq</span><span class="p">(</span><span class="n">C_g</span><span class="p">,</span> <span class="n">C_B</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">Lj</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the values of g, a, and f_q for a transmon qubit.</span>
+<span class="sd">    Calculate the values of g, a, and f_q for a transmon qubit using the capacitance matrix formalism.</span>
+
+<span class="sd">    Uses the formula:</span>
+<span class="sd">        g = (C_g / sqrt(C_Q + C_g)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C,Q))^(1/4)</span>
+
+<span class="sd">    where det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2 is the determinant of the capacitance matrix.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        C_g (float): Capacitance of the gate in Farads.</span>
-<span class="sd">        C_B (float): Capacitance of the bias in Farads.</span>
+<span class="sd">        C_g (float): Coupling capacitance between qubit and resonator in Farads.</span>
+<span class="sd">        C_B (float): Qubit self-capacitance to ground (C_Q) in Farads.</span>
 <span class="sd">        f_r (float): Resonance frequency of the resonator in Hz.</span>
 <span class="sd">        Lj (float): Josephson inductance in Henries.</span>
-<span class="sd">        N (int): Number of photons in the resonator.</span>
+<span class="sd">        N (int): Resonator type factor (N=2 for half-wave, N=4 for quarter-wave).</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        tuple: A tuple containing the values of g, a, and f_q.</span>
@@ -1162,19 +1167,34 @@
     <span class="n">hbar</span> <span class="o">=</span> <span class="mf">1.054e-34</span>  <span class="c1"># reduced Planck constant in Js</span>
     <span class="n">Z_0</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># in Ohms</span>
 
-    <span class="n">C_Sigma</span> <span class="o">=</span> <span class="n">C_g</span> <span class="o">+</span> <span class="n">C_B</span>  <span class="c1"># + 1.5e-15</span>
-    <span class="n">omega_r</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f_r</span>
+    <span class="c1"># C_g is coupling capacitance, C_B is qubit self-cap to ground (C_Q)</span>
+    <span class="n">C_Q</span> <span class="o">=</span> <span class="n">C_B</span>  <span class="c1"># Qubit self-capacitance to ground</span>
+    <span class="n">C_Sigma</span> <span class="o">=</span> <span class="n">C_g</span> <span class="o">+</span> <span class="n">C_Q</span>  <span class="c1"># Total qubit capacitance</span>
+
+    <span class="n">omega_r</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f_r</span>  <span class="c1"># Angular resonator frequency (rad/s)</span>
+
+    <span class="c1"># Josephson energy and charging energy</span>
     <span class="n">EJ</span> <span class="o">=</span> <span class="p">((</span><span class="n">hbar</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">e</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lj</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.5092e24</span><span class="p">)</span>  <span class="c1"># 1J = 1.5092e24 GHz</span>
     <span class="n">EC</span> <span class="o">=</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">C_Sigma</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.5092e24</span><span class="p">)</span>  <span class="c1"># 1J = 1.5092e24 GHz</span>
+
+    <span class="c1"># Resonator capacitance: C_r = pi / (N * omega_r * Z_0)</span>
+    <span class="n">C_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">omega_r</span> <span class="o">*</span> <span class="n">Z_0</span><span class="p">)</span>
+
+    <span class="c1"># Capacitance matrix determinant: det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2</span>
+    <span class="n">det_C</span> <span class="o">=</span> <span class="n">C_Sigma</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_r</span> <span class="o">+</span> <span class="n">C_g</span><span class="p">)</span> <span class="o">-</span> <span class="n">C_g</span><span class="o">**</span><span class="mi">2</span>
 
     <span class="n">transmon</span> <span class="o">=</span> <span class="n">scq</span><span class="o">.</span><span class="n">Transmon</span><span class="p">(</span><span class="n">EJ</span><span class="o">=</span><span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span><span class="o">=</span><span class="n">EC</span><span class="p">,</span> <span class="n">ng</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncut</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 
     <span class="n">a</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">anharmonicity</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span>  <span class="c1"># linear MHz</span>
-    <span class="n">g</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">((</span><span class="n">C_g</span> <span class="o">/</span> <span class="n">C_Sigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">omega_r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">Z_0</span> <span class="o">*</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">hbar</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">EJ</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">EC</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">))</span>
-        <span class="o">/</span> <span class="mf">1e6</span>
-        <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
-    <span class="p">)</span>  <span class="c1"># linear MHz</span>
+
+    <span class="c1"># Coupling strength using capacitance matrix formula</span>
+    <span class="c1"># g [J] = (C_g / sqrt(C_Sigma)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C))^(1/4)</span>
+    <span class="c1"># Note: This formula gives g in energy units (Joules), need to divide by hbar to get rad/s</span>
+    <span class="n">g_J</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_g</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">C_Sigma</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">hbar</span> <span class="o">*</span> <span class="n">omega_r</span> <span class="o">*</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">det_C</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">EJ</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">EC</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># Convert from Joules to MHz: g_MHz = g_J / hbar / (2*pi) / 1e6</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="p">(</span><span class="n">g_J</span> <span class="o">/</span> <span class="n">hbar</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e6</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>  <span class="c1"># linear MHz</span>
+
     <span class="n">f_q</span> <span class="o">=</span> <span class="n">transmon</span><span class="o">.</span><span class="n">E01</span><span class="p">()</span>  <span class="c1"># Linear GHz</span>
 
     <span class="k">return</span> <span class="n">g</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">f_q</span></div>
