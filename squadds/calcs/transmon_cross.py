@@ -129,7 +129,7 @@ def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
     # Keep capacitances in fF (as per original convention), convert to F only where needed
     C_Q_fF = np.abs(C)  # Qubit self-capacitance to ground (fF)
     C_g_fF = np.abs(C_c)  # Coupling capacitance (fF)
-    C_q_fF = C_Q_fF + C_g_fF  # Total qubit capacitance (fF)
+    # C_Q_fF + C_g_fF  # Total qubit capacitance (fF)
 
     # Convert to SI units (F) for the formula
     C_Q = C_Q_fF * 1e-15  # F
@@ -139,9 +139,6 @@ def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
     # Angular resonator frequency
     omega_r = 2 * np.pi * f_r * 1e9  # rad/s
 
-    # Charging energy from total qubit capacitance
-    EC = Ec_from_Cs(C_q_fF)  # Ec_from_Cs expects fF, returns GHz
-
     # Resonator type factor: N=2 for half-wave, N=4 for quarter-wave
     res_type_factor = 2 if res_type == "half" else 4 if res_type == "quarter" else 1
 
@@ -150,6 +147,12 @@ def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 
     # Capacitance matrix determinant: det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2
     det_C = C_q_total * (C_r + C_g) - C_g**2
+
+    # Effective qubit capacitance from the matrix
+    C_q_eff = det_C / (C_r + C_g)
+
+    # Charging energy from effective qubit capacitance
+    EC = Convert.Ec_from_Cs(C_q_eff, units_in="F", units_out="GHz")
 
     # Coupling strength using capacitance matrix formula
     # g [J] = (C_g / sqrt(C_Sigma)) * sqrt(hbar * omega_r * e^2 / det(C)) * (EJ / (8 * EC))^(1/4)
@@ -308,11 +311,11 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         def g_residual(C_g):
             """Residual function: g_calculated - g_target = 0"""
             if C_g <= 0 or C_g >= C_Sigma:
-                return float('inf')
+                return float("inf")
             # Determinant: det(C) = C_Sigma * (C_r + C_g) - C_g^2
             det_C = C_Sigma * (C_r + C_g) - C_g**2
             if det_C <= 0:
-                return float('inf')
+                return float("inf")
             # g_calc is in Joules
             g_calc_J = (C_g / np.sqrt(C_Sigma)) * (common_factor / np.sqrt(det_C))
             return g_calc_J - g_target_J
@@ -428,9 +431,6 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         # Angular resonator frequency
         omega_r = 2 * np.pi * f_r * 1e9  # rad/s
 
-        # Charging energy from total qubit capacitance
-        EC = Convert.Ec_from_Cs(C_q_total, units_in="F", units_out="GHz")
-
         # Resonator capacitance derived from transmission line model
         # C_r = pi / (N * omega_r * Z0) where N=2 for half-wave, N=4 for quarter-wave
         if res_type == "half" or res_type == 2:
@@ -444,6 +444,12 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
 
         # Capacitance matrix determinant: det(C) = (C_Q + C_g)(C_r + C_g) - C_g^2
         det_C = (C_q_total) * (C_r + C_g) - C_g**2
+
+        # Effective qubit capacitance from the matrix
+        C_q_eff = det_C / (C_r + C_g)
+
+        # Charging energy from effective qubit capacitance
+        EC = Convert.Ec_from_Cs(C_q_eff, units_in="F", units_out="GHz")
 
         # Coupling strength using capacitance matrix formula
         # g [J] = (C_g / sqrt(C_Q + C_g)) * sqrt(hbar * omega_r * e^2 / det(C)) * (E_J / (8 * E_C,Q))^(1/4)
