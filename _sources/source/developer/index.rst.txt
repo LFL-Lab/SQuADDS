@@ -128,3 +128,6 @@ Contributors
 | **Ethan Zheng** (University of Southern California) - Data contributor 📀 and Bug Hunter 🐛
 | **Sara Sussman, PhD** (Fermilab) - Bug Hunter 🐛
 | **Priyangshu Chatterjee** (IIT Kharagpur) -  Documentation contributor 📄
+| **Abhishek Chakraborty** (Chapman University/University of Rochester and Riggeti) - Code contributor 💻
+| **Saikat Das** (University of Southern California) - Reviewer ✅
+| **Firas Abouzahr** (Northwestern) - Bug Hunter 🐛
