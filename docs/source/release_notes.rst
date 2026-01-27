@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.4.2 (2026-01-27)
+--------------------------
+
+* **Alpha Version 0.4.2**
+
+**Bug Fixes**
+
+- Fixed a critical `Numba` compilation error in half-wave cavity calculations by replacing incompatible `Convert` utility calls with JIT-compatible implementations.
+
+---
+
 Version 0.4.1 (2026-01-23)
 --------------------------
 

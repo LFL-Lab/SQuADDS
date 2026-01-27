@@ -152,7 +152,7 @@ def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
     C_q_eff = det_C / (C_r + C_g)
 
     # Charging energy from effective qubit capacitance
-    EC = Convert.Ec_from_Cs(C_q_eff, units_in="F", units_out="GHz")
+    EC = Ec_from_Cs(C_q_eff * 1e15)
 
     # Coupling strength using capacitance matrix formula
     # g [J] = (C_g / sqrt(C_Sigma)) * sqrt(hbar * omega_r * e^2 / det(C)) * (EJ / (8 * EC))^(1/4)
