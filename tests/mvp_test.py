@@ -60,7 +60,6 @@ db.unselect_all()
 db.select_system(["qubit", "cavity_claw"])
 db.select_qubit("TransmonCross")
 db.select_cavity_claw("RouteMeander")
-db.select_coupler("CapNInterdigitalTee")
 db.select_resonator_type("half")
 db.show_selections()
 merged_df = db.create_system_df()
@@ -69,7 +68,6 @@ target_params_hwc = {
     "qubit_frequency_GHz": 4,
     "cavity_frequency_GHz": 6.2,
     "kappa_kHz": 120,
-    "resonator_type": "half",
     "anharmonicity_MHz": -200,
     "g_MHz": 70,
 }
