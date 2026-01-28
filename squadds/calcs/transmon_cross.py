@@ -761,10 +761,13 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
         """
         chunks = np.array_split(df, num_chunks)
 
-        with Parallel(n_jobs=num_chunks) as parallel:
-            results = parallel(delayed(self._calculate_g_chunk)(chunk, Z_0) for chunk in chunks)
-
-        return pd.concat(results)
+        try:
+            with Parallel(n_jobs=num_chunks) as parallel:
+                results = parallel(delayed(self._calculate_g_chunk)(chunk, Z_0) for chunk in chunks)
+            return pd.concat(results)
+        except Exception as e:
+            print(f"Parallel processing failed with error: {e}. Falling back to serial execution.")
+            return self._calculate_g_chunk(df, Z_0)
 
     def chi(self, EJ, EC, g, f_r):
         """
