@@ -1,6 +1,31 @@
 Release Notes
 =============
 
+Version 0.4.3 (2026-01-28)
+--------------------------
+
+* **Alpha Version 0.4.3**
+
+**Performance Improvements**
+
+- **~70x Speedup** in Hamiltonian parameter calculations (benchmark: 3.5m -> 3s)
+- Implemented **vectorized Numba execution** for coupling strength (g) calculation, replacing the slow Python loop.
+- Removed `joblib` parallel processing overhead for scalar calculations.
+
+**Bug Fixes**
+
+- **Critical Fix for HWC Simulations:** Corrected `N=4` (Quarter-Wave) hardcoding to `N=2` (Half-Wave) in `objects.py`, ensuring correct physics for Half-Wave Cavity simulations.
+- **Windows Stability Fix:** Resolved `TerminatedWorkerError` crashes on Windows by removing process-based parallelism in favor of robust single-threaded vectorization.
+- Fixed `KeyError` in `run_eigenmode` for NCap simulations where `cross_dict` defaults to empty.
+- Fixed `SettingWithCopyWarning` in analysis module.
+
+**Improvements**
+
+- Cleaned up unused parallel processing methods and dependencies.
+- Improved code stability across operating systems (macOS, Windows, Linux).
+
+---
+
 Version 0.4.2 (2026-01-27)
 --------------------------
 
