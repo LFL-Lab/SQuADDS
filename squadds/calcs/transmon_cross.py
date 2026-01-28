@@ -734,7 +734,11 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
             self.df["anharmonicity_MHz"] = alpha_values
 
             # Step 8: Calculate g using vectorized Numba function (C-speed, no parallel overhead)
-            print("Calculating g_MHz (vectorized)...", flush=True)
+            from numba import config
+
+            num_threads = config.NUMBA_NUM_THREADS
+            mode_str = f"parallel ({num_threads} threads)" if int(num_threads) > 1 else "serial"
+            print(f"Calculating g_MHz (vectorized) in {mode_str}...", flush=True)
             res_type_val = 2 if self.selected_resonator_type == "half" else 4
 
             # Prepare arrays for Numba
