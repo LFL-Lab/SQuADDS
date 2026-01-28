@@ -318,7 +318,7 @@ def run_eigenmode(design, geometry_dict, sim_options, **kwargs):
     # update the claw dims
     claw_opts = geometry_dict["claw_opts"]
 
-    if cross_dict is not None:
+    if cross_dict:
         print(cross_dict)
         claw_opts["cross_gap"] = cross_dict["cross_gap"]
         claw_opts["cross_width"] = cross_dict["cross_width"]
