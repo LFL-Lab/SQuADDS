@@ -8,16 +8,17 @@ Version 0.4.3 (2026-01-28)
 
 **Performance Improvements**
 
-- **~70x Speedup** in Hamiltonian parameter calculations (benchmark: 3.5m -> 3s)
-- Implemented **vectorized Numba execution** for coupling strength (g) calculation, replacing the slow Python loop.
-- Removed `joblib` parallel processing overhead for scalar calculations.
+- **🚀 Blazing Fast Performance:** Total simulation and analysis workflow reduced to **~30 seconds** on Windows (previously minutes/hanging).
+- **~70x Speedup** in Hamiltonian parameter calculations (benchmark: 3.5m -> 1.5s).
+- **Vectorized Search:** Replaced `joblib` with **NumPy vectorization** in `Analyzer.find_closest`, making database queries instant and eliminating overhead.
+- **Multi-Core Enabled:** Added `numba.prange` support for true multi-core CPU utilization during parameter extraction.
 
 **Bug Fixes**
 
-- **Critical Fix for HWC Simulations:** Corrected `N=4` (Quarter-Wave) hardcoding to `N=2` (Half-Wave) in `objects.py`, ensuring correct physics for Half-Wave Cavity simulations.
-- **Windows Stability Fix:** Resolved `TerminatedWorkerError` crashes on Windows by removing process-based parallelism in favor of robust single-threaded vectorization.
-- Fixed `KeyError` in `run_eigenmode` for NCap simulations where `cross_dict` defaults to empty.
-- Fixed `SettingWithCopyWarning` in analysis module.
+- **Critical Fix for HWC Simulations:** Corrected `N=4` (Quarter-Wave) hardcoding to `N=2` (Half-Wave) in `objects.py`.
+- **Windows Stability Fix:** Resolved `TerminatedWorkerError` by removing process-based parallelism in favor of vectorization.
+- Fixed `KeyError` in `run_eigenmode` for NCap simulations.
+- Fixed `SettingWithCopyWarning` and linting errors in `analysis.py`.
 
 **Improvements**
 
