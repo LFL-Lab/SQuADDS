@@ -254,7 +254,8 @@ def get_sim_results(emode_df=None, lom_df=None, ncap_lom_df=None):
         1 if lom_df["design"]["design_options"]["aedt_q3d_inductance"] > 1e-9 else 1e-9
     )
     # print(Lj)
-    gg, aa, ff_q = find_g_a_fq(cross2cpw, cross2ground, f_r, Lj, N=4)
+    N = 2 if ncap_lom_df != {} else 4
+    gg, aa, ff_q = find_g_a_fq(cross2cpw, cross2ground, f_r, Lj, N=N)
     kappa = emode_df["sim_results"]["kappa"]
     Q = emode_df["sim_results"]["Q"]
     if ncap_lom_df != {}:
