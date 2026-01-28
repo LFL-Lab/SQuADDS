@@ -105,7 +105,7 @@ def EC_numba_vectorized(cross_to_claw_arr, cross_to_ground_arr):
     return result
 
 
-@jit(nopython=True, parallel=True)
+@jit(nopython=True)
 def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
     """
     Calculate coupling strength 'g' using the capacitance matrix formalism (numba-accelerated).

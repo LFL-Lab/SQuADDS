@@ -442,7 +442,7 @@ class Analyzer:
 
         elif self.selected_resonator_type == "half":
             # retrieve the best designs
-            self.closest_qubit = self.qubit_df.iloc[self.closest_df.index_qc]
+            self.closest_qubit = self.qubit_df.iloc[self.closest_df.index_qc].copy()
             self.closest_coupler = self.coupler_df.iloc[self.closest_df.index_cplr]
             self.closest_cavity = self.get_closest_cavity()
 
