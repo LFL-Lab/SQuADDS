@@ -114,7 +114,7 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
             return None, None, None
 
     elif device_dict["coupler_type"].lower() == "ncap":
-        emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options)
+        emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options, coupler_type="ncap")
         ncap_lom_df, ncap_lom_obj = run_capn_LOM(design, cavity_dict[cplr_opts_key], LOM_options)
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
         data = get_sim_results(emode_df=emode_df, lom_df=lom_df, ncap_lom_df=ncap_lom_df)
