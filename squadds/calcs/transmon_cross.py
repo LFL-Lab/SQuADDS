@@ -7,7 +7,7 @@ from functools import lru_cache
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numba import jit
+from numba import jit, prange
 from pyEPR.calcs import Convert
 from scipy.constants import Planck, e, hbar
 from scipy.optimize import brentq
@@ -161,7 +161,7 @@ def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
     return (g_J / hbar) * 1e-6 / (2 * np.pi)  # MHz
 
 
-@jit(nopython=True)
+@jit(nopython=True, parallel=True)
 def g_from_cap_matrix_vectorized(cross_to_ground_arr, cross_to_claw_arr, EJ_arr, cavity_freq_arr, res_type_val, Z0=50):
     """
     Vectorized calculation of g for arrays of inputs (numba-accelerated).
@@ -186,7 +186,7 @@ def g_from_cap_matrix_vectorized(cross_to_ground_arr, cross_to_claw_arr, EJ_arr,
     # Common factors
     factor1 = hbar_val * e_val**2
 
-    for i in range(n):
+    for i in prange(n):
         C_Q_fF = np.abs(cross_to_ground_arr[i])
         C_g_fF = np.abs(cross_to_claw_arr[i])
 
