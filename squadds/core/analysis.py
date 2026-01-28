@@ -1,4 +1,3 @@
-import os
 import time
 from typing import Any
 
@@ -12,7 +11,14 @@ import seaborn as sns
 from matplotlib.patches import Patch
 
 from squadds.calcs.transmon_cross import TransmonCrossHamiltonian
-from squadds.core.metrics import *
+from squadds.core.metrics import (
+    ChebyshevMetric,
+    CustomMetric,
+    EuclideanMetric,
+    ManhattanMetric,
+    MetricStrategy,
+    WeightedEuclideanMetric,
+)
 from squadds.core.processing import merge_dfs
 from squadds.core.utils import create_unified_design_options
 
@@ -364,7 +370,7 @@ class Analyzer:
             # remove the "resonator_type" key from self.target_params
             try:
                 self.target_params.pop("resonator_type")
-            except:
+            except Exception:
                 pass
         if (skip_df_gen) or (not self.params_computed):
             self._add_target_params_columns()
@@ -408,22 +414,14 @@ class Analyzer:
             )
 
         # Calculate distances
-        if not parallel:
-            distances = filtered_df.apply(lambda row: self.metric_strategy.calculate(target_params, row), axis=1)
-            sorted_indices = distances.nsmallest(num_top).index
-        else:
-            if num_cpu == "auto":
-                num_cpu = os.cpu_count() or 4
-            elif int(num_cpu) > (os.cpu_count() or 4):
-                raise ValueError(f"num_cpu must be less than or equal to {os.cpu_count() or 4}")
-            else:
-                num_cpu = 2
-                raise UserWarning("`num_chunk`s must be an integer greater than 0. Defaulting to 2.")
+        # Use vectorized calculation (much faster and avoids joblib overhead)
+        if parallel:
+            print(
+                "Using vectorized calculation for speed (ignoring num_cpu parameter as it's not needed for vectorization)."
+            )
 
-            print(f"Using {num_cpu} CPUs for parallel processing")
-
-            distances = self.metric_strategy.calculate_in_parallel(target_params, filtered_df, num_jobs=num_cpu)
-            sorted_indices = pd.Series(distances).nsmallest(num_top).index
+        distances = self.metric_strategy.calculate_vectorized(target_params, filtered_df)
+        sorted_indices = distances.nsmallest(num_top).index
 
         # Sort distances and get the closest ones
         self.closest_df = self.df.loc[sorted_indices]
@@ -448,7 +446,7 @@ class Analyzer:
 
             for merger_term in self.db.claw_merger_terms:
                 self.closest_qubit[merger_term] = self.closest_qubit["design_options"].map(
-                    lambda x: x["connection_pads"]["readout"].get(merger_term)
+                    lambda x, mt=merger_term: x["connection_pads"]["readout"].get(mt)
                 )
 
             # Create a unified design options column
