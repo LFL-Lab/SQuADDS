@@ -8,15 +8,14 @@ Version 0.4.3 (2026-01-28)
 
 **Performance Improvements**
 
-- **🚀 Blazing Fast Performance:** Total simulation and analysis workflow reduced to **~30 seconds** on Windows (previously minutes/hanging).
-- **~70x Speedup** in Hamiltonian parameter calculations (benchmark: 3.5m -> 1.5s).
-- **Vectorized Search:** Replaced `joblib` with **NumPy vectorization** in `Analyzer.find_closest`, making database queries instant and eliminating overhead.
-- **Multi-Core Enabled:** Added `numba.prange` support for true multi-core CPU utilization during parameter extraction.
+- **Great speedup of halfwave cavity workflows (seconds now instead of minutes)**
+- Replaced `joblib` with **NumPy vectorization** in `Analyzer.find_closest`, making database queries instant and eliminating overhead.
+- Added `numba.prange` support for true multi-core CPU utilization during parameter extraction.
 
 **Bug Fixes**
 
-- **Critical Fix for HWC Simulations:** Corrected `N=4` (Quarter-Wave) hardcoding to `N=2` (Half-Wave) in `objects.py`.
-- **Windows Stability Fix:** Resolved `TerminatedWorkerError` by removing process-based parallelism in favor of vectorization.
+- Corrected `N=4` (Quarter-Wave) hardcoding to `N=2` (Half-Wave) in `objects.py`.
+- Resolved `TerminatedWorkerError` by removing process-based parallelism in favor of vectorization.
 - Fixed `KeyError` in `run_eigenmode` for NCap simulations.
 - Fixed `SettingWithCopyWarning` and linting errors in `analysis.py`.
 
