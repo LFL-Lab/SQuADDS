@@ -140,7 +140,7 @@ class AnsysSimulator:
 
         # If there are unknown parameters, ask for confirmation
         if unknown_params:
-            self.console.print("[yellow]⚠️  Unknown parameters detected:[/yellow]")
+            self.console.print("[yellow]Unknown parameters detected:[/yellow]")
             for setup_key, params in unknown_params.items():
                 for param, value in params:
                     self.console.print(f"  • [cyan]{param}[/cyan] = {value} (not in [bold]{setup_key}[/bold])")
