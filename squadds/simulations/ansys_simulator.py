@@ -128,13 +128,42 @@ class AnsysSimulator:
             return
 
         updated_keys = []
+        unknown_params = {}
+
+        for key in target_keys:
+            if key in self.device_dict:
+                # Check which parameters are unknown
+                for param, value in kwargs.items():
+                    if param not in self.device_dict[key]:
+                        if key not in unknown_params:
+                            unknown_params[key] = []
+                        unknown_params[key].append((param, value))
+
+        # If there are unknown parameters, ask for confirmation
+        if unknown_params:
+            self.console.print("[yellow]⚠️  Unknown parameters detected:[/yellow]")
+            for setup_key, params in unknown_params.items():
+                for param, value in params:
+                    self.console.print(f"  • [cyan]{param}[/cyan] = {value} (not in [bold]{setup_key}[/bold])")
+
+            response = input("\n[?] Would you like to add these new parameters? (y/n): ").strip().lower()
+            if response != "y":
+                self.console.print("[dim]Skipping unknown parameters. Only updating existing ones.[/dim]")
+                # Filter out unknown parameters
+                kwargs = {
+                    k: v
+                    for k, v in kwargs.items()
+                    if not any(k in [p[0] for p in params] for params in unknown_params.values())
+                }
+
+        # Update the parameters
         for key in target_keys:
             if key in self.device_dict:
                 self.device_dict[key].update(kwargs)
                 updated_keys.append(key)
 
         if updated_keys:
-            self.console.print(f"[green]Updated {', '.join(updated_keys)}: {list(kwargs.keys())}[/green]")
+            self.console.print(f"[green]✓ Updated {', '.join(updated_keys)}: {list(kwargs.keys())}[/green]")
 
     def _get_setup_targets(self, target):
         """
