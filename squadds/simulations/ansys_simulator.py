@@ -1,10 +1,10 @@
-# from utils import *
 import os
 import sys
 
 # warn using `warnings` if os is mac that this is not supported
 import warnings
 from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
 
 import qiskit_metal as metal
 from qiskit_metal import Dict
@@ -27,7 +27,7 @@ class AnsysSimulator:
 
     Attributes:
         analyzer: The analyzer object.
-        design_options: The design options.
+        device_dict: The device dictionary containing design and setup options.
         lom_analysis_obj: The LOM analysis object.
         epr_analysis_obj: The EPR analysis object.
         design: The design planar object.
@@ -40,12 +40,12 @@ class AnsysSimulator:
 
         Args:
             analyzer: The analyzer object.
-            design_options: The design options.
+            design_options (dict): The device dictionary (renamed to device_dict internally).
         Optional arguments:
             open_gui (bool): If True, a MetalGUI instance is created and assigned to self.gui. Default is False.
         """
         self.analyzer = analyzer
-        self.design_options = design_options
+        self.device_dict = deepcopy(design_options)  # Store a copy for stateful modification
 
         self.lom_analysis_obj = None
         self.epr_analysis_obj = None
@@ -111,6 +111,98 @@ class AnsysSimulator:
                 stacklevel=2,
             )
 
+    def update_simulation_setup(self, **kwargs):
+        """
+        Updates the simulation setup parameters in the stored device dictionary.
+        Smartly searches for the keys in 'setup', 'setup_qubit', or 'setup_cavity_claw'.
+
+        Args:
+            **kwargs: Key-value pairs of parameters to update (e.g., max_passes=10).
+        """
+        targets = []
+        if "setup" in self.device_dict:
+            targets.append(self.device_dict["setup"])
+        if "setup_qubit" in self.device_dict:
+            targets.append(self.device_dict["setup_qubit"])
+        if "setup_cavity_claw" in self.device_dict:
+            targets.append(self.device_dict["setup_cavity_claw"])
+
+        updated_keys = []
+        for key, value in kwargs.items():
+            found = False
+            for target in targets:
+                # We update if the key exists OR if it's a common HFSS setup key we want to force add
+                # For now, let's update if key is in target, or if target looks like a setup dict
+                if key in target:
+                    target[key] = value
+                    found = True
+                # If invalid key, maybe we should just add it? Setup dicts in Metal are flexible.
+                # Let's assume user knows what they are doing and add it if not found,
+                # but to which one?
+                # If not found in any, we add to ALL targets (risky) or just print warning.
+                # Better strategy: Update existing keys, if key doesn't exist, assume it applies to all setups?
+
+            if not found:
+                # If key not found in any existing dict, add to all (e.g. adding a new param)
+                for target in targets:
+                    target[key] = value
+                self.console.print(f"[dim]Added new setup param '{key}' to all setup dicts.[/dim]")
+            else:
+                updated_keys.append(key)
+
+        if updated_keys:
+            self.console.print(f"[green]Updated simulation setup params: {updated_keys}[/green]")
+
+    def update_design_parameters(self, **kwargs):
+        """
+        Updates the geometry design parameters in the stored device dictionary.
+        Smartly searches for the keys in 'design_options', 'design_options_qubit', etc.
+
+        Args:
+            **kwargs: Key-value pairs of design parameters to update (e.g., cross_length="300um").
+        """
+        targets = []
+        # Single design
+        if "design_options" in self.device_dict:
+            targets.append(self.device_dict["design_options"])
+
+        # Coupled design
+        for key in ["design_options_qubit", "design_options_cavity_claw"]:
+            if key in self.device_dict:
+                targets.append(self.device_dict[key])
+
+        # Also check nested dictionaries (like 'cplr_opts', 'cpw_opts')
+        # We need a recursive search or just checks for known sub-dicts
+
+        def update_recursive(target_dict, key, value):
+            updated = False
+            if key in target_dict:
+                target_dict[key] = value
+                return True
+
+            for _k, v in target_dict.items():
+                if isinstance(v, dict):
+                    if update_recursive(v, key, value):
+                        updated = True
+            return updated
+
+        updated_keys = []
+        for key, value in kwargs.items():
+            found = False
+            for target in targets:
+                if update_recursive(target, key, value):
+                    found = True
+
+            if not found:
+                self.console.print(
+                    f"[yellow]Warning: parameter '{key}' not found in any design options. Ignoring.[/yellow]"
+                )
+            else:
+                updated_keys.append(key)
+
+        if updated_keys:
+            self.console.print(f"[green]Updated design parameters: {updated_keys}[/green]")
+
     def get_design_screenshot(self):
         """
         Saves a screenshot of the design.
@@ -126,9 +218,6 @@ class AnsysSimulator:
     def sweep(self, sweep_dict, emode_setup=None, lom_setup=None):
         """
         Sweeps the device based on the provided sweep dictionary.
-
-        Args:
-            sweep_dict (dict): A dictionary containing the sweep options.
 
         Returns:
             pandas.DataFrame: The sweep results.
@@ -150,7 +239,23 @@ class AnsysSimulator:
         else:
             run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="xmon_sweep")
 
-    def simulate(self, device_dict, run_async=False):
+    def simulate(self, device_dict=None, run_async=False):
+        """
+        Simulates the device based on the provided device dictionary.
+
+        Args:
+            device_dict (dict, optional): A dictionary containing the device design options and setup.
+                                          If None, uses the internally stored device_dict.
+            run_async (bool): If True, runs the simulation asynchronously.
+
+        Returns:
+            pandas.DataFrame or concurrent.futures.Future: The simulation results or a Future object.
+        """
+        # Use stored device_dict if none provided
+        if device_dict is None:
+            device_dict = self.device_dict
+
+        # ... logic continues ...
         """
         Simulates the device based on the provided device dictionary.
 
@@ -191,6 +296,15 @@ class AnsysSimulator:
         """Helper method to run the actual simulation logic."""
         return_df = {}
         try:
+            # Print simulation parameters for verification
+            self.console.print("[bold blue]Simulation Parameters:[/bold blue]")
+            if "setup" in device_dict:
+                self.console.print(f"  [cyan]Setup:[/cyan] {device_dict['setup']}")
+            if "setup_qubit" in device_dict:
+                self.console.print(f"  [cyan]Qubit Setup:[/cyan] {device_dict['setup_qubit']}")
+            if "setup_cavity_claw" in device_dict:
+                self.console.print(f"  [cyan]Cavity Setup:[/cyan] {device_dict['setup_cavity_claw']}")
+
             if isinstance(self.analyzer.selected_system, list):  # have a qubit_cavity object
                 self.geom_dict = Dict(
                     qubit_geoms=device_dict["design_options_qubit"],

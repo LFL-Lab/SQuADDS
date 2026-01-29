@@ -29,6 +29,12 @@ Version 0.4.3 (2026-01-28)
 - Added **Asynchronous Ansys Simulation** support (`simulate(..., run_async=True)`).
 - Added `rich` for beautiful, colored terminal status outputs during simulations.
 - Added `wait_for_all()` helper to synchronize async simulations.
+- **Improved Simulation UX:**
+    - `AnsysSimulator` is now stateful (stores `device_dict`).
+    - Added `update_simulation_setup(**kwargs)` for easy hyperparameter updates.
+    - Added `update_design_parameters(**kwargs)` for direct geometry modification.
+    - `simulate()` now uses valid internal state if no argument is provided.
+    - **Transparency:** Prints simulation hyperparameters securely before execution.
 
 ---
 
