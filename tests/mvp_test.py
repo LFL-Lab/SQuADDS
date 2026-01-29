@@ -130,4 +130,4 @@ print("\n[PASSED] Testing get_simulation_setup(target='cavity_claw')...")
 cavity_setup = hwc_sim.get_simulation_setup(target="cavity_claw")
 assert "setup_cavity_claw" in cavity_setup, "cavity_claw target failed!"
 
-print("\n✅ All setup API tests passed!")
+print("\n[PASSED] All setup API tests passed!")
