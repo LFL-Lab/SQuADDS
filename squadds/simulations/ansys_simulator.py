@@ -162,6 +162,41 @@ class AnsysSimulator:
         keys = mapping.get(target, [])
         return [k for k in keys if k in self.device_dict]
 
+    def get_simulation_setup(self, target="all"):
+        """
+        Displays the current simulation setup parameters.
+
+        Args:
+            target (str): Which setup to display. Options: "all", "qubit", "cavity", "coupler", "generic".
+
+        Returns:
+            dict: Dictionary containing the requested setup(s).
+        """
+        from rich.table import Table
+
+        target_keys = self._get_setup_targets(target)
+
+        if not target_keys:
+            self.console.print(f"[yellow]No setup found for target '{target}'[/yellow]")
+            return {}
+
+        result = {}
+        for key in target_keys:
+            if key in self.device_dict:
+                result[key] = self.device_dict[key]
+
+                # Create a nice table for display
+                table = Table(title=f"[bold cyan]{key}[/bold cyan]", show_header=True)
+                table.add_column("Parameter", style="cyan")
+                table.add_column("Value", style="green")
+
+                for param, value in self.device_dict[key].items():
+                    table.add_row(str(param), str(value))
+
+                self.console.print(table)
+
+        return result
+
     def update_design_parameters(self, **kwargs):
         """
         Updates the geometry design parameters in the stored device dictionary.
