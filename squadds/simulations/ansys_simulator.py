@@ -8,6 +8,7 @@ import qiskit_metal as metal
 from qiskit_metal import Dict
 
 from squadds.simulations.objects import *
+from squadds.simulations.utils import find_a_fq
 
 
 class AnsysSimulator:
@@ -200,7 +201,7 @@ class AnsysSimulator:
         Lj = xmon_dict["design"]["design_options"]["aedt_q3d_inductance"] * (
             1 if xmon_dict["design"]["design_options"]["aedt_q3d_inductance"] > 1e-9 else 1e-9
         )
-        a, fq = find_g_a_fq(cross2cpw, cross2ground, Lj)
+        a, fq = find_a_fq(cross2cpw, cross2ground, Lj)
         print(f"qubit anharmonicity = {round(a)} MHz \nqubit frequency = {round(fq, 3)} GHz")
         # return a json object
         return {"qubit_frequency_GHz": fq, "anharmonicity_MHz": a}
