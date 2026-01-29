@@ -83,7 +83,7 @@ class SimulationConfig:
         self.Cj = Cj
 
 
-def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, open_gui=False):
+def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, open_gui=False, generate_plots=False):
     """
     Simulates the whole device by running eigenmode and LOM simulations.
 
@@ -94,6 +94,7 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
         LOM_options (dict): Dictionary containing LOM setup options.
         eigenmode_options (dict): Dictionary containing eigenmode setup options.
         open_gui (bool, optional): If True, the Metal GUI is opened. Default is False.
+        generate_plots (bool, optional): If True, generate convergence and field plots. Default is False.
 
     Returns:
         tuple: A tuple containing the simulation results, LOM analysis object, and eigenmode analysis object.
@@ -106,7 +107,9 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
 
     design.delete_all_components()
     if device_dict["coupler_type"].upper() == "CLT":
-        emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options, cross_dict=cross_dict)
+        emode_df, emode_obj = run_eigenmode(
+            design, cavity_dict, eigenmode_options, generate_plots=generate_plots, cross_dict=cross_dict
+        )
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
         try:
             data = get_sim_results(emode_df=emode_df, lom_df=lom_df)
@@ -114,7 +117,9 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
             return None, None, None
 
     elif device_dict["coupler_type"].lower() == "ncap":
-        emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options, coupler_type="ncap")
+        emode_df, emode_obj = run_eigenmode(
+            design, cavity_dict, eigenmode_options, generate_plots=generate_plots, coupler_type="ncap"
+        )
         ncap_lom_df, ncap_lom_obj = run_capn_LOM(design, cavity_dict[cplr_opts_key], LOM_options)
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
         data = get_sim_results(emode_df=emode_df, lom_df=lom_df, ncap_lom_df=ncap_lom_df)
@@ -157,7 +162,9 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
     return return_df, lom_obj, emode_obj
 
 
-def simulate_single_design(design, device_dict, emode_options=None, lom_options=None, coupler_type="CLT"):
+def simulate_single_design(
+    design, device_dict, emode_options=None, lom_options=None, coupler_type="CLT", generate_plots=False
+):
     """
     Simulates a single design using the provided parameters.
 
@@ -168,6 +175,7 @@ def simulate_single_design(design, device_dict, emode_options=None, lom_options=
         lom_options (dict): A dictionary containing the LOM simulation options.
         coupler_type (str): The type of coupler to be used.
         sim_options (dict): A dictionary containing simulation options.
+        generate_plots (bool): If True, generate convergence and field plots. Default is False.
 
     Returns:
         dict or tuple: The simulation results. If eigenmode simulation is performed, returns a dictionary
@@ -189,7 +197,7 @@ def simulate_single_design(design, device_dict, emode_options=None, lom_options=
     cpw_opts_key, cplr_opts_key = get_cavity_claw_options_keys(device_dict)
 
     if cpw_opts_key in device_dict.keys():
-        emode_df, emode_obj = run_eigenmode(design, device_dict, emode_options)
+        emode_df, emode_obj = run_eigenmode(design, device_dict, emode_options, generate_plots=generate_plots)
         if coupler_type.lower() == "ncap":
             # emode_df, emode_obj = run_eigenmode(design, device_dict, sim_options)
             ncap_lom_df, lom_obj = run_capn_LOM(design, device_dict[cplr_opts_key], lom_options)
@@ -272,7 +280,7 @@ def get_sim_results(emode_df=None, lom_df=None, ncap_lom_df=None):
     return data
 
 
-def run_eigenmode(design, geometry_dict, sim_options, **kwargs):
+def run_eigenmode(design, geometry_dict, sim_options, generate_plots=False, **kwargs):
     """
     Runs the eigenmode simulation for a given design using Ansys HFSS.
 
@@ -280,6 +288,7 @@ def run_eigenmode(design, geometry_dict, sim_options, **kwargs):
         design (str): The name of the design.
         geometry_dict (dict): A dictionary containing the geometry options for the simulation.
         sim_options (dict): A dictionary containing the simulation options.
+        generate_plots (bool): If True, generate convergence and field plots. Default is False.
 
     Returns:
         tuple: A tuple containing the simulation results and the EPRAnalysis object.
@@ -374,7 +383,7 @@ def run_eigenmode(design, geometry_dict, sim_options, **kwargs):
     # add_ground_strip_and_mesh(modeler, coupler, mesh_lengths=mesh_lengths)
     print(mesh_lengths)
     mesh_objects(modeler, mesh_lengths)
-    f_rough, Q, kappa = get_freq_Q_kappa(epra, hfss)
+    f_rough, Q, kappa = get_freq_Q_kappa(epra, hfss, generate_plots=generate_plots)
 
     data = epra.get_data()
 

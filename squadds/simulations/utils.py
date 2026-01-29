@@ -146,25 +146,29 @@ def calculate_center_and_dimensions(bbox):
     return (center_x, center_y, center_z), (x_size, y_size, z_size)
 
 
-def get_freq(epra, test_hfss):
+def get_freq(epra, test_hfss, generate_plots=False):
     """
     Analyze the simulation, plot the results, and report the frequencies, Q, and kappa.
 
     :param epra: The EPR analysis object.
     :param test_hfss: The HFSS object.
+    :param generate_plots: If True, generate convergence and field plots. Default is False.
     """
     project_name = test_hfss.pinfo.project_name
     design_name = test_hfss.pinfo.design_name
 
     setMaterialProperties(project_name, design_name, solutiontype="Eigenmode")
     epra.sim._analyze()
-    try:
-        epra.sim.plot_convergences()
-        epra.sim.save_screenshot()
-        epra.sim.plot_fields("main")
-        epra.sim.save_screenshot()
-    except Exception:
-        print("couldn't generate plots.")
+
+    if generate_plots:
+        try:
+            epra.sim.plot_convergences()
+            epra.sim.save_screenshot()
+            epra.sim.plot_fields("main")
+            epra.sim.save_screenshot()
+        except Exception as e:
+            print(f"couldn't generate plots. Error: {e}")
+
     f = epra.get_frequencies()
 
     freq = f.values[0][0] * 1e9
@@ -172,25 +176,29 @@ def get_freq(epra, test_hfss):
     return freq
 
 
-def get_freq_Q_kappa(epra, test_hfss):
+def get_freq_Q_kappa(epra, test_hfss, generate_plots=False):
     """
     Analyze the simulation, plot the results, and report the frequencies, Q, and kappa.
 
     :param epra: The EPR analysis object.
     :param test_hfss: The HFSS object.
+    :param generate_plots: If True, generate convergence and field plots. Default is False.
     """
     project_name = test_hfss.pinfo.project_name
     design_name = test_hfss.pinfo.design_name
 
     setMaterialProperties(project_name, design_name, solutiontype="Eigenmode")
     epra.sim._analyze()
-    try:
-        epra.sim.plot_convergences()
-        epra.sim.save_screenshot()
-        epra.sim.plot_fields("main")
-        epra.sim.save_screenshot()
-    except Exception:
-        print("couldn't generate plots.")
+
+    if generate_plots:
+        try:
+            epra.sim.plot_convergences()
+            epra.sim.save_screenshot()
+            epra.sim.plot_fields("main")
+            epra.sim.save_screenshot()
+        except Exception:
+            print("couldn't generate plots.")
+
     f = epra.get_frequencies()
     freq = f.values[0][0] * 1e9
     Q = f.values[0][1]

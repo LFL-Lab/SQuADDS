@@ -420,13 +420,14 @@ class AnsysSimulator:
                     device_dict=device_dict,
                     LOM_options=self.setup_dict.qubit_setup,
                     eigenmode_options=self.setup_dict.cavity_setup,
+                    generate_plots=False,
                 )
 
             else:  # have a non-qubit_cavity object
                 self.geom_dict = device_dict["design_options"]
                 self.setup_dict = device_dict["setup"]
                 return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_single_design(
-                    design=self.design, device_dict=device_dict, lom_options=self.setup_dict
+                    design=self.design, device_dict=device_dict, lom_options=self.setup_dict, generate_plots=False
                 )
         except Exception as e:
             self.console.print(f"[bold red]Error during simulation: {e}[/bold red]")
