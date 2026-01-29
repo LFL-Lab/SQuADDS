@@ -274,7 +274,7 @@ def get_sim_results(emode_df=None, lom_df=None, ncap_lom_df=None):
         )
 
     data = dict(
-        cavity_frequency_GHz=f_r, Q=Q, kappa_kHz=kappa, g_MHz=gg, anharmonicity_MHz=aa, qubit_frequency_GHz=ff_q
+        cavity_frequency_GHz=f_r / 1e9, Q=Q, kappa_kHz=kappa, g_MHz=gg, anharmonicity_MHz=aa, qubit_frequency_GHz=ff_q
     )
 
     return data
