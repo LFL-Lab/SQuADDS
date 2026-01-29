@@ -753,25 +753,29 @@
 
 <div class="viewcode-block" id="get_freq">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.get_freq">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_freq</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">test_hfss</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_freq</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">test_hfss</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analyze the simulation, plot the results, and report the frequencies, Q, and kappa.</span>
 
 <span class="sd">    :param epra: The EPR analysis object.</span>
 <span class="sd">    :param test_hfss: The HFSS object.</span>
+<span class="sd">    :param generate_plots: If True, generate convergence and field plots. Default is False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">project_name</span> <span class="o">=</span> <span class="n">test_hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">project_name</span>
     <span class="n">design_name</span> <span class="o">=</span> <span class="n">test_hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">design_name</span>
 
     <span class="n">setMaterialProperties</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">)</span>
     <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">_analyze</span><span class="p">()</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_convergences</span><span class="p">()</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_fields</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;couldn&#39;t generate plots.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">generate_plots</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_convergences</span><span class="p">()</span>
+            <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
+            <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_fields</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
+            <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;couldn&#39;t generate plots. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="n">f</span> <span class="o">=</span> <span class="n">epra</span><span class="o">.</span><span class="n">get_frequencies</span><span class="p">()</span>
 
     <span class="n">freq</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e9</span>
@@ -782,25 +786,29 @@
 
 <div class="viewcode-block" id="get_freq_Q_kappa">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.get_freq_Q_kappa">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_freq_Q_kappa</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">test_hfss</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_freq_Q_kappa</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">test_hfss</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analyze the simulation, plot the results, and report the frequencies, Q, and kappa.</span>
 
 <span class="sd">    :param epra: The EPR analysis object.</span>
 <span class="sd">    :param test_hfss: The HFSS object.</span>
+<span class="sd">    :param generate_plots: If True, generate convergence and field plots. Default is False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">project_name</span> <span class="o">=</span> <span class="n">test_hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">project_name</span>
     <span class="n">design_name</span> <span class="o">=</span> <span class="n">test_hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">design_name</span>
 
     <span class="n">setMaterialProperties</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">)</span>
     <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">_analyze</span><span class="p">()</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_convergences</span><span class="p">()</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_fields</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
-        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;couldn&#39;t generate plots.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">generate_plots</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_convergences</span><span class="p">()</span>
+            <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
+            <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">plot_fields</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
+            <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;couldn&#39;t generate plots.&quot;</span><span class="p">)</span>
+
     <span class="n">f</span> <span class="o">=</span> <span class="n">epra</span><span class="o">.</span><span class="n">get_frequencies</span><span class="p">()</span>
     <span class="n">freq</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e9</span>
     <span class="n">Q</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
@@ -1212,7 +1220,9 @@
 <span class="sd">        C_tg (float): The total capacitance of the ground in Farads.</span>
 <span class="sd">        C_tb (float): The total capacitance of the bias in Farads.</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        float: The cavity linewidth (kappa) in kHz.</span>
+<span class="sd">        tuple: A tuple containing (f_est, kappa).</span>
+<span class="sd">            f_est (float): The estimated frequency in GHz.</span>
+<span class="sd">            kappa (float): The cavity linewidth (kappa) in kHz.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Z0</span> <span class="o">=</span> <span class="mi">50</span>
     <span class="n">w_rough</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f_rough</span>
@@ -1221,7 +1231,10 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">C_res</span><span class="p">)</span>
     <span class="n">w_est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">C_res</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_res</span> <span class="o">+</span> <span class="n">C_tg</span> <span class="o">+</span> <span class="n">C_tb</span><span class="p">))</span> <span class="o">*</span> <span class="n">w_rough</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Z0</span> <span class="o">*</span> <span class="p">(</span><span class="n">w_est</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_tb</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_res</span> <span class="o">+</span> <span class="n">C_tg</span> <span class="o">+</span> <span class="n">C_tb</span><span class="p">))</span> <span class="o">*</span> <span class="mf">1e-15</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span></div>
+    <span class="n">kappa</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Z0</span> <span class="o">*</span> <span class="p">(</span><span class="n">w_est</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_tb</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_res</span> <span class="o">+</span> <span class="n">C_tg</span> <span class="o">+</span> <span class="n">C_tb</span><span class="p">))</span> <span class="o">*</span> <span class="mf">1e-15</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+    <span class="n">f_est</span> <span class="o">=</span> <span class="n">w_est</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">f_est</span><span class="p">,</span> <span class="n">kappa</span></div>
 
 
 

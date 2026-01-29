@@ -579,16 +579,25 @@
                 <article class="bd-article">
                   
   <h1>Source code for squadds.simulations.ansys_simulator</h1><div class="highlight"><pre>
-<span></span><span class="c1"># from utils import *</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
 <span class="c1"># warn using `warnings` if os is mac that this is not supported</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">metal</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.console</span><span class="w"> </span><span class="kn">import</span> <span class="n">Console</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.objects</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.coupled_systems</span><span class="w"> </span><span class="kn">import</span> <span class="n">QubitCavity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.objects</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">run_qubit_cavity_sweep</span><span class="p">,</span>
+    <span class="n">run_sweep</span><span class="p">,</span>
+    <span class="n">simulate_single_design</span><span class="p">,</span>
+    <span class="n">simulate_whole_device</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_a_fq</span>
 
 
@@ -600,7 +609,7 @@
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        analyzer: The analyzer object.</span>
-<span class="sd">        design_options: The design options.</span>
+<span class="sd">        device_dict: The device dictionary containing design and setup options.</span>
 <span class="sd">        lom_analysis_obj: The LOM analysis object.</span>
 <span class="sd">        epr_analysis_obj: The EPR analysis object.</span>
 <span class="sd">        design: The design planar object.</span>
@@ -613,12 +622,12 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            analyzer: The analyzer object.</span>
-<span class="sd">            design_options: The design options.</span>
+<span class="sd">            design_options (dict): The device dictionary (renamed to device_dict internally).</span>
 <span class="sd">        Optional arguments:</span>
 <span class="sd">            open_gui (bool): If True, a MetalGUI instance is created and assigned to self.gui. Default is False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">analyzer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">design_options</span> <span class="o">=</span> <span class="n">design_options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span>  <span class="c1"># Store a copy for stateful modification</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="kc">None</span>
@@ -665,6 +674,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">overwrite_enabled</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_warnings</span><span class="p">()</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">force_jupyter</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;selected system: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_warnings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -679,6 +692,180 @@
                 <span class="s2">&quot;`AnsysSimulator` is not supported on MacOS since Ansys does not have a Mac App. Please use Windows or Linux for simulations.&quot;</span><span class="p">,</span>
                 <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
+
+<div class="viewcode-block" id="AnsysSimulator.update_simulation_setup">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.update_simulation_setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_simulation_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the simulation setup parameters in the stored device dictionary.</span>
+<span class="sd">        Intelligently maps targets to setup keys based on system type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (str): Which setup to update. Options: &quot;all&quot;, &quot;qubit&quot;, &quot;cavity&quot;, &quot;coupler&quot;, &quot;generic&quot;.</span>
+<span class="sd">            **kwargs: Key-value pairs of parameters to update (e.g., max_passes=10).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the appropriate setup keys based on target and system type</span>
+        <span class="n">target_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_setup_targets</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">target_keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[yellow]Warning: target &#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39; is not valid for this system.[/yellow]&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">updated_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">unknown_params</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">target_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">:</span>
+                <span class="c1"># Check which parameters are unknown</span>
+                <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">param</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unknown_params</span><span class="p">:</span>
+                            <span class="n">unknown_params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">unknown_params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">param</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+        <span class="c1"># If there are unknown parameters, ask for confirmation</span>
+        <span class="k">if</span> <span class="n">unknown_params</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[yellow]Unknown parameters detected:[/yellow]&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">setup_key</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">unknown_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • [cyan]</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">[/cyan] = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> (not in [bold]</span><span class="si">{</span><span class="n">setup_key</span><span class="si">}</span><span class="s2">[/bold])&quot;</span><span class="p">)</span>
+
+            <span class="n">response</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[?] Would you like to add these new parameters? (y/n): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">response</span> <span class="o">!=</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[dim]Skipping unknown parameters. Only updating existing ones.[/dim]&quot;</span><span class="p">)</span>
+                <span class="c1"># Filter out unknown parameters</span>
+                <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">]</span> <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">unknown_params</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                <span class="p">}</span>
+
+        <span class="c1"># Update the parameters</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">target_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">updated_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">updated_keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[green]✓ Updated </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">updated_keys</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_setup_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns list of dict keys to update based on target and system type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (str): The target setup to update.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of setup dictionary keys to update.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1"># Coupled system (qubit + cavity)</span>
+            <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;qubit&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;setup_qubit&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;cavity_claw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;coupler&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;setup_coupler&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;all&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;setup_qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">,</span> <span class="s2">&quot;setup_coupler&quot;</span><span class="p">],</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Single system</span>
+            <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;generic&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">],</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]}</span>
+
+        <span class="c1"># Return the keys, filtering out any that don&#39;t exist in device_dict</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">]</span>
+
+<div class="viewcode-block" id="AnsysSimulator.get_simulation_setup">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.get_simulation_setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_simulation_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays the current simulation setup parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (str): Which setup to display. Options: &quot;all&quot;, &quot;qubit&quot;, &quot;cavity&quot;, &quot;coupler&quot;, &quot;generic&quot;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary containing the requested setup(s).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">rich.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
+
+        <span class="n">target_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_setup_targets</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">target_keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[yellow]No setup found for target &#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39;[/yellow]&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">target_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+                <span class="c1"># Create a nice table for display</span>
+                <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[bold cyan]</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">[/bold cyan]&quot;</span><span class="p">,</span> <span class="n">show_header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;Parameter&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;cyan&quot;</span><span class="p">)</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">param</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="AnsysSimulator.update_design_parameters">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.update_design_parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_design_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the geometry design parameters in the stored device dictionary.</span>
+<span class="sd">        Smartly searches for the keys in &#39;design_options&#39;, &#39;design_options_qubit&#39;, etc.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs: Key-value pairs of design parameters to update (e.g., cross_length=&quot;300um&quot;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Single design</span>
+        <span class="k">if</span> <span class="s2">&quot;design_options&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">:</span>
+            <span class="n">targets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Coupled design</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">:</span>
+                <span class="n">targets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="c1"># Also check nested dictionaries (like &#39;cplr_opts&#39;, &#39;cpw_opts&#39;)</span>
+        <span class="c1"># We need a recursive search or just checks for known sub-dicts</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">update_recursive</span><span class="p">(</span><span class="n">target_dict</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">updated</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">target_dict</span><span class="p">:</span>
+                <span class="n">target_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="k">for</span> <span class="n">_k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">target_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">update_recursive</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                        <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="n">updated</span>
+
+        <span class="n">updated_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">update_recursive</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;[yellow]Warning: parameter &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; not found in any design options. Ignoring.[/yellow]&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">updated_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">updated_keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[green]Updated design parameters: </span><span class="si">{</span><span class="n">updated_keys</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="AnsysSimulator.get_design_screenshot">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.get_design_screenshot">[docs]</a>
@@ -700,9 +887,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">sweep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sweep_dict</span><span class="p">,</span> <span class="n">emode_setup</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lom_setup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sweeps the device based on the provided sweep dictionary.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            sweep_dict (dict): A dictionary containing the sweep options.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            pandas.DataFrame: The sweep results.</span>
@@ -727,42 +911,152 @@
 
 <div class="viewcode-block" id="AnsysSimulator.simulate">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.simulate">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">run_async</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simulates the device based on the provided device dictionary.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            device_dict (dict, optional): A dictionary containing the device design options and setup.</span>
+<span class="sd">                                          If None, uses the internally stored device_dict.</span>
+<span class="sd">            run_async (bool): If True, runs the simulation asynchronously.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame or concurrent.futures.Future: The simulation results or a Future object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Use stored device_dict if none provided</span>
+        <span class="k">if</span> <span class="n">device_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">device_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span>
+
+        <span class="c1"># ... logic continues ...</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Simulates the device based on the provided device dictionary.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            device_dict (dict): A dictionary containing the device design options and setup.</span>
+<span class="sd">            run_async (bool): If True, runs the simulation asynchronously using a ThreadPoolExecutor.</span>
+<span class="sd">                              Returns the Future object. Default is False.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pandas.DataFrame: The simulation results.</span>
+<span class="sd">            pandas.DataFrame or concurrent.futures.Future: The simulation results or a Future object.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">run_async</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Ansys-native parallel simulation (run_async=True) is not yet implemented. &quot;</span>
+                <span class="s2">&quot;This feature will render all designs to the same Ansys project and leverage &quot;</span>
+                <span class="s2">&quot;Ansys&#39;s built-in scheduling for parallel execution. &quot;</span>
+                <span class="s2">&quot;Please use run_async=False (default) for sequential simulation. &quot;</span>
+                <span class="s2">&quot;Track progress at: https://github.com/shanto268/SQuADDS/issues&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">device_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">device_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span>
+
+        <span class="c1"># Use a simple print instead of Progress to avoid recursion issues in some Jupyter environments</span>
+        <span class="c1"># when nested prints occur (e.g. from pyEPR)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">rule</span><span class="p">(</span><span class="s2">&quot;[bold cyan]Starting Simulation[/bold cyan]&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_simulation</span><span class="p">(</span><span class="n">device_dict</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[bold green]Simulation Completed Successfully![/bold green]&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Avoid using self.console.print here if it might cause further recursion</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error during simulation: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_run_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper method to run the actual simulation logic.&quot;&quot;&quot;</span>
         <span class="n">return_df</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>  <span class="c1"># have a qubit_cavity object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
-                <span class="n">qubit_geoms</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">],</span> <span class="n">cavity_geoms</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
-                <span class="n">qubit_setup</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_qubit&quot;</span><span class="p">],</span> <span class="n">cavity_setup</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_whole_device</span><span class="p">(</span>
-                <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
-                <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span>
-                <span class="n">LOM_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">qubit_setup</span><span class="p">,</span>
-                <span class="n">eigenmode_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">cavity_setup</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Print simulation plan</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[bold blue]═══ Simulation Plan ═══[/bold blue]&quot;</span><span class="p">)</span>
 
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># have a non-qubit_cavity object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]</span>
-            <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_single_design</span><span class="p">(</span>
-                <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span> <span class="n">lom_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="c1"># Coupled system</span>
+                <span class="n">sim_count</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Eigenmode + Qubit LOM</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[cyan]System Type:[/cyan] Coupled (Qubit + Cavity)&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[cyan]Simulation Types:[/cyan]&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;  1. [green]Eigenmode[/green] on Cavity&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;  2. [green]LOM (Capacitance)[/green] on Qubit&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">return_df</span></div>
+                <span class="c1"># Check for half-wave coupler</span>
+                <span class="k">if</span> <span class="s2">&quot;setup_coupler&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="p">:</span>
+                    <span class="n">sim_count</span> <span class="o">=</span> <span class="mi">3</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;  3. [green]LOM (Capacitance)[/green] on Coupler (NCap)&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[cyan]Total Simulations:[/cyan] </span><span class="si">{</span><span class="n">sim_count</span><span class="si">}</span><span class="s2"> (Half-Wave Resonator)&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[cyan]Total Simulations:[/cyan] </span><span class="si">{</span><span class="n">sim_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Single component</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[cyan]System Type:[/cyan] Single Component&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[cyan]Total Simulations:[/cyan] 1&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[cyan]Simulation Types:[/cyan]&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;  1. [green]LOM (Capacitance)[/green]&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[bold blue]═══════════════════════[/bold blue]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Print simulation parameters for verification</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[bold blue]Simulation Parameters:[/bold blue]&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;setup&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  [cyan]Setup:[/cyan] </span><span class="si">{</span><span class="n">device_dict</span><span class="p">[</span><span class="s1">&#39;setup&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;setup_qubit&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  [cyan]Qubit Setup:[/cyan] </span><span class="si">{</span><span class="n">device_dict</span><span class="p">[</span><span class="s1">&#39;setup_qubit&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;setup_cavity_claw&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  [cyan]Cavity Setup:[/cyan] </span><span class="si">{</span><span class="n">device_dict</span><span class="p">[</span><span class="s1">&#39;setup_cavity_claw&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;setup_coupler&quot;</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  [cyan]Coupler Setup:[/cyan] </span><span class="si">{</span><span class="n">device_dict</span><span class="p">[</span><span class="s1">&#39;setup_coupler&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>  <span class="c1"># have a qubit_cavity object</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+                    <span class="n">qubit_geoms</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">],</span>
+                    <span class="n">cavity_geoms</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+                    <span class="n">qubit_setup</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_qubit&quot;</span><span class="p">],</span> <span class="n">cavity_setup</span><span class="o">=</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_whole_device</span><span class="p">(</span>
+                    <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
+                    <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span>
+                    <span class="n">LOM_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">qubit_setup</span><span class="p">,</span>
+                    <span class="n">eigenmode_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="o">.</span><span class="n">cavity_setup</span><span class="p">,</span>
+                    <span class="n">generate_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># have a non-qubit_cavity object</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">geom_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span> <span class="o">=</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]</span>
+                <span class="n">return_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="n">simulate_single_design</span><span class="p">(</span>
+                    <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="o">=</span><span class="n">device_dict</span><span class="p">,</span> <span class="n">lom_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_dict</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[bold red]Error during simulation: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">[/bold red]&quot;</span><span class="p">)</span>
+            <span class="c1"># Re-raise to be caught by future</span>
+            <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="k">return</span> <span class="n">return_df</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_simulation_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback for async simulation completion.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[bold green]Async Simulation Completed successfully![/bold green]&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[bold red]Async Simulation Failed with error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">[/bold red]&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AnsysSimulator.wait_for_all">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.ansys_simulator.AnsysSimulator.wait_for_all">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Waits for all submitted async simulations to complete.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">wait</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[yellow]Waiting for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span><span class="si">}</span><span class="s2"> simulations to complete...[/yellow]&quot;</span><span class="p">)</span>
+            <span class="n">wait</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;[bold green]All simulations finished.[/bold green]&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span></div>
 
 
 <div class="viewcode-block" id="AnsysSimulator.get_renderer_screenshot">

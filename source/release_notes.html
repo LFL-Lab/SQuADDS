@@ -595,9 +595,27 @@
 </ul>
 <p><strong>Performance Improvements</strong></p>
 <ul class="simple">
-<li><p><strong>Great speedup of halfwave cavity workflows (seconds now instead of minutes)</strong></p></li>
-<li><p>Replaced <cite>joblib</cite> with <strong>NumPy vectorization</strong> in <cite>Analyzer.find_closest</cite>, making database queries instant and eliminating overhead.</p></li>
+<li><p>Great speedup of halfwave cavity workflows (<strong>seconds now instead of minutes*!</strong>)</p></li>
+<li><p>Replaced <cite>joblib</cite> with NumPy vectorization in <cite>Analyzer.find_closest</cite>, making database queries instant and eliminating overhead.</p></li>
 <li><p>Added <cite>numba.prange</cite> support for true multi-core CPU utilization during parameter extraction.</p></li>
+</ul>
+<p><strong>New Features</strong></p>
+<ul class="simple">
+<li><p><cite>AnsysSimulator</cite> is now stateful (stores <cite>device_dict</cite>).</p></li>
+<li><dl class="simple">
+<dt>Added <cite>update_simulation_setup(target, **kwargs)</cite> for granular hyperparameter updates:</dt><dd><ul>
+<li><p>Supports <cite>target=”qubit”</cite>, <cite>“cavity_claw”</cite>, <cite>“coupler”</cite>, <cite>“generic”</cite>, or <cite>“all”</cite>.</p></li>
+<li><p>Intelligently maps targets to correct setup dictionaries based on system type.</p></li>
+<li><p>Interactive confirmation for unknown parameters to prevent typos and for specifying more hyperparameters.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Added <cite>get_simulation_setup(target)</cite> to view current setup parameters in formatted tables.</p></li>
+<li><p><cite>simulate()</cite> now uses valid internal state if no argument is provided.</p></li>
+<li><p><strong>Transparency:</strong> Prints simulation hyperparameters securely before execution.</p></li>
+<li><p>All three setups (<cite>setup_qubit</cite>, <cite>setup_cavity_claw</cite>, <cite>setup_coupler</cite>) now properly included in half-wave cavity dataframes.</p></li>
+<li><p>Added <cite>update_design_parameters(**kwargs)</cite> for direct geometry modification.</p></li>
 </ul>
 <p><strong>Bug Fixes</strong></p>
 <ul class="simple">
@@ -610,6 +628,7 @@
 <ul class="simple">
 <li><p>Cleaned up unused parallel processing methods and dependencies.</p></li>
 <li><p>Improved code stability across operating systems (macOS, Windows, Linux).</p></li>
+<li><p>Added <cite>rich</cite> for beautiful, colored terminal status outputs during simulations.</p></li>
 </ul>
 <p>—</p>
 </section>

@@ -8,9 +8,22 @@ Version 0.4.3 (2026-01-28)
 
 **Performance Improvements**
 
-- **Great speedup of halfwave cavity workflows (seconds now instead of minutes)**
-- Replaced `joblib` with **NumPy vectorization** in `Analyzer.find_closest`, making database queries instant and eliminating overhead.
+- Great speedup of halfwave cavity workflows (**seconds now instead of minutes*!**)
+- Replaced `joblib` with NumPy vectorization in `Analyzer.find_closest`, making database queries instant and eliminating overhead.
 - Added `numba.prange` support for true multi-core CPU utilization during parameter extraction.
+
+**New Features**
+
+- `AnsysSimulator` is now stateful (stores `device_dict`).
+- Added `update_simulation_setup(target, **kwargs)` for granular hyperparameter updates:
+    - Supports `target="qubit"`, `"cavity_claw"`, `"coupler"`, `"generic"`, or `"all"`.
+    - Intelligently maps targets to correct setup dictionaries based on system type.
+    - Interactive confirmation for unknown parameters to prevent typos and for specifying more hyperparameters.
+- Added `get_simulation_setup(target)` to view current setup parameters in formatted tables.
+- `simulate()` now uses valid internal state if no argument is provided.
+- **Transparency:** Prints simulation hyperparameters securely before execution.
+- All three setups (`setup_qubit`, `setup_cavity_claw`, `setup_coupler`) now properly included in half-wave cavity dataframes.
+- Added `update_design_parameters(**kwargs)` for direct geometry modification.
 
 **Bug Fixes**
 
@@ -23,6 +36,7 @@ Version 0.4.3 (2026-01-28)
 
 - Cleaned up unused parallel processing methods and dependencies.
 - Improved code stability across operating systems (macOS, Windows, Linux).
+- Added `rich` for beautiful, colored terminal status outputs during simulations.
 
 ---
 

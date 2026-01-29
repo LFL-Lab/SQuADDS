@@ -669,7 +669,7 @@
 
 <div class="viewcode-block" id="simulate_whole_device">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.simulate_whole_device">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">simulate_whole_device</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">,</span> <span class="n">open_gui</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">simulate_whole_device</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">,</span> <span class="n">open_gui</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulates the whole device by running eigenmode and LOM simulations.</span>
 
@@ -680,6 +680,7 @@
 <span class="sd">        LOM_options (dict): Dictionary containing LOM setup options.</span>
 <span class="sd">        eigenmode_options (dict): Dictionary containing eigenmode setup options.</span>
 <span class="sd">        open_gui (bool, optional): If True, the Metal GUI is opened. Default is False.</span>
+<span class="sd">        generate_plots (bool, optional): If True, generate convergence and field plots. Default is False.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        tuple: A tuple containing the simulation results, LOM analysis object, and eigenmode analysis object.</span>
@@ -692,7 +693,9 @@
 
     <span class="n">design</span><span class="o">.</span><span class="n">delete_all_components</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;CLT&quot;</span><span class="p">:</span>
-        <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">,</span> <span class="n">cross_dict</span><span class="o">=</span><span class="n">cross_dict</span><span class="p">)</span>
+        <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span>
+            <span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="n">generate_plots</span><span class="p">,</span> <span class="n">cross_dict</span><span class="o">=</span><span class="n">cross_dict</span>
+        <span class="p">)</span>
         <span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cross_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">get_sim_results</span><span class="p">(</span><span class="n">emode_df</span><span class="o">=</span><span class="n">emode_df</span><span class="p">,</span> <span class="n">lom_df</span><span class="o">=</span><span class="n">lom_df</span><span class="p">)</span>
@@ -700,7 +703,9 @@
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
     <span class="k">elif</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;ncap&quot;</span><span class="p">:</span>
-        <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">,</span> <span class="n">coupler_type</span><span class="o">=</span><span class="s2">&quot;ncap&quot;</span><span class="p">)</span>
+        <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span>
+            <span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="n">generate_plots</span><span class="p">,</span> <span class="n">coupler_type</span><span class="o">=</span><span class="s2">&quot;ncap&quot;</span>
+        <span class="p">)</span>
         <span class="n">ncap_lom_df</span><span class="p">,</span> <span class="n">ncap_lom_obj</span> <span class="o">=</span> <span class="n">run_capn_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="n">cplr_opts_key</span><span class="p">],</span> <span class="n">LOM_options</span><span class="p">)</span>
         <span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cross_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">get_sim_results</span><span class="p">(</span><span class="n">emode_df</span><span class="o">=</span><span class="n">emode_df</span><span class="p">,</span> <span class="n">lom_df</span><span class="o">=</span><span class="n">lom_df</span><span class="p">,</span> <span class="n">ncap_lom_df</span><span class="o">=</span><span class="n">ncap_lom_df</span><span class="p">)</span>
@@ -746,7 +751,9 @@
 
 <div class="viewcode-block" id="simulate_single_design">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.simulate_single_design">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">simulate_single_design</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lom_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coupler_type</span><span class="o">=</span><span class="s2">&quot;CLT&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">simulate_single_design</span><span class="p">(</span>
+    <span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lom_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coupler_type</span><span class="o">=</span><span class="s2">&quot;CLT&quot;</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulates a single design using the provided parameters.</span>
 
@@ -757,6 +764,7 @@
 <span class="sd">        lom_options (dict): A dictionary containing the LOM simulation options.</span>
 <span class="sd">        coupler_type (str): The type of coupler to be used.</span>
 <span class="sd">        sim_options (dict): A dictionary containing simulation options.</span>
+<span class="sd">        generate_plots (bool): If True, generate convergence and field plots. Default is False.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict or tuple: The simulation results. If eigenmode simulation is performed, returns a dictionary</span>
@@ -778,7 +786,7 @@
     <span class="n">cpw_opts_key</span><span class="p">,</span> <span class="n">cplr_opts_key</span> <span class="o">=</span> <span class="n">get_cavity_claw_options_keys</span><span class="p">(</span><span class="n">device_dict</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">cpw_opts_key</span> <span class="ow">in</span> <span class="n">device_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_options</span><span class="p">)</span>
+        <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">,</span> <span class="n">emode_options</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="n">generate_plots</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">coupler_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;ncap&quot;</span><span class="p">:</span>
             <span class="c1"># emode_df, emode_obj = run_eigenmode(design, device_dict, sim_options)</span>
             <span class="n">ncap_lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_capn_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">device_dict</span><span class="p">[</span><span class="n">cplr_opts_key</span><span class="p">],</span> <span class="n">lom_options</span><span class="p">)</span>
@@ -858,7 +866,7 @@
         <span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">cavity_frequency_GHz</span><span class="o">=</span><span class="n">f_r</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span> <span class="n">kappa_kHz</span><span class="o">=</span><span class="n">kappa</span><span class="p">,</span> <span class="n">g_MHz</span><span class="o">=</span><span class="n">gg</span><span class="p">,</span> <span class="n">anharmonicity_MHz</span><span class="o">=</span><span class="n">aa</span><span class="p">,</span> <span class="n">qubit_frequency_GHz</span><span class="o">=</span><span class="n">ff_q</span>
+        <span class="n">cavity_frequency_GHz</span><span class="o">=</span><span class="n">f_r</span> <span class="o">/</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span> <span class="n">kappa_kHz</span><span class="o">=</span><span class="n">kappa</span><span class="p">,</span> <span class="n">g_MHz</span><span class="o">=</span><span class="n">gg</span><span class="p">,</span> <span class="n">anharmonicity_MHz</span><span class="o">=</span><span class="n">aa</span><span class="p">,</span> <span class="n">qubit_frequency_GHz</span><span class="o">=</span><span class="n">ff_q</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
@@ -867,7 +875,7 @@
 
 <div class="viewcode-block" id="run_eigenmode">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.objects.run_eigenmode">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">geometry_dict</span><span class="p">,</span> <span class="n">sim_options</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">geometry_dict</span><span class="p">,</span> <span class="n">sim_options</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Runs the eigenmode simulation for a given design using Ansys HFSS.</span>
 
@@ -875,6 +883,7 @@
 <span class="sd">        design (str): The name of the design.</span>
 <span class="sd">        geometry_dict (dict): A dictionary containing the geometry options for the simulation.</span>
 <span class="sd">        sim_options (dict): A dictionary containing the simulation options.</span>
+<span class="sd">        generate_plots (bool): If True, generate convergence and field plots. Default is False.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        tuple: A tuple containing the simulation results and the EPRAnalysis object.</span>
@@ -969,7 +978,7 @@
     <span class="c1"># add_ground_strip_and_mesh(modeler, coupler, mesh_lengths=mesh_lengths)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">mesh_lengths</span><span class="p">)</span>
     <span class="n">mesh_objects</span><span class="p">(</span><span class="n">modeler</span><span class="p">,</span> <span class="n">mesh_lengths</span><span class="p">)</span>
-    <span class="n">f_rough</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">kappa</span> <span class="o">=</span> <span class="n">get_freq_Q_kappa</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">hfss</span><span class="p">)</span>
+    <span class="n">f_rough</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">kappa</span> <span class="o">=</span> <span class="n">get_freq_Q_kappa</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">hfss</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="n">generate_plots</span><span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">epra</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 

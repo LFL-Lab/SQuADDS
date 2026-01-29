@@ -630,9 +630,9 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="squadds.simulations.ansys_simulator.AnsysSimulator.design_options">
-<span class="sig-name descname"><span class="pre">design_options</span></span><a class="headerlink" href="#squadds.simulations.ansys_simulator.AnsysSimulator.design_options" title="Link to this definition">#</a></dt>
-<dd><p>The design options.</p>
+<dt class="sig sig-object py" id="squadds.simulations.ansys_simulator.AnsysSimulator.device_dict">
+<span class="sig-name descname"><span class="pre">device_dict</span></span><a class="headerlink" href="#squadds.simulations.ansys_simulator.AnsysSimulator.device_dict" title="Link to this definition">#</a></dt>
+<dd><p>The device dictionary containing design and setup options.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -664,7 +664,7 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>analyzer</strong> – The analyzer object.</p></li>
-<li><p><strong>design_options</strong> – The design options.</p></li>
+<li><p><strong>design_options</strong> (<em>dict</em>) – The device dictionary (renamed to device_dict internally).</p></li>
 </ul>
 </dd>
 </dl>
@@ -689,6 +689,23 @@
 <dd><p>Saves a screenshot of the renderer.</p>
 <p>If the EPR analysis object is not None, it saves a screenshot of the EPR analysis simulation.
 If the LOM analysis object is not None, it saves a screenshot of the LOM analysis simulation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="squadds.simulations.ansys_simulator.AnsysSimulator.get_simulation_setup">
+<span class="sig-name descname"><span class="pre">get_simulation_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/ansys_simulator.html#AnsysSimulator.get_simulation_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.ansys_simulator.AnsysSimulator.get_simulation_setup" title="Link to this definition">#</a></dt>
+<dd><p>Displays the current simulation setup parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>str</em>) – Which setup to display. Options: “all”, “qubit”, “cavity”, “coupler”, “generic”.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary containing the requested setup(s).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -720,20 +737,21 @@ None</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="squadds.simulations.ansys_simulator.AnsysSimulator.simulate">
-<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/ansys_simulator.html#AnsysSimulator.simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.ansys_simulator.AnsysSimulator.simulate" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_async</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/ansys_simulator.html#AnsysSimulator.simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.ansys_simulator.AnsysSimulator.simulate" title="Link to this definition">#</a></dt>
 <dd><p>Simulates the device based on the provided device dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>device_dict</strong> (<em>dict</em>) – A dictionary containing the device design options and setup.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>device_dict</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary containing the device design options and setup.
+If None, uses the internally stored device_dict.</p></li>
+<li><p><strong>run_async</strong> (<em>bool</em>) – If True, runs the simulation asynchronously.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The simulation results.</p>
+<dd class="field-even"><p>The simulation results or a Future object.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pandas.DataFrame</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>None</strong> – </p>
+<dd class="field-odd"><p>pandas.DataFrame or concurrent.futures.Future</p>
 </dd>
 </dl>
 </dd></dl>
@@ -743,17 +761,14 @@ None</p>
 <span class="sig-name descname"><span class="pre">sweep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sweep_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emode_setup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lom_setup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/ansys_simulator.html#AnsysSimulator.sweep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.ansys_simulator.AnsysSimulator.sweep" title="Link to this definition">#</a></dt>
 <dd><p>Sweeps the device based on the provided sweep dictionary.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>sweep_dict</strong> (<em>dict</em>) – A dictionary containing the sweep options.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The sweep results.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The sweep results.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pandas.DataFrame</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pandas.DataFrame</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>None</strong> – </p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong> – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -777,6 +792,39 @@ None</p>
 <dd class="field-odd"><p>results</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="squadds.simulations.ansys_simulator.AnsysSimulator.update_design_parameters">
+<span class="sig-name descname"><span class="pre">update_design_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/ansys_simulator.html#AnsysSimulator.update_design_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.ansys_simulator.AnsysSimulator.update_design_parameters" title="Link to this definition">#</a></dt>
+<dd><p>Updates the geometry design parameters in the stored device dictionary.
+Smartly searches for the keys in ‘design_options’, ‘design_options_qubit’, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – Key-value pairs of design parameters to update (e.g., cross_length=”300um”).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="squadds.simulations.ansys_simulator.AnsysSimulator.update_simulation_setup">
+<span class="sig-name descname"><span class="pre">update_simulation_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/ansys_simulator.html#AnsysSimulator.update_simulation_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.ansys_simulator.AnsysSimulator.update_simulation_setup" title="Link to this definition">#</a></dt>
+<dd><p>Updates the simulation setup parameters in the stored device dictionary.
+Intelligently maps targets to setup keys based on system type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<em>str</em>) – Which setup to update. Options: “all”, “qubit”, “cavity”, “coupler”, “generic”.</p></li>
+<li><p><strong>**kwargs</strong> – Key-value pairs of parameters to update (e.g., max_passes=10).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="squadds.simulations.ansys_simulator.AnsysSimulator.wait_for_all">
+<span class="sig-name descname"><span class="pre">wait_for_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/ansys_simulator.html#AnsysSimulator.wait_for_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.ansys_simulator.AnsysSimulator.wait_for_all" title="Link to this definition">#</a></dt>
+<dd><p>Waits for all submitted async simulations to complete.</p>
 </dd></dl>
 
 </dd></dl>
@@ -908,7 +956,7 @@ None</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.simulations.objects.run_eigenmode">
-<span class="sig-prename descclassname"><span class="pre">squadds.simulations.objects.</span></span><span class="sig-name descname"><span class="pre">run_eigenmode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_options</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/objects.html#run_eigenmode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.objects.run_eigenmode" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">squadds.simulations.objects.</span></span><span class="sig-name descname"><span class="pre">run_eigenmode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/objects.html#run_eigenmode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.objects.run_eigenmode" title="Link to this definition">#</a></dt>
 <dd><p>Runs the eigenmode simulation for a given design using Ansys HFSS.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -916,6 +964,7 @@ None</p>
 <li><p><strong>design</strong> (<em>str</em>) – The name of the design.</p></li>
 <li><p><strong>geometry_dict</strong> (<em>dict</em>) – A dictionary containing the geometry options for the simulation.</p></li>
 <li><p><strong>sim_options</strong> (<em>dict</em>) – A dictionary containing the simulation options.</p></li>
+<li><p><strong>generate_plots</strong> (<em>bool</em>) – If True, generate convergence and field plots. Default is False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1038,7 +1087,7 @@ Saves each sweep iteration to a JSON file with the specified filename.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.simulations.objects.simulate_single_design">
-<span class="sig-prename descclassname"><span class="pre">squadds.simulations.objects.</span></span><span class="sig-name descname"><span class="pre">simulate_single_design</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emode_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lom_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupler_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CLT'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/objects.html#simulate_single_design"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.objects.simulate_single_design" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">squadds.simulations.objects.</span></span><span class="sig-name descname"><span class="pre">simulate_single_design</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emode_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lom_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupler_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CLT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/objects.html#simulate_single_design"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.objects.simulate_single_design" title="Link to this definition">#</a></dt>
 <dd><p>Simulates a single design using the provided parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1049,6 +1098,7 @@ Saves each sweep iteration to a JSON file with the specified filename.</p>
 <li><p><strong>lom_options</strong> (<em>dict</em>) – A dictionary containing the LOM simulation options.</p></li>
 <li><p><strong>coupler_type</strong> (<em>str</em>) – The type of coupler to be used.</p></li>
 <li><p><strong>sim_options</strong> (<em>dict</em>) – A dictionary containing simulation options.</p></li>
+<li><p><strong>generate_plots</strong> (<em>bool</em>) – If True, generate convergence and field plots. Default is False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1064,7 +1114,7 @@ LOM dataframe and LOM object.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.simulations.objects.simulate_whole_device">
-<span class="sig-prename descclassname"><span class="pre">squadds.simulations.objects.</span></span><span class="sig-name descname"><span class="pre">simulate_whole_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eigenmode_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LOM_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">open_gui</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/objects.html#simulate_whole_device"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.objects.simulate_whole_device" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">squadds.simulations.objects.</span></span><span class="sig-name descname"><span class="pre">simulate_whole_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eigenmode_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LOM_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">open_gui</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/objects.html#simulate_whole_device"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.objects.simulate_whole_device" title="Link to this definition">#</a></dt>
 <dd><p>Simulates the whole device by running eigenmode and LOM simulations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1075,6 +1125,7 @@ LOM dataframe and LOM object.</p>
 <li><p><strong>LOM_options</strong> (<em>dict</em>) – Dictionary containing LOM setup options.</p></li>
 <li><p><strong>eigenmode_options</strong> (<em>dict</em>) – Dictionary containing eigenmode setup options.</p></li>
 <li><p><strong>open_gui</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the Metal GUI is opened. Default is False.</p></li>
+<li><p><strong>generate_plots</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, generate convergence and field plots. Default is False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1547,10 +1598,15 @@ of the elements in the input lists.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The cavity linewidth (kappa) in kHz.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing (f_est, kappa).</dt><dd><p>f_est (float): The estimated frequency in GHz.
+kappa (float): The cavity linewidth (kappa) in kHz.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p>tuple</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1603,13 +1659,14 @@ Dict[str, float]: A dictionary representing the bounding box with keys ‘min_x�
 
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.simulations.utils.get_freq">
-<span class="sig-prename descclassname"><span class="pre">squadds.simulations.utils.</span></span><span class="sig-name descname"><span class="pre">get_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_hfss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/utils.html#get_freq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.utils.get_freq" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">squadds.simulations.utils.</span></span><span class="sig-name descname"><span class="pre">get_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_hfss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/utils.html#get_freq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.utils.get_freq" title="Link to this definition">#</a></dt>
 <dd><p>Analyze the simulation, plot the results, and report the frequencies, Q, and kappa.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>epra</strong> – The EPR analysis object.</p></li>
 <li><p><strong>test_hfss</strong> – The HFSS object.</p></li>
+<li><p><strong>generate_plots</strong> – If True, generate convergence and field plots. Default is False.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1617,13 +1674,14 @@ Dict[str, float]: A dictionary representing the bounding box with keys ‘min_x�
 
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.simulations.utils.get_freq_Q_kappa">
-<span class="sig-prename descclassname"><span class="pre">squadds.simulations.utils.</span></span><span class="sig-name descname"><span class="pre">get_freq_Q_kappa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_hfss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/utils.html#get_freq_Q_kappa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.utils.get_freq_Q_kappa" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">squadds.simulations.utils.</span></span><span class="sig-name descname"><span class="pre">get_freq_Q_kappa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_hfss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/simulations/utils.html#get_freq_Q_kappa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.simulations.utils.get_freq_Q_kappa" title="Link to this definition">#</a></dt>
 <dd><p>Analyze the simulation, plot the results, and report the frequencies, Q, and kappa.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>epra</strong> – The EPR analysis object.</p></li>
 <li><p><strong>test_hfss</strong> – The HFSS object.</p></li>
+<li><p><strong>generate_plots</strong> – If True, generate convergence and field plots. Default is False.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1813,18 +1871,22 @@ Dict[str, float]: A dictionary representing the bounding box with keys ‘min_x�
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-squadds.simulations.ansys_simulator">squadds.simulations.ansys_simulator module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.analyzer"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.analyzer</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.design_options"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.design_options</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.device_dict"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.device_dict</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.lom_analysis_obj"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.lom_analysis_obj</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.epr_analysis_obj"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.epr_analysis_obj</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.design"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.design</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.gui"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.gui</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.get_design_screenshot"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.get_design_screenshot()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.get_renderer_screenshot"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.get_renderer_screenshot()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.get_simulation_setup"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.get_simulation_setup()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.get_xmon_info"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.get_xmon_info()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.plot_device"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.plot_device()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.simulate"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.simulate()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.sweep"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.sweep()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.sweep_qubit_cavity"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.sweep_qubit_cavity()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.update_design_parameters"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.update_design_parameters()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.update_simulation_setup"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.update_simulation_setup()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.simulations.ansys_simulator.AnsysSimulator.wait_for_all"><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.wait_for_all()</span></code></a></li>
 </ul>
 </li>
 </ul>

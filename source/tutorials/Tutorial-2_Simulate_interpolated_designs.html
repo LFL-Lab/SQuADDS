@@ -610,7 +610,7 @@
 <p>In this tutorial we will learn how to simulate designs obtained from the SQuADDS Database. We will be using <strong>Ansys HFSS</strong> as the simulator backend in this tutorial.</p>
 <p><strong>Warning: This tutorial will not run on Mac OS since Ansys HFSS is not available on Mac</strong></p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
@@ -734,7 +734,7 @@
 <p>Once you have the target design (in this case in Qiskit Metal format), you can then simulate it in whichever application you choose. However, we provide a native API to make it easier to get started with simulation on Ansys HFSS (support for AWS Palace will be provided hopefully in the near future!).</p>
 <p>We use the <code class="docutils literal notranslate"><span class="pre">AnsysSimulator</span></code> class to run simulations:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnsysSimulator</span>
@@ -787,6 +787,75 @@
 </pre></div>
 </div>
 </div>
+<section id="Updating-Simulation-Setup-Parameters">
+<h3>Updating Simulation Setup Parameters<a class="headerlink" href="#Updating-Simulation-Setup-Parameters" title="Link to this heading">#</a></h3>
+<p>Before running the simulation, you can easily update simulation hyperparameters using the new <code class="docutils literal notranslate"><span class="pre">update_simulation_setup()</span></code> API. This method intelligently maps your updates to the correct setup dictionary based on the system type.</p>
+<p>For <strong>single-component systems</strong> (like our TransmonCross qubit), use <code class="docutils literal notranslate"><span class="pre">target=&quot;generic&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">target=&quot;all&quot;</span></code> to update the LOM setup parameters:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example: Increase simulation accuracy for this qubit</span>
+<span class="n">ansys_simulator</span><span class="o">.</span><span class="n">update_simulation_setup</span><span class="p">(</span>
+    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;generic&quot;</span><span class="p">,</span>  <span class="c1"># For single-component systems</span>
+    <span class="n">max_passes</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>     <span class="c1"># Increase max passes for better convergence</span>
+    <span class="n">min_converged</span><span class="o">=</span><span class="mi">2</span>    <span class="c1"># Require more converged passes</span>
+<span class="p">)</span>
+
+<span class="c1"># The simulator will print what was updated</span>
+<span class="c1"># You can also update multiple parameters at once</span>
+</pre></div>
+</div>
+</div>
+<section id="Viewing-Current-Setup">
+<h4>Viewing Current Setup<a class="headerlink" href="#Viewing-Current-Setup" title="Link to this heading">#</a></h4>
+<p>You can view the current simulation setup parameters at any time using <code class="docutils literal notranslate"><span class="pre">get_simulation_setup()</span></code>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># View the current setup (displays in a formatted table)</span>
+<span class="n">ansys_simulator</span><span class="o">.</span><span class="n">get_simulation_setup</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="s2">&quot;generic&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>For <strong>coupled systems</strong> (qubit + cavity), the API is even more powerful. You can target specific simulations:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">target=&quot;qubit&quot;</span></code> - Updates the qubit LOM setup</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">target=&quot;cavity&quot;</span></code> - Updates the cavity eigenmode setup</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">target=&quot;coupler&quot;</span></code> - Updates the coupler LOM setup (for half-wave resonators with NCap)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">target=&quot;all&quot;</span></code> - Updates all available setups</p></li>
+</ul>
+<p>Example for a coupled system (you’ll see this in action later in the tutorial):</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example for coupled qubit-cavity systems (not run here)</span>
+<span class="c1"># ansys_simulator.update_simulation_setup(target=&quot;qubit&quot;, max_passes=15)</span>
+<span class="c1"># ansys_simulator.update_simulation_setup(target=&quot;cavity&quot;, min_converged=3)</span>
+<span class="c1"># ansys_simulator.update_simulation_setup(target=&quot;coupler&quot;, freq_ghz=5.0)</span>
+<span class="c1"># ansys_simulator.update_simulation_setup(target=&quot;all&quot;, percent_error=0.05)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Viewing-Current-Setups">
+<h4>Viewing Current Setups<a class="headerlink" href="#Viewing-Current-Setups" title="Link to this heading">#</a></h4>
+<p>For coupled systems, you can view all setups or specific ones:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># View all setups (qubit, cavity, and coupler if available)</span>
+<span class="n">ansys_simulator</span><span class="o">.</span><span class="n">get_simulation_setup</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+
+<span class="c1"># Or view a specific setup</span>
+<span class="c1"># ansys_simulator.get_simulation_setup(target=&quot;qubit&quot;)</span>
+<span class="c1"># ansys_simulator.get_simulation_setup(target=&quot;cavity&quot;)</span>
+</pre></div>
+</div>
+</div>
 <p>Then, we simulate our device with Ansys HFSS. In this case, we are simulating a <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> object to get its corresponding capacitance matrix.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
@@ -823,6 +892,8 @@
 </pre></div>
 </div>
 </div>
+</section>
+</section>
 <section id="Extracting-the-data-needed-for-contributing-to-the-dataset">
 <h3>Extracting the data needed for contributing to the dataset<a class="headerlink" href="#Extracting-the-data-needed-for-contributing-to-the-dataset" title="Link to this heading">#</a></h3>
 <p>Suppose that we wanted to contribute this “new” design and simulation results to <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code>.</p>
@@ -904,7 +975,7 @@
 <h2>Simulating an Interpolated Qubit + Cavity device<a class="headerlink" href="#Simulating-an-Interpolated-Qubit-+-Cavity-device" title="Link to this heading">#</a></h2>
 <p>This time, we look for a complete interpolated device, which includes a TransmonCross object coupled to a RouteMeander CPW and CoupledLineTee, as in Tutorial 1 - which does not exist in the simulation database.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span><span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
@@ -918,7 +989,7 @@
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -961,6 +1032,37 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ansys_simulator</span> <span class="o">=</span> <span class="n">AnsysSimulator</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">device_interp</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Updating-Setup-for-Coupled-Systems">
+<h3>Updating Setup for Coupled Systems<a class="headerlink" href="#Updating-Setup-for-Coupled-Systems" title="Link to this heading">#</a></h3>
+<p>For this qubit-cavity coupled system, we can now update simulation parameters for each component independently. This is especially useful when you need different accuracy levels for different simulations:</p>
+<ul class="simple">
+<li><p>The <strong>qubit</strong> simulation (LOM) might need more passes for accurate capacitance extraction</p></li>
+<li><p>The <strong>cavity</strong> simulation (Eigenmode) might need tighter convergence for frequency accuracy</p></li>
+<li><p>The <strong>coupler</strong> simulation (for half-wave resonators) can have its own settings</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Update qubit LOM simulation for higher accuracy</span>
+<span class="n">ansys_simulator</span><span class="o">.</span><span class="n">update_simulation_setup</span><span class="p">(</span>
+    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span>
+    <span class="n">max_passes</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">min_converged_passes</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+
+<span class="c1"># Update cavity eigenmode simulation</span>
+<span class="n">ansys_simulator</span><span class="o">.</span><span class="n">update_simulation_setup</span><span class="p">(</span>
+    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;cavity&quot;</span><span class="p">,</span>
+    <span class="n">max_delta_f</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>  <span class="c1"># Tighter frequency convergence</span>
+    <span class="n">min_converged</span><span class="o">=</span><span class="mi">3</span>
+<span class="p">)</span>
+
+<span class="c1"># Or update all simulations at once</span>
+<span class="c1"># ansys_simulator.update_simulation_setup(target=&quot;all&quot;, percent_error=0.05)</span>
 </pre></div>
 </div>
 </div>
@@ -1053,6 +1155,7 @@
 </pre></div>
 </div>
 </div>
+</section>
 </section>
 <section id="Simulating-an-Interdigitated-Capacitor-Device">
 <h2>Simulating an Interdigitated Capacitor Device<a class="headerlink" href="#Simulating-an-Interdigitated-Capacitor-Device" title="Link to this heading">#</a></h2>
@@ -1241,10 +1344,18 @@
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Capacitance-Matrix-Simulation-for-Qubits">Capacitance Matrix Simulation for Qubits</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Simulate-the-Target-Design">Simulate the Target Design</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Updating-Simulation-Setup-Parameters">Updating Simulation Setup Parameters</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Viewing-Current-Setup">Viewing Current Setup</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Viewing-Current-Setups">Viewing Current Setups</a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Extracting-the-data-needed-for-contributing-to-the-dataset">Extracting the data needed for contributing to the dataset</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Simulating-an-Interpolated-Qubit-+-Cavity-device">Simulating an Interpolated Qubit + Cavity device</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Simulating-an-Interpolated-Qubit-+-Cavity-device">Simulating an Interpolated Qubit + Cavity device</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Updating-Setup-for-Coupled-Systems">Updating Setup for Coupled Systems</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Simulating-an-Interdigitated-Capacitor-Device">Simulating an Interdigitated Capacitor Device</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#License">License</a></li>
 </ul>
