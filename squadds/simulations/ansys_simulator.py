@@ -111,47 +111,56 @@ class AnsysSimulator:
                 stacklevel=2,
             )
 
-    def update_simulation_setup(self, **kwargs):
+    def update_simulation_setup(self, target="all", **kwargs):
         """
         Updates the simulation setup parameters in the stored device dictionary.
-        Smartly searches for the keys in 'setup', 'setup_qubit', or 'setup_cavity_claw'.
+        Intelligently maps targets to setup keys based on system type.
 
         Args:
+            target (str): Which setup to update. Options: "all", "qubit", "cavity", "coupler", "generic".
             **kwargs: Key-value pairs of parameters to update (e.g., max_passes=10).
         """
-        targets = []
-        if "setup" in self.device_dict:
-            targets.append(self.device_dict["setup"])
-        if "setup_qubit" in self.device_dict:
-            targets.append(self.device_dict["setup_qubit"])
-        if "setup_cavity_claw" in self.device_dict:
-            targets.append(self.device_dict["setup_cavity_claw"])
+        # Get the appropriate setup keys based on target and system type
+        target_keys = self._get_setup_targets(target)
+
+        if not target_keys:
+            self.console.print(f"[yellow]Warning: target '{target}' is not valid for this system.[/yellow]")
+            return
 
         updated_keys = []
-        for key, value in kwargs.items():
-            found = False
-            for target in targets:
-                # We update if the key exists OR if it's a common HFSS setup key we want to force add
-                # For now, let's update if key is in target, or if target looks like a setup dict
-                if key in target:
-                    target[key] = value
-                    found = True
-                # If invalid key, maybe we should just add it? Setup dicts in Metal are flexible.
-                # Let's assume user knows what they are doing and add it if not found,
-                # but to which one?
-                # If not found in any, we add to ALL targets (risky) or just print warning.
-                # Better strategy: Update existing keys, if key doesn't exist, assume it applies to all setups?
-
-            if not found:
-                # If key not found in any existing dict, add to all (e.g. adding a new param)
-                for target in targets:
-                    target[key] = value
-                self.console.print(f"[dim]Added new setup param '{key}' to all setup dicts.[/dim]")
-            else:
+        for key in target_keys:
+            if key in self.device_dict:
+                self.device_dict[key].update(kwargs)
                 updated_keys.append(key)
 
         if updated_keys:
-            self.console.print(f"[green]Updated simulation setup params: {updated_keys}[/green]")
+            self.console.print(f"[green]Updated {', '.join(updated_keys)}: {list(kwargs.keys())}[/green]")
+
+    def _get_setup_targets(self, target):
+        """
+        Returns list of dict keys to update based on target and system type.
+
+        Args:
+            target (str): The target setup to update.
+
+        Returns:
+            list: List of setup dictionary keys to update.
+        """
+        if isinstance(self.analyzer.selected_system, list):
+            # Coupled system (qubit + cavity)
+            mapping = {
+                "qubit": ["setup_qubit"],
+                "cavity": ["setup_cavity"],
+                "coupler": ["setup_coupler"],
+                "all": ["setup_qubit", "setup_cavity", "setup_coupler"],
+            }
+        else:
+            # Single system
+            mapping = {"generic": ["setup"], "all": ["setup"]}
+
+        # Return the keys, filtering out any that don't exist in device_dict
+        keys = mapping.get(target, [])
+        return [k for k in keys if k in self.device_dict]
 
     def update_design_parameters(self, **kwargs):
         """
@@ -302,17 +311,15 @@ class AnsysSimulator:
                 self.console.print(f"  [cyan]Setup:[/cyan] {device_dict['setup']}")
             if "setup_qubit" in device_dict:
                 self.console.print(f"  [cyan]Qubit Setup:[/cyan] {device_dict['setup_qubit']}")
-            if "setup_cavity_claw" in device_dict:
-                self.console.print(f"  [cyan]Cavity Setup:[/cyan] {device_dict['setup_cavity_claw']}")
+            if "setup_cavity" in device_dict:
+                self.console.print(f"  [cyan]Cavity Setup:[/cyan] {device_dict['setup_cavity']}")
 
             if isinstance(self.analyzer.selected_system, list):  # have a qubit_cavity object
                 self.geom_dict = Dict(
                     qubit_geoms=device_dict["design_options_qubit"],
                     cavity_geoms=device_dict["design_options_cavity_claw"],
                 )
-                self.setup_dict = Dict(
-                    qubit_setup=device_dict["setup_qubit"], cavity_setup=device_dict["setup_cavity_claw"]
-                )
+                self.setup_dict = Dict(qubit_setup=device_dict["setup_qubit"], cavity_setup=device_dict["setup_cavity"])
                 return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(
                     design=self.design,
                     device_dict=device_dict,

@@ -1243,6 +1243,30 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             )
             self.cavity_df = self.read_parquet_file(self.hwc_fname)
             df = self.read_parquet_file(self.merged_df_hwc_fname)
+
+            # Add setup_coupler from NCap dataset
+            # NCap dataset doesn't have sim_options column, but has setup params directly in the row
+            if not self.coupler_df.empty:
+                # Extract setup parameters from first NCap entry
+                ncap_row = self.coupler_df.iloc[0]
+                setup_coupler = {
+                    "name": ncap_row.get("name", "lom_setup"),
+                    "reuse_selected_design": ncap_row.get("reuse_selected_design", False),
+                    "reuse_setup": ncap_row.get("reuse_setup", False),
+                    "freq_ghz": ncap_row.get("freq_ghz", 5.0),
+                    "save_fields": ncap_row.get("save_fields", False),
+                    "enabled": ncap_row.get("enabled", True),
+                    "max_passes": ncap_row.get("max_passes", 15),
+                    "min_passes": ncap_row.get("min_passes", 2),
+                    "min_converged_passes": ncap_row.get("min_converged_passes", 2),
+                    "percent_error": ncap_row.get("percent_error", 0.1),
+                    "percent_refinement": ncap_row.get("percent_refinement", 30),
+                    "auto_increase_solution_order": ncap_row.get("auto_increase_solution_order", True),
+                    "solution_order": ncap_row.get("solution_order", "Medium"),
+                    "solver_type": ncap_row.get("solver_type", "Iterative"),
+                }
+                df["setup_coupler"] = [setup_coupler] * len(df)
+
             return df
 
         df = self.create_qubit_cavity_df(
