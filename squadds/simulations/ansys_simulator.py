@@ -376,7 +376,7 @@ class AnsysSimulator:
             if "setup_qubit" in device_dict:
                 self.console.print(f"  [cyan]Qubit Setup:[/cyan] {device_dict['setup_qubit']}")
             if "setup_cavity_claw" in device_dict:
-                self.console.print(f"  [cyan]Cavity Setup:[/cyan] {device_dict['setup_cavity']}")
+                self.console.print(f"  [cyan]Cavity Setup:[/cyan] {device_dict['setup_cavity_claw']}")
 
             if isinstance(self.analyzer.selected_system, list):  # have a qubit_cavity object
                 self.geom_dict = Dict(
