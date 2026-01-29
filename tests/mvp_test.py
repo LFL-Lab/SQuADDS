@@ -112,7 +112,7 @@ hwc_device = hwc_results_setup.iloc[0]
 
 # Verify all setup keys are present
 setup_keys = [k for k in hwc_device.keys() if "setup" in k.lower()]
-print(f"\n✓ Setup keys in device: {setup_keys}")
+print(f"\n[PASSED] Setup keys in device: {setup_keys}")
 assert "setup_qubit" in setup_keys, "Missing setup_qubit!"
 assert "setup_cavity_claw" in setup_keys, "Missing setup_cavity_claw!"
 assert "setup_coupler" in setup_keys, "Missing setup_coupler!"
@@ -120,13 +120,13 @@ assert "setup_coupler" in setup_keys, "Missing setup_coupler!"
 # Test AnsysSimulator setup API
 hwc_sim = AnsysSimulator(analyzer_setup, hwc_device)
 
-print("\n✓ Testing get_simulation_setup(target='all')...")
+print("\n[PASSED] Testing get_simulation_setup(target='all')...")
 all_setups = hwc_sim.get_simulation_setup(target="all")
 assert "setup_qubit" in all_setups, "get_simulation_setup missing setup_qubit!"
 assert "setup_cavity_claw" in all_setups, "get_simulation_setup missing setup_cavity_claw!"
 assert "setup_coupler" in all_setups, "get_simulation_setup missing setup_coupler!"
 
-print("\n✓ Testing get_simulation_setup(target='cavity_claw')...")
+print("\n[PASSED] Testing get_simulation_setup(target='cavity_claw')...")
 cavity_setup = hwc_sim.get_simulation_setup(target="cavity_claw")
 assert "setup_cavity_claw" in cavity_setup, "cavity_claw target failed!"
 
