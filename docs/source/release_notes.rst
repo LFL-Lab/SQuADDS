@@ -31,10 +31,19 @@ Version 0.4.3 (2026-01-28)
 - Added `wait_for_all()` helper to synchronize async simulations.
 - **Improved Simulation UX:**
     - `AnsysSimulator` is now stateful (stores `device_dict`).
-    - Added `update_simulation_setup(**kwargs)` for easy hyperparameter updates.
+    - Added `update_simulation_setup(target, **kwargs)` for granular hyperparameter updates:
+        - Supports `target="qubit"`, `"cavity_claw"`, `"coupler"`, `"generic"`, or `"all"`.
+        - Intelligently maps targets to correct setup dictionaries based on system type.
+        - Interactive confirmation for unknown parameters to prevent typos.
+    - Added `get_simulation_setup(target)` to view current setup parameters in formatted tables.
     - Added `update_design_parameters(**kwargs)` for direct geometry modification.
     - `simulate()` now uses valid internal state if no argument is provided.
     - **Transparency:** Prints simulation hyperparameters securely before execution.
+    - **Half-Wave Cavity Support:** All three setups (`setup_qubit`, `setup_cavity_claw`, `setup_coupler`) now properly included in HWC dataframes.
+
+**Known Issues**
+
+- **Async Simulation Limitation:** `simulate(run_async=True)` may fail with "signal only works in main thread" error due to Ansys/Qiskit Metal limitations. Use `run_async=False` (default) for reliable simulations.
 
 ---
 

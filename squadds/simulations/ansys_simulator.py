@@ -369,6 +369,33 @@ class AnsysSimulator:
         """Helper method to run the actual simulation logic."""
         return_df = {}
         try:
+            # Print simulation plan
+            self.console.print("\n[bold blue]═══ Simulation Plan ═══[/bold blue]")
+
+            if isinstance(self.analyzer.selected_system, list):
+                # Coupled system
+                sim_count = 2  # Eigenmode + Qubit LOM
+                self.console.print("[cyan]System Type:[/cyan] Coupled (Qubit + Cavity)")
+                self.console.print("[cyan]Simulation Types:[/cyan]")
+                self.console.print("  1. [green]Eigenmode[/green] on Cavity")
+                self.console.print("  2. [green]LOM (Capacitance)[/green] on Qubit")
+
+                # Check for half-wave coupler
+                if "setup_coupler" in device_dict:
+                    sim_count = 3
+                    self.console.print("  3. [green]LOM (Capacitance)[/green] on Coupler (NCap)")
+                    self.console.print(f"[cyan]Total Simulations:[/cyan] {sim_count} (Half-Wave Resonator)")
+                else:
+                    self.console.print(f"[cyan]Total Simulations:[/cyan] {sim_count}")
+            else:
+                # Single component
+                self.console.print("[cyan]System Type:[/cyan] Single Component")
+                self.console.print("[cyan]Total Simulations:[/cyan] 1")
+                self.console.print("[cyan]Simulation Types:[/cyan]")
+                self.console.print("  1. [green]LOM (Capacitance)[/green]")
+
+            self.console.print("[bold blue]═══════════════════════[/bold blue]\n")
+
             # Print simulation parameters for verification
             self.console.print("[bold blue]Simulation Parameters:[/bold blue]")
             if "setup" in device_dict:
@@ -377,6 +404,8 @@ class AnsysSimulator:
                 self.console.print(f"  [cyan]Qubit Setup:[/cyan] {device_dict['setup_qubit']}")
             if "setup_cavity_claw" in device_dict:
                 self.console.print(f"  [cyan]Cavity Setup:[/cyan] {device_dict['setup_cavity_claw']}")
+            if "setup_coupler" in device_dict:
+                self.console.print(f"  [cyan]Coupler Setup:[/cyan] {device_dict['setup_coupler']}")
 
             if isinstance(self.analyzer.selected_system, list):  # have a qubit_cavity object
                 self.geom_dict = Dict(
