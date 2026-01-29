@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.calcs.transmon_cross &#8212; SQuADDS v0.4.2</title>
+    <title>squadds.calcs.transmon_cross &#8212; SQuADDS v0.4.3</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=ff822928"></script>
+    <script src="../../../_static/documentation_options.js?v=5bfaad31"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -588,9 +588,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span><span class="p">,</span> <span class="n">prange</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyEPR.calcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convert</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Planck</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">hbar</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">brentq</span>
@@ -706,7 +704,7 @@
 
 <div class="viewcode-block" id="g_from_cap_matrix_numba">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.g_from_cap_matrix_numba">[docs]</a>
-<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">g_from_cap_matrix_numba</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">C_c</span><span class="p">,</span> <span class="n">EJ</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate coupling strength &#39;g&#39; using the capacitance matrix formalism (numba-accelerated).</span>
@@ -762,6 +760,83 @@
 
     <span class="c1"># Convert from Joules to MHz: g_MHz = g_J / hbar / (2*pi) / 1e6</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">g_J</span> <span class="o">/</span> <span class="n">hbar</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-6</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>  <span class="c1"># MHz</span></div>
+
+
+
+<div class="viewcode-block" id="g_from_cap_matrix_vectorized">
+<a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.g_from_cap_matrix_vectorized">[docs]</a>
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">g_from_cap_matrix_vectorized</span><span class="p">(</span><span class="n">cross_to_ground_arr</span><span class="p">,</span> <span class="n">cross_to_claw_arr</span><span class="p">,</span> <span class="n">EJ_arr</span><span class="p">,</span> <span class="n">cavity_freq_arr</span><span class="p">,</span> <span class="n">res_type_val</span><span class="p">,</span> <span class="n">Z0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vectorized calculation of g for arrays of inputs (numba-accelerated).</span>
+<span class="sd">    Much faster than looping in Python.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cross_to_ground_arr: Array of C_ground (fF)</span>
+<span class="sd">        cross_to_claw_arr: Array of C_coupling (fF)</span>
+<span class="sd">        EJ_arr: Array of EJ (GHz)</span>
+<span class="sd">        cavity_freq_arr: Array of resonator freq (GHz)</span>
+<span class="sd">        res_type_val: Integer (2 for half, 4 for quarter)</span>
+<span class="sd">        Z0: Characteristic impedance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cross_to_ground_arr</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="c1"># Constants</span>
+    <span class="n">hbar_val</span> <span class="o">=</span> <span class="mf">1.0545718e-34</span>
+    <span class="n">e_val</span> <span class="o">=</span> <span class="mf">1.60217662e-19</span>
+    <span class="n">pi_val</span> <span class="o">=</span> <span class="mf">3.141592653589793</span>
+
+    <span class="c1"># Common factors</span>
+    <span class="n">factor1</span> <span class="o">=</span> <span class="n">hbar_val</span> <span class="o">*</span> <span class="n">e_val</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">C_Q_fF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">cross_to_ground_arr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">C_g_fF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">cross_to_claw_arr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1"># Convert to SI units (F)</span>
+        <span class="n">C_Q</span> <span class="o">=</span> <span class="n">C_Q_fF</span> <span class="o">*</span> <span class="mf">1e-15</span>
+        <span class="n">C_g</span> <span class="o">=</span> <span class="n">C_g_fF</span> <span class="o">*</span> <span class="mf">1e-15</span>
+        <span class="n">C_q_total</span> <span class="o">=</span> <span class="n">C_Q</span> <span class="o">+</span> <span class="n">C_g</span>
+
+        <span class="n">f_r</span> <span class="o">=</span> <span class="n">cavity_freq_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">omega_r</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi_val</span> <span class="o">*</span> <span class="n">f_r</span> <span class="o">*</span> <span class="mf">1e9</span>
+
+        <span class="c1"># Resonator capacitance: C_r = pi / (N * omega_r * Z0)</span>
+        <span class="n">C_r</span> <span class="o">=</span> <span class="n">pi_val</span> <span class="o">/</span> <span class="p">(</span><span class="n">res_type_val</span> <span class="o">*</span> <span class="n">omega_r</span> <span class="o">*</span> <span class="n">Z0</span><span class="p">)</span>
+
+        <span class="c1"># Capacitance matrix determinant</span>
+        <span class="n">det_C</span> <span class="o">=</span> <span class="n">C_q_total</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_r</span> <span class="o">+</span> <span class="n">C_g</span><span class="p">)</span> <span class="o">-</span> <span class="n">C_g</span><span class="o">**</span><span class="mi">2</span>
+
+        <span class="c1"># Effective qubit capacitance</span>
+        <span class="n">C_q_eff</span> <span class="o">=</span> <span class="n">det_C</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_r</span> <span class="o">+</span> <span class="n">C_g</span><span class="p">)</span>
+
+        <span class="c1"># Charging energy from C_q_eff (inlined Ec_from_Cs logic for speed)</span>
+        <span class="c1"># Ec_GHz = e^2 / (2 * C_q_eff) / h / 1e9</span>
+        <span class="c1"># But we acturally use C_q_eff * 1e15 (fF) passed to Ec_from_Cs</span>
+        <span class="c1"># Let&#39;s reuse the Ec_from_Cs function since it&#39;s jitted</span>
+        <span class="n">C_q_eff_fF</span> <span class="o">=</span> <span class="n">C_q_eff</span> <span class="o">*</span> <span class="mf">1e15</span>
+        <span class="c1"># Manual inline of Ec_from_Cs(C_q_eff_fF)</span>
+        <span class="n">Cs_SI</span> <span class="o">=</span> <span class="n">C_q_eff_fF</span> <span class="o">*</span> <span class="mf">1e-15</span>
+        <span class="n">Ec_Joules</span> <span class="o">=</span> <span class="p">(</span><span class="n">e_val</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Cs_SI</span><span class="p">)</span>
+        <span class="n">Ec_Hz</span> <span class="o">=</span> <span class="n">Ec_Joules</span> <span class="o">/</span> <span class="mf">6.62607015e-34</span>
+        <span class="n">EC</span> <span class="o">=</span> <span class="n">Ec_Hz</span> <span class="o">*</span> <span class="mf">1e-9</span>
+
+        <span class="n">EJ</span> <span class="o">=</span> <span class="n">EJ_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># g calculation</span>
+        <span class="c1"># g [J] = (C_g / sqrt(C_q_total)) * sqrt(hbar * omega_r * e^2 / det(C)) * (EJ / (8 * EC))^(1/4)</span>
+        <span class="n">term1</span> <span class="o">=</span> <span class="n">C_g</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">C_q_total</span><span class="p">)</span>
+        <span class="n">term2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">factor1</span> <span class="o">*</span> <span class="n">omega_r</span><span class="p">)</span> <span class="o">/</span> <span class="n">det_C</span><span class="p">)</span>
+        <span class="n">term3</span> <span class="o">=</span> <span class="p">(</span><span class="n">EJ</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">EC</span><span class="p">))</span> <span class="o">**</span> <span class="mf">0.25</span>
+
+        <span class="n">g_J</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">*</span> <span class="n">term2</span> <span class="o">*</span> <span class="n">term3</span>
+
+        <span class="c1"># Convert to MHz</span>
+        <span class="n">g_MHz</span> <span class="o">=</span> <span class="p">(</span><span class="n">g_J</span> <span class="o">/</span> <span class="n">hbar_val</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-6</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi_val</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">g_MHz</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
 
 
 
@@ -951,7 +1026,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Could not find a valid coupling capacitance for target g=</span><span class="si">{</span><span class="n">g</span><span class="si">}</span><span class="s2"> MHz. &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;The target coupling may be outside the achievable range for the given qubit parameters.&quot;</span>
-            <span class="p">)</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ValueError</span>
 
         <span class="n">C_c_fF</span> <span class="o">=</span> <span class="n">C_c_F</span> <span class="o">*</span> <span class="mf">1e15</span>  <span class="c1"># Convert to fF</span>
         <span class="n">EJ_EC_ratio</span> <span class="o">=</span> <span class="n">EJ</span> <span class="o">/</span> <span class="n">EC</span>
@@ -1306,8 +1381,28 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">freq_values</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha_values</span>
 
-            <span class="c1"># Step 8: Now parallel process only the g calculation</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_process_g_only</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">num_chunks</span><span class="p">,</span> <span class="n">Z_0</span><span class="p">)</span>
+            <span class="c1"># Step 8: Calculate g using vectorized Numba function (C-speed, no parallel overhead)</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+
+            <span class="n">num_threads</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">NUMBA_NUM_THREADS</span>
+            <span class="n">mode_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;parallel (</span><span class="si">{</span><span class="n">num_threads</span><span class="si">}</span><span class="s2"> threads)&quot;</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_threads</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;serial&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Calculating g_MHz (vectorized) in </span><span class="si">{</span><span class="n">mode_str</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">res_type_val</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="o">==</span> <span class="s2">&quot;half&quot;</span> <span class="k">else</span> <span class="mi">4</span>
+
+            <span class="c1"># Prepare arrays for Numba</span>
+            <span class="n">cross_to_ground</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;cross_to_ground&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="n">cross_to_claw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;cross_to_claw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="n">EJ_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;EJ&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="n">freq_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+            <span class="c1"># Execute vectorized calculation</span>
+            <span class="n">g_values</span> <span class="o">=</span> <span class="n">g_from_cap_matrix_vectorized</span><span class="p">(</span>
+                <span class="n">cross_to_ground</span><span class="p">,</span> <span class="n">cross_to_claw</span><span class="p">,</span> <span class="n">EJ_vals</span><span class="p">,</span> <span class="n">freq_vals</span><span class="p">,</span> <span class="n">res_type_val</span><span class="p">,</span> <span class="n">Z_0</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g_values</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done calculating g_MHz.&quot;</span><span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_qubit_H_params</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
@@ -1323,103 +1418,8 @@
             <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TransmonCrossHamiltonian.add_cavity_coupled_H_params_chunk">
-<a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.add_cavity_coupled_H_params_chunk">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_cavity_coupled_H_params_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add cavity-coupled Hamiltonian parameters to the DataFrame chunk.</span>
-
-<span class="sd">        This method calculates the coupling strength &#39;g_MHz&#39; between the transmon qubit and the cavity,</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            - chunk: The DataFrame chunk to which the parameters will be added.</span>
-<span class="sd">            - Z_0: The characteristic impedance of the transmission line. Default is 50 ohms.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            - chunk: The DataFrame chunk with the added parameters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_qubit_H_params_chunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
-
-        <span class="n">cross_to_ground_values</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;cross_to_ground&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">cross_to_claw_values</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;cross_to_claw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">EJ_values</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;EJ&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">cavity_frequency_values</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-
-        <span class="n">g_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">g_from_cap_matrix_numba</span><span class="p">(</span><span class="n">ground</span><span class="p">,</span> <span class="n">claw</span><span class="p">,</span> <span class="n">ej</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="s2">&quot;half&quot;</span><span class="p">,</span> <span class="n">Z_0</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">ground</span><span class="p">,</span> <span class="n">claw</span><span class="p">,</span> <span class="n">ej</span><span class="p">,</span> <span class="n">freq</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-                    <span class="n">cross_to_ground_values</span><span class="p">,</span> <span class="n">cross_to_claw_values</span><span class="p">,</span> <span class="n">EJ_values</span><span class="p">,</span> <span class="n">cavity_frequency_values</span>
-                <span class="p">)</span>
-            <span class="p">],</span>
-            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g_values</span>
-
-        <span class="k">return</span> <span class="n">chunk</span></div>
-
-
-<div class="viewcode-block" id="TransmonCrossHamiltonian.parallel_process_dataframe">
-<a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.parallel_process_dataframe">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">parallel_process_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">num_chunks</span><span class="p">,</span> <span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Process the DataFrame in parallel.</span>
-
-<span class="sd">        This method splits the DataFrame into chunks and processes each chunk in parallel.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            - df: The DataFrame to be processed.</span>
-<span class="sd">            - num_chunks: The number of chunks to split the DataFrame into.</span>
-<span class="sd">            - Z_0: The characteristic impedance of the transmission line. Default is 50</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            - df: The DataFrame with the added parameters.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">chunks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">num_chunks</span><span class="p">)</span>
-
-        <span class="k">with</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">num_chunks</span><span class="p">)</span> <span class="k">as</span> <span class="n">parallel</span><span class="p">:</span>
-            <span class="n">results</span> <span class="o">=</span> <span class="n">parallel</span><span class="p">(</span><span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_cavity_coupled_H_params_chunk</span><span class="p">)(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">Z_0</span><span class="p">)</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_g_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate g values for a chunk (EC, EJ, freq, alpha already computed).&quot;&quot;&quot;</span>
-        <span class="n">cross_to_ground_values</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;cross_to_ground&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">cross_to_claw_values</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;cross_to_claw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">EJ_values</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;EJ&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">cavity_frequency_values</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-
-        <span class="n">g_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">g_from_cap_matrix_numba</span><span class="p">(</span><span class="n">ground</span><span class="p">,</span> <span class="n">claw</span><span class="p">,</span> <span class="n">ej</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="s2">&quot;half&quot;</span><span class="p">,</span> <span class="n">Z_0</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">ground</span><span class="p">,</span> <span class="n">claw</span><span class="p">,</span> <span class="n">ej</span><span class="p">,</span> <span class="n">freq</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-                    <span class="n">cross_to_ground_values</span><span class="p">,</span> <span class="n">cross_to_claw_values</span><span class="p">,</span> <span class="n">EJ_values</span><span class="p">,</span> <span class="n">cavity_frequency_values</span>
-                <span class="p">)</span>
-            <span class="p">],</span>
-            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g_values</span>
-        <span class="k">return</span> <span class="n">chunk</span>
-
-<div class="viewcode-block" id="TransmonCrossHamiltonian.parallel_process_g_only">
-<a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.parallel_process_g_only">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">parallel_process_g_only</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">num_chunks</span><span class="p">,</span> <span class="n">Z_0</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parallel process only the g calculation (qubit params already computed).</span>
-
-<span class="sd">        This optimized method is used when EC, EJ, qubit_frequency_GHz, and</span>
-<span class="sd">        anharmonicity_MHz are already computed in the main process.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">chunks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">num_chunks</span><span class="p">)</span>
-
-        <span class="k">with</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">num_chunks</span><span class="p">)</span> <span class="k">as</span> <span class="n">parallel</span><span class="p">:</span>
-            <span class="n">results</span> <span class="o">=</span> <span class="n">parallel</span><span class="p">(</span><span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculate_g_chunk</span><span class="p">)(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">Z_0</span><span class="p">)</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
-
+    <span class="c1"># parallel_process_g_only and intermediate chunk methods removed</span>
+    <span class="c1"># as they are replaced by vectorized implementation.</span>
 
 <div class="viewcode-block" id="TransmonCrossHamiltonian.chi">
 <a class="viewcode-back" href="../../../source/squadds.calcs.html#squadds.calcs.transmon_cross.TransmonCrossHamiltonian.chi">[docs]</a>

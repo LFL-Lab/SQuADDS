@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.simulations.objects &#8212; SQuADDS v0.4.2</title>
+    <title>squadds.simulations.objects &#8212; SQuADDS v0.4.3</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=ff822928"></script>
+    <script src="../../../_static/documentation_options.js?v=5bfaad31"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -700,7 +700,7 @@
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
     <span class="k">elif</span> <span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;ncap&quot;</span><span class="p">:</span>
-        <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">)</span>
+        <span class="n">emode_df</span><span class="p">,</span> <span class="n">emode_obj</span> <span class="o">=</span> <span class="n">run_eigenmode</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">,</span> <span class="n">eigenmode_options</span><span class="p">,</span> <span class="n">coupler_type</span><span class="o">=</span><span class="s2">&quot;ncap&quot;</span><span class="p">)</span>
         <span class="n">ncap_lom_df</span><span class="p">,</span> <span class="n">ncap_lom_obj</span> <span class="o">=</span> <span class="n">run_capn_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cavity_dict</span><span class="p">[</span><span class="n">cplr_opts_key</span><span class="p">],</span> <span class="n">LOM_options</span><span class="p">)</span>
         <span class="n">lom_df</span><span class="p">,</span> <span class="n">lom_obj</span> <span class="o">=</span> <span class="n">run_xmon_LOM</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">cross_dict</span><span class="p">,</span> <span class="n">LOM_options</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">get_sim_results</span><span class="p">(</span><span class="n">emode_df</span><span class="o">=</span><span class="n">emode_df</span><span class="p">,</span> <span class="n">lom_df</span><span class="o">=</span><span class="n">lom_df</span><span class="p">,</span> <span class="n">ncap_lom_df</span><span class="o">=</span><span class="n">ncap_lom_df</span><span class="p">)</span>
@@ -846,7 +846,8 @@
         <span class="mi">1</span> <span class="k">if</span> <span class="n">lom_df</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">][</span><span class="s2">&quot;aedt_q3d_inductance&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">1e-9</span> <span class="k">else</span> <span class="mf">1e-9</span>
     <span class="p">)</span>
     <span class="c1"># print(Lj)</span>
-    <span class="n">gg</span><span class="p">,</span> <span class="n">aa</span><span class="p">,</span> <span class="n">ff_q</span> <span class="o">=</span> <span class="n">find_g_a_fq</span><span class="p">(</span><span class="n">cross2cpw</span><span class="p">,</span> <span class="n">cross2ground</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">Lj</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">ncap_lom_df</span> <span class="o">!=</span> <span class="p">{}</span> <span class="k">else</span> <span class="mi">4</span>
+    <span class="n">gg</span><span class="p">,</span> <span class="n">aa</span><span class="p">,</span> <span class="n">ff_q</span> <span class="o">=</span> <span class="n">find_g_a_fq</span><span class="p">(</span><span class="n">cross2cpw</span><span class="p">,</span> <span class="n">cross2ground</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">Lj</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
     <span class="n">kappa</span> <span class="o">=</span> <span class="n">emode_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;kappa&quot;</span><span class="p">]</span>
     <span class="n">Q</span> <span class="o">=</span> <span class="n">emode_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">ncap_lom_df</span> <span class="o">!=</span> <span class="p">{}:</span>
@@ -912,7 +913,7 @@
     <span class="c1"># update the claw dims</span>
     <span class="n">claw_opts</span> <span class="o">=</span> <span class="n">geometry_dict</span><span class="p">[</span><span class="s2">&quot;claw_opts&quot;</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">cross_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cross_dict</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">cross_dict</span><span class="p">)</span>
         <span class="n">claw_opts</span><span class="p">[</span><span class="s2">&quot;cross_gap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cross_dict</span><span class="p">[</span><span class="s2">&quot;cross_gap&quot;</span><span class="p">]</span>
         <span class="n">claw_opts</span><span class="p">[</span><span class="s2">&quot;cross_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cross_dict</span><span class="p">[</span><span class="s2">&quot;cross_width&quot;</span><span class="p">]</span>
