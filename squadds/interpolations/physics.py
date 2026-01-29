@@ -183,7 +183,7 @@ class ScalingInterpolator(Interpolator):
                 "design_options_qubit": [qubit_design_options],
                 "design_options_cavity_claw": [cavity_design_options],
                 "setup_qubit": [closest_qubit_claw_design["setup_qubit"].iloc[0]],
-                "setup_cavity": [closest_cavity_cpw_design["setup_cavity"].iloc[0]],
+                "setup_cavity_claw": [closest_cavity_cpw_design["setup_cavity_claw"].iloc[0]],
             }
         )
 
