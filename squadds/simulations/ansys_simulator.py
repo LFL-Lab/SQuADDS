@@ -344,6 +344,18 @@ class AnsysSimulator:
             None
         """
         if run_async:
+            raise NotImplementedError(
+                "Ansys-native parallel simulation (run_async=True) is not yet implemented. "
+                "This feature will render all designs to the same Ansys project and leverage "
+                "Ansys's built-in scheduling for parallel execution. "
+                "Please use run_async=False (default) for sequential simulation. "
+                "Track progress at: https://github.com/shanto268/SQuADDS/issues"
+            )
+
+        if device_dict is None:
+            device_dict = self.device_dict
+
+        if run_async:
             self.console.print(
                 f"[bold cyan]Submitting async simulation for system: {self.analyzer.selected_system}[/bold cyan]"
             )
