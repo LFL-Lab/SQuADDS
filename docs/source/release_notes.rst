@@ -24,6 +24,12 @@ Version 0.4.3 (2026-01-28)
 - Cleaned up unused parallel processing methods and dependencies.
 - Improved code stability across operating systems (macOS, Windows, Linux).
 
+**New Features**
+
+- Added **Asynchronous Ansys Simulation** support (`simulate(..., run_async=True)`).
+- Added `rich` for beautiful, colored terminal status outputs during simulations.
+- Added `wait_for_all()` helper to synchronize async simulations.
+
 ---
 
 Version 0.4.2 (2026-01-27)

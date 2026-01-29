@@ -1,13 +1,23 @@
 # from utils import *
+import os
 import sys
 
 # warn using `warnings` if os is mac that this is not supported
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 
 import qiskit_metal as metal
 from qiskit_metal import Dict
+from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from squadds.simulations.objects import *
+from squadds.simulations.objects import (
+    QubitCavity,
+    run_qubit_cavity_sweep,
+    run_sweep,
+    simulate_single_design,
+    simulate_whole_device,
+)
 from squadds.simulations.utils import find_a_fq
 
 
@@ -82,6 +92,10 @@ class AnsysSimulator:
         self.design.overwrite_enabled = True
         self._warnings()
 
+        self.console = Console()
+        self.executor = ThreadPoolExecutor(max_workers=os.cpu_count() or 4)
+        self.futures = []
+
         print(f"selected system: {self.analyzer.selected_system}")
 
     def _warnings(self):
@@ -136,42 +150,92 @@ class AnsysSimulator:
         else:
             run_sweep(self.design, sweep_dict, emode_setup, lom_setup, filename="xmon_sweep")
 
-    def simulate(self, device_dict):
+    def simulate(self, device_dict, run_async=False):
         """
         Simulates the device based on the provided device dictionary.
 
         Args:
             device_dict (dict): A dictionary containing the device design options and setup.
+            run_async (bool): If True, runs the simulation asynchronously using a ThreadPoolExecutor.
+                              Returns the Future object. Default is False.
 
         Returns:
-            pandas.DataFrame: The simulation results.
+            pandas.DataFrame or concurrent.futures.Future: The simulation results or a Future object.
 
         Raises:
             None
         """
-        return_df = {}
-        if isinstance(self.analyzer.selected_system, list):  # have a qubit_cavity object
-            self.geom_dict = Dict(
-                qubit_geoms=device_dict["design_options_qubit"], cavity_geoms=device_dict["design_options_cavity_claw"]
+        if run_async:
+            self.console.print(
+                f"[bold cyan]Submitting async simulation for system: {self.analyzer.selected_system}[/bold cyan]"
             )
-            self.setup_dict = Dict(
-                qubit_setup=device_dict["setup_qubit"], cavity_setup=device_dict["setup_cavity_claw"]
-            )
-            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(
-                design=self.design,
-                device_dict=device_dict,
-                LOM_options=self.setup_dict.qubit_setup,
-                eigenmode_options=self.setup_dict.cavity_setup,
-            )
+            future = self.executor.submit(self._run_simulation, device_dict)
+            future.add_done_callback(self._simulation_callback)
+            self.futures.append(future)
+            return future
+        else:
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=self.console,
+            ) as progress:
+                task = progress.add_task(
+                    f"[green]Running sync simulation for {self.analyzer.selected_system}...", total=None
+                )
+                result = self._run_simulation(device_dict)
+                progress.update(task, completed=True)
+                self.console.print("[bold green]Simulation Completed![/bold green]")
+                return result
 
-        else:  # have a non-qubit_cavity object
-            self.geom_dict = device_dict["design_options"]
-            self.setup_dict = device_dict["setup"]
-            return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_single_design(
-                design=self.design, device_dict=device_dict, lom_options=self.setup_dict
-            )
+    def _run_simulation(self, device_dict):
+        """Helper method to run the actual simulation logic."""
+        return_df = {}
+        try:
+            if isinstance(self.analyzer.selected_system, list):  # have a qubit_cavity object
+                self.geom_dict = Dict(
+                    qubit_geoms=device_dict["design_options_qubit"],
+                    cavity_geoms=device_dict["design_options_cavity_claw"],
+                )
+                self.setup_dict = Dict(
+                    qubit_setup=device_dict["setup_qubit"], cavity_setup=device_dict["setup_cavity_claw"]
+                )
+                return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(
+                    design=self.design,
+                    device_dict=device_dict,
+                    LOM_options=self.setup_dict.qubit_setup,
+                    eigenmode_options=self.setup_dict.cavity_setup,
+                )
+
+            else:  # have a non-qubit_cavity object
+                self.geom_dict = device_dict["design_options"]
+                self.setup_dict = device_dict["setup"]
+                return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_single_design(
+                    design=self.design, device_dict=device_dict, lom_options=self.setup_dict
+                )
+        except Exception as e:
+            self.console.print(f"[bold red]Error during simulation: {e}[/bold red]")
+            # Re-raise to be caught by future
+            raise e
 
         return return_df
+
+    def _simulation_callback(self, future):
+        """Callback for async simulation completion."""
+        try:
+            future.result()
+            self.console.print("[bold green]Async Simulation Completed successfully![/bold green]")
+        except Exception as e:
+            self.console.print(f"[bold red]Async Simulation Failed with error: {e}[/bold red]")
+
+    def wait_for_all(self):
+        """Waits for all submitted async simulations to complete."""
+        from concurrent.futures import wait
+
+        if self.futures:
+            self.console.print(f"[yellow]Waiting for {len(self.futures)} simulations to complete...[/yellow]")
+            wait(self.futures)
+            self.console.print("[bold green]All simulations finished.[/bold green]")
+            self.futures = []
 
     def get_renderer_screenshot(self):
         """
