@@ -37,6 +37,12 @@ jobs:
       - name: Set up Python
         run: uv python install 3.11
 
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libopengl0 libglu1-mesa
+
       - name: Install dependencies
         run: uv sync --extra docs
 

@@ -1243,6 +1243,45 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             )
             self.cavity_df = self.read_parquet_file(self.hwc_fname)
             df = self.read_parquet_file(self.merged_df_hwc_fname)
+
+            # Add setup_qubit and setup_cavity_claw from individual datasets
+            qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit)
+            cavity_df_full = self.get_dataset(
+                data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity
+            )
+
+            # Extract setup from first entries
+            if not qubit_df.empty and "sim_options" in qubit_df.columns:
+                setup_qubit = qubit_df.iloc[0]["sim_options"]
+                df["setup_qubit"] = [setup_qubit] * len(df)
+
+            if not cavity_df_full.empty and "sim_options" in cavity_df_full.columns:
+                setup_cavity_claw = cavity_df_full.iloc[0]["sim_options"]
+                df["setup_cavity_claw"] = [setup_cavity_claw] * len(df)
+
+            # Add setup_coupler from NCap dataset
+            # NCap dataset doesn't have sim_options column, but has setup params directly in the row
+            if not self.coupler_df.empty:
+                # Extract setup parameters from first NCap entry
+                ncap_row = self.coupler_df.iloc[0]
+                setup_coupler = {
+                    "name": ncap_row.get("name", "lom_setup"),
+                    "reuse_selected_design": ncap_row.get("reuse_selected_design", False),
+                    "reuse_setup": ncap_row.get("reuse_setup", False),
+                    "freq_ghz": ncap_row.get("freq_ghz", 5.0),
+                    "save_fields": ncap_row.get("save_fields", False),
+                    "enabled": ncap_row.get("enabled", True),
+                    "max_passes": ncap_row.get("max_passes", 15),
+                    "min_passes": ncap_row.get("min_passes", 2),
+                    "min_converged_passes": ncap_row.get("min_converged_passes", 2),
+                    "percent_error": ncap_row.get("percent_error", 0.1),
+                    "percent_refinement": ncap_row.get("percent_refinement", 30),
+                    "auto_increase_solution_order": ncap_row.get("auto_increase_solution_order", True),
+                    "solution_order": ncap_row.get("solution_order", "Medium"),
+                    "solver_type": ncap_row.get("solver_type", "Iterative"),
+                }
+                df["setup_coupler"] = [setup_coupler] * len(df)
+
             return df
 
         df = self.create_qubit_cavity_df(

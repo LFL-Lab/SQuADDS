@@ -146,25 +146,29 @@ def calculate_center_and_dimensions(bbox):
     return (center_x, center_y, center_z), (x_size, y_size, z_size)
 
 
-def get_freq(epra, test_hfss):
+def get_freq(epra, test_hfss, generate_plots=False):
     """
     Analyze the simulation, plot the results, and report the frequencies, Q, and kappa.
 
     :param epra: The EPR analysis object.
     :param test_hfss: The HFSS object.
+    :param generate_plots: If True, generate convergence and field plots. Default is False.
     """
     project_name = test_hfss.pinfo.project_name
     design_name = test_hfss.pinfo.design_name
 
     setMaterialProperties(project_name, design_name, solutiontype="Eigenmode")
     epra.sim._analyze()
-    try:
-        epra.sim.plot_convergences()
-        epra.sim.save_screenshot()
-        epra.sim.plot_fields("main")
-        epra.sim.save_screenshot()
-    except Exception:
-        print("couldn't generate plots.")
+
+    if generate_plots:
+        try:
+            epra.sim.plot_convergences()
+            epra.sim.save_screenshot()
+            epra.sim.plot_fields("main")
+            epra.sim.save_screenshot()
+        except Exception as e:
+            print(f"couldn't generate plots. Error: {e}")
+
     f = epra.get_frequencies()
 
     freq = f.values[0][0] * 1e9
@@ -172,25 +176,29 @@ def get_freq(epra, test_hfss):
     return freq
 
 
-def get_freq_Q_kappa(epra, test_hfss):
+def get_freq_Q_kappa(epra, test_hfss, generate_plots=False):
     """
     Analyze the simulation, plot the results, and report the frequencies, Q, and kappa.
 
     :param epra: The EPR analysis object.
     :param test_hfss: The HFSS object.
+    :param generate_plots: If True, generate convergence and field plots. Default is False.
     """
     project_name = test_hfss.pinfo.project_name
     design_name = test_hfss.pinfo.design_name
 
     setMaterialProperties(project_name, design_name, solutiontype="Eigenmode")
     epra.sim._analyze()
-    try:
-        epra.sim.plot_convergences()
-        epra.sim.save_screenshot()
-        epra.sim.plot_fields("main")
-        epra.sim.save_screenshot()
-    except Exception:
-        print("couldn't generate plots.")
+
+    if generate_plots:
+        try:
+            epra.sim.plot_convergences()
+            epra.sim.save_screenshot()
+            epra.sim.plot_fields("main")
+            epra.sim.save_screenshot()
+        except Exception:
+            print("couldn't generate plots.")
+
     f = epra.get_frequencies()
     freq = f.values[0][0] * 1e9
     Q = f.values[0][1]
@@ -563,7 +571,9 @@ def find_kappa(f_rough, C_tg, C_tb):
         C_tg (float): The total capacitance of the ground in Farads.
         C_tb (float): The total capacitance of the bias in Farads.
     Returns:
-        float: The cavity linewidth (kappa) in kHz.
+        tuple: A tuple containing (f_est, kappa).
+            f_est (float): The estimated frequency in GHz.
+            kappa (float): The cavity linewidth (kappa) in kHz.
     """
     Z0 = 50
     w_rough = 2 * np.pi * f_rough
@@ -572,7 +582,10 @@ def find_kappa(f_rough, C_tg, C_tb):
     print(C_res)
     w_est = np.sqrt(C_res / (C_res + C_tg + C_tb)) * w_rough
 
-    return (1 / 2 * Z0 * (w_est**2) * (C_tb**2) / (C_res + C_tg + C_tb)) * 1e-15 / (2 * np.pi) * 1e-3
+    kappa = (1 / 2 * Z0 * (w_est**2) * (C_tb**2) / (C_res + C_tg + C_tb)) * 1e-15 / (2 * np.pi) * 1e-3
+    f_est = w_est / (2 * np.pi)
+
+    return f_est, kappa
 
 
 def find_chi(alpha, f_q, g, f_r):
