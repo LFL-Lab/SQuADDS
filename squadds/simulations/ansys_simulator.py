@@ -11,8 +11,8 @@ from qiskit_metal import Dict
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+from squadds.components.coupled_systems import QubitCavity
 from squadds.simulations.objects import (
-    QubitCavity,
     run_qubit_cavity_sweep,
     run_sweep,
     simulate_single_design,
