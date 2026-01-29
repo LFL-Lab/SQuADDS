@@ -114,7 +114,7 @@ def simulate_whole_device(design, device_dict, eigenmode_options, LOM_options, o
             return None, None, None
 
     elif device_dict["coupler_type"].lower() == "ncap":
-        emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options)
+        emode_df, emode_obj = run_eigenmode(design, cavity_dict, eigenmode_options, coupler_type="ncap")
         ncap_lom_df, ncap_lom_obj = run_capn_LOM(design, cavity_dict[cplr_opts_key], LOM_options)
         lom_df, lom_obj = run_xmon_LOM(design, cross_dict, LOM_options)
         data = get_sim_results(emode_df=emode_df, lom_df=lom_df, ncap_lom_df=ncap_lom_df)
@@ -254,7 +254,8 @@ def get_sim_results(emode_df=None, lom_df=None, ncap_lom_df=None):
         1 if lom_df["design"]["design_options"]["aedt_q3d_inductance"] > 1e-9 else 1e-9
     )
     # print(Lj)
-    gg, aa, ff_q = find_g_a_fq(cross2cpw, cross2ground, f_r, Lj, N=4)
+    N = 2 if ncap_lom_df != {} else 4
+    gg, aa, ff_q = find_g_a_fq(cross2cpw, cross2ground, f_r, Lj, N=N)
     kappa = emode_df["sim_results"]["kappa"]
     Q = emode_df["sim_results"]["Q"]
     if ncap_lom_df != {}:
@@ -317,7 +318,7 @@ def run_eigenmode(design, geometry_dict, sim_options, **kwargs):
     # update the claw dims
     claw_opts = geometry_dict["claw_opts"]
 
-    if cross_dict is not None:
+    if cross_dict:
         print(cross_dict)
         claw_opts["cross_gap"] = cross_dict["cross_gap"]
         claw_opts["cross_width"] = cross_dict["cross_width"]

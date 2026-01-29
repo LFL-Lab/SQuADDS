@@ -8,6 +8,7 @@ import qiskit_metal as metal
 from qiskit_metal import Dict
 
 from squadds.simulations.objects import *
+from squadds.simulations.utils import find_a_fq
 
 
 class AnsysSimulator:

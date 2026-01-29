@@ -1,6 +1,31 @@
 Release Notes
 =============
 
+Version 0.4.3 (2026-01-28)
+--------------------------
+
+* **Alpha Version 0.4.3**
+
+**Performance Improvements**
+
+- **Great speedup of halfwave cavity workflows (seconds now instead of minutes)**
+- Replaced `joblib` with **NumPy vectorization** in `Analyzer.find_closest`, making database queries instant and eliminating overhead.
+- Added `numba.prange` support for true multi-core CPU utilization during parameter extraction.
+
+**Bug Fixes**
+
+- Corrected `N=4` (Quarter-Wave) hardcoding to `N=2` (Half-Wave) in `objects.py`.
+- Resolved `TerminatedWorkerError` by removing process-based parallelism in favor of vectorization.
+- Fixed `KeyError` in `run_eigenmode` for NCap simulations.
+- Fixed `SettingWithCopyWarning` and linting errors in `analysis.py`.
+
+**Improvements**
+
+- Cleaned up unused parallel processing methods and dependencies.
+- Improved code stability across operating systems (macOS, Windows, Linux).
+
+---
+
 Version 0.4.2 (2026-01-27)
 --------------------------
 

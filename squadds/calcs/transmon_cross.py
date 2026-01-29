@@ -7,9 +7,7 @@ from functools import lru_cache
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-from joblib import Parallel, delayed
-from numba import jit
+from numba import jit, prange
 from pyEPR.calcs import Convert
 from scipy.constants import Planck, e, hbar
 from scipy.optimize import brentq
@@ -105,7 +103,7 @@ def EC_numba_vectorized(cross_to_claw_arr, cross_to_ground_arr):
     return result
 
 
-@jit(nopython=True, parallel=True)
+@jit(nopython=True)
 def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
     """
     Calculate coupling strength 'g' using the capacitance matrix formalism (numba-accelerated).
@@ -161,6 +159,80 @@ def g_from_cap_matrix_numba(C, C_c, EJ, f_r, res_type, Z0=50):
 
     # Convert from Joules to MHz: g_MHz = g_J / hbar / (2*pi) / 1e6
     return (g_J / hbar) * 1e-6 / (2 * np.pi)  # MHz
+
+
+@jit(nopython=True, parallel=True)
+def g_from_cap_matrix_vectorized(cross_to_ground_arr, cross_to_claw_arr, EJ_arr, cavity_freq_arr, res_type_val, Z0=50):
+    """
+    Vectorized calculation of g for arrays of inputs (numba-accelerated).
+    Much faster than looping in Python.
+
+    Args:
+        cross_to_ground_arr: Array of C_ground (fF)
+        cross_to_claw_arr: Array of C_coupling (fF)
+        EJ_arr: Array of EJ (GHz)
+        cavity_freq_arr: Array of resonator freq (GHz)
+        res_type_val: Integer (2 for half, 4 for quarter)
+        Z0: Characteristic impedance
+    """
+    n = len(cross_to_ground_arr)
+    result = np.empty(n, dtype=np.float32)
+
+    # Constants
+    hbar_val = 1.0545718e-34
+    e_val = 1.60217662e-19
+    pi_val = 3.141592653589793
+
+    # Common factors
+    factor1 = hbar_val * e_val**2
+
+    for i in prange(n):
+        C_Q_fF = np.abs(cross_to_ground_arr[i])
+        C_g_fF = np.abs(cross_to_claw_arr[i])
+
+        # Convert to SI units (F)
+        C_Q = C_Q_fF * 1e-15
+        C_g = C_g_fF * 1e-15
+        C_q_total = C_Q + C_g
+
+        f_r = cavity_freq_arr[i]
+        omega_r = 2 * pi_val * f_r * 1e9
+
+        # Resonator capacitance: C_r = pi / (N * omega_r * Z0)
+        C_r = pi_val / (res_type_val * omega_r * Z0)
+
+        # Capacitance matrix determinant
+        det_C = C_q_total * (C_r + C_g) - C_g**2
+
+        # Effective qubit capacitance
+        C_q_eff = det_C / (C_r + C_g)
+
+        # Charging energy from C_q_eff (inlined Ec_from_Cs logic for speed)
+        # Ec_GHz = e^2 / (2 * C_q_eff) / h / 1e9
+        # But we acturally use C_q_eff * 1e15 (fF) passed to Ec_from_Cs
+        # Let's reuse the Ec_from_Cs function since it's jitted
+        C_q_eff_fF = C_q_eff * 1e15
+        # Manual inline of Ec_from_Cs(C_q_eff_fF)
+        Cs_SI = C_q_eff_fF * 1e-15
+        Ec_Joules = (e_val**2) / (2 * Cs_SI)
+        Ec_Hz = Ec_Joules / 6.62607015e-34
+        EC = Ec_Hz * 1e-9
+
+        EJ = EJ_arr[i]
+
+        # g calculation
+        # g [J] = (C_g / sqrt(C_q_total)) * sqrt(hbar * omega_r * e^2 / det(C)) * (EJ / (8 * EC))^(1/4)
+        term1 = C_g / np.sqrt(C_q_total)
+        term2 = np.sqrt((factor1 * omega_r) / det_C)
+        term3 = (EJ / (8 * EC)) ** 0.25
+
+        g_J = term1 * term2 * term3
+
+        # Convert to MHz
+        g_MHz = (g_J / hbar_val) * 1e-6 / (2 * pi_val)
+        result[i] = g_MHz
+
+    return result
 
 
 class TransmonCrossHamiltonian(QubitHamiltonian):
@@ -333,7 +405,7 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
             raise ValueError(
                 f"Could not find a valid coupling capacitance for target g={g} MHz. "
                 f"The target coupling may be outside the achievable range for the given qubit parameters."
-            )
+            ) from ValueError
 
         C_c_fF = C_c_F * 1e15  # Convert to fF
         EJ_EC_ratio = EJ / EC
@@ -661,8 +733,28 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
             self.df["qubit_frequency_GHz"] = freq_values
             self.df["anharmonicity_MHz"] = alpha_values
 
-            # Step 8: Now parallel process only the g calculation
-            self.df = self.parallel_process_g_only(self.df, num_chunks, Z_0)
+            # Step 8: Calculate g using vectorized Numba function (C-speed, no parallel overhead)
+            from numba import config
+
+            num_threads = config.NUMBA_NUM_THREADS
+            mode_str = f"parallel ({num_threads} threads)" if int(num_threads) > 1 else "serial"
+            print(f"Calculating g_MHz (vectorized) in {mode_str}...", flush=True)
+            res_type_val = 2 if self.selected_resonator_type == "half" else 4
+
+            # Prepare arrays for Numba
+            cross_to_ground = self.df["cross_to_ground"].values.astype(np.float64)
+            cross_to_claw = self.df["cross_to_claw"].values.astype(np.float64)
+            EJ_vals = self.df["EJ"].values.astype(np.float64)
+            freq_vals = self.df["cavity_frequency_GHz"].values.astype(np.float64)
+
+            # Execute vectorized calculation
+            g_values = g_from_cap_matrix_vectorized(
+                cross_to_ground, cross_to_claw, EJ_vals, freq_vals, res_type_val, Z_0
+            )
+
+            self.df["g_MHz"] = g_values
+            print("Done calculating g_MHz.")
+
         else:
             self.add_qubit_H_params()
             self.df["g_MHz"] = self.df.apply(
@@ -677,94 +769,8 @@ class TransmonCrossHamiltonian(QubitHamiltonian):
                 axis=1,
             )
 
-    def add_cavity_coupled_H_params_chunk(self, chunk, Z_0=50):
-        """
-        Add cavity-coupled Hamiltonian parameters to the DataFrame chunk.
-
-        This method calculates the coupling strength 'g_MHz' between the transmon qubit and the cavity,
-
-        Args:
-            - chunk: The DataFrame chunk to which the parameters will be added.
-            - Z_0: The characteristic impedance of the transmission line. Default is 50 ohms.
-
-        Returns:
-            - chunk: The DataFrame chunk with the added parameters.
-        """
-        chunk = self.add_qubit_H_params_chunk(chunk)
-
-        cross_to_ground_values = chunk["cross_to_ground"].values
-        cross_to_claw_values = chunk["cross_to_claw"].values
-        EJ_values = chunk["EJ"].values
-        cavity_frequency_values = chunk["cavity_frequency_GHz"].values
-
-        g_values = np.array(
-            [
-                g_from_cap_matrix_numba(ground, claw, ej, freq, "half", Z_0)
-                for ground, claw, ej, freq in zip(
-                    cross_to_ground_values, cross_to_claw_values, EJ_values, cavity_frequency_values
-                )
-            ],
-            dtype=np.float32,
-        )
-
-        chunk["g_MHz"] = g_values
-
-        return chunk
-
-    def parallel_process_dataframe(self, df, num_chunks, Z_0=50):
-        """
-        Process the DataFrame in parallel.
-
-        This method splits the DataFrame into chunks and processes each chunk in parallel.
-
-        Args:
-            - df: The DataFrame to be processed.
-            - num_chunks: The number of chunks to split the DataFrame into.
-            - Z_0: The characteristic impedance of the transmission line. Default is 50
-
-        Returns:
-            - df: The DataFrame with the added parameters.
-
-        """
-        chunks = np.array_split(df, num_chunks)
-
-        with Parallel(n_jobs=num_chunks) as parallel:
-            results = parallel(delayed(self.add_cavity_coupled_H_params_chunk)(chunk, Z_0) for chunk in chunks)
-
-        return pd.concat(results)
-
-    def _calculate_g_chunk(self, chunk, Z_0=50):
-        """Calculate g values for a chunk (EC, EJ, freq, alpha already computed)."""
-        cross_to_ground_values = chunk["cross_to_ground"].values
-        cross_to_claw_values = chunk["cross_to_claw"].values
-        EJ_values = chunk["EJ"].values
-        cavity_frequency_values = chunk["cavity_frequency_GHz"].values
-
-        g_values = np.array(
-            [
-                g_from_cap_matrix_numba(ground, claw, ej, freq, "half", Z_0)
-                for ground, claw, ej, freq in zip(
-                    cross_to_ground_values, cross_to_claw_values, EJ_values, cavity_frequency_values
-                )
-            ],
-            dtype=np.float32,
-        )
-        chunk["g_MHz"] = g_values
-        return chunk
-
-    def parallel_process_g_only(self, df, num_chunks, Z_0=50):
-        """
-        Parallel process only the g calculation (qubit params already computed).
-
-        This optimized method is used when EC, EJ, qubit_frequency_GHz, and
-        anharmonicity_MHz are already computed in the main process.
-        """
-        chunks = np.array_split(df, num_chunks)
-
-        with Parallel(n_jobs=num_chunks) as parallel:
-            results = parallel(delayed(self._calculate_g_chunk)(chunk, Z_0) for chunk in chunks)
-
-        return pd.concat(results)
+    # parallel_process_g_only and intermediate chunk methods removed
+    # as they are replaced by vectorized implementation.
 
     def chi(self, EJ, EC, g, f_r):
         """

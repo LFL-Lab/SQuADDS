@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
-from joblib import Parallel, delayed
 from numpy import linalg as LA
 
 logging.basicConfig(level=logging.INFO)
@@ -25,27 +24,18 @@ class MetricStrategy(ABC):
         """
         raise NotImplementedError("This method should be overridden by subclass")
 
-    def calculate_in_parallel(self, target_params: dict, df: pd.DataFrame, num_jobs: int = 4) -> pd.Series:
-        """Calculate distances in parallel.
+    def calculate_vectorized(self, target_params: dict, df: pd.DataFrame) -> pd.Series:
+        """Calculate distances using vectorized operations.
 
         Args:
             target_params (dict): Dictionary of target parameters.
             df (pd.DataFrame): The DataFrame containing rows to calculate distances for.
-            num_jobs (int): Number of jobs for parallel processing.
 
         Returns:
             pd.Series: Series of calculated distances.
         """
-        chunk_size = int(np.ceil(len(df) / num_jobs))
-        chunks = [df.iloc[i : i + chunk_size] for i in range(0, len(df), chunk_size)]
-
-        distances = Parallel(n_jobs=num_jobs)(delayed(self._calculate_chunk)(target_params, chunk) for chunk in chunks)
-
-        return pd.concat(distances)
-
-    def _calculate_chunk(self, target_params: dict, chunk: pd.DataFrame) -> pd.Series:
-        """Helper method to calculate distances for a chunk of DataFrame rows."""
-        return chunk.apply(lambda row: self.calculate(target_params, row), axis=1)
+        # Default fallback to apply if not overridden
+        return df.apply(lambda row: self.calculate(target_params, row), axis=1)
 
 
 class EuclideanMetric(MetricStrategy):
@@ -70,6 +60,16 @@ class EuclideanMetric(MetricStrategy):
                 distance += (df_row[column] - target_value) ** 2 / target_value**2
         return np.sqrt(distance)
 
+    def calculate_vectorized(self, target_params: dict, df: pd.DataFrame) -> pd.Series:
+        """Vectorized Euclidean distance calculation."""
+        distance_sq = 0.0
+        for column, target_value in target_params.items():
+            if isinstance(target_value, (int, float)) and column in df.columns:
+                # Vectorized operation on pandas Series
+                diff_norm = (df[column] - target_value) / target_value
+                distance_sq += diff_norm**2
+        return np.sqrt(distance_sq)
+
 
 class ManhattanMetric(MetricStrategy):
     """Implements the Manhattan metric strategy."""
@@ -88,6 +88,14 @@ class ManhattanMetric(MetricStrategy):
         row_vector = np.array([df_row[key] for key in target_params])
         return LA.norm(target_vector - row_vector, ord=1)
 
+    def calculate_vectorized(self, target_params: dict, df: pd.DataFrame) -> pd.Series:
+        """Vectorized Manhattan distance calculation."""
+        distance = 0.0
+        for column, target_value in target_params.items():
+            if isinstance(target_value, (int, float)) and column in df.columns:
+                distance += np.abs(df[column] - target_value)
+        return distance
+
 
 class ChebyshevMetric(MetricStrategy):
     """Implements the Chebyshev metric strategy."""
@@ -105,6 +113,20 @@ class ChebyshevMetric(MetricStrategy):
         target_vector = np.array([target_params[key] for key in target_params])
         row_vector = np.array([df_row[key] for key in target_params])
         return LA.norm(target_vector - row_vector, ord=np.inf)
+
+    def calculate_vectorized(self, target_params: dict, df: pd.DataFrame) -> pd.Series:
+        """Vectorized Chebyshev distance calculation."""
+        distance = pd.Series(0.0, index=df.index)
+        first = True
+        for column, target_value in target_params.items():
+            if isinstance(target_value, (int, float)) and column in df.columns:
+                abs_diff = np.abs(df[column] - target_value)
+                if first:
+                    distance = abs_diff
+                    first = False
+                else:
+                    distance = np.maximum(distance, abs_diff)
+        return distance
 
 
 class WeightedEuclideanMetric(MetricStrategy):
@@ -139,6 +161,20 @@ class WeightedEuclideanMetric(MetricStrategy):
                 simulated_value = row.get(param, 0)
                 weight = self.weights.get(param, 1)
                 distance += weight * ((target_value - simulated_value) ** 2) / target_value**2
+        return distance
+
+    def calculate_vectorized(self, target_params: dict, df: pd.DataFrame) -> pd.Series:
+        """Vectorized Weighted Euclidean distance calculation."""
+        if self.weights is None:
+            self.weights = {key: 1 for key in target_params.keys()}
+
+        distance = 0.0
+        for param, target_value in target_params.items():
+            if isinstance(target_value, (int, float)) and param in df.columns:
+                simulated_values = df[param]
+                weight = self.weights.get(param, 1)
+                term = ((target_value - simulated_values) ** 2) / target_value**2
+                distance += weight * term
         return distance
 
 

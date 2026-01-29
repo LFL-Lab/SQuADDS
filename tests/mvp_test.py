@@ -53,3 +53,29 @@ interpolator = ScalingInterpolator(analyzer, target_params)
 design_df = interpolator.get_design()
 
 print(design_df)
+
+print("=" * 50)
+print("Testing Half-Wave Cavity (HWC)...")
+db.unselect_all()
+db.select_system(["qubit", "cavity_claw"])
+db.select_qubit("TransmonCross")
+db.select_cavity_claw("RouteMeander")
+db.select_resonator_type("half")
+db.show_selections()
+merged_df = db.create_system_df()
+
+target_params_hwc = {
+    "qubit_frequency_GHz": 4,
+    "cavity_frequency_GHz": 6.2,
+    "kappa_kHz": 120,
+    "anharmonicity_MHz": -200,
+    "g_MHz": 70,
+}
+
+results_hwc = analyzer.find_closest(target_params=target_params_hwc, num_top=1, metric="Euclidean", display=True)
+print(results_hwc)
+
+interpolator_hwc = ScalingInterpolator(analyzer, target_params_hwc)
+design_df_hwc = interpolator_hwc.get_design()
+print(design_df_hwc)
+print("HWC Test Check passed!")
