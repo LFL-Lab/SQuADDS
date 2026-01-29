@@ -179,9 +179,9 @@ class AnsysSimulator:
             # Coupled system (qubit + cavity)
             mapping = {
                 "qubit": ["setup_qubit"],
-                "cavity": ["setup_cavity"],
+                "cavity_claw": ["setup_cavity_claw"],
                 "coupler": ["setup_coupler"],
-                "all": ["setup_qubit", "setup_cavity", "setup_coupler"],
+                "all": ["setup_qubit", "setup_cavity_claw", "setup_coupler"],
             }
         else:
             # Single system
@@ -375,7 +375,7 @@ class AnsysSimulator:
                 self.console.print(f"  [cyan]Setup:[/cyan] {device_dict['setup']}")
             if "setup_qubit" in device_dict:
                 self.console.print(f"  [cyan]Qubit Setup:[/cyan] {device_dict['setup_qubit']}")
-            if "setup_cavity" in device_dict:
+            if "setup_cavity_claw" in device_dict:
                 self.console.print(f"  [cyan]Cavity Setup:[/cyan] {device_dict['setup_cavity']}")
 
             if isinstance(self.analyzer.selected_system, list):  # have a qubit_cavity object
@@ -383,7 +383,9 @@ class AnsysSimulator:
                     qubit_geoms=device_dict["design_options_qubit"],
                     cavity_geoms=device_dict["design_options_cavity_claw"],
                 )
-                self.setup_dict = Dict(qubit_setup=device_dict["setup_qubit"], cavity_setup=device_dict["setup_cavity"])
+                self.setup_dict = Dict(
+                    qubit_setup=device_dict["setup_qubit"], cavity_setup=device_dict["setup_cavity_claw"]
+                )
                 return_df, self.lom_analysis_obj, self.epr_analysis_obj = simulate_whole_device(
                     design=self.design,
                     device_dict=device_dict,

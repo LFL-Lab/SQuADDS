@@ -1244,9 +1244,20 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             self.cavity_df = self.read_parquet_file(self.hwc_fname)
             df = self.read_parquet_file(self.merged_df_hwc_fname)
 
-            # Rename setup_cavity_claw to setup_cavity for consistency
-            if "setup_cavity_claw" in df.columns:
-                df = df.rename(columns={"setup_cavity_claw": "setup_cavity"})
+            # Add setup_qubit and setup_cavity_claw from individual datasets
+            qubit_df = self.get_dataset(data_type="cap_matrix", component="qubit", component_name=self.selected_qubit)
+            cavity_df_full = self.get_dataset(
+                data_type="eigenmode", component="cavity_claw", component_name=self.selected_cavity
+            )
+
+            # Extract setup from first entries
+            if not qubit_df.empty and "sim_options" in qubit_df.columns:
+                setup_qubit = qubit_df.iloc[0]["sim_options"]
+                df["setup_qubit"] = [setup_qubit] * len(df)
+
+            if not cavity_df_full.empty and "sim_options" in cavity_df_full.columns:
+                setup_cavity_claw = cavity_df_full.iloc[0]["sim_options"]
+                df["setup_cavity_claw"] = [setup_cavity_claw] * len(df)
 
             # Add setup_coupler from NCap dataset
             # NCap dataset doesn't have sim_options column, but has setup params directly in the row
