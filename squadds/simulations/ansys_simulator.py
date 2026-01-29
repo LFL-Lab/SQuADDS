@@ -9,7 +9,6 @@ from copy import deepcopy
 import qiskit_metal as metal
 from qiskit_metal import Dict
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from squadds.components.coupled_systems import QubitCavity
 from squadds.simulations.objects import (
@@ -92,7 +91,7 @@ class AnsysSimulator:
         self.design.overwrite_enabled = True
         self._warnings()
 
-        self.console = Console()
+        self.console = Console(force_jupyter=False)
         self.executor = ThreadPoolExecutor(max_workers=os.cpu_count() or 4)
         self.futures = []
 
@@ -355,27 +354,17 @@ class AnsysSimulator:
         if device_dict is None:
             device_dict = self.device_dict
 
-        if run_async:
-            self.console.print(
-                f"[bold cyan]Submitting async simulation for system: {self.analyzer.selected_system}[/bold cyan]"
-            )
-            future = self.executor.submit(self._run_simulation, device_dict)
-            future.add_done_callback(self._simulation_callback)
-            self.futures.append(future)
-            return future
-        else:
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                console=self.console,
-            ) as progress:
-                task = progress.add_task(
-                    f"[green]Running sync simulation for {self.analyzer.selected_system}...", total=None
-                )
-                result = self._run_simulation(device_dict)
-                progress.update(task, completed=True)
-                self.console.print("[bold green]Simulation Completed![/bold green]")
-                return result
+        # Use a simple print instead of Progress to avoid recursion issues in some Jupyter environments
+        # when nested prints occur (e.g. from pyEPR)
+        self.console.rule("[bold cyan]Starting Simulation[/bold cyan]")
+        try:
+            result = self._run_simulation(device_dict)
+            self.console.print("[bold green]Simulation Completed Successfully![/bold green]")
+            return result
+        except Exception as e:
+            # Avoid using self.console.print here if it might cause further recursion
+            print(f"Error during simulation: {e}")
+            raise e
 
     def _run_simulation(self, device_dict):
         """Helper method to run the actual simulation logic."""
