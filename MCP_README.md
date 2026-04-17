@@ -2,9 +2,46 @@
 
 > Model Context Protocol (MCP) server for the [SQuADDS](https://github.com/LFL-Lab/SQuADDS) superconducting quantum device design database.
 
-This MCP server wraps the SQuADDS Python library, making the database of pre-simulated superconducting quantum device designs accessible to AI agents (Claude, Cursor, custom LLM agents) and human developers through the standardized [Model Context Protocol](https://modelcontextprotocol.io).
+This MCP server wraps the SQuADDS Python library, making the database of pre-simulated superconducting quantum device designs accessible to AI agents (Claude, Cursor, VS Code Copilot, Gemini, Codex, and custom LLM agents) and human developers through the standardized [Model Context Protocol](https://modelcontextprotocol.io).
 
-## Quick Start
+## 🤖 Agent Setup (Copy-Paste This to Your AI Agent)
+
+> **If you're using an AI coding assistant**, just paste this prompt into it to have it set up everything for you:
+
+```
+I need you to set up the SQuADDS MCP server so I can access the superconducting
+qubit design database through you. Here's what to do:
+
+1. Clone the repo and install:
+   git clone https://github.com/LFL-Lab/SQuADDS.git
+   cd SQuADDS
+   uv sync --extra mcp
+
+2. Add the MCP server to your config. The command to run the server is:
+   uv run --directory /path/to/SQuADDS squadds-mcp
+
+3. Once connected, read the `squadds://guide` resource for a quick overview
+   of available tools.
+
+The server exposes these key tools:
+- `list_components` / `list_datasets` — explore the database
+- `find_closest_designs` — find designs matching target Hamiltonian parameters
+- `interpolate_design` — get physics-interpolated designs
+- `get_hamiltonian_param_keys` — discover valid search parameters
+
+Typical target parameter ranges:
+- qubit_frequency_GHz: 3–8
+- anharmonicity_MHz: −500 to −50
+- cavity_frequency_GHz: 5–12
+- kappa_kHz: 10–1000
+- g_MHz: 10–200
+
+Please set this up and confirm you can access the SQuADDS tools.
+```
+
+---
+
+## 🧑‍💻 Manual Setup
 
 ### 1. Install dependencies
 
@@ -26,19 +63,22 @@ uv run huggingface-cli login
 ### 3. Run the server
 
 ```bash
-# Run via the CLI entrypoint
+# Run via the CLI entrypoint (stdio mode — for local AI assistants)
 uv run squadds-mcp
 
 # Or run the module directly
 uv run python -m squadds_mcp.server
+
+# HTTP mode (for networked/remote usage)
+SQUADDS_MCP_TRANSPORT=streamable-http SQUADDS_MCP_PORT=8000 uv run squadds-mcp
 ```
 
 ### 4. Connect from an AI client
 
-#### Claude Desktop / Claude Code
+<details>
+<summary><strong>Claude Desktop</strong></summary>
 
-Add to your MCP settings (`claude_desktop_config.json` or via `claude mcp add`):
-
+Add to `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
@@ -52,16 +92,20 @@ Add to your MCP settings (`claude_desktop_config.json` or via `claude mcp add`):
   }
 }
 ```
+</details>
 
-Or with Claude Code:
+<details>
+<summary><strong>Claude Code</strong></summary>
+
 ```bash
 claude mcp add squadds -- uv run --directory /path/to/SQuADDS squadds-mcp
 ```
+</details>
 
-#### Cursor
+<details>
+<summary><strong>Cursor</strong></summary>
 
 Add to `.cursor/mcp.json` in your project:
-
 ```json
 {
   "mcpServers": {
@@ -72,14 +116,87 @@ Add to `.cursor/mcp.json` in your project:
   }
 }
 ```
+</details>
 
-#### HTTP Transport (for networked/remote usage)
+<details>
+<summary><strong>VS Code (Copilot)</strong></summary>
+
+Add to `.vscode/settings.json`:
+```json
+{
+  "mcp": {
+    "servers": {
+      "squadds": {
+        "command": "uv",
+        "args": ["run", "--directory", "/path/to/SQuADDS", "squadds-mcp"]
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>Antigravity (Gemini)</strong></summary>
+
+Add to `~/.gemini/settings.json` (or project-level `.gemini/settings.json`):
+```json
+{
+  "mcpServers": {
+    "squadds": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/SQuADDS", "squadds-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>Gemini CLI</strong></summary>
+
+Add to `~/.gemini/settings.json`:
+```json
+{
+  "mcpServers": {
+    "squadds": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/SQuADDS", "squadds-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>OpenAI Codex CLI</strong></summary>
+
+```bash
+codex --mcp-config mcp.json
+```
+
+With `mcp.json`:
+```json
+{
+  "mcpServers": {
+    "squadds": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/SQuADDS", "squadds-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>HTTP Transport (for any client)</strong></summary>
 
 ```bash
 SQUADDS_MCP_TRANSPORT=streamable-http SQUADDS_MCP_PORT=8000 uv run squadds-mcp
 ```
 
 Then connect from any MCP client to `http://localhost:8000/mcp`.
+</details>
 
 ---
 

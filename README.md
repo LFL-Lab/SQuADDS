@@ -26,6 +26,7 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
   - [Install using pip](#install-using-pip)
   - [Run using Docker](#run-using-docker)
 - [Tutorials](#tutorials)
+- [MCP Server (AI Agent Integration)](#mcp-server-ai-agent-integration)
 - [Contributing](#contributing)
 - [License](#license)
 - [FAQs](#faqs)
@@ -196,6 +197,186 @@ The following tutorials are available to help you get started with `SQuADDS`:
 - [Tutorial 7: Simulate designs with palace](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-7_Simulate_designs_with_palace.html)
 - [Tutorial 8: ML Interpolation in SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-8_ML_interpolation_in_SQuADDS.html)
 - [Tutorial 9: Learning the Inverse Map](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-9_Learing_the_Inverse_Design_Map.html)
+
+---
+
+## MCP Server (AI Agent Integration)
+
+SQuADDS includes a built-in **Model Context Protocol (MCP)** server that lets AI coding agents interact with the entire database — searching designs, interpolating parameters, and exploring components — through a standardized protocol.
+
+### 🤖 Agent Setup (Copy-Paste This to Your AI Agent)
+
+> **If you're using an AI coding assistant**, just paste this prompt to have it set up SQuADDS MCP for you:
+
+<details>
+<summary><strong>📋 Click to copy the agent setup prompt</strong></summary>
+
+```
+I need you to set up the SQuADDS MCP server so I can access the superconducting
+qubit design database through you. Here's what to do:
+
+1. Clone the repo and install:
+   git clone https://github.com/LFL-Lab/SQuADDS.git
+   cd SQuADDS
+   uv sync --extra mcp
+
+2. Add the MCP server to your config. The command to run the server is:
+   uv run --directory /path/to/SQuADDS squadds-mcp
+
+3. Once connected, read the `squadds://guide` resource for a quick overview
+   of available tools.
+
+The server exposes these key tools:
+- `list_components` / `list_datasets` — explore the database
+- `find_closest_designs` — find designs matching target Hamiltonian parameters
+- `interpolate_design` — get physics-interpolated designs
+- `get_hamiltonian_param_keys` — discover valid search parameters
+
+Typical target parameter ranges:
+- qubit_frequency_GHz: 3–8
+- anharmonicity_MHz: −500 to −50
+- cavity_frequency_GHz: 5–12
+- kappa_kHz: 10–1000
+- g_MHz: 10–200
+
+Please set this up and confirm you can access the SQuADDS tools.
+```
+
+</details>
+
+### 🧑‍💻 Manual Setup
+
+#### Install
+
+```bash
+git clone https://github.com/LFL-Lab/SQuADDS.git
+cd SQuADDS
+uv sync --extra mcp
+```
+
+#### Run
+
+```bash
+# stdio mode (for local AI assistants)
+uv run squadds-mcp
+
+# HTTP mode (for networked/remote usage)
+SQUADDS_MCP_TRANSPORT=streamable-http uv run squadds-mcp
+```
+
+#### Connect Your AI Client
+
+<details>
+<summary><strong>Claude Desktop</strong></summary>
+
+Add to `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "squadds": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/SQuADDS", "squadds-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>Claude Code</strong></summary>
+
+```bash
+claude mcp add squadds -- uv run --directory /path/to/SQuADDS squadds-mcp
+```
+</details>
+
+<details>
+<summary><strong>Cursor</strong></summary>
+
+Add to `.cursor/mcp.json` in your project:
+```json
+{
+  "mcpServers": {
+    "squadds": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/SQuADDS", "squadds-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>VS Code (Copilot)</strong></summary>
+
+Add to `.vscode/settings.json`:
+```json
+{
+  "mcp": {
+    "servers": {
+      "squadds": {
+        "command": "uv",
+        "args": ["run", "--directory", "/path/to/SQuADDS", "squadds-mcp"]
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>Antigravity (Gemini)</strong></summary>
+
+Add to `~/.gemini/settings.json` (or project-level `.gemini/settings.json`):
+```json
+{
+  "mcpServers": {
+    "squadds": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/SQuADDS", "squadds-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>Gemini CLI</strong></summary>
+
+Add to `~/.gemini/settings.json`:
+```json
+{
+  "mcpServers": {
+    "squadds": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/SQuADDS", "squadds-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>OpenAI Codex CLI</strong></summary>
+
+```bash
+codex --mcp-config mcp.json
+```
+
+With `mcp.json`:
+```json
+{
+  "mcpServers": {
+    "squadds": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/SQuADDS", "squadds-mcp"]
+    }
+  }
+}
+```
+</details>
+
+📖 **Full MCP documentation:** [MCP_README.md](MCP_README.md) | **Developer guide:** [MCP_DEVELOPER_GUIDE.md](MCP_DEVELOPER_GUIDE.md)
 
 ---
 
