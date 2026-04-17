@@ -51,7 +51,6 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 ## Machine Learning (ML):
 
 - Develop an architecture/framework for deploying ML models on SQuADDS (via HuggingFace endpoints/spaces, in code, etc.)
-- Provide APIs (modules/methods) for incorporating ML interpolation features into SQuADDS
 - Utilize HuggingFace Tasks for ML applications
 - Identify relevant design space variables for any system given a set of $\hat{H}$ parameters using encoders
 - Determine analytical dependence of $\hat{H}$ parameters on design space variables using Kolmogorov-Arnold Networks (KANs)
@@ -64,8 +63,6 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 ## Workflows:
 
 - Add any other workflow that assists developers in contributing
-- Implement an automated build check with comprehensive unit tests
-- Automated tests upon PR submission
 
 ## Feature Requests:
 
@@ -101,6 +98,12 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Fancy/For Fun:
 
-- Setup a Model Context Protocol server for SQuADDS
 - Implement LLM-based queries for SQuADDS using [pandas-ai](https://docs.pandas-ai.com/intro) (support for OpenAI and local LLaMA models)
 - Add visual components to the SQuADDS UI
+
+## Completed:
+
+- Setup a Model Context Protocol server for SQuADDS
+- Implement an automated build check with comprehensive unit tests
+- Automated tests upon PR submission
+- Provide APIs (modules/methods) for incorporating ML interpolation features into SQuADDS
