@@ -195,4 +195,4 @@ def test_safe_ansys_design_name_is_short_and_stable():
     assert first == second
     assert first.startswith("dm_")
     assert "-" not in first
-    assert len(first) <= 24
+    assert len(first) == 11

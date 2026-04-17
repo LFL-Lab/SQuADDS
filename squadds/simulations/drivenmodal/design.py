@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import hashlib
-import re
 from pathlib import Path
 from typing import Any
 
@@ -95,10 +94,8 @@ def safe_ansys_design_name(identifier: str, *, prefix: str = "dm") -> str:
     checkpoint and artifact layout, but use a compact deterministic alias for
     the internal Ansys design name.
     """
-    slug = re.sub(r"[^0-9A-Za-z]+", "_", identifier).strip("_").lower()
-    slug = slug[:12] or "run"
     digest = hashlib.sha1(identifier.encode("utf-8")).hexdigest()[:8]
-    return f"{prefix}_{slug}_{digest}"
+    return f"{prefix}_{digest}"
 
 
 def render_drivenmodal_design(
