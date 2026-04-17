@@ -83,7 +83,7 @@ except ImportError:  # pragma: no cover - plain Python fallback for non-notebook
 # HFSS artifacts for the same `RUN_TAG`.
 
 # %%
-RUN_TAG = "v1"
+RUN_TAG = "v2"
 FORCE_RERUN = False
 MAX_SOLVE_ATTEMPTS = 3
 
@@ -101,19 +101,19 @@ LAYER_STACK = DrivenModalLayerStackSpec(
 SETUP = DrivenModalSetupSpec(
     name="DrivenModalSetup",
     freq_ghz=5.0,
-    max_delta_s=0.02,
+    max_delta_s=0.005,
     max_passes=20,
     min_passes=2,
-    min_converged=2,
+    min_converged=3,
     pct_refinement=30,
-    basis_order=1,
+    basis_order=-1,
 )
 SWEEP = DrivenModalSweepSpec(
     name="DrivenModalSweep",
     start_ghz=1.0,
-    stop_ghz=12.0,
+    stop_ghz=10.0,
     count=221,
-    sweep_type="Fast",
+    sweep_type="Interpolating",
     save_fields=False,
 )
 ARTIFACTS = DrivenModalArtifactPolicy(
