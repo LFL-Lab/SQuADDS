@@ -140,6 +140,22 @@ def dump_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str))
 
 
+def prepare_renderer_project(renderer: QHFSSRenderer, project_dir: Path, project_name: str) -> Path:
+    """Create a fresh HFSS project and save it to an absolute AEDT path.
+
+    This avoids the Windows/pyEPR project-path duplication bug triggered by
+    passing ``project_path``/``project_name`` through ``QHFSSRenderer`` options.
+    """
+    project_dir = project_dir.resolve()
+    project_dir.mkdir(parents=True, exist_ok=True)
+    project_file = project_dir / f"{project_name}.aedt"
+    renderer.start()
+    renderer.new_ansys_project()
+    renderer.connect_ansys()
+    renderer.pinfo.project.save(str(project_file))
+    return project_file
+
+
 def load_reference_row(config_name: str, index: int) -> dict[str, Any]:
     dataset = load_dataset(REMOTE_REPO_ID, config_name, split="train")
     return dataset[index]
@@ -319,12 +335,10 @@ def run_capacitance_demo(
                 design,
                 initiate=False,
                 options=Dict(
-                    project_path=str(project_dir),
-                    project_name=request.metadata["run_id"],
                     design_name=f"{request.metadata['run_id']}_dm",
                 ),
             )
-            renderer.start()
+            project_file = prepare_renderer_project(renderer, project_dir, request.metadata["run_id"])
             renderer.new_ansys_design(f"{request.metadata['run_id']}_dm", "drivenmodal")
             renderer.clean_active_design()
 
@@ -359,6 +373,7 @@ def run_capacitance_demo(
                     "z_pickle": str(z_pickle),
                     "layer_stack_csv": str(layer_stack_csv),
                     "project_dir": str(project_dir),
+                    "project_file": str(project_file),
                 },
             )
             mark_stage_complete(manifest_path, "artifacts_exported")

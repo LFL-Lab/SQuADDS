@@ -111,6 +111,7 @@ Update this section after every meaningful verification run with the exact comma
 - Whether the eventual sweep progress tracker should live only inside driven-modal artifact manifests or also surface a generic reusable sweep runtime helper should be decided in the artifacts slice. Current preference is a reusable helper.
 - `calculate_g_from_chi(...)` intentionally returns a positive coupling magnitude using `abs(chi / denominator)` because the project is currently using `chi = f_e - f_r`, while the transmon `alpha` remains negative. Another agent should not flip this back without revisiting the sign convention across the whole workflow.
 - The coupled tutorial currently uses the existing SQuADDS qubit-capacitance + bare-Lj narrative to derive `f_q`, `alpha`, and the state-dependent junction inductances, while the resonator quantities come from driven-modal HFSS. That is intentional for this first executable tutorial pass.
+- The Windows validation run exposed a `pyEPR.load_ansys_project(...)` path-duplication bug when `QHFSSRenderer` is initialized with both `project_path` and `project_name`. The current tutorial workaround is to create a fresh project through the active Desktop session, reconnect, and save it to an absolute `.aedt` path before creating the driven-modal design.
 
 ## Next safe restart point
 
