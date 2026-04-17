@@ -8,6 +8,7 @@ from squadds.simulations.drivenmodal.design import (
     format_exception_for_console,
     render_drivenmodal_design,
     run_drivenmodal_sweep,
+    safe_ansys_design_name,
     write_qiskit_layer_stack_csv,
 )
 from squadds.simulations.drivenmodal.models import DrivenModalLayerStackSpec
@@ -185,3 +186,13 @@ def test_run_drivenmodal_sweep_prefers_setup_handle_and_sets_current_sweep():
     assert sweep is setup.sweep
     assert renderer.current_sweep is setup.sweep
     assert setup.sweep.analyzed is True
+
+
+def test_safe_ansys_design_name_is_short_and_stable():
+    first = safe_ansys_design_name("tutorial10-qubit-claw-000-v1")
+    second = safe_ansys_design_name("tutorial10-qubit-claw-000-v1")
+
+    assert first == second
+    assert first.startswith("dm_")
+    assert "-" not in first
+    assert len(first) <= 24

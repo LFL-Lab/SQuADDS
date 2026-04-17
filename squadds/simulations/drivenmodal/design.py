@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import re
 from pathlib import Path
 from typing import Any
 
@@ -83,6 +85,20 @@ def connect_renderer_to_new_ansys_design(
 def format_exception_for_console(exc: BaseException) -> str:
     """Return an ASCII-safe exception string for Windows console output."""
     return str(exc).encode("ascii", "backslashreplace").decode("ascii")
+
+
+def safe_ansys_design_name(identifier: str, *, prefix: str = "dm") -> str:
+    """Return a short HFSS-safe design name derived from a longer run identifier.
+
+    Older HFSS / pyEPR combinations can become unstable when driven-modal design
+    names are long and heavily punctuated. We keep the user-facing run ID in the
+    checkpoint and artifact layout, but use a compact deterministic alias for
+    the internal Ansys design name.
+    """
+    slug = re.sub(r"[^0-9A-Za-z]+", "_", identifier).strip("_").lower()
+    slug = slug[:12] or "run"
+    digest = hashlib.sha1(identifier.encode("utf-8")).hexdigest()[:8]
+    return f"{prefix}_{slug}_{digest}"
 
 
 def render_drivenmodal_design(

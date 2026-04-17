@@ -49,6 +49,7 @@ from squadds.simulations.drivenmodal.design import (
     format_exception_for_console,
     render_drivenmodal_design,
     run_drivenmodal_sweep,
+    safe_ansys_design_name,
 )
 from squadds.simulations.drivenmodal.hfss_data import (
     parameter_dataframe_to_tensor,
@@ -335,6 +336,7 @@ def run_capacitance_demo(
         project_dir.mkdir(parents=True, exist_ok=True)
         design, layer_stack_csv = build_design_fn(request, artifacts_dir / "layer_stack.csv")
         dump_json(artifacts_dir / "resolved_layer_stack.json", {"rows": prepared["layer_stack"]})
+        ansys_design_name = safe_ansys_design_name(request.metadata["run_id"])
 
         renderer = None
         try:
@@ -342,13 +344,13 @@ def run_capacitance_demo(
                 design,
                 initiate=False,
                 options=Dict(
-                    design_name=f"{request.metadata['run_id']}_dm",
+                    design_name=ansys_design_name,
                 ),
             )
             project_file = prepare_renderer_project(renderer, project_dir, request.metadata["run_id"])
             connect_renderer_to_new_ansys_design(
                 renderer,
-                f"{request.metadata['run_id']}_dm",
+                ansys_design_name,
                 "drivenmodal",
             )
             renderer.clean_active_design()
@@ -390,6 +392,7 @@ def run_capacitance_demo(
                     "layer_stack_csv": str(layer_stack_csv),
                     "project_dir": str(project_dir),
                     "project_file": str(project_file),
+                    "ansys_design_name": ansys_design_name,
                 },
             )
             mark_stage_complete(manifest_path, "artifacts_exported")
