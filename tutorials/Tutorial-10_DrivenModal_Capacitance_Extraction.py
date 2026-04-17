@@ -42,7 +42,11 @@ from squadds.simulations.drivenmodal.capacitance import (
     capacitance_matrix_from_y,
     maxwell_capacitance_dataframe,
 )
-from squadds.simulations.drivenmodal.design import create_multiplanar_design
+from squadds.simulations.drivenmodal.design import (
+    connect_renderer_to_new_ansys_design,
+    create_multiplanar_design,
+    format_exception_for_console,
+)
 from squadds.simulations.drivenmodal.hfss_data import (
     parameter_dataframe_to_tensor,
     write_touchstone_from_dataframe,
@@ -339,7 +343,11 @@ def run_capacitance_demo(
                 ),
             )
             project_file = prepare_renderer_project(renderer, project_dir, request.metadata["run_id"])
-            renderer.new_ansys_design(f"{request.metadata['run_id']}_dm", "drivenmodal")
+            connect_renderer_to_new_ansys_design(
+                renderer,
+                f"{request.metadata['run_id']}_dm",
+                "drivenmodal",
+            )
             renderer.clean_active_design()
 
             port_specs = build_capacitance_port_specs(request.system_kind, request.design_payload)
@@ -382,7 +390,10 @@ def run_capacitance_demo(
                 try:
                     renderer.disconnect_ansys()
                 except Exception as exc:  # pragma: no cover - best effort cleanup on the HFSS machine
-                    print(f"[{label}] Warning while disconnecting Ansys: {exc}")
+                    print(
+                        f"[{label}] Warning while disconnecting Ansys: "
+                        f"{format_exception_for_console(exc)}"
+                    )
 
     freqs_hz, y_matrices = parameter_dataframe_to_tensor(y_df, matrix_size=2, parameter_prefix="Y")
     cap_df = capacitance_dataframe_from_y_sweep(freqs_hz, y_matrices, node_names=node_names)

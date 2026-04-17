@@ -50,7 +50,11 @@ from squadds.simulations.drivenmodal.coupled_postprocess import (
     terminate_port_y,
     y_to_s,
 )
-from squadds.simulations.drivenmodal.design import create_multiplanar_design
+from squadds.simulations.drivenmodal.design import (
+    connect_renderer_to_new_ansys_design,
+    create_multiplanar_design,
+    format_exception_for_console,
+)
 from squadds.simulations.drivenmodal.hfss_data import (
     parameter_dataframe_to_tensor,
     write_touchstone_from_dataframe,
@@ -390,7 +394,11 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
                 ),
             )
             project_file = prepare_renderer_project(renderer, project_dir, request.metadata["run_id"])
-            renderer.new_ansys_design(f"{request.metadata['run_id']}_dm", "drivenmodal")
+            connect_renderer_to_new_ansys_design(
+                renderer,
+                f"{request.metadata['run_id']}_dm",
+                "drivenmodal",
+            )
             renderer.clean_active_design()
 
             port_specs = build_coupled_system_port_specs(request.design_payload)
@@ -433,7 +441,10 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
                 try:
                     renderer.disconnect_ansys()
                 except Exception as exc:  # pragma: no cover - best effort cleanup on the HFSS machine
-                    print(f"[{request.metadata['run_id']}] Warning while disconnecting Ansys: {exc}")
+                    print(
+                        f"[{request.metadata['run_id']}] Warning while disconnecting Ansys: "
+                        f"{format_exception_for_console(exc)}"
+                    )
 
     freqs_hz, y_matrices = parameter_dataframe_to_tensor(y_df, matrix_size=3, parameter_prefix="Y")
     ground_load = 1j * 2 * np.pi * freqs_hz * reference["lj_ground_h"]

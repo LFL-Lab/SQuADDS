@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from qiskit_metal.designs.design_multiplanar import MultiPlanar
 
@@ -43,3 +44,27 @@ def create_multiplanar_design(
     design.chips[layer_stack.chip_name]["size"]["size_x"] = chip_size_x
     design.chips[layer_stack.chip_name]["size"]["size_y"] = chip_size_y
     return design, csv_path
+
+
+def connect_renderer_to_new_ansys_design(
+    renderer: Any,
+    design_name: str,
+    solution_type: str = "drivenmodal",
+):
+    """Create a new Ansys design without forcing an immediate setup lookup.
+
+    Qiskit Metal's ``new_ansys_design(..., connect=True)`` helper reconnects via
+    ``connect_ansys_design()``, which unconditionally calls ``connect_setup()``.
+    Brand-new driven-modal designs do not have a setup yet, so that path fails
+    before callers can create one. We avoid that eager setup lookup by creating
+    the design with ``connect=False`` and then explicitly binding ``pinfo`` to
+    the new design only.
+    """
+    ansys_design = renderer.new_ansys_design(design_name, solution_type, connect=False)
+    renderer.pinfo.connect_design(ansys_design.name)
+    return ansys_design
+
+
+def format_exception_for_console(exc: BaseException) -> str:
+    """Return an ASCII-safe exception string for Windows console output."""
+    return str(exc).encode("ascii", "backslashreplace").decode("ascii")
