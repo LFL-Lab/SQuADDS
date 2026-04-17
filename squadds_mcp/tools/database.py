@@ -226,3 +226,218 @@ def register_database_tools(mcp: FastMCP) -> None:
         db = ctx.request_context.lifespan_context.db
         results = db.view_simulation_results(device_name)
         return sanitize_for_json(results) if results else {"error": f"No results found for device '{device_name}'."}
+
+    @mcp.tool()
+    async def list_data_types(ctx: Context) -> dict:
+        """List and explain available data types in SQuADDS.
+
+        SQuADDS has two main data types:
+        - **cap_matrix**: Capacitance matrix simulation data. Contains geometric
+          design parameters and the resulting capacitance values from electrostatic
+          simulations. Used for qubit and coupler components.
+        - **eigenmode**: Eigenmode simulation data. Contains resonant frequencies,
+          quality factors (kappa), and other electromagnetic properties from
+          eigenmode simulations. Used for cavity_claw components.
+
+        Use the returned data type names with ``get_dataset`` or ``get_dataset_info``.
+        """
+        db = ctx.request_context.lifespan_context.db
+        all_types = db.supported_data_types()
+        unique_types = sorted(set(all_types))
+
+        type_descriptions = {
+            "cap_matrix": {
+                "description": "Capacitance matrix data from electrostatic simulations",
+                "used_for": ["qubit", "coupler"],
+                "typical_columns": [
+                    "design_options (geometry parameters)",
+                    "sim_options (simulation settings)",
+                    "sim_results (capacitance matrix values)",
+                    "contributor (data source info)",
+                ],
+                "physics": (
+                    "The capacitance matrix relates voltages to charges on each island. "
+                    "For a transmon: C_q determines E_C (charging energy) and thus "
+                    "qubit frequency and anharmonicity. For coupled systems: cross-capacitances "
+                    "determine coupling strength (g)."
+                ),
+            },
+            "eigenmode": {
+                "description": "Eigenmode simulation data (frequencies, quality factors)",
+                "used_for": ["cavity_claw"],
+                "typical_columns": [
+                    "design_options (geometry parameters)",
+                    "sim_options (simulation settings)",
+                    "cavity_frequency_GHz (resonant frequency)",
+                    "kappa_kHz (linewidth / coupling rate)",
+                    "coupler_type (CLT for quarter-wave, NCap for half-wave)",
+                ],
+                "physics": (
+                    "Eigenmode simulations find the natural resonant frequencies and "
+                    "decay rates of the cavity. kappa (linewidth) determines the "
+                    "photon lifetime and measurement speed."
+                ),
+            },
+        }
+
+        result = {
+            "data_types": unique_types,
+            "descriptions": {t: type_descriptions.get(t, {"description": t}) for t in unique_types},
+        }
+        return result
+
+    @mcp.tool()
+    async def get_capacitance_data(
+        ctx: Context,
+        component: str,
+        component_name: str,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> DatasetResult:
+        """Load capacitance matrix (cap_matrix) data for a component.
+
+        This is a convenience tool that wraps ``get_dataset`` specifically
+        for capacitance data, which is the most commonly needed raw data type.
+
+        **Capacitance data is available for:**
+        - Qubits: ``component='qubit'``, ``component_name='TransmonCross'``
+          → Contains design geometry and resulting capacitance matrices.
+          The capacitance values determine the qubit's charging energy (E_C),
+          which sets the qubit frequency and anharmonicity.
+        - Couplers: ``component='coupler'``, ``component_name='NCap'``
+          → Contains CapNInterdigitalTee coupler geometry and capacitances.
+          Used for half-wave resonator systems.
+
+        **Note:** Cavity/resonator data uses data_type='eigenmode', not 'cap_matrix'.
+        Use ``get_dataset(component='cavity_claw', ..., data_type='eigenmode')`` for that.
+
+        Args:
+            component: 'qubit' or 'coupler'.
+            component_name: Component name (e.g. 'TransmonCross', 'NCap').
+            limit: Max rows per page (default 50, max 200).
+            offset: Starting row index (default 0).
+        """
+        db = ctx.request_context.lifespan_context.db
+        limit = min(limit, 200)
+
+        df = db.get_dataset(
+            data_type="cap_matrix",
+            component=component,
+            component_name=component_name,
+        )
+
+        if df is None:
+            return DatasetResult(
+                rows=[],
+                total_rows=0,
+                offset=offset,
+                limit=limit,
+                component=component,
+                component_name=component_name,
+                data_type="cap_matrix",
+            )
+
+        total = len(df)
+        rows = dataframe_to_records(df, limit=limit, offset=offset)
+
+        return DatasetResult(
+            rows=rows,
+            total_rows=total,
+            offset=offset,
+            limit=limit,
+            component=component,
+            component_name=component_name,
+            data_type="cap_matrix",
+        )
+
+    @mcp.tool()
+    async def get_resonator_info(ctx: Context) -> dict:
+        """Get detailed information about resonator types in SQuADDS.
+
+        SQuADDS supports two resonator topologies that fundamentally affect
+        the system Hamiltonian:
+
+        **Quarter-wave (λ/4) resonators:**
+        - Coupler type: CLT (Coplanar-Line-T)
+        - Standard CPW resonator shorted at one end
+        - More compact design
+        - Most common in literature
+        - Use ``resonator_type='quarter'`` in search tools
+
+        **Half-wave (λ/2) resonators:**
+        - Coupler type: NCap (CapNInterdigitalTee)
+        - CPW resonator open at both ends, coupled via interdigital capacitor
+        - Requires separate capacitance data for the NCap coupler
+        - Different frequency-length relationship than quarter-wave
+        - Use ``resonator_type='half'`` in search tools
+
+        **Critical distinction for design searches:**
+        - ``resonator_type='quarter'`` → searches CLT-coupled designs
+        - ``resonator_type='half'`` → searches NCap-coupled designs
+        - The resonator type affects ALL Hamiltonian parameters (frequency, kappa, g)
+        - You MUST specify the correct resonator_type for accurate design matching
+
+        This tool returns available resonator types, their coupler mappings,
+        and which datasets contain data for each type.
+        """
+        db = ctx.request_context.lifespan_context.db
+
+        # Check what configs exist for each type
+        configs = db.configs
+        has_clt = any("CLT" in c for c in configs)
+        has_ncap = any("NCap" in c for c in configs)
+
+        return {
+            "resonator_types": {
+                "quarter": {
+                    "coupler_type": "CLT",
+                    "full_name": "Quarter-wave (λ/4) resonator",
+                    "coupling_mechanism": "Coplanar Line T-junction",
+                    "description": (
+                        "Standard CPW resonator shorted at one end. "
+                        "The resonant frequency is f = c/(4*L*sqrt(ε_eff)) where L is the "
+                        "total resonator length. Most common topology in superconducting circuits."
+                    ),
+                    "data_available": has_clt,
+                    "datasets": [
+                        "cavity_claw-RouteMeander-eigenmode (filtered by coupler_type='CLT')",
+                        "qubit-TransmonCross-cap_matrix (qubit capacitance)",
+                    ],
+                    "how_to_search": {
+                        "tool": "find_closest_designs",
+                        "params": {"system_type": "qubit_cavity", "resonator_type": "quarter"},
+                    },
+                },
+                "half": {
+                    "coupler_type": "NCap",
+                    "full_name": "Half-wave (λ/2) resonator",
+                    "coupling_mechanism": "CapNInterdigitalTee (interdigital capacitor)",
+                    "description": (
+                        "CPW resonator open at both ends, coupled via an interdigital capacitor. "
+                        "The resonant frequency is f = c/(2*L*sqrt(ε_eff)). Requires separate NCap "
+                        "coupler capacitance data for accurate Hamiltonian parameter calculation."
+                    ),
+                    "data_available": has_ncap,
+                    "datasets": [
+                        "cavity_claw-RouteMeander-eigenmode (filtered by coupler_type='NCap')",
+                        "qubit-TransmonCross-cap_matrix (qubit capacitance)",
+                        "coupler-NCap-cap_matrix (coupler capacitance — REQUIRED for half-wave)",
+                    ],
+                    "how_to_search": {
+                        "tool": "find_closest_designs",
+                        "params": {"system_type": "qubit_cavity", "resonator_type": "half"},
+                    },
+                },
+            },
+            "key_differences": [
+                "Quarter-wave resonators are more compact (shorter for same frequency)",
+                "Half-wave resonators have a voltage antinode at both ends",
+                "Half-wave systems require NCap coupler capacitance data for Hamiltonian extraction",
+                "The coupling strength (g) depends on the coupler geometry, which differs between the two",
+                "resonator_type MUST match when searching: mixing types gives incorrect results",
+            ],
+            "recommendation": (
+                "Use 'quarter' (default) unless you specifically need half-wave resonators. "
+                "Quarter-wave has more data in SQuADDS and is the standard in most qubit architectures."
+            ),
+        }

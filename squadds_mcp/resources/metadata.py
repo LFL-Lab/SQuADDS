@@ -109,18 +109,26 @@ parameters, it finds the closest matching design geometries.
    - `list_components` → see component types (qubit, cavity_claw, coupler)
    - `list_component_names(component="qubit")` → see qubit types
    - `list_datasets` → see all available datasets
+   - `list_data_types` → understand cap_matrix vs eigenmode data
+   - `get_resonator_info` → understand quarter vs half wave resonators
    - `get_dataset_info(component, name, data_type)` → dataset metadata
 
 ### 2. Find a Design (Most Common)
    - `get_hamiltonian_param_keys(system_type)` → discover valid target params
    - `find_closest_designs(system_type, target_params, ...)` → search!
    - Result includes design_options (geometry) + hamiltonian_params (physics)
+   - **IMPORTANT**: Set `resonator_type` correctly ('quarter' or 'half')
 
 ### 3. Get an Interpolated Design
    - `interpolate_design(target_params, ...)` → physics-scaled design
    - Only for qubit_cavity systems
 
-### 4. Inspect Reference Devices
+### 4. Query Capacitance Data
+   - `get_capacitance_data(component="qubit", component_name="TransmonCross")` → qubit cap matrix
+   - `get_capacitance_data(component="coupler", component_name="NCap")` → NCap coupler caps
+   - Capacitance determines E_C (charging energy) → qubit freq + anharmonicity
+
+### 5. Inspect Reference Devices
    - `list_measured_devices` → all experimental devices
    - `get_reference_device(component, name, data_type)` → validation source
    - `get_fabrication_recipe(device_name)` → how to build it
@@ -130,6 +138,20 @@ parameters, it finds the closest matching design geometries.
    - `cavity_claw` — standalone cavity (params: cavity_frequency_GHz, kappa_kHz)
    - `qubit_cavity` — coupled system (all params above + g_MHz)
 
+## Resonator Types (CRITICAL for coupled systems)
+   - `quarter` (default) — λ/4 resonator with CLT coupler. Most common.
+   - `half` — λ/2 resonator with NCap (interdigital capacitor) coupler.
+   - The resonator type affects ALL Hamiltonian parameters!
+   - Always specify the correct type when searching for designs.
+   - Call `get_resonator_info` for full details.
+
+## Data Types
+   - `cap_matrix` — Capacitance matrix data (for qubits and couplers).
+     Contains design geometry → capacitance values.
+   - `eigenmode` — Eigenmode simulation data (for cavities).
+     Contains design geometry → frequency, kappa, coupler_type.
+   - Call `list_data_types` for full explanations.
+
 ## Typical Target Parameters
    - qubit_frequency_GHz: 3–8 GHz
    - anharmonicity_MHz: −500 to −50 MHz
@@ -138,3 +160,4 @@ parameters, it finds the closest matching design geometries.
    - g_MHz: 10–200 MHz
    - resonator_type: "quarter" or "half"
 """
+
