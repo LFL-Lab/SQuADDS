@@ -343,9 +343,7 @@ def run_capacitance_demo(
             renderer = QHFSSRenderer(
                 design,
                 initiate=False,
-                options=Dict(
-                    design_name=ansys_design_name,
-                ),
+                options=Dict(),
             )
             project_file = prepare_renderer_project(renderer, project_dir, request.metadata["run_id"])
             connect_renderer_to_new_ansys_design(
