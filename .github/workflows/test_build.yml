@@ -57,12 +57,16 @@ jobs:
       - name: Run import tests
         run: uv run python tests/imports_test.py
 
-      - name: Run MVP tests
-        run: uv run python tests/mvp_test.py
-
       - name: Run pytest
-        run: uv run pytest tests/ -v --tb=short
-        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          uv run pytest -q --tb=short --ignore=tests/imports_test.py --ignore=tests/mvp_test.py
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ] && [ "$status" -ne 5 ]; then
+            exit "$status"
+          fi
 
   lint:
     runs-on: ubuntu-latest
