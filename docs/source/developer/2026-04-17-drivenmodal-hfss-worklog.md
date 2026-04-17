@@ -113,6 +113,10 @@ Add newly touched files here as implementation progresses.
 - `uv run python -m py_compile tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py` -> pass
 - `uv run pytest tests/test_drivenmodal_design.py -q --tb=short` -> pass, 8 passed, 4 upstream Qiskit Metal warnings
 - `uv run --extra dev ruff check tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py` -> pass
+- Windows/Ansys validation:
+  - `ssh LFLLAB-CODEX ... uv run python .\\SQuADDS\\tutorials\\Tutorial-10_DrivenModal_Capacitance_Extraction.py`
+  - Outcome at commit `cbe1277`: Tutorial 10 now exits successfully end-to-end on the validation machine.
+  - Important caveat: the qubit-claw stage completes and saves artifacts, but the NCap stage currently produces clearly unphysical capacitance magnitudes (for example `top_to_ground` on the order of `4.7e5 fF`). Another agent should therefore treat Tutorial 10 as runtime-executable but not yet numerically calibrated for NCap/Q3D agreement.
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
@@ -123,6 +127,10 @@ Update this section after every meaningful verification run with the exact comma
   - HFSS driven-modal should use the same active conductors, declared through `port_list` and `jj_to_port`, and should not invent a fake explicit ground port because the renderer already creates the required pin endcaps and lumped-port sheets.
   - For qubit-style capacitance extraction, the documented Qiskit Metal pattern is the same one now used in Tutorial 10: one readout pin in `port_list` plus `rect_jj` in `jj_to_port`.
 - The same docs review also confirmed that Qiskit Metal's higher-level `ScatteringImpedanceSim` analysis is not a free escape hatch on the current Windows stack. In `qiskit_metal==0.5.3.post1`, `ScatteringImpedanceSim._analyze()` still calls `renderer.initialize_drivenmodal(...)`, and that helper immediately routes through the older `new_ansys_setup(...)` + `add_sweep(...)` path that already misbehaves with the pyEPR/HFSS combination on the validation machine. Another agent should therefore keep the current wrapper approach unless the underlying Qiskit Metal version changes.
+- Tutorial 10 runtime status has changed materially:
+  - the original blocker was "script crashes before or during the HFSS solve";
+  - after the retry and startup-isolation patches, the blocker is now "script runs to completion, but NCap port/terminal modeling does not yet reproduce Q3D-like capacitances."
+  Another agent should not spend time re-solving the old renderer startup bug unless it reappears on a newer environment.
 - `scikit-rf` is currently wired as a core dependency because the coupled-system post-processing helpers now depend on it. Another agent can revisit that split later, but should do so deliberately rather than implicitly.
 - Whether dense capacitance-vs-frequency data should be stored as JSON, parquet, or a more compact artifact format remains open until dataset serialization is implemented.
 - The tutorials currently store dense capacitance-vs-frequency data as parquet and raw complex HFSS tables as pickle because the latter remain the most convenient portable checkpoint format for complex-valued pandas frames. Another agent can revisit that once the Hugging Face artifact contract is finalized.
