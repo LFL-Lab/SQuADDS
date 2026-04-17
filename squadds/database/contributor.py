@@ -2,10 +2,8 @@ import glob
 import json
 import os
 import subprocess
-from datetime import datetime
 
 from datasets import get_dataset_config_names, load_dataset
-from dotenv import load_dotenv
 
 from squadds.core.globals import *
 from squadds.core.utils import (
@@ -16,6 +14,7 @@ from squadds.core.utils import (
     get_type,
     validate_types,
 )
+from squadds.database.contributor_env import build_contributor_record, load_contributor_environment
 
 """
 ! TODO:
@@ -67,7 +66,7 @@ class ExistingConfigData:
         self.__repo_name = "SQuADDS/SQuADDS_DB"
         self.config = config
         self._validate_config_name()
-        load_dotenv(ENV_FILE_PATH)
+        load_contributor_environment()
         self.sim_results = {}
         self.design = {"design_tool": "", "design_options": {}}
         self.sim_options = {"setup": {}, "simulator": ""}
@@ -144,14 +143,7 @@ class ExistingConfigData:
         print(json.dumps(self.to_dict(), indent=4))
 
     def __set_contributor_info(self):
-        self.contributor = {
-            "group": os.getenv("GROUP_NAME"),
-            "PI": os.getenv("PI_NAME"),
-            "institution": os.getenv("INSTITUTION"),
-            "uploader": os.getenv("USER_NAME"),
-            "misc": os.getenv("CONTRIB_MISC"),
-            "date_created": datetime.now().strftime("%Y-%m-%d %H%M%S"),
-        }
+        self.contributor = build_contributor_record()
 
     def get_contributor_info(self):
         """
