@@ -14,6 +14,7 @@
 
 ### Create
 
+- `docs/source/developer/2026-04-17-drivenmodal-hfss-worklog.md`
 - `squadds/simulations/drivenmodal/__init__.py`
 - `squadds/simulations/drivenmodal/models.py`
 - `squadds/simulations/drivenmodal/layer_stack.py`
@@ -37,6 +38,8 @@
 
 ### Modify
 
+- `docs/source/developer/2026-04-17-drivenmodal-hfss-prd.md`
+- `docs/source/developer/2026-04-17-drivenmodal-hfss-plan.md`
 - `squadds/simulations/ansys_simulator.py`
 - `squadds/simulations/__init__.py`
 - `pyproject.toml`
@@ -44,6 +47,67 @@
 - `README.md`
 - `docs/source/release_notes.rst`
 - `tests/test_ansys_simulator.py`
+
+---
+
+### Task 0: Establish the single-source-of-truth work log
+
+**Files:**
+- Create: `docs/source/developer/2026-04-17-drivenmodal-hfss-worklog.md`
+- Modify: `docs/source/developer/2026-04-17-drivenmodal-hfss-prd.md`
+- Modify: `docs/source/developer/2026-04-17-drivenmodal-hfss-plan.md`
+
+- [ ] **Step 1: Create the work log before starting code**
+
+```markdown
+# Driven-Modal HFSS Work Log
+
+## Canonical docs
+- PRD: `docs/source/developer/2026-04-17-drivenmodal-hfss-prd.md`
+- Plan: `docs/source/developer/2026-04-17-drivenmodal-hfss-plan.md`
+
+## Branch
+- `codex/drivenmodal-api-prd`
+
+## Rules for future agents
+- Do not touch unrelated untracked local tutorial/runtime files.
+- Keep materials fixed in v1; only thickness-style layer-stack overrides are allowed.
+- Keep checkpoint manifests resume-safe; never introduce sweep execution that cannot restart from partial progress.
+- Prefer modular, reusable simulation helpers over system-specific one-off scripts.
+
+## Current status
+- [ ] Task 0 work log created
+- [ ] Task 1 scaffold started
+- [ ] Task 2 models started
+
+## Next concrete step
+- Write the first failing import and model tests.
+```
+
+- [ ] **Step 2: Record restart / handoff conventions**
+
+Update the work log with sections for:
+
+- current implementation slice
+- touched files
+- latest verification commands and outputs
+- open decisions
+- next safe restart point
+
+- [ ] **Step 3: Re-read the PRD and plan after adding the work log**
+
+Run: `sed -n '1,120p' docs/source/developer/2026-04-17-drivenmodal-hfss-prd.md`
+Expected: The PRD references the work log as the canonical execution-status record
+
+Run: `sed -n '1,120p' docs/source/developer/2026-04-17-drivenmodal-hfss-plan.md`
+Expected: The plan includes the work log in file structure and Task 0
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add docs/source/developer/2026-04-17-drivenmodal-hfss-worklog.md docs/source/developer/2026-04-17-drivenmodal-hfss-prd.md docs/source/developer/2026-04-17-drivenmodal-hfss-plan.md
+git commit -m "docs: add drivenmodal work log and handoff conventions"
+```
 
 ---
 

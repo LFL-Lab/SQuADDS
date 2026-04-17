@@ -14,6 +14,8 @@ SQuADDS currently exposes Ansys-backed eigenmode and lumped-element workflows th
 
 The first release is design- and API-complete, but it intentionally stops short of live HFSS validation in CI. The implementation must be structured so that once Ansys-enabled validation is ready, the runtime and dataset flows can be turned on without re-architecting the feature.
 
+Implementation will be tracked through a single repo-native work log at [2026-04-17-drivenmodal-hfss-worklog.md](/Users/shanto/LFL/SQuADDS/SQuADDS/docs/source/developer/2026-04-17-drivenmodal-hfss-worklog.md). That file is the source of truth for current execution status, active decisions, restart instructions, verification evidence, and handoff notes for future agents.
+
 ## Problem Statement
 
 Users can already search SQuADDS for pre-simulated devices and can run some Ansys-backed workflows, but they cannot yet:
@@ -309,6 +311,8 @@ The minimum stage markers are:
 - `serialized`
 
 This allows reruns to resume from exported artifacts rather than repeating the entire HFSS solve whenever possible.
+
+The same restart semantics must also be reflected in the implementation work log so another agent can determine, without reading git history, which checkpoint stages already exist and which code paths are expected to be resume-safe.
 
 ## Dataset Design
 

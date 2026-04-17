@@ -1,7 +1,7 @@
-"""Simulation interfaces and typed request models."""
+"""Driven-modal HFSS request, result, and utility models."""
 
-from .ansys_simulator import AnsysSimulator
-from .drivenmodal import (
+from .layer_stack import LAYER_STACK_COLUMNS, build_layer_stack_dataframe, resolve_layer_stack
+from .models import (
     CapacitanceExtractionRequest,
     CapacitanceExtractionResult,
     CoupledSystemDrivenModalRequest,
@@ -14,7 +14,7 @@ from .drivenmodal import (
 )
 
 __all__ = [
-    "AnsysSimulator",
+    "LAYER_STACK_COLUMNS",
     "CapacitanceExtractionRequest",
     "CapacitanceExtractionResult",
     "CoupledSystemDrivenModalRequest",
@@ -24,4 +24,6 @@ __all__ = [
     "DrivenModalRunManifest",
     "DrivenModalSetupSpec",
     "DrivenModalSweepSpec",
+    "build_layer_stack_dataframe",
+    "resolve_layer_stack",
 ]
