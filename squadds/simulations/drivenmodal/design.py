@@ -127,8 +127,42 @@ def ensure_drivenmodal_setup(renderer: Any, **setup_kwargs: Any):
     setup_name = setup_kwargs.get("name")
 
     if setup_name and hasattr(renderer, "activate_ansys_setup"):
-        renderer.activate_ansys_setup(setup_name)
-        if hasattr(renderer, "edit_drivenmodal_setup"):
+        try:
+            renderer.activate_ansys_setup(setup_name)
+        except Exception:
+            # Older pyEPR / Qiskit Metal combinations can fail to rebound an
+            # existing driven-modal setup even though creation succeeded. Keep
+            # the returned setup handle and continue via direct setup methods.
+            pass
+        if hasattr(renderer, "pinfo"):
+            renderer.pinfo.setup_name = setup_name
+            renderer.pinfo.setup = setup
+        if hasattr(renderer, "edit_drivenmodal_setup") and getattr(renderer, "pinfo", None) is not None:
             renderer.edit_drivenmodal_setup(Dict(setup_kwargs))
 
     return setup
+
+
+def run_drivenmodal_sweep(renderer: Any, setup: Any, *, setup_name: str, **sweep_kwargs: Any):
+    """Insert and analyze a driven-modal sweep with compatibility fallbacks.
+
+    Older HFSS renderer stacks expose a valid setup object from
+    ``add_drivenmodal_setup`` but fail when the renderer later tries to recover
+    that setup through ``pinfo.get_setup(setup_name)``. When a concrete setup
+    handle is available, use it directly for sweep insertion and analysis, then
+    store the resulting sweep on ``renderer.current_sweep`` so parameter export
+    continues to work.
+    """
+    sweep_name = sweep_kwargs["name"]
+
+    if setup is not None and hasattr(setup, "insert_sweep") and hasattr(setup, "get_sweep"):
+        setup.insert_sweep(**sweep_kwargs)
+        sweep = setup.get_sweep(sweep_name)
+        if hasattr(sweep, "analyze_sweep"):
+            sweep.analyze_sweep()
+        renderer.current_sweep = sweep
+        return sweep
+
+    renderer.add_sweep(setup_name=setup_name, **sweep_kwargs)
+    renderer.analyze_sweep(sweep_name, setup_name)
+    return getattr(renderer, "current_sweep", None)

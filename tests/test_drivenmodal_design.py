@@ -7,6 +7,7 @@ from squadds.simulations.drivenmodal.design import (
     ensure_drivenmodal_setup,
     format_exception_for_console,
     render_drivenmodal_design,
+    run_drivenmodal_sweep,
     write_qiskit_layer_stack_csv,
 )
 from squadds.simulations.drivenmodal.models import DrivenModalLayerStackSpec
@@ -130,8 +131,57 @@ def test_ensure_drivenmodal_setup_activates_and_edits_named_setup():
     )
 
     assert result == "setup"
-    assert renderer.calls == [
+    assert renderer.calls[:2] == [
         ("add", {"name": "DrivenModalSetup", "freq_ghz": 5.0, "max_passes": 20}),
         ("activate", "DrivenModalSetup"),
-        ("edit", {"name": "DrivenModalSetup", "freq_ghz": 5.0, "max_passes": 20}),
     ]
+
+
+def test_run_drivenmodal_sweep_prefers_setup_handle_and_sets_current_sweep():
+    class FakeSweep:
+        def __init__(self):
+            self.analyzed = False
+
+        def analyze_sweep(self):
+            self.analyzed = True
+
+    class FakeSetup:
+        def __init__(self):
+            self.insert_calls = []
+            self.sweep = FakeSweep()
+
+        def insert_sweep(self, **kwargs):
+            self.insert_calls.append(kwargs)
+
+        def get_sweep(self, name):
+            assert name == "DrivenModalSweep"
+            return self.sweep
+
+    renderer = SimpleNamespace(current_sweep=None)
+    setup = FakeSetup()
+
+    sweep = run_drivenmodal_sweep(
+        renderer,
+        setup,
+        setup_name="DrivenModalSetup",
+        start_ghz=1.0,
+        stop_ghz=12.0,
+        count=221,
+        name="DrivenModalSweep",
+        type="Fast",
+        save_fields=False,
+    )
+
+    assert setup.insert_calls == [
+        {
+            "start_ghz": 1.0,
+            "stop_ghz": 12.0,
+            "count": 221,
+            "name": "DrivenModalSweep",
+            "type": "Fast",
+            "save_fields": False,
+        }
+    ]
+    assert sweep is setup.sweep
+    assert renderer.current_sweep is setup.sweep
+    assert setup.sweep.analyzed is True

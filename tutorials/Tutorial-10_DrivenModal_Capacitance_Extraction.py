@@ -48,6 +48,7 @@ from squadds.simulations.drivenmodal.design import (
     ensure_drivenmodal_setup,
     format_exception_for_console,
     render_drivenmodal_design,
+    run_drivenmodal_sweep,
 )
 from squadds.simulations.drivenmodal.hfss_data import (
     parameter_dataframe_to_tensor,
@@ -363,11 +364,15 @@ def run_capacitance_demo(
             )
             mark_stage_complete(manifest_path, "rendered")
 
-            ensure_drivenmodal_setup(renderer, **request.setup.to_renderer_kwargs())
+            setup = ensure_drivenmodal_setup(renderer, **request.setup.to_renderer_kwargs())
             mark_stage_complete(manifest_path, "setup_created")
 
-            renderer.add_sweep(setup_name=request.setup.name, **request.sweep.to_renderer_kwargs())
-            renderer.analyze_sweep(request.sweep.name, request.setup.name)
+            run_drivenmodal_sweep(
+                renderer,
+                setup,
+                setup_name=request.setup.name,
+                **request.sweep.to_renderer_kwargs(),
+            )
             mark_stage_complete(manifest_path, "sweep_completed")
 
             s_df, y_df, z_df = renderer.get_all_Pparms_matrices(matrix_size=len(port_specs))
