@@ -72,3 +72,32 @@ def connect_renderer_to_new_ansys_design(
 def format_exception_for_console(exc: BaseException) -> str:
     """Return an ASCII-safe exception string for Windows console output."""
     return str(exc).encode("ascii", "backslashreplace").decode("ascii")
+
+
+def render_drivenmodal_design(
+    renderer: Any,
+    *,
+    selection: list[str],
+    open_pins: list[tuple[str, str]] | None = None,
+    port_list: list[tuple[str, str, float | str]] | None = None,
+    jj_to_port: list[tuple[str, str, float | str, bool]] | None = None,
+    ignored_jjs: list[tuple[str, str]] | None = None,
+    box_plus_buffer: bool = True,
+):
+    """Render a driven-modal geometry with a Qiskit Metal compatibility guard.
+
+    Qiskit Metal's current HFSS driven-modal renderer assumes ``open_pins`` is a
+    list whenever ``port_list`` is present and concatenates into it internally.
+    Normalizing ``None`` to ``[]`` here keeps the public call shape clean while
+    avoiding that renderer-side ``TypeError``.
+    """
+    if open_pins is None and (port_list or jj_to_port):
+        open_pins = []
+    return renderer.render_design(
+        selection=selection,
+        open_pins=open_pins,
+        port_list=port_list,
+        jj_to_port=jj_to_port,
+        ignored_jjs=ignored_jjs,
+        box_plus_buffer=box_plus_buffer,
+    )

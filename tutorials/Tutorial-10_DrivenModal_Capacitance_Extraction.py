@@ -46,6 +46,7 @@ from squadds.simulations.drivenmodal.design import (
     connect_renderer_to_new_ansys_design,
     create_multiplanar_design,
     format_exception_for_console,
+    render_drivenmodal_design,
 )
 from squadds.simulations.drivenmodal.hfss_data import (
     parameter_dataframe_to_tensor,
@@ -352,7 +353,8 @@ def run_capacitance_demo(
 
             port_specs = build_capacitance_port_specs(request.system_kind, request.design_payload)
             port_list, jj_to_port = split_rendered_ports(port_specs)
-            renderer.render_design(
+            render_drivenmodal_design(
+                renderer,
                 selection=list(design.components.keys()),
                 port_list=port_list or None,
                 jj_to_port=jj_to_port or None,

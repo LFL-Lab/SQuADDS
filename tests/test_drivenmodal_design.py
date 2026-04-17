@@ -5,6 +5,7 @@ from squadds.simulations.drivenmodal.design import (
     connect_renderer_to_new_ansys_design,
     create_multiplanar_design,
     format_exception_for_console,
+    render_drivenmodal_design,
     write_qiskit_layer_stack_csv,
 )
 from squadds.simulations.drivenmodal.models import DrivenModalLayerStackSpec
@@ -69,3 +70,29 @@ def test_format_exception_for_console_escapes_non_ascii_characters():
     message = format_exception_for_console(Exception("bad setup \U0001f914"))
 
     assert message == "bad setup \\U0001f914"
+
+
+def test_render_drivenmodal_design_normalizes_open_pins_for_ports():
+    class FakeRenderer:
+        def __init__(self):
+            self.kwargs = None
+
+        def render_design(self, **kwargs):
+            self.kwargs = kwargs
+            return "rendered"
+
+    renderer = FakeRenderer()
+
+    result = render_drivenmodal_design(
+        renderer,
+        selection=["xmon"],
+        port_list=[("xmon", "readout", 50)],
+        jj_to_port=[("xmon", "rect_jj", 50, True)],
+        box_plus_buffer=False,
+    )
+
+    assert result == "rendered"
+    assert renderer.kwargs["open_pins"] == []
+    assert renderer.kwargs["port_list"] == [("xmon", "readout", 50)]
+    assert renderer.kwargs["jj_to_port"] == [("xmon", "rect_jj", 50, True)]
+    assert renderer.kwargs["box_plus_buffer"] is False
