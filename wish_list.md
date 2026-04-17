@@ -69,7 +69,8 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Feature Requests:
 
-- add airbridge generation tool
+- DRY sims
+- async ansys
 - add chi to the complete df
 - Enable users to add methods with computation and append to `merged_df` for search in the `Analyzer` module
 - Allow users to pass a circuit from SQCircuits and SQuADDS to provide a first-guess physical layout in Qiskit Metal

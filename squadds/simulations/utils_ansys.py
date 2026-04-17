@@ -32,36 +32,38 @@ def delete_old_setups(aedt):
         aedt.setups[0].delete()
 
 
-def get_freq(epra, test_hfss):
+def get_freq(epra, test_hfss, generate_plots=False):
     project_name = test_hfss.pinfo.project_name
     design_name = test_hfss.pinfo.design_name
     setMaterialProperties(project_name, design_name, solutiontype="Eigenmode")
     epra.sim._analyze()
-    try:
-        epra.sim.plot_convergences()
-        epra.sim.save_screenshot()
-        epra.sim.plot_fields("main")
-        epra.sim.save_screenshot()
-    except Exception:
-        print("couldn't generate plots.")
+    if generate_plots:
+        try:
+            epra.sim.plot_convergences()
+            epra.sim.save_screenshot()
+            epra.sim.plot_fields("main")
+            epra.sim.save_screenshot()
+        except Exception as exc:
+            print(f"couldn't generate plots. Error: {exc}")
     f = epra.get_frequencies()
     freq = f.values[0][0] * 1e9
     print(f"freq = {round(freq / 1e9, 3)} GHz")
     return freq
 
 
-def get_freq_Q_kappa(epra, test_hfss):
+def get_freq_Q_kappa(epra, test_hfss, generate_plots=False):
     project_name = test_hfss.pinfo.project_name
     design_name = test_hfss.pinfo.design_name
     setMaterialProperties(project_name, design_name, solutiontype="Eigenmode")
     epra.sim._analyze()
-    try:
-        epra.sim.plot_convergences()
-        epra.sim.save_screenshot()
-        epra.sim.plot_fields("main")
-        epra.sim.save_screenshot()
-    except Exception:
-        print("couldn't generate plots.")
+    if generate_plots:
+        try:
+            epra.sim.plot_convergences()
+            epra.sim.save_screenshot()
+            epra.sim.plot_fields("main")
+            epra.sim.save_screenshot()
+        except Exception:
+            print("couldn't generate plots.")
     f = epra.get_frequencies()
     freq = f.values[0][0] * 1e9
     Q = f.values[0][1]

@@ -39,7 +39,9 @@ def find_kappa(f_rough, C_tg, C_tb):
     C_res = np.pi / (2 * w_rough * Z0) * 1e15
     print(C_res)
     w_est = np.sqrt(C_res / (C_res + C_tg + C_tb)) * w_rough
-    return (1 / 2 * Z0 * (w_est**2) * (C_tb**2) / (C_res + C_tg + C_tb)) * 1e-15 / (2 * np.pi) * 1e-3
+    kappa = (1 / 2 * Z0 * (w_est**2) * (C_tb**2) / (C_res + C_tg + C_tb)) * 1e-15 / (2 * np.pi) * 1e-3
+    f_est = w_est / (2 * np.pi)
+    return f_est, kappa
 
 
 def find_chi(alpha, f_q, g, f_r):

@@ -40,6 +40,12 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
 
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libopengl0 libglu1-mesa
+
       - name: Install dependencies
         run: uv sync --extra dev
 
@@ -48,15 +54,8 @@ jobs:
           echo "HUGGINGFACE_API_KEY=${{ secrets.HUGGINGFACE_API_KEY }}" > .env
         shell: bash
 
-      - name: Run import tests
-        run: uv run python tests/imports_test.py
-
-      - name: Run MVP tests
-        run: uv run python tests/mvp_test.py
-
       - name: Run pytest
-        run: uv run pytest tests/ -v --tb=short
-        continue-on-error: true
+        run: uv run pytest -q
 
   lint:
     runs-on: ubuntu-latest

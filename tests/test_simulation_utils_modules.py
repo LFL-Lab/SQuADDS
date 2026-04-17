@@ -5,6 +5,7 @@ from squadds.simulations.utils import (
     chunk_sweep_options,
     extract_value,
     flatten_dict,
+    find_kappa,
     get_cavity_claw_options_keys,
     read_json_files,
 )
@@ -50,3 +51,10 @@ def test_read_json_files_loads_all_json_payloads(tmp_path):
     values = sorted(item["value"] for item in read_json_files(str(tmp_path)))
 
     assert values == [1, 2]
+
+
+def test_find_kappa_returns_frequency_and_linewidth_tuple():
+    frequency, linewidth = find_kappa(7.1, 1.0, 2.0)
+
+    assert isinstance(frequency, float)
+    assert isinstance(linewidth, float)
