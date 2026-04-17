@@ -1,7 +1,12 @@
 import pandas as pd
 import pytest
 
-from squadds.core.db_state import format_selection_lines, get_unselect_attr_name, reset_selections, update_target_param_keys
+from squadds.core.db_state import (
+    format_selection_lines,
+    get_unselect_attr_name,
+    reset_selections,
+    update_target_param_keys,
+)
 
 
 class DummyDB:
@@ -66,7 +71,9 @@ def test_format_selection_lines_for_single_component_system():
 
 def test_update_target_param_keys_handles_initial_and_multi_system_updates():
     df = pd.DataFrame({"sim_results": [{"g_MHz": 55, "unit_g_MHz": "MHz"}]})
-    getter = lambda frame: ["g_MHz", "unit_g_MHz"]
+
+    def getter(frame):
+        return ["g_MHz", "unit_g_MHz"]
 
     assert update_target_param_keys(None, "qubit", df, getter) == ["g_MHz"]
     assert update_target_param_keys(["existing"], ["qubit", "cavity_claw"], df, getter) == ["existing", "g_MHz"]

@@ -1,4 +1,3 @@
-import glob
 import json
 import os
 import subprocess
@@ -182,7 +181,9 @@ class ExistingConfigData:
         Returns:
             None
         """
-        self.sim_results, self.units = add_sim_result_entry(self.sim_results, self.units, result_name, result_value, unit)
+        self.sim_results, self.units = add_sim_result_entry(
+            self.sim_results, self.units, result_name, result_value, unit
+        )
 
     def add_sim_setup(self, sim_setup):
         """

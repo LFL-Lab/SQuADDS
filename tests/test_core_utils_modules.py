@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 from squadds.core.utils import (
@@ -60,11 +59,17 @@ def test_create_unified_design_options_builds_expected_nested_payload():
         "design_options_cavity_claw": {
             "cplr_opts": {"finger_count": 5},
             "cpw_opts": {"total_length": "1000um"},
-            "claw_opts": {"connection_pads": {"readout": {"claw_cpw_width": "5um", "claw_cpw_length": "7um", "ground_spacing": "9um"}}},
+            "claw_opts": {
+                "connection_pads": {
+                    "readout": {"claw_cpw_width": "5um", "claw_cpw_length": "7um", "ground_spacing": "9um"}
+                }
+            },
         },
         "design_options_qubit": {
             "cross_length": "120um",
-            "connection_pads": {"readout": {"claw_cpw_width": "1um", "claw_cpw_length": "2um", "ground_spacing": "3um"}},
+            "connection_pads": {
+                "readout": {"claw_cpw_width": "1um", "claw_cpw_length": "2um", "ground_spacing": "3um"}
+            },
         },
         "coupler_type": "NCap",
     }

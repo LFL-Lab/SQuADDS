@@ -2,7 +2,6 @@ import importlib
 
 import pytest
 
-
 MODULES = [
     "squadds",
     "squadds.calcs",

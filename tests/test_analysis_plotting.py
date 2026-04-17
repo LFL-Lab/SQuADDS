@@ -68,5 +68,5 @@ def test_build_closest_design_hspace_plot_rejects_unknown_resonator_type():
         }
     )
 
-    with pytest.raises(ValueError, match='not supported'):
+    with pytest.raises(ValueError, match="not supported"):
         build_closest_design_hspace_plot(df, {}, df.iloc[0], "lumped")

@@ -32,7 +32,9 @@ def test_load_sweep_entries_from_json_prefix_builds_contributor_enriched_entries
     first = tmp_path / "sweep_1.json"
     second = tmp_path / "sweep_2.json"
     first.write_text(json.dumps({"design": {"a": 1}, "sim_options": {"b": 2}, "sim_results": {"c": 3}}))
-    second.write_text(json.dumps({"design": {"a": 4}, "sim_options": {"b": 5}, "sim_results": {"c": 6}, "notes": {"d": 7}}))
+    second.write_text(
+        json.dumps({"design": {"a": 4}, "sim_options": {"b": 5}, "sim_results": {"c": 6}, "notes": {"d": 7}})
+    )
 
     entries = load_sweep_entries_from_json_prefix(str(tmp_path / "sweep_"), {"uploader": "shanto"})
 

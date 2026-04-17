@@ -58,7 +58,9 @@ def test_extract_qubit_options_returns_expected_arrays():
 
 
 def test_extract_cpw_options_fills_none_for_invalid_rows():
-    df = pd.DataFrame({"design_options": [{"cavity_claw_options": {"cpw_opts": {"left_options": {"total_length": "4mm"}}}}]})
+    df = pd.DataFrame(
+        {"design_options": [{"cavity_claw_options": {"cpw_opts": {"left_options": {"total_length": "4mm"}}}}]}
+    )
 
     extracted = extract_cpw_options(df)
 

@@ -5,12 +5,18 @@ from squadds.database.github_ops import (
     DEFAULT_TEMP_CLONE_DIR,
     MEASURED_DEVICE_JSON_PATH,
     ORIGINAL_DATASET_REPO_NAME,
-    append_to_json as append_to_json_impl,
     build_authenticated_remote_url,
     build_forked_repo_name,
     build_measured_data_commit_message,
     load_github_token,
+)
+from squadds.database.github_ops import (
+    append_to_json as append_to_json_impl,
+)
+from squadds.database.github_ops import (
     read_json_file as read_json_file_impl,
+)
+from squadds.database.github_ops import (
     save_json_file as save_json_file_impl,
 )
 

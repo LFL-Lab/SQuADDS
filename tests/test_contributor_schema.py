@@ -4,12 +4,20 @@ from squadds.database.contributor_schema import validate_design_payload, validat
 
 
 def test_validate_sim_setup_payload_accepts_matching_schema():
-    validate_sim_setup_payload({"setup": {}, "simulator": ""}, {"setup": "dict", "simulator": "str"}, lambda v: "dict" if isinstance(v, dict) else type(v).__name__.lower())
+    validate_sim_setup_payload(
+        {"setup": {}, "simulator": ""},
+        {"setup": "dict", "simulator": "str"},
+        lambda v: "dict" if isinstance(v, dict) else type(v).__name__.lower(),
+    )
 
 
 def test_validate_sim_setup_payload_rejects_missing_key():
     with pytest.raises(ValueError, match="Missing required simulation setup option: simulator"):
-        validate_sim_setup_payload({"setup": {}}, {"setup": "dict", "simulator": "str"}, lambda v: "dict" if isinstance(v, dict) else type(v).__name__.lower())
+        validate_sim_setup_payload(
+            {"setup": {}},
+            {"setup": "dict", "simulator": "str"},
+            lambda v: "dict" if isinstance(v, dict) else type(v).__name__.lower(),
+        )
 
 
 def test_validate_design_payload_accepts_optional_design_tool():

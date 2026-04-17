@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 
-
 NCAP_SIM_COLS = [
     "bottom_to_bottom",
     "bottom_to_ground",

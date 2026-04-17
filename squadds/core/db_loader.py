@@ -30,7 +30,9 @@ def validate_dataset_request(
         return DatasetRequestValidation(False, "Please specify a data type.")
 
     if component not in supported_components:
-        return DatasetRequestValidation(False, "Component not supported. Available components are:", supported_components)
+        return DatasetRequestValidation(
+            False, "Component not supported. Available components are:", supported_components
+        )
 
     if component_name not in supported_component_names:
         return DatasetRequestValidation(
@@ -40,7 +42,9 @@ def validate_dataset_request(
         )
 
     if data_type not in supported_data_types:
-        return DatasetRequestValidation(False, "Data type not supported. Available data types are:", supported_data_types)
+        return DatasetRequestValidation(
+            False, "Data type not supported. Available data types are:", supported_data_types
+        )
 
     return DatasetRequestValidation(True)
 

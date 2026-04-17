@@ -5,7 +5,6 @@ import pytest
 from squadds import Analyzer, SQuADDS_DB
 from squadds.interpolations.physics import ScalingInterpolator
 
-
 RUN_LIVE_TESTS = os.getenv("SQUADDS_RUN_LIVE_TESTS") == "1"
 
 pytestmark = [
@@ -130,7 +129,9 @@ def test_half_wave_setup_api(headless_qiskit_environment):
 
     setup_keys = [key for key in device.keys() if "setup" in key.lower()]
     assert "setup_qubit" in setup_keys
-    assert any(key in setup_keys for key in ["setup_cavity_claw", "setup_cavity_claw_merged", "setup_cavity_claw_closest"])
+    assert any(
+        key in setup_keys for key in ["setup_cavity_claw", "setup_cavity_claw_merged", "setup_cavity_claw_closest"]
+    )
     assert "setup_coupler" in setup_keys
 
     simulator = AnsysSimulator(analyzer, device)

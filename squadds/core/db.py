@@ -12,7 +12,6 @@ import requests
 from datasets import load_dataset
 from huggingface_hub import get_token, login
 from tabulate import tabulate
-from tqdm import tqdm
 
 from squadds.core.db_catalog import (
     extract_supported_component_names,
@@ -46,7 +45,12 @@ from squadds.core.db_selection import (
     resolve_resonator_coupler,
     resolve_system_selection,
 )
-from squadds.core.db_state import format_selection_lines, get_unselect_attr_name, reset_selections, update_target_param_keys
+from squadds.core.db_state import (
+    format_selection_lines,
+    get_unselect_attr_name,
+    reset_selections,
+    update_target_param_keys,
+)
 from squadds.core.db_views import build_dataset_rows, describe_dataset
 from squadds.core.design_patterns import SingletonMeta
 from squadds.core.processing import *
@@ -751,7 +755,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         # self.selected_data_type = "cap_matrix" # TODO: handle dynamically
 
         # check if coupler is supported
-        if not is_supported_coupler(self.selected_coupler, self.supported_component_names()):  # TODO: handle dynamically
+        if not is_supported_coupler(
+            self.selected_coupler, self.supported_component_names()
+        ):  # TODO: handle dynamically
             print(f"Coupler `{self.selected_coupler}` not supported. Available couplers are:")
             self.view_component_names("coupler")
             return

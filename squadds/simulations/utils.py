@@ -16,7 +16,11 @@ from squadds.simulations.utils_component_factory import (
     create_qubitcavity,
 )
 from squadds.simulations.utils_display import make_table
-from squadds.simulations.utils_geometry import calculate_center_and_dimensions, generate_bbox, get_cavity_claw_options_keys
+from squadds.simulations.utils_geometry import (
+    calculate_center_and_dimensions,
+    generate_bbox,
+    get_cavity_claw_options_keys,
+)
 from squadds.simulations.utils_io import read_json_files, save_simulation_data_to_json
 from squadds.simulations.utils_parsing import (
     convert_str_to_float,

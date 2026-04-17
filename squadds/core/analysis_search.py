@@ -37,7 +37,9 @@ def get_H_param_keys_for_system(selected_system):
     raise ValueError("Invalid system.")
 
 
-def remove_resonator_type_from_target_params(target_params: dict, selected_resonator_type: str | None, *, missing_ok: bool):
+def remove_resonator_type_from_target_params(
+    target_params: dict, selected_resonator_type: str | None, *, missing_ok: bool
+):
     """Preserve the legacy half-wave behavior by mutating the target-params dict in place."""
     if selected_resonator_type == "half":
         if missing_ok:

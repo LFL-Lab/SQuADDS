@@ -28,7 +28,14 @@ from squadds.core.utils_docs import view_contributors_from_rst
 from squadds.core.utils_email import create_mailto_link, send_email_via_client
 from squadds.core.utils_env import set_github_token
 from squadds.core.utils_hf import delete_HF_cache, set_huggingface_api_key
-from squadds.core.utils_schema import compare_schemas, get_config_schema, get_entire_schema, get_schema, get_type, validate_types
+from squadds.core.utils_schema import (
+    compare_schemas,
+    get_config_schema,
+    get_entire_schema,
+    get_schema,
+    get_type,
+    validate_types,
+)
 
 __all__ = [
     "HfApi",

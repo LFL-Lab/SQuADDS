@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 LEGACY_RESONATOR_TO_COUPLER = {"quarter": "CLT", "half": "NCap"}
 
 

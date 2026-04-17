@@ -9,9 +9,7 @@ def validate_sim_setup_payload(sim_setup, sim_setup_schema, get_type_fn):
         if key not in sim_setup:
             raise ValueError(f"Missing required simulation setup option: {key}")
         if get_type_fn(sim_setup[key]) != expected_type:
-            raise TypeError(
-                f"Incorrect type for {key}. Expected {expected_type}, got {get_type_fn(sim_setup[key])}."
-            )
+            raise TypeError(f"Incorrect type for {key}. Expected {expected_type}, got {get_type_fn(sim_setup[key])}.")
 
 
 def validate_design_payload(design, design_options_schema, get_type_fn, require_design_tool=False):

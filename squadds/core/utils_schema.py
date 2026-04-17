@@ -30,7 +30,11 @@ def get_config_schema(entry):
 
 def get_schema(obj):
     if isinstance(obj, dict):
-        return {key: "dict" if isinstance(value, dict) else get_schema(value) for key, value in obj.items() if key != "contributor"}
+        return {
+            key: "dict" if isinstance(value, dict) else get_schema(value)
+            for key, value in obj.items()
+            if key != "contributor"
+        }
     if isinstance(obj, list):
         return "dict" if any(isinstance(elem, dict) for elem in obj) else type(obj[0]).__name__
     return type(obj).__name__
@@ -57,6 +61,4 @@ def compare_schemas(data_schema, expected_schema, path=""):
         elif get_type(data_type) != expected_type:
             if expected_type == "float" and get_type(data_type) == "str":
                 continue
-            raise ValueError(
-                f"Type mismatch for '{path}{key}'. Expected: {expected_type}, Got: {get_type(data_type)}"
-            )
+            raise ValueError(f"Type mismatch for '{path}{key}'. Expected: {expected_type}, Got: {get_type(data_type)}")
