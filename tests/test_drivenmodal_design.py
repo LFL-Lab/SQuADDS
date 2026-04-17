@@ -36,6 +36,7 @@ def test_create_multiplanar_design_loads_explicit_layer_stack(tmp_path: Path):
     assert design.overwrite_enabled is True
     assert set(design.ls.ls_df["material"]) == {"pec", "silicon"}
     assert "-650um" in set(design.ls.ls_df["thickness"])
+    assert design.get_chip_z("main") == "0.0mm"
 
 
 def test_connect_renderer_to_new_ansys_design_skips_eager_setup_lookup():

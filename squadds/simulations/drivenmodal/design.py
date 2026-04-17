@@ -31,6 +31,7 @@ def create_multiplanar_design(
     layer_stack_path: str | Path,
     chip_size_x: str = "9mm",
     chip_size_y: str = "7mm",
+    chip_center_z: str = "0.0mm",
     enable_renderers: bool = True,
 ) -> tuple[MultiPlanar, Path]:
     """Create a MultiPlanar design bound to an explicit layer-stack CSV."""
@@ -43,6 +44,9 @@ def create_multiplanar_design(
     design.overwrite_enabled = True
     design.chips[layer_stack.chip_name]["size"]["size_x"] = chip_size_x
     design.chips[layer_stack.chip_name]["size"]["size_y"] = chip_size_y
+    # QHFSSRenderer reads the active chip elevation from center_z when lifting
+    # 2D polygons into 3D points. MultiPlanar does not always populate it.
+    design.chips[layer_stack.chip_name]["size"].setdefault("center_z", chip_center_z)
     return design, csv_path
 
 
