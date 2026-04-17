@@ -93,7 +93,7 @@ except ImportError:  # pragma: no cover - plain Python fallback for non-notebook
 # %%
 RESONATOR_TYPE = "quarter"  # change to "half" and rerun for the half-wave flow
 REFERENCE_INDEX = 0
-RUN_TAG = "v1"
+RUN_TAG = "v2"
 FORCE_RERUN = False
 
 LAYER_STACK = DrivenModalLayerStackSpec(
@@ -218,6 +218,22 @@ def normalize_cavity_options(cavity_options: dict[str, Any], coupler_type: str) 
     return normalized
 
 
+def regularize_cavity_options_for_drivenmodal(cavity_options: dict[str, Any]) -> dict[str, Any]:
+    """Return a driven-modal-safe copy of the cavity options.
+
+    The quarter-wave coupled-system reference geometry can generate a sub-micron
+    starter jog on ``qubitcavity_left_cpw`` when the legacy ``49.9um`` fillet
+    is preserved. Q3D/eigenmode flows tolerate that path, but HFSS driven-modal
+    rendering can fail while drawing the left polyline. Zeroing that one fillet
+    keeps the route topology intact while removing the pathological segment.
+    """
+    normalized = deserialize_json_like(cavity_options)
+    cpw_key = "cpw_opts" if "cpw_opts" in normalized else "cpw_options"
+    left_options = normalized.setdefault(cpw_key, {}).setdefault("left_options", {})
+    left_options["fillet"] = "0um"
+    return normalized
+
+
 def get_bare_lj_h(qubit_options: dict[str, Any]) -> float:
     for key in ["aedt_hfss_inductance", "hfss_inductance", "aedt_q3d_inductance", "q3d_inductance"]:
         value = qubit_options.get(key)
@@ -293,8 +309,8 @@ def build_request(row: pd.Series) -> CoupledSystemDrivenModalRequest:
         resonator_type=f"{RESONATOR_TYPE}_wave",
         design_payload={
             "design_options_qubit": normalize_qubit_options(row["design_options_qubit"]),
-            "design_options_cavity_claw": normalize_cavity_options(
-                row["design_options_cavity_claw"], row["coupler_type"]
+            "design_options_cavity_claw": regularize_cavity_options_for_drivenmodal(
+                normalize_cavity_options(row["design_options_cavity_claw"], row["coupler_type"])
             ),
             "coupler_type": row["coupler_type"],
             "port_mapping": {

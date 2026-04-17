@@ -130,6 +130,10 @@ Add newly touched files here as implementation progresses.
   - Qubit-claw (`tutorial10-qubit-claw-003-v3`) remains only partially matched: `cross_to_claw` is excellent (`+1.67%`) and `ground_to_ground` is reasonable (`-5.48%`), but self/ground terms remain badly imbalanced (`cross_to_ground -33.4%`, `claw_to_ground +106.7%`).
   - NCap (`tutorial10-ncap-001-v3`) improved by roughly an order of magnitude relative to the earlier worst-case blow-up, but is still numerically wrong for the ground-related terms (`top_to_ground ≈ 1.15e4 fF` vs `29.2 fF`, `ground_to_ground ≈ 1.14e4 fF` vs `124.2 fF`).
   - The Windows machine currently accumulates many stale `ansysedt` processes across retries/runs; another agent should consider explicit desktop/process cleanup as part of the next stability pass.
+- Windows/Ansys validation at commit `384e808`:
+  - `ssh LFLLAB-CODEX ... uv run python .\\SQuADDS\\tutorials\\Tutorial-10_DrivenModal_Capacitance_Extraction.py` after deleting the `tutorial10-*-v3` checkpoint and HFSS project directories to force a fresh rerun
+  - Outcome: increasing Tutorial 10 to `min_converged = 7` made the qubit-claw stage less stable. Attempts 1 and 2 failed with the usual HFSS COM analyze error `(-2147352567, 'Exception occurred.', ... -2147024349)`, and attempt 3 hung inside HFSS analyze without ever exporting artifacts or completing post-processing.
+  - Conclusion: `min_converged = 7` is not a better working state on the current Windows validation machine. Keep `min_converged = 5` as the best-known runnable Tutorial 10 setting until AEDT cleanup or terminal modeling changes justify retesting higher convergence targets.
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
@@ -151,6 +155,7 @@ Update this section after every meaningful verification run with the exact comma
   - `min_converged = 5`
   - explicit chip box derived from component `qgeometry_bounds()` plus the shared Qiskit Metal renderer defaults `x_buffer_width_mm = y_buffer_width_mm = 0.2`
   This configuration did not materially improve the qubit-claw self/ground mismatch and did not fix NCap calibration. Another agent should prioritize terminal/reference modeling and cleanup of stale AEDT state over further blind sweep-parameter tightening.
+- A fresh rerun with `min_converged = 7` was attempted and failed to complete the qubit-claw stage. Treat that as a rejected tuning experiment rather than the new baseline.
 - `scikit-rf` is currently wired as a core dependency because the coupled-system post-processing helpers now depend on it. Another agent can revisit that split later, but should do so deliberately rather than implicitly.
 - Whether dense capacitance-vs-frequency data should be stored as JSON, parquet, or a more compact artifact format remains open until dataset serialization is implemented.
 - The tutorials currently store dense capacitance-vs-frequency data as parquet and raw complex HFSS tables as pickle because the latter remain the most convenient portable checkpoint format for complex-valued pandas frames. Another agent can revisit that once the Hugging Face artifact contract is finalized.

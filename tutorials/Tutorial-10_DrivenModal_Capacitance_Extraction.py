@@ -106,7 +106,7 @@ SETUP = DrivenModalSetupSpec(
     max_delta_s=0.005,
     max_passes=20,
     min_passes=2,
-    min_converged=7,
+    min_converged=5,
     pct_refinement=30,
     basis_order=-1,
 )
