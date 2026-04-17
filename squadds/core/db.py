@@ -9,11 +9,25 @@ import warnings
 
 import pandas as pd
 import requests
-from datasets import get_dataset_config_names, load_dataset
+from datasets import load_dataset
 from huggingface_hub import get_token, login
 from tabulate import tabulate
 from tqdm import tqdm
 
+from squadds.core.db_catalog import (
+    extract_supported_component_names,
+    extract_supported_components,
+    extract_supported_data_types,
+    get_component_names_for_component,
+    load_supported_config_names,
+)
+from squadds.core.db_loader import build_dataset_config, validate_dataset_request
+from squadds.core.db_selection import (
+    build_component_selection,
+    is_supported_coupler,
+    resolve_resonator_coupler,
+    resolve_system_selection,
+)
 from squadds.core.design_patterns import SingletonMeta
 from squadds.core.processing import *
 from squadds.core.utils import *
@@ -151,17 +165,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             list: A list of supported components.
         """
-        components = []
-        for config in self.configs:
-            try:
-                components.append(config.split("-")[0])
-            except:
-                pass
-            try:
-                components.append(config.split("-")[0])
-            except:
-                pass
-        return components
+        return extract_supported_components(self.configs)
 
     def supported_component_names(self):
         """
@@ -170,17 +174,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             list: A list of supported component names.
         """
-        component_names = []
-        for config in self.configs:
-            try:
-                component_names.append(config.split("-")[1])
-            except:
-                pass
-            try:
-                component_names.append(config.split("-")[1])
-            except:
-                pass
-        return component_names
+        return extract_supported_component_names(self.configs)
 
     def supported_data_types(self):
         """
@@ -189,17 +183,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             list: A list of supported data types.
         """
-        data_types = []
-        for config in self.configs:
-            try:
-                data_types.append(config.split("-")[2])
-            except:
-                pass
-            try:
-                data_types.append(config.split("-")[2])
-            except:
-                pass
-        return data_types
+        return extract_supported_data_types(self.configs)
 
     def supported_config_names(self):
         """
@@ -208,13 +192,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             A list of supported configuration names.
         """
-        delete_HF_cache()
-        configs = get_dataset_config_names(self.repo_name, download_mode="force_redownload")
-        # if there are not two "-" in the config name, remove it (since it does conform to the simulation naming convention)
-        configs = [config for config in configs if config.count("-") == 2]
-        # if there are not two "-" in the config name, remove it (since it does conform to the simulation naming convention)
-        configs = [config for config in configs if config.count("-") == 2]
-        return configs
+        return load_supported_config_names(self.repo_name)
 
     def get_configs(self):
         """
@@ -243,12 +221,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print("Component not supported. Available components are:")
             print(self.supported_components() + ["CLT"])  # TODO: handle dynamically
             return
-        else:
-            component_names = []
-            for config in self.configs:
-                if component in config:
-                    component_names.append(config.split("-")[1])
-            return component_names + ["CLT"]
+        return get_component_names_for_component(self.configs, component)
 
     def view_component_names(self, component=None):
         """
@@ -266,11 +239,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print("Component not supported. Available components are:")
             print(self.supported_components() + ["CLT"])  # TODO: handle dynamically
         else:
-            component_names = []
-            for config in self.configs:
-                if component in config:
-                    component_names.append(config.split("-")[1])
-            print(component_names + ["CLT"])  # TODO: handle dynamically
+            print(get_component_names_for_component(self.configs, component))
 
     def view_datasets(self):
         """
@@ -816,23 +785,19 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             None
         """
         # Validation and checks
-        if isinstance(components, list):
-            for component in components:
-                if component not in self.supported_components():
-                    print(f"Component `{component}` not supported. Available components are:")
-                    print(self.supported_components())
-                    return
-                else:
-                    self.selected_system = components
+        selected_system, selected_component, unsupported_component = resolve_system_selection(
+            components, self.supported_components()
+        )
 
-        elif isinstance(components, str):
-            if components not in self.supported_components():
-                print(f"Component `{components}` not supported. Available components are:")
-                print(self.supported_components())
-                return
-            else:
-                self.selected_system = components
-                self.selected_component = components
+        if unsupported_component is not None:
+            print(f"Component `{unsupported_component}` not supported. Available components are:")
+            print(self.supported_components())
+            return
+
+        if selected_system is not None:
+            self.selected_system = selected_system
+        if selected_component is not None:
+            self.selected_component = selected_component
 
     def select_qubit(self, qubit=None):
         """
@@ -848,14 +813,14 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             None
         """
         # check whether selected_component is qubit
-        if (self.selected_system == "qubit") or ("qubit" in self.selected_system):
-            self.selected_qubit = qubit
-            self.selected_component_name = qubit
-            self.selected_data_type = "cap_matrix"  # TODO: handle dynamically
-        else:
-            raise UserWarning(
-                "Selected system is either not specified or does not contain a qubit! Please check `self.selected_system`"
-            )
+        self.selected_qubit = qubit
+        self.selected_component_name, self.selected_data_type = build_component_selection(
+            self.selected_system,
+            "qubit",
+            qubit,
+            "cap_matrix",
+            "Selected system is either not specified or does not contain a qubit! Please check `self.selected_system`",
+        )
 
         # check if qubit is supported
         if self.selected_qubit not in self.supported_component_names():
@@ -877,14 +842,14 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             None
         """
         # check whether selected_component is cavity
-        if (self.selected_system == "cavity_claw") or ("cavity_claw" in self.selected_system):
-            self.selected_cavity = cavity
-            self.selected_component_name = cavity
-            self.selected_data_type = "eigenmode"  # TODO: handle dynamically
-        else:
-            raise UserWarning(
-                "Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`"
-            )
+        self.selected_cavity = cavity
+        self.selected_component_name, self.selected_data_type = build_component_selection(
+            self.selected_system,
+            "cavity_claw",
+            cavity,
+            "eigenmode",
+            "Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`",
+        )
 
         # check if cavity is supported
         if self.selected_cavity not in self.supported_component_names():
@@ -906,14 +871,14 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             None
         """
         # check whether selected_component is cavity
-        if (self.selected_system == "cavity") or ("cavity" in self.selected_system):
-            self.selected_cavity = cavity
-            self.selected_component_name = cavity
-            self.selected_data_type = "eigenmode"  # TODO: handle dynamically
-        else:
-            raise UserWarning(
-                "Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`"
-            )
+        self.selected_cavity = cavity
+        self.selected_component_name, self.selected_data_type = build_component_selection(
+            self.selected_system,
+            "cavity",
+            cavity,
+            "eigenmode",
+            "Selected system is either not specified or does not contain a cavity! Please check `self.selected_system`",
+        )
 
         # check if cavity is supported
         if self.selected_cavity not in self.supported_component_names():
@@ -928,15 +893,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Args:
             resonator_type (str): The type of resonator, e.g., "quarter" or "half".
         """
-        resonator_to_coupler = {"quarter": "CLT", "half": "NCap"}
-
-        if resonator_type not in resonator_to_coupler:
-            raise ValueError(
-                f"Invalid resonator type: {resonator_type}. Must be one of {list(resonator_to_coupler.keys())}."
-            )
-
         self._internal_call = True  # Set the flag to indicate an internal call
-        self.select_coupler(resonator_to_coupler[resonator_type])
+        self.select_coupler(resolve_resonator_coupler(resonator_type))
         self.selected_resonator_type = resonator_type
         self._internal_call = False  # Reset the flag after the call
 
@@ -966,7 +924,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         # self.selected_data_type = "cap_matrix" # TODO: handle dynamically
 
         # check if coupler is supported
-        if self.selected_coupler not in self.supported_component_names() + ["CLT"]:  # TODO: handle dynamically
+        if not is_supported_coupler(self.selected_coupler, self.supported_component_names()):  # TODO: handle dynamically
             print(f"Coupler `{self.selected_coupler}` not supported. Available couplers are:")
             self.view_component_names("coupler")
             return
@@ -995,35 +953,22 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         component = component if component is not None else self.selected_system
         component_name = component_name if component_name is not None else self.selected_component_name
 
-        # Check if system and component_name are still None
-        if component is None or component_name is None:
-            print("Both system and component name must be defined.")
-            return
-
-        if data_type is None:
-            print("Please specify a data type.")
-            return
-
-        # Check if the component is supported
-        if component not in self.supported_components():
-            print("Component not supported. Available components are:")
-            print(self.supported_components())
-            return
-
-        # Check if the component name is supported
-        if component_name not in self.supported_component_names():
-            print("Component name not supported. Available component names are:")
-            print(self.supported_component_names())
-            return
-
-        # Check if the data type is supported
-        if data_type not in self.supported_data_types():
-            print("Data type not supported. Available data types are:")
-            print(self.supported_data_types())
+        validation = validate_dataset_request(
+            component,
+            component_name,
+            data_type,
+            self.supported_components(),
+            self.supported_component_names(),
+            self.supported_data_types(),
+        )
+        if not validation.is_valid:
+            print(validation.message)
+            if validation.options is not None:
+                print(validation.options)
             return
 
         # Construct the configuration string based on the provided or default values
-        config = f"{component}-{component_name}-{data_type}"
+        config = build_dataset_config(component, component_name, data_type)
         try:
             df = load_dataset(self.repo_name, config)["train"].to_pandas()
             return flatten_df_second_level(df)
@@ -1055,35 +1000,22 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         component = component if component is not None else self.selected_system
         component_name = component_name if component_name is not None else self.selected_component_name
 
-        # Check if system and component_name are still None
-        if component is None or component_name is None:
-            print("Both system and component name must be defined.")
-            return
-
-        if data_type is None:
-            print("Please specify a data type.")
-            return
-
-        # Check if the component is supported
-        if component not in self.supported_components():
-            print("Component not supported. Available components are:")
-            print(self.supported_components())
-            return
-
-        # Check if the component name is supported
-        if component_name not in self.supported_component_names():
-            print("Component name not supported. Available component names are:")
-            print(self.supported_component_names())
-            return
-
-        # Check if the data type is supported
-        if data_type not in self.supported_data_types():
-            print("Data type not supported. Available data types are:")
-            print(self.supported_data_types())
+        validation = validate_dataset_request(
+            component,
+            component_name,
+            data_type,
+            self.supported_components(),
+            self.supported_component_names(),
+            self.supported_data_types(),
+        )
+        if not validation.is_valid:
+            print(validation.message)
+            if validation.options is not None:
+                print(validation.options)
             return
 
         # Construct the configuration string based on the provided or default values
-        config = f"{component}-{component_name}-{data_type}"
+        config = build_dataset_config(component, component_name, data_type)
         try:
             df = load_dataset(self.repo_name, config, cache_dir=None)["train"].to_pandas()
             self._set_target_param_keys(df)
