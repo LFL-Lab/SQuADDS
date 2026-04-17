@@ -6,7 +6,7 @@ Version 0.4.4 (2026-04-17)
 
 * **Alpha Version 0.4.4**
 
-**🤖 MCP Server (AI Agent Integration) — NEW**
+**MCP Server**
 
 - Added a built-in `Model Context Protocol (MCP) <https://modelcontextprotocol.io>`_ server that lets AI coding assistants (Claude, Cursor, VS Code Copilot, Gemini, Codex) interact with the SQuADDS database through the standardized MCP protocol.
 - **15 MCP Tools**: Database browsing, design search (``find_closest_designs``), physics-based interpolation (``interpolate_design``), contributor info, and more.

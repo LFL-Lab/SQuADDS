@@ -204,12 +204,12 @@ The following tutorials are available to help you get started with `SQuADDS`:
 
 SQuADDS includes a built-in **Model Context Protocol (MCP)** server that lets AI coding agents interact with the entire database — searching designs, interpolating parameters, and exploring components — through a standardized protocol.
 
-### 🤖 Agent Setup (Copy-Paste This to Your AI Agent)
+### Agent Setup (Copy-Paste This to Your AI Agent)
 
 > **If you're using an AI coding assistant**, just paste this prompt to have it set up SQuADDS MCP for you:
 
 <details>
-<summary><strong>📋 Click to copy the agent setup prompt</strong></summary>
+<summary><strong>Click to copy the agent setup prompt</strong></summary>
 
 ```
 I need you to set up the SQuADDS MCP server so I can access the superconducting
@@ -244,7 +244,7 @@ Please set this up and confirm you can access the SQuADDS tools.
 
 </details>
 
-### 🧑‍💻 Manual Setup
+### Manual Setup
 
 #### Install
 
@@ -376,7 +376,7 @@ With `mcp.json`:
 ```
 </details>
 
-📖 **Full MCP documentation:** [MCP_README.md](MCP_README.md) | **Developer guide:** [MCP_DEVELOPER_GUIDE.md](MCP_DEVELOPER_GUIDE.md)
+**Full MCP documentation:** [MCP_README.md](MCP_README.md) | **Developer guide:** [MCP_DEVELOPER_GUIDE.md](MCP_DEVELOPER_GUIDE.md)
 
 ---
 

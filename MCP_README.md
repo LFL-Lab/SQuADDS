@@ -4,7 +4,7 @@
 
 This MCP server wraps the SQuADDS Python library, making the database of pre-simulated superconducting quantum device designs accessible to AI agents (Claude, Cursor, VS Code Copilot, Gemini, Codex, and custom LLM agents) and human developers through the standardized [Model Context Protocol](https://modelcontextprotocol.io).
 
-## 🤖 Agent Setup (Copy-Paste This to Your AI Agent)
+## Agent Setup (Copy-Paste This to Your AI Agent)
 
 > **If you're using an AI coding assistant**, just paste this prompt into it to have it set up everything for you:
 
@@ -41,7 +41,7 @@ Please set this up and confirm you can access the SQuADDS tools.
 
 ---
 
-## 🧑‍💻 Manual Setup
+## Manual Setup
 
 ### 1. Install dependencies
 
