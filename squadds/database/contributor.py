@@ -15,6 +15,12 @@ from squadds.core.utils import (
     validate_types,
 )
 from squadds.database.contributor_env import build_contributor_record, load_contributor_environment
+from squadds.database.contributor_file_ops import (
+    append_entries_to_dataset_file,
+    load_contribution_from_json_file,
+    load_sweep_entries_from_json_prefix,
+    validate_sweep_entries,
+)
 from squadds.database.contributor_records import (
     add_sim_result_entry,
     build_contribution_payload,
@@ -22,6 +28,7 @@ from squadds.database.contributor_records import (
     merge_contributor_notes,
     validate_required_structure,
 )
+from squadds.database.contributor_schema import validate_design_payload, validate_sim_setup_payload
 from squadds.database.contributor_validation import get_nested_value, summarize_content_differences
 
 """
@@ -187,17 +194,7 @@ class ExistingConfigData:
         # Retrieve the schema for simulation options
         schema = self.get_config_schema()
 
-        # Validate the provided simulation setup options against the schema
-        sim_setup_schema = schema.get("sim_options", {})
-        if not isinstance(sim_setup, dict):
-            raise ValueError("Simulation setup options must be provided as a dictionary.")
-
-        # Check if all keys are present and have correct types
-        for key, expected_type in sim_setup_schema.items():
-            if key not in sim_setup:
-                raise ValueError(f"Missing required simulation setup option: {key}")
-            if get_type(sim_setup[key]) != expected_type:
-                raise TypeError(f"Incorrect type for {key}. Expected {expected_type}, got {get_type(sim_setup[key])}.")
+        validate_sim_setup_payload(sim_setup, schema.get("sim_options", {}), get_type)
 
         # All checks passed, add the simulation setup options
         self.sim_options.update(sim_setup)
@@ -212,22 +209,7 @@ class ExistingConfigData:
         # Retrieve the schema for design
         schema = self.get_config_schema()
 
-        # Validate the provided design against the schema
-        if not isinstance(design, dict):
-            raise ValueError("Design must be provided as a dictionary.")
-
-        design_options = design.get("design_options", {})
-        design_tool = design.get("design_tool")
-
-        # Validate design options and design tool
-        design_options_schema = schema.get("design", {}).get("design_options", {})
-        if get_type(design_options) != design_options_schema:
-            raise TypeError(
-                f"Incorrect type for design options. Expected {design_options_schema}, got {get_type(design_options)}."
-            )
-
-        if design_tool and get_type(design_tool) != "str":
-            raise TypeError(f"Incorrect type for design tool. Expected 'str', got {get_type(design_tool)}.")
+        validate_design_payload(design, schema.get("design", {}).get("design_options", {}), get_type)
 
         # All checks passed, add the design options and tool
         self.design.update(design)
@@ -242,23 +224,12 @@ class ExistingConfigData:
         # Retrieve the schema for design
         schema = self.get_config_schema()
 
-        # Validate the provided design against the schema
-        if not isinstance(design, dict):
-            raise ValueError("Design must be provided as a dictionary.")
-
-        # Extract design options and design tool from the input dictionary
-        design_options = design.get("design_options")
-        design_tool = design.get("design_tool")
-
-        # Validate design options and design tool
-        design_options_schema = schema.get("design", {}).get("design_options", {})
-        if get_type(design_options) != design_options_schema:
-            raise TypeError(
-                f"Incorrect type for design options. Expected {design_options_schema}, got {get_type(design_options)}."
-            )
-
-        if get_type(design_tool) != "str":
-            raise TypeError(f"Incorrect type for design tool. Expected 'str', got {get_type(design_tool)}.")
+        validate_design_payload(
+            design,
+            schema.get("design", {}).get("design_options", {}),
+            get_type,
+            require_design_tool=True,
+        )
 
         # All checks passed, add the design options and tool
         self.design.update(design)
@@ -459,13 +430,12 @@ class ExistingConfigData:
         """
         if not self.is_validated:
             try:
-                for entry in self.sweep_data:
-                    print(f"Validating entry {self.sweep_data.index(entry) + 1} of {len(self.sweep_data)}...")
-                    self.validate_structure(entry)
-                    self.validate_types(entry)
-                    self.validate_content(entry)
-                    print(f"Entry {self.sweep_data.index(entry) + 1} of {len(self.sweep_data)} validated successfully.")
-                    print("--------------------------------------------------")
+                validate_sweep_entries(
+                    self.sweep_data,
+                    validate_structure_fn=self.validate_structure,
+                    validate_types_fn=self.validate_types,
+                    validate_content_fn=self.validate_content,
+                )
                 self.__isValidated = True
             except Exception as e:
                 print("Validation failed.")
@@ -546,11 +516,7 @@ class ExistingConfigData:
             # update the local repo
             os.chdir(path_to_repo + "/" + self.__repo_name.split("/")[-1])
             dataset_file = f"{self.config}.json"
-            with open(dataset_file, "r+") as file:
-                data = json.load(file)
-                data.append(self.to_dict())
-                file.seek(0)
-                json.dump(data, file, indent=4)
+            append_entries_to_dataset_file(dataset_file, [self.to_dict()])
             print(f"Data added to {dataset_file} successfully.")
         else:
             if not self.is_validated:
@@ -558,12 +524,7 @@ class ExistingConfigData:
             # update the local repo
             os.chdir(path_to_repo + "/" + self.__repo_name.split("/")[-1])
             dataset_file = f"{self.config}.json"
-            with open(dataset_file, "r+") as file:
-                data = json.load(file)
-                for entry in self.sweep_data:
-                    data.append(entry)
-                file.seek(0)
-                json.dump(data, file, indent=4)
+            append_entries_to_dataset_file(dataset_file, self.sweep_data)
             print(f"Data added to {dataset_file} successfully.")
 
     def upload_to_HF(self, path_to_repo):
@@ -627,36 +588,22 @@ class ExistingConfigData:
             if not os.path.exists(file_path):
                 raise ValueError(f"File not found: {file_path}")
 
-            with open(file_path) as file:
-                data = json.load(file)
-                self.design = data["design"]
-                self.sim_options = data["sim_options"]
-                self.sim_results = data["sim_results"]
-                self.__set_contributor_info()
-                try:
-                    self.notes = data["notes"]
-                except KeyError:
-                    pass
+            data = load_contribution_from_json_file(file_path)
+            self.design = data["design"]
+            self.sim_options = data["sim_options"]
+            self.sim_results = data["sim_results"]
+            self.__set_contributor_info()
+            try:
+                self.notes = data["notes"]
+            except KeyError:
+                pass
 
             print("Contribution loaded successfully.")
         else:
-            json_files = glob.glob(os.path.abspath(json_file + "*.json"))
-            if not json_files:
-                raise ValueError(f"Files not found: {json_files}")
-            for file in json_files:
-                entry = {}
-                with open(file) as f:
-                    data = json.load(f)
-                    entry["design"] = data["design"]
-                    entry["sim_options"] = data["sim_options"]
-                    entry["sim_results"] = data["sim_results"]
-                    entry["contributor"] = self.get_contributor_info()
-                    try:
-                        entry["notes"] = data["notes"]
-                    except KeyError:
-                        entry["notes"] = {}
-
-                    self.sweep_data.append(entry)
+            sweep_data = load_sweep_entries_from_json_prefix(json_file, self.get_contributor_info())
+            if not sweep_data:
+                raise ValueError(f"Files not found: {sweep_data}")
+            self.sweep_data.extend(sweep_data)
 
             print("Sweep data loaded successfully.")
 

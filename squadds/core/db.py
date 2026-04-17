@@ -21,6 +21,17 @@ from squadds.core.db_catalog import (
     get_component_names_for_component,
     load_supported_config_names,
 )
+from squadds.core.db_devices import (
+    build_measured_device_records,
+    build_measured_device_rows,
+    build_recipe_rows,
+    build_reference_device_records,
+    collect_all_simulation_contributors,
+    find_device_contributor_info,
+    find_reference_device_info,
+    find_simulation_results_for_device,
+    unique_contributor_records,
+)
 from squadds.core.db_half_wave import (
     NCAP_SIM_COLS,
     filter_and_validate_ncap_cavity_df,
@@ -35,6 +46,8 @@ from squadds.core.db_selection import (
     resolve_resonator_coupler,
     resolve_system_selection,
 )
+from squadds.core.db_state import format_selection_lines, get_unselect_attr_name, reset_selections, update_target_param_keys
+from squadds.core.db_views import build_dataset_rows, describe_dataset
 from squadds.core.design_patterns import SingletonMeta
 from squadds.core.processing import *
 from squadds.core.utils import *
@@ -258,30 +271,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         components = self.supported_components()
         component_names = self.supported_component_names()
         data_types = self.supported_data_types()
-        component_urls = [
-            f"https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/{name}.png" for name in component_names
-        ]
-
-        component_images = []
-
-        for url in component_urls:
-            component_images.append(url)
-            table = [components, component_names, data_types, component_images]
-        component_urls = [
-            f"https://github.com/LFL-Lab/SQuADDS/tree/master/docs/_static/images/{name}.png" for name in component_names
-        ]
-
-        component_images = []
-
-        for url in component_urls:
-            component_images.append(url)
-            table = [components, component_names, data_types, component_images]
-
-        # Transpose the table (convert columns to rows)
-        table = list(map(list, zip(*table)))
-
-        # Remove duplicate entries in table
-        table = [list(x) for x in set(tuple(x) for x in table)]
+        table = build_dataset_rows(components, component_names, data_types)
 
         # Print the table with headers
         print(
@@ -331,20 +321,20 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         config = component + "-" + component_name + "-" + data_type
 
         dataset = load_dataset(self.repo_name, config)["train"]
-        # describe the dataset and print in table format
+        metadata = describe_dataset(dataset)
         print("=" * 80)
         print("Dataset Features:")
-        pprint.pprint(dataset.features, depth=2)
+        pprint.pprint(metadata["features"], depth=2)
         print("\nDataset Description:")
-        print(dataset.description)
+        print(metadata["description"])
         print("\nDataset Citation:")
-        print(dataset.citation)
+        print(metadata["citation"])
         print("\nDataset Homepage:")
-        print(dataset.homepage)
+        print(metadata["homepage"])
         print("\nDataset License:")
-        print(dataset.license)
+        print(metadata["license"])
         print("\nDataset Size in Bytes:")
-        print(dataset.size_in_bytes)
+        print(metadata["size_in_bytes"])
         print("=" * 80)
 
     def view_all_contributors(self):
@@ -369,37 +359,11 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         View all unique simulation contributors and their relevant information.
         """
-        # Placeholder for the full contributor info
-        unique_contributors_info = []
-
         banner = "=" * 80
         title = "SIMULATION DATA CONTRIBUTORS"
         print(f"\n{banner}\n{title.center(80)}\n{banner}\n")
 
-        for config in self.configs:
-            dataset = load_dataset(self.repo_name, config)["train"]
-            configs_contrib_info = dataset["contributor"]
-
-            for contrib_info in configs_contrib_info:
-                # Extracting the relevant information
-                relevant_info = {
-                    "Uploader": contrib_info.get("uploader", "N/A"),
-                    "PI": contrib_info.get("PI", "N/A"),
-                    "Group": contrib_info.get("group", "N/A"),
-                    "Institution": contrib_info.get("institution", "N/A"),
-                    "Config": config,  # Add the config to the relevant info
-                }
-
-                # Check if this combination of info is already in the list
-                if not any(
-                    existing_info["Config"] == config
-                    and existing_info["Uploader"] == relevant_info["Uploader"]
-                    and existing_info["PI"] == relevant_info["PI"]
-                    and existing_info["Group"] == relevant_info["Group"]
-                    and existing_info["Institution"] == relevant_info["Institution"]
-                    for existing_info in unique_contributors_info
-                ):
-                    unique_contributors_info.append(relevant_info)
+        unique_contributors_info = collect_all_simulation_contributors(self.configs, self.repo_name, load_dataset)
 
         print(tabulate(unique_contributors_info, headers="keys", tablefmt="grid"))
         print(f"\n{banner}\n")  # End with a banner
@@ -413,49 +377,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         dataset = load_dataset(self.repo_name, "measured_device_database")["train"]
 
-        all_devices_info = []
-
-        for entry in zip(
-            dataset["contrib_info"],
-            dataset["design_code"],
-            dataset["paper_link"],
-            dataset["image"],
-            dataset["foundry"],
-            dataset["fabrication_recipe"],
-            dataset["substrate"],
-            dataset["materials"],
-            dataset["junction_style"],
-            dataset["junction_material"],
-        ):
-            (
-                contrib_info,
-                design_code,
-                paper_link,
-                image,
-                foundry,
-                recipe,
-                substrate,
-                materials,
-                junction_style,
-                junction_materials,
-            ) = entry
-
-            device_info = {
-                "Name": contrib_info.get("name", "N/A"),
-                "Design Code": design_code,
-                "Paper Link": paper_link,
-                "Image": image,
-                "Foundry": foundry,
-                "Substrate": substrate,
-                "Materials": materials,
-                "Junction Style": junction_style,
-                "Junction Materials": junction_materials,
-                # "Fabrication Recipe": recipe
-            }
-            all_devices_info.append(device_info)
-
-        # Convert the list of dictionaries to a DataFrame
-        df = pd.DataFrame(all_devices_info)
+        df = pd.DataFrame(build_measured_device_records(dataset))
 
         return df
 
@@ -467,31 +389,8 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         dataset = load_dataset(self.repo_name, "measured_device_database")["train"]
 
-        all_devices_info = []
-
-        for entry in zip(
-            dataset["contrib_info"],
-            dataset["design_code"],
-            dataset["paper_link"],
-            dataset["image"],
-            dataset["foundry"],
-            dataset["fabrication_recipe"],
-        ):
-            contrib_info, design_code, paper_link, image, foundry, recipe = entry
-
-            device_info = {
-                "Name": contrib_info.get("name", "N/A"),
-                "Design Code": design_code,
-                "Paper Link": paper_link,
-                "Image": image,
-                "Foundry": foundry,
-                "Fabrication Recipe": recipe,
-            }
-            all_devices_info.append(device_info)
-
-        # Prepare the data for tabular display
         headers = ["Name", "Design Code", "Paper Link", "Image", "Foundry", "Fabrication Recipe"]
-        rows = [[device_info[header] for header in headers] for device_info in all_devices_info]
+        rows = [[device_info[header] for header in headers] for device_info in build_measured_device_rows(dataset)]
 
         # Print the table with tabulate
         print(tabulate(rows, headers=headers, tablefmt="grid", stralign="left", numalign="left"))
@@ -507,14 +406,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             None
         """
         dataset = load_dataset(self.repo_name, config)["train"]
-        configs_contrib_info = dataset["contributor"]
-        unique_contributors_info = []
-
-        for contrib_info in configs_contrib_info:
-            # Extracting the relevant information
-            relevant_info = {key: contrib_info[key] for key in ["uploader", "PI", "group", "institution"]}
-            if relevant_info not in unique_contributors_info:
-                unique_contributors_info.append(relevant_info)
+        unique_contributors_info = unique_contributor_records(
+            dataset["contributor"],
+            ("uploader", "PI", "group", "institution"),
+        )
 
         print(tabulate(unique_contributors_info, headers="keys", tablefmt="grid"))
 
@@ -580,13 +475,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             dict: a dict of sim results.
         """
         dataset = load_dataset(self.repo_name, "measured_device_database")["train"]
-        configs_contrib_info = dataset["contrib_info"]
-        simulation_info = dataset["sim_results"]
-
-        for contrib_info, sim_results in zip(configs_contrib_info, simulation_info):
-            if contrib_info["name"] == device_name:
-                return sim_results
-        return {}
+        return find_simulation_results_for_device(dataset, device_name)
 
     def get_device_contributors_of(self, component=None, component_name=None, data_type=None):
         """
@@ -605,25 +494,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
         config = f"{component}-{component_name}-{data_type}"
         dataset = load_dataset(self.repo_name, "measured_device_database")["train"]
-
-        for entry in zip(dataset["contrib_info"], dataset["sim_results"]):
-            contrib_info, sim_results = entry
-
-            if config in sim_results:
-                relevant_info = {
-                    "Foundry": contrib_info.get("foundry", "N/A"),
-                    "PI": contrib_info.get("PI", "N/A"),
-                    "Group": contrib_info.get("group", "N/A"),
-                    "Institution": contrib_info.get("institution", "N/A"),
-                    "Measured By": ", ".join(contrib_info.get("measured_by", [])),
-                    "Reference Device Name": contrib_info.get("name", "N/A"),
-                    "Uploader": contrib_info.get("uploader", "N/A"),
-                }
-
-                print(tabulate(relevant_info.items(), tablefmt="grid"))
-                return relevant_info
-
-        return None
+        relevant_info = find_device_contributor_info(dataset, config)
+        if relevant_info is not None:
+            print(tabulate(relevant_info.items(), tablefmt="grid"))
+        return relevant_info
 
     def view_device_contributors_of(self, component=None, component_name=None, data_type=None):
         """
@@ -642,22 +516,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
         config = f"{component}-{component_name}-{data_type}"
         dataset = load_dataset(self.repo_name, "measured_device_database")["train"]
-
-        for entry in zip(dataset["contrib_info"], dataset["sim_results"]):
-            contrib_info, sim_results = entry
-
-            if config in sim_results:
-                relevant_info = {
-                    "Foundry": contrib_info.get("foundry", "N/A"),
-                    "PI": contrib_info.get("PI", "N/A"),
-                    "Group": contrib_info.get("group", "N/A"),
-                    "Institution": contrib_info.get("institution", "N/A"),
-                    "Measured By": ", ".join(contrib_info.get("measured_by", [])),
-                    "Reference Device Name": contrib_info.get("name", "N/A"),
-                    "Uploader": contrib_info.get("uploader", "N/A"),
-                }
-
-                print(tabulate(relevant_info.items(), tablefmt="grid"))
+        relevant_info = find_device_contributor_info(dataset, config)
+        if relevant_info is not None:
+            print(tabulate(relevant_info.items(), tablefmt="grid"))
 
         return "The reference device could not be retrieved."
 
@@ -676,29 +537,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
         config = f"{component}-{component_name}-{data_type}"
         dataset = load_dataset(self.repo_name, "measured_device_database")["train"]
-
-        for entry in zip(
-            dataset["contrib_info"],
-            dataset["sim_results"],
-            dataset["design_code"],
-            dataset["paper_link"],
-            dataset["image"],
-            dataset["foundry"],
-            dataset["fabrication_recipe"],
-        ):
-            contrib_info, sim_results, design_code, paper_link, image, foundry, recipe = entry
-
-            if config in sim_results:
-                combined_info = {
-                    "Design Code": design_code,
-                    "Paper Link": paper_link,
-                    "Image": image,
-                    "Foundry": foundry,
-                    "Fabrication Recipe": recipe,
-                }
-                combined_info.update(contrib_info)
-
-                print(tabulate(combined_info.items(), tablefmt="grid"))
+        combined_info = find_reference_device_info(dataset, config)
+        if combined_info is not None:
+            print(tabulate(combined_info.items(), tablefmt="grid"))
 
     def view_recipe_of(self, device_name):
         """
@@ -711,22 +552,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             dict: A dictionary containing foundry and fabrication recipe information.
         """
         dataset = load_dataset(self.repo_name, "measured_device_database")["train"]
-
-        for contrib_info, foundry, recipe, github_url in zip(
-            dataset["contrib_info"],
-            dataset["foundry"],
-            dataset["fabrication_recipe"],
-            dataset["design_code"],
-        ):
-            if contrib_info["name"] == device_name:
-                # append tree/main/Fabrication to the github_url
-                github_url = f"{github_url}/tree/main/Fabrication"
-                # Prepare the data for tabulation
-                data = [["Foundry", foundry], ["Fabublox Link", recipe], ["Fabrication Recipe Links", github_url]]
-
-                # Print the data in a tabulated format
-                print(tabulate(data, tablefmt="grid"))
-                return
+        data = build_recipe_rows(dataset, device_name)
+        if data is not None:
+            print(tabulate(data, tablefmt="grid"))
+            return
 
         print("Error: Device not found in the dataset.")
 
@@ -742,16 +571,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
 
         dataset = load_dataset(self.repo_name, "measured_device_database")["train"]
-        configs_contrib_info = dataset["contrib_info"]
-        unique_contributors_info = []
-
-        for contrib_info in configs_contrib_info:
-            relevant_info = {key: contrib_info[key] for key in ["name", "group", "measured_by"]}
-
-            device_name = contrib_info["name"]
-            relevant_info["simulations"] = self.view_simulation_results(device_name)
-            if relevant_info not in unique_contributors_info:
-                unique_contributors_info.append(relevant_info)
+        unique_contributors_info = build_reference_device_records(dataset, self.view_simulation_results)
 
         print(tabulate(unique_contributors_info, headers="keys", tablefmt="grid"))
 
@@ -1222,14 +1042,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         """
         Clears the selected component, data type, qubit, cavity, coupler, and system.
         """
-        self.selected_component_name = None
-        self.selected_component = None
-        self.selected_data_type = None
-        self.selected_qubit = None
-        self.selected_cavity = None
-        self.selected_coupler = None
-        self.selected_system = None
-        self.selected_resonator_type = None
+        reset_selections(self)
 
     def show_selections(self):
         """
@@ -1238,21 +1051,17 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         If the selected system is a list, it prints the selected qubit, cavity, coupler, and system.
         If the selected system is a string, it prints the selected component, component name, data type, system, and coupler.
         """
-        if isinstance(self.selected_system, list):  # TODO: handle dynamically
-            print("Selected qubit: ", self.selected_qubit)
-            print("Selected cavity: ", self.selected_cavity)
-            print("Selected coupler to feedline: ", self.selected_coupler)
-            if self.selected_resonator_type is not None:
-                print("Selected resonator type: ", self.selected_resonator_type)
-            print("Selected system: ", self.selected_system)
-        elif isinstance(self.selected_system, str):
-            print("Selected component: ", self.selected_component)
-            print("Selected component name: ", self.selected_component_name)
-            print("Selected data type: ", self.selected_data_type)
-            print("Selected system: ", self.selected_system)
-            print("Selected coupler: ", self.selected_coupler)
-            if self.selected_resonator_type is not None:
-                print("Selected resonator type: ", self.selected_resonator_type)
+        for line in format_selection_lines(
+            self.selected_system,
+            self.selected_component,
+            self.selected_component_name,
+            self.selected_data_type,
+            self.selected_qubit,
+            self.selected_cavity,
+            self.selected_coupler,
+            self.selected_resonator_type,
+        ):
+            print(line)
 
     def _set_target_param_keys(self, df):
         """
@@ -1264,24 +1073,12 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Raises:
             UserWarning: If no selected system DataFrame is created or if target_param_keys is not None or a list.
         """
-        # ensure selected_df is not None
-        if self.selected_system is None:
-            raise UserWarning("No selected system df is created. Please check `self.selected_df`")
-        else:
-            # check if self.target_param_keys is None
-            if self.target_param_keys is None:
-                self.target_param_keys = get_sim_results_keys(df)
-            # check if target_param_keys is type list and system has more than one element
-            elif isinstance(self.target_param_keys, list) and len(self.selected_system) == 2:
-                self.target_param_keys += get_sim_results_keys(df)
-            # check if target_param_keys is type list and system has only one element
-            elif isinstance(self.target_param_keys, list) and len(self.selected_system) != 1:
-                self.target_param_keys = get_sim_results_keys(df)
-            else:
-                raise UserWarning("target_param_keys is not None or a list. Please check `self.target_param_keys`")
-
-            # update the attribute to remove any elements that start with "unit"
-            self.target_param_keys = [key for key in self.target_param_keys if not key.startswith("unit")]
+        self.target_param_keys = update_target_param_keys(
+            self.target_param_keys,
+            self.selected_system,
+            df,
+            get_sim_results_keys,
+        )
 
     def _get_units(self, df):
         # TODO: needs implementation
@@ -1304,23 +1101,11 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
         None
         """
-        if param == "component":
-            self.selected_component = None
-        elif param == "component_name":
-            self.selected_component_name = None
-        elif param == "data_type":
-            self.selected_data_type = None
-        elif param == "qubit":
-            self.selected_qubit = None
-        elif param == "cavity_claw":
-            self.selected_cavity = None
-        elif param == "coupler":
-            self.selected_coupler = None
-        elif param == "system":
-            self.selected_system = None
-        else:
+        attr_name = get_unselect_attr_name(param)
+        if attr_name is None:
             print("Please specify a valid parameter to unselect.")
             return
+        setattr(self, attr_name, None)
 
     def show_selected_system(self):
         raise NotImplementedError("Waiting on Andre's code")
