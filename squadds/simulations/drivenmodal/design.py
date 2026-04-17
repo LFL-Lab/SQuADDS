@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from qiskit_metal import Dict
 from qiskit_metal.designs.design_multiplanar import MultiPlanar
 
 from .layer_stack import build_layer_stack_dataframe, resolve_chip_metadata
@@ -111,3 +112,23 @@ def render_drivenmodal_design(
         ignored_jjs=ignored_jjs,
         box_plus_buffer=box_plus_buffer,
     )
+
+
+def ensure_drivenmodal_setup(renderer: Any, **setup_kwargs: Any):
+    """Create and bind a driven-modal setup across Qiskit Metal renderer versions.
+
+    Some HFSS renderer versions create the setup but do not update
+    ``renderer.pinfo.setup`` to reference the newly created name. Later calls
+    such as ``add_sweep`` then fail because they look up the active setup
+    through ``pinfo``. We make that state transition explicit here and reapply
+    the supported editable setup fields once the setup is activated.
+    """
+    setup = renderer.add_drivenmodal_setup(**setup_kwargs)
+    setup_name = setup_kwargs.get("name")
+
+    if setup_name and hasattr(renderer, "activate_ansys_setup"):
+        renderer.activate_ansys_setup(setup_name)
+        if hasattr(renderer, "edit_drivenmodal_setup"):
+            renderer.edit_drivenmodal_setup(Dict(setup_kwargs))
+
+    return setup

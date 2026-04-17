@@ -53,6 +53,7 @@ from squadds.simulations.drivenmodal.coupled_postprocess import (
 from squadds.simulations.drivenmodal.design import (
     connect_renderer_to_new_ansys_design,
     create_multiplanar_design,
+    ensure_drivenmodal_setup,
     format_exception_for_console,
     render_drivenmodal_design,
 )
@@ -413,7 +414,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
             )
             mark_stage_complete(manifest_path, "rendered")
 
-            renderer.add_drivenmodal_setup(**request.setup.to_renderer_kwargs())
+            ensure_drivenmodal_setup(renderer, **request.setup.to_renderer_kwargs())
             mark_stage_complete(manifest_path, "setup_created")
 
             renderer.add_sweep(setup_name=request.setup.name, **request.sweep.to_renderer_kwargs())

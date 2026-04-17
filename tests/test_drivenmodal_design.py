@@ -4,6 +4,7 @@ from pathlib import Path
 from squadds.simulations.drivenmodal.design import (
     connect_renderer_to_new_ansys_design,
     create_multiplanar_design,
+    ensure_drivenmodal_setup,
     format_exception_for_console,
     render_drivenmodal_design,
     write_qiskit_layer_stack_csv,
@@ -102,3 +103,35 @@ def test_render_drivenmodal_design_normalizes_open_pins_for_ports():
     assert renderer.kwargs["port_list"] == [("xmon", "readout", 50)]
     assert renderer.kwargs["jj_to_port"] == [("xmon", "rect_jj", 50, True)]
     assert renderer.kwargs["box_plus_buffer"] is False
+
+
+def test_ensure_drivenmodal_setup_activates_and_edits_named_setup():
+    class FakeRenderer:
+        def __init__(self):
+            self.calls = []
+
+        def add_drivenmodal_setup(self, **kwargs):
+            self.calls.append(("add", kwargs))
+            return "setup"
+
+        def activate_ansys_setup(self, setup_name):
+            self.calls.append(("activate", setup_name))
+
+        def edit_drivenmodal_setup(self, setup_args):
+            self.calls.append(("edit", dict(setup_args)))
+
+    renderer = FakeRenderer()
+
+    result = ensure_drivenmodal_setup(
+        renderer,
+        name="DrivenModalSetup",
+        freq_ghz=5.0,
+        max_passes=20,
+    )
+
+    assert result == "setup"
+    assert renderer.calls == [
+        ("add", {"name": "DrivenModalSetup", "freq_ghz": 5.0, "max_passes": 20}),
+        ("activate", "DrivenModalSetup"),
+        ("edit", {"name": "DrivenModalSetup", "freq_ghz": 5.0, "max_passes": 20}),
+    ]
