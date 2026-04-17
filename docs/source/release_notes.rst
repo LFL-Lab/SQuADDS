@@ -1,6 +1,35 @@
 Release Notes
 =============
 
+Version 0.4.4 (2026-04-17)
+--------------------------
+
+* **Alpha Version 0.4.4**
+
+**Refactor and Maintainability**
+
+- Refactored large internal modules into smaller helper modules while preserving the public SQuADDS APIs.
+- Kept `squadds.core.*`, `squadds.simulations.*`, and contributor/database entrypoints as compatibility facades over the refactored internals.
+- Added characterization tests around the extracted helper modules to make future cleanup safer.
+
+**Testing and CI**
+
+- Added a dedicated `integration-smoke` workflow job that runs `tests/mvp_test.py` on GitHub Actions with live Hugging Face access enabled.
+- Restored visible MVP smoke-test output in CI logs so collaborators can inspect the merged dataframe, closest-match result, interpolated design, and setup payloads directly.
+- Improved test logging for integration debugging by using explicit pytest tracebacks/output settings in CI.
+
+**Dependencies**
+
+- Updated the `datasets` floor and lockfile so live Hugging Face metadata with `Json` feature types remains compatible during MVP smoke tests.
+
+**Bug Fixes**
+
+- Fixed a `ScalingInterpolator` regression where NumPy was not imported during interpolation scaling.
+- Fixed half-wave parquet output writing so reruns overwrite expected artifacts even when the destination directory already exists.
+- Fixed helper edge cases found during refactor review, including option-key detection, sweep chunk key preservation, optional merger-term handling, contributor token fallback behavior, and live dataset setup/design payload normalization.
+
+---
+
 Version 0.4.3 (2026-01-28)
 --------------------------
 

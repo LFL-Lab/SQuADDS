@@ -1,3 +1,6 @@
+import json
+from copy import deepcopy
+
 import numpy as np
 import pandas as pd
 from pyEPR.calcs import Convert
@@ -5,6 +8,42 @@ from pyEPR.calcs import Convert
 from squadds import Analyzer
 from squadds.core.utils import *
 from squadds.interpolations.interpolator import Interpolator
+
+
+def _deserialize_json_like(value):
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped.startswith("{") or stripped.startswith("["):
+            try:
+                value = json.loads(stripped)
+            except json.JSONDecodeError:
+                return value
+        else:
+            return value
+
+    if isinstance(value, dict):
+        return {key: _deserialize_json_like(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_deserialize_json_like(item) for item in value]
+    return value
+
+
+def _extract_setup_payload(row, *keys):
+    for key in keys:
+        if key not in row or row[key] is None:
+            continue
+        payload = _deserialize_json_like(row[key])
+        if isinstance(payload, dict) and "setup" in payload and isinstance(payload["setup"], dict):
+            return payload["setup"]
+        return payload
+    raise KeyError(f"None of the setup keys were found: {keys}")
+
+
+def _extract_optional_setup_payload(row, *keys, default=None):
+    try:
+        return _extract_setup_payload(row, *keys)
+    except KeyError:
+        return default
 
 
 class ScalingInterpolator(Interpolator):
@@ -109,21 +148,27 @@ class ScalingInterpolator(Interpolator):
         else:
             closest_cavity_cpw_design = self.analyzer.find_closest(target_params_cavity, num_top=1)
 
+        closest_cavity_cpw_row = closest_cavity_cpw_design.iloc[0]
+        cavity_design_options = _deserialize_json_like(deepcopy(closest_cavity_cpw_row["design_options_cavity_claw"]))
+        cavity_setup = _extract_setup_payload(
+            closest_cavity_cpw_row,
+            "setup_cavity_claw",
+            "setup_cavity_claw_merged",
+            "setup",
+            "setup_cavity_claw_closest",
+        )
+
         closest_kappa = closest_cavity_cpw_design["kappa_kHz"].values[0]
         closest_f_cavity = closest_cavity_cpw_design["cavity_frequency_GHz"].values[0]
 
         if self.analyzer.selected_resonator_type == "half":
-            closest_coupler_length = string_to_float(
-                closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]["cplr_opts"]["finger_length"]
-            )
+            closest_coupler_length = string_to_float(cavity_design_options["cplr_opts"]["finger_length"])
         else:
-            closest_coupler_length = string_to_float(
-                closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]["cplr_opts"]["coupling_length"]
-            )
+            closest_coupler_length = string_to_float(cavity_design_options["cplr_opts"]["coupling_length"])
 
         # Scale resonator and coupling element dimensions
         updated_resonator_length = (
-            string_to_float(closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]["cpw_opts"]["total_length"])
+            string_to_float(cavity_design_options["cpw_opts"]["total_length"])
             * (closest_cavity_cpw_design["cavity_frequency_GHz"] / f_res_target).values[0]
         )
         updated_resonator_length = round(updated_resonator_length)
@@ -153,7 +198,7 @@ class ScalingInterpolator(Interpolator):
         )
 
         # Update the qubit and cavity design options
-        qubit_design_options = closest_qubit_claw_design["design_options_qubit"].iloc[0]
+        qubit_design_options = deepcopy(closest_qubit_claw_design["design_options_qubit"].iloc[0])
         qubit_design_options["cross_length"] = f"{updated_cross_length}um"
         qubit_design_options["connection_pads"]["readout"]["claw_length"] = f"{updated_claw_length}um"
         required_Lj = Convert.Lj_from_Ej(closest_qubit_claw_design["EJ"].iloc[0], units_in="GHz", units_out="nH")
@@ -166,7 +211,6 @@ class ScalingInterpolator(Interpolator):
         # setting the `claw_cpw_length` params to zero
         qubit_design_options["connection_pads"]["readout"]["claw_cpw_length"] = "0um"
 
-        cavity_design_options = closest_cavity_cpw_design["design_options_cavity_claw"].iloc[0]
         cavity_design_options["cpw_opts"]["total_length"] = f"{updated_resonator_length}um"
 
         if self.analyzer.selected_resonator_type == "half":
@@ -182,8 +226,14 @@ class ScalingInterpolator(Interpolator):
                 "coupler_type": self.analyzer.selected_coupler,
                 "design_options_qubit": [qubit_design_options],
                 "design_options_cavity_claw": [cavity_design_options],
-                "setup_qubit": [closest_qubit_claw_design["setup_qubit"].iloc[0]],
-                "setup_cavity_claw": [closest_cavity_cpw_design["setup_cavity_claw"].iloc[0]],
+                "setup_qubit": [
+                    _extract_optional_setup_payload(
+                        closest_qubit_claw_design.iloc[0],
+                        "setup_qubit",
+                        default=None,
+                    )
+                ],
+                "setup_cavity_claw": [cavity_setup],
             }
         )
 
