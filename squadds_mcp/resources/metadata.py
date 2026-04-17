@@ -32,7 +32,6 @@ def register_metadata_resources(mcp: FastMCP) -> None:
     async def get_version(ctx: Context) -> str:
         """SQuADDS and MCP server version information."""
         import squadds
-
         from squadds_mcp import __version__ as mcp_version
 
         return json.dumps(
@@ -160,4 +159,3 @@ parameters, it finds the closest matching design geometries.
    - g_MHz: 10–200 MHz
    - resonator_type: "quarter" or "half"
 """
-

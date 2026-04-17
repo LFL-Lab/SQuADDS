@@ -20,7 +20,7 @@ Adding a New Analysis Tool
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from mcp.server.fastmcp import Context, FastMCP
 
@@ -60,8 +60,7 @@ def _configure_db_for_search(
         db.select_resonator_type(resonator_type)
     else:
         raise ValueError(
-            f"Invalid system_type '{system_type}'. "
-            "Must be one of: 'qubit_cavity', 'qubit', 'cavity_claw'."
+            f"Invalid system_type '{system_type}'. Must be one of: 'qubit_cavity', 'qubit', 'cavity_claw'."
         )
 
 
@@ -99,8 +98,7 @@ def register_analysis_tools(mcp: FastMCP) -> None:
         }
         if system_type not in key_map:
             raise ValueError(
-                f"Invalid system_type '{system_type}'. "
-                "Must be one of: 'qubit_cavity', 'qubit', 'cavity_claw'."
+                f"Invalid system_type '{system_type}'. Must be one of: 'qubit_cavity', 'qubit', 'cavity_claw'."
             )
         return HamiltonianKeysResult(keys=key_map[system_type], system_type=system_type)
 
@@ -165,7 +163,7 @@ def register_analysis_tools(mcp: FastMCP) -> None:
         # Extract results
         h_param_keys = analyzer.H_param_keys or []
         designs = []
-        for rank, (idx, row) in enumerate(closest_df.iterrows(), start=1):
+        for rank, (_idx, row) in enumerate(closest_df.iterrows(), start=1):
             # Design options
             design_opts = {}
             if "design_options" in row.index and row["design_options"] is not None:

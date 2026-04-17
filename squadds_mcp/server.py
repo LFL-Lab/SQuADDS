@@ -55,7 +55,6 @@ from dataclasses import dataclass
 
 from mcp.server.fastmcp import FastMCP
 
-
 # ---------------------------------------------------------------------------
 # Lifespan context — holds shared resources across all tool invocations
 # ---------------------------------------------------------------------------

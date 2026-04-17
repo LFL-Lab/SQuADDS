@@ -73,7 +73,7 @@ def register_contribution_tools(mcp: FastMCP) -> None:
         db = ctx.request_context.lifespan_context.db
         dataset = load_dataset(db.repo_name, "measured_device_database")["train"]
 
-        for i, entry in enumerate(dataset):
+        for _i, entry in enumerate(dataset):
             if entry.get("name") == device_name:
                 recipe_info = {
                     "device_name": device_name,

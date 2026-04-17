@@ -18,8 +18,6 @@ Adding a New Database Tool
 
 from __future__ import annotations
 
-from typing import Optional
-
 from datasets import load_dataset
 from mcp.server.fastmcp import Context, FastMCP
 
@@ -100,9 +98,7 @@ def register_database_tools(mcp: FastMCP) -> None:
 
         datasets = []
         for comp, name, dtype in zip(components, component_names, data_types):
-            datasets.append(
-                DatasetSummaryRow(component=comp, component_name=name, data_type=dtype)
-            )
+            datasets.append(DatasetSummaryRow(component=comp, component_name=name, data_type=dtype))
         return DatasetSummaryResult(datasets=datasets, count=len(datasets))
 
     @mcp.tool()

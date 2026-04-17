@@ -17,10 +17,9 @@ Adding a New Schema
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
-
 
 # ---------------------------------------------------------------------------
 # Input schemas
@@ -60,27 +59,27 @@ class TargetParams(BaseModel):
     - **qubit_cavity**: all of the above plus ``g_MHz``
     """
 
-    qubit_frequency_GHz: Optional[float] = Field(
+    qubit_frequency_GHz: float | None = Field(
         default=None,
         description="Target qubit frequency in GHz (typical range: 3–8 GHz).",
     )
-    anharmonicity_MHz: Optional[float] = Field(
+    anharmonicity_MHz: float | None = Field(
         default=None,
         description="Target anharmonicity in MHz (typical range: −500 to −50 MHz, negative).",
     )
-    cavity_frequency_GHz: Optional[float] = Field(
+    cavity_frequency_GHz: float | None = Field(
         default=None,
         description="Target cavity/resonator frequency in GHz (typical range: 5–12 GHz).",
     )
-    kappa_kHz: Optional[float] = Field(
+    kappa_kHz: float | None = Field(
         default=None,
         description="Target cavity linewidth (kappa) in kHz (typical range: 10–1000 kHz).",
     )
-    g_MHz: Optional[float] = Field(
+    g_MHz: float | None = Field(
         default=None,
         description="Target qubit-cavity coupling strength in MHz (typical range: 10–200 MHz).",
     )
-    resonator_type: Optional[str] = Field(
+    resonator_type: str | None = Field(
         default=None,
         description="Resonator type: 'quarter' or 'half'. Required for cavity searches.",
     )
@@ -134,7 +133,7 @@ class DatasetInfoResult(BaseModel):
     num_rows: int = Field(description="Number of rows.")
     features: dict[str, str] = Field(description="Feature name → type mapping.")
     description: str = Field(default="", description="Dataset description.")
-    size_bytes: Optional[int] = Field(default=None, description="Dataset size in bytes.")
+    size_bytes: int | None = Field(default=None, description="Dataset size in bytes.")
 
 
 class DatasetSummaryRow(BaseModel):
@@ -156,10 +155,10 @@ class MeasuredDeviceResult(BaseModel):
     """Information about a measured (experimental) device."""
 
     name: str = Field(description="Device name.")
-    design_code: Optional[str] = Field(default=None, description="Design code identifier.")
-    paper_link: Optional[str] = Field(default=None, description="Link to associated paper.")
-    foundry: Optional[str] = Field(default=None, description="Fabrication foundry.")
-    fabrication_recipe: Optional[Any] = Field(default=None, description="Fabrication recipe details.")
+    design_code: str | None = Field(default=None, description="Design code identifier.")
+    paper_link: str | None = Field(default=None, description="Link to associated paper.")
+    foundry: str | None = Field(default=None, description="Fabrication foundry.")
+    fabrication_recipe: Any | None = Field(default=None, description="Fabrication recipe details.")
 
 
 class DesignResult(BaseModel):
@@ -186,17 +185,17 @@ class InterpolatedDesignResult(BaseModel):
     design_options: dict[str, Any] = Field(description="Interpolated design options (qubit + cavity + coupler).")
     qubit_options: dict[str, Any] = Field(description="Qubit-specific design options.")
     cavity_options: dict[str, Any] = Field(description="Cavity-specific design options.")
-    coupler_type: Optional[str] = Field(default=None, description="Coupler type used.")
+    coupler_type: str | None = Field(default=None, description="Coupler type used.")
     scaling_info: dict[str, Any] = Field(default_factory=dict, description="Scaling factors applied.")
 
 
 class ContributorInfo(BaseModel):
     """Information about a data contributor."""
 
-    uploader: Optional[str] = None
-    PI: Optional[str] = None
-    group: Optional[str] = None
-    institution: Optional[str] = None
+    uploader: str | None = None
+    PI: str | None = None
+    group: str | None = None
+    institution: str | None = None
 
 
 class ContributorsResult(BaseModel):

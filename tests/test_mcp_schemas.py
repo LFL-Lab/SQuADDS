@@ -6,23 +6,13 @@ Validates that all schemas serialize/deserialize correctly and
 enforce their constraints.
 """
 
-import pytest
-from pydantic import ValidationError
-
 from squadds_mcp.schemas import (
     ClosestDesignsResult,
     ComponentListResult,
-    ConfigListResult,
-    ContributorInfo,
-    ContributorsResult,
-    DatasetInfoResult,
     DatasetResult,
-    DatasetSummaryResult,
-    DatasetSummaryRow,
     DesignResult,
     HamiltonianKeysResult,
     InterpolatedDesignResult,
-    MeasuredDeviceResult,
     TargetParams,
     VersionResult,
 )

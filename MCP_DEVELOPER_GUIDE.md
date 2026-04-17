@@ -54,7 +54,7 @@ In `schemas.py`, add a Pydantic model:
 ```python
 class MyToolResult(BaseModel):
     """Description of what this result contains."""
-    
+
     field_name: str = Field(description="What this field means.")
     data: dict[str, Any] = Field(description="The actual data.")
 ```
@@ -74,7 +74,7 @@ def register_my_tools(mcp: FastMCP) -> None:
         param2: int = 10,
     ) -> MyToolResult:
         """Clear description of what this tool does.
-        
+
         This docstring becomes the tool's description in MCP.
         AI agents read this to decide when to use the tool.
         Be specific about:
@@ -82,17 +82,17 @@ def register_my_tools(mcp: FastMCP) -> None:
         - What parameters mean
         - What the output contains
         - Any side effects or caveats
-        
+
         Args:
             param1: Description of param1.
             param2: Description of param2 (default: 10).
         """
         # Access the database via lifespan context
         db = ctx.request_context.lifespan_context.db
-        
+
         # Do your work...
         result = db.some_method(param1)
-        
+
         # Return a structured result
         return MyToolResult(
             field_name=param1,
@@ -153,7 +153,7 @@ In `prompts/workflows.py`:
 @mcp.prompt()
 def my_workflow(target_frequency: float = 5.0) -> str:
     """Brief description of this workflow prompt.
-    
+
     Detailed explanation of when an agent should use this.
     """
     return f"""# My Workflow
@@ -177,7 +177,7 @@ Every tool and resource function can access the shared `SQuADDS_DB` instance:
 ```python
 async def my_tool(ctx: Context) -> ...:
     db = ctx.request_context.lifespan_context.db
-    
+
     # Now use db methods:
     db.supported_components()
     db.get_component_names("qubit")
@@ -222,7 +222,7 @@ Tools should handle errors gracefully and return meaningful messages:
 @mcp.tool()
 async def my_tool(ctx: Context, component: str) -> ComponentListResult:
     db = ctx.request_context.lifespan_context.db
-    
+
     # Validate inputs
     supported = db.supported_components()
     if component not in supported:
@@ -230,13 +230,13 @@ async def my_tool(ctx: Context, component: str) -> ComponentListResult:
             f"Component '{component}' not supported. "
             f"Available: {supported}"
         )
-    
+
     # If a non-critical operation fails, return a useful default
     try:
         names = db.get_component_names(component)
     except Exception as e:
         return ComponentListResult(items=[], count=0)
-    
+
     return ComponentListResult(items=names, count=len(names))
 ```
 

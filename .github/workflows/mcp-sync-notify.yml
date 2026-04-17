@@ -41,10 +41,12 @@ jobs:
             PREV_TAG=$(git tag --sort=-v:refname | head -2 | tail -1)
           fi
 
-          echo "current_tag=${CURRENT_TAG}" >> $GITHUB_OUTPUT
-          echo "prev_tag=${PREV_TAG}" >> $GITHUB_OUTPUT
-          echo "release_url=${RELEASE_URL}" >> $GITHUB_OUTPUT
-          echo "release_name=${RELEASE_NAME}" >> $GITHUB_OUTPUT
+          {
+            echo "current_tag=${CURRENT_TAG}"
+            echo "prev_tag=${PREV_TAG}"
+            echo "release_url=${RELEASE_URL}"
+            echo "release_name=${RELEASE_NAME}"
+          } >> "$GITHUB_OUTPUT"
           echo "Current: ${CURRENT_TAG}, Previous: ${PREV_TAG}"
 
       - name: Analyze API changes
@@ -68,20 +70,21 @@ jobs:
 
           CHANGES_FOUND=false
           AFFECTED_FILES=""
-          API_CHANGES_JSON="[]"
 
           for filepath in "${MCP_CRITICAL_FILES[@]}"; do
             DIFF=$(git diff "${PREV_TAG}".."${CURRENT_TAG}" -- "$filepath" 2>/dev/null || true)
             if [ -n "$DIFF" ]; then
               CHANGES_FOUND=true
               AFFECTED_FILES="${AFFECTED_FILES}${filepath}\n"
-              echo "### \`${filepath}\`" >> /tmp/api_changes.md
-              echo '```diff' >> /tmp/api_changes.md
-              # Show only function signature changes (def/class lines)
-              git diff "${PREV_TAG}".."${CURRENT_TAG}" -- "$filepath" | \
-                grep -E "^[+-].*(def |class |    def )" | head -30 >> /tmp/api_changes.md || true
-              echo '```' >> /tmp/api_changes.md
-              echo "" >> /tmp/api_changes.md
+              {
+                echo "### \`${filepath}\`"
+                echo '```diff'
+                # Show only function signature changes (def/class lines)
+                git diff "${PREV_TAG}".."${CURRENT_TAG}" -- "$filepath" | \
+                  grep -E "^[+-].*(def |class |    def )" | head -30 || true
+                echo '```'
+                echo ""
+              } >> /tmp/api_changes.md
             fi
           done
 
@@ -105,22 +108,24 @@ jobs:
           fi
 
           # Save outputs
-          echo "changes_found=${CHANGES_FOUND}" >> $GITHUB_OUTPUT
-          echo "affected_mcp_modules=${AFFECTED_MCP_MODULES}" >> $GITHUB_OUTPUT
+          {
+            echo "changes_found=${CHANGES_FOUND}"
+            echo "affected_mcp_modules=${AFFECTED_MCP_MODULES}"
+          } >> "$GITHUB_OUTPUT"
 
           # Save the full diff summary (multiline)
           {
             echo "api_changes_md<<EOF"
             cat /tmp/api_changes.md
             echo "EOF"
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
           # Save affected files list
           {
             echo "affected_files<<EOF"
             echo -e "$AFFECTED_FILES"
             echo "EOF"
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create MCP sync issue
         uses: actions/github-script@v7

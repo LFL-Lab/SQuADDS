@@ -7,7 +7,6 @@ and server creation without requiring a live HuggingFace connection.
 """
 
 import json
-import math
 
 import numpy as np
 import pandas as pd
@@ -20,7 +19,6 @@ from squadds_mcp.utils import (
     safe_get,
     sanitize_for_json,
 )
-
 
 # ---------------------------------------------------------------------------
 # Tests for utils.py
