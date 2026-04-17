@@ -117,6 +117,19 @@ Add newly touched files here as implementation progresses.
   - `ssh LFLLAB-CODEX ... uv run python .\\SQuADDS\\tutorials\\Tutorial-10_DrivenModal_Capacitance_Extraction.py`
   - Outcome at commit `cbe1277`: Tutorial 10 now exits successfully end-to-end on the validation machine.
   - Important caveat: the qubit-claw stage completes and saves artifacts, but the NCap stage currently produces clearly unphysical capacitance magnitudes (for example `top_to_ground` on the order of `4.7e5 fF`). Another agent should therefore treat Tutorial 10 as runtime-executable but not yet numerically calibrated for NCap/Q3D agreement.
+- `uv run pytest tests/test_drivenmodal_models.py tests/test_drivenmodal_design.py tests/test_ansys_simulator.py -q --tb=short` -> pass, 18 passed, 8 expected warnings
+- `uv run --extra dev ruff check squadds/simulations/drivenmodal/models.py squadds/simulations/drivenmodal/design.py tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py tests/test_drivenmodal_models.py tests/test_drivenmodal_design.py` -> pass
+- `uv run --extra dev ruff format --check squadds/simulations/drivenmodal/models.py squadds/simulations/drivenmodal/design.py tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py tests/test_drivenmodal_models.py tests/test_drivenmodal_design.py` -> pass
+- Official Ansys HFSS sweep docs review:
+  - `https://ansyshelp.ansys.com/public/Views/Secured/Electronics/v252/en/Subsystems/HFSS/Subsystems/HFSS%20Scripting/Content/InsertFrequencySweep.htm`
+  - `https://aedt.docs.pyansys.com/version/stable/API/_autosummary/ansys.aedt.core.hfss.Hfss.create_linear_count_sweep.html`
+  Outcome: Qiskit Metal/pyEPR currently hides HFSS interpolating-sweep controls such as `InterpTolerance` and `InterpMaxSolns`; official defaults are `0.5` and `250`. The SQuADDS wrapper now exposes those controls directly for driven-modal sweeps.
+- Windows/Ansys validation at commit `7ff01b1`:
+  - `ssh LFLLAB-CODEX ... uv run python .\\SQuADDS\\tutorials\\Tutorial-10_DrivenModal_Capacitance_Extraction.py`
+  - Outcome: Tutorial 10 still exits successfully end-to-end with the tighter interpolating sweep (`count=400`, `InterpTolerance=0.005`, `InterpMaxSolns=400`) and an explicit chip box derived from the same Qiskit Metal buffer defaults used by Q3D/HFSS auto-bounding-box rendering.
+  - Qubit-claw (`tutorial10-qubit-claw-003-v3`) remains only partially matched: `cross_to_claw` is excellent (`+1.67%`) and `ground_to_ground` is reasonable (`-5.48%`), but self/ground terms remain badly imbalanced (`cross_to_ground -33.4%`, `claw_to_ground +106.7%`).
+  - NCap (`tutorial10-ncap-001-v3`) improved by roughly an order of magnitude relative to the earlier worst-case blow-up, but is still numerically wrong for the ground-related terms (`top_to_ground ≈ 1.15e4 fF` vs `29.2 fF`, `ground_to_ground ≈ 1.14e4 fF` vs `124.2 fF`).
+  - The Windows machine currently accumulates many stale `ansysedt` processes across retries/runs; another agent should consider explicit desktop/process cleanup as part of the next stability pass.
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
@@ -131,6 +144,13 @@ Update this section after every meaningful verification run with the exact comma
   - the original blocker was "script crashes before or during the HFSS solve";
   - after the retry and startup-isolation patches, the blocker is now "script runs to completion, but NCap port/terminal modeling does not yet reproduce Q3D-like capacitances."
   Another agent should not spend time re-solving the old renderer startup bug unless it reappears on a newer environment.
+- The current tighter interpolating sweep configuration is:
+  - `count = 400`
+  - `InterpTolerance = 0.005`
+  - `InterpMaxSolns = 400`
+  - `min_converged = 5`
+  - explicit chip box derived from component `qgeometry_bounds()` plus the shared Qiskit Metal renderer defaults `x_buffer_width_mm = y_buffer_width_mm = 0.2`
+  This configuration did not materially improve the qubit-claw self/ground mismatch and did not fix NCap calibration. Another agent should prioritize terminal/reference modeling and cleanup of stale AEDT state over further blind sweep-parameter tightening.
 - `scikit-rf` is currently wired as a core dependency because the coupled-system post-processing helpers now depend on it. Another agent can revisit that split later, but should do so deliberately rather than implicitly.
 - Whether dense capacitance-vs-frequency data should be stored as JSON, parquet, or a more compact artifact format remains open until dataset serialization is implemented.
 - The tutorials currently store dense capacitance-vs-frequency data as parquet and raw complex HFSS tables as pickle because the latter remain the most convenient portable checkpoint format for complex-valued pandas frames. Another agent can revisit that once the Hugging Face artifact contract is finalized.
