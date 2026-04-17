@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.database.contributor_HF &#8212; SQuADDS v0.4.3</title>
+    <title>squadds.database.contributor_HF &#8212; SQuADDS v0.4.4</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=5bfaad31"></script>
+    <script src="../../../_static/documentation_options.js?v=90733dfc"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -579,17 +579,13 @@
                 <article class="bd-article">
                   
   <h1>Source code for squadds.database.contributor_HF</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">HfApi</span><span class="p">,</span> <span class="n">get_token</span><span class="p">,</span> <span class="n">login</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.database.checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">Checker</span>
-
-<span class="n">load_dotenv</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.database.contributor_env</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_hf_api_and_token</span><span class="p">,</span> <span class="n">load_contributor_environment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.database.hf_dataset_ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_dataset_name</span><span class="p">,</span> <span class="n">ensure_dataset_repository</span><span class="p">,</span> <span class="n">upload_dataset_files</span>
 
 
 <div class="viewcode-block" id="Contribute">
@@ -618,6 +614,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_files</span><span class="p">):</span>
+        <span class="n">load_contributor_environment</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset_files</span> <span class="o">=</span> <span class="n">data_files</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">institute</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;INSTITUTION&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pi_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PI_NAME&quot;</span><span class="p">)</span>
@@ -639,14 +636,7 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If Hugging Face token is not found.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">api</span> <span class="o">=</span> <span class="n">HfApi</span><span class="p">()</span>
-        <span class="n">token</span> <span class="o">=</span> <span class="n">get_token</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Hugging Face token not found. Please log in using `huggingface-cli login`.&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;HUGGINGFACE_API_KEY&quot;</span><span class="p">)</span>
-            <span class="n">login</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">api</span><span class="p">,</span> <span class="n">token</span></div>
+        <span class="k">return</span> <span class="n">get_hf_api_and_token</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Contribute.create_dataset_name">
@@ -665,14 +655,16 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            str: Unique name for the dataset.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">components_joined</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
-        <span class="n">date</span> <span class="o">=</span> <span class="n">date</span> <span class="ow">or</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">base_string</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">components_joined</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data_nature</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data_source</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">institute</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pi_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span> <span class="o">=</span> <span class="n">build_dataset_name</span><span class="p">(</span>
+            <span class="n">components</span><span class="p">,</span>
+            <span class="n">data_type</span><span class="p">,</span>
+            <span class="n">data_nature</span><span class="p">,</span>
+            <span class="n">data_source</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">institute</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pi_name</span><span class="p">,</span>
+            <span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">uid_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">base_string</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">8</span><span class="p">]</span>  <span class="c1"># Short hash</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_string</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">uid_hash</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_string</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">uid_hash</span><span class="si">}</span><span class="s2">&quot;</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span></div>
 
 
 <div class="viewcode-block" id="Contribute.get_dataset_link">
@@ -728,11 +720,7 @@
         <span class="n">dataset_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_dataset_name</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">data_nature</span><span class="p">,</span> <span class="n">data_source</span><span class="p">,</span> <span class="n">date</span><span class="p">)</span>
 
         <span class="c1"># Create a repository for the dataset on HuggingFace (if it doesn&#39;t exist)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">create_repo</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="n">dataset_name</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="n">repo_type</span><span class="o">=</span><span class="s2">&quot;dataset&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset repository </span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2"> created.&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating dataset repository: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+        <span class="n">ensure_dataset_repository</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Contribute.upload_dataset_no_validation">
@@ -752,25 +740,8 @@
         <span class="n">dataset_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_dataset_name</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">data_nature</span><span class="p">,</span> <span class="n">data_source</span><span class="p">,</span> <span class="n">date</span><span class="p">)</span>
 
         <span class="c1"># Create a repository for the dataset on HuggingFace (if it doesn&#39;t exist)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">create_repo</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="n">dataset_name</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="n">repo_type</span><span class="o">=</span><span class="s2">&quot;dataset&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset repository </span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2"> created.&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating dataset repository: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Upload files to the dataset</span>
-        <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span>
-                    <span class="n">path_or_fileobj</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
-                    <span class="n">path_in_repo</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">),</span>
-                    <span class="n">repo_id</span><span class="o">=</span><span class="n">dataset_name</span><span class="p">,</span>
-                    <span class="n">repo_type</span><span class="o">=</span><span class="s2">&quot;dataset&quot;</span><span class="p">,</span>
-                    <span class="n">token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Uploaded </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error uploading file </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+        <span class="n">ensure_dataset_repository</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+        <span class="n">upload_dataset_files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

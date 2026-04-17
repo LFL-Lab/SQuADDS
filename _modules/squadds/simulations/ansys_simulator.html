@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.simulations.ansys_simulator &#8212; SQuADDS v0.4.3</title>
+    <title>squadds.simulations.ansys_simulator &#8212; SQuADDS v0.4.4</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=5bfaad31"></script>
+    <script src="../../../_static/documentation_options.js?v=90733dfc"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -592,6 +592,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">rich.console</span><span class="w"> </span><span class="kn">import</span> <span class="n">Console</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.coupled_systems</span><span class="w"> </span><span class="kn">import</span> <span class="n">QubitCavity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.json_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">deserialize_json_like</span><span class="p">,</span> <span class="n">normalize_setup_payload</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.objects</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">run_qubit_cavity_sweep</span><span class="p">,</span>
     <span class="n">run_sweep</span><span class="p">,</span>
@@ -628,6 +629,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">analyzer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span>  <span class="c1"># Store a copy for stateful modification</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_device_dict</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lom_analysis_obj</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epr_analysis_obj</span> <span class="o">=</span> <span class="kc">None</span>
@@ -679,6 +681,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;selected system: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">analyzer</span><span class="o">.</span><span class="n">selected_system</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_device_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalize legacy/live dataset payload variants into the canonical simulator shape.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options_qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">deserialize_json_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;setup&quot;</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;setup_&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalize_setup_payload</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="s2">&quot;setup_cavity_claw&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;setup_cavity_claw_merged&quot;</span><span class="p">,</span> <span class="s2">&quot;setup_cavity_claw_closest&quot;</span><span class="p">,</span> <span class="s2">&quot;setup&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="s2">&quot;setup_cavity_claw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalize_setup_payload</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="k">break</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_warnings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

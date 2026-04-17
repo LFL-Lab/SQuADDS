@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.simulations.objects &#8212; SQuADDS v0.4.3</title>
+    <title>squadds.simulations.objects &#8212; SQuADDS v0.4.4</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=5bfaad31"></script>
+    <script src="../../../_static/documentation_options.js?v=90733dfc"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -593,6 +593,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.analyses.quantization</span><span class="w"> </span><span class="kn">import</span> <span class="n">EPRanalysis</span><span class="p">,</span> <span class="n">LOManalysis</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.qubits</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCross</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.result_normalization</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">build_eigenmode_payload</span><span class="p">,</span>
+    <span class="n">build_ncap_lom_payload</span><span class="p">,</span>
+    <span class="n">build_xmon_lom_payload</span><span class="p">,</span>
+    <span class="n">normalize_simulation_results</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.sweeper_helperfunctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_QSweep_parameters</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -831,45 +837,13 @@
 <span class="sd">        dict: A dictionary containing the calculated simulation results.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># if the arguments are None, return and print error message</span>
-    <span class="k">if</span> <span class="n">ncap_lom_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ncap_lom_df</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">lom_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">lom_df</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">emode_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">emode_df</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">emode_df</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lom_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No simulation results available.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="p">{}</span> <span class="k">if</span> <span class="n">emode_df</span> <span class="o">==</span> <span class="p">{}</span> <span class="k">else</span> <span class="n">emode_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
-    <span class="p">{}</span> <span class="k">if</span> <span class="n">lom_df</span> <span class="o">==</span> <span class="p">{}</span> <span class="k">else</span> <span class="n">lom_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
-
-    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="n">cross2cpw</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lom_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;cross_to_claw&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-15</span>
-    <span class="n">cross2ground</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lom_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;cross_to_ground&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-15</span>
-    <span class="n">f_r</span> <span class="o">=</span> <span class="n">emode_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;cavity_frequency&quot;</span><span class="p">]</span>
-    <span class="n">Lj</span> <span class="o">=</span> <span class="n">lom_df</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">][</span><span class="s2">&quot;aedt_q3d_inductance&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span>
-        <span class="mi">1</span> <span class="k">if</span> <span class="n">lom_df</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">][</span><span class="s2">&quot;aedt_q3d_inductance&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">1e-9</span> <span class="k">else</span> <span class="mf">1e-9</span>
-    <span class="p">)</span>
-    <span class="c1"># print(Lj)</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">ncap_lom_df</span> <span class="o">!=</span> <span class="p">{}</span> <span class="k">else</span> <span class="mi">4</span>
-    <span class="n">gg</span><span class="p">,</span> <span class="n">aa</span><span class="p">,</span> <span class="n">ff_q</span> <span class="o">=</span> <span class="n">find_g_a_fq</span><span class="p">(</span><span class="n">cross2cpw</span><span class="p">,</span> <span class="n">cross2ground</span><span class="p">,</span> <span class="n">f_r</span><span class="p">,</span> <span class="n">Lj</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
-    <span class="n">kappa</span> <span class="o">=</span> <span class="n">emode_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;kappa&quot;</span><span class="p">]</span>
-    <span class="n">Q</span> <span class="o">=</span> <span class="n">emode_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">ncap_lom_df</span> <span class="o">!=</span> <span class="p">{}:</span>
-        <span class="n">f_r</span><span class="p">,</span> <span class="n">kappa</span> <span class="o">=</span> <span class="n">find_kappa</span><span class="p">(</span>
-            <span class="n">emode_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;cavity_frequency&quot;</span><span class="p">],</span>
-            <span class="n">ncap_lom_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;C_top2ground&quot;</span><span class="p">],</span>
-            <span class="n">ncap_lom_df</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;C_top2bottom&quot;</span><span class="p">],</span>
-        <span class="p">)</span>
-
-    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">cavity_frequency_GHz</span><span class="o">=</span><span class="n">f_r</span> <span class="o">/</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span> <span class="n">kappa_kHz</span><span class="o">=</span><span class="n">kappa</span><span class="p">,</span> <span class="n">g_MHz</span><span class="o">=</span><span class="n">gg</span><span class="p">,</span> <span class="n">anharmonicity_MHz</span><span class="o">=</span><span class="n">aa</span><span class="p">,</span> <span class="n">qubit_frequency_GHz</span><span class="o">=</span><span class="n">ff_q</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">data</span></div>
+    <span class="k">return</span> <span class="n">normalize_simulation_results</span><span class="p">(</span>
+        <span class="n">emode_df</span><span class="o">=</span><span class="n">emode_df</span><span class="p">,</span>
+        <span class="n">lom_df</span><span class="o">=</span><span class="n">lom_df</span><span class="p">,</span>
+        <span class="n">ncap_lom_df</span><span class="o">=</span><span class="n">ncap_lom_df</span><span class="p">,</span>
+        <span class="n">find_g_a_fq_fn</span><span class="o">=</span><span class="n">find_g_a_fq</span><span class="p">,</span>
+        <span class="n">find_kappa_fn</span><span class="o">=</span><span class="n">find_kappa</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
 
@@ -982,23 +956,16 @@
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">epra</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 
-    <span class="n">data_df</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="n">coupler_type</span><span class="p">,</span> <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="n">geometry_dict</span><span class="p">,</span> <span class="s2">&quot;design_tool&quot;</span><span class="p">:</span> <span class="s2">&quot;Qiskit Metal&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;sim_options&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;sim_type&quot;</span><span class="p">:</span> <span class="s2">&quot;epr&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="n">setup</span><span class="p">,</span>
-            <span class="s2">&quot;renderer_options&quot;</span><span class="p">:</span> <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
-            <span class="s2">&quot;simulator&quot;</span><span class="p">:</span> <span class="s2">&quot;Ansys HFSS&quot;</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;cavity_frequency&quot;</span><span class="p">:</span> <span class="n">f_rough</span><span class="p">,</span>
-            <span class="s2">&quot;cavity_frequency_unit&quot;</span><span class="p">:</span> <span class="s2">&quot;GHz&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="n">Q</span><span class="p">,</span>
-            <span class="s2">&quot;kappa&quot;</span><span class="p">:</span> <span class="n">kappa</span><span class="p">,</span>
-            <span class="s2">&quot;kappa_unit&quot;</span><span class="p">:</span> <span class="s2">&quot;kHz&quot;</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;misc&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
-    <span class="p">}</span>
+    <span class="n">data_df</span> <span class="o">=</span> <span class="n">build_eigenmode_payload</span><span class="p">(</span>
+        <span class="n">coupler_type</span><span class="p">,</span>
+        <span class="n">geometry_dict</span><span class="p">,</span>
+        <span class="n">setup</span><span class="p">,</span>
+        <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
+        <span class="n">f_rough</span><span class="p">,</span>
+        <span class="n">Q</span><span class="p">,</span>
+        <span class="n">kappa</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data_df</span><span class="p">,</span> <span class="n">epra</span></div>
 
@@ -1051,19 +1018,7 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">loma</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">setup</span> <span class="o">=</span> <span class="n">loma</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span>
 
-    <span class="n">data_df</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">:</span> <span class="s2">&quot;NCap&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="n">param</span><span class="p">,</span> <span class="s2">&quot;design_tool&quot;</span><span class="p">:</span> <span class="s2">&quot;Qiskit Metal&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;sim_options&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sim_type&quot;</span><span class="p">:</span> <span class="s2">&quot;lom&quot;</span><span class="p">,</span> <span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="n">setup</span><span class="p">,</span> <span class="s2">&quot;simulator&quot;</span><span class="p">:</span> <span class="s2">&quot;Ansys HFSS&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;C_top2top&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cap_body_0_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-            <span class="s2">&quot;C_top2bottom&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cap_body_0_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-            <span class="s2">&quot;C_top2ground&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cap_body_0_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
-            <span class="s2">&quot;C_bottom2bottom&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cap_body_1_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-            <span class="s2">&quot;C_bottom2ground&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cap_body_1_</span><span class="si">{</span><span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
-            <span class="s2">&quot;C_ground2ground&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="p">[</span><span class="s2">&quot;ground_main_plane&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;misc&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
-    <span class="p">}</span>
+    <span class="n">data_df</span> <span class="o">=</span> <span class="n">build_ncap_lom_payload</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">cap_df</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">coupler</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data_df</span><span class="p">,</span> <span class="n">loma</span></div>
 
@@ -1118,30 +1073,14 @@
         <span class="c1"># print(&quot;#&quot;*100)</span>
         <span class="c1"># print(c1.sim.renderer.options)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="n">design</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="n">qname</span><span class="p">]</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="s2">&quot;design_tool&quot;</span><span class="p">:</span> <span class="s2">&quot;Qiskit Metal&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;sim_options&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;sim_type&quot;</span><span class="p">:</span> <span class="s2">&quot;lom&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="n">c1</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="p">,</span>
-                <span class="s2">&quot;renderer_options&quot;</span><span class="p">:</span> <span class="n">c1</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
-                <span class="s2">&quot;simulator&quot;</span><span class="p">:</span> <span class="s2">&quot;Ansys HFSS&quot;</span><span class="p">,</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;cross_to_ground&quot;</span><span class="p">:</span> <span class="mi">0</span>
-                <span class="k">if</span> <span class="s2">&quot;ground_main_plane&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
-                <span class="k">else</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="s2">&quot;ground_main_plane&quot;</span><span class="p">]),</span>
-                <span class="s2">&quot;claw_to_ground&quot;</span><span class="p">:</span> <span class="mi">0</span>
-                <span class="k">if</span> <span class="s2">&quot;ground_main_plane&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s2">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
-                <span class="k">else</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s2">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="s2">&quot;ground_main_plane&quot;</span><span class="p">]),</span>
-                <span class="s2">&quot;cross_to_claw&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s2">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]),</span>
-                <span class="s2">&quot;cross_to_cross&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="sa">f</span><span class="s2">&quot;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]),</span>
-                <span class="s2">&quot;claw_to_claw&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s2">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cname</span><span class="si">}</span><span class="s2">_connector_arm_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]),</span>
-                <span class="s2">&quot;ground_to_ground&quot;</span><span class="p">:</span> <span class="mi">0</span>
-                <span class="k">if</span> <span class="s2">&quot;ground_main_plane&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cross_</span><span class="si">{</span><span class="n">qname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
-                <span class="k">else</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cap_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;ground_main_plane&quot;</span><span class="p">][</span><span class="s2">&quot;ground_main_plane&quot;</span><span class="p">]),</span>
-                <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;fF&quot;</span><span class="p">,</span>
-            <span class="p">},</span>
-        <span class="p">}</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">build_xmon_lom_payload</span><span class="p">(</span>
+            <span class="n">design</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="n">qname</span><span class="p">]</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
+            <span class="n">c1</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">setup</span><span class="p">,</span>
+            <span class="n">c1</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
+            <span class="n">cap_df</span><span class="p">,</span>
+            <span class="n">qname</span><span class="p">,</span>
+            <span class="n">cname</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="c1"># save_simulation_data_to_json(data, filename = f&quot;qubitonly_num{i}_{comp_id}_v{version}&quot;)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ansys HFSS simulation failed. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Are you sure the Ansys HFSS is installed?&quot;</span><span class="p">)</span>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.database.contributor &#8212; SQuADDS v0.4.3</title>
+    <title>squadds.database.contributor &#8212; SQuADDS v0.4.4</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=5bfaad31"></script>
+    <script src="../../../_static/documentation_options.js?v=90733dfc"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -579,14 +579,11 @@
                 <article class="bd-article">
                   
   <h1>Source code for squadds.database.contributor</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_dataset_config_names</span><span class="p">,</span> <span class="n">load_dataset</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.globals</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -597,6 +594,22 @@
     <span class="n">get_type</span><span class="p">,</span>
     <span class="n">validate_types</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.database.contributor_env</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_contributor_record</span><span class="p">,</span> <span class="n">load_contributor_environment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.database.contributor_file_ops</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">append_entries_to_dataset_file</span><span class="p">,</span>
+    <span class="n">load_contribution_from_json_file</span><span class="p">,</span>
+    <span class="n">load_sweep_entries_from_json_prefix</span><span class="p">,</span>
+    <span class="n">validate_sweep_entries</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.database.contributor_records</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">add_sim_result_entry</span><span class="p">,</span>
+    <span class="n">build_contribution_payload</span><span class="p">,</span>
+    <span class="n">build_empty_contribution_state</span><span class="p">,</span>
+    <span class="n">merge_contributor_notes</span><span class="p">,</span>
+    <span class="n">validate_required_structure</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.database.contributor_schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_design_payload</span><span class="p">,</span> <span class="n">validate_sim_setup_payload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.database.contributor_validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_nested_value</span><span class="p">,</span> <span class="n">summarize_content_differences</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">! TODO:</span>
@@ -650,12 +663,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span> <span class="o">=</span> <span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_config_name</span><span class="p">()</span>
-        <span class="n">load_dotenv</span><span class="p">(</span><span class="n">ENV_FILE_PATH</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;design_tool&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="p">{}}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;simulator&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">load_contributor_environment</span><span class="p">()</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">build_empty_contribution_state</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ref_entry</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__set_contributor_info</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
@@ -742,14 +756,7 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_contributor_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;GROUP_NAME&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;PI&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PI_NAME&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;institution&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;INSTITUTION&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;uploader&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;USER_NAME&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;misc&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;CONTRIB_MISC&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;date_created&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">),</span>
-        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span> <span class="o">=</span> <span class="n">build_contributor_record</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ExistingConfigData.get_contributor_info">
 <a class="viewcode-back" href="../../../source/squadds.database.html#squadds.database.contributor.ExistingConfigData.get_contributor_info">[docs]</a>
@@ -777,9 +784,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>  <span class="c1"># Add unit to the set</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">[</span><span class="n">result_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">result_name</span><span class="si">}</span><span class="s2">_unit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit</span>  <span class="c1"># Keep the individual unit keys for now</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">add_sim_result_entry</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">result_name</span><span class="p">,</span> <span class="n">result_value</span><span class="p">,</span> <span class="n">unit</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ExistingConfigData.add_sim_setup">
@@ -794,17 +801,7 @@
         <span class="c1"># Retrieve the schema for simulation options</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_config_schema</span><span class="p">()</span>
 
-        <span class="c1"># Validate the provided simulation setup options against the schema</span>
-        <span class="n">sim_setup_schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sim_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sim_setup</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Simulation setup options must be provided as a dictionary.&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Check if all keys are present and have correct types</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">expected_type</span> <span class="ow">in</span> <span class="n">sim_setup_schema</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sim_setup</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required simulation setup option: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">get_type</span><span class="p">(</span><span class="n">sim_setup</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">!=</span> <span class="n">expected_type</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incorrect type for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">. Expected </span><span class="si">{</span><span class="n">expected_type</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">sim_setup</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">validate_sim_setup_payload</span><span class="p">(</span><span class="n">sim_setup</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sim_options&quot;</span><span class="p">,</span> <span class="p">{}),</span> <span class="n">get_type</span><span class="p">)</span>
 
         <span class="c1"># All checks passed, add the simulation setup options</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sim_setup</span><span class="p">)</span></div>
@@ -822,22 +819,7 @@
         <span class="c1"># Retrieve the schema for design</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_config_schema</span><span class="p">()</span>
 
-        <span class="c1"># Validate the provided design against the schema</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Design must be provided as a dictionary.&quot;</span><span class="p">)</span>
-
-        <span class="n">design_options</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="n">design_tool</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_tool&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Validate design options and design tool</span>
-        <span class="n">design_options_schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="k">if</span> <span class="n">get_type</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span> <span class="o">!=</span> <span class="n">design_options_schema</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Incorrect type for design options. Expected </span><span class="si">{</span><span class="n">design_options_schema</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">design_tool</span> <span class="ow">and</span> <span class="n">get_type</span><span class="p">(</span><span class="n">design_tool</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incorrect type for design tool. Expected &#39;str&#39;, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">design_tool</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">validate_design_payload</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="p">{}),</span> <span class="n">get_type</span><span class="p">)</span>
 
         <span class="c1"># All checks passed, add the design options and tool</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">design</span><span class="p">)</span></div>
@@ -855,23 +837,12 @@
         <span class="c1"># Retrieve the schema for design</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_config_schema</span><span class="p">()</span>
 
-        <span class="c1"># Validate the provided design against the schema</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Design must be provided as a dictionary.&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Extract design options and design tool from the input dictionary</span>
-        <span class="n">design_options</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">)</span>
-        <span class="n">design_tool</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_tool&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Validate design options and design tool</span>
-        <span class="n">design_options_schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="k">if</span> <span class="n">get_type</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span> <span class="o">!=</span> <span class="n">design_options_schema</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Incorrect type for design options. Expected </span><span class="si">{</span><span class="n">design_options_schema</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">design_options</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">get_type</span><span class="p">(</span><span class="n">design_tool</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incorrect type for design tool. Expected &#39;str&#39;, got </span><span class="si">{</span><span class="n">get_type</span><span class="p">(</span><span class="n">design_tool</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">validate_design_payload</span><span class="p">(</span>
+            <span class="n">design</span><span class="p">,</span>
+            <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="n">get_type</span><span class="p">,</span>
+            <span class="n">require_design_tool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># All checks passed, add the design options and tool</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">design</span><span class="p">)</span></div>
@@ -886,21 +857,14 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: A dictionary representation of the Contributor object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Check if all units are the same</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">common_unit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  <span class="c1"># Get the common unit</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">common_unit</span>
-            <span class="c1"># Remove individual unit keys</span>
-            <span class="k">for</span> <span class="n">result_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-                <span class="k">if</span> <span class="s2">&quot;_unit&quot;</span> <span class="ow">in</span> <span class="n">result_name</span><span class="p">:</span>
-                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">[</span><span class="n">result_name</span><span class="p">]</span>
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
-            <span class="s2">&quot;sim_options&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span><span class="p">,</span>
-            <span class="s2">&quot;sim_results&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">,</span>
-            <span class="s2">&quot;contributor&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span><span class="p">,</span>
-            <span class="s2">&quot;notes&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">,</span>
-        <span class="p">}</span></div>
+        <span class="k">return</span> <span class="n">build_contribution_payload</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">contributor</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ExistingConfigData.clear">
@@ -909,11 +873,12 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clears the contribution data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;design_tool&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="p">{}}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;setup&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;simulator&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">build_empty_contribution_state</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__isValidated</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
@@ -926,13 +891,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            notes (dict): A dictionary containing notes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">notes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">notes</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">notes</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Notes must be provided as a dictionary.&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Merge new notes with existing ones</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">notes</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">merge_contributor_notes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ExistingConfigData.validate_structure">
@@ -949,14 +908,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">expected_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_config_schema</span><span class="p">()</span>
 
-        <span class="c1"># Compare the structure of actual data with the expected schema</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">expected_structure</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">actual_structure</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">sub_key</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">sub_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">actual_structure</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required sub-key &#39;</span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">validate_required_structure</span><span class="p">(</span><span class="n">actual_structure</span><span class="p">,</span> <span class="n">expected_structure</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Structure validated successfully....&quot;</span><span class="p">)</span></div>
 
 
@@ -972,14 +924,7 @@
         <span class="n">expected_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_config_schema</span><span class="p">()</span>
         <span class="n">actual_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 
-        <span class="c1"># Compare the structure of actual data with the expected schema</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">expected_structure</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">actual_structure</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">sub_key</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">sub_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">actual_structure</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required sub-key &#39;</span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">validate_required_structure</span><span class="p">(</span><span class="n">actual_structure</span><span class="p">,</span> <span class="n">expected_structure</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Structure validated successfully....&quot;</span><span class="p">)</span></div>
 
 
@@ -1043,14 +988,7 @@
 <span class="sd">            data (dict): The data to be validated.</span>
 <span class="sd">        Validates the content of the contribution against the dataset schema.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">get_nested</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span>
-                    <span class="n">dictionary</span> <span class="o">=</span> <span class="n">dictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="kc">None</span>
-            <span class="k">return</span> <span class="n">dictionary</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1060,37 +998,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_entry</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">get_nested</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span>
-                    <span class="n">dictionary</span> <span class="o">=</span> <span class="n">dictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="kc">None</span>
-            <span class="k">return</span> <span class="n">dictionary</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">find_common_keys</span><span class="p">(</span><span class="n">dict1</span><span class="p">,</span> <span class="n">dict2</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Recursively find and compare common keys in two dictionaries.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="n">common_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dict1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">dict2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="n">diff_keys</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dict1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">dict2</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span> <span class="o">|</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dict2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">dict1</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">common_keys</span><span class="p">:</span>
-                <span class="n">new_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="n">key</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict1</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict2</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
-                    <span class="k">yield from</span> <span class="n">find_common_keys</span><span class="p">(</span><span class="n">dict1</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">dict2</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">new_path</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">dict1</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">dict2</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
-                        <span class="k">yield</span> <span class="n">new_path</span><span class="p">,</span> <span class="kc">False</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">yield</span> <span class="n">new_path</span><span class="p">,</span> <span class="kc">True</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">diff_keys</span><span class="p">:</span>
-                <span class="n">new_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="n">key</span>
-                <span class="k">yield</span> <span class="n">new_path</span><span class="p">,</span> <span class="kc">None</span>
-
-        <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">find_common_keys</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ref</span><span class="p">))</span>
-        <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
-        <span class="n">mismatched_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">]</span>
-        <span class="n">missing_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">mismatched_keys</span><span class="p">,</span> <span class="n">missing_keys</span> <span class="o">=</span> <span class="n">summarize_content_differences</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ref</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">mismatched_keys</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span>
@@ -1098,13 +1006,13 @@
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mismatched_keys</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">, data type in &#39;data&#39;: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">get_nested</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">))</span><span class="si">}</span><span class="s2">, data type in &#39;ref&#39;: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">get_nested</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">, data type in &#39;data&#39;: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">get_nested_value</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">))</span><span class="si">}</span><span class="s2">, data type in &#39;ref&#39;: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">get_nested_value</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">missing_keys</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Missing keys found. These keys are present in one dictionary but not the other:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">missing_keys</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">get_nested</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">get_nested_value</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is missing in &#39;ref&#39;&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is missing in &#39;data&#39;&quot;</span><span class="p">)</span>
@@ -1168,13 +1076,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_validated</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validating entry </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">)</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">validate_structure</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">validate_types</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">validate_content</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Entry </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> validated successfully.&quot;</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--------------------------------------------------&quot;</span><span class="p">)</span>
+                <span class="n">validate_sweep_entries</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">,</span>
+                    <span class="n">validate_structure_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validate_structure</span><span class="p">,</span>
+                    <span class="n">validate_types_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validate_types</span><span class="p">,</span>
+                    <span class="n">validate_content_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validate_content</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__isValidated</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Validation failed.&quot;</span><span class="p">)</span>
@@ -1261,11 +1168,7 @@
             <span class="c1"># update the local repo</span>
             <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path_to_repo</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">dataset_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">.json&quot;</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dataset_file</span><span class="p">,</span> <span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
-                <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">append_entries_to_dataset_file</span><span class="p">(</span><span class="n">dataset_file</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()])</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data added to </span><span class="si">{</span><span class="n">dataset_file</span><span class="si">}</span><span class="s2"> successfully.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_validated</span><span class="p">:</span>
@@ -1273,12 +1176,7 @@
             <span class="c1"># update the local repo</span>
             <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path_to_repo</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repo_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">dataset_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">.json&quot;</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dataset_file</span><span class="p">,</span> <span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">:</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-                <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">append_entries_to_dataset_file</span><span class="p">(</span><span class="n">dataset_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data added to </span><span class="si">{</span><span class="n">dataset_file</span><span class="si">}</span><span class="s2"> successfully.&quot;</span><span class="p">)</span></div>
 
 
@@ -1348,36 +1246,22 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File not found: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__set_contributor_info</span><span class="p">()</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span>
-                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                    <span class="k">pass</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">load_contribution_from_json_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sim_options</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sim_results</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__set_contributor_info</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Contribution loaded successfully.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">json_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">json_file</span> <span class="o">+</span> <span class="s2">&quot;*.json&quot;</span><span class="p">))</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">json_files</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Files not found: </span><span class="si">{</span><span class="n">json_files</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">json_files</span><span class="p">:</span>
-                <span class="n">entry</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">]</span>
-                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sim_options&quot;</span><span class="p">]</span>
-                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
-                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;contributor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_contributor_info</span><span class="p">()</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span>
-                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                        <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+            <span class="n">sweep_data</span> <span class="o">=</span> <span class="n">load_sweep_entries_from_json_prefix</span><span class="p">(</span><span class="n">json_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_contributor_info</span><span class="p">())</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sweep_data</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No sweep files found for prefix: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sweep_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sweep_data</span><span class="p">)</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sweep data loaded successfully.&quot;</span><span class="p">)</span></div>
 
