@@ -1,0 +1,36 @@
+name: Lint GitHub Actions
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - ".github/workflows/**"
+      - ".github/actions/**"
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - ".github/workflows/**"
+      - ".github/actions/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lint workflows
+        uses: reviewdog/action-actionlint@v1
+        with:
+          fail_level: error
+          reporter: github-check
