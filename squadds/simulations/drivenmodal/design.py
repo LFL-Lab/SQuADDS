@@ -1,0 +1,45 @@
+"""Design helpers for explicit driven-modal layer-stack workflows."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from qiskit_metal.designs.design_multiplanar import MultiPlanar
+
+from .layer_stack import build_layer_stack_dataframe
+from .models import DrivenModalLayerStackSpec
+
+
+def write_qiskit_layer_stack_csv(
+    spec: DrivenModalLayerStackSpec,
+    output_path: str | Path,
+) -> Path:
+    """Persist the resolved layer stack in the CSV format consumed by Qiskit Metal."""
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    frame = build_layer_stack_dataframe(spec).copy()
+    frame["fill"] = frame["fill"].map(lambda value: str(value).lower())
+    frame.to_csv(path, index=False)
+    return path
+
+
+def create_multiplanar_design(
+    *,
+    layer_stack: DrivenModalLayerStackSpec,
+    layer_stack_path: str | Path,
+    chip_size_x: str = "9mm",
+    chip_size_y: str = "7mm",
+    enable_renderers: bool = True,
+) -> tuple[MultiPlanar, Path]:
+    """Create a MultiPlanar design bound to an explicit layer-stack CSV."""
+    csv_path = write_qiskit_layer_stack_csv(layer_stack, layer_stack_path)
+    design = MultiPlanar(
+        overwrite_enabled=True,
+        enable_renderers=enable_renderers,
+        layer_stack_filename=str(csv_path),
+    )
+    design.overwrite_enabled = True
+    design.chips[layer_stack.chip_name]["size"]["size_x"] = chip_size_x
+    design.chips[layer_stack.chip_name]["size"]["size_y"] = chip_size_y
+    return design, csv_path

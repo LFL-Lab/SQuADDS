@@ -22,12 +22,13 @@ This file is the single source of truth for active implementation status, handof
 
 ## Current implementation slice
 
-- Active slice: work-log setup plus driven-modal foundation scaffolding
+- Active slice: tutorial-runtime support for Windows/Ansys validation
 - Scope of current slice:
-  - establish durable handoff context
-  - scaffold driven-modal package
-  - add typed request/result models
-  - add layer-stack preset resolution
+  - add reusable helpers for explicit layer-stack CSV emission and `MultiPlanar` construction
+  - add reusable helpers for parsing HFSS parameter tables and exporting Touchstone files
+  - correct the driven-modal port model so capacitance extractions only declare active conductors plus JJ ports, not a fake ground port
+  - add reusable helpers for capacitance-matrix expansion and coupled-system port termination
+  - land runnable `tutorials/*.py` files for capacitance extraction and coupled-system post-processing
 
 ## Status checklist
 
@@ -42,7 +43,7 @@ This file is the single source of truth for active implementation status, handof
 - [x] artifact/checkpoint manifest helpers landed
 - [x] `AnsysSimulator` driven-modal facade landed
 - [x] coupled-system post-processing landed
-- [ ] tutorials landed
+- [x] tutorials landed
 
 ## Touched files
 
@@ -67,6 +68,12 @@ This file is the single source of truth for active implementation status, handof
 - `squadds/simulations/drivenmodal/coupled_postprocess.py`
 - `tests/test_drivenmodal_capacitance.py`
 - `tests/test_drivenmodal_coupled_postprocess.py`
+- `squadds/simulations/drivenmodal/design.py`
+- `squadds/simulations/drivenmodal/hfss_data.py`
+- `tests/test_drivenmodal_design.py`
+- `tests/test_drivenmodal_hfss_data.py`
+- `tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py`
+- `tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py`
 
 Add newly touched files here as implementation progresses.
 
@@ -88,6 +95,11 @@ Add newly touched files here as implementation progresses.
 - `uv run pytest tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py tests/test_ansys_simulator.py -q --tb=short` -> pass, 43 passed, 8 expected warnings
 - `uv run --extra dev ruff check squadds/simulations/drivenmodal squadds/simulations/ansys_simulator.py tests/imports_test.py tests/test_drivenmodal_*.py tests/test_ansys_simulator.py` -> pass
 - `uv run --extra dev ruff format --check squadds/simulations/drivenmodal squadds/simulations/ansys_simulator.py tests/imports_test.py tests/test_drivenmodal_*.py tests/test_ansys_simulator.py` -> pass
+- `uv run pytest tests/test_drivenmodal_design.py tests/test_drivenmodal_hfss_data.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py -q --tb=short` -> pass, 15 passed, 4 upstream Qiskit Metal warnings
+- `uv run python -m py_compile tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py` -> pass
+- `uv run pytest tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_drivenmodal_design.py tests/test_drivenmodal_hfss_data.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py tests/test_ansys_simulator.py -q --tb=short` -> pass, 53 passed, 8 expected warnings
+- `uv run --extra dev ruff check squadds/simulations/drivenmodal tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_drivenmodal_design.py tests/test_drivenmodal_hfss_data.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py tests/test_ansys_simulator.py` -> pass
+- `uv run --extra dev ruff format --check squadds/simulations/drivenmodal tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_drivenmodal_design.py tests/test_drivenmodal_hfss_data.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py tests/test_ansys_simulator.py` -> pass
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
@@ -95,8 +107,10 @@ Update this section after every meaningful verification run with the exact comma
 
 - `scikit-rf` is currently wired as a core dependency because the coupled-system post-processing helpers now depend on it. Another agent can revisit that split later, but should do so deliberately rather than implicitly.
 - Whether dense capacitance-vs-frequency data should be stored as JSON, parquet, or a more compact artifact format remains open until dataset serialization is implemented.
+- The tutorials currently store dense capacitance-vs-frequency data as parquet and raw complex HFSS tables as pickle because the latter remain the most convenient portable checkpoint format for complex-valued pandas frames. Another agent can revisit that once the Hugging Face artifact contract is finalized.
 - Whether the eventual sweep progress tracker should live only inside driven-modal artifact manifests or also surface a generic reusable sweep runtime helper should be decided in the artifacts slice. Current preference is a reusable helper.
 - `calculate_g_from_chi(...)` intentionally returns a positive coupling magnitude using `abs(chi / denominator)` because the project is currently using `chi = f_e - f_r`, while the transmon `alpha` remains negative. Another agent should not flip this back without revisiting the sign convention across the whole workflow.
+- The coupled tutorial currently uses the existing SQuADDS qubit-capacitance + bare-Lj narrative to derive `f_q`, `alpha`, and the state-dependent junction inductances, while the resonator quantities come from driven-modal HFSS. That is intentional for this first executable tutorial pass.
 
 ## Next safe restart point
 
@@ -106,8 +120,8 @@ If a new agent needs to resume from here:
 2. Read the PRD and plan linked above.
 3. Confirm branch is still `codex/drivenmodal-api-prd`.
 4. Confirm unrelated untracked files remain untouched.
-5. Continue with the next red-green slice: dataset serialization helpers, richer manifest/progress semantics for sweep batches, and tutorial scaffolding.
-6. Use the existing manifest helpers as the base for a more general sweep executor rather than replacing them with a separate incompatible progress format.
+5. Continue with the next red-green slice: dataset serialization helpers plus a generic resumable sweep executor that can drive more than the single-geometry tutorial flows.
+6. Use the current tutorial scripts as concrete Windows/Ansys validation clients when refining the public API instead of rewriting them from scratch.
 
 ## Handoff notes for future agents
 

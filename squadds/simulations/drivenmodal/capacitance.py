@@ -15,6 +15,28 @@ def capacitance_matrix_from_y(freq_hz: float, y_matrix) -> np.ndarray:
     return 0.5 * (c_matrix + c_matrix.T)
 
 
+def maxwell_capacitance_dataframe(
+    c_matrix,
+    *,
+    node_names: list[str],
+    ground_name: str = "ground",
+) -> pd.DataFrame:
+    """Expand an active-node capacitance matrix into a full Maxwell matrix with ground."""
+    active = np.asarray(c_matrix, dtype=float)
+    if active.shape != (len(node_names), len(node_names)):
+        raise ValueError("node_names must match the capacitance matrix dimensions.")
+
+    size = active.shape[0]
+    maxwell = np.zeros((size + 1, size + 1), dtype=float)
+    maxwell[:size, :size] = active
+    row_sums = active.sum(axis=1)
+    maxwell[:size, size] = -row_sums
+    maxwell[size, :size] = -row_sums
+    maxwell[size, size] = row_sums.sum()
+    labels = [*node_names, ground_name]
+    return pd.DataFrame(maxwell, index=labels, columns=labels)
+
+
 def capacitance_dataframe_from_y_sweep(freqs_hz, y_matrices, node_names: list[str]) -> pd.DataFrame:
     """Flatten a Y-parameter sweep into a dataframe of capacitance entries by node pair."""
     freqs = np.asarray(freqs_hz, dtype=float)

@@ -7,6 +7,8 @@ from squadds.simulations.drivenmodal.coupled_postprocess import (
     calculate_g_from_chi,
     calculate_kappa_hz,
     calculate_loaded_q,
+    terminate_port_y,
+    y_to_s,
 )
 
 
@@ -32,3 +34,37 @@ def test_calculate_g_from_chi_returns_positive_rate():
 
     assert np.isfinite(value)
     assert value > 0
+
+
+def test_terminate_port_y_returns_two_port_schur_complement():
+    y_matrices = np.array(
+        [
+            [
+                [1.0 + 0.0j, 0.1 + 0.0j, 0.2 + 0.0j],
+                [0.1 + 0.0j, 2.0 + 0.0j, 0.3 + 0.0j],
+                [0.2 + 0.0j, 0.3 + 0.0j, 3.0 + 0.0j],
+            ]
+        ]
+    )
+
+    reduced = terminate_port_y(y_matrices, terminated_port=2, load_impedance_ohms=50.0)
+
+    y_load = 1 / 50.0
+    correction = 1 / (3.0 + y_load)
+    expected = np.array(
+        [
+            [
+                [1.0 - (0.2 * 0.2) * correction + 0.0j, 0.1 - (0.2 * 0.3) * correction + 0.0j],
+                [0.1 - (0.3 * 0.2) * correction + 0.0j, 2.0 - (0.3 * 0.3) * correction + 0.0j],
+            ]
+        ]
+    )
+    assert np.allclose(reduced, expected)
+
+
+def test_y_to_s_maps_open_circuit_to_identity_scattering():
+    y_matrices = np.zeros((1, 2, 2), dtype=complex)
+
+    s_matrices = y_to_s(y_matrices, z0_ohms=50.0)
+
+    assert np.allclose(s_matrices[0], np.eye(2))

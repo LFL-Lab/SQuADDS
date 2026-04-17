@@ -3,6 +3,7 @@ import numpy as np
 from squadds.simulations.drivenmodal.capacitance import (
     capacitance_dataframe_from_y_sweep,
     capacitance_matrix_from_y,
+    maxwell_capacitance_dataframe,
 )
 
 
@@ -29,3 +30,14 @@ def test_capacitance_dataframe_from_y_sweep_flattens_entries_by_node_name():
     assert list(frame.columns) == ["frequency_hz", "top__top_F", "top__bottom_F", "bottom__top_F", "bottom__bottom_F"]
     assert np.isclose(frame.iloc[0]["top__top_F"], 10e-15)
     assert np.isclose(frame.iloc[1]["bottom__bottom_F"], 8e-15)
+
+
+def test_maxwell_capacitance_dataframe_adds_ground_row_and_column():
+    frame = maxwell_capacitance_dataframe(
+        np.array([[10e-15, -2e-15], [-2e-15, 9e-15]]),
+        node_names=["cross", "claw"],
+    )
+
+    assert list(frame.index) == ["cross", "claw", "ground"]
+    assert np.isclose(frame.loc["cross", "ground"], -8e-15)
+    assert np.isclose(frame.loc["ground", "ground"], 15e-15)

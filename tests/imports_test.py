@@ -13,6 +13,8 @@ MODULES = [
     "squadds.simulations.drivenmodal.ports",
     "squadds.simulations.drivenmodal.artifacts",
     "squadds.simulations.drivenmodal.hfss_runner",
+    "squadds.simulations.drivenmodal.design",
+    "squadds.simulations.drivenmodal.hfss_data",
     "squadds.simulations.drivenmodal.capacitance",
     "squadds.simulations.drivenmodal.coupled_postprocess",
     "squadds.simulations.drivenmodal.models",

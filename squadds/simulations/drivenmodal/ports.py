@@ -22,9 +22,14 @@ def _build_port_spec(kind: str, port_mapping: Mapping[str, object]) -> DrivenMod
     component = raw_spec.get("component")
     pin = raw_spec.get("pin")
     impedance_ohms = float(raw_spec.get("impedance_ohms", 50.0))
-    metadata = raw_spec.get("metadata", {})
+    metadata = dict(raw_spec.get("metadata", {}))
     if not isinstance(metadata, Mapping):
         raise ValueError(f"metadata for port '{kind}' must be a mapping.")
+    if kind in {"cross", "jj"}:
+        metadata.setdefault("hfss_target", "junction")
+        metadata.setdefault("draw_inductor", False)
+    else:
+        metadata.setdefault("hfss_target", "pin")
 
     return DrivenModalPortSpec(
         kind=kind,
@@ -38,9 +43,9 @@ def _build_port_spec(kind: str, port_mapping: Mapping[str, object]) -> DrivenMod
 def build_capacitance_port_specs(system_kind: str, design_payload: Mapping[str, object]) -> list[DrivenModalPortSpec]:
     """Build the ordered port declarations for capacitance extraction systems."""
     if system_kind == "ncap":
-        ordered_kinds = ["top", "bottom", "ground"]
+        ordered_kinds = ["top", "bottom"]
     elif system_kind == "qubit_claw":
-        ordered_kinds = ["cross", "claw", "ground"]
+        ordered_kinds = ["cross", "claw"]
     else:
         raise ValueError(f"Unsupported capacitance system_kind: {system_kind}")
 
@@ -53,3 +58,26 @@ def build_coupled_system_port_specs(design_payload: Mapping[str, object]) -> lis
     port_mapping = _require_port_mapping(design_payload)
     ordered_kinds = ["feedline_input", "feedline_output", "jj"]
     return [_build_port_spec(kind, port_mapping) for kind in ordered_kinds]
+
+
+def split_rendered_ports(
+    port_specs: list[DrivenModalPortSpec],
+) -> tuple[list[tuple[str, str, float]], list[tuple[str, str, float, bool]]]:
+    """Split mixed pin/junction specs into Qiskit Metal ``port_list`` and ``jj_to_port`` payloads."""
+    port_list: list[tuple[str, str, float]] = []
+    jj_to_port: list[tuple[str, str, float, bool]] = []
+
+    for spec in port_specs:
+        if spec.metadata.get("hfss_target") == "junction":
+            jj_to_port.append(
+                (
+                    spec.component,
+                    spec.pin,
+                    float(spec.impedance_ohms),
+                    bool(spec.metadata.get("draw_inductor", False)),
+                )
+            )
+        else:
+            port_list.append(spec.to_qiskit_port_entry())
+
+    return port_list, jj_to_port

@@ -49,3 +49,50 @@ def calculate_g_from_chi(*, f_r_hz: float, f_q_hz: float, chi_hz: float, alpha_h
     # magnitude while preserving the user's chosen resonance ordering elsewhere.
     g_squared_magnitude = abs(chi / denominator)
     return float(math.sqrt(g_squared_magnitude))
+
+
+def terminate_port_y(y_matrices, *, terminated_port: int, load_impedance_ohms) -> np.ndarray:
+    """Terminate a single port of an N-port admittance sweep using a load impedance."""
+    matrices = np.asarray(y_matrices, dtype=complex)
+    if matrices.ndim != 3:
+        raise ValueError("y_matrices must be a 3D array of shape (freq, nport, nport).")
+
+    nports = matrices.shape[1]
+    if matrices.shape[2] != nports:
+        raise ValueError("y_matrices must be square in the last two dimensions.")
+    if not 0 <= terminated_port < nports:
+        raise ValueError("terminated_port is out of range.")
+
+    load_impedance = np.asarray(load_impedance_ohms, dtype=complex)
+    if load_impedance.ndim == 0:
+        load_impedance = np.full(matrices.shape[0], load_impedance, dtype=complex)
+    if load_impedance.shape != (matrices.shape[0],):
+        raise ValueError("load_impedance_ohms must be a scalar or one value per frequency.")
+
+    keep = [index for index in range(nports) if index != terminated_port]
+    y_aa = matrices[:, keep][:, :, keep]
+    y_ab = matrices[:, keep, terminated_port][:, :, np.newaxis]
+    y_ba = matrices[:, terminated_port, keep][:, np.newaxis, :]
+    y_bb = matrices[:, terminated_port, terminated_port]
+    y_load = 1.0 / load_impedance
+    denominator = (y_bb + y_load)[:, np.newaxis, np.newaxis]
+    return y_aa - (y_ab * y_ba) / denominator
+
+
+def y_to_s(y_matrices, *, z0_ohms: float = 50.0) -> np.ndarray:
+    """Convert a sweep of admittance matrices into scattering matrices for a uniform reference impedance."""
+    matrices = np.asarray(y_matrices, dtype=complex)
+    if matrices.ndim != 3:
+        raise ValueError("y_matrices must be a 3D array of shape (freq, nport, nport).")
+
+    nports = matrices.shape[1]
+    if matrices.shape[2] != nports:
+        raise ValueError("y_matrices must be square in the last two dimensions.")
+
+    identity = np.eye(nports, dtype=complex)
+    s_matrices = np.empty_like(matrices)
+    for index, y_matrix in enumerate(matrices):
+        left = identity - z0_ohms * y_matrix
+        right = identity + z0_ohms * y_matrix
+        s_matrices[index] = left @ np.linalg.inv(right)
+    return s_matrices
