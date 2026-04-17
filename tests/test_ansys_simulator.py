@@ -1,7 +1,15 @@
 import json
+from pathlib import Path
 from unittest.mock import patch
 
 from squadds.simulations.ansys_simulator import AnsysSimulator
+from squadds.simulations.drivenmodal.models import (
+    CapacitanceExtractionRequest,
+    DrivenModalArtifactPolicy,
+    DrivenModalLayerStackSpec,
+    DrivenModalSetupSpec,
+    DrivenModalSweepSpec,
+)
 
 
 class DummyAnalyzer:
@@ -65,3 +73,28 @@ def test_normalize_device_dict_deserializes_json_like_payloads(headless_qiskit_e
     assert simulator.device_dict["design_options_qubit"]["cross_length"] == "200um"
     assert simulator.device_dict["design_options_cavity_claw"]["cpw_opts"]["total_length"] == "4000um"
     assert simulator.device_dict["setup_cavity_claw"] == {"max_passes": 15}
+
+
+def test_run_drivenmodal_initializes_checkpoint_manifest(headless_qiskit_environment, tmp_path: Path):
+    simulator = AnsysSimulator(
+        DummyAnalyzer("qubit_claw"),
+        {
+            "design_options": {"cross_length": "200um"},
+            "setup": {"freq_ghz": 5.0},
+        },
+    )
+    request = CapacitanceExtractionRequest(
+        system_kind="qubit_claw",
+        design_payload={"design_options": {"cross_length": "200um"}},
+        layer_stack=DrivenModalLayerStackSpec(),
+        setup=DrivenModalSetupSpec(),
+        sweep=DrivenModalSweepSpec(start_ghz=1.0, stop_ghz=10.0, count=101),
+        artifacts=DrivenModalArtifactPolicy(),
+        metadata={"run_id": "qubit-claw-demo"},
+    )
+
+    result = simulator.run_drivenmodal(request, checkpoint_dir=tmp_path)
+
+    assert result["request"]["system_kind"] == "qubit_claw"
+    assert result["manifest"]["run_id"] == "qubit-claw-demo"
+    assert (tmp_path / "qubit-claw-demo" / "manifest.json").exists()

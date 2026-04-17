@@ -12,6 +12,7 @@ from rich.console import Console
 
 from squadds.components.coupled_systems import QubitCavity
 from squadds.core.json_utils import deserialize_json_like, normalize_setup_payload
+from squadds.simulations.drivenmodal.hfss_runner import run_drivenmodal_request
 from squadds.simulations.objects import (
     run_qubit_cavity_sweep,
     run_sweep,
@@ -484,6 +485,14 @@ class AnsysSimulator:
             self.epr_analysis_obj.sim.save_screenshot()
         if self.lom_analysis_obj is not None:
             self.lom_analysis_obj.sim.save_screenshot()
+
+    def run_drivenmodal(self, request, *, checkpoint_dir=None, export_artifacts=True):
+        """Initialize a checkpointed driven-modal run from a typed request."""
+        return run_drivenmodal_request(
+            request,
+            checkpoint_dir=checkpoint_dir,
+            export_artifacts=export_artifacts,
+        )
 
     def get_xmon_info(self, xmon_dict):
         """

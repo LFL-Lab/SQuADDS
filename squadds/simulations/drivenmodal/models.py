@@ -106,6 +106,40 @@ class DrivenModalArtifactPolicy:
 
 
 @dataclass(frozen=True)
+class DrivenModalPortSpec:
+    """A reusable Qiskit Metal / HFSS lumped-port declaration."""
+
+    kind: str
+    component: str
+    pin: str
+    impedance_ohms: float = 50.0
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not self.kind:
+            raise ValueError("kind is required.")
+        if not self.component:
+            raise ValueError("component is required.")
+        if not self.pin:
+            raise ValueError("pin is required.")
+        if self.impedance_ohms <= 0:
+            raise ValueError("impedance_ohms must be positive.")
+        _require_mapping("metadata", self.metadata)
+
+    def to_qiskit_port_entry(self) -> tuple[str, str, float]:
+        return (self.component, self.pin, float(self.impedance_ohms))
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "kind": self.kind,
+            "component": self.component,
+            "pin": self.pin,
+            "impedance_ohms": self.impedance_ohms,
+            "metadata": dict(self.metadata),
+        }
+
+
+@dataclass(frozen=True)
 class CapacitanceExtractionRequest:
     """Request to extract a frequency-dependent capacitance matrix from HFSS driven-modal data."""
 

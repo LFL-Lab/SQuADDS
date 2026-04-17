@@ -38,9 +38,9 @@ This file is the single source of truth for active implementation status, handof
 - [x] driven-modal package scaffold landed
 - [x] request/result models landed
 - [x] layer-stack presets landed
-- [ ] port spec builders landed
-- [ ] artifact/checkpoint manifest helpers landed
-- [ ] `AnsysSimulator` driven-modal facade landed
+- [x] port spec builders landed
+- [x] artifact/checkpoint manifest helpers landed
+- [x] `AnsysSimulator` driven-modal facade landed
 - [ ] coupled-system post-processing landed
 - [ ] tutorials landed
 
@@ -57,6 +57,12 @@ This file is the single source of truth for active implementation status, handof
 - `tests/imports_test.py`
 - `tests/test_drivenmodal_models.py`
 - `tests/test_drivenmodal_layer_stack.py`
+- `squadds/simulations/drivenmodal/ports.py`
+- `squadds/simulations/drivenmodal/artifacts.py`
+- `squadds/simulations/drivenmodal/hfss_runner.py`
+- `tests/test_drivenmodal_ports.py`
+- `tests/test_drivenmodal_artifacts.py`
+- `tests/test_ansys_simulator.py`
 
 Add newly touched files here as implementation progresses.
 
@@ -66,6 +72,12 @@ Add newly touched files here as implementation progresses.
 - `uv run pytest tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py -q --tb=short` -> pass, 24 passed, 4 upstream Qiskit Metal deprecation warnings
 - `uv run --extra dev ruff check squadds/simulations/drivenmodal squadds/simulations/__init__.py tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py` -> pass
 - `uv run --extra dev ruff format --check squadds/simulations/drivenmodal squadds/simulations/__init__.py tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py` -> pass
+- `uv run pytest tests/imports_test.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_ansys_simulator.py -q --tb=short` -> pass, 29 passed, upstream Qiskit Metal deprecation warnings plus expected macOS `AnsysSimulator` warning
+- `uv run --extra dev ruff check squadds/simulations/drivenmodal squadds/simulations/ansys_simulator.py tests/imports_test.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_ansys_simulator.py` -> pass
+- `uv run --extra dev ruff format --check squadds/simulations/drivenmodal squadds/simulations/ansys_simulator.py tests/imports_test.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_ansys_simulator.py` -> pass
+- `uv run pytest tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_ansys_simulator.py -q --tb=short` -> pass, 36 passed, 8 expected warnings from Qiskit Metal/macOS Ansys constraints
+- `uv run --extra dev ruff check squadds/simulations/drivenmodal squadds/simulations/ansys_simulator.py tests/imports_test.py tests/test_drivenmodal_*.py tests/test_ansys_simulator.py` -> pass
+- `uv run --extra dev ruff format --check squadds/simulations/drivenmodal squadds/simulations/ansys_simulator.py tests/imports_test.py tests/test_drivenmodal_*.py tests/test_ansys_simulator.py` -> pass
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
@@ -83,7 +95,8 @@ If a new agent needs to resume from here:
 2. Read the PRD and plan linked above.
 3. Confirm branch is still `codex/drivenmodal-api-prd`.
 4. Confirm unrelated untracked files remain untouched.
-5. Continue with the next red-green slice: port specs, checkpoint manifests, and reusable sweep progress tracking helpers.
+5. Continue with the next red-green slice: coupled-system post-processing helpers, richer manifest/progress semantics for sweep batches, and tutorial scaffolding.
+6. Use the existing manifest helpers as the base for a more general sweep executor rather than replacing them with a separate incompatible progress format.
 
 ## Handoff notes for future agents
 
