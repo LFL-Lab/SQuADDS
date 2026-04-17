@@ -1,3 +1,4 @@
+import json
 from unittest.mock import patch
 
 from squadds.simulations.ansys_simulator import AnsysSimulator
@@ -38,3 +39,29 @@ def test_update_simulation_setup_respects_unknown_parameter_prompt(headless_qisk
 
     assert simulator.device_dict["setup_qubit"]["max_passes"] == 20
     assert "brand_new" not in simulator.device_dict["setup_qubit"]
+
+
+def test_normalize_device_dict_deserializes_json_like_payloads(headless_qiskit_environment):
+    simulator = AnsysSimulator(
+        DummyAnalyzer(["qubit", "cavity_claw"]),
+        {
+            "design_options_qubit": json.dumps(
+                {
+                    "cross_length": "200um",
+                    "connection_pads": {"readout": {"claw_length": "150um", "ground_spacing": "20um"}},
+                }
+            ),
+            "design_options_cavity_claw": json.dumps(
+                {
+                    "cpw_opts": {"total_length": "4000um"},
+                    "cplr_opts": {"coupling_length": "250um"},
+                    "claw_opts": {"connection_pads": {"readout": {"ground_spacing": "20um"}}},
+                }
+            ),
+            "setup_cavity_claw_merged": json.dumps({"setup": {"max_passes": 15}}),
+        },
+    )
+
+    assert simulator.device_dict["design_options_qubit"]["cross_length"] == "200um"
+    assert simulator.device_dict["design_options_cavity_claw"]["cpw_opts"]["total_length"] == "4000um"
+    assert simulator.device_dict["setup_cavity_claw"] == {"max_passes": 15}

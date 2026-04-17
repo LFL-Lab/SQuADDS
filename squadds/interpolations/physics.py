@@ -1,4 +1,3 @@
-import json
 from copy import deepcopy
 
 import numpy as np
@@ -6,44 +5,13 @@ import pandas as pd
 from pyEPR.calcs import Convert
 
 from squadds import Analyzer
-from squadds.core.utils import *
+from squadds.core.json_utils import (
+    deserialize_json_like,
+    extract_optional_setup_payload,
+    extract_setup_payload,
+)
+from squadds.core.utils import create_unified_design_options, string_to_float
 from squadds.interpolations.interpolator import Interpolator
-
-
-def _deserialize_json_like(value):
-    if isinstance(value, str):
-        stripped = value.strip()
-        if stripped.startswith("{") or stripped.startswith("["):
-            try:
-                value = json.loads(stripped)
-            except json.JSONDecodeError:
-                return value
-        else:
-            return value
-
-    if isinstance(value, dict):
-        return {key: _deserialize_json_like(item) for key, item in value.items()}
-    if isinstance(value, list):
-        return [_deserialize_json_like(item) for item in value]
-    return value
-
-
-def _extract_setup_payload(row, *keys):
-    for key in keys:
-        if key not in row or row[key] is None:
-            continue
-        payload = _deserialize_json_like(row[key])
-        if isinstance(payload, dict) and "setup" in payload and isinstance(payload["setup"], dict):
-            return payload["setup"]
-        return payload
-    raise KeyError(f"None of the setup keys were found: {keys}")
-
-
-def _extract_optional_setup_payload(row, *keys, default=None):
-    try:
-        return _extract_setup_payload(row, *keys)
-    except KeyError:
-        return default
 
 
 class ScalingInterpolator(Interpolator):
@@ -65,10 +33,7 @@ class ScalingInterpolator(Interpolator):
         alpha_target = self.target_params["anharmonicity_MHz"]
         f_res_target = self.target_params["cavity_frequency_GHz"]
         kappa_target = self.target_params["kappa_kHz"]
-        try:
-            res_type = self.target_params["resonator_type"]
-        except:
-            res_type = self.analyzer.selected_resonator_type
+        res_type = self.target_params.get("resonator_type", self.analyzer.selected_resonator_type)
 
         self.df = self.analyzer.df
 
@@ -85,37 +50,35 @@ class ScalingInterpolator(Interpolator):
                 {"qubit_frequency_GHz": f_q_target, "anharmonicity_MHz": alpha_target, "g_MHz": g_target}, num_top=1
             )
 
+        closest_qubit_claw_row = closest_qubit_claw_design.iloc[0]
+        qubit_design_options = deserialize_json_like(deepcopy(closest_qubit_claw_row["design_options_qubit"]))
+
         # Scale values
         alpha_scaling = closest_qubit_claw_design["anharmonicity_MHz"] / alpha_target
         g_scaling = g_target / closest_qubit_claw_design["g_MHz"]
 
         # Scale qubit and claw dimensions
-        updated_cross_length = (
-            string_to_float(closest_qubit_claw_design["design_options_qubit"].iloc[0]["cross_length"])
-            * alpha_scaling.values[0]
-        )
+        updated_cross_length = string_to_float(qubit_design_options["cross_length"]) * alpha_scaling.values[0]
         updated_claw_length = (
-            string_to_float(
-                closest_qubit_claw_design["design_options_qubit"].iloc[0]["connection_pads"]["readout"]["claw_length"]
-            )
+            string_to_float(qubit_design_options["connection_pads"]["readout"]["claw_length"])
             * g_scaling.values[0]
             * alpha_scaling.values[0]
         )
 
         # Scaling logic for cavity-coupler designs
         # Filter DataFrame based on qubit coupling claw capacitance
-        try:
+        if "cross_to_claw" in closest_qubit_claw_design.columns:
             cross_to_claw_cap_chosen = closest_qubit_claw_design["cross_to_claw"].iloc[0]
-        except:
+        else:
             cross_to_claw_cap_chosen = closest_qubit_claw_design["cross_to_claw_closest"].iloc[0]
 
         threshold = 0.3  # 30% threshold
-        try:
+        if "cross_to_claw" in self.df.columns:
             filtered_df = self.df[
                 (self.df["cross_to_claw"] >= (1 - threshold) * cross_to_claw_cap_chosen)
                 & (self.df["cross_to_claw"] <= (1 + threshold) * cross_to_claw_cap_chosen)
             ]
-        except:
+        else:
             filtered_df = self.df[
                 (self.df["cross_to_claw_closest"] >= (1 - threshold) * cross_to_claw_cap_chosen)
                 & (self.df["cross_to_claw_closest"] <= (1 + threshold) * cross_to_claw_cap_chosen)
@@ -149,8 +112,8 @@ class ScalingInterpolator(Interpolator):
             closest_cavity_cpw_design = self.analyzer.find_closest(target_params_cavity, num_top=1)
 
         closest_cavity_cpw_row = closest_cavity_cpw_design.iloc[0]
-        cavity_design_options = _deserialize_json_like(deepcopy(closest_cavity_cpw_row["design_options_cavity_claw"]))
-        cavity_setup = _extract_setup_payload(
+        cavity_design_options = deserialize_json_like(deepcopy(closest_cavity_cpw_row["design_options_cavity_claw"]))
+        cavity_setup = extract_setup_payload(
             closest_cavity_cpw_row,
             "setup_cavity_claw",
             "setup_cavity_claw_merged",
@@ -198,7 +161,6 @@ class ScalingInterpolator(Interpolator):
         )
 
         # Update the qubit and cavity design options
-        qubit_design_options = deepcopy(closest_qubit_claw_design["design_options_qubit"].iloc[0])
         qubit_design_options["cross_length"] = f"{updated_cross_length}um"
         qubit_design_options["connection_pads"]["readout"]["claw_length"] = f"{updated_claw_length}um"
         required_Lj = Convert.Lj_from_Ej(closest_qubit_claw_design["EJ"].iloc[0], units_in="GHz", units_out="nH")
@@ -227,8 +189,8 @@ class ScalingInterpolator(Interpolator):
                 "design_options_qubit": [qubit_design_options],
                 "design_options_cavity_claw": [cavity_design_options],
                 "setup_qubit": [
-                    _extract_optional_setup_payload(
-                        closest_qubit_claw_design.iloc[0],
+                    extract_optional_setup_payload(
+                        closest_qubit_claw_row,
                         "setup_qubit",
                         default=None,
                     )

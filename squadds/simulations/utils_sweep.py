@@ -2,7 +2,13 @@ from squadds.simulations.utils_geometry import get_cavity_claw_options_keys
 
 
 def chunk_sweep_options(sweep_opts, N):
+    if N <= 0:
+        raise ValueError("N must be greater than 0.")
+
     cpw_opts_key, cplr_opts_key = get_cavity_claw_options_keys(sweep_opts)
+    if cpw_opts_key is None or cplr_opts_key is None:
+        raise ValueError("Sweep options must include both cavity and coupler option keys.")
+
     claw_lengths = sweep_opts["claw_opts"]["connection_pads"]["readout"]["claw_length"]
     total_lengths = sweep_opts[cpw_opts_key]["total_length"]
     base_chunk_size = len(claw_lengths) // N

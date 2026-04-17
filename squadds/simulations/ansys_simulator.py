@@ -1,6 +1,5 @@
 import os
 import sys
-import json
 
 # warn using `warnings` if os is mac that this is not supported
 import warnings
@@ -12,6 +11,7 @@ from qiskit_metal import Dict
 from rich.console import Console
 
 from squadds.components.coupled_systems import QubitCavity
+from squadds.core.json_utils import deserialize_json_like, normalize_setup_payload
 from squadds.simulations.objects import (
     run_qubit_cavity_sweep,
     run_sweep,
@@ -19,31 +19,6 @@ from squadds.simulations.objects import (
     simulate_whole_device,
 )
 from squadds.simulations.utils import find_a_fq
-
-
-def _deserialize_json_like(value):
-    if isinstance(value, str):
-        stripped = value.strip()
-        if stripped.startswith("{") or stripped.startswith("["):
-            try:
-                value = json.loads(stripped)
-            except json.JSONDecodeError:
-                return value
-        else:
-            return value
-
-    if isinstance(value, dict):
-        return {key: _deserialize_json_like(item) for key, item in value.items()}
-    if isinstance(value, list):
-        return [_deserialize_json_like(item) for item in value]
-    return value
-
-
-def _normalize_setup_payload(value):
-    payload = _deserialize_json_like(value)
-    if isinstance(payload, dict) and "setup" in payload and isinstance(payload["setup"], dict):
-        return payload["setup"]
-    return payload
 
 
 class AnsysSimulator:
@@ -128,16 +103,16 @@ class AnsysSimulator:
         """Normalize legacy/live dataset payload variants into the canonical simulator shape."""
         for key in ["design_options", "design_options_qubit", "design_options_cavity_claw"]:
             if key in self.device_dict:
-                self.device_dict[key] = _deserialize_json_like(self.device_dict[key])
+                self.device_dict[key] = deserialize_json_like(self.device_dict[key])
 
         for key in list(self.device_dict.keys()):
             if key == "setup" or key.startswith("setup_"):
-                self.device_dict[key] = _normalize_setup_payload(self.device_dict[key])
+                self.device_dict[key] = normalize_setup_payload(self.device_dict[key])
 
         if "setup_cavity_claw" not in self.device_dict:
             for key in ["setup_cavity_claw_merged", "setup_cavity_claw_closest", "setup"]:
                 if key in self.device_dict and self.device_dict[key] is not None:
-                    self.device_dict["setup_cavity_claw"] = _normalize_setup_payload(self.device_dict[key])
+                    self.device_dict["setup_cavity_claw"] = normalize_setup_payload(self.device_dict[key])
                     break
 
     def _warnings(self):

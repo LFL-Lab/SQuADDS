@@ -1,11 +1,13 @@
 import json
 
+import pytest
+
 from squadds.simulations.utils import (
     calculate_center_and_dimensions,
     chunk_sweep_options,
     extract_value,
-    flatten_dict,
     find_kappa,
+    flatten_dict,
     get_cavity_claw_options_keys,
     read_json_files,
 )
@@ -57,6 +59,29 @@ def test_chunk_sweep_options_preserves_detected_option_key_names():
     assert "cpw_opts_variant" in chunks[0]
     assert "cplr_opts_variant" in chunks[0]
     assert chunks[0]["cpw_opts_variant"]["total_length"] == [1000, 2000]
+
+
+def test_chunk_sweep_options_rejects_non_positive_chunk_count():
+    with pytest.raises(ValueError, match="N must be greater than 0"):
+        chunk_sweep_options(
+            {
+                "claw_opts": {"connection_pads": {"readout": {"claw_length": [10, 20]}}},
+                "cpw_opts": {"total_length": [1000, 2000]},
+                "cplr_opts": {"finger_count": [3]},
+            },
+            0,
+        )
+
+
+def test_chunk_sweep_options_rejects_missing_cavity_or_coupler_keys():
+    with pytest.raises(ValueError, match="include both cavity and coupler option keys"):
+        chunk_sweep_options(
+            {
+                "claw_opts": {"connection_pads": {"readout": {"claw_length": [10, 20]}}},
+                "claw_only": {"total_length": [1000, 2000]},
+            },
+            1,
+        )
 
 
 def test_extract_value_and_flatten_dict_handle_nested_mappings():

@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from squadds.simulations.result_normalization import (
     build_eigenmode_payload,
@@ -119,6 +120,36 @@ def test_normalize_simulation_results_handles_legacy_large_values_even_when_unit
 
     assert result["cavity_frequency_GHz"] == 7.1
     assert result["kappa_kHz"] == 140.0
+
+
+@pytest.mark.parametrize(
+    ("emode_df", "lom_df", "expected_message"),
+    [
+        (
+            {"sim_results": {"cavity_frequency": 7.1, "kappa": 140.0, "Q": 1.2e5}},
+            None,
+            "lom_df is required",
+        ),
+        (
+            None,
+            {
+                "sim_results": {"cross_to_claw": 10.0, "cross_to_ground": 20.0},
+                "design": {"design_options": {"aedt_q3d_inductance": 2.0}},
+            },
+            "emode_df is required",
+        ),
+    ],
+)
+def test_normalize_simulation_results_raises_clear_error_for_missing_required_payloads(
+    emode_df, lom_df, expected_message
+):
+    with pytest.raises(ValueError, match=expected_message):
+        normalize_simulation_results(
+            emode_df=emode_df,
+            lom_df=lom_df,
+            find_g_a_fq_fn=lambda cross2cpw, cross2ground, f_r, Lj, N: (55.0, -210.0, 4.95),
+            find_kappa_fn=lambda *args: (0.0, 0.0),
+        )
 
 
 def test_build_eigenmode_payload_matches_legacy_shape():

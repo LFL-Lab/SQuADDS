@@ -3,6 +3,17 @@
 from __future__ import annotations
 
 
+def _require_mapping(name, payload, required_keys):
+    if not payload:
+        raise ValueError(f"{name} is required and must include {', '.join(required_keys)}.")
+
+    missing_keys = [key for key in required_keys if key not in payload]
+    if missing_keys:
+        raise ValueError(f"{name} is missing required keys: {', '.join(missing_keys)}.")
+
+    return payload
+
+
 def _normalize_frequency_to_ghz(value, unit=None):
     """Normalize raw frequency values to GHz while tolerating legacy unit metadata."""
     normalized_unit = str(unit).lower() if unit is not None else None
@@ -54,24 +65,42 @@ def normalize_simulation_results(
         print("No simulation results available.")
         return None
 
-    emode_sim_results = emode_df["sim_results"]
-    lom_sim_results = lom_df["sim_results"]
+    emode_sim_results = _require_mapping(
+        "emode_df['sim_results']",
+        _require_mapping("emode_df", emode_df, ["sim_results"])["sim_results"],
+        ["cavity_frequency", "kappa", "Q"],
+    )
+    lom_sim_results = _require_mapping(
+        "lom_df['sim_results']",
+        _require_mapping("lom_df", lom_df, ["sim_results", "design"])["sim_results"],
+        ["cross_to_claw", "cross_to_ground"],
+    )
+    lom_design = _require_mapping("lom_df['design']", lom_df["design"], ["design_options"])
+    lom_design_options = _require_mapping(
+        "lom_df['design']['design_options']",
+        lom_design["design_options"],
+        ["aedt_q3d_inductance"],
+    )
 
     cross2cpw = abs(lom_sim_results["cross_to_claw"]) * 1e-15
     cross2ground = abs(lom_sim_results["cross_to_ground"]) * 1e-15
     raw_frequency = emode_sim_results["cavity_frequency"]
-    Lj = lom_df["design"]["design_options"]["aedt_q3d_inductance"] * (
-        1 if lom_df["design"]["design_options"]["aedt_q3d_inductance"] > 1e-9 else 1e-9
-    )
+    Lj = lom_design_options["aedt_q3d_inductance"] * (1 if lom_design_options["aedt_q3d_inductance"] > 1e-9 else 1e-9)
     N = 2 if ncap_lom_df != {} else 4
     gg, aa, ff_q = find_g_a_fq_fn(cross2cpw, cross2ground, raw_frequency, Lj, N=N)
     raw_kappa = emode_sim_results["kappa"]
     Q = emode_sim_results["Q"]
     if ncap_lom_df != {}:
+        ncap_sim_results = _require_mapping("ncap_lom_df", ncap_lom_df, ["sim_results"])["sim_results"]
+        ncap_sim_results = _require_mapping(
+            "ncap_lom_df['sim_results']",
+            ncap_sim_results,
+            ["C_top2ground", "C_top2bottom"],
+        )
         raw_frequency, raw_kappa = find_kappa_fn(
             emode_sim_results["cavity_frequency"],
-            ncap_lom_df["sim_results"]["C_top2ground"],
-            ncap_lom_df["sim_results"]["C_top2bottom"],
+            ncap_sim_results["C_top2ground"],
+            ncap_sim_results["C_top2bottom"],
         )
 
     return dict(
