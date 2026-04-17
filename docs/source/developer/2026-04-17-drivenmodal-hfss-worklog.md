@@ -41,7 +41,7 @@ This file is the single source of truth for active implementation status, handof
 - [x] port spec builders landed
 - [x] artifact/checkpoint manifest helpers landed
 - [x] `AnsysSimulator` driven-modal facade landed
-- [ ] coupled-system post-processing landed
+- [x] coupled-system post-processing landed
 - [ ] tutorials landed
 
 ## Touched files
@@ -63,6 +63,10 @@ This file is the single source of truth for active implementation status, handof
 - `tests/test_drivenmodal_ports.py`
 - `tests/test_drivenmodal_artifacts.py`
 - `tests/test_ansys_simulator.py`
+- `squadds/simulations/drivenmodal/capacitance.py`
+- `squadds/simulations/drivenmodal/coupled_postprocess.py`
+- `tests/test_drivenmodal_capacitance.py`
+- `tests/test_drivenmodal_coupled_postprocess.py`
 
 Add newly touched files here as implementation progresses.
 
@@ -78,14 +82,21 @@ Add newly touched files here as implementation progresses.
 - `uv run pytest tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_ansys_simulator.py -q --tb=short` -> pass, 36 passed, 8 expected warnings from Qiskit Metal/macOS Ansys constraints
 - `uv run --extra dev ruff check squadds/simulations/drivenmodal squadds/simulations/ansys_simulator.py tests/imports_test.py tests/test_drivenmodal_*.py tests/test_ansys_simulator.py` -> pass
 - `uv run --extra dev ruff format --check squadds/simulations/drivenmodal squadds/simulations/ansys_simulator.py tests/imports_test.py tests/test_drivenmodal_*.py tests/test_ansys_simulator.py` -> pass
+- `uv run pytest tests/imports_test.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py -q --tb=short` -> pass, 27 passed, 4 upstream Qiskit Metal warnings
+- `uv run --extra dev ruff check squadds/simulations/drivenmodal tests/imports_test.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py` -> pass
+- `uv run --extra dev ruff format --check squadds/simulations/drivenmodal tests/imports_test.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py` -> pass
+- `uv run pytest tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py tests/test_ansys_simulator.py -q --tb=short` -> pass, 43 passed, 8 expected warnings
+- `uv run --extra dev ruff check squadds/simulations/drivenmodal squadds/simulations/ansys_simulator.py tests/imports_test.py tests/test_drivenmodal_*.py tests/test_ansys_simulator.py` -> pass
+- `uv run --extra dev ruff format --check squadds/simulations/drivenmodal squadds/simulations/ansys_simulator.py tests/imports_test.py tests/test_drivenmodal_*.py tests/test_ansys_simulator.py` -> pass
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
 ## Open decisions
 
-- Whether `scikit-rf` should be a core dependency or an optional extra remains open until the post-processing slice is implemented.
+- `scikit-rf` is currently wired as a core dependency because the coupled-system post-processing helpers now depend on it. Another agent can revisit that split later, but should do so deliberately rather than implicitly.
 - Whether dense capacitance-vs-frequency data should be stored as JSON, parquet, or a more compact artifact format remains open until dataset serialization is implemented.
 - Whether the eventual sweep progress tracker should live only inside driven-modal artifact manifests or also surface a generic reusable sweep runtime helper should be decided in the artifacts slice. Current preference is a reusable helper.
+- `calculate_g_from_chi(...)` intentionally returns a positive coupling magnitude using `abs(chi / denominator)` because the project is currently using `chi = f_e - f_r`, while the transmon `alpha` remains negative. Another agent should not flip this back without revisiting the sign convention across the whole workflow.
 
 ## Next safe restart point
 
@@ -95,7 +106,7 @@ If a new agent needs to resume from here:
 2. Read the PRD and plan linked above.
 3. Confirm branch is still `codex/drivenmodal-api-prd`.
 4. Confirm unrelated untracked files remain untouched.
-5. Continue with the next red-green slice: coupled-system post-processing helpers, richer manifest/progress semantics for sweep batches, and tutorial scaffolding.
+5. Continue with the next red-green slice: dataset serialization helpers, richer manifest/progress semantics for sweep batches, and tutorial scaffolding.
 6. Use the existing manifest helpers as the base for a more general sweep executor rather than replacing them with a separate incompatible progress format.
 
 ## Handoff notes for future agents
