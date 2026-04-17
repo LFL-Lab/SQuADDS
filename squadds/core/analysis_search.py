@@ -58,7 +58,7 @@ def outside_bounds(df: pd.DataFrame, params: dict, display: bool = True) -> bool
 
     for param, value in params.items():
         if param not in df.columns:
-            raise ValueError(f"{param} is not a column in dataframe: {df}")
+            raise ValueError(f"{param} is not a column in dataframe with columns={list(df.columns)} shape={df.shape}")
 
         if isinstance(value, (int, float)):
             if value < df[param].min() or value > df[param].max():

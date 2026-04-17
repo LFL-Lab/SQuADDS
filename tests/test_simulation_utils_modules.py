@@ -104,3 +104,10 @@ def test_find_kappa_returns_frequency_and_linewidth_tuple():
 
     assert isinstance(frequency, float)
     assert isinstance(linewidth, float)
+
+
+def test_find_kappa_does_not_emit_debug_stdout(capsys):
+    find_kappa(7.1, 1.0, 2.0)
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
