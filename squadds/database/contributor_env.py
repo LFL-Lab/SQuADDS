@@ -44,6 +44,6 @@ def get_hf_api_and_token() -> tuple[HfApi, str | None]:
     if token is None:
         raise ValueError("Hugging Face token not found. Please log in using `huggingface-cli login`.")
 
-    token = os.getenv("HUGGINGFACE_API_KEY")
+    token = os.getenv("HUGGINGFACE_API_KEY") or token
     login(token)
     return api, token

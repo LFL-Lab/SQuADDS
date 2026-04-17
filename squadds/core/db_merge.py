@@ -32,11 +32,14 @@ def create_qubit_cavity_dataframe(
     num_cpu=None,
 ) -> pd.DataFrame:
     """Merge qubit and cavity dataframes using the legacy SQuADDS_DB behavior."""
+    merger_terms = [] if merger_terms is None else merger_terms
     qubit_df, cavity_df = add_merger_terms_columns(qubit_df, cavity_df, merger_terms)
 
     qubit_df = qubit_df.reset_index().rename(columns={"index": "index_qc"})
 
-    if parallelize:
+    if not merger_terms:
+        merged_df = qubit_df.merge(cavity_df, how="cross", suffixes=("_qubit", "_cavity_claw"))
+    elif parallelize:
         n_cores = cpu_count() if num_cpu is None else num_cpu
         qubit_df_splits = np.array_split(qubit_df, n_cores)
 

@@ -55,7 +55,43 @@ jobs:
         shell: bash
 
       - name: Run pytest
-        run: uv run pytest -q
+        run: uv run pytest -q -m "not integration" --tb=short
+
+  integration-smoke:
+    runs-on: ubuntu-latest
+    env:
+      MPLBACKEND: Agg
+      QISKIT_METAL_HEADLESS: "1"
+      SQUADDS_RUN_LIVE_TESTS: "1"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libopengl0 libglu1-mesa
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Set up environment file
+        run: |
+          echo "HUGGINGFACE_API_KEY=${{ secrets.HUGGINGFACE_API_KEY }}" > .env
+        shell: bash
+
+      - name: Run MVP integration smoke tests
+        run: uv run pytest -q tests/mvp_test.py --tb=short -ra
 
   lint:
     runs-on: ubuntu-latest

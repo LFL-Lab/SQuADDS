@@ -93,3 +93,19 @@ def test_save_half_wave_parquet_outputs_writes_expected_files(tmp_path):
     assert (tmp_path / "artifacts" / "half-wave-cavity_df.parquet").exists()
     assert (tmp_path / "artifacts" / "qubit_half-wave-cavity_df_uncompressed.parquet").exists()
     assert (tmp_path / "artifacts" / "qubit_half-wave-cavity_df.parquet").exists()
+
+
+def test_save_half_wave_parquet_outputs_overwrites_existing_directory(tmp_path):
+    data_dir = tmp_path / "artifacts"
+    data_dir.mkdir()
+    (data_dir / "half-wave-cavity_df.parquet").write_text("stale")
+
+    save_half_wave_parquet_outputs(
+        pd.DataFrame({"value": [1]}),
+        pd.DataFrame({"value": [2]}),
+        pd.DataFrame({"value": [3]}),
+        data_dir=str(data_dir),
+    )
+
+    reloaded = pd.read_parquet(data_dir / "half-wave-cavity_df.parquet")
+    assert reloaded["value"].tolist() == [1]

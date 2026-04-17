@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from pyEPR.calcs import Convert
 
@@ -127,7 +128,6 @@ class ScalingInterpolator(Interpolator):
         )
         updated_resonator_length = round(updated_resonator_length)
 
-        res_scaling = closest_f_cavity / f_res_target
         res_scaling = closest_f_cavity / f_res_target
         kappa_scaling = np.sqrt(kappa_target / closest_kappa)
 

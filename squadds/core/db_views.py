@@ -7,7 +7,15 @@ def build_dataset_rows(components, component_names, data_types, image_base_url=D
     """
     component_urls = [f"{image_base_url}/{name}.png" for name in component_names]
     rows = list(map(list, zip(components, component_names, data_types, component_urls)))
-    return [list(row) for row in set(tuple(row) for row in rows)]
+    seen = set()
+    deduped_rows = []
+    for row in rows:
+        row_key = tuple(row)
+        if row_key in seen:
+            continue
+        seen.add(row_key)
+        deduped_rows.append(row)
+    return deduped_rows
 
 
 def describe_dataset(dataset):

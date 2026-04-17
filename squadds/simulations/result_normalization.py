@@ -3,6 +3,38 @@
 from __future__ import annotations
 
 
+def _normalize_frequency_to_ghz(value, unit=None):
+    """Normalize raw frequency values to GHz while tolerating legacy unit metadata."""
+    normalized_unit = str(unit).lower() if unit is not None else None
+    if normalized_unit == "mhz":
+        return value / 1e3
+    if normalized_unit == "khz":
+        return value / 1e6
+    if normalized_unit == "hz":
+        return value / 1e9
+    if normalized_unit == "ghz" and abs(value) < 1e6:
+        return value
+    if abs(value) >= 1e6:
+        return value / 1e9
+    return value
+
+
+def _normalize_linewidth_to_khz(value, unit=None):
+    """Normalize raw linewidth values to kHz while tolerating legacy unit metadata."""
+    normalized_unit = str(unit).lower() if unit is not None else None
+    if normalized_unit == "ghz":
+        return value * 1e6
+    if normalized_unit == "mhz":
+        return value * 1e3
+    if normalized_unit == "hz":
+        return value / 1e3
+    if normalized_unit == "khz" and abs(value) < 1e4:
+        return value
+    if abs(value) >= 1e4:
+        return value / 1e3
+    return value
+
+
 def normalize_simulation_results(
     emode_df=None,
     lom_df=None,
@@ -18,34 +50,40 @@ def normalize_simulation_results(
         lom_df = {}
     if emode_df is None:
         emode_df = {}
-    if emode_df is None and lom_df is None:
+    if emode_df == {} and lom_df == {}:
         print("No simulation results available.")
         return None
 
-    {} if emode_df == {} else emode_df["sim_results"]
-    {} if lom_df == {} else lom_df["sim_results"]
+    emode_sim_results = emode_df["sim_results"]
+    lom_sim_results = lom_df["sim_results"]
 
-    cross2cpw = abs(lom_df["sim_results"]["cross_to_claw"]) * 1e-15
-    cross2ground = abs(lom_df["sim_results"]["cross_to_ground"]) * 1e-15
-    f_r = emode_df["sim_results"]["cavity_frequency"]
+    cross2cpw = abs(lom_sim_results["cross_to_claw"]) * 1e-15
+    cross2ground = abs(lom_sim_results["cross_to_ground"]) * 1e-15
+    raw_frequency = emode_sim_results["cavity_frequency"]
     Lj = lom_df["design"]["design_options"]["aedt_q3d_inductance"] * (
         1 if lom_df["design"]["design_options"]["aedt_q3d_inductance"] > 1e-9 else 1e-9
     )
     N = 2 if ncap_lom_df != {} else 4
-    gg, aa, ff_q = find_g_a_fq_fn(cross2cpw, cross2ground, f_r, Lj, N=N)
-    kappa = emode_df["sim_results"]["kappa"]
-    Q = emode_df["sim_results"]["Q"]
+    gg, aa, ff_q = find_g_a_fq_fn(cross2cpw, cross2ground, raw_frequency, Lj, N=N)
+    raw_kappa = emode_sim_results["kappa"]
+    Q = emode_sim_results["Q"]
     if ncap_lom_df != {}:
-        f_r, kappa = find_kappa_fn(
-            emode_df["sim_results"]["cavity_frequency"],
+        raw_frequency, raw_kappa = find_kappa_fn(
+            emode_sim_results["cavity_frequency"],
             ncap_lom_df["sim_results"]["C_top2ground"],
             ncap_lom_df["sim_results"]["C_top2bottom"],
         )
 
     return dict(
-        cavity_frequency_GHz=f_r,
+        cavity_frequency_GHz=_normalize_frequency_to_ghz(
+            raw_frequency,
+            emode_sim_results.get("cavity_frequency_unit"),
+        ),
         Q=Q,
-        kappa_kHz=kappa,
+        kappa_kHz=_normalize_linewidth_to_khz(
+            raw_kappa,
+            emode_sim_results.get("kappa_unit"),
+        ),
         g_MHz=gg,
         anharmonicity_MHz=aa,
         qubit_frequency_GHz=ff_q,

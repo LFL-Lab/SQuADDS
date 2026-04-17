@@ -3,13 +3,13 @@ from qiskit_metal.qlibrary.core import QComponent
 
 
 def get_cavity_claw_options_keys(cavity_dict):
+    cpw_opts_key = None
+    cplr_opts_key = None
     for key in cavity_dict.keys():
         if key.startswith("cpw"):
             cpw_opts_key = key
         elif key.startswith("cplr"):
             cplr_opts_key = key
-        else:
-            cpw_opts_key, cplr_opts_key = None, None
 
     return cpw_opts_key, cplr_opts_key
 

@@ -9,7 +9,15 @@ from squadds.simulations.result_normalization import (
 
 
 def test_normalize_simulation_results_combines_eigenmode_and_lom_data():
-    emode_df = {"sim_results": {"cavity_frequency": 7.1, "kappa": 140.0, "Q": 1.2e5}}
+    emode_df = {
+        "sim_results": {
+            "cavity_frequency": 7.1,
+            "cavity_frequency_unit": "GHz",
+            "kappa": 140.0,
+            "kappa_unit": "kHz",
+            "Q": 1.2e5,
+        }
+    }
     lom_df = {
         "sim_results": {"cross_to_claw": 10.0, "cross_to_ground": 20.0},
         "design": {"design_options": {"aedt_q3d_inductance": 2.0}},
@@ -33,7 +41,15 @@ def test_normalize_simulation_results_combines_eigenmode_and_lom_data():
 
 
 def test_normalize_simulation_results_updates_ncap_frequency_and_kappa():
-    emode_df = {"sim_results": {"cavity_frequency": 7.1, "kappa": 140.0, "Q": 1.2e5}}
+    emode_df = {
+        "sim_results": {
+            "cavity_frequency": 7.1,
+            "cavity_frequency_unit": "GHz",
+            "kappa": 140.0,
+            "kappa_unit": "kHz",
+            "Q": 1.2e5,
+        }
+    }
     lom_df = {
         "sim_results": {"cross_to_claw": 10.0, "cross_to_ground": 20.0},
         "design": {"design_options": {"aedt_q3d_inductance": 0.5}},
@@ -51,6 +67,58 @@ def test_normalize_simulation_results_updates_ncap_frequency_and_kappa():
     assert result["cavity_frequency_GHz"] == 6.9
     assert result["kappa_kHz"] == 180.0
     assert result["g_MHz"] == 60.0
+
+
+def test_normalize_simulation_results_converts_hz_payloads_to_ghz_and_khz():
+    emode_df = {
+        "sim_results": {
+            "cavity_frequency": 7.1e9,
+            "cavity_frequency_unit": "Hz",
+            "kappa": 140e3,
+            "kappa_unit": "Hz",
+            "Q": 1.2e5,
+        }
+    }
+    lom_df = {
+        "sim_results": {"cross_to_claw": 10.0, "cross_to_ground": 20.0},
+        "design": {"design_options": {"aedt_q3d_inductance": 2.0}},
+    }
+
+    result = normalize_simulation_results(
+        emode_df=emode_df,
+        lom_df=lom_df,
+        find_g_a_fq_fn=lambda cross2cpw, cross2ground, f_r, Lj, N: (55.0, -210.0, 4.95),
+        find_kappa_fn=lambda *args: (0.0, 0.0),
+    )
+
+    assert result["cavity_frequency_GHz"] == 7.1
+    assert result["kappa_kHz"] == 140.0
+
+
+def test_normalize_simulation_results_handles_legacy_large_values_even_when_units_are_mislabeled():
+    emode_df = {
+        "sim_results": {
+            "cavity_frequency": 7.1e9,
+            "cavity_frequency_unit": "GHz",
+            "kappa": 140e3,
+            "kappa_unit": "kHz",
+            "Q": 1.2e5,
+        }
+    }
+    lom_df = {
+        "sim_results": {"cross_to_claw": 10.0, "cross_to_ground": 20.0},
+        "design": {"design_options": {"aedt_q3d_inductance": 2.0}},
+    }
+
+    result = normalize_simulation_results(
+        emode_df=emode_df,
+        lom_df=lom_df,
+        find_g_a_fq_fn=lambda cross2cpw, cross2ground, f_r, Lj, N: (55.0, -210.0, 4.95),
+        find_kappa_fn=lambda *args: (0.0, 0.0),
+    )
+
+    assert result["cavity_frequency_GHz"] == 7.1
+    assert result["kappa_kHz"] == 140.0
 
 
 def test_build_eigenmode_payload_matches_legacy_shape():

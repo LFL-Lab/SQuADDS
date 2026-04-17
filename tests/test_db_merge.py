@@ -68,3 +68,15 @@ def test_create_qubit_cavity_dataframe_merges_rows_and_builds_unified_design_opt
     assert "design_options" in merged_df.columns
     assert merged_df.iloc[0]["design_options"]["cavity_claw_options"]["coupler_type"] == "CLT"
     assert merged_df.iloc[0]["design_options"]["qubit_options"]["cross_length"] == "200um"
+
+
+def test_create_qubit_cavity_dataframe_accepts_none_merger_terms():
+    merged_df = create_qubit_cavity_dataframe(
+        _build_qubit_df(),
+        _build_cavity_df(),
+        merger_terms=None,
+        parallelize=False,
+    )
+
+    assert merged_df["index_qc"].tolist() == [0]
+    assert "design_options" in merged_df.columns

@@ -54,3 +54,22 @@ def test_get_hf_api_and_token_logs_in_with_env_token(monkeypatch):
     assert isinstance(api, FakeApi)
     assert token == "env-token"
     assert calls == ["env-token"]
+
+
+def test_get_hf_api_and_token_falls_back_to_cached_token_when_env_var_missing(monkeypatch):
+    calls = []
+
+    class FakeApi:
+        pass
+
+    monkeypatch.setattr(contributor_env, "load_contributor_environment", lambda: None)
+    monkeypatch.setattr(contributor_env, "HfApi", FakeApi)
+    monkeypatch.setattr(contributor_env, "get_token", lambda: "cached-token")
+    monkeypatch.setattr(contributor_env, "login", lambda token: calls.append(token))
+    monkeypatch.delenv("HUGGINGFACE_API_KEY", raising=False)
+
+    api, token = contributor_env.get_hf_api_and_token()
+
+    assert isinstance(api, FakeApi)
+    assert token == "cached-token"
+    assert calls == ["cached-token"]

@@ -18,6 +18,17 @@ def test_build_dataset_rows_matches_legacy_zip_and_dedup_behavior():
     ]
 
 
+def test_build_dataset_rows_preserves_first_seen_order_when_deduplicating():
+    rows = build_dataset_rows(
+        components=["qubit", "cavity_claw", "qubit"],
+        component_names=["TransmonCross", "RouteMeander", "TransmonCross"],
+        data_types=["cap_matrix", "eigenmode", "cap_matrix"],
+    )
+
+    assert rows[0][:3] == ["qubit", "TransmonCross", "cap_matrix"]
+    assert rows[1][:3] == ["cavity_claw", "RouteMeander", "eigenmode"]
+
+
 def test_describe_dataset_collects_printed_metadata_fields():
     class FakeDataset:
         features = {"value": "float"}

@@ -36,14 +36,6 @@ def create_unified_design_options(row):
         "ground_spacing"
     ]
 
-    qubit_dict["connection_pads"]["readout"]["claw_cpw_width"] = "0um"
-    qubit_dict["connection_pads"]["readout"]["claw_cpw_length"] = "0um"
-    cavity_dict["claw_opts"]["connection_pads"]["readout"]["claw_cpw_width"] = "0um"
-    cavity_dict["claw_opts"]["connection_pads"]["readout"]["claw_cpw_length"] = "0um"
-    cavity_dict["claw_opts"]["connection_pads"]["readout"]["ground_spacing"] = qubit_dict["connection_pads"]["readout"][
-        "ground_spacing"
-    ]
-
     return {
         "cavity_claw_options": {
             "coupler_type": coupler_type,

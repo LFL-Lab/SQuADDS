@@ -44,8 +44,7 @@ def optimize_half_wave_dataframe(
 
 def save_half_wave_parquet_outputs(cavity_df, merged_df, opt_df, data_dir: str = "data"):
     """Persist the half-wave parquet outputs using the legacy filenames."""
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-        cavity_df.to_parquet(os.path.join(data_dir, "half-wave-cavity_df.parquet"))
-        merged_df.to_parquet(os.path.join(data_dir, "qubit_half-wave-cavity_df_uncompressed.parquet"))
-        opt_df.to_parquet(os.path.join(data_dir, "qubit_half-wave-cavity_df.parquet"))
+    os.makedirs(data_dir, exist_ok=True)
+    cavity_df.to_parquet(os.path.join(data_dir, "half-wave-cavity_df.parquet"))
+    merged_df.to_parquet(os.path.join(data_dir, "qubit_half-wave-cavity_df_uncompressed.parquet"))
+    opt_df.to_parquet(os.path.join(data_dir, "qubit_half-wave-cavity_df.parquet"))

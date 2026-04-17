@@ -28,13 +28,6 @@ def create_clt_coupler(opts, design):
 
 
 def create_cpw(opts, cplr, design):
-    if "finger_count" not in cplr.options:
-        (
-            int("".join(filter(str.isdigit, cplr.options["coupling_length"])))
-            if int("".join(filter(str.isdigit, cplr.options["coupling_length"]))) > 150
-            else 0
-        )
-
     opts.update({"lead": Dict(start_straight="50um", end_straight="50um")})
     opts.update(
         {
