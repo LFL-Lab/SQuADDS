@@ -65,8 +65,10 @@ jobs:
             "squadds/__init__.py"
           )
 
-          echo "## API Diff: ${PREV_TAG} → ${CURRENT_TAG}" > /tmp/api_changes.md
-          echo "" >> /tmp/api_changes.md
+          {
+            echo "## API Diff: ${PREV_TAG} → ${CURRENT_TAG}"
+            echo ""
+          } > /tmp/api_changes.md
 
           CHANGES_FOUND=false
           AFFECTED_FILES=""
@@ -111,17 +113,13 @@ jobs:
           {
             echo "changes_found=${CHANGES_FOUND}"
             echo "affected_mcp_modules=${AFFECTED_MCP_MODULES}"
-          } >> "$GITHUB_OUTPUT"
 
-          # Save the full diff summary (multiline)
-          {
+            # Save the full diff summary (multiline)
             echo "api_changes_md<<EOF"
             cat /tmp/api_changes.md
             echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
-          # Save affected files list
-          {
+            
+            # Save affected files list
             echo "affected_files<<EOF"
             echo -e "$AFFECTED_FILES"
             echo "EOF"
