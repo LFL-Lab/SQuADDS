@@ -25,10 +25,13 @@ def deserialize_json_like(value):
 
 
 def normalize_setup_payload(value):
-    """Return the inner setup mapping when payloads are wrapped in {'setup': ...}."""
+    """Return the inner setup mapping when payloads are wrapped in legacy containers."""
     payload = deserialize_json_like(value)
-    if isinstance(payload, dict) and "setup" in payload and isinstance(payload["setup"], dict):
-        return payload["setup"]
+
+    if isinstance(payload, dict) and "setup" in payload:
+        return normalize_setup_payload(payload["setup"])
+    if isinstance(payload, list) and len(payload) == 1:
+        return normalize_setup_payload(payload[0])
     return payload
 
 

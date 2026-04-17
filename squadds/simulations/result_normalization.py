@@ -85,7 +85,7 @@ def normalize_simulation_results(
     cross2cpw = abs(lom_sim_results["cross_to_claw"]) * 1e-15
     cross2ground = abs(lom_sim_results["cross_to_ground"]) * 1e-15
     raw_frequency = emode_sim_results["cavity_frequency"]
-    Lj = lom_design_options["aedt_q3d_inductance"] * (1 if lom_design_options["aedt_q3d_inductance"] > 1e-9 else 1e-9)
+    Lj = max(lom_design_options["aedt_q3d_inductance"], 1e-9)
     N = 2 if ncap_lom_df != {} else 4
     gg, aa, ff_q = find_g_a_fq_fn(cross2cpw, cross2ground, raw_frequency, Lj, N=N)
     raw_kappa = emode_sim_results["kappa"]

@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from squadds.database.contributor_file_ops import (
     append_entries_to_dataset_file,
     load_contribution_from_json_file,
@@ -81,3 +83,17 @@ def test_validate_sweep_entries_runs_all_callbacks_in_order():
     ]
     assert printed[0] == "Validating entry 1 of 2..."
     assert printed[-1] == "--------------------------------------------------"
+
+
+def test_existing_config_from_json_reports_missing_sweep_prefix(monkeypatch):
+    from squadds.database import contributor
+
+    monkeypatch.setattr(contributor.ExistingConfigData, "_supported_config_names", lambda self: ["cfg"])
+    monkeypatch.setattr(contributor, "load_contributor_environment", lambda: None)
+    monkeypatch.setattr(contributor, "build_contributor_record", lambda: {})
+    monkeypatch.setattr(contributor, "load_sweep_entries_from_json_prefix", lambda prefix, info: [])
+
+    data = contributor.ExistingConfigData("cfg")
+
+    with pytest.raises(ValueError, match="missing_prefix"):
+        data.from_json("missing_prefix", is_sweep=True)

@@ -603,7 +603,7 @@ class ExistingConfigData:
         else:
             sweep_data = load_sweep_entries_from_json_prefix(json_file, self.get_contributor_info())
             if not sweep_data:
-                raise ValueError(f"Files not found: {sweep_data}")
+                raise ValueError(f"No sweep files found for prefix: {os.path.abspath(json_file)}")
             self.sweep_data.extend(sweep_data)
 
             print("Sweep data loaded successfully.")

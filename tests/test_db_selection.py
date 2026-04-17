@@ -50,6 +50,11 @@ def test_build_component_selection_raises_for_mismatched_system():
         build_component_selection("cavity_claw", "qubit", "TransmonCross", "cap_matrix", "warning")
 
 
+def test_build_component_selection_raises_user_warning_when_system_not_selected():
+    with pytest.raises(UserWarning, match="warning"):
+        build_component_selection(None, "qubit", "TransmonCross", "cap_matrix", "warning")
+
+
 def test_resolve_resonator_coupler_maps_legacy_aliases():
     assert resolve_resonator_coupler("quarter") == "CLT"
     assert resolve_resonator_coupler("half") == "NCap"

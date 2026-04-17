@@ -22,6 +22,8 @@ def make_table(title, data):
         pars = ["coupling_length", "coupling_space"]
     elif title == "purcell_filter":
         pars = ["total_length", "cap_gap_ground", "finger_length", "cap_width", "cap_gap"]
+    else:
+        raise ValueError(f"Unsupported table title: {title}")
 
     table = PrettyTable()
     table.title = title

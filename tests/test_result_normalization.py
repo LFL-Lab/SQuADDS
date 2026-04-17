@@ -122,6 +122,36 @@ def test_normalize_simulation_results_handles_legacy_large_values_even_when_unit
     assert result["kappa_kHz"] == 140.0
 
 
+def test_normalize_simulation_results_clamps_small_inductance_before_physics_callback():
+    seen = {}
+    emode_df = {
+        "sim_results": {
+            "cavity_frequency": 7.1,
+            "cavity_frequency_unit": "GHz",
+            "kappa": 140.0,
+            "kappa_unit": "kHz",
+            "Q": 1.2e5,
+        }
+    }
+    lom_df = {
+        "sim_results": {"cross_to_claw": 10.0, "cross_to_ground": 20.0},
+        "design": {"design_options": {"aedt_q3d_inductance": 0.0}},
+    }
+
+    def record_lj(cross2cpw, cross2ground, f_r, Lj, N):
+        seen["Lj"] = Lj
+        return (55.0, -210.0, 4.95)
+
+    normalize_simulation_results(
+        emode_df=emode_df,
+        lom_df=lom_df,
+        find_g_a_fq_fn=record_lj,
+        find_kappa_fn=lambda *args: (0.0, 0.0),
+    )
+
+    assert seen["Lj"] == 1e-9
+
+
 @pytest.mark.parametrize(
     ("emode_df", "lom_df", "expected_message"),
     [

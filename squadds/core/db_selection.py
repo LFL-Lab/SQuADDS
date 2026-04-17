@@ -31,8 +31,16 @@ def build_component_selection(
     warning_message: str,
 ) -> tuple[str | None, str]:
     """Return the selected component name and data type for matching systems."""
-    if (selected_system == required_component) or (required_component in selected_system):
-        return component_name, data_type
+    if selected_system is None:
+        raise UserWarning(warning_message)
+    if isinstance(selected_system, str):
+        if selected_system == required_component:
+            return component_name, data_type
+        raise UserWarning(warning_message)
+    if isinstance(selected_system, list):
+        if required_component in selected_system:
+            return component_name, data_type
+        raise UserWarning(warning_message)
     raise UserWarning(warning_message)
 
 
