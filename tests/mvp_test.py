@@ -1,133 +1,149 @@
 import os
 
-import matplotlib as mpl
-
-# Check if a display is available
-if os.environ.get("DISPLAY", "") == "":
-    print("No display found. Running in headless mode.")
-    mpl.use("Agg")  # Set the matplotlib backend to Agg (headless)
-    os.environ["QISKIT_METAL_HEADLESS"] = "1"  # Set Qiskit Metal to headless mode
-else:
-    print("Display found. Running with GUI support.")
-    # You can let matplotlib choose the default backend (Qt5Agg, TkAgg, etc.)
-    if "QISKIT_METAL_HEADLESS" in os.environ:
-        del os.environ["QISKIT_METAL_HEADLESS"]  # Remove the headless flag if GUI is available
-
+import pytest
 
 from squadds import Analyzer, SQuADDS_DB
 from squadds.interpolations.physics import ScalingInterpolator
 
-db = SQuADDS_DB()
-db.view_datasets()
-db.get_configs()
-db.get_dataset_info(component="qubit", component_name="TransmonCross", data_type="cap_matrix")
-db.get_dataset_info(component="cavity_claw", component_name="RouteMeander", data_type="eigenmode")
-db.see_dataset(component="qubit", component_name="TransmonCross", data_type="cap_matrix")
-db.view_all_contributors()
+RUN_LIVE_TESTS = os.getenv("SQUADDS_RUN_LIVE_TESTS") == "1"
 
-db.unselect_all()
-db.select_system(["qubit", "cavity_claw"])
-db.select_qubit("TransmonCross")
-db.select_cavity_claw("RouteMeander")
-db.select_resonator_type("quarter")
-db.show_selections()
-merged_df = db.create_system_df()
-print(merged_df)
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(
+        not RUN_LIVE_TESTS,
+        reason="Set SQUADDS_RUN_LIVE_TESTS=1 to run live Hugging Face smoke tests.",
+    ),
+]
 
-analyzer = Analyzer(db)
 
-target_params = {
-    "qubit_frequency_GHz": 4,
-    "cavity_frequency_GHz": 6.2,
-    "kappa_kHz": 120,
-    "resonator_type": "quarter",
-    "anharmonicity_MHz": -200,
-    "g_MHz": 70,
-}
+def _print_section(title, value):
+    print("=" * 80)
+    print(title)
+    print(value)
 
-results = analyzer.find_closest(target_params=target_params, num_top=1, metric="Euclidean", display=True)
-print(results)
 
-interpolator = ScalingInterpolator(analyzer, target_params)
+def test_database_metadata_queries(headless_qiskit_environment):
+    db = SQuADDS_DB()
+    supported_components = db.supported_components()
+    qubit_names = db.get_component_names("qubit")
+    cavity_names = db.get_component_names("cavity_claw")
 
-design_df = interpolator.get_design()
+    _print_section("Supported components", supported_components)
+    _print_section("Qubit component names", qubit_names)
+    _print_section("Cavity component names", cavity_names)
 
-print(design_df)
+    assert "qubit" in supported_components
+    assert "TransmonCross" in qubit_names
+    assert "RouteMeander" in cavity_names
 
-print("=" * 50)
-print("Testing Half-Wave Cavity (HWC)...")
-db.unselect_all()
-db.select_system(["qubit", "cavity_claw"])
-db.select_qubit("TransmonCross")
-db.select_cavity_claw("RouteMeander")
-db.select_resonator_type("half")
-db.show_selections()
-merged_df = db.create_system_df()
 
-target_params_hwc = {
-    "qubit_frequency_GHz": 4,
-    "cavity_frequency_GHz": 6.2,
-    "kappa_kHz": 120,
-    "anharmonicity_MHz": -200,
-    "g_MHz": 70,
-}
+def test_quarter_wave_search_and_interpolation(headless_qiskit_environment):
+    db = SQuADDS_DB()
+    db.unselect_all()
+    db.select_system(["qubit", "cavity_claw"])
+    db.select_qubit("TransmonCross")
+    db.select_cavity_claw("RouteMeander")
+    db.select_resonator_type("quarter")
 
-results_hwc = analyzer.find_closest(target_params=target_params_hwc, num_top=1, metric="Euclidean", display=True)
-print(results_hwc)
+    merged_df = db.create_system_df()
+    assert not merged_df.empty
 
-interpolator_hwc = ScalingInterpolator(analyzer, target_params_hwc)
-design_df_hwc = interpolator_hwc.get_design()
-print(design_df_hwc)
-print("HWC Test Check passed!")
+    analyzer = Analyzer(db)
+    target_params = {
+        "qubit_frequency_GHz": 4,
+        "cavity_frequency_GHz": 6.2,
+        "kappa_kHz": 120,
+        "resonator_type": "quarter",
+        "anharmonicity_MHz": -200,
+        "g_MHz": 70,
+    }
 
-# Test setup API for half-wave resonator
-print("\n" + "=" * 60)
-print("Testing Setup API for Half-Wave Resonator")
-print("=" * 60)
+    results = analyzer.find_closest(target_params=target_params, num_top=1, metric="Euclidean", display=True)
+    design_df = ScalingInterpolator(analyzer, target_params).get_design()
 
-from squadds import AnsysSimulator
+    _print_section("Quarter-wave merged dataframe preview", merged_df.head())
+    _print_section("Quarter-wave closest results", results)
+    _print_section("Quarter-wave interpolated design", design_df)
 
-# Create fresh analyzer to get updated dataframe with setup columns
-db_setup = SQuADDS_DB()
-db_setup.select_system(["qubit", "cavity_claw"])
-db_setup.select_qubit("TransmonCross")
-db_setup.select_cavity_claw("RouteMeander")
-db_setup.select_resonator_type("half")
-hwc_df_setup = db_setup.create_system_df()
-analyzer_setup = Analyzer(db_setup)
+    assert len(results) == 1
+    assert not design_df.empty
+    assert "design_options" in design_df.columns
 
-hwc_target_params_setup = {
-    "qubit_frequency_GHz": 4,
-    "anharmonicity_MHz": -200,
-    "cavity_frequency_GHz": 6.2,
-    "kappa_kHz": 100,
-    "g_MHz": 70,
-}
 
-hwc_results_setup = analyzer_setup.find_closest(
-    target_params=hwc_target_params_setup, num_top=1, metric="Euclidean", display=False
-)
+def test_half_wave_search_and_interpolation(headless_qiskit_environment):
+    db = SQuADDS_DB()
+    db.unselect_all()
+    db.select_system(["qubit", "cavity_claw"])
+    db.select_qubit("TransmonCross")
+    db.select_cavity_claw("RouteMeander")
+    db.select_resonator_type("half")
 
-hwc_device = hwc_results_setup.iloc[0]
+    merged_df = db.create_system_df()
+    assert not merged_df.empty
 
-# Verify all setup keys are present
-setup_keys = [k for k in hwc_device.keys() if "setup" in k.lower()]
-print(f"\n[PASSED] Setup keys in device: {setup_keys}")
-assert "setup_qubit" in setup_keys, "Missing setup_qubit!"
-assert "setup_cavity_claw" in setup_keys, "Missing setup_cavity_claw!"
-assert "setup_coupler" in setup_keys, "Missing setup_coupler!"
+    analyzer = Analyzer(db)
+    target_params = {
+        "qubit_frequency_GHz": 4,
+        "cavity_frequency_GHz": 6.2,
+        "kappa_kHz": 120,
+        "anharmonicity_MHz": -200,
+        "g_MHz": 70,
+    }
 
-# Test AnsysSimulator setup API
-hwc_sim = AnsysSimulator(analyzer_setup, hwc_device)
+    results = analyzer.find_closest(target_params=target_params, num_top=1, metric="Euclidean", display=True)
+    design_df = ScalingInterpolator(analyzer, target_params).get_design()
 
-print("\n[PASSED] Testing get_simulation_setup(target='all')...")
-all_setups = hwc_sim.get_simulation_setup(target="all")
-assert "setup_qubit" in all_setups, "get_simulation_setup missing setup_qubit!"
-assert "setup_cavity_claw" in all_setups, "get_simulation_setup missing setup_cavity_claw!"
-assert "setup_coupler" in all_setups, "get_simulation_setup missing setup_coupler!"
+    _print_section("Half-wave merged dataframe preview", merged_df.head())
+    _print_section("Half-wave closest results", results)
+    _print_section("Half-wave interpolated design", design_df)
 
-print("\n[PASSED] Testing get_simulation_setup(target='cavity_claw')...")
-cavity_setup = hwc_sim.get_simulation_setup(target="cavity_claw")
-assert "setup_cavity_claw" in cavity_setup, "cavity_claw target failed!"
+    assert len(results) == 1
+    assert not design_df.empty
+    assert "design_options" in design_df.columns
 
-print("\n[PASSED] All setup API tests passed!")
+
+def test_half_wave_setup_api(headless_qiskit_environment):
+    from squadds import AnsysSimulator
+
+    db = SQuADDS_DB()
+    db.unselect_all()
+    db.select_system(["qubit", "cavity_claw"])
+    db.select_qubit("TransmonCross")
+    db.select_cavity_claw("RouteMeander")
+    db.select_resonator_type("half")
+
+    merged_df = db.create_system_df()
+    assert not merged_df.empty
+
+    analyzer = Analyzer(db)
+    target_params = {
+        "qubit_frequency_GHz": 4,
+        "anharmonicity_MHz": -200,
+        "cavity_frequency_GHz": 6.2,
+        "kappa_kHz": 100,
+        "g_MHz": 70,
+    }
+
+    results = analyzer.find_closest(target_params=target_params, num_top=1, metric="Euclidean", display=False)
+    device = results.iloc[0]
+
+    setup_keys = [key for key in device.keys() if "setup" in key.lower()]
+    assert "setup_qubit" in setup_keys
+    assert any(
+        key in setup_keys for key in ["setup_cavity_claw", "setup_cavity_claw_merged", "setup_cavity_claw_closest"]
+    )
+    assert "setup_coupler" in setup_keys
+
+    simulator = AnsysSimulator(analyzer, device)
+    all_setups = simulator.get_simulation_setup(target="all")
+    cavity_setup = simulator.get_simulation_setup(target="cavity_claw")
+
+    _print_section("Half-wave closest device", results)
+    _print_section("Half-wave setup keys", setup_keys)
+    _print_section("Half-wave all setups", all_setups)
+    _print_section("Half-wave cavity setup", cavity_setup)
+
+    assert "setup_qubit" in all_setups
+    assert "setup_cavity_claw" in all_setups
+    assert "setup_coupler" in all_setups
+    assert "setup_cavity_claw" in cavity_setup

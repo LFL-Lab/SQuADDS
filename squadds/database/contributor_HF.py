@@ -1,14 +1,10 @@
-import hashlib
 import os
 from datetime import datetime
 
-from dotenv import load_dotenv
-from huggingface_hub import HfApi, get_token, login
-
 from squadds.core.utils import *
 from squadds.database.checker import Checker
-
-load_dotenv(ENV_FILE_PATH)
+from squadds.database.contributor_env import get_hf_api_and_token, load_contributor_environment
+from squadds.database.hf_dataset_ops import build_dataset_name, ensure_dataset_repository, upload_dataset_files
 
 
 class Contribute:
@@ -35,6 +31,7 @@ class Contribute:
     """
 
     def __init__(self, data_files):
+        load_contributor_environment()
         self.dataset_files = data_files
         self.institute = os.getenv("INSTITUTION")
         self.pi_name = os.getenv("PI_NAME")
@@ -54,14 +51,7 @@ class Contribute:
         Raises:
             ValueError: If Hugging Face token is not found.
         """
-        api = HfApi()
-        token = get_token()
-        if token is None:
-            raise ValueError("Hugging Face token not found. Please log in using `huggingface-cli login`.")
-        else:
-            token = os.getenv("HUGGINGFACE_API_KEY")
-            login(token)
-        return api, token
+        return get_hf_api_and_token()
 
     def create_dataset_name(self, components, data_type, data_nature, data_source, date=None):
         """
@@ -77,14 +67,16 @@ class Contribute:
         Returns:
             str: Unique name for the dataset.
         """
-        components_joined = "-".join(components)
-        date = date or datetime.now().strftime("%Y%m%d")
-        base_string = (
-            f"{components_joined}_{data_type}_{data_nature}_{data_source}_{self.institute}_{self.pi_name}_{date}"
+        self.dataset_name = build_dataset_name(
+            components,
+            data_type,
+            data_nature,
+            data_source,
+            self.institute,
+            self.pi_name,
+            date=date,
         )
-        uid_hash = hashlib.sha256(base_string.encode()).hexdigest()[:8]  # Short hash
-        self.dataset_name = f"{base_string}_{uid_hash}"
-        return f"{base_string}_{uid_hash}"
+        return self.dataset_name
 
     def get_dataset_link(self):
         """
@@ -131,11 +123,7 @@ class Contribute:
         dataset_name = self.create_dataset_name(components, data_type, data_nature, data_source, date)
 
         # Create a repository for the dataset on HuggingFace (if it doesn't exist)
-        try:
-            self.api.create_repo(repo_id=dataset_name, token=self.token, repo_type="dataset")
-            print(f"Dataset repository {dataset_name} created.")
-        except Exception as e:
-            print(f"Error creating dataset repository: {e}")
+        ensure_dataset_repository(self.api, self.token, dataset_name)
 
     def upload_dataset_no_validation(self, components, data_type, data_nature, data_source, files, date=None):
         """
@@ -152,22 +140,5 @@ class Contribute:
         dataset_name = self.create_dataset_name(components, data_type, data_nature, data_source, date)
 
         # Create a repository for the dataset on HuggingFace (if it doesn't exist)
-        try:
-            self.api.create_repo(repo_id=dataset_name, token=self.token, repo_type="dataset")
-            print(f"Dataset repository {dataset_name} created.")
-        except Exception as e:
-            print(f"Error creating dataset repository: {e}")
-
-        # Upload files to the dataset
-        for file_path in files:
-            try:
-                self.api.upload_file(
-                    path_or_fileobj=file_path,
-                    path_in_repo=os.path.basename(file_path),
-                    repo_id=dataset_name,
-                    repo_type="dataset",
-                    token=self.token,
-                )
-                print(f"Uploaded {file_path} to {dataset_name}.")
-            except Exception as e:
-                print(f"Error uploading file {file_path}: {e}")
+        ensure_dataset_repository(self.api, self.token, dataset_name)
+        upload_dataset_files(self.api, self.token, dataset_name, files)

@@ -1,11 +1,8 @@
-import glob
 import json
 import os
 import subprocess
-from datetime import datetime
 
 from datasets import get_dataset_config_names, load_dataset
-from dotenv import load_dotenv
 
 from squadds.core.globals import *
 from squadds.core.utils import (
@@ -16,6 +13,22 @@ from squadds.core.utils import (
     get_type,
     validate_types,
 )
+from squadds.database.contributor_env import build_contributor_record, load_contributor_environment
+from squadds.database.contributor_file_ops import (
+    append_entries_to_dataset_file,
+    load_contribution_from_json_file,
+    load_sweep_entries_from_json_prefix,
+    validate_sweep_entries,
+)
+from squadds.database.contributor_records import (
+    add_sim_result_entry,
+    build_contribution_payload,
+    build_empty_contribution_state,
+    merge_contributor_notes,
+    validate_required_structure,
+)
+from squadds.database.contributor_schema import validate_design_payload, validate_sim_setup_payload
+from squadds.database.contributor_validation import get_nested_value, summarize_content_differences
 
 """
 ! TODO:
@@ -67,12 +80,13 @@ class ExistingConfigData:
         self.__repo_name = "SQuADDS/SQuADDS_DB"
         self.config = config
         self._validate_config_name()
-        load_dotenv(ENV_FILE_PATH)
-        self.sim_results = {}
-        self.design = {"design_tool": "", "design_options": {}}
-        self.sim_options = {"setup": {}, "simulator": ""}
-        self.units = set()
-        self.notes = {}
+        load_contributor_environment()
+        state = build_empty_contribution_state()
+        self.sim_results = state["sim_results"]
+        self.design = state["design"]
+        self.sim_options = state["sim_options"]
+        self.units = state["units"]
+        self.notes = state["notes"]
         self.ref_entry = {}
         self.__set_contributor_info()
         self.entry = self.to_dict()
@@ -144,14 +158,7 @@ class ExistingConfigData:
         print(json.dumps(self.to_dict(), indent=4))
 
     def __set_contributor_info(self):
-        self.contributor = {
-            "group": os.getenv("GROUP_NAME"),
-            "PI": os.getenv("PI_NAME"),
-            "institution": os.getenv("INSTITUTION"),
-            "uploader": os.getenv("USER_NAME"),
-            "misc": os.getenv("CONTRIB_MISC"),
-            "date_created": datetime.now().strftime("%Y-%m-%d %H%M%S"),
-        }
+        self.contributor = build_contributor_record()
 
     def get_contributor_info(self):
         """
@@ -174,9 +181,9 @@ class ExistingConfigData:
         Returns:
             None
         """
-        self.units.add(unit)  # Add unit to the set
-        self.sim_results[result_name] = result_value
-        self.sim_results[f"{result_name}_unit"] = unit  # Keep the individual unit keys for now
+        self.sim_results, self.units = add_sim_result_entry(
+            self.sim_results, self.units, result_name, result_value, unit
+        )
 
     def add_sim_setup(self, sim_setup):
         """
@@ -188,17 +195,7 @@ class ExistingConfigData:
         # Retrieve the schema for simulation options
         schema = self.get_config_schema()
 
-        # Validate the provided simulation setup options against the schema
-        sim_setup_schema = schema.get("sim_options", {})
-        if not isinstance(sim_setup, dict):
-            raise ValueError("Simulation setup options must be provided as a dictionary.")
-
-        # Check if all keys are present and have correct types
-        for key, expected_type in sim_setup_schema.items():
-            if key not in sim_setup:
-                raise ValueError(f"Missing required simulation setup option: {key}")
-            if get_type(sim_setup[key]) != expected_type:
-                raise TypeError(f"Incorrect type for {key}. Expected {expected_type}, got {get_type(sim_setup[key])}.")
+        validate_sim_setup_payload(sim_setup, schema.get("sim_options", {}), get_type)
 
         # All checks passed, add the simulation setup options
         self.sim_options.update(sim_setup)
@@ -213,22 +210,7 @@ class ExistingConfigData:
         # Retrieve the schema for design
         schema = self.get_config_schema()
 
-        # Validate the provided design against the schema
-        if not isinstance(design, dict):
-            raise ValueError("Design must be provided as a dictionary.")
-
-        design_options = design.get("design_options", {})
-        design_tool = design.get("design_tool")
-
-        # Validate design options and design tool
-        design_options_schema = schema.get("design", {}).get("design_options", {})
-        if get_type(design_options) != design_options_schema:
-            raise TypeError(
-                f"Incorrect type for design options. Expected {design_options_schema}, got {get_type(design_options)}."
-            )
-
-        if design_tool and get_type(design_tool) != "str":
-            raise TypeError(f"Incorrect type for design tool. Expected 'str', got {get_type(design_tool)}.")
+        validate_design_payload(design, schema.get("design", {}).get("design_options", {}), get_type)
 
         # All checks passed, add the design options and tool
         self.design.update(design)
@@ -243,23 +225,12 @@ class ExistingConfigData:
         # Retrieve the schema for design
         schema = self.get_config_schema()
 
-        # Validate the provided design against the schema
-        if not isinstance(design, dict):
-            raise ValueError("Design must be provided as a dictionary.")
-
-        # Extract design options and design tool from the input dictionary
-        design_options = design.get("design_options")
-        design_tool = design.get("design_tool")
-
-        # Validate design options and design tool
-        design_options_schema = schema.get("design", {}).get("design_options", {})
-        if get_type(design_options) != design_options_schema:
-            raise TypeError(
-                f"Incorrect type for design options. Expected {design_options_schema}, got {get_type(design_options)}."
-            )
-
-        if get_type(design_tool) != "str":
-            raise TypeError(f"Incorrect type for design tool. Expected 'str', got {get_type(design_tool)}.")
+        validate_design_payload(
+            design,
+            schema.get("design", {}).get("design_options", {}),
+            get_type,
+            require_design_tool=True,
+        )
 
         # All checks passed, add the design options and tool
         self.design.update(design)
@@ -271,31 +242,25 @@ class ExistingConfigData:
         Returns:
             dict: A dictionary representation of the Contributor object.
         """
-        # Check if all units are the same
-        if len(self.units) == 1:
-            common_unit = self.units.pop()  # Get the common unit
-            self.sim_results["units"] = common_unit
-            # Remove individual unit keys
-            for result_name in list(self.sim_results.keys()):
-                if "_unit" in result_name:
-                    del self.sim_results[result_name]
-        return {
-            "design": self.design,
-            "sim_options": self.sim_options,
-            "sim_results": self.sim_results,
-            "contributor": self.contributor,
-            "notes": self.notes,
-        }
+        return build_contribution_payload(
+            self.design,
+            self.sim_options,
+            self.sim_results,
+            self.contributor,
+            self.notes,
+            self.units,
+        )
 
     def clear(self):
         """
         Clears the contribution data.
         """
-        self.sim_results = {}
-        self.design = {"design_tool": "", "design_options": {}}
-        self.sim_options = {"setup": {}, "simulator": ""}
-        self.units = set()
-        self.notes = {}
+        state = build_empty_contribution_state()
+        self.sim_results = state["sim_results"]
+        self.design = state["design"]
+        self.sim_options = state["sim_options"]
+        self.units = state["units"]
+        self.notes = state["notes"]
         self.__isValidated = False
 
     def add_notes(self, notes=None):
@@ -305,13 +270,7 @@ class ExistingConfigData:
         Args:
             notes (dict): A dictionary containing notes.
         """
-        if notes is None:
-            notes = {}
-        if not isinstance(notes, dict):
-            raise ValueError("Notes must be provided as a dictionary.")
-
-        # Merge new notes with existing ones
-        self.notes.update(notes)
+        self.notes = merge_contributor_notes(self.notes, notes)
 
     def validate_structure(self, actual_structure):
         """
@@ -325,14 +284,7 @@ class ExistingConfigData:
         """
         expected_structure = self.get_config_schema()
 
-        # Compare the structure of actual data with the expected schema
-        for key, value in expected_structure.items():
-            if key not in actual_structure:
-                raise ValueError(f"Missing required key: {key}")
-            if isinstance(value, dict):
-                for sub_key in value:
-                    if sub_key not in actual_structure[key]:
-                        raise ValueError(f"Missing required sub-key '{sub_key}' in '{key}'")
+        validate_required_structure(actual_structure, expected_structure)
         print("Structure validated successfully....")
 
     def _validate_structure(self):
@@ -345,14 +297,7 @@ class ExistingConfigData:
         expected_structure = self.get_config_schema()
         actual_structure = self.to_dict()
 
-        # Compare the structure of actual data with the expected schema
-        for key, value in expected_structure.items():
-            if key not in actual_structure:
-                raise ValueError(f"Missing required key: {key}")
-            if isinstance(value, dict):
-                for sub_key in value:
-                    if sub_key not in actual_structure[key]:
-                        raise ValueError(f"Missing required sub-key '{sub_key}' in '{key}'")
+        validate_required_structure(actual_structure, expected_structure)
         print("Structure validated successfully....")
 
     def validate_types(self, data):
@@ -404,14 +349,7 @@ class ExistingConfigData:
             data (dict): The data to be validated.
         Validates the content of the contribution against the dataset schema.
         """
-
-        def get_nested(dictionary, keys):
-            for key in keys.split("."):
-                if dictionary is not None and key in dictionary:
-                    dictionary = dictionary[key]
-                else:
-                    return None
-            return dictionary
+        return None
 
     def _validate_content(self):
         """
@@ -420,37 +358,7 @@ class ExistingConfigData:
         data = self.to_dict()
         ref = self.ref_entry
 
-        def get_nested(dictionary, keys):
-            for key in keys.split("."):
-                if dictionary is not None and key in dictionary:
-                    dictionary = dictionary[key]
-                else:
-                    return None
-            return dictionary
-
-        def find_common_keys(dict1, dict2, path=""):
-            """
-            Recursively find and compare common keys in two dictionaries.
-            """
-            common_keys = set(dict1.keys()) & set(dict2.keys())
-            diff_keys = (set(dict1.keys()) - set(dict2.keys())) | (set(dict2.keys()) - set(dict1.keys()))
-            for key in common_keys:
-                new_path = f"{path}.{key}" if path else key
-                if isinstance(dict1[key], dict) and isinstance(dict2[key], dict):
-                    yield from find_common_keys(dict1[key], dict2[key], new_path)
-                else:
-                    if type(dict1[key]) != type(dict2[key]):
-                        yield new_path, False
-                    else:
-                        yield new_path, True
-            for key in diff_keys:
-                new_path = f"{path}.{key}" if path else key
-                yield new_path, None
-
-        result = list(find_common_keys(data, ref))
-        [key for key, match in result if match is not None]
-        mismatched_keys = [key for key, match in result if match is False]
-        missing_keys = [key for key, match in result if match is None]
+        mismatched_keys, missing_keys = summarize_content_differences(data, ref)
 
         if mismatched_keys:
             print(
@@ -458,13 +366,13 @@ class ExistingConfigData:
             )
             for key in mismatched_keys:
                 print(
-                    f"Key: {key}, data type in 'data': {type(get_nested(data, key))}, data type in 'ref': {type(get_nested(ref, key))}"
+                    f"Key: {key}, data type in 'data': {type(get_nested_value(data, key))}, data type in 'ref': {type(get_nested_value(ref, key))}"
                 )
 
         if missing_keys:
             print("\nMissing keys found. These keys are present in one dictionary but not the other:\n")
             for key in missing_keys:
-                if get_nested(data, key) is not None:
+                if get_nested_value(data, key) is not None:
                     print(f"Key: {key} is missing in 'ref'")
                 else:
                     print(f"Key: {key} is missing in 'data'")
@@ -523,13 +431,12 @@ class ExistingConfigData:
         """
         if not self.is_validated:
             try:
-                for entry in self.sweep_data:
-                    print(f"Validating entry {self.sweep_data.index(entry) + 1} of {len(self.sweep_data)}...")
-                    self.validate_structure(entry)
-                    self.validate_types(entry)
-                    self.validate_content(entry)
-                    print(f"Entry {self.sweep_data.index(entry) + 1} of {len(self.sweep_data)} validated successfully.")
-                    print("--------------------------------------------------")
+                validate_sweep_entries(
+                    self.sweep_data,
+                    validate_structure_fn=self.validate_structure,
+                    validate_types_fn=self.validate_types,
+                    validate_content_fn=self.validate_content,
+                )
                 self.__isValidated = True
             except Exception as e:
                 print("Validation failed.")
@@ -610,11 +517,7 @@ class ExistingConfigData:
             # update the local repo
             os.chdir(path_to_repo + "/" + self.__repo_name.split("/")[-1])
             dataset_file = f"{self.config}.json"
-            with open(dataset_file, "r+") as file:
-                data = json.load(file)
-                data.append(self.to_dict())
-                file.seek(0)
-                json.dump(data, file, indent=4)
+            append_entries_to_dataset_file(dataset_file, [self.to_dict()])
             print(f"Data added to {dataset_file} successfully.")
         else:
             if not self.is_validated:
@@ -622,12 +525,7 @@ class ExistingConfigData:
             # update the local repo
             os.chdir(path_to_repo + "/" + self.__repo_name.split("/")[-1])
             dataset_file = f"{self.config}.json"
-            with open(dataset_file, "r+") as file:
-                data = json.load(file)
-                for entry in self.sweep_data:
-                    data.append(entry)
-                file.seek(0)
-                json.dump(data, file, indent=4)
+            append_entries_to_dataset_file(dataset_file, self.sweep_data)
             print(f"Data added to {dataset_file} successfully.")
 
     def upload_to_HF(self, path_to_repo):
@@ -691,36 +589,22 @@ class ExistingConfigData:
             if not os.path.exists(file_path):
                 raise ValueError(f"File not found: {file_path}")
 
-            with open(file_path) as file:
-                data = json.load(file)
-                self.design = data["design"]
-                self.sim_options = data["sim_options"]
-                self.sim_results = data["sim_results"]
-                self.__set_contributor_info()
-                try:
-                    self.notes = data["notes"]
-                except KeyError:
-                    pass
+            data = load_contribution_from_json_file(file_path)
+            self.design = data["design"]
+            self.sim_options = data["sim_options"]
+            self.sim_results = data["sim_results"]
+            self.__set_contributor_info()
+            try:
+                self.notes = data["notes"]
+            except KeyError:
+                pass
 
             print("Contribution loaded successfully.")
         else:
-            json_files = glob.glob(os.path.abspath(json_file + "*.json"))
-            if not json_files:
-                raise ValueError(f"Files not found: {json_files}")
-            for file in json_files:
-                entry = {}
-                with open(file) as f:
-                    data = json.load(f)
-                    entry["design"] = data["design"]
-                    entry["sim_options"] = data["sim_options"]
-                    entry["sim_results"] = data["sim_results"]
-                    entry["contributor"] = self.get_contributor_info()
-                    try:
-                        entry["notes"] = data["notes"]
-                    except KeyError:
-                        entry["notes"] = {}
-
-                    self.sweep_data.append(entry)
+            sweep_data = load_sweep_entries_from_json_prefix(json_file, self.get_contributor_info())
+            if not sweep_data:
+                raise ValueError(f"No sweep files found for prefix: {os.path.abspath(json_file)}")
+            self.sweep_data.extend(sweep_data)
 
             print("Sweep data loaded successfully.")
 

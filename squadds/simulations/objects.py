@@ -12,6 +12,12 @@ from qiskit_metal import Dict
 from qiskit_metal.analyses.quantization import EPRanalysis, LOManalysis
 
 from squadds.components.qubits import TransmonCross
+from squadds.simulations.result_normalization import (
+    build_eigenmode_payload,
+    build_ncap_lom_payload,
+    build_xmon_lom_payload,
+    normalize_simulation_results,
+)
 
 from .sweeper_helperfunctions import extract_QSweep_parameters
 from .utils import (
@@ -239,45 +245,13 @@ def get_sim_results(emode_df=None, lom_df=None, ncap_lom_df=None):
         dict: A dictionary containing the calculated simulation results.
 
     """
-    # if the arguments are None, return and print error message
-    if ncap_lom_df is None:
-        ncap_lom_df = {}
-    if lom_df is None:
-        lom_df = {}
-    if emode_df is None:
-        emode_df = {}
-    if emode_df is None and lom_df is None:
-        print("No simulation results available.")
-        return None
-
-    {} if emode_df == {} else emode_df["sim_results"]
-    {} if lom_df == {} else lom_df["sim_results"]
-
-    data = {}
-
-    cross2cpw = abs(lom_df["sim_results"]["cross_to_claw"]) * 1e-15
-    cross2ground = abs(lom_df["sim_results"]["cross_to_ground"]) * 1e-15
-    f_r = emode_df["sim_results"]["cavity_frequency"]
-    Lj = lom_df["design"]["design_options"]["aedt_q3d_inductance"] * (
-        1 if lom_df["design"]["design_options"]["aedt_q3d_inductance"] > 1e-9 else 1e-9
+    return normalize_simulation_results(
+        emode_df=emode_df,
+        lom_df=lom_df,
+        ncap_lom_df=ncap_lom_df,
+        find_g_a_fq_fn=find_g_a_fq,
+        find_kappa_fn=find_kappa,
     )
-    # print(Lj)
-    N = 2 if ncap_lom_df != {} else 4
-    gg, aa, ff_q = find_g_a_fq(cross2cpw, cross2ground, f_r, Lj, N=N)
-    kappa = emode_df["sim_results"]["kappa"]
-    Q = emode_df["sim_results"]["Q"]
-    if ncap_lom_df != {}:
-        f_r, kappa = find_kappa(
-            emode_df["sim_results"]["cavity_frequency"],
-            ncap_lom_df["sim_results"]["C_top2ground"],
-            ncap_lom_df["sim_results"]["C_top2bottom"],
-        )
-
-    data = dict(
-        cavity_frequency_GHz=f_r / 1e9, Q=Q, kappa_kHz=kappa, g_MHz=gg, anharmonicity_MHz=aa, qubit_frequency_GHz=ff_q
-    )
-
-    return data
 
 
 def run_eigenmode(design, geometry_dict, sim_options, generate_plots=False, **kwargs):
@@ -387,23 +361,16 @@ def run_eigenmode(design, geometry_dict, sim_options, generate_plots=False, **kw
 
     data = epra.get_data()
 
-    data_df = {
-        "design": {"coupler_type": coupler_type, "design_options": geometry_dict, "design_tool": "Qiskit Metal"},
-        "sim_options": {
-            "sim_type": "epr",
-            "setup": setup,
-            "renderer_options": epra.sim.renderer.options,
-            "simulator": "Ansys HFSS",
-        },
-        "sim_results": {
-            "cavity_frequency": f_rough,
-            "cavity_frequency_unit": "GHz",
-            "Q": Q,
-            "kappa": kappa,
-            "kappa_unit": "kHz",
-        },
-        "misc": data,
-    }
+    data_df = build_eigenmode_payload(
+        coupler_type,
+        geometry_dict,
+        setup,
+        epra.sim.renderer.options,
+        f_rough,
+        Q,
+        kappa,
+        data,
+    )
 
     return data_df, epra
 
@@ -453,19 +420,7 @@ def run_capn_LOM(design, param, sim_options):
     data = loma.get_data()
     setup = loma.sim.setup
 
-    data_df = {
-        "design": {"coupler_type": "NCap", "design_options": param, "design_tool": "Qiskit Metal"},
-        "sim_options": {"sim_type": "lom", "setup": setup, "simulator": "Ansys HFSS"},
-        "sim_results": {
-            "C_top2top": abs(cap_df[f"cap_body_0_{coupler.name}"].values[0]),
-            "C_top2bottom": abs(cap_df[f"cap_body_0_{coupler.name}"].values[1]),
-            "C_top2ground": abs(cap_df[f"cap_body_0_{coupler.name}"].values[2]),
-            "C_bottom2bottom": abs(cap_df[f"cap_body_1_{coupler.name}"].values[1]),
-            "C_bottom2ground": abs(cap_df[f"cap_body_1_{coupler.name}"].values[2]),
-            "C_ground2ground": abs(cap_df["ground_main_plane"].values[2]),
-        },
-        "misc": data,
-    }
+    data_df = build_ncap_lom_payload(param, setup, cap_df, data, coupler.name)
 
     return data_df, loma
 
@@ -517,30 +472,14 @@ def run_xmon_LOM(design, cross_dict, sim_options):
         # print("#"*100)
         # print(c1.sim.renderer.options)
 
-        data = {
-            "design": {"design_options": design.components[qname].options, "design_tool": "Qiskit Metal"},
-            "sim_options": {
-                "sim_type": "lom",
-                "setup": c1.sim.setup,
-                "renderer_options": c1.sim.renderer.options,
-                "simulator": "Ansys HFSS",
-            },
-            "sim_results": {
-                "cross_to_ground": 0
-                if "ground_main_plane" not in cap_df.loc[f"cross_{qname}"]
-                else abs(cap_df.loc[f"cross_{qname}"]["ground_main_plane"]),
-                "claw_to_ground": 0
-                if "ground_main_plane" not in cap_df.loc[f"{cname}_connector_arm_{qname}"]
-                else abs(cap_df.loc[f"{cname}_connector_arm_{qname}"]["ground_main_plane"]),
-                "cross_to_claw": abs(cap_df.loc[f"cross_{qname}"][f"{cname}_connector_arm_{qname}"]),
-                "cross_to_cross": abs(cap_df.loc[f"cross_{qname}"][f"cross_{qname}"]),
-                "claw_to_claw": abs(cap_df.loc[f"{cname}_connector_arm_{qname}"][f"{cname}_connector_arm_{qname}"]),
-                "ground_to_ground": 0
-                if "ground_main_plane" not in cap_df.loc[f"cross_{qname}"]
-                else abs(cap_df.loc["ground_main_plane"]["ground_main_plane"]),
-                "units": "fF",
-            },
-        }
+        data = build_xmon_lom_payload(
+            design.components[qname].options,
+            c1.sim.setup,
+            c1.sim.renderer.options,
+            cap_df,
+            qname,
+            cname,
+        )
         # save_simulation_data_to_json(data, filename = f"qubitonly_num{i}_{comp_id}_v{version}")
     except Exception as e:
         print(f"Ansys HFSS simulation failed. Error: {e}. Are you sure the Ansys HFSS is installed?")

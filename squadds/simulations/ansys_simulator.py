@@ -11,6 +11,7 @@ from qiskit_metal import Dict
 from rich.console import Console
 
 from squadds.components.coupled_systems import QubitCavity
+from squadds.core.json_utils import deserialize_json_like, normalize_setup_payload
 from squadds.simulations.objects import (
     run_qubit_cavity_sweep,
     run_sweep,
@@ -45,6 +46,7 @@ class AnsysSimulator:
         """
         self.analyzer = analyzer
         self.device_dict = deepcopy(design_options)  # Store a copy for stateful modification
+        self._normalize_device_dict()
 
         self.lom_analysis_obj = None
         self.epr_analysis_obj = None
@@ -96,6 +98,22 @@ class AnsysSimulator:
         self.futures = []
 
         print(f"selected system: {self.analyzer.selected_system}")
+
+    def _normalize_device_dict(self):
+        """Normalize legacy/live dataset payload variants into the canonical simulator shape."""
+        for key in ["design_options", "design_options_qubit", "design_options_cavity_claw"]:
+            if key in self.device_dict:
+                self.device_dict[key] = deserialize_json_like(self.device_dict[key])
+
+        for key in list(self.device_dict.keys()):
+            if key == "setup" or key.startswith("setup_"):
+                self.device_dict[key] = normalize_setup_payload(self.device_dict[key])
+
+        if "setup_cavity_claw" not in self.device_dict:
+            for key in ["setup_cavity_claw_merged", "setup_cavity_claw_closest", "setup"]:
+                if key in self.device_dict and self.device_dict[key] is not None:
+                    self.device_dict["setup_cavity_claw"] = normalize_setup_payload(self.device_dict[key])
+                    break
 
     def _warnings(self):
         """

@@ -1,9 +1,24 @@
-import json
 import os
 import shutil
-from datetime import datetime
 
-from dotenv import load_dotenv
+from squadds.database.github_ops import (
+    DEFAULT_TEMP_CLONE_DIR,
+    MEASURED_DEVICE_JSON_PATH,
+    ORIGINAL_DATASET_REPO_NAME,
+    build_authenticated_remote_url,
+    build_forked_repo_name,
+    build_measured_data_commit_message,
+    load_github_token,
+)
+from squadds.database.github_ops import (
+    append_to_json as append_to_json_impl,
+)
+from squadds.database.github_ops import (
+    read_json_file as read_json_file_impl,
+)
+from squadds.database.github_ops import (
+    save_json_file as save_json_file_impl,
+)
 
 try:
     import git
@@ -26,10 +41,7 @@ def _check_contrib_deps():
 def login_to_github():
     """Logs in to GitHub using a token stored in environment variables."""
     _check_contrib_deps()
-    load_dotenv()  # Load environment variables
-    github_token = os.getenv("GITHUB_TOKEN")
-    if github_token is None:
-        raise ValueError("GitHub token not found in environment variables.")
+    github_token = load_github_token()
     return Github(github_token)
 
 
@@ -65,7 +77,7 @@ def fork_repository(github_token):
     - str: URL of the forked repository if successful, None otherwise.
     """
     _check_contrib_deps()
-    original_repo_name = "LFL-Lab/SQuADDS_DB"
+    original_repo_name = ORIGINAL_DATASET_REPO_NAME
     # Authenticate with GitHub
     g = Github(github_token)
 
@@ -98,13 +110,7 @@ def read_json_file(file_path):
     Returns:
     - dict: The contents of the JSON file as a Python dictionary.
     """
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"File not found: {file_path}")
-
-    print(f"Reading JSON file from {file_path}...")
-    with open(file_path) as file:
-        data = json.load(file)
-    return data
+    return read_json_file_impl(file_path)
 
 
 def append_to_json(data, new_entry):
@@ -118,9 +124,7 @@ def append_to_json(data, new_entry):
     Returns:
     - dict: Updated JSON data.
     """
-    print("Appending new entry to JSON data...")
-    data.append(new_entry)
-    return data
+    return append_to_json_impl(data, new_entry)
 
 
 def save_json_file(file_path, data):
@@ -131,9 +135,7 @@ def save_json_file(file_path, data):
     - file_path (str): Path to the JSON file.
     - data (dict): Updated JSON data.
     """
-    print(f"Saving updated JSON data to {file_path}...")
-    with open(file_path, "w") as file:
-        json.dump(data, file, indent=4)
+    save_json_file_impl(file_path, data)
 
 
 def commit_changes(repo, file_path, commit_message):
@@ -172,9 +174,8 @@ def push_changes(repo, branch_name="main", github_token=None):
         if github_token:
             # Construct the URL with the token for authentication
             remote_url = repo.remotes.origin.url
-            if remote_url.startswith("https://"):
-                repo_name = remote_url.split("github.com/")[1]
-                authenticated_url = f"https://{github_token}@github.com/{repo_name}"
+            authenticated_url = build_authenticated_remote_url(remote_url, github_token)
+            if authenticated_url is not None:
                 repo.remotes.origin.set_url(authenticated_url)
                 print("Updated remote URL with token for authentication")
             else:
@@ -207,14 +208,11 @@ def contribute_measured_data(
     - str: Commit hash if successful, None otherwise.
     """
     # Variable setup
-    TEMP_CLONE_DIR = "./temp_forked_repo"
-    json_file_path = "measured_device_database.json"
-    load_dotenv()
-    github_token = os.getenv("GITHUB_TOKEN")
-    if github_token is None:
-        raise ValueError("GitHub token not found in environment variables.")
+    TEMP_CLONE_DIR = DEFAULT_TEMP_CLONE_DIR
+    json_file_path = MEASURED_DEVICE_JSON_PATH
+    github_token = load_github_token()
     gh_name = get_github_username(github_token)
-    forked_repo_name = f"{gh_name}/SQuADDS_DB"
+    forked_repo_name = build_forked_repo_name(gh_name)
     branch_name = "main"
 
     # Step 0: Fork the repository
@@ -238,7 +236,7 @@ def contribute_measured_data(
     save_json_file(full_json_file_path, updated_data)
 
     # Step 6: Commit the changes with a unique datetime-based message
-    commit_message = f"Update JSON dataset with new entry - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    commit_message = build_measured_data_commit_message()
     commit_changes(repo, json_file_path, commit_message)
 
     # Step 7: Push the changes to the remote repository
@@ -268,7 +266,7 @@ def create_pull_request(forked_repo_name, branch_name, pr_title, pr_body, github
     - str: URL of the created pull request if successful, None otherwise.
     """
 
-    original_repo_name = "LFL-Lab/SQuADDS_DB"
+    original_repo_name = ORIGINAL_DATASET_REPO_NAME
 
     # Authenticate with GitHub using the provided token
     g = Github(github_token)
