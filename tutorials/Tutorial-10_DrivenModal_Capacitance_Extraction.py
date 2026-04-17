@@ -43,6 +43,7 @@ from squadds.simulations.drivenmodal.capacitance import (
     maxwell_capacitance_dataframe,
 )
 from squadds.simulations.drivenmodal.design import (
+    apply_buffered_chip_bounds,
     connect_renderer_to_new_ansys_design,
     create_multiplanar_design,
     ensure_drivenmodal_setup,
@@ -83,14 +84,15 @@ except ImportError:  # pragma: no cover - plain Python fallback for non-notebook
 # HFSS artifacts for the same `RUN_TAG`.
 
 # %%
-RUN_TAG = "v2"
+RUN_TAG = "v3"
 FORCE_RERUN = False
 MAX_SOLVE_ATTEMPTS = 3
 
 REMOTE_REPO_ID = "SQuADDS/SQuADDS_DB"
 QUBIT_CONFIG = "qubit-TransmonCross-cap_matrix"
 NCAP_CONFIG = "coupler-NCap-cap_matrix"
-REFERENCE_INDEX = 0
+QUBIT_REFERENCE_INDEX = 3
+NCAP_REFERENCE_INDEX = 1
 
 LAYER_STACK = DrivenModalLayerStackSpec(
     preset="squadds_hfss_v1",
@@ -104,7 +106,7 @@ SETUP = DrivenModalSetupSpec(
     max_delta_s=0.005,
     max_passes=20,
     min_passes=2,
-    min_converged=3,
+    min_converged=5,
     pct_refinement=30,
     basis_order=-1,
 )
@@ -112,9 +114,11 @@ SWEEP = DrivenModalSweepSpec(
     name="DrivenModalSweep",
     start_ghz=1.0,
     stop_ghz=10.0,
-    count=221,
+    count=400,
     sweep_type="Interpolating",
     save_fields=False,
+    interpolation_tol=0.005,
+    interpolation_max_solutions=400,
 )
 ARTIFACTS = DrivenModalArtifactPolicy(
     export_touchstone=True,
@@ -237,7 +241,7 @@ def plot_capacitance_traces(cap_df: pd.DataFrame, title: str, entries: list[str]
 
 
 def build_qubit_claw_request(reference_row: dict[str, Any]) -> CapacitanceExtractionRequest:
-    run_id = f"tutorial10-qubit-claw-{REFERENCE_INDEX:03d}-{RUN_TAG}"
+    run_id = f"tutorial10-qubit-claw-{QUBIT_REFERENCE_INDEX:03d}-{RUN_TAG}"
     return CapacitanceExtractionRequest(
         system_kind="qubit_claw",
         design_payload={
@@ -260,7 +264,7 @@ def build_qubit_claw_request(reference_row: dict[str, Any]) -> CapacitanceExtrac
 
 
 def build_ncap_request(reference_row: dict[str, Any]) -> CapacitanceExtractionRequest:
-    run_id = f"tutorial10-ncap-{REFERENCE_INDEX:03d}-{RUN_TAG}"
+    run_id = f"tutorial10-ncap-{NCAP_REFERENCE_INDEX:03d}-{RUN_TAG}"
     return CapacitanceExtractionRequest(
         system_kind="ncap",
         design_payload={
@@ -371,13 +375,21 @@ def run_capacitance_demo(
                     "drivenmodal",
                 )
                 renderer.clean_active_design()
+                chip_box = apply_buffered_chip_bounds(
+                    design,
+                    selection=list(design.components.keys()),
+                    chip_name=request.layer_stack.chip_name,
+                    x_buffer_mm=0.2,
+                    y_buffer_mm=0.2,
+                )
+                dump_json(artifacts_dir / "chip_box.json", chip_box)
 
                 render_drivenmodal_design(
                     renderer,
                     selection=list(design.components.keys()),
                     port_list=port_list or None,
                     jj_to_port=jj_to_port or None,
-                    box_plus_buffer=True,
+                    box_plus_buffer=False,
                 )
                 mark_stage_complete(manifest_path, "rendered")
 
@@ -409,6 +421,7 @@ def run_capacitance_demo(
                         "project_file": str(project_file),
                         "ansys_design_name": ansys_design_name,
                         "attempt_label": attempt_label,
+                        "chip_box": chip_box,
                     },
                 )
                 dump_json(
@@ -419,6 +432,7 @@ def run_capacitance_demo(
                         "project_dir": str(attempt_project_dir),
                         "project_file": str(project_file),
                         "ansys_design_name": ansys_design_name,
+                        "chip_box": chip_box,
                     },
                 )
                 mark_stage_complete(manifest_path, "artifacts_exported")
@@ -436,8 +450,7 @@ def run_capacitance_demo(
                     },
                 )
                 print(
-                    f"[{label}] HFSS solve {attempt}/{MAX_SOLVE_ATTEMPTS} failed: "
-                    f"{format_exception_for_console(exc)}"
+                    f"[{label}] HFSS solve {attempt}/{MAX_SOLVE_ATTEMPTS} failed: {format_exception_for_console(exc)}"
                 )
                 if attempt == MAX_SOLVE_ATTEMPTS:
                     raise
@@ -447,10 +460,7 @@ def run_capacitance_demo(
                     try:
                         renderer.disconnect_ansys()
                     except Exception as exc:  # pragma: no cover - best effort cleanup on the HFSS machine
-                        print(
-                            f"[{label}] Warning while disconnecting Ansys: "
-                            f"{format_exception_for_console(exc)}"
-                        )
+                        print(f"[{label}] Warning while disconnecting Ansys: {format_exception_for_console(exc)}")
         else:  # pragma: no cover - defensive guard for analyzers that exit the loop unexpectedly
             if last_error is not None:
                 raise last_error
@@ -490,12 +500,12 @@ def run_capacitance_demo(
 # %%
 ensure_runtime_dirs()
 
-qubit_reference_row = load_reference_row(QUBIT_CONFIG, REFERENCE_INDEX)
-ncap_reference_row = load_reference_row(NCAP_CONFIG, REFERENCE_INDEX)
+qubit_reference_row = load_reference_row(QUBIT_CONFIG, QUBIT_REFERENCE_INDEX)
+ncap_reference_row = load_reference_row(NCAP_CONFIG, NCAP_REFERENCE_INDEX)
 
-print("Qubit-claw reference design options:")
+print(f"Qubit-claw reference design options (index={QUBIT_REFERENCE_INDEX}):")
 print(json.dumps(qubit_reference_row["design"]["design_options"], indent=2))
-print("\nNCap reference design options:")
+print(f"\nNCap reference design options (index={NCAP_REFERENCE_INDEX}):")
 print(json.dumps(ncap_reference_row["design"]["design_options"], indent=2))
 
 

@@ -98,6 +98,59 @@ def safe_ansys_design_name(identifier: str, *, prefix: str = "dm") -> str:
     return f"{prefix}_{digest}"
 
 
+def _format_mm(value_mm: float) -> str:
+    return f"{value_mm:.6f}".rstrip("0").rstrip(".") + "mm"
+
+
+def apply_buffered_chip_bounds(
+    design: Any,
+    *,
+    selection: list[str],
+    chip_name: str = "main",
+    x_buffer_mm: float = 0.2,
+    y_buffer_mm: float = 0.2,
+) -> dict[str, float]:
+    """Set the chip size from the rendered-component bounds plus renderer buffers.
+
+    Qiskit Metal's HFSS and Q3D renderers both use the same shared
+    ``box_plus_buffer=True`` logic in ``QAnsysRenderer``. This helper makes that
+    box explicit on the design before rendering so tutorials can record and
+    inspect the exact chip/ground bounding box used for a run.
+    """
+    if not selection:
+        raise ValueError("selection must include at least one component.")
+
+    bounds = [design.components[name].qgeometry_bounds() for name in selection]
+    min_x = min(bound[0] for bound in bounds)
+    min_y = min(bound[1] for bound in bounds)
+    max_x = max(bound[2] for bound in bounds)
+    max_y = max(bound[3] for bound in bounds)
+
+    width_x = (max_x - min_x) + 2 * x_buffer_mm
+    width_y = (max_y - min_y) + 2 * y_buffer_mm
+    center_x = (max_x + min_x) / 2
+    center_y = (max_y + min_y) / 2
+
+    chip_size = design.chips[chip_name]["size"]
+    chip_size["size_x"] = _format_mm(width_x)
+    chip_size["size_y"] = _format_mm(width_y)
+    chip_size["center_x"] = _format_mm(center_x)
+    chip_size["center_y"] = _format_mm(center_y)
+
+    return {
+        "min_x_mm": min_x,
+        "min_y_mm": min_y,
+        "max_x_mm": max_x,
+        "max_y_mm": max_y,
+        "buffered_size_x_mm": width_x,
+        "buffered_size_y_mm": width_y,
+        "buffered_center_x_mm": center_x,
+        "buffered_center_y_mm": center_y,
+        "x_buffer_mm": x_buffer_mm,
+        "y_buffer_mm": y_buffer_mm,
+    }
+
+
 def render_drivenmodal_design(
     renderer: Any,
     *,
@@ -156,6 +209,103 @@ def ensure_drivenmodal_setup(renderer: Any, **setup_kwargs: Any):
     return setup
 
 
+def _insert_sweep_with_interpolation_options(setup: Any, **sweep_kwargs: Any):
+    """Insert a driven-modal sweep while exposing HFSS interpolating-sweep options.
+
+    Older Qiskit Metal / pyEPR stacks only forward the basic sweep arguments,
+    which hides HFSS's interpolation tolerance and maximum-basis controls. When
+    callers provide those options we fall back to the underlying HFSS scripting
+    payload directly, while preserving the legacy defaults from the official
+    ``InsertFrequencySweep`` contract.
+    """
+    interpolation_tol = sweep_kwargs.pop("interpolation_tol", None)
+    interpolation_max_solutions = sweep_kwargs.pop("interpolation_max_solutions", None)
+    if interpolation_tol is None and interpolation_max_solutions is None:
+        setup.insert_sweep(**sweep_kwargs)
+        return
+
+    sweep_type = sweep_kwargs["type"]
+    if sweep_type != "Interpolating":
+        setup.insert_sweep(**sweep_kwargs)
+        return
+
+    count = sweep_kwargs.get("count")
+    step_ghz = sweep_kwargs.get("step_ghz")
+    if (count and step_ghz) or ((not count) and (not step_ghz)):
+        raise ValueError("Provide either count or step_ghz when inserting a driven-modal sweep.")
+
+    params = [
+        "NAME:" + sweep_kwargs["name"],
+        "IsEnabled:=",
+        True,
+        "Type:=",
+        sweep_type,
+        "SaveFields:=",
+        sweep_kwargs.get("save_fields", False),
+        "SaveRadFields:=",
+        False,
+        "InterpTolerance:=",
+        float(interpolation_tol if interpolation_tol is not None else 0.5),
+        "InterpMaxSolns:=",
+        int(interpolation_max_solutions if interpolation_max_solutions is not None else 250),
+        "InterpMinSolns:=",
+        0,
+        "InterpMinSubranges:=",
+        1,
+        "InterpUseS:=",
+        True,
+        "InterpUsePortImped:=",
+        False,
+        "InterpUsePropConst:=",
+        True,
+        "UseDerivativeConvergence:=",
+        False,
+        "InterpDerivTolerance:=",
+        0.2,
+        "UseFullBasis:=",
+        True,
+        "EnforcePassivity:=",
+        True,
+        "PassivityErrorTolerance:=",
+        0.0001,
+        "SMatrixOnlySolveMode:=",
+        "Manual",
+        "SMatrixOnlySolveAbove:=",
+        "1MHz",
+        "ExtrapToDC:=",
+        False,
+    ]
+
+    if count:
+        params.extend(
+            [
+                "RangeType:=",
+                "LinearCount",
+                "RangeStart:=",
+                f"{sweep_kwargs['start_ghz']:f}GHz",
+                "RangeEnd:=",
+                f"{sweep_kwargs['stop_ghz']:f}GHz",
+                "RangeCount:=",
+                count,
+            ]
+        )
+    else:
+        params.extend(
+            [
+                "RangeType:=",
+                "LinearStep",
+                "RangeStart:=",
+                f"{sweep_kwargs['start_ghz']:f}GHz",
+                "RangeEnd:=",
+                f"{sweep_kwargs['stop_ghz']:f}GHz",
+                "RangeStep:=",
+                step_ghz,
+            ]
+        )
+
+    setup._setup_module.InsertFrequencySweep(setup.name, params)
+
+
 def run_drivenmodal_sweep(renderer: Any, setup: Any, *, setup_name: str, **sweep_kwargs: Any):
     """Insert and analyze a driven-modal sweep with compatibility fallbacks.
 
@@ -169,13 +319,20 @@ def run_drivenmodal_sweep(renderer: Any, setup: Any, *, setup_name: str, **sweep
     sweep_name = sweep_kwargs["name"]
 
     if setup is not None and hasattr(setup, "insert_sweep") and hasattr(setup, "get_sweep"):
-        setup.insert_sweep(**sweep_kwargs)
+        _insert_sweep_with_interpolation_options(setup, **sweep_kwargs)
         sweep = setup.get_sweep(sweep_name)
         if hasattr(sweep, "analyze_sweep"):
             sweep.analyze_sweep()
         renderer.current_sweep = sweep
         return sweep
 
-    renderer.add_sweep(setup_name=setup_name, **sweep_kwargs)
+    renderer.add_sweep(
+        setup_name=setup_name,
+        **{
+            key: value
+            for key, value in sweep_kwargs.items()
+            if key not in {"interpolation_tol", "interpolation_max_solutions"}
+        },
+    )
     renderer.analyze_sweep(sweep_name, setup_name)
     return getattr(renderer, "current_sweep", None)

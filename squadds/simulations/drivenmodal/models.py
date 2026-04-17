@@ -73,12 +73,18 @@ class DrivenModalSweepSpec:
     name: str = "Sweep"
     sweep_type: str = "Fast"
     save_fields: bool = False
+    interpolation_tol: float | None = None
+    interpolation_max_solutions: int | None = None
 
     def __post_init__(self) -> None:
         if self.stop_ghz <= self.start_ghz:
             raise ValueError("stop_ghz must be greater than start_ghz.")
         if self.count < 2:
             raise ValueError("count must be at least 2.")
+        if self.interpolation_tol is not None and self.interpolation_tol <= 0:
+            raise ValueError("interpolation_tol must be positive when provided.")
+        if self.interpolation_max_solutions is not None and self.interpolation_max_solutions < 1:
+            raise ValueError("interpolation_max_solutions must be at least 1 when provided.")
 
     def to_renderer_kwargs(self) -> dict[str, Any]:
         return {
@@ -88,6 +94,8 @@ class DrivenModalSweepSpec:
             "name": self.name,
             "type": self.sweep_type,
             "save_fields": self.save_fields,
+            "interpolation_tol": self.interpolation_tol,
+            "interpolation_max_solutions": self.interpolation_max_solutions,
         }
 
 

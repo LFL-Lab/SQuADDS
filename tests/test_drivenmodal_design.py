@@ -1,7 +1,8 @@
-from types import SimpleNamespace
 from pathlib import Path
+from types import SimpleNamespace
 
 from squadds.simulations.drivenmodal.design import (
+    apply_buffered_chip_bounds,
     connect_renderer_to_new_ansys_design,
     create_multiplanar_design,
     ensure_drivenmodal_setup,
@@ -107,6 +108,41 @@ def test_render_drivenmodal_design_normalizes_open_pins_for_ports():
     assert renderer.kwargs["box_plus_buffer"] is False
 
 
+def test_apply_buffered_chip_bounds_sets_explicit_chip_size():
+    class FakeComponent:
+        def __init__(self, bounds):
+            self._bounds = bounds
+
+        def qgeometry_bounds(self):
+            return self._bounds
+
+    class FakeDesign:
+        def __init__(self):
+            self.components = {
+                "xmon": FakeComponent((-1.0, -0.5, 1.0, 0.5)),
+                "claw": FakeComponent((1.0, -0.25, 2.0, 0.25)),
+            }
+            self.chips = {"main": {"size": {}}}
+
+    design = FakeDesign()
+
+    chip_box = apply_buffered_chip_bounds(
+        design,
+        selection=["xmon", "claw"],
+        x_buffer_mm=0.2,
+        y_buffer_mm=0.2,
+    )
+
+    assert chip_box["min_x_mm"] == -1.0
+    assert chip_box["max_x_mm"] == 2.0
+    assert chip_box["buffered_size_x_mm"] == 3.4
+    assert chip_box["buffered_size_y_mm"] == 1.4
+    assert design.chips["main"]["size"]["size_x"] == "3.4mm"
+    assert design.chips["main"]["size"]["size_y"] == "1.4mm"
+    assert design.chips["main"]["size"]["center_x"] == "0.5mm"
+    assert design.chips["main"]["size"]["center_y"] == "0mm"
+
+
 def test_ensure_drivenmodal_setup_activates_and_edits_named_setup():
     class FakeRenderer:
         def __init__(self):
@@ -186,6 +222,64 @@ def test_run_drivenmodal_sweep_prefers_setup_handle_and_sets_current_sweep():
     assert sweep is setup.sweep
     assert renderer.current_sweep is setup.sweep
     assert setup.sweep.analyzed is True
+
+
+def test_run_drivenmodal_sweep_supports_interpolating_sweep_advanced_options():
+    class FakeSweep:
+        def __init__(self):
+            self.analyzed = False
+
+        def analyze_sweep(self):
+            self.analyzed = True
+
+    class FakeModule:
+        def __init__(self):
+            self.calls = []
+
+        def InsertFrequencySweep(self, setup_name, params):
+            self.calls.append((setup_name, params))
+
+    class FakeSetup:
+        def __init__(self):
+            self.name = "DrivenModalSetup"
+            self._setup_module = FakeModule()
+            self.sweep = FakeSweep()
+
+        def insert_sweep(self, **kwargs):
+            raise AssertionError("legacy insert_sweep path should not be used")
+
+        def get_sweep(self, name):
+            assert name == "DrivenModalSweep"
+            return self.sweep
+
+    renderer = SimpleNamespace(current_sweep=None)
+    setup = FakeSetup()
+
+    sweep = run_drivenmodal_sweep(
+        renderer,
+        setup,
+        setup_name="DrivenModalSetup",
+        start_ghz=1.0,
+        stop_ghz=10.0,
+        count=400,
+        name="DrivenModalSweep",
+        type="Interpolating",
+        save_fields=False,
+        interpolation_tol=0.005,
+        interpolation_max_solutions=400,
+    )
+
+    assert sweep is setup.sweep
+    assert renderer.current_sweep is setup.sweep
+    assert setup.sweep.analyzed is True
+    assert len(setup._setup_module.calls) == 1
+    _, params = setup._setup_module.calls[0]
+    assert "InterpTolerance:=" in params
+    assert params[params.index("InterpTolerance:=") + 1] == 0.005
+    assert "InterpMaxSolns:=" in params
+    assert params[params.index("InterpMaxSolns:=") + 1] == 400
+    assert "RangeCount:=" in params
+    assert params[params.index("RangeCount:=") + 1] == 400
 
 
 def test_safe_ansys_design_name_is_short_and_stable():
