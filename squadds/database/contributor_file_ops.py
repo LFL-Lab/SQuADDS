@@ -27,7 +27,7 @@ def load_sweep_entries_from_json_prefix(json_prefix, contributor_info):
     Load all sweep entries under a JSON filename prefix.
     """
     entries = []
-    for file_path in glob.glob(os.path.abspath(json_prefix + "*.json")):
+    for file_path in sorted(glob.glob(os.path.abspath(json_prefix + "*.json"))):
         with open(file_path) as file:
             data = json.load(file)
         entry = {

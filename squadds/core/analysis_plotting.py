@@ -6,7 +6,6 @@ import datashader as ds
 import datashader.transfer_functions as tf
 import matplotlib.pyplot as plt
 import seaborn as sns
-from matplotlib.patches import Patch
 
 
 def build_closest_design_hspace_plot(df, target_params, closest_df_entry, selected_resonator_type):
@@ -89,8 +88,6 @@ def build_closest_design_hspace_plot(df, target_params, closest_df_entry, select
         ax1.set_xlabel(r"$f_{res}$ (GHz)", fontweight="bold", fontsize=24)
         ax1.set_ylabel(r"$\kappa / 2 \pi$ (Hz)", fontweight="bold", fontsize=24)
         ax1.tick_params(axis="both", which="major", labelsize=20)
-
-        Patch(facecolor=color_presim, edgecolor="none", label="Pre-Simulated")
 
         ax2.imshow(img2.to_pil(), aspect="auto", extent=[*x2_range, *y2_range])
         ax2.set_xlabel(r"$\alpha / 2 \pi$ (MHz)", fontweight="bold", fontsize=24)

@@ -6,7 +6,11 @@ from tabulate import tabulate
 
 def view_contributors_from_rst(rst_url):
     contributors_data = []
-    response = requests.get(rst_url)
+    try:
+        response = requests.get(rst_url, timeout=10)
+    except requests.RequestException as exc:
+        print(f"Failed to fetch the file: {exc}")
+        return
 
     if response.status_code == 200:
         content = response.text
