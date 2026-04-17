@@ -100,11 +100,29 @@ Add newly touched files here as implementation progresses.
 - `uv run pytest tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_drivenmodal_design.py tests/test_drivenmodal_hfss_data.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py tests/test_ansys_simulator.py -q --tb=short` -> pass, 53 passed, 8 expected warnings
 - `uv run --extra dev ruff check squadds/simulations/drivenmodal tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_drivenmodal_design.py tests/test_drivenmodal_hfss_data.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py tests/test_ansys_simulator.py` -> pass
 - `uv run --extra dev ruff format --check squadds/simulations/drivenmodal tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py tests/imports_test.py tests/test_drivenmodal_models.py tests/test_drivenmodal_layer_stack.py tests/test_drivenmodal_ports.py tests/test_drivenmodal_artifacts.py tests/test_drivenmodal_design.py tests/test_drivenmodal_hfss_data.py tests/test_drivenmodal_capacitance.py tests/test_drivenmodal_coupled_postprocess.py tests/test_ansys_simulator.py` -> pass
+- Official Qiskit Metal docs review:
+  - `https://qiskit-community.github.io/qiskit-metal/tut/4-Analysis/4.03-Impedance.html`
+  - `https://qiskit-community.github.io/qiskit-metal/tut/4-Analysis/4.23-Impedance-and-scattering-Z-S-Y-matrices.html`
+  - `https://qiskit-community.github.io/qiskit-metal/_modules/qiskit_metal/renderers/renderer_ansys_pyaedt/hfss_renderer_drivenmodal_aedt.html`
+  - `https://qiskit-community.github.io/qiskit-metal/_modules/qiskit_metal/renderers/renderer_ansys_pyaedt/q3d_renderer_aedt.html`
+  Outcome: confirmed the intended modeling contract is active conductors only, with HFSS ports declared via `port_list` / `jj_to_port` and no explicit fake ground port.
+- Remote Windows source inspection:
+  - `inspect.getsource(ScatteringImpedanceSim._analyze)`
+  - `inspect.getsource(QHFSSRenderer.initialize_drivenmodal)`
+  Outcome: confirmed the high-level `ScatteringImpedanceSim` path still routes through the same older `initialize_drivenmodal -> add_sweep` stack, so the tutorial wrapper remains justified on the validation machine.
+- `uv run python -m py_compile tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py` -> pass
+- `uv run pytest tests/test_drivenmodal_design.py -q --tb=short` -> pass, 8 passed, 4 upstream Qiskit Metal warnings
+- `uv run --extra dev ruff check tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py` -> pass
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
 ## Open decisions
 
+- Official Qiskit Metal docs review completed on 2026-04-17. The key modeling conclusion is:
+  - Q3D capacitance extraction should continue to treat the active metal bodies as conductors with open terminations on their exported pins.
+  - HFSS driven-modal should use the same active conductors, declared through `port_list` and `jj_to_port`, and should not invent a fake explicit ground port because the renderer already creates the required pin endcaps and lumped-port sheets.
+  - For qubit-style capacitance extraction, the documented Qiskit Metal pattern is the same one now used in Tutorial 10: one readout pin in `port_list` plus `rect_jj` in `jj_to_port`.
+- The same docs review also confirmed that Qiskit Metal's higher-level `ScatteringImpedanceSim` analysis is not a free escape hatch on the current Windows stack. In `qiskit_metal==0.5.3.post1`, `ScatteringImpedanceSim._analyze()` still calls `renderer.initialize_drivenmodal(...)`, and that helper immediately routes through the older `new_ansys_setup(...)` + `add_sweep(...)` path that already misbehaves with the pyEPR/HFSS combination on the validation machine. Another agent should therefore keep the current wrapper approach unless the underlying Qiskit Metal version changes.
 - `scikit-rf` is currently wired as a core dependency because the coupled-system post-processing helpers now depend on it. Another agent can revisit that split later, but should do so deliberately rather than implicitly.
 - Whether dense capacitance-vs-frequency data should be stored as JSON, parquet, or a more compact artifact format remains open until dataset serialization is implemented.
 - The tutorials currently store dense capacitance-vs-frequency data as parquet and raw complex HFSS tables as pickle because the latter remain the most convenient portable checkpoint format for complex-valued pandas frames. Another agent can revisit that once the Hugging Face artifact contract is finalized.
