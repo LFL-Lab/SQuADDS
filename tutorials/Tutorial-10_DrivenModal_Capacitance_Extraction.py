@@ -152,15 +152,23 @@ def dump_json(path: Path, payload: dict[str, Any]) -> None:
 def prepare_renderer_project(renderer: QHFSSRenderer, project_dir: Path, project_name: str) -> Path:
     """Create a fresh HFSS project and save it to an absolute AEDT path.
 
-    This avoids the Windows/pyEPR project-path duplication bug triggered by
-    passing ``project_path``/``project_name`` through ``QHFSSRenderer`` options.
+    This avoids two separate older Windows-stack issues:
+
+    1. the pyEPR project-path duplication bug triggered by passing
+       ``project_path``/``project_name`` through ``QHFSSRenderer`` options; and
+    2. the stale active-project reconnect bug where ``renderer.start()`` binds a
+       brand-new renderer to the previously active HFSS design/setup before the
+       tutorial can create its own fresh project for the next run.
     """
     project_dir = project_dir.resolve()
     project_dir.mkdir(parents=True, exist_ok=True)
     project_file = project_dir / f"{project_name}.aedt"
-    renderer.start()
+
+    # ``new_ansys_project()`` creates and activates a blank project through the
+    # Ansys Desktop API without touching the stale setup state from a prior run.
     renderer.new_ansys_project()
     renderer.connect_ansys()
+    renderer.initiated = True
     renderer.pinfo.project.save(str(project_file))
     return project_file
 
