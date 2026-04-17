@@ -21,6 +21,12 @@ from squadds.core.db_catalog import (
     get_component_names_for_component,
     load_supported_config_names,
 )
+from squadds.core.db_half_wave import (
+    NCAP_SIM_COLS,
+    filter_and_validate_ncap_cavity_df,
+    optimize_half_wave_dataframe,
+    save_half_wave_parquet_outputs,
+)
 from squadds.core.db_loader import build_dataset_config, validate_dataset_request
 from squadds.core.db_merge import create_qubit_cavity_dataframe
 from squadds.core.db_selection import (
@@ -1092,10 +1098,11 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             "Selected coupler must be either 'NCap' or 'CapNInterdigitalTee'."
         )
 
-        cavity_df = filter_df_by_conditions(cavity_df, {"coupler_type": "NCap"})
-
-        if not all(cavity_df["coupler_type"] == "NCap"):
-            raise ValueError("All entries in the 'coupler_type' column of the cavity_df must be 'NCap'.")
+        cavity_df = filter_and_validate_ncap_cavity_df(
+            cavity_df,
+            filter_df_by_conditions_fn=filter_df_by_conditions,
+            coupler_type="NCap",
+        )
 
         # update the kappa and cavity_frequency values
         cavity_df = self._update_cap_interdigital_tee_parameters(cavity_df)
@@ -1140,21 +1147,18 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
         # process the df to reduce the memory usage
         print("Optimizing the DataFrame...")
-        opt_df = process_design_options(df)
-        initial_mem = compute_memory_usage(df)
-        opt_df = optimize_dataframe(opt_df)
-        opt_df = delete_object_columns(opt_df)
-        opt_df = delete_categorical_columns(opt_df)
-        final_mem = compute_memory_usage(opt_df)
+        opt_df, initial_mem, final_mem = optimize_half_wave_dataframe(
+            df,
+            process_design_options_fn=process_design_options,
+            compute_memory_usage_fn=compute_memory_usage,
+            optimize_dataframe_fn=optimize_dataframe,
+            delete_object_columns_fn=delete_object_columns,
+            delete_categorical_columns_fn=delete_categorical_columns,
+        )
         print(f"Memory usage reduced by {100 * (initial_mem - final_mem) / initial_mem:.2f}%")
 
         if save_data:
-            # create a data directory if it does not exist using os.makedirs
-            if not os.path.exists("data"):
-                os.makedirs("data")
-                cavity_df.to_parquet("data/half-wave-cavity_df.parquet")
-                df.to_parquet("data/qubit_half-wave-cavity_df_uncompressed.parquet")
-                opt_df.to_parquet("data/qubit_half-wave-cavity_df.parquet")
+            save_half_wave_parquet_outputs(cavity_df, df, opt_df, data_dir="data")
 
         return opt_df
 
@@ -1186,16 +1190,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
     def _update_cap_interdigital_tee_parameters(self, cavity_df):
         """Updates parameters for CapNInterdigitalTee coupler."""
         ncap_df = self.get_dataset(data_type="cap_matrix", component="coupler", component_name="NCap")
-        ncap_sim_cols = [
-            "bottom_to_bottom",
-            "bottom_to_ground",
-            "ground_to_ground",
-            "top_to_bottom",
-            "top_to_ground",
-            "top_to_top",
-        ]
-
-        df = update_ncap_parameters(cavity_df, ncap_df, self.ncap_merger_terms, ncap_sim_cols)
+        df = update_ncap_parameters(cavity_df, ncap_df, self.ncap_merger_terms, NCAP_SIM_COLS)
         return df
 
     def create_qubit_cavity_df(self, qubit_df, cavity_df, merger_terms=None, parallelize=False, num_cpu=None):

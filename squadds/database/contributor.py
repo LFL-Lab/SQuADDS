@@ -15,6 +15,14 @@ from squadds.core.utils import (
     validate_types,
 )
 from squadds.database.contributor_env import build_contributor_record, load_contributor_environment
+from squadds.database.contributor_records import (
+    add_sim_result_entry,
+    build_contribution_payload,
+    build_empty_contribution_state,
+    merge_contributor_notes,
+    validate_required_structure,
+)
+from squadds.database.contributor_validation import get_nested_value, summarize_content_differences
 
 """
 ! TODO:
@@ -67,11 +75,12 @@ class ExistingConfigData:
         self.config = config
         self._validate_config_name()
         load_contributor_environment()
-        self.sim_results = {}
-        self.design = {"design_tool": "", "design_options": {}}
-        self.sim_options = {"setup": {}, "simulator": ""}
-        self.units = set()
-        self.notes = {}
+        state = build_empty_contribution_state()
+        self.sim_results = state["sim_results"]
+        self.design = state["design"]
+        self.sim_options = state["sim_options"]
+        self.units = state["units"]
+        self.notes = state["notes"]
         self.ref_entry = {}
         self.__set_contributor_info()
         self.entry = self.to_dict()
@@ -166,9 +175,7 @@ class ExistingConfigData:
         Returns:
             None
         """
-        self.units.add(unit)  # Add unit to the set
-        self.sim_results[result_name] = result_value
-        self.sim_results[f"{result_name}_unit"] = unit  # Keep the individual unit keys for now
+        self.sim_results, self.units = add_sim_result_entry(self.sim_results, self.units, result_name, result_value, unit)
 
     def add_sim_setup(self, sim_setup):
         """
@@ -263,31 +270,25 @@ class ExistingConfigData:
         Returns:
             dict: A dictionary representation of the Contributor object.
         """
-        # Check if all units are the same
-        if len(self.units) == 1:
-            common_unit = self.units.pop()  # Get the common unit
-            self.sim_results["units"] = common_unit
-            # Remove individual unit keys
-            for result_name in list(self.sim_results.keys()):
-                if "_unit" in result_name:
-                    del self.sim_results[result_name]
-        return {
-            "design": self.design,
-            "sim_options": self.sim_options,
-            "sim_results": self.sim_results,
-            "contributor": self.contributor,
-            "notes": self.notes,
-        }
+        return build_contribution_payload(
+            self.design,
+            self.sim_options,
+            self.sim_results,
+            self.contributor,
+            self.notes,
+            self.units,
+        )
 
     def clear(self):
         """
         Clears the contribution data.
         """
-        self.sim_results = {}
-        self.design = {"design_tool": "", "design_options": {}}
-        self.sim_options = {"setup": {}, "simulator": ""}
-        self.units = set()
-        self.notes = {}
+        state = build_empty_contribution_state()
+        self.sim_results = state["sim_results"]
+        self.design = state["design"]
+        self.sim_options = state["sim_options"]
+        self.units = state["units"]
+        self.notes = state["notes"]
         self.__isValidated = False
 
     def add_notes(self, notes=None):
@@ -297,13 +298,7 @@ class ExistingConfigData:
         Args:
             notes (dict): A dictionary containing notes.
         """
-        if notes is None:
-            notes = {}
-        if not isinstance(notes, dict):
-            raise ValueError("Notes must be provided as a dictionary.")
-
-        # Merge new notes with existing ones
-        self.notes.update(notes)
+        self.notes = merge_contributor_notes(self.notes, notes)
 
     def validate_structure(self, actual_structure):
         """
@@ -317,14 +312,7 @@ class ExistingConfigData:
         """
         expected_structure = self.get_config_schema()
 
-        # Compare the structure of actual data with the expected schema
-        for key, value in expected_structure.items():
-            if key not in actual_structure:
-                raise ValueError(f"Missing required key: {key}")
-            if isinstance(value, dict):
-                for sub_key in value:
-                    if sub_key not in actual_structure[key]:
-                        raise ValueError(f"Missing required sub-key '{sub_key}' in '{key}'")
+        validate_required_structure(actual_structure, expected_structure)
         print("Structure validated successfully....")
 
     def _validate_structure(self):
@@ -337,14 +325,7 @@ class ExistingConfigData:
         expected_structure = self.get_config_schema()
         actual_structure = self.to_dict()
 
-        # Compare the structure of actual data with the expected schema
-        for key, value in expected_structure.items():
-            if key not in actual_structure:
-                raise ValueError(f"Missing required key: {key}")
-            if isinstance(value, dict):
-                for sub_key in value:
-                    if sub_key not in actual_structure[key]:
-                        raise ValueError(f"Missing required sub-key '{sub_key}' in '{key}'")
+        validate_required_structure(actual_structure, expected_structure)
         print("Structure validated successfully....")
 
     def validate_types(self, data):
@@ -396,14 +377,7 @@ class ExistingConfigData:
             data (dict): The data to be validated.
         Validates the content of the contribution against the dataset schema.
         """
-
-        def get_nested(dictionary, keys):
-            for key in keys.split("."):
-                if dictionary is not None and key in dictionary:
-                    dictionary = dictionary[key]
-                else:
-                    return None
-            return dictionary
+        return None
 
     def _validate_content(self):
         """
@@ -412,37 +386,7 @@ class ExistingConfigData:
         data = self.to_dict()
         ref = self.ref_entry
 
-        def get_nested(dictionary, keys):
-            for key in keys.split("."):
-                if dictionary is not None and key in dictionary:
-                    dictionary = dictionary[key]
-                else:
-                    return None
-            return dictionary
-
-        def find_common_keys(dict1, dict2, path=""):
-            """
-            Recursively find and compare common keys in two dictionaries.
-            """
-            common_keys = set(dict1.keys()) & set(dict2.keys())
-            diff_keys = (set(dict1.keys()) - set(dict2.keys())) | (set(dict2.keys()) - set(dict1.keys()))
-            for key in common_keys:
-                new_path = f"{path}.{key}" if path else key
-                if isinstance(dict1[key], dict) and isinstance(dict2[key], dict):
-                    yield from find_common_keys(dict1[key], dict2[key], new_path)
-                else:
-                    if type(dict1[key]) != type(dict2[key]):
-                        yield new_path, False
-                    else:
-                        yield new_path, True
-            for key in diff_keys:
-                new_path = f"{path}.{key}" if path else key
-                yield new_path, None
-
-        result = list(find_common_keys(data, ref))
-        [key for key, match in result if match is not None]
-        mismatched_keys = [key for key, match in result if match is False]
-        missing_keys = [key for key, match in result if match is None]
+        mismatched_keys, missing_keys = summarize_content_differences(data, ref)
 
         if mismatched_keys:
             print(
@@ -450,13 +394,13 @@ class ExistingConfigData:
             )
             for key in mismatched_keys:
                 print(
-                    f"Key: {key}, data type in 'data': {type(get_nested(data, key))}, data type in 'ref': {type(get_nested(ref, key))}"
+                    f"Key: {key}, data type in 'data': {type(get_nested_value(data, key))}, data type in 'ref': {type(get_nested_value(ref, key))}"
                 )
 
         if missing_keys:
             print("\nMissing keys found. These keys are present in one dictionary but not the other:\n")
             for key in missing_keys:
-                if get_nested(data, key) is not None:
+                if get_nested_value(data, key) is not None:
                     print(f"Key: {key} is missing in 'ref'")
                 else:
                     print(f"Key: {key} is missing in 'data'")
