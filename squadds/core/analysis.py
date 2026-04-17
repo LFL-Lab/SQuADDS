@@ -1,14 +1,9 @@
 import time
 from typing import Any
 
-import datashader as ds
-import datashader.transfer_functions as tf
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
-from matplotlib.patches import Patch
 
 from squadds.calcs.transmon_cross import TransmonCrossHamiltonian
 from squadds.core.analysis_enrichment import (
@@ -17,6 +12,7 @@ from squadds.core.analysis_enrichment import (
     extract_qubit_options,
     fix_cavity_claw_dataframe,
 )
+from squadds.core.analysis_plotting import build_closest_design_hspace_plot
 from squadds.core.analysis_search import (
     SUPPORTED_METRICS,
     filter_df_by_target_params,
@@ -453,140 +449,12 @@ class Analyzer:
         Returns:
             None
         """
-        # Set Seaborn style and context
-        sns.set_style("whitegrid")
-        sns.set_context("paper", font_scale=1.4)
-
-        # Create a colormap for the scatter plot points
-        viridis_cmap = plt.cm.get_cmap("viridis")
-        viridis_cmap(0.2)
-        color_presim = viridis_cmap(0.9)
-        color_database = viridis_cmap(0.6)
-
-        # Create the figure with two subplots
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-
-        if self.selected_resonator_type == "quarter":
-            # First subplot: kappa_kHz vs fres
-            ax1.scatter(
-                x=self.df["cavity_frequency_GHz"],
-                y=self.df["kappa_kHz"],
-                color=color_presim,
-                marker=".",
-                s=50,
-                label="Pre-Simulated",
-            )
-            ax1.scatter(
-                x=self.target_params["cavity_frequency_GHz"],
-                y=self.target_params["kappa_kHz"],
-                color="red",
-                s=100,
-                marker="x",
-                label="Target",
-            )
-            closest_fres = self.closest_df_entry["cavity_frequency_GHz"]
-            closest_kappa_kHz = self.closest_df_entry["kappa_kHz"]
-            ax1.scatter(
-                closest_fres, closest_kappa_kHz, color=[color_database], s=100, marker="s", alpha=0.7, label="Closest"
-            )
-            ax1.set_xlabel(r"$f_{res}$ (GHz)", fontweight="bold", fontsize=24)
-            ax1.set_ylabel(r"$\kappa / 2 \pi$ (kHz)", fontweight="bold", fontsize=24)
-            ax1.tick_params(axis="both", which="major", labelsize=20)
-
-            # Second subplot: g vs alpha
-            ax2.scatter(
-                x=self.df["anharmonicity_MHz"],
-                y=self.df["g_MHz"],
-                color=color_presim,
-                marker=".",
-                s=50,
-                label="Pre-Simulated",
-            )
-            ax2.scatter(
-                x=self.target_params["anharmonicity_MHz"],
-                y=self.target_params["g_MHz"],
-                color="red",
-                s=100,
-                marker="x",
-                label="Target",
-            )
-            closest_alpha = [self.closest_df_entry["anharmonicity_MHz"]]
-            closest_g = [self.closest_df_entry["g_MHz"]]
-            ax2.scatter(closest_alpha, closest_g, color=[color_database], s=100, marker="s", alpha=0.7, label="Closest")
-            ax2.set_xlabel(r"$\alpha / 2 \pi$ (MHz)", fontweight="bold", fontsize=24)
-            ax2.set_ylabel(r"$g / 2 \pi$ (MHz)", fontweight="bold", fontsize=24)
-            ax2.tick_params(axis="both", which="major", labelsize=20)
-
-        elif self.selected_resonator_type == "half":
-            # set up canvas objects
-            x1_range = (self.df["cavity_frequency_GHz"].min(), self.df["cavity_frequency_GHz"].max())
-            y1_range = (self.df["kappa_kHz"].min(), self.df["kappa_kHz"].max())
-
-            x2_range = (self.df["anharmonicity_MHz"].min(), self.df["anharmonicity_MHz"].max())
-            y2_range = (self.df["g_MHz"].min(), self.df["g_MHz"].max())
-
-            canvas1 = ds.Canvas(plot_width=800, plot_height=600, x_range=x1_range, y_range=y1_range)
-            canvas2 = ds.Canvas(plot_width=800, plot_height=600, x_range=x2_range, y_range=y2_range)
-            agg1 = canvas1.points(self.df, "cavity_frequency_GHz", "kappa_kHz")
-            agg2 = canvas2.points(self.df, "anharmonicity_MHz", "g_MHz")
-
-            # Create the image using a list of colors from the 'Blues' colormap
-            cmap = cm.get_cmap("Blues")
-            colors = [cmap(i) for i in range(cmap.N)]
-            hex_colors = [f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}" for r, g, b, _ in colors]
-            img1 = tf.shade(agg1, cmap=hex_colors)
-            img2 = tf.shade(agg2, cmap=hex_colors)
-
-            # Plot the first subplot
-            ax1.imshow(img1.to_pil(), aspect="auto", extent=[*x1_range, *y1_range])
-            ax1.set_xlabel(r"$f_{res}$ (GHz)", fontweight="bold", fontsize=24)
-            ax1.set_ylabel(r"$\kappa / 2 \pi$ (Hz)", fontweight="bold", fontsize=24)
-            ax1.tick_params(axis="both", which="major", labelsize=20)
-
-            # !TODO: add legend
-            Patch(facecolor=color_presim, edgecolor="none", label="Pre-Simulated")
-
-            # Plot the second subplot
-            ax2.imshow(img2.to_pil(), aspect="auto", extent=[*x2_range, *y2_range])
-            ax2.set_xlabel(r"$\alpha / 2 \pi$ (MHz)", fontweight="bold", fontsize=24)
-            ax2.set_ylabel(r"$g / 2 \pi$ (MHz)", fontweight="bold", fontsize=24)
-            ax2.tick_params(axis="both", which="major", labelsize=20)
-
-            # Plot the target points
-            ax1.plot(
-                self.target_params["cavity_frequency_GHz"], self.target_params["kappa_kHz"] * 1e3, "rx", label="Target"
-            )
-            ax2.plot(self.target_params["anharmonicity_MHz"], self.target_params["g_MHz"], "ro", label="Target")
-
-            # Plot the closest design point
-            ax1.plot(
-                self.closest_df_entry["cavity_frequency_GHz"],
-                self.closest_df_entry["kappa"],
-                "bs",
-                alpha=1,
-                label="Closest",
-            )
-            ax2.plot(
-                self.closest_df_entry["anharmonicity_MHz"],
-                self.closest_df_entry["g_MHz"],
-                "bs",
-                alpha=0.7,
-                label="Closest",
-            )
-        else:
-            raise ValueError(
-                f'Your chosen resonator type - {self.selected_resonator_type} - is not supported. Please use "quarter" or "half"'
-            )
-
-        legend1 = ax1.legend(loc="upper left", fontsize=16)
-        for text in legend1.get_texts():
-            text.set_fontweight("bold")
-
-        legend2 = ax2.legend(loc="lower left", fontsize=16)
-        for text in legend2.get_texts():
-            text.set_fontweight("bold")
-
-        plt.tight_layout()
+        build_closest_design_hspace_plot(
+            self.df,
+            self.target_params,
+            self.closest_df_entry,
+            self.selected_resonator_type,
+        )
         plt.show()
 
     def get_qubit_options(self, df: pd.DataFrame) -> dict[str, list[Any]]:
