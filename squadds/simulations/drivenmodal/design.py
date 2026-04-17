@@ -7,7 +7,7 @@ from typing import Any
 
 from qiskit_metal.designs.design_multiplanar import MultiPlanar
 
-from .layer_stack import build_layer_stack_dataframe
+from .layer_stack import build_layer_stack_dataframe, resolve_chip_metadata
 from .models import DrivenModalLayerStackSpec
 
 
@@ -42,11 +42,21 @@ def create_multiplanar_design(
         layer_stack_filename=str(csv_path),
     )
     design.overwrite_enabled = True
-    design.chips[layer_stack.chip_name]["size"]["size_x"] = chip_size_x
-    design.chips[layer_stack.chip_name]["size"]["size_y"] = chip_size_y
+    chip = design.chips[layer_stack.chip_name]
+    chip_size = chip["size"]
+    chip_size["size_x"] = chip_size_x
+    chip_size["size_y"] = chip_size_y
     # QHFSSRenderer reads the active chip elevation from center_z when lifting
     # 2D polygons into 3D points. MultiPlanar does not always populate it.
-    design.chips[layer_stack.chip_name]["size"].setdefault("center_z", chip_center_z)
+    chip_size.setdefault("center_z", chip_center_z)
+
+    chip_metadata = resolve_chip_metadata(layer_stack)
+    chip.setdefault("material", chip_metadata["material"])
+    chip.setdefault("layer_start", chip_metadata["layer_start"])
+    chip.setdefault("layer_end", chip_metadata["layer_end"])
+    chip_size.setdefault("size_z", chip_metadata["size_z"])
+    chip_size.setdefault("sample_holder_top", chip_metadata["sample_holder_top"])
+    chip_size.setdefault("sample_holder_bottom", chip_metadata["sample_holder_bottom"])
     return design, csv_path
 
 

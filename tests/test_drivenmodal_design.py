@@ -38,6 +38,12 @@ def test_create_multiplanar_design_loads_explicit_layer_stack(tmp_path: Path):
     assert set(design.ls.ls_df["material"]) == {"pec", "silicon"}
     assert "-650um" in set(design.ls.ls_df["thickness"])
     assert design.get_chip_z("main") == "0.0mm"
+    assert design.chips["main"]["material"] == "silicon"
+    assert design.chips["main"]["layer_start"] == "0"
+    assert design.chips["main"]["layer_end"] == "2048"
+    assert design.chips["main"]["size"]["size_z"] == "-650um"
+    assert design.chips["main"]["size"]["sample_holder_top"] == "790um"
+    assert design.chips["main"]["size"]["sample_holder_bottom"] == "1550um"
 
 
 def test_connect_renderer_to_new_ansys_design_skips_eager_setup_lookup():
