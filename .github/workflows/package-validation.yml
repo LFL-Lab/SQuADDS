@@ -89,12 +89,14 @@ jobs:
           mkdir -p /tmp/squadds-wheel-smoke
           uv venv /tmp/squadds-wheel-smoke/.venv
           uv pip install --python /tmp/squadds-wheel-smoke/.venv/bin/python dist/*.whl
-          /tmp/squadds-wheel-smoke/.venv/bin/python -c "import squadds; print(squadds.__version__)"
-          /tmp/squadds-wheel-smoke/.venv/bin/python -c "from squadds import Analyzer, SQuADDS_DB; print('surface ok')"
+          cd /tmp/squadds-wheel-smoke
+          .venv/bin/python -c "import squadds; print(squadds.__version__)"
+          .venv/bin/python -c "from squadds import Analyzer, SQuADDS_DB; print('surface ok')"
 
       - name: Smoke test sdist install
         run: |
           mkdir -p /tmp/squadds-sdist-smoke
           uv venv /tmp/squadds-sdist-smoke/.venv
           uv pip install --python /tmp/squadds-sdist-smoke/.venv/bin/python dist/*.tar.gz
-          /tmp/squadds-sdist-smoke/.venv/bin/python -c "import squadds; print(squadds.__version__)"
+          cd /tmp/squadds-sdist-smoke
+          .venv/bin/python -c "import squadds; print(squadds.__version__)"
