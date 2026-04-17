@@ -1,0 +1,216 @@
+name: MCP Sync Notification
+
+# Triggered when a new SQuADDS release is published
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to generate sync notification for (e.g. v0.4.5)'
+        required: false
+        type: string
+
+jobs:
+  notify-mcp:
+    name: Generate MCP Sync Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for diff
+
+      - name: Determine release info
+        id: release_info
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            CURRENT_TAG="${{ github.event.release.tag_name }}"
+            RELEASE_URL="${{ github.event.release.html_url }}"
+            RELEASE_NAME="${{ github.event.release.name }}"
+          else
+            CURRENT_TAG="${{ github.event.inputs.release_tag || github.ref_name }}"
+            RELEASE_URL="${{ github.server_url }}/${{ github.repository }}/releases/tag/${CURRENT_TAG}"
+            RELEASE_NAME="${CURRENT_TAG}"
+          fi
+
+          # Find the previous tag
+          PREV_TAG=$(git tag --sort=-v:refname | grep -A1 "^${CURRENT_TAG}$" | tail -1)
+          if [ -z "$PREV_TAG" ] || [ "$PREV_TAG" = "$CURRENT_TAG" ]; then
+            PREV_TAG=$(git tag --sort=-v:refname | head -2 | tail -1)
+          fi
+
+          echo "current_tag=${CURRENT_TAG}" >> $GITHUB_OUTPUT
+          echo "prev_tag=${PREV_TAG}" >> $GITHUB_OUTPUT
+          echo "release_url=${RELEASE_URL}" >> $GITHUB_OUTPUT
+          echo "release_name=${RELEASE_NAME}" >> $GITHUB_OUTPUT
+          echo "Current: ${CURRENT_TAG}, Previous: ${PREV_TAG}"
+
+      - name: Analyze API changes
+        id: api_changes
+        run: |
+          CURRENT_TAG="${{ steps.release_info.outputs.current_tag }}"
+          PREV_TAG="${{ steps.release_info.outputs.prev_tag }}"
+
+          # Files that MCP tools depend on
+          MCP_CRITICAL_FILES=(
+            "squadds/core/db.py"
+            "squadds/core/analysis.py"
+            "squadds/core/metrics.py"
+            "squadds/interpolations/physics.py"
+            "squadds/calcs/"
+            "squadds/__init__.py"
+          )
+
+          echo "## API Diff: ${PREV_TAG} → ${CURRENT_TAG}" > /tmp/api_changes.md
+          echo "" >> /tmp/api_changes.md
+
+          CHANGES_FOUND=false
+          AFFECTED_FILES=""
+          API_CHANGES_JSON="[]"
+
+          for filepath in "${MCP_CRITICAL_FILES[@]}"; do
+            DIFF=$(git diff "${PREV_TAG}".."${CURRENT_TAG}" -- "$filepath" 2>/dev/null || true)
+            if [ -n "$DIFF" ]; then
+              CHANGES_FOUND=true
+              AFFECTED_FILES="${AFFECTED_FILES}${filepath}\n"
+              echo "### \`${filepath}\`" >> /tmp/api_changes.md
+              echo '```diff' >> /tmp/api_changes.md
+              # Show only function signature changes (def/class lines)
+              git diff "${PREV_TAG}".."${CURRENT_TAG}" -- "$filepath" | \
+                grep -E "^[+-].*(def |class |    def )" | head -30 >> /tmp/api_changes.md || true
+              echo '```' >> /tmp/api_changes.md
+              echo "" >> /tmp/api_changes.md
+            fi
+          done
+
+          if [ "$CHANGES_FOUND" = false ]; then
+            echo "No changes detected in MCP-critical files." >> /tmp/api_changes.md
+          fi
+
+          # Determine affected MCP modules
+          AFFECTED_MCP_MODULES=""
+          if echo -e "$AFFECTED_FILES" | grep -q "db.py"; then
+            AFFECTED_MCP_MODULES="${AFFECTED_MCP_MODULES}tools/database.py, "
+          fi
+          if echo -e "$AFFECTED_FILES" | grep -q "analysis.py\|metrics.py"; then
+            AFFECTED_MCP_MODULES="${AFFECTED_MCP_MODULES}tools/analysis.py, "
+          fi
+          if echo -e "$AFFECTED_FILES" | grep -q "physics.py\|calcs/"; then
+            AFFECTED_MCP_MODULES="${AFFECTED_MCP_MODULES}tools/interpolation.py, "
+          fi
+          if echo -e "$AFFECTED_FILES" | grep -q "__init__.py"; then
+            AFFECTED_MCP_MODULES="${AFFECTED_MCP_MODULES}schemas.py, "
+          fi
+
+          # Save outputs
+          echo "changes_found=${CHANGES_FOUND}" >> $GITHUB_OUTPUT
+          echo "affected_mcp_modules=${AFFECTED_MCP_MODULES}" >> $GITHUB_OUTPUT
+
+          # Save the full diff summary (multiline)
+          {
+            echo "api_changes_md<<EOF"
+            cat /tmp/api_changes.md
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+          # Save affected files list
+          {
+            echo "affected_files<<EOF"
+            echo -e "$AFFECTED_FILES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create MCP sync issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const currentTag = '${{ steps.release_info.outputs.current_tag }}';
+            const prevTag = '${{ steps.release_info.outputs.prev_tag }}';
+            const releaseUrl = '${{ steps.release_info.outputs.release_url }}';
+            const releaseName = '${{ steps.release_info.outputs.release_name }}';
+            const changesFound = '${{ steps.api_changes.outputs.changes_found }}' === 'true';
+            const affectedModules = '${{ steps.api_changes.outputs.affected_mcp_modules }}';
+            const affectedFiles = `${{ steps.api_changes.outputs.affected_files }}`.trim();
+            const apiChangesMd = `${{ steps.api_changes.outputs.api_changes_md }}`;
+
+            const priority = changesFound ? '🟡 Review Required' : '🟢 Low Risk';
+            const breakingLabel = changesFound ? 'breaking-change' : 'non-breaking';
+
+            const title = `🔄 MCP Sync: SQuADDS ${currentTag} released — ${priority}`;
+
+            const body = `## SQuADDS ${currentTag} Release — MCP Sync Notification
+
+            **Release:** [${releaseName}](${releaseUrl})
+            **Previous Version:** ${prevTag}
+            **API Changes Detected:** ${changesFound ? '⚠️ Yes' : '✅ None in MCP-critical files'}
+            **Priority:** ${priority}
+
+            ---
+
+            ### Changes in MCP-Critical Files
+
+            ${apiChangesMd}
+
+            ### Affected MCP Modules
+
+            ${affectedModules || 'None detected — but manual review recommended.'}
+
+            ### Full Changelog
+
+            [Compare ${prevTag}...${currentTag}](${context.serverUrl}/${owner}/${repo}/compare/${prevTag}...${currentTag})
+
+            ---
+
+            ### Agent Metadata
+
+            > **This block is machine-readable.** AI agents should parse this JSON
+            > to understand what needs to be updated in the MCP server.
+
+            \`\`\`json
+            {
+              "type": "squadds_release_sync",
+              "squadds_version": "${currentTag}",
+              "previous_version": "${prevTag}",
+              "release_url": "${releaseUrl}",
+              "breaking_changes": ${changesFound},
+              "affected_mcp_modules": [${affectedModules.split(', ').filter(Boolean).map(m => `"${m}"`).join(', ')}],
+              "files_changed": [${affectedFiles.split('\n').filter(Boolean).map(f => `"${f}"`).join(', ')}],
+              "full_changelog": "${context.serverUrl}/${owner}/${repo}/compare/${prevTag}...${currentTag}",
+              "action_required": "${changesFound ? 'review_and_update' : 'verify_compatibility'}",
+              "verification_command": "uv run pytest tests/test_mcp_schemas.py tests/test_mcp_tools.py -v"
+            }
+            \`\`\`
+
+            ---
+
+            ### Checklist
+
+            - [ ] Review API changes above
+            - [ ] Update affected MCP tools if needed
+            - [ ] Run \`uv run pytest tests/test_mcp_*.py -v\` to verify
+            - [ ] Update \`squadds_mcp/__init__.py\` version if needed
+            `;
+
+            // Check for duplicate open issues
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner, repo,
+              state: 'open',
+              labels: 'mcp-sync',
+            });
+
+            const hasDuplicate = existingIssues.data.some(
+              issue => issue.title.includes(currentTag)
+            );
+
+            if (!hasDuplicate) {
+              const issue = await github.rest.issues.create({
+                owner, repo, title, body,
+                labels: ['mcp-sync', breakingLabel, 'automated'],
+              });
+              console.log(`Created sync issue #${issue.data.number}`);
+            } else {
+              console.log(`Skipping — issue for ${currentTag} already exists`);
+            }

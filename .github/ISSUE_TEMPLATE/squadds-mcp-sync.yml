@@ -1,0 +1,97 @@
+---
+name: "🔄 MCP Sync Update"
+description: "Auto-generated when SQuADDS releases a new version. Used for tracking MCP server compatibility."
+title: "🔄 MCP Sync: SQuADDS [VERSION] released"
+labels: ["mcp-sync", "automated"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## SQuADDS Release → MCP Sync
+
+        This issue was auto-generated to track MCP server compatibility
+        with a new SQuADDS release. AI agents can parse the **Agent Metadata**
+        section to understand what needs updating.
+
+  - type: input
+    id: squadds_version
+    attributes:
+      label: SQuADDS Version
+      description: The new SQuADDS release version
+      placeholder: "v0.4.5"
+    validations:
+      required: true
+
+  - type: input
+    id: previous_version
+    attributes:
+      label: Previous Version
+      description: The previous SQuADDS version
+      placeholder: "v0.4.4"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: breaking_changes
+    attributes:
+      label: Breaking Changes?
+      description: Were API changes detected in MCP-critical files?
+      options:
+        - "Yes — review required"
+        - "No — verify only"
+    validations:
+      required: true
+
+  - type: textarea
+    id: api_changes
+    attributes:
+      label: API Changes
+      description: Summary of API changes in MCP-critical files
+      placeholder: |
+        ### squadds/core/db.py
+        - `get_dataset()` — new parameter `cache_dir` added
+        - `SQuADDS_DB.__init__()` — signature unchanged
+
+        ### squadds/core/analysis.py
+        - No changes
+
+  - type: textarea
+    id: affected_mcp_modules
+    attributes:
+      label: Affected MCP Modules
+      description: Which MCP tool modules need updating
+      placeholder: |
+        - `squadds_mcp/tools/database.py`
+        - `squadds_mcp/tools/analysis.py`
+
+  - type: textarea
+    id: agent_metadata
+    attributes:
+      label: Agent Metadata (JSON)
+      description: |
+        Machine-readable metadata for AI agents.
+        AI agents should parse this JSON block to determine what actions to take.
+      render: json
+      placeholder: |
+        {
+          "type": "squadds_release_sync",
+          "squadds_version": "v0.4.5",
+          "previous_version": "v0.4.4",
+          "breaking_changes": true,
+          "affected_mcp_modules": ["tools/database.py"],
+          "files_changed": ["squadds/core/db.py"],
+          "action_required": "review_and_update",
+          "verification_command": "uv run pytest tests/test_mcp_*.py -v"
+        }
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Update Checklist
+      description: Track progress on the sync update
+      options:
+        - label: Review API changes
+        - label: Update affected MCP tools
+        - label: Run MCP tests (`uv run pytest tests/test_mcp_*.py -v`)
+        - label: Update MCP server version if needed
+        - label: Create PR with changes

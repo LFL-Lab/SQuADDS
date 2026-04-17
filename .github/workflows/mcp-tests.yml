@@ -1,0 +1,154 @@
+name: MCP Server Tests
+
+on:
+  push:
+    branches:
+      - master
+      - main
+      - mcp
+    paths:
+      - 'squadds/**'
+      - 'squadds_mcp/**'
+      - 'tests/test_mcp_*.py'
+      - 'pyproject.toml'
+  pull_request:
+    branches:
+      - master
+      - main
+      - mcp
+    paths:
+      - 'squadds/**'
+      - 'squadds_mcp/**'
+      - 'tests/test_mcp_*.py'
+      - 'pyproject.toml'
+
+  # Nightly compatibility check against latest SQuADDS
+  schedule:
+    - cron: '0 6 * * *'  # 6 AM UTC daily
+
+  workflow_dispatch:
+
+jobs:
+  mcp-unit-tests:
+    name: MCP Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --extra mcp --extra dev
+
+      - name: Run MCP schema tests
+        run: uv run pytest tests/test_mcp_schemas.py -v --tb=short
+
+      - name: Run MCP tool & utility tests
+        run: uv run pytest tests/test_mcp_tools.py -v --tb=short
+
+      - name: Verify MCP server can be created
+        run: |
+          uv run python -c "
+          from squadds_mcp.server import create_server
+          server = create_server()
+          print(f'✅ Server created: {server.name}')
+          print('✅ All tools, resources, and prompts registered successfully')
+          "
+
+  mcp-compat-test:
+    name: MCP Compatibility (Latest SQuADDS)
+    runs-on: ubuntu-latest
+    # Only run on schedule and manual dispatch — not on every push
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install with latest SQuADDS from PyPI
+        run: |
+          uv sync --extra mcp --extra dev
+          # Override with latest PyPI version to test forward compatibility
+          uv pip install --upgrade SQuADDS
+
+      - name: Run MCP tests against latest SQuADDS
+        id: compat_test
+        continue-on-error: true
+        run: uv run pytest tests/test_mcp_schemas.py tests/test_mcp_tools.py -v --tb=long
+
+      - name: Create issue on failure
+        if: steps.compat_test.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const title = `🔴 MCP Compatibility: Tests failed against latest SQuADDS`;
+            const body = `## MCP Compatibility Test Failure
+
+            The nightly compatibility test against the **latest SQuADDS from PyPI** has failed.
+
+            **Run:** [${context.runId}](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId})
+            **Triggered:** ${new Date().toISOString()}
+
+            ### What this means
+            The latest SQuADDS release may have introduced API changes that break MCP tools.
+
+            ### Next steps
+            1. Check the [workflow logs](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}) for specific failures
+            2. Identify which SQuADDS API changed
+            3. Update the affected MCP tools in \`squadds_mcp/tools/\`
+            4. Run \`uv run pytest tests/test_mcp_*.py -v\` locally to verify
+
+            ### Agent Metadata
+            \`\`\`json
+            {
+              "type": "mcp_compat_failure",
+              "run_id": "${context.runId}",
+              "timestamp": "${new Date().toISOString()}",
+              "affected_package": "squadds_mcp",
+              "test_files": ["tests/test_mcp_schemas.py", "tests/test_mcp_tools.py"],
+              "action_required": "update_mcp_tools"
+            }
+            \`\`\`
+            `;
+
+            // Check for existing open issues to avoid duplicates
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner, repo,
+              state: 'open',
+              labels: 'mcp-sync',
+            });
+
+            const hasDuplicate = existingIssues.data.some(
+              issue => issue.title.includes('MCP Compatibility')
+            );
+
+            if (!hasDuplicate) {
+              await github.rest.issues.create({
+                owner, repo, title, body,
+                labels: ['mcp-sync', 'bug', 'automated'],
+              });
+              console.log('Created compatibility failure issue');
+            } else {
+              console.log('Skipping — open compatibility issue already exists');
+            }
