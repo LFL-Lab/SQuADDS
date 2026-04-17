@@ -1,0 +1,102 @@
+name: Package Validation
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - "pyproject.toml"
+      - "uv.lock"
+      - "README.md"
+      - "LICENSE"
+      - "squadds/**"
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - "pyproject.toml"
+      - "uv.lock"
+      - "README.md"
+      - "LICENSE"
+      - "squadds/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-distributions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - name: Verify distribution metadata
+        run: uvx --from twine twine check dist/*
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-distributions
+          path: dist/
+
+  install-smoke:
+    needs: build-distributions
+    runs-on: ubuntu-latest
+    env:
+      MPLBACKEND: Agg
+      QISKIT_METAL_HEADLESS: "1"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libopengl0 libglu1-mesa
+
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: built-distributions
+          path: dist/
+
+      - name: Smoke test wheel install
+        run: |
+          mkdir -p /tmp/squadds-wheel-smoke
+          uv venv /tmp/squadds-wheel-smoke/.venv
+          uv pip install --python /tmp/squadds-wheel-smoke/.venv/bin/python dist/*.whl
+          cd /tmp/squadds-wheel-smoke
+          .venv/bin/python -c "import squadds; print(squadds.__version__)"
+          .venv/bin/python -c "from squadds import Analyzer, SQuADDS_DB; print('surface ok')"
+
+      - name: Smoke test sdist install
+        run: |
+          mkdir -p /tmp/squadds-sdist-smoke
+          uv venv /tmp/squadds-sdist-smoke/.venv
+          uv pip install --python /tmp/squadds-sdist-smoke/.venv/bin/python dist/*.tar.gz
+          cd /tmp/squadds-sdist-smoke
+          .venv/bin/python -c "import squadds; print(squadds.__version__)"
