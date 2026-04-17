@@ -1,37 +1,24 @@
-def test_import(module_name):
-    try:
-        __import__(module_name)
-        print(f"Successfully imported {module_name}")
-    except ImportError as e:
-        print(f"Failed to import {module_name}: {e}")
-    except Exception as e:
-        print(f"Error while importing {module_name}: {e}")
+import importlib
+
+import pytest
 
 
-def main():
-    # Test import of main package
-    test_import("squadds")
-
-    # Test import of submodules
-    submodules = [
-        "squadds.calcs",
-        "squadds.core",
-        "squadds.database",
-        "squadds.interpolations",
-        "squadds.core.utils",
-        "squadds.core.design_patterns",
-        "squadds.core.analysis",
-        "squadds.database.utils",
-        "squadds.interpolations.interpolator",
-        "squadds.calcs.qubit",
-        "squadds.calcs.transmon_cross",
-    ]
-
-    for submodule in submodules:
-        test_import(submodule)
-
-    print("Imports test passed")
+MODULES = [
+    "squadds",
+    "squadds.calcs",
+    "squadds.core",
+    "squadds.database",
+    "squadds.interpolations",
+    "squadds.core.utils",
+    "squadds.core.design_patterns",
+    "squadds.core.analysis",
+    "squadds.database.utils",
+    "squadds.interpolations.interpolator",
+    "squadds.calcs.qubit",
+    "squadds.calcs.transmon_cross",
+]
 
 
-if __name__ == "__main__":
-    main()
+@pytest.mark.parametrize("module_name", MODULES)
+def test_module_imports(module_name):
+    importlib.import_module(module_name)

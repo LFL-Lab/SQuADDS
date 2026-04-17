@@ -1,152 +1,103 @@
+"""Helpers for expanding nested sweep dictionaries into concrete combinations."""
+
+from __future__ import annotations
+
 from itertools import product
+from typing import Any
 
 
-def extract_QSweep_parameters(parameters: dict) -> list[dict]:
+NestedDict = dict[str, Any]
+
+__all__ = [
+    "extract_QSweep_parameters",
+    "extract_parameters",
+    "extract_values",
+    "generate_combinations",
+    "create_dict_list",
+]
+
+
+def extract_QSweep_parameters(parameters: NestedDict) -> list[NestedDict]:
+    """Return every concrete parameter combination from a nested sweep dictionary.
+
+    The public API is intentionally unchanged. Nested dictionaries are flattened
+    into dotted paths, leaf values are converted into lists when needed, and the
+    cartesian product of all leaf lists is reconstructed back into nested
+    dictionaries.
     """
-    Input:
-    * parameters (dict) - nested dictionary with a list
-        at the end of the nest
 
-    Output:
-    * list_of_combos (list of dicts) - same nested structure
-        as your input. But you'll have each combination.
-    """
-    ext_parameters = extract_parameters(parameters)
-    values = extract_values(parameters)
-    combo = generate_combinations(values)
-    list_of_combos = create_dict_list(ext_parameters, combo)
-    return list_of_combos
+    flattened_keys = extract_parameters(parameters)
+    flattened_values = extract_values(parameters)
+    combinations = generate_combinations(flattened_values)
+    return create_dict_list(flattened_keys, combinations)
 
 
-def extract_parameters(dictionary, keys=None, prefix=""):
-    """
-    Extract keys in nested dict, then separates these keys by a `.`
-    For our purposes, gets the parameters of interest
+def extract_parameters(dictionary: NestedDict, keys: list[str] | None = None, prefix: str = "") -> list[str]:
+    """Flatten nested keys into dotted paths in traversal order."""
 
-    Input:
-    * dictionary (dict)
-
-    Output:
-    * keys (list of string)
-
-    Example:
-    my_dict = {'transmon1': {'cross_width': '30um',
-                             'connection_pads': {'readout': {'pad_width': '200um'}}}}
-    print(extract_keys(my_dict))
-    # prints: ['transmon1.cross_width', 'transmon1.connection_pads.readout.pad_width']
-    """
     if keys is None:
         keys = []
+
     for key, value in dictionary.items():
         full_key = f"{prefix}{key}" if prefix else key
         if isinstance(value, dict):
-            extract_parameters(value, keys, full_key + ".")
+            extract_parameters(value, keys=keys, prefix=f"{full_key}.")
         else:
             keys.append(full_key)
+
     return keys
 
 
-def as_list(x):
-    """
-    Converts the input to a list if it is not already a list.
+def as_list(value: Any) -> list[Any]:
+    """Return the input as a list while preserving existing lists."""
 
-    Args:
-        x: The input value.
-
-    Returns:
-        A list containing the input value if it is not already a list.
-
-    """
-    return x if type(x) is list else [x]
+    return value if isinstance(value, list) else [value]
 
 
-def extract_values(dictionary, values=None):
-    """
-    Extract values in nested dict
-    For our purposes, gets the initial guesses associated w/ self.parameters
+def extract_values(dictionary: NestedDict, values: list[list[Any]] | None = None) -> list[list[Any]]:
+    """Collect nested leaf values in traversal order, coercing scalars to lists."""
 
-    Input:
-    * dictionary (dict)
-
-    Output:
-    * values (list of string)
-
-    Example:
-    my_dict = {'transmon1': {'cross_width': '30um',
-                                'connection_pads': {'readout': {'pad_width': '200um'}}}}
-    print(extract_values(my_dict))
-    # prints: ['30um', '200um']
-    """
     if values is None:
         values = []
-    for _key, value in dictionary.items():
+
+    for value in dictionary.values():
         if isinstance(value, dict):
-            extract_values(value, values)
+            extract_values(value, values=values)
         else:
             values.append(as_list(value))
+
     return values
 
 
-def generate_combinations(lists):
-    """
-    This function takes in a list of lists and returns a
-    list of tuples that contain all possible combinations
-    of the elements in the input lists.
+def generate_combinations(value_lists: list[list[Any]]) -> list[tuple[Any, ...]]:
+    """Return the cartesian product for a list of leaf-value lists."""
 
-    Input:
-    * lists (list) - A list of lists containing elements
-        that we want to generate combinations for.
-
-    Output:
-    * combination (list of tuples) - A list of tuples
-        containing all possible combinations of the elements in the input lists.
-    """
-    combinations = list(product(*lists))
-    return combinations
+    return list(product(*value_lists))
 
 
-def create_dict_list(keys, values):
-    """'
-    Takes in a list of strings (keys) and a list of values,
-    and returns a list of nested dictionaries where `.`
-    in the string references the level of nesting.
+def _assign_nested_value(target: NestedDict, dotted_key: str, value: Any) -> None:
+    """Assign a leaf value inside ``target`` using a dotted path."""
 
-    Input:
-    * keys (list of strings) - A list of strings representing
-        the keys for the dictionaries.
-    * values (list) - A list of values to be used as the
-        values for the dictionaries
+    current = target
+    parts = dotted_key.split(".")
 
-    Output:
-    * dict_list (list of nested dictionaries) - A list of
-        nested dictionaries where each dictionary has the
-        keys as its keys and the values as its values.
-    """
-    # Initialize an empty list to store the dictionaries
-    dict_list = []
+    for part in parts[:-1]:
+        if part not in current:
+            current[part] = {}
+        current = current[part]
 
-    # Iterate over the values
-    for vals in values:
-        # Create an empty dictionary to store the nested dictionaries
-        nested_dict = {}
+    current[parts[-1]] = value
 
-        # Iterate over the keys and values
-        for i, key in enumerate(keys):
-            # Split the key into parts
-            parts = key.split(".")
-            # Initialize a reference to the dictionary at the top level
-            d = nested_dict
-            # Iterate over the parts, except for the last one
-            for part in parts[:-1]:
-                # If the part does not exist in the dictionary, create an empty dictionary
-                if part not in d:
-                    d[part] = {}
-                # Update the reference to the inner dictionary
-                d = d[part]
-            # Set the value of the last part to the corresponding value
-            d[parts[-1]] = vals[i]
 
-        # Append the nested dictionary to the list
+def create_dict_list(keys: list[str], values: list[tuple[Any, ...]]) -> list[NestedDict]:
+    """Rebuild nested dictionaries for every key/value combination."""
+
+    dict_list: list[NestedDict] = []
+
+    for value_tuple in values:
+        nested_dict: NestedDict = {}
+        for dotted_key, leaf_value in zip(keys, value_tuple, strict=True):
+            _assign_nested_value(nested_dict, dotted_key, leaf_value)
         dict_list.append(nested_dict)
 
     return dict_list
