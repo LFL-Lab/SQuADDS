@@ -272,24 +272,26 @@ def build_design_geometry_summary(design) -> dict[str, Any]:
 
 
 def build_design_options_payload(row: pd.Series) -> dict[str, Any]:
+    if "design_options_qubit" in row and "design_options_cavity_claw" in row:
+        qubit_options = deserialize_json_like(row["design_options_qubit"])
+        cavity_split = deserialize_json_like(row["design_options_cavity_claw"])
+        coupler_options = cavity_split.get("coupler_options") or cavity_split.get("cplr_opts") or {}
+        cpw_options = cavity_split.get("cpw_options") or cavity_split.get("cpw_opts") or {}
+
+        return {
+            "qubit_options": qubit_options,
+            "cavity_claw_options": {
+                "coupler_type": row["coupler_type"],
+                "coupler_options": coupler_options,
+                "cpw_opts": {"left_options": cpw_options},
+            },
+        }
+
     raw_design_options = row.get("design_options")
     if raw_design_options is not None and not pd.isna(raw_design_options):
-        design_options = deserialize_json_like(raw_design_options)
-        return design_options
+        return deserialize_json_like(raw_design_options)
 
-    qubit_options = deserialize_json_like(row["design_options_qubit"])
-    cavity_split = deserialize_json_like(row["design_options_cavity_claw"])
-    coupler_options = cavity_split.get("coupler_options") or cavity_split.get("cplr_opts") or {}
-    cpw_options = cavity_split.get("cpw_options") or cavity_split.get("cpw_opts") or {}
-
-    return {
-        "qubit_options": qubit_options,
-        "cavity_claw_options": {
-            "coupler_type": row["coupler_type"],
-            "coupler_options": coupler_options,
-            "cpw_opts": {"left_options": cpw_options},
-        },
-    }
+    raise KeyError("Could not resolve a QubitCavity-compatible design options payload from the reference row.")
 
 
 def regularize_design_options_for_drivenmodal(design_options: dict[str, Any]) -> dict[str, Any]:
