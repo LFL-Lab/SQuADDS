@@ -1,3 +1,4 @@
+import warnings
 from collections import OrderedDict
 
 from qiskit_metal import Dict
@@ -55,11 +56,15 @@ class QubitCavity(QComponent):
         self.make_qubit()
         self.make_cavity()
         self.make_pins()
-        print(
-            'There might be "kinks" in the CPW, which is a known issue in `qiskit-metal`.\n'
-            "To resolve this, try adjusting the `start_straight` or `end_straight` parameters.\n"
-            "For more details and resolution tips, check out this guide:\n"
-            "https://qiskit-community.github.io/qiskit-metal/tut/2-From-components-to-chip/2.12-Simple-Meander.html"
+        warnings.warn(
+            "QubitCavity is a convenience wrapper for quick visualization only. "
+            "For production designs, build components individually (TransmonCross, "
+            "CoupledLineTee, RouteMeander) to control trace widths, fillets, and "
+            "lead straights. See SQuADDS Tutorial 5 or the MCP layout-guide resource. "
+            "If you see CPW kinks, increase 'lead.start_straight' / 'lead.end_straight' "
+            "on the RouteMeander (try 75um / 50um).",
+            UserWarning,
+            stacklevel=2,
         )
 
     def make_qubit(self):
@@ -150,7 +155,18 @@ class QubitCavity(QComponent):
             adj_distance = 0
         jogs = OrderedDict()
         jogs[0] = ["R90", f"{adj_distance / (1.5)}um"]
-        left_opts.update({"lead": Dict(start_straight="150um", end_straight="50um", start_jogged_extension=jogs)})
+
+        # Compute a safe fillet from the meander spacing to avoid self-intersecting curves.
+        meander_spacing = 0.100  # default 100um in mm
+        if hasattr(p, "cpw_opts") and hasattr(p.cpw_opts, "left_options"):
+            fillet_val = p.cpw_opts.left_options.get("fillet", 0.0499)
+            if isinstance(fillet_val, str):
+                fillet_val = float(fillet_val.replace("um", "")) / 1000
+            min(fillet_val, meander_spacing / 2.1)
+        else:
+            min(0.0499, meander_spacing / 2.1)
+
+        left_opts.update({"lead": Dict(start_straight="75um", end_straight="50um", start_jogged_extension=jogs)})
         left_opts.update(
             {
                 "pin_inputs": Dict(
@@ -176,6 +192,25 @@ class QubitCavity(QComponent):
         left_opts["pin_inputs"]["end_pin"].update({"pin": "second_end"})
 
         self.LeftMeander = RouteMeander(self.design, f"{self.name}_left_cpw", options=left_opts)
+
+        # --- Trace width matching ---
+        # Ensure the RouteMeander trace_width matches the qubit claw's CPW width
+        # to avoid impedance discontinuities at the connection point.
+        qubit_conn_name = list(self.qubit.options["connection_pads"].keys())[0]
+        qubit_conn_opts = self.qubit.options["connection_pads"][qubit_conn_name]
+        claw_cpw_w = qubit_conn_opts.get("claw_cpw_width", None)
+        meander_trace_w = self.LeftMeander.options.get("trace_width", None)
+        if claw_cpw_w is not None and meander_trace_w is not None:
+            if str(claw_cpw_w) != str(meander_trace_w):
+                warnings.warn(
+                    f"Trace width mismatch: qubit claw_cpw_width={claw_cpw_w} "
+                    f"but RouteMeander trace_width={meander_trace_w}. "
+                    f"Setting RouteMeander trace_width to {claw_cpw_w} to match. "
+                    f"Override by explicitly setting trace_width in cpw_opts.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+                self.LeftMeander.options["trace_width"] = str(claw_cpw_w)
 
         if p.cavity_claw_options["coupler_type"] == "inductive":
             right_opts = Dict()

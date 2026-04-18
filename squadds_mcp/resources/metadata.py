@@ -158,4 +158,23 @@ parameters, it finds the closest matching design geometries.
    - kappa_kHz: 10–1000 kHz
    - g_MHz: 10–200 MHz
    - resonator_type: "quarter" or "half"
+
+## Chip Layout and Design
+
+### Layout Best Practices
+Read `squadds://layout-guide` BEFORE generating any qiskit-metal layout code.
+It covers trace width matching, fillet rules, meander kink fixes, impedance
+matching, and charge line routing.
+
+### Fab-Ready Chip Design
+Read `squadds://chip-design-reference` for the complete workflow from
+SQuADDS search results to a GDS file ready for fabrication. Use the
+`design_fab_ready_chip` prompt for a guided step-by-step walkthrough.
+
+### DO NOT Use QubitCavity for Production
+The `QubitCavity` class (`squadds.components.coupled_systems`) is a
+convenience wrapper for quick visualization only. It has known geometry
+issues (trace width mismatches, uncontrolled kinks). For any real design,
+build each component individually using qiskit-metal primitives as
+described in the layout guide and chip design reference.
 """

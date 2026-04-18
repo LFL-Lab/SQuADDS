@@ -146,9 +146,11 @@ def create_server() -> FastMCP:
     register_contribution_tools(mcp)
 
     # -- Register resources --
+    from squadds_mcp.resources.layout_guide import register_layout_resources
     from squadds_mcp.resources.metadata import register_metadata_resources
 
     register_metadata_resources(mcp)
+    register_layout_resources(mcp)
 
     # -- Register prompts --
     from squadds_mcp.prompts.workflows import register_workflow_prompts
