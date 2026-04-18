@@ -169,3 +169,104 @@ If no design is close enough:
 ## Step 5: Present the recommendation
 Report the best design with clear geometry specs and expected performance.
 """
+
+    @mcp.prompt()
+    def design_fab_ready_chip(
+        num_qubits: int = 4,
+        qubit_frequency: float = 3.7,
+        anharmonicity: float = -210.0,
+        cavity_frequency: float = 6.98,
+        coupling_g: float = 100.0,
+        resonator_type: str = "quarter",
+    ) -> str:
+        """Step-by-step workflow for designing a fab-ready multi-qubit chip.
+
+        This encodes the complete Tutorial 5 workflow: from SQuADDS search
+        to GDS export. It guides agents through building each component
+        individually with proper geometry — NOT using the QubitCavity class.
+
+        IMPORTANT: Before using this prompt, read the `squadds://layout-guide`
+        and `squadds://chip-design-reference` resources for layout rules.
+        """
+        return f"""# Design a Fab-Ready {num_qubits}-Qubit Chip
+
+## IMPORTANT: Read Layout Resources First
+Before proceeding, read these resources:
+- `squadds://layout-guide` — CPW layout best practices (trace matching, fillets, kink fixes)
+- `squadds://chip-design-reference` — Full chip design reference
+
+## DO NOT use `QubitCavity` class
+The `QubitCavity` class has known geometry issues. Build each component individually.
+
+---
+
+## Target Parameters
+- {num_qubits} qubits at ~{qubit_frequency} GHz
+- Anharmonicity: {anharmonicity} MHz
+- Cavity frequency: {cavity_frequency} GHz
+- Coupling strength: {coupling_g} MHz
+- Resonator type: {resonator_type}
+
+## Step 1: Pre-Design Queries
+**AGENT ACTION REQUIRED:** Ask the user for the following layout parameters:
+1. What are the 50Ω matched `trace_width` and `trace_gap` for their specific layer stack (e.g., Si/Al, Sapphire/Nb)?
+2. How many readout/feedline launchpads do they want (e.g., pass-through with 2 ports, or reflective with 1 port)?
+3. What are the physical positions for these ports?
+
+## Step 2: Search SQuADDS for the Closest Design
+Call `find_closest_designs` with:
+- system_type: "qubit_cavity"
+- target_params: {{
+    "qubit_frequency_GHz": {qubit_frequency},
+    "anharmonicity_MHz": {anharmonicity},
+    "cavity_frequency_GHz": {cavity_frequency},
+    "g_MHz": {coupling_g},
+    "resonator_type": "{resonator_type}"
+  }}
+- num_results: 1
+
+## Step 2: Extract Component Options
+From the result's `design_options`, extract three separate option dicts.
+These map directly to qiskit-metal component parameters:
+- **Qubit options**: cross_length, cross_width, cross_gap, claw_length,
+  claw_width, claw_gap, ground_spacing
+- **CPW options**: trace_width, trace_gap, total_length
+- **Coupler options**: coupling_length, coupling_space, down_length,
+  prime_width, prime_gap, second_width, second_gap
+- **Lj**: Josephson inductance in nH
+
+## Step 4: Compute Junction Geometry
+Based on the foundry's current density ($J_c$), JJ length, and minimum
+width constraints for a **Dolan style JJ**, compute $w_{{JJ}}$.
+
+## Step 5: Build the Layout in Qiskit-Metal
+**Use the `get_qiskit_metal_snippet` tool** to retrieve standardized Python code snippets to create shapes.
+You must use these snippets rather than inventing instantiation code yourself.
+
+Process:
+1. `DesignPlanar` — Set chip size (e.g., 5mm × 5mm)
+2. Obtain feedline/launchpad codes (`wirebond`, `feedline`) and place them using user's 50Ω parameters.
+3. For each qubit-cavity pair:
+   a. Get code snippet for `qubit` and place it using SQuADDS qubit options.
+   b. Get code snippet for `clt` and place it on the feedline.
+   c. Get code snippet for `cpw` and connect CLT to qubit.
+4. Get code snippet for `airbridge` and add airbridges.
+
+**CRITICAL trace width rule**: The qubit's `claw_cpw_width` MUST equal
+the RouteMeander's `trace_width`. Both should be the same value from
+the SQuADDS data_cpw options (typically 10um).
+
+## Step 6: Fix Meander Kinks
+Visually inspect (`gui.rebuild()`). If there are kinks near CPW endpoints, tweak lead straight parameters.
+
+## Step 7: Add Charge Lines
+Get `charge_line_otg` and `charge_line_route` code snippets.
+Use `RouteAnchors` to avoid forced 90° turns.
+
+## Step 8: Assign Layers and Export GDS
+1. Set metal layer numbers per foundry (e.g., metal=3, charge_lines=6)
+2. Configure ground plane holes (cheese): 25um × 25um, 125um spacing
+3. Set keepout buffer: 100–200um around traces
+4. Export: `a_gds.export_to_gds("filename.gds")`
+5. Run DRC before sending to fab
+"""

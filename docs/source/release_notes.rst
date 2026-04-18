@@ -9,9 +9,9 @@ Version 0.4.4 (2026-04-17)
 **MCP Server**
 
 - Added a built-in `Model Context Protocol (MCP) <https://modelcontextprotocol.io>`_ server that lets AI coding assistants (Claude, Cursor, VS Code Copilot, Gemini, Codex) interact with the SQuADDS database through the standardized MCP protocol.
-- **15 MCP Tools**: Database browsing, design search (``find_closest_designs``), physics-based interpolation (``interpolate_design``), contributor info, and more.
-- **6 MCP Resources**: Version info, citation, component lists, dataset summaries, and a quick-reference guide for AI agents.
-- **3 MCP Prompts**: Guided workflow templates for designing qubit-cavity systems, exploring the database, and finding optimal designs.
+- **16 MCP Tools**: Database browsing, design search (``find_closest_designs``), physics-based interpolation (``interpolate_design``), Qiskit-Metal code snippet generation (``get_qiskit_metal_snippet``), contributor info, and more.
+- **6 MCP Resources**: Version info, citation, component lists, dataset summaries, and a comprehensive CPW layout guide (``squadds://layout-guide``) specifying impedance matching, feedline topology, and airbridge generation.
+- **3 MCP Prompts**: Guided workflow templates for designing fab-ready qubit-cavity chips (``design_fab_ready_chip``), exploring the database, and finding optimal designs.
 - Run with ``uv run squadds-mcp`` (stdio) or ``SQUADDS_MCP_TRANSPORT=streamable-http uv run squadds-mcp`` (HTTP).
 - Works with Claude Desktop, Claude Code, Cursor, VS Code, Antigravity, Gemini CLI, and OpenAI Codex.
 - Full documentation: `MCP_README.md <https://github.com/LFL-Lab/SQuADDS/blob/master/MCP_README.md>`_ and `MCP_DEVELOPER_GUIDE.md <https://github.com/LFL-Lab/SQuADDS/blob/master/MCP_DEVELOPER_GUIDE.md>`_.
