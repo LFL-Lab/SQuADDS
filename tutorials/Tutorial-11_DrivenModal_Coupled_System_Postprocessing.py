@@ -27,6 +27,8 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -394,6 +396,28 @@ def prepare_renderer_project(renderer: QHFSSRenderer, project_dir: Path, project
     renderer.connect_ansys()
     renderer.pinfo.project.save(str(project_file))
     return project_file
+
+
+def reset_ansys_desktop_processes() -> None:
+    """Best-effort hard reset of stale AEDT desktop sessions on Windows.
+
+    Qiskit Metal / pyEPR can keep a just-finished project active inside the
+    Desktop session even after ``disconnect_ansys()``. The next
+    ``renderer.start()`` then reconnects into that stale project and eagerly
+    tries to resolve a setup before callers can create the new one. For this
+    tutorial workflow we prefer a clean desktop between attempts/runs.
+    """
+    if os.name != "nt":
+        return
+    try:
+        subprocess.run(
+            ["taskkill", "/IM", "ansysedt.exe", "/F"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        return
 
 
 def network_from_sweep(freqs_hz: np.ndarray, s_matrices: np.ndarray, *, z0_ohms: float = 50.0) -> rf.Network:
@@ -876,6 +900,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
                             f"[{request.metadata['run_id']}] Warning while disconnecting Ansys: "
                             f"{format_exception_for_console(exc)}"
                         )
+                reset_ansys_desktop_processes()
         else:  # pragma: no cover - defensive guard for analyzers that exit the loop unexpectedly
             if last_error is not None:
                 raise last_error
