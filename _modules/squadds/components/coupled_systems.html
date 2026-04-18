@@ -166,7 +166,7 @@
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../source/mcp_server.html">
-    MCP Server (AI Agents)
+    MCP Server
   </a>
 </li>
 
@@ -389,7 +389,7 @@
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../source/mcp_server.html">
-    MCP Server (AI Agents)
+    MCP Server
   </a>
 </li>
 
@@ -593,7 +593,8 @@
                 <article class="bd-article">
                   
   <h1>Source code for squadds.components.coupled_systems</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">QComponent</span>
@@ -657,11 +658,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">make_qubit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_cavity</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_pins</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="s1">&#39;There might be &quot;kinks&quot; in the CPW, which is a known issue in `qiskit-metal`.</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="s2">&quot;To resolve this, try adjusting the `start_straight` or `end_straight` parameters.</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;For more details and resolution tips, check out this guide:</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;https://qiskit-community.github.io/qiskit-metal/tut/2-From-components-to-chip/2.12-Simple-Meander.html&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;QubitCavity is a convenience wrapper for quick visualization only. &quot;</span>
+            <span class="s2">&quot;For production designs, build components individually (TransmonCross, &quot;</span>
+            <span class="s2">&quot;CoupledLineTee, RouteMeander) to control trace widths, fillets, and &quot;</span>
+            <span class="s2">&quot;lead straights. See SQuADDS Tutorial 5 or the MCP layout-guide resource. &quot;</span>
+            <span class="s2">&quot;If you see CPW kinks, increase &#39;lead.start_straight&#39; / &#39;lead.end_straight&#39; &quot;</span>
+            <span class="s2">&quot;on the RouteMeander (try 75um / 50um).&quot;</span><span class="p">,</span>
+            <span class="ne">UserWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -764,7 +769,18 @@
             <span class="n">adj_distance</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">jogs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="n">jogs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;R90&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">adj_distance</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">]</span>
-        <span class="n">left_opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;lead&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span><span class="n">start_straight</span><span class="o">=</span><span class="s2">&quot;150um&quot;</span><span class="p">,</span> <span class="n">end_straight</span><span class="o">=</span><span class="s2">&quot;50um&quot;</span><span class="p">,</span> <span class="n">start_jogged_extension</span><span class="o">=</span><span class="n">jogs</span><span class="p">)})</span>
+
+        <span class="c1"># Compute a safe fillet from the meander spacing to avoid self-intersecting curves.</span>
+        <span class="n">meander_spacing</span> <span class="o">=</span> <span class="mf">0.100</span>  <span class="c1"># default 100um in mm</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s2">&quot;cpw_opts&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">cpw_opts</span><span class="p">,</span> <span class="s2">&quot;left_options&quot;</span><span class="p">):</span>
+            <span class="n">fillet_val</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">cpw_opts</span><span class="o">.</span><span class="n">left_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fillet&quot;</span><span class="p">,</span> <span class="mf">0.0499</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fillet_val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">fillet_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fillet_val</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;um&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1000</span>
+            <span class="nb">min</span><span class="p">(</span><span class="n">fillet_val</span><span class="p">,</span> <span class="n">meander_spacing</span> <span class="o">/</span> <span class="mf">2.1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">min</span><span class="p">(</span><span class="mf">0.0499</span><span class="p">,</span> <span class="n">meander_spacing</span> <span class="o">/</span> <span class="mf">2.1</span><span class="p">)</span>
+
+        <span class="n">left_opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;lead&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span><span class="n">start_straight</span><span class="o">=</span><span class="s2">&quot;75um&quot;</span><span class="p">,</span> <span class="n">end_straight</span><span class="o">=</span><span class="s2">&quot;50um&quot;</span><span class="p">,</span> <span class="n">start_jogged_extension</span><span class="o">=</span><span class="n">jogs</span><span class="p">)})</span>
         <span class="n">left_opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;pin_inputs&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span>
@@ -790,6 +806,25 @@
         <span class="n">left_opts</span><span class="p">[</span><span class="s2">&quot;pin_inputs&quot;</span><span class="p">][</span><span class="s2">&quot;end_pin&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;pin&quot;</span><span class="p">:</span> <span class="s2">&quot;second_end&quot;</span><span class="p">})</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">LeftMeander</span> <span class="o">=</span> <span class="n">RouteMeander</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_left_cpw&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">left_opts</span><span class="p">)</span>
+
+        <span class="c1"># --- Trace width matching ---</span>
+        <span class="c1"># Ensure the RouteMeander trace_width matches the qubit claw&#39;s CPW width</span>
+        <span class="c1"># to avoid impedance discontinuities at the connection point.</span>
+        <span class="n">qubit_conn_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qubit</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">qubit_conn_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubit</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="n">qubit_conn_name</span><span class="p">]</span>
+        <span class="n">claw_cpw_w</span> <span class="o">=</span> <span class="n">qubit_conn_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;claw_cpw_width&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">meander_trace_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LeftMeander</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trace_width&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">claw_cpw_w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">meander_trace_w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">claw_cpw_w</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">meander_trace_w</span><span class="p">):</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Trace width mismatch: qubit claw_cpw_width=</span><span class="si">{</span><span class="n">claw_cpw_w</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;but RouteMeander trace_width=</span><span class="si">{</span><span class="n">meander_trace_w</span><span class="si">}</span><span class="s2">. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Setting RouteMeander trace_width to </span><span class="si">{</span><span class="n">claw_cpw_w</span><span class="si">}</span><span class="s2"> to match. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Override by explicitly setting trace_width in cpw_opts.&quot;</span><span class="p">,</span>
+                    <span class="ne">UserWarning</span><span class="p">,</span>
+                    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">LeftMeander</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;trace_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">claw_cpw_w</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;inductive&quot;</span><span class="p">:</span>
             <span class="n">right_opts</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">()</span>
