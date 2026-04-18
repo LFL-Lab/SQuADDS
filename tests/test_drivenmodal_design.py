@@ -117,6 +117,10 @@ def test_apply_cryo_silicon_material_properties_updates_active_hfss_material():
     silicon = FakeSilicon()
 
     class FakeMaterials:
+        def exists_material(self, material_name):
+            calls.append(("exists", material_name))
+            return False
+
         def checkifmaterialexists(self, material_name):
             calls.append(("check", material_name))
             return silicon
@@ -146,15 +150,74 @@ def test_apply_cryo_silicon_material_properties_updates_active_hfss_material():
         (
             "init",
             {
-                "projectname": "Project1",
-                "designname": "dm_test",
+                "project": "Project1",
+                "design": "dm_test",
                 "solution_type": "DrivenModal",
-                "new_desktop_session": False,
+                "new_desktop": False,
                 "close_on_exit": False,
             },
         ),
+        ("exists", "silicon"),
         ("check", "silicon"),
         ("release", False, False),
+    ]
+
+
+def test_apply_cryo_silicon_material_properties_prefers_live_renderer_session():
+    silicon = SimpleNamespace(permittivity=11.9, dielectric_loss_tangent=1e-3)
+    calls = []
+
+    class FakeDefinitionManager:
+        def GetManager(self, name):
+            calls.append(("manager", name))
+            return object()
+
+        def GetProjectMaterialNames(self):
+            calls.append(("names",))
+            return ["silicon"]
+
+    class FakeProject:
+        def GetDefinitionManager(self):
+            calls.append(("definition_manager",))
+            return FakeDefinitionManager()
+
+    class FakeMaterials:
+        def __init__(self, app):
+            calls.append(("materials_init", bool(app.odesktop), bool(app.oproject), bool(app.odesign)))
+
+        def exists_material(self, material_name):
+            calls.append(("exists", material_name))
+            return silicon
+
+    renderer = SimpleNamespace(
+        logger=SimpleNamespace(info=lambda *args, **kwargs: None),
+        pinfo=SimpleNamespace(
+            project_name="Project1",
+            design_name="dm_test",
+            desktop=SimpleNamespace(_desktop=object()),
+            project=SimpleNamespace(_project=FakeProject(), parent=SimpleNamespace(_desktop=object())),
+            design=SimpleNamespace(_design=object()),
+        ),
+    )
+
+    result = apply_cryo_silicon_material_properties(
+        renderer,
+        hfss_factory=lambda **kwargs: (_ for _ in ()).throw(AssertionError("fallback should not run")),
+        materials_factory=FakeMaterials,
+    )
+
+    assert result == {
+        "material": "silicon",
+        "permittivity": 11.45,
+        "dielectric_loss_tangent": 1e-07,
+        "project_name": "Project1",
+        "design_name": "dm_test",
+    }
+    assert silicon.permittivity == 11.45
+    assert silicon.dielectric_loss_tangent == 1e-7
+    assert calls == [
+        ("materials_init", True, True, True),
+        ("exists", "silicon"),
     ]
 
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -95,6 +96,7 @@ def apply_cryo_silicon_material_properties(
     permittivity: float = 11.45,
     loss_tangent: float = 1e-7,
     hfss_factory: Any | None = None,
+    materials_factory: Any | None = None,
 ) -> dict[str, float | str]:
     """Overwrite HFSS silicon properties with the cryogenic SQuADDS defaults.
 
@@ -110,34 +112,105 @@ def apply_cryo_silicon_material_properties(
     if not project_name or not design_name:
         raise ValueError("Renderer must be connected to an HFSS project and design before editing materials.")
 
+    result = {
+        "material": "silicon",
+        "permittivity": float(permittivity),
+        "dielectric_loss_tangent": float(loss_tangent),
+        "project_name": str(project_name),
+        "design_name": str(design_name),
+    }
+
+    class _LiveMaterialApp:
+        def __init__(self, source_renderer: Any):
+            live_pinfo = getattr(source_renderer, "pinfo", None)
+            live_project = getattr(live_pinfo, "project", None)
+            live_design = getattr(live_pinfo, "design", None)
+            live_desktop = getattr(live_pinfo, "desktop", None)
+
+            self.logger = getattr(source_renderer, "logger", logging.getLogger(__name__))
+            self._oproject = getattr(live_project, "_project", None)
+            self._odesign = getattr(live_design, "_design", None)
+            self._desktop = getattr(live_desktop, "_desktop", None)
+            if self._desktop is None:
+                self._desktop = getattr(getattr(live_project, "parent", None), "_desktop", None)
+            self.design_type = "HFSS"
+
+        @property
+        def odesktop(self):
+            return self._desktop
+
+        @property
+        def oproject(self):
+            return self._oproject
+
+        @property
+        def odesign(self):
+            return self._odesign
+
+        @property
+        def odefinition_manager(self):
+            if self._oproject is None:
+                return None
+            return self._oproject.GetDefinitionManager()
+
+        @property
+        def omaterial_manager(self):
+            definition_manager = self.odefinition_manager
+            if definition_manager is None:
+                return None
+            return definition_manager.GetManager("Material")
+
+        def evaluate_expression(self, expression):
+            return expression
+
+    if materials_factory is None:
+        try:
+            from ansys.aedt.core.modules.material_lib import Materials
+        except Exception:
+            Materials = None
+        materials_factory = Materials
+
+    if materials_factory is not None:
+        try:
+            live_materials = materials_factory(_LiveMaterialApp(renderer))
+            silicon = live_materials.exists_material("silicon")
+            if silicon:
+                silicon.permittivity = permittivity
+                silicon.dielectric_loss_tangent = loss_tangent
+                return result
+        except Exception:
+            # Fall back to opening a dedicated PyAEDT handle when the current
+            # renderer session does not expose enough state for Materials(...).
+            pass
+
     if hfss_factory is None:
         try:
-            from ansys.aedt.core import Hfss
+            from pyaedt import Hfss
         except Exception as exc:  # pragma: no cover - only exercised on the HFSS machine
             raise RuntimeError("PyAEDT is required to update driven-modal material properties.") from exc
         hfss_factory = Hfss
 
-    aedt = hfss_factory(
-        projectname=project_name,
-        designname=design_name,
-        solution_type="DrivenModal",
-        new_desktop_session=False,
-        close_on_exit=False,
-    )
+    aedt = None
     try:
-        silicon = aedt.materials.checkifmaterialexists("silicon")
+        aedt = hfss_factory(
+            project=project_name,
+            design=design_name,
+            solution_type="DrivenModal",
+            new_desktop=False,
+            close_on_exit=False,
+        )
+        silicon = aedt.materials.exists_material("silicon")
+        if not silicon:
+            silicon = aedt.materials.checkifmaterialexists("silicon")
         silicon.permittivity = permittivity
         silicon.dielectric_loss_tangent = loss_tangent
-        return {
-            "material": "silicon",
-            "permittivity": float(permittivity),
-            "dielectric_loss_tangent": float(loss_tangent),
-            "project_name": str(project_name),
-            "design_name": str(design_name),
-        }
+        return result
     finally:
-        if hasattr(aedt, "release_desktop"):
-            aedt.release_desktop(close_projects=False, close_desktop=False)
+        if aedt is not None and hasattr(aedt, "release_desktop"):
+            try:
+                aedt.release_desktop(close_projects=False, close_desktop=False)
+            except Exception:
+                pass
 
 
 def ensure_perfect_e_boundary(
