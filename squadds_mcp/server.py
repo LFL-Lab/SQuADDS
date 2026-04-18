@@ -138,12 +138,14 @@ def create_server() -> FastMCP:
     from squadds_mcp.tools.analysis import register_analysis_tools
     from squadds_mcp.tools.contribution import register_contribution_tools
     from squadds_mcp.tools.database import register_database_tools
+    from squadds_mcp.tools.generation import register_generation_tools
     from squadds_mcp.tools.interpolation import register_interpolation_tools
 
     register_database_tools(mcp)
     register_analysis_tools(mcp)
     register_interpolation_tools(mcp)
     register_contribution_tools(mcp)
+    register_generation_tools(mcp)
 
     # -- Register resources --
     from squadds_mcp.resources.layout_guide import register_layout_resources

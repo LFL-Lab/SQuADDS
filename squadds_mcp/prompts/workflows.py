@@ -178,7 +178,6 @@ Report the best design with clear geometry specs and expected performance.
         cavity_frequency: float = 6.98,
         coupling_g: float = 100.0,
         resonator_type: str = "quarter",
-        fab_uncertainty_GHz: float = 0.75,
     ) -> str:
         """Step-by-step workflow for designing a fab-ready multi-qubit chip.
 
@@ -197,8 +196,7 @@ Before proceeding, read these resources:
 - `squadds://chip-design-reference` — Full chip design reference
 
 ## DO NOT use `QubitCavity` class
-The `QubitCavity` class has known geometry issues (trace width mismatches,
-uncontrolled kinks, no charge line support). Build each component individually.
+The `QubitCavity` class has known geometry issues. Build each component individually.
 
 ---
 
@@ -208,9 +206,14 @@ uncontrolled kinks, no charge line support). Build each component individually.
 - Cavity frequency: {cavity_frequency} GHz
 - Coupling strength: {coupling_g} MHz
 - Resonator type: {resonator_type}
-- Fabrication uncertainty: ±{fab_uncertainty_GHz} GHz
 
-## Step 1: Search SQuADDS for the Closest Design
+## Step 1: Pre-Design Queries
+**AGENT ACTION REQUIRED:** Ask the user for the following layout parameters:
+1. What are the 50Ω matched `trace_width` and `trace_gap` for their specific layer stack (e.g., Si/Al, Sapphire/Nb)?
+2. How many readout/feedline launchpads do they want (e.g., pass-through with 2 ports, or reflective with 1 port)?
+3. What are the physical positions for these ports?
+
+## Step 2: Search SQuADDS for the Closest Design
 Call `find_closest_designs` with:
 - system_type: "qubit_cavity"
 - target_params: {{
@@ -232,55 +235,33 @@ These map directly to qiskit-metal component parameters:
   prime_width, prime_gap, second_width, second_gap
 - **Lj**: Josephson inductance in nH
 
-## Step 3: Compute Junction Geometry
+## Step 4: Compute Junction Geometry
 Based on the foundry's current density ($J_c$), JJ length, and minimum
-width constraints, compute $w_{{JJ}}$:
-- $L_J = \\Phi_0 / (2\\pi I_c)$, where $I_c = J_c \\times l_{{JJ}} \\times w_{{JJ}}$
-- Round to foundry resolution (e.g., nearest 10nm)
-- Enforce minimum width
-
-## Step 4: Spray Resonator Frequencies
-Compensate for $L_J$ uncertainty across {num_qubits} qubits:
-```python
-import numpy as np
-target_cav_freqs = np.linspace(
-    {cavity_frequency} - 2*{fab_uncertainty_GHz},
-    {cavity_frequency} + 2*{fab_uncertainty_GHz},
-    {num_qubits}
-)
-cpw_lengths = base_cpw_length * ({cavity_frequency} / target_cav_freqs)
-```
+width constraints, compute $w_{{JJ}}$.
 
 ## Step 5: Build the Layout in Qiskit-Metal
-Build each component individually using these qiskit-metal classes:
+**Use the `get_qiskit_metal_snippet` tool** to retrieve standardized Python code snippets to create shapes.
+You must use these snippets rather than inventing instantiation code yourself.
+
+Process:
 1. `DesignPlanar` — Set chip size (e.g., 5mm × 5mm)
-2. `LaunchpadWirebond` — Feedline ports (50Ω: trace_width=11.7um, trace_gap=5.1um)
-3. `RouteStraight` — Feedline connecting the two launchpads
-4. `LaunchpadWirebond` — Charge line ports
-5. For each qubit-cavity pair:
-   a. `TransmonCross` (from squadds.components.qubits) — with SQuADDS qubit options
-   b. `CoupledLineTee` — with SQuADDS coupler options, on feedline
-   c. `RouteMeander` — connecting CLT to qubit, with SQuADDS CPW options
+2. Obtain feedline/launchpad codes (`wirebond`, `feedline`) and place them using user's 50Ω parameters.
+3. For each qubit-cavity pair:
+   a. Get code snippet for `qubit` and place it using SQuADDS qubit options.
+   b. Get code snippet for `clt` and place it on the feedline.
+   c. Get code snippet for `cpw` and connect CLT to qubit.
+4. Get code snippet for `airbridge` and add airbridges.
 
 **CRITICAL trace width rule**: The qubit's `claw_cpw_width` MUST equal
 the RouteMeander's `trace_width`. Both should be the same value from
 the SQuADDS data_cpw options (typically 10um).
 
 ## Step 6: Fix Meander Kinks
-After creating all RouteMeanders, set lead straights to eliminate kinks:
-```python
-for cpw in cpw_objects:
-    cpw.options.lead.start_straight = '75um'
-    cpw.options.lead.end_straight = '50um'
-gui.rebuild()
-```
-Visually inspect each CPW — if kinks persist, increase these values.
+Visually inspect (`gui.rebuild()`). If there are kinks near CPW endpoints, tweak lead straight parameters.
 
 ## Step 7: Add Charge Lines
-Use `RouteAnchors` (NOT RouteMeander) for charge lines:
-- Place `OpenToGround` terminations near each qubit
-- Route from charge line ports to OTG using `RouteAnchors` with `fillet='80um'`
-- This avoids the forced 90° turns that RouteMeander would create
+Get `charge_line_otg` and `charge_line_route` code snippets.
+Use `RouteAnchors` to avoid forced 90° turns.
 
 ## Step 8: Assign Layers and Export GDS
 1. Set metal layer numbers per foundry (e.g., metal=3, charge_lines=6)

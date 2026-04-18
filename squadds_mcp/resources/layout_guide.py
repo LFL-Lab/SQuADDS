@@ -149,17 +149,18 @@ for cpw in cpw_objects:
 
 After changing, always `gui.rebuild()` and visually inspect.
 
-## 5. Impedance Considerations
+## 5. Feedlines & Impedance Matching
 
-- **Feedline**: Should be 50Ω matched. Typical dimensions for Si substrate:
-  `trace_width='11.7um'`, `trace_gap='5.1um'`
-- **Resonator/qubit CPW**: Higher impedance (~70–100Ω) is typical.
-  The SQuADDS database values handle this automatically.
-- **Charge lines**: Can use different impedance. Typical:
-  `trace_width='10um'`, `trace_gap='6um'`
-
-**Never mix 50Ω feedline dimensions with resonator dimensions** unless
-you intentionally want an impedance transformer.
+- **Impedance Matching (50Ω)**: Feedline traces are usually matched to 50Ω.
+  The required `trace_width` and `trace_gap` depend entirely on the user's
+  layer stack (e.g., Si/Al vs Sapphire/Nb).
+  👉 **Agent Action**: ALWAYS ask the user for their 50Ω `trace_width` and `trace_gap` dimensions for their specific substrate before creating a feedline.
+- **Port Topology**: Feedlines can be configuration in different ways.
+  👉 **Agent Action**: Ask the user:
+  1. How many readout/feedline launchpads do they want?
+  2. What are the rough positions (e.g., edge of the chip)?
+  3. Are the readout lines pass-through (2 ports per line) or reflective (1 port and 1 `OpenToGround` or short)?
+- **Resonator CPWs**: These are typically higher impedance (70–100Ω). The SQuADDS database options handle this. Do not mix matched feedline dimensions with resonator CPW dimensions.
 
 ## 6. Component Placement
 
@@ -195,14 +196,19 @@ Before exporting:
    ```
 4. Run DRC before sending to fab
 
-## 8. Junction Geometry
+## 8. Airbridges
+
+Airbridges are critical for preventing slot-line modes on CPW meanders and feedlines.
+- Use `AirbridgeGenerator` from `squadds.components.airbridge.airbridge_generator`.
+- Calculate `crossover_length` = `trace_width` + (2 × `trace_gap`).
+- Call `AirbridgeGenerator(design, target_comps=[meander_comp], crossover_length=[crossover_length], pitch=0.070, add_curved_ab=True)`
+
+## 9. Junction Geometry
 
 When computing Josephson junction dimensions:
 - $L_J = \\Phi_0 / (2\\pi I_c)$ where $I_c = J_c \\times l_{JJ} \\times w_{JJ}$
 - Round $w_{JJ}$ to your foundry's minimum resolution (often 10nm steps)
 - Enforce minimum width: `jj_width = max(computed_width, foundry_min)`
-- Spread resonator frequencies across the wafer to compensate for
-  $L_J$ fabrication uncertainty (see Tutorial 5 "spray" technique)
 """
 
     @mcp.resource("squadds://chip-design-reference")
@@ -265,20 +271,7 @@ def compute_JJ_width(Lj_nH, current_density_uA_um2, JJ_length_nm):
 
 Round to foundry resolution and enforce minimum width.
 
-## Phase 3: Frequency Spray (Multi-Qubit Chips)
-
-Compensate for Lj fabrication uncertainty:
-```python
-fab_error_GHz = 0.75
-target_cav_freqs = np.linspace(
-    w_cav - 2 * fab_error_GHz,
-    w_cav + 2 * fab_error_GHz,
-    num_qubits
-)
-cpw_lengths = base_length * (base_freq / target_cav_freqs)
-```
-
-## Phase 4: Build Design in Qiskit-Metal
+## Phase 3: Build Design in Qiskit-Metal
 
 ### Required imports:
 ```python
@@ -309,6 +302,27 @@ from squadds.components.qubits import TransmonCross
 ### Critical trace-width rule:
 The qubit connection pad's `claw_cpw_width` must equal the RouteMeander's
 `trace_width`. Both should typically be `10um` in SQuADDS designs.
+
+## Phase 4: Add Airbridges
+
+Add airbridges to CPW meanders to suppress parasitic modes.
+```python
+from squadds.components.airbridge.airbridge_generator import AirbridgeGenerator
+
+cpw_width = float(design.parse_value(cpw_opts.trace_width))
+cpw_gap = float(design.parse_value(cpw_opts.trace_gap))
+crossover_length = cpw_width + (2 * cpw_gap)
+
+AirbridgeGenerator(
+    design=design,
+    target_comps=cpw_objects,
+    crossover_length=[crossover_length],
+    min_spacing=0.005,
+    pitch=0.070,
+    add_curved_ab=True
+)
+gui.rebuild()
+```
 
 ## Phase 5: Export GDS
 
