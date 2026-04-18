@@ -165,6 +165,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="mcp_server.html">
+    MCP Server (AI Agents)
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="apidocs/index.html">
     Documentation
   </a>
@@ -177,13 +184,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="developer/index.html">
-    Developer Notes
-  </a>
-</li>
-
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -192,6 +192,13 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="developer/index.html">
+    Developer Notes
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="resources/simulations.html">
     Simulation Notes
@@ -378,6 +385,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="tutorials/index.html">
     Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="mcp_server.html">
+    MCP Server (AI Agents)
   </a>
 </li>
 
@@ -593,6 +607,17 @@
 <ul class="simple">
 <li><p><strong>Alpha Version 0.4.4</strong></p></li>
 </ul>
+<p><strong>MCP Server</strong></p>
+<ul class="simple">
+<li><p>Added a built-in <a class="reference external" href="https://modelcontextprotocol.io">Model Context Protocol (MCP)</a> server that lets AI coding assistants (Claude, Cursor, VS Code Copilot, Gemini, Codex) interact with the SQuADDS database through the standardized MCP protocol.</p></li>
+<li><p><strong>15 MCP Tools</strong>: Database browsing, design search (<code class="docutils literal notranslate"><span class="pre">find_closest_designs</span></code>), physics-based interpolation (<code class="docutils literal notranslate"><span class="pre">interpolate_design</span></code>), contributor info, and more.</p></li>
+<li><p><strong>6 MCP Resources</strong>: Version info, citation, component lists, dataset summaries, and a quick-reference guide for AI agents.</p></li>
+<li><p><strong>3 MCP Prompts</strong>: Guided workflow templates for designing qubit-cavity systems, exploring the database, and finding optimal designs.</p></li>
+<li><p>Run with <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">squadds-mcp</span></code> (stdio) or <code class="docutils literal notranslate"><span class="pre">SQUADDS_MCP_TRANSPORT=streamable-http</span> <span class="pre">uv</span> <span class="pre">run</span> <span class="pre">squadds-mcp</span></code> (HTTP).</p></li>
+<li><p>Works with Claude Desktop, Claude Code, Cursor, VS Code, Antigravity, Gemini CLI, and OpenAI Codex.</p></li>
+<li><p>Full documentation: <a class="reference external" href="https://github.com/LFL-Lab/SQuADDS/blob/master/MCP_README.md">MCP_README.md</a> and <a class="reference external" href="https://github.com/LFL-Lab/SQuADDS/blob/master/MCP_DEVELOPER_GUIDE.md">MCP_DEVELOPER_GUIDE.md</a>.</p></li>
+<li><p>Added CI workflows for MCP testing (nightly compatibility checks against latest PyPI SQuADDS) and automated sync notifications on new releases.</p></li>
+</ul>
 <p><strong>Refactor and Maintainability</strong></p>
 <ul class="simple">
 <li><p>Refactored large internal modules into smaller helper modules while preserving the public SQuADDS APIs.</p></li>
@@ -604,10 +629,12 @@
 <li><p>Added a dedicated <cite>integration-smoke</cite> workflow job that runs <cite>tests/mvp_test.py</cite> on GitHub Actions with live Hugging Face access enabled.</p></li>
 <li><p>Restored visible MVP smoke-test output in CI logs so collaborators can inspect the merged dataframe, closest-match result, interpolated design, and setup payloads directly.</p></li>
 <li><p>Improved test logging for integration debugging by using explicit pytest tracebacks/output settings in CI.</p></li>
+<li><p>Added MCP server unit tests (43 tests covering schemas, utilities, and server creation).</p></li>
 </ul>
 <p><strong>Dependencies</strong></p>
 <ul class="simple">
 <li><p>Updated the <cite>datasets</cite> floor and lockfile so live Hugging Face metadata with <cite>Json</cite> feature types remains compatible during MVP smoke tests.</p></li>
+<li><p>Added optional <code class="docutils literal notranslate"><span class="pre">mcp</span></code> dependency group: <code class="docutils literal notranslate"><span class="pre">mcp[cli]&gt;=1.9</span></code>, <code class="docutils literal notranslate"><span class="pre">pydantic&gt;=2.0</span></code>.</p></li>
 </ul>
 <p><strong>Bug Fixes</strong></p>
 <ul class="simple">
