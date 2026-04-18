@@ -134,6 +134,14 @@ Add newly touched files here as implementation progresses.
   - `ssh LFLLAB-CODEX ... uv run python .\\SQuADDS\\tutorials\\Tutorial-10_DrivenModal_Capacitance_Extraction.py` after deleting the `tutorial10-*-v3` checkpoint and HFSS project directories to force a fresh rerun
   - Outcome: increasing Tutorial 10 to `min_converged = 7` made the qubit-claw stage less stable. Attempts 1 and 2 failed with the usual HFSS COM analyze error `(-2147352567, 'Exception occurred.', ... -2147024349)`, and attempt 3 hung inside HFSS analyze without ever exporting artifacts or completing post-processing.
   - Conclusion: `min_converged = 7` is not a better working state on the current Windows validation machine. Keep `min_converged = 5` as the best-known runnable Tutorial 10 setting until AEDT cleanup or terminal modeling changes justify retesting higher convergence targets.
+- Windows/Ansys validation for Tutorial 11 at commits `6a1ef62`, `a1de63e`, `ea88a78`, `c9a10f9`, and `3f3607d`:
+  - `ssh LFLLAB-CODEX ... uv run python .\\SQuADDS\\tutorials\\Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py`
+  - Outcome at `6a1ef62`: the original coupled-system render crash was narrowed to `qubitcavity_left_cpw`; zeroing the left CPW fillet removed the old short-segment warning, but HFSS still rejected the polyline because the route overshot the end pin and immediately backtracked on itself.
+  - Outcome at `a1de63e`: `QubitCavity.make_cpws()` now preserves caller-provided `lead` and `meander` overrides, and Tutorial 11 explicitly sets `left_options.lead.end_straight = 0um`. This made the quarter-wave `qubitcavity_left_cpw` path simple (`is_simple=True`) locally and cleared the HFSS render failure on the Windows machine.
+  - Outcome at `ea88a78`: the quarter-wave HFSS solve reached post-processing, but the original fixed `4-9 GHz` sweep left the loaded resonance on the upper sweep boundary, so the FWHM-based `kappa` extraction failed.
+  - Outcome at `c9a10f9`: Tutorial 11 now uses a reference-guided sweep window and no longer crashes when the linewidth fit is unresolved; instead it writes a warning-backed summary with `NaN` placeholders for the unresolved coupled-system metrics.
+  - Outcome at `3f3607d`: Tutorial 11 now inherits Tutorial 10's fresh-design HFSS retry loop. On the Windows validation machine, the quarter-wave tutorial exits successfully end-to-end, writes raw/loaded Touchstone artifacts plus `comparison.csv`/`summary.json`, and reports the current unresolved-notch state instead of failing.
+  - Current quarter-wave status: infrastructure is working and artifacts are saved under `tutorials\\runtime\\drivenmodal_coupled_system\\checkpoints\\tutorial11-quarter-000-v2`, but the loaded `S21` notch still sits on the sweep edge, so `cavity_frequency_ghz`, `kappa_mhz`, `g_mhz`, and `chi_mhz` are intentionally recorded as `NaN` in the summary rather than as misleading values.
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
@@ -163,6 +171,11 @@ Update this section after every meaningful verification run with the exact comma
 - `calculate_g_from_chi(...)` intentionally returns a positive coupling magnitude using `abs(chi / denominator)` because the project is currently using `chi = f_e - f_r`, while the transmon `alpha` remains negative. Another agent should not flip this back without revisiting the sign convention across the whole workflow.
 - The coupled tutorial currently uses the existing SQuADDS qubit-capacitance + bare-Lj narrative to derive `f_q`, `alpha`, and the state-dependent junction inductances, while the resonator quantities come from driven-modal HFSS. That is intentional for this first executable tutorial pass.
 - The Windows validation run exposed a `pyEPR.load_ansys_project(...)` path-duplication bug when `QHFSSRenderer` is initialized with both `project_path` and `project_name`. The current tutorial workaround is to create a fresh project through the active Desktop session, reconnect, and save it to an absolute `.aedt` path before creating the driven-modal design.
+- Tutorial 11 is now structurally executable for the quarter-wave reference geometry, but its coupled-system extraction is still physics-limited rather than infra-limited. Another agent should investigate, in order:
+  - whether the current feedline/JJ port mapping is the correct observable for a strong notch in this geometry,
+  - whether the quarter-wave sweep window still needs another upward expansion because the loaded response remains monotonic up to the current upper edge,
+  - whether resonance detection should switch from raw FWHM on `|S21|` to a more robust complex-response / group-delay / circle-fit workflow for weakly perturbed notches.
+- Half-wave Tutorial 11 has not been validated yet. The current reference row used by the tutorial shows `cavity_frequency ≈ 26.9 GHz`, so another agent should expect very different sweep budgets from the quarter-wave case and should not assume the quarter-wave sweep window is reusable there.
 
 ## Next safe restart point
 
@@ -172,8 +185,9 @@ If a new agent needs to resume from here:
 2. Read the PRD and plan linked above.
 3. Confirm branch is still `codex/drivenmodal-api-prd`.
 4. Confirm unrelated untracked files remain untouched.
-5. Continue with the next red-green slice: dataset serialization helpers plus a generic resumable sweep executor that can drive more than the single-geometry tutorial flows.
-6. Use the current tutorial scripts as concrete Windows/Ansys validation clients when refining the public API instead of rewriting them from scratch.
+5. For the coupled-system branch, start from the saved quarter-wave Tutorial 11 artifacts and summary warning in `tutorials/runtime/drivenmodal_coupled_system/checkpoints/tutorial11-quarter-000-v2` before changing the tutorial again.
+6. Next red-green slice for Tutorial 11: turn the current warning-backed quarter-wave run into a trustworthy extracted `f_r/kappa/g/chi` workflow, then validate the half-wave path.
+7. Use the current tutorial scripts as concrete Windows/Ansys validation clients when refining the public API instead of rewriting them from scratch.
 
 ## Handoff notes for future agents
 
