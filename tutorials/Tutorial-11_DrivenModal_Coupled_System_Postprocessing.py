@@ -95,6 +95,7 @@ RESONATOR_TYPE = "quarter"  # change to "half" and rerun for the half-wave flow
 REFERENCE_INDEX = 0
 RUN_TAG = "v2"
 FORCE_RERUN = False
+MAX_SOLVE_ATTEMPTS = 3
 
 LAYER_STACK = DrivenModalLayerStackSpec(
     preset="squadds_hfss_v1",
@@ -446,78 +447,118 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
         s_df = pd.read_pickle(s_pickle)
         y_df = pd.read_pickle(y_pickle)
     else:
-        project_dir = HFSS_PROJECT_ROOT / request.metadata["run_id"]
-        project_dir.mkdir(parents=True, exist_ok=True)
-        design, layer_stack_csv = build_coupled_design(request, artifacts_dir / "layer_stack.csv")
+        base_project_dir = HFSS_PROJECT_ROOT / request.metadata["run_id"]
+        base_project_dir.mkdir(parents=True, exist_ok=True)
         dump_json(artifacts_dir / "resolved_layer_stack.json", {"rows": prepared["layer_stack"]})
+        port_specs = build_coupled_system_port_specs(request.design_payload)
+        port_list, jj_to_port = split_rendered_ports(port_specs)
+        last_error: BaseException | None = None
 
-        ansys_design_name = safe_ansys_design_name(request.metadata["run_id"])
+        for attempt in range(1, MAX_SOLVE_ATTEMPTS + 1):
+            attempt_label = f"attempt-{attempt:02d}"
+            attempt_id = f"{request.metadata['run_id']}-{attempt_label}"
+            attempt_project_dir = base_project_dir / attempt_label
+            attempt_project_dir.mkdir(parents=True, exist_ok=True)
+            attempt_log_path = artifacts_dir / f"solver_{attempt_label}.json"
+            ansys_design_name = safe_ansys_design_name(attempt_id)
+            renderer = None
+            try:
+                design, layer_stack_csv = build_coupled_design(request, artifacts_dir / "layer_stack.csv")
+                renderer = QHFSSRenderer(
+                    design,
+                    initiate=False,
+                    options=Dict(),
+                )
+                project_file = prepare_renderer_project(renderer, attempt_project_dir, attempt_id)
+                connect_renderer_to_new_ansys_design(
+                    renderer,
+                    ansys_design_name,
+                    "drivenmodal",
+                )
+                renderer.clean_active_design()
 
-        renderer = None
-        try:
-            renderer = QHFSSRenderer(
-                design,
-                initiate=False,
-                options=Dict(),
-            )
-            project_file = prepare_renderer_project(renderer, project_dir, request.metadata["run_id"])
-            connect_renderer_to_new_ansys_design(
-                renderer,
-                ansys_design_name,
-                "drivenmodal",
-            )
-            renderer.clean_active_design()
+                render_drivenmodal_design(
+                    renderer,
+                    selection=list(design.components.keys()),
+                    port_list=port_list or None,
+                    jj_to_port=jj_to_port or None,
+                    box_plus_buffer=True,
+                )
+                mark_stage_complete(manifest_path, "rendered")
 
-            port_specs = build_coupled_system_port_specs(request.design_payload)
-            port_list, jj_to_port = split_rendered_ports(port_specs)
-            render_drivenmodal_design(
-                renderer,
-                selection=list(design.components.keys()),
-                port_list=port_list or None,
-                jj_to_port=jj_to_port or None,
-                box_plus_buffer=True,
-            )
-            mark_stage_complete(manifest_path, "rendered")
+                setup = ensure_drivenmodal_setup(renderer, **request.setup.to_renderer_kwargs())
+                mark_stage_complete(manifest_path, "setup_created")
 
-            setup = ensure_drivenmodal_setup(renderer, **request.setup.to_renderer_kwargs())
-            mark_stage_complete(manifest_path, "setup_created")
+                run_drivenmodal_sweep(
+                    renderer,
+                    setup,
+                    setup_name=request.setup.name,
+                    **request.sweep.to_renderer_kwargs(),
+                )
+                mark_stage_complete(manifest_path, "sweep_completed")
 
-            run_drivenmodal_sweep(
-                renderer,
-                setup,
-                setup_name=request.setup.name,
-                **request.sweep.to_renderer_kwargs(),
-            )
-            mark_stage_complete(manifest_path, "sweep_completed")
-
-            s_df, y_df, z_df = renderer.get_all_Pparms_matrices(matrix_size=3)
-            s_df.to_pickle(s_pickle)
-            y_df.to_pickle(y_pickle)
-            z_df.to_pickle(z_pickle)
-            write_touchstone_from_dataframe(s_df, matrix_size=3, output_path=s3p_path)
-            dump_json(
-                artifacts_dir / "solver_artifacts.json",
-                {
-                    "raw_touchstone": str(s3p_path),
-                    "s_pickle": str(s_pickle),
-                    "y_pickle": str(y_pickle),
-                    "z_pickle": str(z_pickle),
-                    "layer_stack_csv": str(layer_stack_csv),
-                    "project_dir": str(project_dir),
-                    "project_file": str(project_file),
-                    "ansys_design_name": ansys_design_name,
-                },
-            )
-            mark_stage_complete(manifest_path, "artifacts_exported")
-        finally:
-            if renderer is not None:
-                try:
-                    renderer.disconnect_ansys()
-                except Exception as exc:  # pragma: no cover - best effort cleanup on the HFSS machine
-                    print(
-                        f"[{request.metadata['run_id']}] Warning while disconnecting Ansys: "
-                        f"{format_exception_for_console(exc)}"
-                    )
+                s_df, y_df, z_df = renderer.get_all_Pparms_matrices(matrix_size=3)
+                s_df.to_pickle(s_pickle)
+                y_df.to_pickle(y_pickle)
+                z_df.to_pickle(z_pickle)
+                write_touchstone_from_dataframe(s_df, matrix_size=3, output_path=s3p_path)
+                dump_json(
+                    artifacts_dir / "solver_artifacts.json",
+                    {
+                        "raw_touchstone": str(s3p_path),
+                        "s_pickle": str(s_pickle),
+                        "y_pickle": str(y_pickle),
+                        "z_pickle": str(z_pickle),
+                        "layer_stack_csv": str(layer_stack_csv),
+                        "project_dir": str(attempt_project_dir),
+                        "project_file": str(project_file),
+                        "ansys_design_name": ansys_design_name,
+                        "attempt_label": attempt_label,
+                    },
+                )
+                dump_json(
+                    attempt_log_path,
+                    {
+                        "status": "success",
+                        "attempt_label": attempt_label,
+                        "project_dir": str(attempt_project_dir),
+                        "project_file": str(project_file),
+                        "ansys_design_name": ansys_design_name,
+                    },
+                )
+                mark_stage_complete(manifest_path, "artifacts_exported")
+                break
+            except Exception as exc:
+                last_error = exc
+                dump_json(
+                    attempt_log_path,
+                    {
+                        "status": "failed",
+                        "attempt_label": attempt_label,
+                        "project_dir": str(attempt_project_dir),
+                        "ansys_design_name": ansys_design_name,
+                        "error": format_exception_for_console(exc),
+                    },
+                )
+                print(
+                    f"[{request.metadata['run_id']}] HFSS solve {attempt}/{MAX_SOLVE_ATTEMPTS} failed: "
+                    f"{format_exception_for_console(exc)}"
+                )
+                if attempt == MAX_SOLVE_ATTEMPTS:
+                    raise
+                print(f"[{request.metadata['run_id']}] Retrying with a fresh internal HFSS design...")
+            finally:
+                if renderer is not None:
+                    try:
+                        renderer.disconnect_ansys()
+                    except Exception as exc:  # pragma: no cover - best effort cleanup on the HFSS machine
+                        print(
+                            f"[{request.metadata['run_id']}] Warning while disconnecting Ansys: "
+                            f"{format_exception_for_console(exc)}"
+                        )
+        else:  # pragma: no cover - defensive guard for analyzers that exit the loop unexpectedly
+            if last_error is not None:
+                raise last_error
 
     freqs_hz, y_matrices = parameter_dataframe_to_tensor(y_df, matrix_size=3, parameter_prefix="Y")
     ground_load = 1j * 2 * np.pi * freqs_hz * reference["lj_ground_h"]
