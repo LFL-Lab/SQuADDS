@@ -40,6 +40,7 @@ from qiskit_metal.renderers.renderer_ansys.hfss_renderer import QHFSSRenderer
 from scipy.signal import peak_widths
 
 from squadds import SQuADDS_DB
+from squadds.components.coupled_systems import QubitCavity
 from squadds.core.json_utils import deserialize_json_like
 from squadds.simulations.drivenmodal.artifacts import load_run_manifest, mark_stage_complete
 from squadds.simulations.drivenmodal.coupled_postprocess import (
@@ -51,6 +52,7 @@ from squadds.simulations.drivenmodal.coupled_postprocess import (
     y_to_s,
 )
 from squadds.simulations.drivenmodal.design import (
+    apply_buffered_chip_bounds,
     connect_renderer_to_new_ansys_design,
     create_multiplanar_design,
     ensure_drivenmodal_setup,
@@ -72,7 +74,7 @@ from squadds.simulations.drivenmodal.models import (
     DrivenModalSweepSpec,
 )
 from squadds.simulations.drivenmodal.ports import build_coupled_system_port_specs, split_rendered_ports
-from squadds.simulations.utils import create_qubitcavity, string_to_float
+from squadds.simulations.utils import mesh_objects, string_to_float
 from squadds.simulations.utils_physics import find_g_a_fq
 
 try:
@@ -93,9 +95,10 @@ except ImportError:  # pragma: no cover - plain Python fallback for non-notebook
 # %%
 RESONATOR_TYPE = "quarter"  # change to "half" and rerun for the half-wave flow
 REFERENCE_INDEX = 0
-RUN_TAG = "v2"
+RUN_TAG = "v3"
 FORCE_RERUN = False
 MAX_SOLVE_ATTEMPTS = 3
+ROOT_COMPONENT_NAME = "qubit_cavity"
 
 LAYER_STACK = DrivenModalLayerStackSpec(
     preset="squadds_hfss_v1",
@@ -106,18 +109,18 @@ LAYER_STACK = DrivenModalLayerStackSpec(
 SETUP_TEMPLATE = DrivenModalSetupSpec(
     name="DrivenModalSetup",
     freq_ghz=6.0,
-    max_delta_s=0.02,
+    max_delta_s=0.005,
     max_passes=20,
     min_passes=2,
-    min_converged=2,
+    min_converged=5,
     pct_refinement=30,
-    basis_order=1,
+    basis_order=-1,
 )
 SWEEP_TEMPLATE = DrivenModalSweepSpec(
     name="DrivenModalSweep",
     start_ghz=5.0,
     stop_ghz=6.0,
-    count=4001,
+    count=20000,
     sweep_type="Interpolating",
     save_fields=False,
     interpolation_tol=0.005,
@@ -154,6 +157,203 @@ def stage_is_complete(manifest_path: Path, stage_name: str) -> bool:
 def dump_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str))
+
+
+def _design_component_name(design, raw_component: Any) -> str:
+    if isinstance(raw_component, str):
+        return raw_component
+    try:
+        component = design._components[int(raw_component)]
+    except Exception:
+        return str(raw_component)
+    return component.name
+
+
+def save_qiskit_layout_plot(
+    design,
+    *,
+    output_path: Path,
+    title: str,
+    port_mapping: dict[str, Any],
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig, ax = plt.subplots(figsize=(10, 4.5))
+
+    poly_table = design.qgeometry.tables.get("poly")
+    if poly_table is not None and len(poly_table) > 0:
+        for _, row in poly_table.iterrows():
+            geom = row["geometry"]
+            x, y = geom.exterior.xy
+            ax.fill(
+                x,
+                y,
+                alpha=0.35 if not row["subtract"] else 0.0,
+                color="tab:blue" if not row["subtract"] else "white",
+                edgecolor="black",
+                linewidth=0.6,
+            )
+
+    path_table = design.qgeometry.tables.get("path")
+    if path_table is not None and len(path_table) > 0:
+        for _, row in path_table.iterrows():
+            geom = row["geometry"]
+            x, y = geom.xy
+            ax.plot(
+                x,
+                y,
+                color="magenta" if not row["subtract"] else "gray",
+                linewidth=max(float(row["width"]) * 100, 1.0),
+            )
+
+    for port_kind, raw_spec in port_mapping.items():
+        component = raw_spec.get("component")
+        pin = raw_spec.get("pin")
+        if component not in design.components:
+            continue
+        pin_dict = getattr(design.components[component], "pins", {}).get(pin)
+        if pin_dict is None:
+            continue
+        middle = np.asarray(pin_dict["middle"], dtype=float)
+        ax.scatter(
+            [middle[0]],
+            [middle[1]],
+            s=36,
+            label=port_kind,
+        )
+        ax.annotate(port_kind, (middle[0], middle[1]), textcoords="offset points", xytext=(4, 4), fontsize=8)
+
+    ax.set_aspect("equal")
+    ax.set_xlabel("mm")
+    ax.set_ylabel("mm")
+    ax.set_title(title)
+    ax.grid(True, alpha=0.2)
+    ax.legend(loc="upper right", fontsize=8)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=220)
+    plt.close(fig)
+
+
+def build_design_geometry_summary(design) -> dict[str, Any]:
+    components_summary: list[dict[str, Any]] = []
+    for name, component in design.components.items():
+        try:
+            bounds = component.qgeometry_bounds()
+        except Exception:
+            bounds = None
+        components_summary.append(
+            {
+                "name": name,
+                "class_name": type(component).__name__,
+                "pins": sorted(getattr(component, "pins", {}).keys()),
+                "bounds": bounds,
+            }
+        )
+
+    qgeometry_summary: dict[str, list[dict[str, Any]]] = {}
+    for table_name, table in design.qgeometry.tables.items():
+        entries: list[dict[str, Any]] = []
+        for _, row in table.iterrows():
+            entry = {
+                "component": _design_component_name(design, row["component"]),
+                "name": row["name"],
+                "subtract": bool(row.get("subtract", False)),
+            }
+            if "width" in row:
+                entry["width"] = float(row["width"])
+            if "fillet" in row and not pd.isna(row["fillet"]):
+                entry["fillet"] = float(row["fillet"])
+            entries.append(entry)
+        qgeometry_summary[table_name] = entries
+
+    return {
+        "components": components_summary,
+        "qgeometry": qgeometry_summary,
+    }
+
+
+def build_design_options_payload(row: pd.Series) -> dict[str, Any]:
+    raw_design_options = row.get("design_options")
+    if raw_design_options is not None and not pd.isna(raw_design_options):
+        design_options = deserialize_json_like(raw_design_options)
+        return design_options
+
+    qubit_options = deserialize_json_like(row["design_options_qubit"])
+    cavity_split = deserialize_json_like(row["design_options_cavity_claw"])
+    coupler_options = cavity_split.get("coupler_options") or cavity_split.get("cplr_opts") or {}
+    cpw_options = cavity_split.get("cpw_options") or cavity_split.get("cpw_opts") or {}
+
+    return {
+        "qubit_options": qubit_options,
+        "cavity_claw_options": {
+            "coupler_type": row["coupler_type"],
+            "coupler_options": coupler_options,
+            "cpw_opts": {"left_options": cpw_options},
+        },
+    }
+
+
+def regularize_design_options_for_drivenmodal(design_options: dict[str, Any]) -> dict[str, Any]:
+    normalized = deserialize_json_like(design_options)
+    cavity_options = normalized["cavity_claw_options"]
+    cavity_options["coupler_type"] = cavity_options["coupler_type"]
+    cpw_key = "cpw_opts" if "cpw_opts" in cavity_options else "cpw_options"
+    left_options = cavity_options.setdefault(cpw_key, {}).setdefault("left_options", {})
+    left_options["fillet"] = "0um"
+    lead_options = left_options.setdefault("lead", {})
+    lead_options["end_straight"] = "0um"
+    return normalized
+
+
+def build_coupled_seed_mesh_lengths(design) -> dict[str, dict[str, Any]]:
+    non_subtract_objects: list[str] = []
+    for table_name in ["path", "poly"]:
+        table = design.qgeometry.tables.get(table_name)
+        if table is None:
+            continue
+        for _, row in table.iterrows():
+            if bool(row.get("subtract", False)):
+                continue
+            component_name = _design_component_name(design, row["component"])
+            if component_name == ROOT_COMPONENT_NAME:
+                continue
+            non_subtract_objects.append(f"{row['name']}_{component_name}")
+
+    unique_objects = sorted(set(non_subtract_objects))
+    if not unique_objects:
+        return {}
+    return {"mesh_coupled_system": {"objects": unique_objects, "MaxLength": "7um"}}
+
+
+def save_render_debug_artifacts(
+    *,
+    design,
+    artifacts_dir: Path,
+    title: str,
+    selection: list[str],
+    port_mapping: dict[str, Any],
+    port_list: list[tuple[str, str, float]],
+    jj_to_port: list[tuple[str, str, float, bool]],
+    open_pins: list[tuple[str, str]],
+    chip_bounds: dict[str, float],
+) -> None:
+    dump_json(artifacts_dir / "qiskit_geometry_summary.json", build_design_geometry_summary(design))
+    dump_json(
+        artifacts_dir / "resolved_render_inputs.json",
+        {
+            "selection": selection,
+            "port_mapping": port_mapping,
+            "open_pins": open_pins,
+            "port_list": port_list,
+            "jj_to_port": jj_to_port,
+            "chip_bounds": chip_bounds,
+        },
+    )
+    save_qiskit_layout_plot(
+        design,
+        output_path=artifacts_dir / "qiskit_layout.png",
+        title=title,
+        port_mapping=port_mapping,
+    )
 
 
 def prepare_renderer_project(renderer: QHFSSRenderer, project_dir: Path, project_name: str) -> Path:
@@ -214,30 +414,6 @@ def load_reference_row(resonator_type: str, index: int) -> pd.Series:
 
 def normalize_qubit_options(qubit_options: dict[str, Any]) -> dict[str, Any]:
     return deserialize_json_like(qubit_options)
-
-
-def normalize_cavity_options(cavity_options: dict[str, Any], coupler_type: str) -> dict[str, Any]:
-    normalized = deserialize_json_like(cavity_options)
-    normalized["coupler_type"] = coupler_type
-    return normalized
-
-
-def regularize_cavity_options_for_drivenmodal(cavity_options: dict[str, Any]) -> dict[str, Any]:
-    """Return a driven-modal-safe copy of the cavity options.
-
-    The quarter-wave coupled-system reference geometry can generate a sub-micron
-    starter jog on ``qubitcavity_left_cpw`` when the legacy ``49.9um`` fillet
-    is preserved. Q3D/eigenmode flows tolerate that path, but HFSS driven-modal
-    rendering can fail while drawing the left polyline. Zeroing that one fillet
-    keeps the route topology intact while removing the pathological segment.
-    """
-    normalized = deserialize_json_like(cavity_options)
-    cpw_key = "cpw_opts" if "cpw_opts" in normalized else "cpw_options"
-    left_options = normalized.setdefault(cpw_key, {}).setdefault("left_options", {})
-    left_options["fillet"] = "0um"
-    lead_options = left_options.setdefault("lead", {})
-    lead_options["end_straight"] = "0um"
-    return normalized
 
 
 def get_bare_lj_h(qubit_options: dict[str, Any]) -> float:
@@ -339,19 +515,17 @@ def build_reference_setup_and_sweep(row: pd.Series) -> tuple[DrivenModalSetupSpe
 def build_request(row: pd.Series) -> CoupledSystemDrivenModalRequest:
     run_id = f"tutorial11-{RESONATOR_TYPE}-{REFERENCE_INDEX:03d}-{RUN_TAG}"
     setup, sweep = build_reference_setup_and_sweep(row)
+    design_options = regularize_design_options_for_drivenmodal(build_design_options_payload(row))
     return CoupledSystemDrivenModalRequest(
         resonator_type=f"{RESONATOR_TYPE}_wave",
         design_payload={
-            "design_options_qubit": normalize_qubit_options(row["design_options_qubit"]),
-            "design_options_cavity_claw": regularize_cavity_options_for_drivenmodal(
-                normalize_cavity_options(row["design_options_cavity_claw"], row["coupler_type"])
-            ),
+            "design_options": design_options,
             "coupler_type": row["coupler_type"],
             "port_mapping": {
-                "feedline_input": {"component": "qubitcavity", "pin": "prime_start"},
-                "feedline_output": {"component": "qubitcavity", "pin": "prime_end"},
+                "feedline_input": {"component": ROOT_COMPONENT_NAME, "pin": "prime_start"},
+                "feedline_output": {"component": ROOT_COMPONENT_NAME, "pin": "prime_end"},
                 "jj": {
-                    "component": "qubitcavity_xmon",
+                    "component": f"{ROOT_COMPONENT_NAME}_xmon",
                     "pin": "rect_jj",
                     "metadata": {"hfss_target": "junction", "draw_inductor": False},
                 },
@@ -371,13 +545,7 @@ def build_coupled_design(request: CoupledSystemDrivenModalRequest, layer_stack_c
         layer_stack_path=layer_stack_csv,
         enable_renderers=True,
     )
-    create_qubitcavity(
-        Dict(
-            cavity_claw_options=Dict(request.design_payload["design_options_cavity_claw"]),
-            qubit_options=Dict(request.design_payload["design_options_qubit"]),
-        ),
-        design,
-    )
+    QubitCavity(design, ROOT_COMPONENT_NAME, options=Dict(request.design_payload["design_options"]))
     design.rebuild()
     return design, csv_path
 
@@ -452,6 +620,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
         dump_json(artifacts_dir / "resolved_layer_stack.json", {"rows": prepared["layer_stack"]})
         port_specs = build_coupled_system_port_specs(request.design_payload)
         port_list, jj_to_port = split_rendered_ports(port_specs)
+        open_pins: list[tuple[str, str]] = []
         last_error: BaseException | None = None
 
         for attempt in range(1, MAX_SOLVE_ATTEMPTS + 1):
@@ -464,6 +633,23 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
             renderer = None
             try:
                 design, layer_stack_csv = build_coupled_design(request, artifacts_dir / "layer_stack.csv")
+                selection = sorted(design.components.keys())
+                chip_bounds = apply_buffered_chip_bounds(
+                    design,
+                    selection=selection,
+                    chip_name=request.layer_stack.chip_name,
+                )
+                save_render_debug_artifacts(
+                    design=design,
+                    artifacts_dir=artifacts_dir,
+                    title=f"Tutorial 11 {RESONATOR_TYPE}-wave Qiskit Metal layout",
+                    selection=selection,
+                    port_mapping=request.design_payload["port_mapping"],
+                    port_list=port_list,
+                    jj_to_port=jj_to_port,
+                    open_pins=open_pins,
+                    chip_bounds=chip_bounds,
+                )
                 renderer = QHFSSRenderer(
                     design,
                     initiate=False,
@@ -479,12 +665,44 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
 
                 render_drivenmodal_design(
                     renderer,
-                    selection=list(design.components.keys()),
+                    selection=selection,
+                    open_pins=open_pins,
                     port_list=port_list or None,
                     jj_to_port=jj_to_port or None,
-                    box_plus_buffer=True,
+                    box_plus_buffer=False,
                 )
+                hfss_objects = sorted(getattr(renderer.pinfo.design.modeler, "object_names", []))
+                dump_json(
+                    artifacts_dir / f"hfss_render_{attempt_label}.json",
+                    {
+                        "attempt_label": attempt_label,
+                        "ansys_design_name": ansys_design_name,
+                        "project_file": str(project_file),
+                        "hfss_objects": hfss_objects,
+                    },
+                )
+                try:
+                    renderer.save_screenshot(path=str(artifacts_dir / f"hfss_render_{attempt_label}.png"), show=False)
+                except Exception as exc:
+                    dump_json(
+                        artifacts_dir / f"hfss_render_{attempt_label}_screenshot_error.json",
+                        {"error": format_exception_for_console(exc)},
+                    )
                 mark_stage_complete(manifest_path, "rendered")
+
+                if hasattr(renderer, "options"):
+                    renderer.options.max_mesh_length_port = "7um"
+                mesh_lengths = build_coupled_seed_mesh_lengths(design)
+                modeler = renderer.pinfo.design.modeler
+                available_objects = set(getattr(modeler, "object_names", []))
+                filtered_mesh_lengths = {}
+                for mesh_name, mesh_info in mesh_lengths.items():
+                    objects = [name for name in mesh_info["objects"] if name in available_objects]
+                    if objects:
+                        filtered_mesh_lengths[mesh_name] = {"objects": objects, "MaxLength": mesh_info["MaxLength"]}
+                if filtered_mesh_lengths:
+                    mesh_objects(modeler, filtered_mesh_lengths)
+                dump_json(artifacts_dir / "mesh_lengths.json", filtered_mesh_lengths)
 
                 setup = ensure_drivenmodal_setup(renderer, **request.setup.to_renderer_kwargs())
                 mark_stage_complete(manifest_path, "setup_created")
@@ -630,60 +848,48 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
 # ## Load the reference geometry from SQuADDS
 
 # %%
-ensure_runtime_dirs()
+def main() -> None:
+    ensure_runtime_dirs()
 
-reference_row = load_reference_row(RESONATOR_TYPE, REFERENCE_INDEX)
-reference_summary = build_reference_summary(reference_row)
-request = build_request(reference_row)
+    reference_row = load_reference_row(RESONATOR_TYPE, REFERENCE_INDEX)
+    reference_summary = build_reference_summary(reference_row)
+    request = build_request(reference_row)
 
-print("Selected resonator type:", RESONATOR_TYPE)
-print("Coupler type:", reference_row["coupler_type"])
-print("Reference cavity options:")
-print(json.dumps(deserialize_json_like(reference_row["design_options_cavity_claw"]), indent=2))
-print("\nReference qubit options:")
-print(json.dumps(deserialize_json_like(reference_row["design_options_qubit"]), indent=2))
+    print("Selected resonator type:", RESONATOR_TYPE)
+    print("Coupler type:", reference_row["coupler_type"])
+    print("Reference design options:")
+    print(json.dumps(deserialize_json_like(request.design_payload["design_options"]), indent=2))
 
+    coupled_result = run_coupled_demo(request, reference_summary)
+    comparison_df = pd.DataFrame(coupled_result["comparison_rows"])
+    display(comparison_df)
 
-# %% [markdown]
-# ## Run the driven-modal simulation and post-processing
+    ground_touchstone = rf.Network(coupled_result["artifacts"]["loaded_ground_touchstone"])
+    excited_touchstone = rf.Network(coupled_result["artifacts"]["loaded_excited_touchstone"])
 
-# %%
-coupled_result = run_coupled_demo(request, reference_summary)
-comparison_df = pd.DataFrame(coupled_result["comparison_rows"])
-display(comparison_df)
+    plt.figure(figsize=(10, 4))
+    plt.plot(ground_touchstone.f / 1e9, 20 * np.log10(np.abs(ground_touchstone.s[:, 1, 0])), label="ground-loaded S21")
+    plt.plot(
+        excited_touchstone.f / 1e9,
+        20 * np.log10(np.abs(excited_touchstone.s[:, 1, 0])),
+        label="excited-loaded S21",
+    )
+    plt.xlabel("Frequency (GHz)")
+    plt.ylabel("|S21| (dB)")
+    plt.title(f"Driven-modal loaded responses ({RESONATOR_TYPE}-wave)")
+    plt.grid(True, alpha=0.25)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
 
+    run_dir = Path(coupled_result["run_dir"])
+    layer_stack_df = pd.read_csv(run_dir / "artifacts" / "layer_stack.csv")
+    display(layer_stack_df)
 
-# %% [markdown]
-# ## Plot the loaded ground/excited resonator responses
-
-# %%
-ground_touchstone = rf.Network(coupled_result["artifacts"]["loaded_ground_touchstone"])
-excited_touchstone = rf.Network(coupled_result["artifacts"]["loaded_excited_touchstone"])
-
-plt.figure(figsize=(10, 4))
-plt.plot(ground_touchstone.f / 1e9, 20 * np.log10(np.abs(ground_touchstone.s[:, 1, 0])), label="ground-loaded S21")
-plt.plot(excited_touchstone.f / 1e9, 20 * np.log10(np.abs(excited_touchstone.s[:, 1, 0])), label="excited-loaded S21")
-plt.xlabel("Frequency (GHz)")
-plt.ylabel("|S21| (dB)")
-plt.title(f"Driven-modal loaded responses ({RESONATOR_TYPE}-wave)")
-plt.grid(True, alpha=0.25)
-plt.legend()
-plt.tight_layout()
-plt.show()
-
-
-# %% [markdown]
-# ## Inspect the layer stack and checkpoint outputs
-
-# %%
-run_dir = Path(coupled_result["run_dir"])
-layer_stack_df = pd.read_csv(run_dir / "artifacts" / "layer_stack.csv")
-display(layer_stack_df)
-
-print("Run directory:", run_dir)
-print("Artifacts:")
-for name, value in coupled_result["artifacts"].items():
-    print(f"  - {name}: {value}")
+    print("Run directory:", run_dir)
+    print("Artifacts:")
+    for name, value in coupled_result["artifacts"].items():
+        print(f"  - {name}: {value}")
 
 
 # %% [markdown]
@@ -712,3 +918,7 @@ for name, value in coupled_result["artifacts"].items():
 # - reusable postprocessing helpers that take the raw multiport response,
 #   terminate the JJ port with state-dependent inductances, and recover the
 #   SQuADDS-facing quantities without re-running HFSS.
+
+
+if __name__ == "__main__":
+    main()
