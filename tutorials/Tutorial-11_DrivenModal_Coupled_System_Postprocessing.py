@@ -231,6 +231,8 @@ def regularize_cavity_options_for_drivenmodal(cavity_options: dict[str, Any]) ->
     cpw_key = "cpw_opts" if "cpw_opts" in normalized else "cpw_options"
     left_options = normalized.setdefault(cpw_key, {}).setdefault("left_options", {})
     left_options["fillet"] = "0um"
+    lead_options = left_options.setdefault("lead", {})
+    lead_options["end_straight"] = "0um"
     return normalized
 
 

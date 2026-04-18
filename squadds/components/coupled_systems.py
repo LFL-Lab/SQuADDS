@@ -150,7 +150,12 @@ class QubitCavity(QComponent):
             adj_distance = 0
         jogs = OrderedDict()
         jogs[0] = ["R90", f"{adj_distance / (1.5)}um"]
-        left_opts.update({"lead": Dict(start_straight="150um", end_straight="50um", start_jogged_extension=jogs)})
+        lead_opts = Dict()
+        self.copier(lead_opts, left_opts.get("lead", Dict()))
+        lead_opts.setdefault("start_straight", "150um")
+        lead_opts.setdefault("end_straight", "50um")
+        lead_opts.setdefault("start_jogged_extension", jogs)
+        left_opts.update({"lead": lead_opts})
         left_opts.update(
             {
                 "pin_inputs": Dict(
@@ -159,14 +164,14 @@ class QubitCavity(QComponent):
                 )
             }
         )
-        left_opts.update(
-            {
-                "meander": Dict(
-                    spacing="100um",
-                    asymmetry=f"{adj_distance / (3)}um",  # need this to make CPW asymmetry half of the coupling length
-                )
-            }
-        )  # if not, sharp kinks occur in CPW :(
+        meander_opts = Dict()
+        self.copier(meander_opts, left_opts.get("meander", Dict()))
+        meander_opts.setdefault("spacing", "100um")
+        meander_opts.setdefault(
+            "asymmetry",
+            f"{adj_distance / (3)}um",  # need this to make CPW asymmetry half of the coupling length
+        )
+        left_opts.update({"meander": meander_opts})  # if not, sharp kinks occur in CPW :(
         # cpw = RouteMeander(design, 'cpw', options = opts)
 
         left_opts["pin_inputs"]["start_pin"].update({"component": self.qubit.name})
