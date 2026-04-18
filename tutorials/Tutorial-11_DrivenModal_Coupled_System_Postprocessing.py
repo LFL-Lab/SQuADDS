@@ -102,7 +102,7 @@ LAYER_STACK = DrivenModalLayerStackSpec(
     metal_thickness_um=0.2,
     substrate_thickness_um=750.0,
 )
-SETUP = DrivenModalSetupSpec(
+SETUP_TEMPLATE = DrivenModalSetupSpec(
     name="DrivenModalSetup",
     freq_ghz=6.0,
     max_delta_s=0.02,
@@ -112,13 +112,15 @@ SETUP = DrivenModalSetupSpec(
     pct_refinement=30,
     basis_order=1,
 )
-SWEEP = DrivenModalSweepSpec(
+SWEEP_TEMPLATE = DrivenModalSweepSpec(
     name="DrivenModalSweep",
-    start_ghz=4.0,
-    stop_ghz=9.0,
-    count=801,
-    sweep_type="Fast",
+    start_ghz=5.0,
+    stop_ghz=6.0,
+    count=4001,
+    sweep_type="Interpolating",
     save_fields=False,
+    interpolation_tol=0.005,
+    interpolation_max_solutions=400,
 )
 ARTIFACTS = DrivenModalArtifactPolicy(
     export_touchstone=True,
@@ -305,8 +307,36 @@ def build_reference_summary(row: pd.Series) -> dict[str, float]:
     }
 
 
+def build_reference_setup_and_sweep(row: pd.Series) -> tuple[DrivenModalSetupSpec, DrivenModalSweepSpec]:
+    cavity_frequency_ghz = float(row["cavity_frequency"]) / 1e9
+    sweep_padding_ghz = 0.5
+    return (
+        DrivenModalSetupSpec(
+            name=SETUP_TEMPLATE.name,
+            freq_ghz=cavity_frequency_ghz,
+            max_delta_s=SETUP_TEMPLATE.max_delta_s,
+            max_passes=SETUP_TEMPLATE.max_passes,
+            min_passes=SETUP_TEMPLATE.min_passes,
+            min_converged=SETUP_TEMPLATE.min_converged,
+            pct_refinement=SETUP_TEMPLATE.pct_refinement,
+            basis_order=SETUP_TEMPLATE.basis_order,
+        ),
+        DrivenModalSweepSpec(
+            name=SWEEP_TEMPLATE.name,
+            start_ghz=max(1.0, cavity_frequency_ghz - sweep_padding_ghz),
+            stop_ghz=cavity_frequency_ghz + sweep_padding_ghz,
+            count=SWEEP_TEMPLATE.count,
+            sweep_type=SWEEP_TEMPLATE.sweep_type,
+            save_fields=SWEEP_TEMPLATE.save_fields,
+            interpolation_tol=SWEEP_TEMPLATE.interpolation_tol,
+            interpolation_max_solutions=SWEEP_TEMPLATE.interpolation_max_solutions,
+        ),
+    )
+
+
 def build_request(row: pd.Series) -> CoupledSystemDrivenModalRequest:
     run_id = f"tutorial11-{RESONATOR_TYPE}-{REFERENCE_INDEX:03d}-{RUN_TAG}"
+    setup, sweep = build_reference_setup_and_sweep(row)
     return CoupledSystemDrivenModalRequest(
         resonator_type=f"{RESONATOR_TYPE}_wave",
         design_payload={
@@ -326,8 +356,8 @@ def build_request(row: pd.Series) -> CoupledSystemDrivenModalRequest:
             },
         },
         layer_stack=LAYER_STACK,
-        setup=SETUP,
-        sweep=SWEEP,
+        setup=setup,
+        sweep=sweep,
         artifacts=ARTIFACTS,
         metadata={"run_id": run_id},
     )
