@@ -95,7 +95,7 @@ except ImportError:  # pragma: no cover - plain Python fallback for non-notebook
 # %%
 RESONATOR_TYPE = "quarter"  # change to "half" and rerun for the half-wave flow
 REFERENCE_INDEX = 0
-RUN_TAG = "v5"
+RUN_TAG = "v6"
 FORCE_RERUN = False
 MAX_SOLVE_ATTEMPTS = 3
 ROOT_COMPONENT_NAME = "qubit_cavity"
@@ -106,6 +106,8 @@ DISCOVERY_SWEEP_PADDING_GHZ = 2.0
 DISCOVERY_SWEEP_COUNT = 4001
 DISCOVERY_MAX_DELTA_S = 0.01
 DISCOVERY_MIN_CONVERGED = 3
+MAX_DISCOVERY_ATTEMPTS = 4
+DISCOVERY_CENTER_SHIFT_GHZ = DISCOVERY_SWEEP_PADDING_GHZ
 
 FINAL_SWEEP_PADDING_GHZ = 0.5
 
@@ -560,6 +562,18 @@ def build_final_setup_and_sweep(center_frequency_ghz: float) -> tuple[DrivenModa
     )
 
 
+def build_shifted_discovery_setup_and_sweep(
+    center_frequency_ghz: float,
+) -> tuple[DrivenModalSetupSpec, DrivenModalSweepSpec]:
+    return build_setup_and_sweep(
+        center_frequency_ghz=center_frequency_ghz,
+        sweep_padding_ghz=DISCOVERY_SWEEP_PADDING_GHZ,
+        sweep_count=DISCOVERY_SWEEP_COUNT,
+        max_delta_s=DISCOVERY_MAX_DELTA_S,
+        min_converged=DISCOVERY_MIN_CONVERGED,
+    )
+
+
 def build_request(
     row: pd.Series,
     *,
@@ -637,6 +651,40 @@ def build_postprocessing_warning(ground_metrics: dict[str, float], excited_metri
             "Loaded resonance linewidth could not be extracted from the sampled |S21| trace. "
             "The notch is too narrow or too shallow for the current FWHM-based estimator."
         )
+    return None
+
+
+def select_resonance_for_followup(summary: dict[str, Any]) -> float | None:
+    extracted_frequency = summary["extracted"]["cavity_frequency_ghz"]
+    if extracted_frequency is not None and not np.isnan(extracted_frequency):
+        return float(extracted_frequency)
+
+    ground_metrics = summary["ground_metrics"]
+    if ground_metrics["resonance_at_sweep_edge"]:
+        return None
+
+    f_res_hz = ground_metrics["f_res_hz"]
+    if f_res_hz is None or np.isnan(f_res_hz):
+        return None
+    return float(f_res_hz) / 1e9
+
+
+def discovery_boundary_direction(
+    summary: dict[str, Any],
+    sweep: DrivenModalSweepSpec,
+) -> str | None:
+    ground_metrics = summary["ground_metrics"]
+    if not ground_metrics["resonance_at_sweep_edge"]:
+        return None
+
+    f_res_hz = ground_metrics["f_res_hz"]
+    if f_res_hz is None or np.isnan(f_res_hz):
+        return None
+    f_res_ghz = f_res_hz / 1e9
+    if abs(f_res_ghz - sweep.start_ghz) <= 1e-6:
+        return "lower"
+    if abs(f_res_ghz - sweep.stop_ghz) <= 1e-6:
+        return "upper"
     return None
 
 
@@ -908,30 +956,66 @@ def main() -> None:
     reference_row = load_reference_row(RESONATOR_TYPE, REFERENCE_INDEX)
     reference_summary = build_reference_summary(reference_row)
     discovery_setup, discovery_sweep = build_discovery_setup_and_sweep(reference_row)
-    discovery_request = build_request(
-        reference_row,
-        setup=discovery_setup,
-        sweep=discovery_sweep,
-        run_suffix="discovery",
-    )
+    discovery_center_ghz = discovery_setup.freq_ghz
 
     print("Selected resonator type:", RESONATOR_TYPE)
     print("Coupler type:", reference_row["coupler_type"])
     print("Reference design options:")
-    print(json.dumps(deserialize_json_like(discovery_request.design_payload["design_options"]), indent=2))
+    initial_request = build_request(
+        reference_row,
+        setup=discovery_setup,
+        sweep=discovery_sweep,
+        run_suffix="discovery-01",
+    )
+    print(json.dumps(deserialize_json_like(initial_request.design_payload["design_options"]), indent=2))
 
-    print("\nRunning discovery sweep...")
-    discovery_result = run_coupled_demo(discovery_request, reference_summary)
-    discovery_df = pd.DataFrame(discovery_result["comparison_rows"])
-    display(discovery_df)
+    discovery_result = None
+    discovery_frequency_ghz = None
+    for attempt in range(1, MAX_DISCOVERY_ATTEMPTS + 1):
+        discovery_setup, discovery_sweep = build_shifted_discovery_setup_and_sweep(discovery_center_ghz)
+        discovery_request = build_request(
+            reference_row,
+            setup=discovery_setup,
+            sweep=discovery_sweep,
+            run_suffix=f"discovery-{attempt:02d}",
+        )
+        print(
+            f"\nRunning discovery sweep attempt {attempt}/{MAX_DISCOVERY_ATTEMPTS} "
+            f"from {discovery_sweep.start_ghz:.6f} to {discovery_sweep.stop_ghz:.6f} GHz..."
+        )
+        discovery_result = run_coupled_demo(discovery_request, reference_summary)
+        discovery_df = pd.DataFrame(discovery_result["comparison_rows"])
+        display(discovery_df)
 
-    discovered_frequency_ghz = discovery_result["extracted"]["cavity_frequency_ghz"]
-    if np.isnan(discovered_frequency_ghz):
+        discovery_frequency_ghz = select_resonance_for_followup(discovery_result)
+        if discovery_frequency_ghz is not None:
+            break
+
+        direction = discovery_boundary_direction(discovery_result, discovery_sweep)
+        if direction is None:
+            break
+
+        if direction == "lower":
+            discovery_center_ghz = max(
+                1.0 + DISCOVERY_SWEEP_PADDING_GHZ,
+                discovery_center_ghz - DISCOVERY_CENTER_SHIFT_GHZ,
+            )
+        else:
+            discovery_center_ghz += DISCOVERY_CENTER_SHIFT_GHZ
+        print(
+            "Discovery notch remained on the "
+            f"{direction} sweep boundary; shifting the discovery center to {discovery_center_ghz:.6f} GHz."
+        )
+
+    if discovery_frequency_ghz is None:
         coupled_result = discovery_result
-        print("Discovery sweep did not resolve a cavity frequency, so the final high-resolution sweep was skipped.")
+        print(
+            "Discovery sweeps did not bracket a cavity resonance well enough for the final "
+            "high-resolution sweep."
+        )
     else:
-        print(f"Discovery sweep located cavity resonance near {discovered_frequency_ghz:.6f} GHz")
-        final_setup, final_sweep = build_final_setup_and_sweep(discovered_frequency_ghz)
+        print(f"Discovery sweep located cavity resonance near {discovery_frequency_ghz:.6f} GHz")
+        final_setup, final_sweep = build_final_setup_and_sweep(discovery_frequency_ghz)
         final_request = build_request(
             reference_row,
             setup=final_setup,
