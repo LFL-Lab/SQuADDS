@@ -28,6 +28,15 @@ from .models import (
     DrivenModalSetupSpec,
     DrivenModalSweepSpec,
 )
+from .qubit_admittance import (
+    bare_lj_to_ej_ghz,
+    capacitance_to_ec_ghz,
+    combine_port_admittance_with_jj,
+    extract_parallel_mode_from_total_admittance,
+    extract_qubit_from_port_admittance,
+    jj_parallel_admittance,
+    jj_parallel_impedance,
+)
 
 __all__ = [
     "LAYER_STACK_COLUMNS",
@@ -48,10 +57,17 @@ __all__ = [
     "DrivenModalRunManifest",
     "DrivenModalSetupSpec",
     "DrivenModalSweepSpec",
+    "bare_lj_to_ej_ghz",
     "build_layer_stack_dataframe",
+    "capacitance_to_ec_ghz",
     "maxwell_capacitance_dataframe",
     "network_from_parameter_dataframe",
     "parameter_dataframe_to_tensor",
+    "combine_port_admittance_with_jj",
+    "extract_parallel_mode_from_total_admittance",
+    "extract_qubit_from_port_admittance",
+    "jj_parallel_admittance",
+    "jj_parallel_impedance",
     "resolve_layer_stack",
     "terminate_port_y",
     "write_qiskit_layer_stack_csv",

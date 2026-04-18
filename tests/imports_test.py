@@ -17,6 +17,7 @@ MODULES = [
     "squadds.simulations.drivenmodal.hfss_data",
     "squadds.simulations.drivenmodal.capacitance",
     "squadds.simulations.drivenmodal.coupled_postprocess",
+    "squadds.simulations.drivenmodal.qubit_admittance",
     "squadds.simulations.drivenmodal.models",
     "squadds.simulations.drivenmodal.layer_stack",
     "squadds.core.utils",

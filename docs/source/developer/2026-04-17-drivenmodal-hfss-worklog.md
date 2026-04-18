@@ -70,10 +70,13 @@ This file is the single source of truth for active implementation status, handof
 - `tests/test_drivenmodal_coupled_postprocess.py`
 - `squadds/simulations/drivenmodal/design.py`
 - `squadds/simulations/drivenmodal/hfss_data.py`
+- `squadds/simulations/drivenmodal/qubit_admittance.py`
 - `tests/test_drivenmodal_design.py`
 - `tests/test_drivenmodal_hfss_data.py`
+- `tests/test_drivenmodal_qubit_admittance.py`
 - `tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py`
 - `tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py`
+- `tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py`
 
 Add newly touched files here as implementation progresses.
 
@@ -185,6 +188,27 @@ Add newly touched files here as implementation progresses.
   - Added an explicit `apply_cryo_silicon_material_properties(...)` helper in `squadds/simulations/drivenmodal/design.py`.
   - Tutorial 10 and Tutorial 11 now call that helper immediately after connecting the live HFSS renderer, and save `material_properties.json` next to the other run artifacts.
   - This aligns driven-modal HFSS with the existing eigenmode/Q3D convention of using cryogenic silicon (`epsilon_r = 11.45`, `loss_tangent = 1e-7`) instead of the AEDT default room-temperature material.
+- Tutorial 12 qubit-port admittance groundwork on 2026-04-18:
+  - Added `squadds/simulations/drivenmodal/qubit_admittance.py` with reusable helpers for:
+    - parallel `R || L || C` JJ admittance/impedance,
+    - combining the HFSS environment admittance `Y33` with the JJ surrogate,
+    - extracting the linear mode from the `Im[Y33_total] = 0` crossing,
+    - computing transmon `f01` and anharmonicity through `scqubits` rather than approximate closed-form formulas.
+  - Added `tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py`, which reuses Tutorial 11's geometry/render/HFSS/export pipeline but centers the driven-modal sweep around the expected qubit band and post-processes the saved `Y33` admittance instead of the loaded cavity `S21`.
+  - Local verification for the new qubit-admittance slice:
+    - `uv run python -m py_compile tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py` -> pass
+    - `uv run pytest tests/test_drivenmodal_qubit_admittance.py tests/imports_test.py -q --tb=short` -> pass, 29 passed, 4 upstream Qiskit Metal warnings
+    - `uv run --extra dev ruff check squadds/simulations/drivenmodal/qubit_admittance.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py tests/test_drivenmodal_qubit_admittance.py tests/imports_test.py` -> pass
+    - `uv run --extra dev ruff format --check squadds/simulations/drivenmodal/qubit_admittance.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py tests/test_drivenmodal_qubit_admittance.py tests/imports_test.py` -> pass
+- Local JJ resistance sensitivity check on 2026-04-18 using `tutorial11-quarter-000-v6-zoom-8to9-22000` raw Touchstone:
+  - For realistic sub-gap resistance values (`R_J >= 50 kΩ`), the cavity/qubit resonance frequency is effectively unchanged and the linewidth moves only by a few kHz to a few tens of kHz.
+  - Example at `C_J = 2 fF`, `LJ_g`:
+    - `R_J = ∞` -> `f_r ≈ 8.588117642 GHz`, `kappa ≈ 0.069667 MHz`
+    - `R_J = 100 kΩ` -> same `f_r`, `kappa ≈ 0.071089 MHz`
+    - `R_J = 50 kΩ` -> same `f_r`, `kappa ≈ 0.074319 MHz`
+    - `R_J = 10 kΩ` -> same `f_r`, `kappa ≈ 0.127802 MHz`
+    - `R_J = 1 kΩ` -> `f_r` finally shifts by `≈ -136 kHz`, `kappa ≈ 0.630695 MHz`
+  - Interpretation: a configurable `R_J` is physically reasonable and useful as a loss knob, but it is not the main explanation for the current resonance mismatch. Tutorial 12 should therefore support `R_J`, while treating `L_J` and `C_J` as the dominant frequency-setting terms.
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
@@ -219,6 +243,14 @@ Update this section after every meaningful verification run with the exact comma
   - whether the actual HFSS project object/material assignment should be exported directly from the live renderer session for stronger render-level verification,
   - whether resonance detection should switch from raw FWHM on `|S21|` to a more robust complex-response / group-delay / circle-fit workflow if the final dense sweep still leaves `chi` numerically pinned to zero.
   The 2026-04-18 local `L || C` sweep strongly suggests the third bullet is now the right next move: the loaded cavity resonance is real, but the `LJ_g`/`LJ_e` split is only about one frequency bin in the current zoomed Touchstone.
+- The 2026-04-18 `R || L || C` sensitivity pass adds an important refinement:
+  - realistic `R_J` values do not materially move the extracted resonance frequency on the current Touchstone data,
+  - so `R_J` should be kept as an optional dissipation parameter rather than treated as the missing ingredient for matching `f_r`.
+- Tutorial 12 is now the next validation slice after the cryogenic cavity rerun:
+  - reuse Tutorial 11's validated 3-port geometry/render path,
+  - sweep the qubit-frequency band,
+  - read `Y33`,
+  - extract the linear qubit pole and then compute `f01` / `alpha` via `scqubits`.
 - Half-wave Tutorial 11 has not been validated yet. The current reference row used by the tutorial shows `cavity_frequency ≈ 26.9 GHz`, so another agent should expect very different sweep budgets from the quarter-wave case and should not assume the quarter-wave sweep window is reusable there.
 
 ## Next safe restart point
