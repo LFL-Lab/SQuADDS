@@ -173,7 +173,14 @@ def apply_cryo_silicon_material_properties(
     if materials_factory is not None:
         try:
             live_materials = materials_factory(_LiveMaterialApp(renderer))
-            silicon = live_materials.exists_material("silicon")
+            silicon = None
+            material_keys = getattr(live_materials, "material_keys", {})
+            if isinstance(material_keys, dict):
+                silicon = material_keys.get("silicon")
+                if silicon is None:
+                    silicon = material_keys.get("silicon".casefold())
+            if silicon is None and hasattr(live_materials, "_aedmattolibrary"):
+                silicon = live_materials._aedmattolibrary("silicon")
             if silicon:
                 silicon.permittivity = permittivity
                 silicon.dielectric_loss_tangent = loss_tangent

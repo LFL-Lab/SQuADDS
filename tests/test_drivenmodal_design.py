@@ -184,10 +184,7 @@ def test_apply_cryo_silicon_material_properties_prefers_live_renderer_session():
     class FakeMaterials:
         def __init__(self, app):
             calls.append(("materials_init", bool(app.odesktop), bool(app.oproject), bool(app.odesign)))
-
-        def exists_material(self, material_name):
-            calls.append(("exists", material_name))
-            return silicon
+            self.material_keys = {"silicon": silicon}
 
     renderer = SimpleNamespace(
         logger=SimpleNamespace(info=lambda *args, **kwargs: None),
@@ -217,7 +214,6 @@ def test_apply_cryo_silicon_material_properties_prefers_live_renderer_session():
     assert silicon.dielectric_loss_tangent == 1e-7
     assert calls == [
         ("materials_init", True, True, True),
-        ("exists", "silicon"),
     ]
 
 
