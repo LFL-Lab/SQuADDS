@@ -95,13 +95,19 @@ except ImportError:  # pragma: no cover - plain Python fallback for non-notebook
 # %%
 RESONATOR_TYPE = "quarter"  # change to "half" and rerun for the half-wave flow
 REFERENCE_INDEX = 0
-RUN_TAG = "v4"
+RUN_TAG = "v5"
 FORCE_RERUN = False
 MAX_SOLVE_ATTEMPTS = 3
 ROOT_COMPONENT_NAME = "qubit_cavity"
 FEEDLINE_COMPONENT_NAME = "feedline"
 WIREBOND_COMPONENT_NAMES = ("wb_top", "wb_bottom")
-DISCOVERY_MODE = True
+
+DISCOVERY_SWEEP_PADDING_GHZ = 2.0
+DISCOVERY_SWEEP_COUNT = 4001
+DISCOVERY_MAX_DELTA_S = 0.01
+DISCOVERY_MIN_CONVERGED = 3
+
+FINAL_SWEEP_PADDING_GHZ = 0.5
 
 LAYER_STACK = DrivenModalLayerStackSpec(
     preset="squadds_hfss_v1",
@@ -501,16 +507,18 @@ def build_reference_summary(row: pd.Series) -> dict[str, float]:
     }
 
 
-def build_reference_setup_and_sweep(row: pd.Series) -> tuple[DrivenModalSetupSpec, DrivenModalSweepSpec]:
-    cavity_frequency_ghz = float(row["cavity_frequency"]) / 1e9
-    sweep_padding_ghz = 2.0 if DISCOVERY_MODE else 0.5
-    sweep_count = 4001 if DISCOVERY_MODE else SWEEP_TEMPLATE.count
-    max_delta_s = 0.01 if DISCOVERY_MODE else SETUP_TEMPLATE.max_delta_s
-    min_converged = 3 if DISCOVERY_MODE else SETUP_TEMPLATE.min_converged
+def build_setup_and_sweep(
+    *,
+    center_frequency_ghz: float,
+    sweep_padding_ghz: float,
+    sweep_count: int,
+    max_delta_s: float,
+    min_converged: int,
+) -> tuple[DrivenModalSetupSpec, DrivenModalSweepSpec]:
     return (
         DrivenModalSetupSpec(
             name=SETUP_TEMPLATE.name,
-            freq_ghz=cavity_frequency_ghz,
+            freq_ghz=center_frequency_ghz,
             max_delta_s=max_delta_s,
             max_passes=SETUP_TEMPLATE.max_passes,
             min_passes=SETUP_TEMPLATE.min_passes,
@@ -520,8 +528,8 @@ def build_reference_setup_and_sweep(row: pd.Series) -> tuple[DrivenModalSetupSpe
         ),
         DrivenModalSweepSpec(
             name=SWEEP_TEMPLATE.name,
-            start_ghz=max(1.0, cavity_frequency_ghz - sweep_padding_ghz),
-            stop_ghz=cavity_frequency_ghz + sweep_padding_ghz,
+            start_ghz=max(1.0, center_frequency_ghz - sweep_padding_ghz),
+            stop_ghz=center_frequency_ghz + sweep_padding_ghz,
             count=sweep_count,
             sweep_type=SWEEP_TEMPLATE.sweep_type,
             save_fields=SWEEP_TEMPLATE.save_fields,
@@ -531,9 +539,35 @@ def build_reference_setup_and_sweep(row: pd.Series) -> tuple[DrivenModalSetupSpe
     )
 
 
-def build_request(row: pd.Series) -> CoupledSystemDrivenModalRequest:
-    run_id = f"tutorial11-{RESONATOR_TYPE}-{REFERENCE_INDEX:03d}-{RUN_TAG}"
-    setup, sweep = build_reference_setup_and_sweep(row)
+def build_discovery_setup_and_sweep(row: pd.Series) -> tuple[DrivenModalSetupSpec, DrivenModalSweepSpec]:
+    cavity_frequency_ghz = float(row["cavity_frequency"]) / 1e9
+    return build_setup_and_sweep(
+        center_frequency_ghz=cavity_frequency_ghz,
+        sweep_padding_ghz=DISCOVERY_SWEEP_PADDING_GHZ,
+        sweep_count=DISCOVERY_SWEEP_COUNT,
+        max_delta_s=DISCOVERY_MAX_DELTA_S,
+        min_converged=DISCOVERY_MIN_CONVERGED,
+    )
+
+
+def build_final_setup_and_sweep(center_frequency_ghz: float) -> tuple[DrivenModalSetupSpec, DrivenModalSweepSpec]:
+    return build_setup_and_sweep(
+        center_frequency_ghz=center_frequency_ghz,
+        sweep_padding_ghz=FINAL_SWEEP_PADDING_GHZ,
+        sweep_count=SWEEP_TEMPLATE.count,
+        max_delta_s=SETUP_TEMPLATE.max_delta_s,
+        min_converged=SETUP_TEMPLATE.min_converged,
+    )
+
+
+def build_request(
+    row: pd.Series,
+    *,
+    setup: DrivenModalSetupSpec,
+    sweep: DrivenModalSweepSpec,
+    run_suffix: str,
+) -> CoupledSystemDrivenModalRequest:
+    run_id = f"tutorial11-{RESONATOR_TYPE}-{REFERENCE_INDEX:03d}-{RUN_TAG}-{run_suffix}"
     design_options = regularize_design_options_for_drivenmodal(build_design_options_payload(row))
     return CoupledSystemDrivenModalRequest(
         resonator_type=f"{RESONATOR_TYPE}_wave",
@@ -873,16 +907,41 @@ def main() -> None:
 
     reference_row = load_reference_row(RESONATOR_TYPE, REFERENCE_INDEX)
     reference_summary = build_reference_summary(reference_row)
-    request = build_request(reference_row)
+    discovery_setup, discovery_sweep = build_discovery_setup_and_sweep(reference_row)
+    discovery_request = build_request(
+        reference_row,
+        setup=discovery_setup,
+        sweep=discovery_sweep,
+        run_suffix="discovery",
+    )
 
     print("Selected resonator type:", RESONATOR_TYPE)
     print("Coupler type:", reference_row["coupler_type"])
     print("Reference design options:")
-    print(json.dumps(deserialize_json_like(request.design_payload["design_options"]), indent=2))
+    print(json.dumps(deserialize_json_like(discovery_request.design_payload["design_options"]), indent=2))
 
-    coupled_result = run_coupled_demo(request, reference_summary)
-    comparison_df = pd.DataFrame(coupled_result["comparison_rows"])
-    display(comparison_df)
+    print("\nRunning discovery sweep...")
+    discovery_result = run_coupled_demo(discovery_request, reference_summary)
+    discovery_df = pd.DataFrame(discovery_result["comparison_rows"])
+    display(discovery_df)
+
+    discovered_frequency_ghz = discovery_result["extracted"]["cavity_frequency_ghz"]
+    if np.isnan(discovered_frequency_ghz):
+        coupled_result = discovery_result
+        print("Discovery sweep did not resolve a cavity frequency, so the final high-resolution sweep was skipped.")
+    else:
+        print(f"Discovery sweep located cavity resonance near {discovered_frequency_ghz:.6f} GHz")
+        final_setup, final_sweep = build_final_setup_and_sweep(discovered_frequency_ghz)
+        final_request = build_request(
+            reference_row,
+            setup=final_setup,
+            sweep=final_sweep,
+            run_suffix="final",
+        )
+        print("Running final high-resolution sweep...")
+        coupled_result = run_coupled_demo(final_request, reference_summary)
+        comparison_df = pd.DataFrame(coupled_result["comparison_rows"])
+        display(comparison_df)
 
     ground_touchstone = rf.Network(coupled_result["artifacts"]["loaded_ground_touchstone"])
     excited_touchstone = rf.Network(coupled_result["artifacts"]["loaded_excited_touchstone"])
