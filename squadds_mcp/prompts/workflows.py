@@ -237,7 +237,7 @@ These map directly to qiskit-metal component parameters:
 
 ## Step 4: Compute Junction Geometry
 Based on the foundry's current density ($J_c$), JJ length, and minimum
-width constraints, compute $w_{{JJ}}$.
+width constraints for a **Dolan style JJ**, compute $w_{{JJ}}$.
 
 ## Step 5: Build the Layout in Qiskit-Metal
 **Use the `get_qiskit_metal_snippet` tool** to retrieve standardized Python code snippets to create shapes.

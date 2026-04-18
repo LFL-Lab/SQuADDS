@@ -205,7 +205,7 @@ Airbridges are critical for preventing slot-line modes on CPW meanders and feedl
 
 ## 9. Junction Geometry
 
-When computing Josephson junction dimensions:
+When computing Josephson junction dimensions (specifically for **Dolan style JJs**):
 - $L_J = \\Phi_0 / (2\\pi I_c)$ where $I_c = J_c \\times l_{JJ} \\times w_{JJ}$
 - Round $w_{JJ}$ to your foundry's minimum resolution (often 10nm steps)
 - Enforce minimum width: `jj_width = max(computed_width, foundry_min)`
@@ -255,7 +255,7 @@ LJs = analyzer.get_Ljs(results)                    # Josephson inductance in nH
 
 ## Phase 2: Compute Junction Geometry
 
-Given your foundry's constraints (JJ length, current densities, min width):
+Given your foundry's constraints (JJ length, current densities, min width) for a **Dolan style** junction:
 
 ```python
 import numpy as np
