@@ -38,6 +38,8 @@ import pandas as pd
 import scqubits as scq
 import skrf as rf
 from qiskit_metal import Dict
+from qiskit_metal.qlibrary.terminations.open_to_ground import OpenToGround
+from qiskit_metal.qlibrary.tlines.straight_path import RouteStraight
 from qiskit_metal.renderers.renderer_ansys.hfss_renderer import QHFSSRenderer
 from scipy.signal import peak_widths
 
@@ -55,13 +57,18 @@ from squadds.simulations.drivenmodal.coupled_postprocess import (
 )
 from squadds.simulations.drivenmodal.design import (
     apply_buffered_chip_bounds,
+    apply_cryo_silicon_material_properties,
     connect_renderer_to_new_ansys_design,
     create_multiplanar_design,
     ensure_drivenmodal_setup,
+    ensure_perfect_e_boundary,
     format_exception_for_console,
     render_drivenmodal_design,
     run_drivenmodal_sweep,
     safe_ansys_design_name,
+    save_renderer_project,
+    simplify_collinear_path_points,
+    snapshot_boundary_assignments,
 )
 from squadds.simulations.drivenmodal.hfss_data import (
     parameter_dataframe_to_tensor,
@@ -102,7 +109,8 @@ FORCE_RERUN = False
 MAX_SOLVE_ATTEMPTS = 3
 ROOT_COMPONENT_NAME = "qubit_cavity"
 FEEDLINE_COMPONENT_NAME = "feedline"
-WIREBOND_COMPONENT_NAMES = ("wb_top", "wb_bottom")
+RENDER_LAUNCHERS = False
+FEEDLINE_OTG_COMPONENT_NAMES = ("feedline_top_otg", "feedline_bottom_otg")
 
 DISCOVERY_SWEEP_PADDING_GHZ = 2.0
 DISCOVERY_SWEEP_COUNT = 4001
@@ -285,6 +293,10 @@ def build_design_geometry_summary(design) -> dict[str, Any]:
 
 
 def build_design_options_payload(row: pd.Series) -> dict[str, Any]:
+    raw_design_options = row.get("design_options")
+    if raw_design_options is not None and not pd.isna(raw_design_options):
+        return deserialize_json_like(raw_design_options)
+
     if "design_options_qubit" in row and "design_options_cavity_claw" in row:
         qubit_options = deserialize_json_like(row["design_options_qubit"])
         cavity_split = deserialize_json_like(row["design_options_cavity_claw"])
@@ -300,10 +312,6 @@ def build_design_options_payload(row: pd.Series) -> dict[str, Any]:
             },
         }
 
-    raw_design_options = row.get("design_options")
-    if raw_design_options is not None and not pd.isna(raw_design_options):
-        return deserialize_json_like(raw_design_options)
-
     raise KeyError("Could not resolve a QubitCavity-compatible design options payload from the reference row.")
 
 
@@ -312,10 +320,18 @@ def regularize_design_options_for_drivenmodal(design_options: dict[str, Any]) ->
     cavity_options = normalized["cavity_claw_options"]
     cavity_options["coupler_type"] = cavity_options["coupler_type"]
     cpw_key = "cpw_opts" if "cpw_opts" in cavity_options else "cpw_options"
-    left_options = cavity_options.setdefault(cpw_key, {}).setdefault("left_options", {})
-    left_options["fillet"] = "0um"
-    lead_options = left_options.setdefault("lead", {})
-    lead_options["end_straight"] = "0um"
+    cpw_options = deserialize_json_like(cavity_options.setdefault(cpw_key, {}))
+    cavity_options[cpw_key] = cpw_options
+    left_options = deserialize_json_like(cpw_options.setdefault("left_options", {}))
+    cpw_options["left_options"] = left_options
+    if "lead" in left_options:
+        left_options["lead"] = deserialize_json_like(left_options["lead"])
+    else:
+        left_options["lead"] = {}
+    if "meander" in left_options:
+        left_options["meander"] = deserialize_json_like(left_options["meander"])
+    else:
+        left_options["meander"] = {}
     return normalized
 
 
@@ -335,9 +351,35 @@ def build_coupled_seed_mesh_lengths(design) -> dict[str, dict[str, Any]]:
     return {"mesh_coupled_system": {"objects": sorted(set(candidate_objects)), "MaxLength": "7um"}}
 
 
-def build_render_selection(design) -> list[str]:
-    selection: list[str] = []
+def assign_render_layers(design, *, metal_layer: str | int) -> None:
+    metal_layer_str = str(metal_layer)
     for name, component in design.components.items():
+        if name == ROOT_COMPONENT_NAME:
+            continue
+        try:
+            component.options.layer = metal_layer_str
+        except Exception:
+            continue
+
+
+def build_render_selection(design, *, include_launchers: bool = RENDER_LAUNCHERS) -> list[str]:
+    preferred_names = [
+        FEEDLINE_COMPONENT_NAME,
+        f"{ROOT_COMPONENT_NAME}_CLT_coupler",
+        f"{ROOT_COMPONENT_NAME}_capn_coupler",
+        f"{ROOT_COMPONENT_NAME}_NCap_coupler",
+        f"{ROOT_COMPONENT_NAME}_left_cpw",
+        f"{ROOT_COMPONENT_NAME}_right_cpw",
+        f"{ROOT_COMPONENT_NAME}_xmon",
+    ]
+    preferred_names.extend(sorted(name for name in design.components if name.startswith(f"{ROOT_COMPONENT_NAME}_")))
+
+    selection: list[str] = []
+    seen: set[str] = set()
+    for name in preferred_names:
+        if name not in design.components or name in seen:
+            continue
+        component = design.components[name]
         try:
             bounds = component.qgeometry_bounds()
         except Exception:
@@ -347,7 +389,8 @@ def build_render_selection(design) -> list[str]:
         if tuple(bounds) == (0, 0, 0, 0):
             continue
         selection.append(name)
-    return sorted(selection)
+        seen.add(name)
+    return selection
 
 
 def save_render_debug_artifacts(
@@ -394,8 +437,7 @@ def prepare_renderer_project(renderer: QHFSSRenderer, project_dir: Path, project
     renderer.start()
     renderer.new_ansys_project()
     renderer.connect_ansys()
-    renderer.pinfo.project.save(str(project_file))
-    return project_file
+    return save_renderer_project(renderer, project_file)
 
 
 def reset_ansys_desktop_processes() -> None:
@@ -630,15 +672,90 @@ def build_request(
     )
 
 
+def build_qiskit_cavity_options(request: CoupledSystemDrivenModalRequest) -> Dict:
+    """Reuse the dataset's coupled-system payload with the QubitCavity builder."""
+    design_options = deserialize_json_like(request.design_payload["design_options"])
+    cavity_options = Dict(deserialize_json_like(design_options["cavity_claw_options"]))
+    cpw_key = "cpw_opts" if "cpw_opts" in cavity_options else "cpw_options"
+    cpw_options = Dict(deserialize_json_like(cavity_options[cpw_key]))
+    left_options = Dict(deserialize_json_like(cpw_options["left_options"]))
+    cpw_options["left_options"] = left_options
+    cavity_options[cpw_key] = cpw_options
+    cavity_options["coupler_type"] = request.design_payload["coupler_type"]
+
+    qubit_options = Dict(deserialize_json_like(design_options["qubit_options"]))
+    connection_pads = Dict(deserialize_json_like(qubit_options.get("connection_pads", {})))
+    readout_pad = Dict(deserialize_json_like(connection_pads.get("readout", {})))
+    if readout_pad:
+        if float(string_to_float(readout_pad.get("claw_cpw_length", "0um"))) == 0.0:
+            readout_pad["claw_cpw_length"] = "40um"
+        # Keep the connector stem electrically continuous with the resonator CPW
+        # instead of trusting any stale fixed width embedded in the payload.
+        readout_pad["claw_cpw_width"] = left_options["trace_width"]
+        connection_pads["readout"] = readout_pad
+        qubit_options["connection_pads"] = connection_pads
+    qubit_options["pos_y"] = "0um"
+
+    return Dict(
+        chip=request.layer_stack.chip_name,
+        qubit_options=qubit_options,
+        cavity_claw_options=cavity_options,
+    )
+
+
+def get_feedline_trace_dimensions(request: CoupledSystemDrivenModalRequest) -> tuple[str, str]:
+    design_options = deserialize_json_like(request.design_payload["design_options"])
+    cavity_options = deserialize_json_like(design_options["cavity_claw_options"])
+    cpw_key = "cpw_opts" if "cpw_opts" in cavity_options else "cpw_options"
+    left_options = deserialize_json_like(deserialize_json_like(cavity_options[cpw_key])["left_options"])
+    return left_options["trace_width"], left_options["trace_gap"]
+
+
+def create_explicit_feedline_anchors(design, *, trace_width: str, trace_gap: str) -> None:
+    OpenToGround(
+        design,
+        FEEDLINE_OTG_COMPONENT_NAMES[0],
+        options=Dict(pos_x="0mm", pos_y="2.1mm", orientation="-90"),
+    )
+    OpenToGround(
+        design,
+        FEEDLINE_OTG_COMPONENT_NAMES[1],
+        options=Dict(pos_x="0mm", pos_y="-1.9mm", orientation="90"),
+    )
+    RouteStraight(
+        design,
+        FEEDLINE_COMPONENT_NAME,
+        options=Dict(
+            pin_inputs=Dict(
+                start_pin=Dict(component=FEEDLINE_OTG_COMPONENT_NAMES[0], pin="open"),
+                end_pin=Dict(component=FEEDLINE_OTG_COMPONENT_NAMES[1], pin="open"),
+            ),
+            trace_width=trace_width,
+            trace_gap=trace_gap,
+        ),
+    )
+
+
 def build_coupled_design(request: CoupledSystemDrivenModalRequest, layer_stack_csv: Path):
     design, csv_path = create_multiplanar_design(
         layer_stack=request.layer_stack,
         layer_stack_path=layer_stack_csv,
         enable_renderers=True,
     )
-    cavity = QubitCavity(design, ROOT_COMPONENT_NAME, options=Dict(request.design_payload["design_options"]))
-    cavity.make_wirebond_pads()
+    QubitCavity(
+        design,
+        ROOT_COMPONENT_NAME,
+        options=build_qiskit_cavity_options(request),
+    )
+    trace_width, trace_gap = get_feedline_trace_dimensions(request)
+    create_explicit_feedline_anchors(
+        design,
+        trace_width=trace_width,
+        trace_gap=trace_gap,
+    )
+    assign_render_layers(design, metal_layer=request.layer_stack.metal_layer)
     design.rebuild()
+    simplify_collinear_path_points(design)
     return design, csv_path
 
 
@@ -759,7 +876,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
             renderer = None
             try:
                 design, layer_stack_csv = build_coupled_design(request, artifacts_dir / "layer_stack.csv")
-                selection = build_render_selection(design)
+                selection = build_render_selection(design, include_launchers=RENDER_LAUNCHERS)
                 chip_bounds = apply_buffered_chip_bounds(
                     design,
                     selection=selection,
@@ -788,6 +905,8 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
                     "drivenmodal",
                 )
                 renderer.clean_active_design()
+                cryo_material = apply_cryo_silicon_material_properties(renderer)
+                dump_json(artifacts_dir / "material_properties.json", cryo_material)
 
                 render_drivenmodal_design(
                     renderer,
@@ -797,6 +916,13 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
                     jj_to_port=jj_to_port or None,
                     box_plus_buffer=False,
                 )
+                assigned_perf_e = ensure_perfect_e_boundary(
+                    renderer,
+                    getattr(renderer, "assign_perfE", []),
+                    boundary_name="PerfE_Metal",
+                )
+                boundary_snapshot = snapshot_boundary_assignments(renderer)
+                save_renderer_project(renderer, project_file)
                 hfss_objects = sorted(getattr(renderer.pinfo.design.modeler, "object_names", []))
                 dump_json(
                     artifacts_dir / f"hfss_render_{attempt_label}.json",
@@ -805,6 +931,8 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
                         "ansys_design_name": ansys_design_name,
                         "project_file": str(project_file),
                         "hfss_objects": hfss_objects,
+                        "assign_perfE": assigned_perf_e,
+                        "boundaries": boundary_snapshot,
                     },
                 )
                 try:
@@ -831,6 +959,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
                 )
 
                 setup = ensure_drivenmodal_setup(renderer, **request.setup.to_renderer_kwargs())
+                save_renderer_project(renderer, project_file)
                 mark_stage_complete(manifest_path, "setup_created")
 
                 run_drivenmodal_sweep(
@@ -839,6 +968,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
                     setup_name=request.setup.name,
                     **request.sweep.to_renderer_kwargs(),
                 )
+                save_renderer_project(renderer, project_file)
                 mark_stage_complete(manifest_path, "sweep_completed")
 
                 s_df, y_df, z_df = renderer.get_all_Pparms_matrices(matrix_size=3)
@@ -858,6 +988,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
                         "project_file": str(project_file),
                         "ansys_design_name": ansys_design_name,
                         "attempt_label": attempt_label,
+                        "render_launchers": RENDER_LAUNCHERS,
                     },
                 )
                 dump_json(
@@ -974,6 +1105,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
 # %% [markdown]
 # ## Load the reference geometry from SQuADDS
 
+
 # %%
 def main() -> None:
     ensure_runtime_dirs()
@@ -1034,10 +1166,7 @@ def main() -> None:
 
     if discovery_frequency_ghz is None:
         coupled_result = discovery_result
-        print(
-            "Discovery sweeps did not bracket a cavity resonance well enough for the final "
-            "high-resolution sweep."
-        )
+        print("Discovery sweeps did not bracket a cavity resonance well enough for the final high-resolution sweep.")
     else:
         print(f"Discovery sweep located cavity resonance near {discovery_frequency_ghz:.6f} GHz")
         final_setup, final_sweep = build_final_setup_and_sweep(discovery_frequency_ghz)

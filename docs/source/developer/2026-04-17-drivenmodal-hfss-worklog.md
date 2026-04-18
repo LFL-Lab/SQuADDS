@@ -142,6 +142,49 @@ Add newly touched files here as implementation progresses.
   - Outcome at `c9a10f9`: Tutorial 11 now uses a reference-guided sweep window and no longer crashes when the linewidth fit is unresolved; instead it writes a warning-backed summary with `NaN` placeholders for the unresolved coupled-system metrics.
   - Outcome at `3f3607d`: Tutorial 11 now inherits Tutorial 10's fresh-design HFSS retry loop. On the Windows validation machine, the quarter-wave tutorial exits successfully end-to-end, writes raw/loaded Touchstone artifacts plus `comparison.csv`/`summary.json`, and reports the current unresolved-notch state instead of failing.
   - Current quarter-wave status: infrastructure is working and artifacts are saved under `tutorials\\runtime\\drivenmodal_coupled_system\\checkpoints\\tutorial11-quarter-000-v2`, but the loaded `S21` notch still sits on the sweep edge, so `cavity_frequency_ghz`, `kappa_mhz`, `g_mhz`, and `chi_mhz` are intentionally recorded as `NaN` in the summary rather than as misleading values.
+- Windows/Ansys validation for Tutorial 11 at commit `adaa855`:
+  - Root-cause fix: Tutorial 11 now builds the full `QubitCavity` feedline geometry by calling `make_wirebond_pads()`, places the driven-modal ports on `feedline.start` / `feedline.end`, and applies the seed meshes directly rather than filtering them away through the empty `modeler.object_names` path.
+  - Outcome on the Windows validation machine: the first fresh run on the corrected geometry (`tutorial11-quarter-000-v4`) produced a real cavity resonance instead of the nearly flat through-line response seen on the older short-feedline model.
+  - Extracted discovery values:
+    - `cavity_frequency_ghz ≈ 8.134333`
+    - `kappa_mhz ≈ 1.85539`
+    - `g_mhz = 0.0`
+    - `chi_mhz = 0.0`
+  - Interpretation: the geometry/port/render path is now good enough to observe the resonator, but the broad discovery sweep (`6.9633 -> 10.9633 GHz`, `count=4001`, `max_delta_s=0.01`, `min_converged=3`) is too coarse to resolve the tiny qubit-state shift, so the follow-on high-resolution sweep must be centered on the discovered resonance rather than on the stale database reference.
+- Local implementation update at commit `e5dad97`:
+  - Tutorial 11 now uses an explicit two-stage flow:
+    - discovery sweep with broader/faster settings to locate the cavity resonance on the corrected geometry
+    - final dense sweep with the user-requested production settings (`max_delta_s=0.005`, `min_converged=5`, interpolating sweep, `count=20000`, `±0.5 GHz`) centered on the discovered cavity frequency
+  - This is intended to preserve robustness on the Ansys validation machine while still converging to the final user-facing extraction path automatically.
+- Windows/Ansys validation for Tutorial 11 `tutorial11-quarter-000-v6-zoom-8to9-22000` on 2026-04-18:
+  - The dense `8-9 GHz` / `22000` point run finished completely and, unlike the older broad discovery runs, now brackets the cavity notch cleanly enough for the existing FWHM extractor to return finite values.
+  - Current extracted values from `summary.json`:
+    - `cavity_frequency_ghz ≈ 8.588117642`
+    - `kappa_mhz ≈ 0.148518`
+    - `g_mhz = 0.0`
+    - `chi_mhz = 0.0`
+  - Interpretation: the EM side is now finding the loaded cavity notch in the right neighborhood, but the current `LJ_g` / `LJ_e` post-processing path still produces a state split below the old coarse extraction threshold, so `chi` and `g` numerically collapse to zero even though the resonance itself is now real and centered in-band.
+- Local Mac-side touchstone analysis on 2026-04-18:
+  - Copied raw Touchstone files for both `tutorial11-quarter-000-v6-discovery-01` and `tutorial11-quarter-000-v6-zoom-8to9-22000` from the Windows box into `tutorials/runtime/drivenmodal_coupled_system/local_analysis/...`.
+  - Generated Plotly diagnostics and CSV summaries for:
+    - JJ `open` / `short` / pure `LJ_g` / pure `LJ_e` terminations,
+    - a parallel `L || C` junction sweep using representative Dolan-junction capacitance values (`0, 0.5, 1, 2, 4, 8 fF`),
+    - resonance-vs-inductance, shift-vs-open, and `L/C` heatmap views.
+  - The zoomed run confirms the physically relevant resonance feature is near `8.58784 GHz` for `JJ open`, and the physical junction termination moves it upward by only a few hundred kHz:
+    - `JJ open`: `8.587839922 GHz`
+    - pure `LJ_g`: `8.588117415 GHz` (`+277.5 kHz`)
+    - pure `LJ_e`: `8.588089958 GHz` (`+250.0 kHz`)
+  - The actual `LJ_g` vs `LJ_e` split in the zoomed data is only tens of kHz:
+    - `0 fF` shunt capacitance: `27.46 kHz`
+    - `0.5 fF`: `42.83 kHz`
+    - `1 fF`: `43.41 kHz`
+    - `2 fF`: `45.43 kHz`
+    - `4 fF`: `39.18 kHz`
+  - Since the `8-9 GHz / 22000` sweep spacing is about `45.46 kHz`, this explains why the older post-processing often collapsed to `chi = 0`: the physical state split is roughly one frequency bin, not multiple bins.
+- Driven-modal material fix on 2026-04-18:
+  - Added an explicit `apply_cryo_silicon_material_properties(...)` helper in `squadds/simulations/drivenmodal/design.py`.
+  - Tutorial 10 and Tutorial 11 now call that helper immediately after connecting the live HFSS renderer, and save `material_properties.json` next to the other run artifacts.
+  - This aligns driven-modal HFSS with the existing eigenmode/Q3D convention of using cryogenic silicon (`epsilon_r = 11.45`, `loss_tangent = 1e-7`) instead of the AEDT default room-temperature material.
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
@@ -172,9 +215,10 @@ Update this section after every meaningful verification run with the exact comma
 - The coupled tutorial currently uses the existing SQuADDS qubit-capacitance + bare-Lj narrative to derive `f_q`, `alpha`, and the state-dependent junction inductances, while the resonator quantities come from driven-modal HFSS. That is intentional for this first executable tutorial pass.
 - The Windows validation run exposed a `pyEPR.load_ansys_project(...)` path-duplication bug when `QHFSSRenderer` is initialized with both `project_path` and `project_name`. The current tutorial workaround is to create a fresh project through the active Desktop session, reconnect, and save it to an absolute `.aedt` path before creating the driven-modal design.
 - Tutorial 11 is now structurally executable for the quarter-wave reference geometry, but its coupled-system extraction is still physics-limited rather than infra-limited. Another agent should investigate, in order:
-  - whether the current feedline/JJ port mapping is the correct observable for a strong notch in this geometry,
-  - whether the quarter-wave sweep window still needs another upward expansion because the loaded response remains monotonic up to the current upper edge,
-  - whether resonance detection should switch from raw FWHM on `|S21|` to a more robust complex-response / group-delay / circle-fit workflow for weakly perturbed notches.
+  - whether the new full-feedline geometry plus final dense sweep resolves the nonzero qubit-state shift (`chi`) and corresponding `g` without requiring a more sophisticated fitting method,
+  - whether the actual HFSS project object/material assignment should be exported directly from the live renderer session for stronger render-level verification,
+  - whether resonance detection should switch from raw FWHM on `|S21|` to a more robust complex-response / group-delay / circle-fit workflow if the final dense sweep still leaves `chi` numerically pinned to zero.
+  The 2026-04-18 local `L || C` sweep strongly suggests the third bullet is now the right next move: the loaded cavity resonance is real, but the `LJ_g`/`LJ_e` split is only about one frequency bin in the current zoomed Touchstone.
 - Half-wave Tutorial 11 has not been validated yet. The current reference row used by the tutorial shows `cavity_frequency ≈ 26.9 GHz`, so another agent should expect very different sweep budgets from the quarter-wave case and should not assume the quarter-wave sweep window is reusable there.
 
 ## Next safe restart point
@@ -186,7 +230,7 @@ If a new agent needs to resume from here:
 3. Confirm branch is still `codex/drivenmodal-api-prd`.
 4. Confirm unrelated untracked files remain untouched.
 5. For the coupled-system branch, start from the saved quarter-wave Tutorial 11 artifacts and summary warning in `tutorials/runtime/drivenmodal_coupled_system/checkpoints/tutorial11-quarter-000-v2` before changing the tutorial again.
-6. Next red-green slice for Tutorial 11: turn the current warning-backed quarter-wave run into a trustworthy extracted `f_r/kappa/g/chi` workflow, then validate the half-wave path.
+6. Next red-green slice for Tutorial 11: replace the current coarse notch extractor with a sub-bin / complex-response-based resonance tracker on the existing `8-9 GHz / 22000` Touchstone, then validate whether that exposes the small but nonzero `LJ_g` / `LJ_e` split before rerunning HFSS again.
 7. Use the current tutorial scripts as concrete Windows/Ansys validation clients when refining the public API instead of rewriting them from scratch.
 
 ## Handoff notes for future agents

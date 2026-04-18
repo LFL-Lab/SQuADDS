@@ -44,6 +44,7 @@ from squadds.simulations.drivenmodal.capacitance import (
 )
 from squadds.simulations.drivenmodal.design import (
     apply_buffered_chip_bounds,
+    apply_cryo_silicon_material_properties,
     connect_renderer_to_new_ansys_design,
     create_multiplanar_design,
     ensure_drivenmodal_setup,
@@ -375,6 +376,8 @@ def run_capacitance_demo(
                     "drivenmodal",
                 )
                 renderer.clean_active_design()
+                cryo_material = apply_cryo_silicon_material_properties(renderer)
+                dump_json(artifacts_dir / "material_properties.json", cryo_material)
                 chip_box = apply_buffered_chip_bounds(
                     design,
                     selection=list(design.components.keys()),

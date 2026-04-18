@@ -1,15 +1,23 @@
 from pathlib import Path
 from types import SimpleNamespace
 
+import pandas as pd
+from shapely.geometry import LineString
+
 from squadds.simulations.drivenmodal.design import (
     apply_buffered_chip_bounds,
+    apply_cryo_silicon_material_properties,
     connect_renderer_to_new_ansys_design,
     create_multiplanar_design,
     ensure_drivenmodal_setup,
+    ensure_perfect_e_boundary,
     format_exception_for_console,
     render_drivenmodal_design,
     run_drivenmodal_sweep,
     safe_ansys_design_name,
+    save_renderer_project,
+    simplify_collinear_path_points,
+    snapshot_boundary_assignments,
     write_qiskit_layer_stack_csv,
 )
 from squadds.simulations.drivenmodal.models import DrivenModalLayerStackSpec
@@ -82,6 +90,116 @@ def test_format_exception_for_console_escapes_non_ascii_characters():
     assert message == "bad setup \\U0001f914"
 
 
+def test_save_renderer_project_persists_current_project_state(tmp_path: Path):
+    saved_paths = []
+
+    class FakeProject:
+        def save(self, path):
+            saved_paths.append(path)
+
+    renderer = SimpleNamespace(pinfo=SimpleNamespace(project=FakeProject()))
+    project_path = tmp_path / "demo.aedt"
+
+    returned_path = save_renderer_project(renderer, project_path)
+
+    assert returned_path == project_path
+    assert saved_paths == [str(project_path)]
+
+
+def test_apply_cryo_silicon_material_properties_updates_active_hfss_material():
+    calls = []
+
+    class FakeSilicon:
+        def __init__(self):
+            self.permittivity = 11.9
+            self.dielectric_loss_tangent = 1e-3
+
+    silicon = FakeSilicon()
+
+    class FakeMaterials:
+        def checkifmaterialexists(self, material_name):
+            calls.append(("check", material_name))
+            return silicon
+
+    class FakeHfss:
+        def __init__(self, **kwargs):
+            calls.append(("init", kwargs))
+            self.materials = FakeMaterials()
+
+        def release_desktop(self, close_projects=False, close_desktop=False):
+            calls.append(("release", close_projects, close_desktop))
+
+    renderer = SimpleNamespace(pinfo=SimpleNamespace(project_name="Project1", design_name="dm_test"))
+
+    result = apply_cryo_silicon_material_properties(renderer, hfss_factory=FakeHfss)
+
+    assert result == {
+        "material": "silicon",
+        "permittivity": 11.45,
+        "dielectric_loss_tangent": 1e-07,
+        "project_name": "Project1",
+        "design_name": "dm_test",
+    }
+    assert silicon.permittivity == 11.45
+    assert silicon.dielectric_loss_tangent == 1e-7
+    assert calls == [
+        (
+            "init",
+            {
+                "projectname": "Project1",
+                "designname": "dm_test",
+                "solution_type": "DrivenModal",
+                "new_desktop_session": False,
+                "close_on_exit": False,
+            },
+        ),
+        ("check", "silicon"),
+        ("release", False, False),
+    ]
+
+
+def test_ensure_perfect_e_boundary_prefers_pinfo_design_api():
+    calls = []
+
+    class FakeModeler:
+        def assign_perfect_E(self, object_names, name):
+            calls.append(("modeler", name, list(object_names)))
+
+    class FakeDesign:
+        def append_PerfE_assignment(self, boundary_name, object_names):
+            calls.append(("design", boundary_name, list(object_names)))
+
+    renderer = SimpleNamespace(pinfo=SimpleNamespace(design=FakeDesign()), modeler=FakeModeler())
+
+    assigned = ensure_perfect_e_boundary(renderer, ["trace_a", "trace_b", "trace_a"])
+
+    assert assigned == ["trace_a", "trace_b"]
+    assert calls == [("design", "PerfE_Metal", ["trace_a", "trace_b"])]
+
+
+def test_snapshot_boundary_assignments_reads_hfss_boundary_module():
+    class FakeBoundaries:
+        def GetBoundaries(self):
+            return ["PerfE_Metal", "LumpPort_feedline"]
+
+    class FakeDesign:
+        _boundaries = FakeBoundaries()
+
+        def get_boundary_assignment(self, boundary_name):
+            if boundary_name == "PerfE_Metal":
+                return ["trace_b", "trace_a", "trace_a"]
+            return ["Port_feedline"]
+
+    renderer = SimpleNamespace(pinfo=SimpleNamespace(design=FakeDesign()))
+
+    snapshot = snapshot_boundary_assignments(renderer)
+
+    assert snapshot == {
+        "PerfE_Metal": ["trace_a", "trace_b"],
+        "LumpPort_feedline": ["Port_feedline"],
+    }
+
+
 def test_render_drivenmodal_design_normalizes_open_pins_for_ports():
     class FakeRenderer:
         def __init__(self):
@@ -141,6 +259,50 @@ def test_apply_buffered_chip_bounds_sets_explicit_chip_size():
     assert design.chips["main"]["size"]["size_y"] == "1.4mm"
     assert design.chips["main"]["size"]["center_x"] == "0.5mm"
     assert design.chips["main"]["size"]["center_y"] == "0mm"
+
+
+def test_simplify_collinear_path_points_collapses_redundant_vertices():
+    class FakeDesign:
+        def __init__(self):
+            self.qgeometry = SimpleNamespace(
+                tables={
+                    "path": pd.DataFrame(
+                        [
+                            {
+                                "geometry": LineString(
+                                    [
+                                        (0.0, 2.1),
+                                        (0.0, 2.10585),
+                                        (0.0, -1.90585),
+                                        (0.0, -1.9),
+                                    ]
+                                )
+                            },
+                            {
+                                "geometry": LineString(
+                                    [
+                                        (0.0, 0.0),
+                                        (1.0, 0.0),
+                                        (1.0, 1.0),
+                                    ]
+                                )
+                            },
+                        ]
+                    )
+                }
+            )
+
+    design = FakeDesign()
+
+    simplified_count = simplify_collinear_path_points(design)
+
+    assert simplified_count == 1
+    assert list(design.qgeometry.tables["path"].iloc[0]["geometry"].coords) == [(0.0, 2.1), (0.0, -1.9)]
+    assert list(design.qgeometry.tables["path"].iloc[1]["geometry"].coords) == [
+        (0.0, 0.0),
+        (1.0, 0.0),
+        (1.0, 1.0),
+    ]
 
 
 def test_ensure_drivenmodal_setup_activates_and_edits_named_setup():

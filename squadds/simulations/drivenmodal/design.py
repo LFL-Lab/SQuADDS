@@ -8,6 +8,7 @@ from typing import Any
 
 from qiskit_metal import Dict
 from qiskit_metal.designs.design_multiplanar import MultiPlanar
+from shapely.geometry import LineString
 
 from .layer_stack import build_layer_stack_dataframe, resolve_chip_metadata
 from .models import DrivenModalLayerStackSpec
@@ -81,6 +82,109 @@ def connect_renderer_to_new_ansys_design(
     return ansys_design
 
 
+def save_renderer_project(renderer: Any, project_file: str | Path) -> Path:
+    """Persist the current AEDT project state to disk."""
+    project_path = Path(project_file)
+    renderer.pinfo.project.save(str(project_path))
+    return project_path
+
+
+def apply_cryo_silicon_material_properties(
+    renderer: Any,
+    *,
+    permittivity: float = 11.45,
+    loss_tangent: float = 1e-7,
+    hfss_factory: Any | None = None,
+) -> dict[str, float | str]:
+    """Overwrite HFSS silicon properties with the cryogenic SQuADDS defaults.
+
+    Qiskit Metal's driven-modal renderer only references the material by name in
+    the layer stack. On a fresh AEDT install, that means HFSS keeps Ansys'
+    default room-temperature silicon permittivity instead of the 11.45 value
+    already used in the eigenmode/Q3D flows. We patch the active project
+    material in-place once the renderer is connected to the target design.
+    """
+    pinfo = getattr(renderer, "pinfo", None)
+    project_name = getattr(pinfo, "project_name", None)
+    design_name = getattr(pinfo, "design_name", None)
+    if not project_name or not design_name:
+        raise ValueError("Renderer must be connected to an HFSS project and design before editing materials.")
+
+    if hfss_factory is None:
+        try:
+            from ansys.aedt.core import Hfss
+        except Exception as exc:  # pragma: no cover - only exercised on the HFSS machine
+            raise RuntimeError("PyAEDT is required to update driven-modal material properties.") from exc
+        hfss_factory = Hfss
+
+    aedt = hfss_factory(
+        projectname=project_name,
+        designname=design_name,
+        solution_type="DrivenModal",
+        new_desktop_session=False,
+        close_on_exit=False,
+    )
+    try:
+        silicon = aedt.materials.checkifmaterialexists("silicon")
+        silicon.permittivity = permittivity
+        silicon.dielectric_loss_tangent = loss_tangent
+        return {
+            "material": "silicon",
+            "permittivity": float(permittivity),
+            "dielectric_loss_tangent": float(loss_tangent),
+            "project_name": str(project_name),
+            "design_name": str(design_name),
+        }
+    finally:
+        if hasattr(aedt, "release_desktop"):
+            aedt.release_desktop(close_projects=False, close_desktop=False)
+
+
+def ensure_perfect_e_boundary(
+    renderer: Any,
+    object_names: list[str],
+    *,
+    boundary_name: str = "PerfE_Metal",
+) -> list[str]:
+    """Ensure a stable Perfect E boundary exists for the rendered metal sheets."""
+    cleaned_names = sorted({str(name) for name in object_names if name})
+    if not cleaned_names:
+        return []
+
+    design = getattr(getattr(renderer, "pinfo", None), "design", None)
+    if design is not None and hasattr(design, "append_PerfE_assignment"):
+        design.append_PerfE_assignment(boundary_name, cleaned_names)
+        return cleaned_names
+
+    modeler = getattr(renderer, "modeler", None)
+    if modeler is not None and hasattr(modeler, "assign_perfect_E"):
+        modeler.assign_perfect_E(cleaned_names, name=boundary_name)
+        return cleaned_names
+
+    raise AttributeError("Renderer does not expose an HFSS Perfect E assignment API.")
+
+
+def snapshot_boundary_assignments(renderer: Any) -> dict[str, list[str]]:
+    """Return saved HFSS boundary assignments for later artifact/debug dumps."""
+    design = getattr(getattr(renderer, "pinfo", None), "design", None)
+    if design is None or not hasattr(design, "_boundaries"):
+        return {}
+
+    try:
+        boundary_names = list(design._boundaries.GetBoundaries())
+    except Exception:
+        return {}
+
+    assignments: dict[str, list[str]] = {}
+    for boundary_name in boundary_names:
+        try:
+            assigned_objects = sorted(set(design.get_boundary_assignment(boundary_name)))
+        except Exception:
+            assigned_objects = []
+        assignments[str(boundary_name)] = assigned_objects
+    return assignments
+
+
 def format_exception_for_console(exc: BaseException) -> str:
     """Return an ASCII-safe exception string for Windows console output."""
     return str(exc).encode("ascii", "backslashreplace").decode("ascii")
@@ -100,6 +204,57 @@ def safe_ansys_design_name(identifier: str, *, prefix: str = "dm") -> str:
 
 def _format_mm(value_mm: float) -> str:
     return f"{value_mm:.6f}".rstrip("0").rstrip(".") + "mm"
+
+
+def _is_collinear(prev_point: tuple[float, float], point: tuple[float, float], next_point: tuple[float, float]) -> bool:
+    x1, y1 = prev_point
+    x2, y2 = point
+    x3, y3 = next_point
+    area2 = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1)
+    return abs(area2) <= 1e-12
+
+
+def simplify_collinear_path_points(design: Any) -> int:
+    """Collapse redundant collinear path vertices before Ansys rendering.
+
+    Qiskit Metal can emit straight CPW centerlines with tiny extra collinear
+    segments near terminations. Older HFSS / COM combinations sometimes reject
+    those paths in ``CreatePolyline`` even though the geometry is physically a
+    simple straight line. Removing only the redundant collinear interior points
+    preserves bends/fillets while producing a more stable path for rendering.
+    """
+    path_table = design.qgeometry.tables.get("path")
+    if path_table is None or len(path_table) == 0:
+        return 0
+
+    simplified = 0
+    for index, row in path_table.iterrows():
+        coords = [tuple(map(float, point)) for point in row["geometry"].coords]
+        if len(coords) <= 2:
+            continue
+
+        cleaned = [coords[0]]
+        for point in coords[1:]:
+            if point != cleaned[-1]:
+                cleaned.append(point)
+
+        if len(cleaned) <= 2:
+            new_coords = [cleaned[0], cleaned[-1]]
+        else:
+            new_coords = [cleaned[0]]
+            for position, point in enumerate(cleaned[1:-1], start=1):
+                if _is_collinear(new_coords[-1], point, cleaned[position + 1]):
+                    continue
+                new_coords.append(point)
+            new_coords.append(cleaned[-1])
+
+        if len(new_coords) < 2:
+            continue
+        if new_coords != coords:
+            path_table.at[index, "geometry"] = LineString(new_coords)
+            simplified += 1
+
+    return simplified
 
 
 def apply_buffered_chip_bounds(
