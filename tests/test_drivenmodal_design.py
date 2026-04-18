@@ -164,27 +164,16 @@ def test_apply_cryo_silicon_material_properties_updates_active_hfss_material():
 
 
 def test_apply_cryo_silicon_material_properties_prefers_live_renderer_session():
-    silicon = SimpleNamespace(permittivity=11.9, dielectric_loss_tangent=1e-3)
     calls = []
 
     class FakeDefinitionManager:
-        def GetManager(self, name):
-            calls.append(("manager", name))
-            return object()
-
-        def GetProjectMaterialNames(self):
-            calls.append(("names",))
-            return ["silicon"]
+        def EditMaterial(self, material_name, args):
+            calls.append(("edit", material_name, args))
 
     class FakeProject:
         def GetDefinitionManager(self):
             calls.append(("definition_manager",))
             return FakeDefinitionManager()
-
-    class FakeMaterials:
-        def __init__(self, app):
-            calls.append(("materials_init", bool(app.odesktop), bool(app.oproject), bool(app.odesign)))
-            self.material_keys = {"silicon": silicon}
 
     renderer = SimpleNamespace(
         logger=SimpleNamespace(info=lambda *args, **kwargs: None),
@@ -200,7 +189,6 @@ def test_apply_cryo_silicon_material_properties_prefers_live_renderer_session():
     result = apply_cryo_silicon_material_properties(
         renderer,
         hfss_factory=lambda **kwargs: (_ for _ in ()).throw(AssertionError("fallback should not run")),
-        materials_factory=FakeMaterials,
     )
 
     assert result == {
@@ -210,11 +198,13 @@ def test_apply_cryo_silicon_material_properties_prefers_live_renderer_session():
         "project_name": "Project1",
         "design_name": "dm_test",
     }
-    assert silicon.permittivity == 11.45
-    assert silicon.dielectric_loss_tangent == 1e-7
-    assert calls == [
-        ("materials_init", True, True, True),
-    ]
+    assert calls[0] == ("definition_manager",)
+    assert calls[1][0] == "edit"
+    assert calls[1][1] == "silicon"
+    assert "permittivity:=" in calls[1][2]
+    assert "11.45" in calls[1][2]
+    assert "dielectric_loss_tangent:=" in calls[1][2]
+    assert "1e-07" in calls[1][2]
 
 
 def test_ensure_perfect_e_boundary_prefers_pinfo_design_api():

@@ -170,17 +170,74 @@ def apply_cryo_silicon_material_properties(
             Materials = None
         materials_factory = Materials
 
+    def _cryo_silicon_args() -> list[Any]:
+        return [
+            "NAME:silicon",
+            "CoordinateSystemType:=",
+            "Cartesian",
+            "BulkOrSurfaceType:=",
+            1,
+            [
+                "NAME:PhysicsTypes",
+                "set:=",
+                ["Electromagnetic", "Thermal", "Structural"],
+            ],
+            [
+                "NAME:AttachedData",
+                [
+                    "NAME:MatAppearanceData",
+                    "property_data:=",
+                    "appearance_data",
+                    "Red:=",
+                    210,
+                    "Green:=",
+                    105,
+                    "Blue:=",
+                    30,
+                    "Transparency:=",
+                    0,
+                ],
+            ],
+            "permittivity:=",
+            str(permittivity),
+            "permeability:=",
+            "1.0",
+            "conductivity:=",
+            "0",
+            "dielectric_loss_tangent:=",
+            str(loss_tangent),
+            "magnetic_loss_tangent:=",
+            "0",
+            "thermal_conductivity:=",
+            "0.01",
+            "mass_density:=",
+            "0",
+            "specific_heat:=",
+            "0",
+            "thermal_expansion_coefficient:=",
+            "0",
+            "youngs_modulus:=",
+            "0",
+            "poissons_ratio:=",
+            "0",
+            "diffusivity:=",
+            "0.8",
+            "molecular_mass:=",
+            "0",
+            "viscosity:=",
+            "0",
+        ]
+
+    live_app = _LiveMaterialApp(renderer)
+    definition_manager = live_app.odefinition_manager
+    if definition_manager is not None and hasattr(definition_manager, "EditMaterial"):
+        definition_manager.EditMaterial("silicon", _cryo_silicon_args())
+        return result
+
     if materials_factory is not None:
         try:
-            live_materials = materials_factory(_LiveMaterialApp(renderer))
-            silicon = None
-            material_keys = getattr(live_materials, "material_keys", {})
-            if isinstance(material_keys, dict):
-                silicon = material_keys.get("silicon")
-                if silicon is None:
-                    silicon = material_keys.get("silicon".casefold())
-            if silicon is None and hasattr(live_materials, "_aedmattolibrary"):
-                silicon = live_materials._aedmattolibrary("silicon")
+            live_materials = materials_factory(live_app)
+            silicon = live_materials.exists_material("silicon")
             if silicon:
                 silicon.permittivity = permittivity
                 silicon.dielectric_loss_tangent = loss_tangent
