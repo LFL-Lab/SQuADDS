@@ -197,6 +197,7 @@ def extract_notch_metrics(freqs_hz: np.ndarray, s21: np.ndarray) -> dict[str, fl
         "left_index": float(left_ips[0]),
         "right_index": float(right_ips[0]),
         "min_s21_db": float(s21_mag_db[min_idx]),
+        "resonance_at_sweep_edge": float(min_idx in {0, len(freqs_hz) - 1}),
     }
 
 
@@ -402,6 +403,20 @@ def compare_metrics(extracted: dict[str, float], reference: dict[str, float]) ->
     return pd.DataFrame(rows)
 
 
+def build_postprocessing_warning(ground_metrics: dict[str, float], excited_metrics: dict[str, float]) -> str | None:
+    if ground_metrics["resonance_at_sweep_edge"] or excited_metrics["resonance_at_sweep_edge"]:
+        return (
+            "Loaded resonance remained on the sweep boundary. The HFSS solve completed, but the "
+            "current driven-modal sweep window does not bracket a full notch for linewidth extraction."
+        )
+    if ground_metrics["fwhm_hz"] <= 0:
+        return (
+            "Loaded resonance linewidth could not be extracted from the sampled |S21| trace. "
+            "The notch is too narrow or too shallow for the current FWHM-based estimator."
+        )
+    return None
+
+
 def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[str, float]) -> dict[str, Any]:
     prepared = run_drivenmodal_request(request, checkpoint_dir=CHECKPOINT_ROOT)
     run_dir = Path(prepared["manifest"]["run_dir"])
@@ -520,24 +535,33 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
 
     ground_metrics = extract_notch_metrics(freqs_hz, s_ground[:, 1, 0])
     excited_metrics = extract_notch_metrics(freqs_hz, s_excited[:, 1, 0])
-    chi_hz = calculate_chi_hz(ground_metrics["f_res_hz"], excited_metrics["f_res_hz"])
-    loaded_q = calculate_loaded_q(f_res_hz=ground_metrics["f_res_hz"], fwhm_hz=ground_metrics["fwhm_hz"])
-    kappa_hz = calculate_kappa_hz(f_res_hz=ground_metrics["f_res_hz"], loaded_q=loaded_q)
-    g_rad_s = calculate_g_from_chi(
-        f_r_hz=ground_metrics["f_res_hz"],
-        f_q_hz=reference["f_q_hz"],
-        chi_hz=chi_hz,
-        alpha_hz=reference["alpha_hz"],
-    )
-
+    postprocessing_warning = build_postprocessing_warning(ground_metrics, excited_metrics)
     extracted = {
-        "cavity_frequency_ghz": ground_metrics["f_res_hz"] / 1e9,
-        "kappa_mhz": kappa_hz / 1e6,
-        "g_mhz": g_rad_s / (2 * np.pi * 1e6),
+        "cavity_frequency_ghz": np.nan,
+        "kappa_mhz": np.nan,
+        "g_mhz": np.nan,
         "qubit_frequency_ghz": reference["f_q_hz"] / 1e9,
         "anharmonicity_mhz": reference["alpha_hz"] / 1e6,
-        "chi_mhz": chi_hz / 1e6,
+        "chi_mhz": np.nan,
     }
+    if postprocessing_warning is None:
+        chi_hz = calculate_chi_hz(ground_metrics["f_res_hz"], excited_metrics["f_res_hz"])
+        loaded_q = calculate_loaded_q(f_res_hz=ground_metrics["f_res_hz"], fwhm_hz=ground_metrics["fwhm_hz"])
+        kappa_hz = calculate_kappa_hz(f_res_hz=ground_metrics["f_res_hz"], loaded_q=loaded_q)
+        g_rad_s = calculate_g_from_chi(
+            f_r_hz=ground_metrics["f_res_hz"],
+            f_q_hz=reference["f_q_hz"],
+            chi_hz=chi_hz,
+            alpha_hz=reference["alpha_hz"],
+        )
+        extracted.update(
+            {
+                "cavity_frequency_ghz": ground_metrics["f_res_hz"] / 1e9,
+                "kappa_mhz": kappa_hz / 1e6,
+                "g_mhz": g_rad_s / (2 * np.pi * 1e6),
+                "chi_mhz": chi_hz / 1e6,
+            }
+        )
     comparison_df = compare_metrics(extracted, reference)
     comparison_df.to_csv(artifacts_dir / "comparison.csv", index=False)
 
@@ -548,6 +572,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
         "ground_metrics": ground_metrics,
         "excited_metrics": excited_metrics,
         "comparison_rows": comparison_df.to_dict(orient="records"),
+        "postprocessing_warning": postprocessing_warning,
         "artifacts": {
             "raw_touchstone": str(s3p_path),
             "loaded_ground_touchstone": str(ground_s2p_path),
