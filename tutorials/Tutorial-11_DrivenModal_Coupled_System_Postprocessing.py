@@ -95,10 +95,13 @@ except ImportError:  # pragma: no cover - plain Python fallback for non-notebook
 # %%
 RESONATOR_TYPE = "quarter"  # change to "half" and rerun for the half-wave flow
 REFERENCE_INDEX = 0
-RUN_TAG = "v3"
+RUN_TAG = "v4"
 FORCE_RERUN = False
 MAX_SOLVE_ATTEMPTS = 3
 ROOT_COMPONENT_NAME = "qubit_cavity"
+FEEDLINE_COMPONENT_NAME = "feedline"
+WIREBOND_COMPONENT_NAMES = ("wb_top", "wb_bottom")
+DISCOVERY_MODE = True
 
 LAYER_STACK = DrivenModalLayerStackSpec(
     preset="squadds_hfss_v1",
@@ -307,7 +310,7 @@ def regularize_design_options_for_drivenmodal(design_options: dict[str, Any]) ->
 
 
 def build_coupled_seed_mesh_lengths(design) -> dict[str, dict[str, Any]]:
-    non_subtract_objects: list[str] = []
+    candidate_objects: list[str] = []
     for table_name in ["path", "poly"]:
         table = design.qgeometry.tables.get(table_name)
         if table is None:
@@ -318,12 +321,23 @@ def build_coupled_seed_mesh_lengths(design) -> dict[str, dict[str, Any]]:
             component_name = _design_component_name(design, row["component"])
             if component_name == ROOT_COMPONENT_NAME:
                 continue
-            non_subtract_objects.append(f"{row['name']}_{component_name}")
+            candidate_objects.append(f"{row['name']}_{component_name}")
+    return {"mesh_coupled_system": {"objects": sorted(set(candidate_objects)), "MaxLength": "7um"}}
 
-    unique_objects = sorted(set(non_subtract_objects))
-    if not unique_objects:
-        return {}
-    return {"mesh_coupled_system": {"objects": unique_objects, "MaxLength": "7um"}}
+
+def build_render_selection(design) -> list[str]:
+    selection: list[str] = []
+    for name, component in design.components.items():
+        try:
+            bounds = component.qgeometry_bounds()
+        except Exception:
+            bounds = None
+        if bounds is None:
+            continue
+        if tuple(bounds) == (0, 0, 0, 0):
+            continue
+        selection.append(name)
+    return sorted(selection)
 
 
 def save_render_debug_artifacts(
@@ -489,15 +503,18 @@ def build_reference_summary(row: pd.Series) -> dict[str, float]:
 
 def build_reference_setup_and_sweep(row: pd.Series) -> tuple[DrivenModalSetupSpec, DrivenModalSweepSpec]:
     cavity_frequency_ghz = float(row["cavity_frequency"]) / 1e9
-    sweep_padding_ghz = 0.5
+    sweep_padding_ghz = 2.0 if DISCOVERY_MODE else 0.5
+    sweep_count = 4001 if DISCOVERY_MODE else SWEEP_TEMPLATE.count
+    max_delta_s = 0.01 if DISCOVERY_MODE else SETUP_TEMPLATE.max_delta_s
+    min_converged = 3 if DISCOVERY_MODE else SETUP_TEMPLATE.min_converged
     return (
         DrivenModalSetupSpec(
             name=SETUP_TEMPLATE.name,
             freq_ghz=cavity_frequency_ghz,
-            max_delta_s=SETUP_TEMPLATE.max_delta_s,
+            max_delta_s=max_delta_s,
             max_passes=SETUP_TEMPLATE.max_passes,
             min_passes=SETUP_TEMPLATE.min_passes,
-            min_converged=SETUP_TEMPLATE.min_converged,
+            min_converged=min_converged,
             pct_refinement=SETUP_TEMPLATE.pct_refinement,
             basis_order=SETUP_TEMPLATE.basis_order,
         ),
@@ -505,7 +522,7 @@ def build_reference_setup_and_sweep(row: pd.Series) -> tuple[DrivenModalSetupSpe
             name=SWEEP_TEMPLATE.name,
             start_ghz=max(1.0, cavity_frequency_ghz - sweep_padding_ghz),
             stop_ghz=cavity_frequency_ghz + sweep_padding_ghz,
-            count=SWEEP_TEMPLATE.count,
+            count=sweep_count,
             sweep_type=SWEEP_TEMPLATE.sweep_type,
             save_fields=SWEEP_TEMPLATE.save_fields,
             interpolation_tol=SWEEP_TEMPLATE.interpolation_tol,
@@ -524,8 +541,8 @@ def build_request(row: pd.Series) -> CoupledSystemDrivenModalRequest:
             "design_options": design_options,
             "coupler_type": row["coupler_type"],
             "port_mapping": {
-                "feedline_input": {"component": ROOT_COMPONENT_NAME, "pin": "prime_start"},
-                "feedline_output": {"component": ROOT_COMPONENT_NAME, "pin": "prime_end"},
+                "feedline_input": {"component": FEEDLINE_COMPONENT_NAME, "pin": "start"},
+                "feedline_output": {"component": FEEDLINE_COMPONENT_NAME, "pin": "end"},
                 "jj": {
                     "component": f"{ROOT_COMPONENT_NAME}_xmon",
                     "pin": "rect_jj",
@@ -547,7 +564,8 @@ def build_coupled_design(request: CoupledSystemDrivenModalRequest, layer_stack_c
         layer_stack_path=layer_stack_csv,
         enable_renderers=True,
     )
-    QubitCavity(design, ROOT_COMPONENT_NAME, options=Dict(request.design_payload["design_options"]))
+    cavity = QubitCavity(design, ROOT_COMPONENT_NAME, options=Dict(request.design_payload["design_options"]))
+    cavity.make_wirebond_pads()
     design.rebuild()
     return design, csv_path
 
@@ -635,7 +653,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
             renderer = None
             try:
                 design, layer_stack_csv = build_coupled_design(request, artifacts_dir / "layer_stack.csv")
-                selection = sorted(design.components.keys())
+                selection = build_render_selection(design)
                 chip_bounds = apply_buffered_chip_bounds(
                     design,
                     selection=selection,
@@ -696,15 +714,15 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
                     renderer.options.max_mesh_length_port = "7um"
                 mesh_lengths = build_coupled_seed_mesh_lengths(design)
                 modeler = renderer.pinfo.design.modeler
-                available_objects = set(getattr(modeler, "object_names", []))
-                filtered_mesh_lengths = {}
-                for mesh_name, mesh_info in mesh_lengths.items():
-                    objects = [name for name in mesh_info["objects"] if name in available_objects]
-                    if objects:
-                        filtered_mesh_lengths[mesh_name] = {"objects": objects, "MaxLength": mesh_info["MaxLength"]}
-                if filtered_mesh_lengths:
-                    mesh_objects(modeler, filtered_mesh_lengths)
-                dump_json(artifacts_dir / "mesh_lengths.json", filtered_mesh_lengths)
+                mesh_error = None
+                try:
+                    mesh_objects(modeler, mesh_lengths)
+                except Exception as exc:
+                    mesh_error = format_exception_for_console(exc)
+                dump_json(
+                    artifacts_dir / "mesh_lengths.json",
+                    {"targets": mesh_lengths, "error": mesh_error},
+                )
 
                 setup = ensure_drivenmodal_setup(renderer, **request.setup.to_renderer_kwargs())
                 mark_stage_complete(manifest_path, "setup_created")
