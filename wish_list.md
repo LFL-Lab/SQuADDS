@@ -64,8 +64,6 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 ## Workflows:
 
 - Add any other workflow that assists developers in contributing
-- Implement an automated build check with comprehensive unit tests
-- Automated tests upon PR submission
 
 ## Feature Requests:
 
@@ -101,6 +99,5 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 
 ## Fancy/For Fun:
 
-- Setup a Model Context Protocol server for SQuADDS
 - Implement LLM-based queries for SQuADDS using [pandas-ai](https://docs.pandas-ai.com/intro) (support for OpenAI and local LLaMA models)
 - Add visual components to the SQuADDS UI
