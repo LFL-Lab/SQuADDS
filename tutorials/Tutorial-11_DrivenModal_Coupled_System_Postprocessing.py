@@ -27,6 +27,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import subprocess
 from pathlib import Path
@@ -35,6 +36,8 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 import scqubits as scq
 import skrf as rf
 from qiskit_metal import Dict
@@ -83,15 +86,20 @@ from squadds.simulations.drivenmodal.models import (
     DrivenModalSweepSpec,
 )
 from squadds.simulations.drivenmodal.ports import build_coupled_system_port_specs, split_rendered_ports
+from squadds.simulations.drivenmodal.qubit_admittance import jj_parallel_impedance
 from squadds.simulations.utils import mesh_objects, string_to_float
 from squadds.simulations.utils_physics import find_g_a_fq
 
 try:
+    from IPython.display import HTML
     from IPython.display import display as display
 except ImportError:  # pragma: no cover - plain Python fallback for non-notebook execution
 
     def display(obj):
         print(obj)
+
+    def HTML(value):
+        return value
 
 
 # %% [markdown]
@@ -158,6 +166,7 @@ ARTIFACTS = DrivenModalArtifactPolicy(
 RUNTIME_ROOT = Path("tutorials/runtime/drivenmodal_coupled_system")
 CHECKPOINT_ROOT = RUNTIME_ROOT / "checkpoints"
 HFSS_PROJECT_ROOT = RUNTIME_ROOT / "hfss_projects"
+LOCAL_ANALYSIS_ROOT = RUNTIME_ROOT / "local_analysis"
 
 
 # %% [markdown]
@@ -168,6 +177,7 @@ HFSS_PROJECT_ROOT = RUNTIME_ROOT / "hfss_projects"
 def ensure_runtime_dirs() -> None:
     CHECKPOINT_ROOT.mkdir(parents=True, exist_ok=True)
     HFSS_PROJECT_ROOT.mkdir(parents=True, exist_ok=True)
+    LOCAL_ANALYSIS_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 def stage_is_complete(manifest_path: Path, stage_name: str) -> bool:
@@ -178,6 +188,11 @@ def stage_is_complete(manifest_path: Path, stage_name: str) -> bool:
 def dump_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str))
+
+
+def write_plotly_html(fig: go.Figure, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_html(path, include_plotlyjs="cdn")
 
 
 def _design_component_name(design, raw_component: Any) -> str:
@@ -490,6 +505,402 @@ def extract_notch_metrics(freqs_hz: np.ndarray, s21: np.ndarray) -> dict[str, fl
         "min_s21_db": float(s21_mag_db[min_idx]),
         "resonance_at_sweep_edge": float(min_idx in {0, len(freqs_hz) - 1}),
     }
+
+
+def build_local_analysis_method_result(
+    ground_freq_hz: float,
+    excited_freq_hz: float,
+    reference: dict[str, float],
+) -> dict[str, float]:
+    chi_hz = calculate_chi_hz(ground_freq_hz, excited_freq_hz)
+    g_rad_s = calculate_g_from_chi(
+        f_r_hz=ground_freq_hz,
+        f_q_hz=reference["f_q_hz"],
+        chi_hz=chi_hz,
+        alpha_hz=reference["alpha_hz"],
+    )
+    return {
+        "f_ground_ghz": float(ground_freq_hz / 1e9),
+        "f_excited_ghz": float(excited_freq_hz / 1e9),
+        "chi_mhz": float(chi_hz / 1e6),
+        "g_mhz": float(g_rad_s / (2 * np.pi * 1e6)),
+    }
+
+
+def build_shift_threshold_rows(sweep_df: pd.DataFrame, *, bin_hz: float) -> list[dict[str, float]]:
+    rows: list[dict[str, float]] = []
+    for c_ff in sorted(pd.unique(sweep_df["C_fF"])):
+        subset = sweep_df[sweep_df["C_fF"] == c_ff].copy()
+        subset["abs_delta_hz"] = subset["delta_vs_open_mhz"].abs() * 1e6
+        hit = subset[subset["abs_delta_hz"] >= bin_hz].sort_values("L_nH").head(1)
+        if hit.empty:
+            continue
+        row = hit.iloc[0]
+        rows.append(
+            {
+                "C_fF": float(c_ff),
+                "first_visible_shift_L_nH": float(row["L_nH"]),
+                "first_visible_shift_freq_ghz": float(row["residual_feature_ghz"]),
+                "delta_hz": float(row["abs_delta_hz"]),
+                "bin_hz": float(bin_hz),
+            }
+        )
+    return rows
+
+
+def generate_local_analysis_artifacts(summary: dict[str, Any]) -> dict[str, Any]:
+    raw_touchstone_path = Path(summary["artifacts"]["raw_touchstone"])
+    if not raw_touchstone_path.exists():
+        raise FileNotFoundError(f"Raw touchstone not found at {raw_touchstone_path}")
+
+    run_id = Path(summary["run_dir"]).name
+    output_dir = LOCAL_ANALYSIS_ROOT / run_id
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    raw_network = rf.Network(str(raw_touchstone_path))
+    freqs_hz = raw_network.f
+    freq_ghz = freqs_hz / 1e9
+    y_raw = raw_network.y
+    reference = summary["reference"]
+    lj_ground = reference["lj_ground_h"]
+    lj_excited = reference["lj_excited_h"]
+
+    def term_network(terminated_port: int, zload, remaining_port_1: str, remaining_port_2: str) -> dict[str, Any]:
+        y_term = terminate_port_y(y_raw, terminated_port=terminated_port, load_impedance_ohms=zload)
+        s_term = y_to_s(y_term, z0_ohms=50.0)
+        metrics = extract_notch_metrics(freqs_hz, s_term[:, 1, 0])
+        s21 = s_term[:, 1, 0]
+        mag_db = 20 * np.log10(np.maximum(np.abs(s21), 1e-16))
+        phase_deg = np.unwrap(np.angle(s21)) * 180 / np.pi
+        phase_grad = np.abs(np.gradient(phase_deg, freq_ghz))
+        complex_grad = np.abs(np.gradient(s21, freq_ghz))
+        mag_idx = int(np.argmin(mag_db))
+        phase_idx = int(np.argmax(phase_grad))
+        complex_idx = int(np.argmax(complex_grad))
+        return {
+            "metrics": metrics,
+            "mag_db": mag_db,
+            "phase_deg": phase_deg,
+            "mag_min_freq_ghz": float(freq_ghz[mag_idx]),
+            "phase_grad_peak_freq_ghz": float(freq_ghz[phase_idx]),
+            "complex_grad_peak_freq_ghz": float(freq_ghz[complex_idx]),
+            "notch_freq_ghz": float(metrics["f_res_hz"] / 1e9),
+            "notch_min_db": float(metrics["min_s21_db"]),
+            "edge_flag": bool(metrics["resonance_at_sweep_edge"]),
+            "fwhm_hz": float(metrics["fwhm_hz"]),
+            "phase_at_feature_deg": float(phase_deg[phase_idx]),
+            "remaining_port_1": remaining_port_1,
+            "remaining_port_2": remaining_port_2,
+        }
+
+    qubit_scenarios = {
+        "jj_open": term_network(2, np.full_like(freqs_hz, np.inf, dtype=complex), "feedline_input", "feedline_output"),
+        "jj_short": term_network(2, np.zeros_like(freqs_hz, dtype=complex), "feedline_input", "feedline_output"),
+        "jj_lj_ground_pure_L": term_network(
+            2,
+            jj_parallel_impedance(freqs_hz, lj_h=lj_ground, cj_f=0.0, rj_ohms=math.inf),
+            "feedline_input",
+            "feedline_output",
+        ),
+        "jj_lj_excited_pure_L": term_network(
+            2,
+            jj_parallel_impedance(freqs_hz, lj_h=lj_excited, cj_f=0.0, rj_ohms=math.inf),
+            "feedline_input",
+            "feedline_output",
+        ),
+        "jj_lj_ground_physical": term_network(
+            2,
+            jj_parallel_impedance(freqs_hz, lj_h=lj_ground, cj_f=2e-15, rj_ohms=50_000.0),
+            "feedline_input",
+            "feedline_output",
+        ),
+        "jj_lj_excited_physical": term_network(
+            2,
+            jj_parallel_impedance(freqs_hz, lj_h=lj_excited, cj_f=2e-15, rj_ohms=50_000.0),
+            "feedline_input",
+            "feedline_output",
+        ),
+    }
+    feedline_scenarios = {
+        "feedline_output_open": term_network(
+            1,
+            np.full_like(freqs_hz, np.inf, dtype=complex),
+            "feedline_input",
+            "jj",
+        ),
+        "feedline_output_short": term_network(
+            1,
+            np.zeros_like(freqs_hz, dtype=complex),
+            "feedline_input",
+            "jj",
+        ),
+    }
+
+    fig = go.Figure()
+    for i in range(3):
+        for j in range(3):
+            fig.add_trace(
+                go.Scatter(
+                    x=freq_ghz,
+                    y=20 * np.log10(np.maximum(np.abs(raw_network.s[:, i, j]), 1e-16)),
+                    name=f"|S{i + 1}{j + 1}| dB",
+                )
+            )
+    fig.update_layout(
+        title="Raw 3-port overview (cryo 11.45)", xaxis_title="Frequency (GHz)", yaxis_title="Magnitude (dB)"
+    )
+    write_plotly_html(fig, output_dir / "raw_3port_overview.html")
+
+    for name, scenarios in [
+        ("qubit_port_terminations", qubit_scenarios),
+        ("feedline_port_terminations", feedline_scenarios),
+    ]:
+        fig_full = go.Figure()
+        fig_zoom = go.Figure()
+        for scenario_name, data in scenarios.items():
+            fig_full.add_trace(go.Scatter(x=freq_ghz, y=data["mag_db"], name=scenario_name))
+            fig_zoom.add_trace(go.Scatter(x=freq_ghz, y=data["mag_db"], name=scenario_name))
+        fig_full.update_layout(
+            title=f"{name.replace('_', ' ').title()} full",
+            xaxis_title="Frequency (GHz)",
+            yaxis_title="|Transmission| (dB)",
+        )
+        fig_zoom.update_layout(
+            title=f"{name.replace('_', ' ').title()} zoom",
+            xaxis_title="Frequency (GHz)",
+            yaxis_title="|Transmission| (dB)",
+            xaxis_range=[8.72, 8.83],
+        )
+        write_plotly_html(fig_full, output_dir / f"{name}_full.html")
+        write_plotly_html(fig_zoom, output_dir / f"{name}_zoom.html")
+
+    fig = go.Figure()
+    for scenario_name in [
+        "jj_open",
+        "jj_short",
+        "jj_lj_ground_pure_L",
+        "jj_lj_excited_pure_L",
+        "jj_lj_ground_physical",
+        "jj_lj_excited_physical",
+    ]:
+        fig.add_trace(go.Scatter(x=freq_ghz, y=qubit_scenarios[scenario_name]["mag_db"], name=scenario_name))
+    fig.update_layout(
+        title="JJ reference terminations around resonance",
+        xaxis_title="Frequency (GHz)",
+        yaxis_title="|S21| (dB)",
+        xaxis_range=[8.74, 8.81],
+    )
+    write_plotly_html(fig, output_dir / "jj_reference_terminations.html")
+
+    rows: list[dict[str, Any]] = []
+    for scenario_name, data in qubit_scenarios.items():
+        rows.append(
+            {
+                "group": "qubit_port",
+                "scenario": scenario_name,
+                "terminated_port": 2,
+                "load_kind": scenario_name,
+                "remaining_port_1": data["remaining_port_1"],
+                "remaining_port_2": data["remaining_port_2"],
+                "mag_min_freq_ghz": data["mag_min_freq_ghz"],
+                "residual_min_freq_ghz": data["notch_freq_ghz"],
+                "phase_grad_peak_freq_ghz": data["phase_grad_peak_freq_ghz"],
+                "complex_grad_peak_freq_ghz": data["complex_grad_peak_freq_ghz"],
+                "notch_freq_ghz": data["notch_freq_ghz"],
+                "notch_min_db": data["notch_min_db"],
+                "edge_flag": data["edge_flag"],
+                "fwhm_hz": data["fwhm_hz"],
+                "phase_at_feature_deg": data["phase_at_feature_deg"],
+            }
+        )
+    for scenario_name, data in feedline_scenarios.items():
+        rows.append(
+            {
+                "group": "feedline_port",
+                "scenario": scenario_name,
+                "terminated_port": 1,
+                "load_kind": scenario_name,
+                "remaining_port_1": data["remaining_port_1"],
+                "remaining_port_2": data["remaining_port_2"],
+                "mag_min_freq_ghz": data["mag_min_freq_ghz"],
+                "residual_min_freq_ghz": data["notch_freq_ghz"],
+                "phase_grad_peak_freq_ghz": data["phase_grad_peak_freq_ghz"],
+                "complex_grad_peak_freq_ghz": data["complex_grad_peak_freq_ghz"],
+                "notch_freq_ghz": data["notch_freq_ghz"],
+                "notch_min_db": data["notch_min_db"],
+                "edge_flag": data["edge_flag"],
+                "fwhm_hz": data["fwhm_hz"],
+                "phase_at_feature_deg": data["phase_at_feature_deg"],
+            }
+        )
+    scenario_df = pd.DataFrame(rows)
+    scenario_csv = output_dir / "scenario_summary.csv"
+    scenario_df.to_csv(scenario_csv, index=False)
+
+    baseline = []
+    for scenario_name in [
+        "jj_open",
+        "jj_short",
+        "jj_lj_ground_pure_L",
+        "jj_lj_excited_pure_L",
+        "jj_lj_ground_physical",
+        "jj_lj_excited_physical",
+    ]:
+        data = qubit_scenarios[scenario_name]
+        baseline.append(
+            {
+                "scenario": scenario_name,
+                "residual_feature_hz": data["notch_freq_ghz"] * 1e9,
+                "mag_min_hz": data["mag_min_freq_ghz"] * 1e9,
+                "phase_grad_peak_hz": data["phase_grad_peak_freq_ghz"] * 1e9,
+                "complex_grad_peak_hz": data["complex_grad_peak_freq_ghz"] * 1e9,
+                "min_db": data["notch_min_db"],
+            }
+        )
+    dump_json(output_dir / "jj_reference_scenarios.json", {"baseline": baseline})
+
+    exploratory = {
+        "notch_method_pure_L": build_local_analysis_method_result(
+            qubit_scenarios["jj_lj_ground_pure_L"]["notch_freq_ghz"] * 1e9,
+            qubit_scenarios["jj_lj_excited_pure_L"]["notch_freq_ghz"] * 1e9,
+            reference,
+        ),
+        "phase_gradient_method_pure_L": build_local_analysis_method_result(
+            qubit_scenarios["jj_lj_ground_pure_L"]["phase_grad_peak_freq_ghz"] * 1e9,
+            qubit_scenarios["jj_lj_excited_pure_L"]["phase_grad_peak_freq_ghz"] * 1e9,
+            reference,
+        ),
+        "notch_method_physical": build_local_analysis_method_result(
+            qubit_scenarios["jj_lj_ground_physical"]["notch_freq_ghz"] * 1e9,
+            qubit_scenarios["jj_lj_excited_physical"]["notch_freq_ghz"] * 1e9,
+            reference,
+        ),
+    }
+    exploratory_json = output_dir / "exploratory_postprocessing.json"
+    dump_json(exploratory_json, exploratory)
+
+    open_freq = qubit_scenarios["jj_open"]["notch_freq_ghz"]
+    ljg_physical_freq = qubit_scenarios["jj_lj_ground_physical"]["notch_freq_ghz"]
+    l_nh_values = np.concatenate([np.logspace(np.log10(0.1), np.log10(8.0), 80), np.linspace(8.0, 12.5, 91)]).astype(
+        float
+    )
+    c_ff_values = np.array([0.0, 0.5, 1.0, 2.0, 4.0])
+    sweep_rows = []
+    for c_ff in c_ff_values:
+        for l_nh in l_nh_values:
+            zload = jj_parallel_impedance(freqs_hz, lj_h=l_nh * 1e-9, cj_f=c_ff * 1e-15, rj_ohms=50_000.0)
+            data = term_network(2, zload, "feedline_input", "feedline_output")
+            sweep_rows.append(
+                {
+                    "L_nH": float(l_nh),
+                    "C_fF": float(c_ff),
+                    "residual_feature_ghz": data["notch_freq_ghz"],
+                    "delta_vs_open_mhz": (data["notch_freq_ghz"] - open_freq) * 1e3,
+                    "delta_vs_ljg_khz": (data["notch_freq_ghz"] - ljg_physical_freq) * 1e6,
+                    "min_db": data["notch_min_db"],
+                }
+            )
+    sweep_df = pd.DataFrame(sweep_rows)
+    sweep_csv = output_dir / "jj_parallel_lc_sweep.csv"
+    sweep_df.to_csv(sweep_csv, index=False)
+
+    bin_hz = float(np.min(np.diff(freqs_hz)))
+    threshold_rows = build_shift_threshold_rows(sweep_df, bin_hz=bin_hz)
+    pd.DataFrame(threshold_rows).to_csv(output_dir / "jj_shift_thresholds.csv", index=False)
+
+    fig = px.line(
+        sweep_df,
+        x="L_nH",
+        y="residual_feature_ghz",
+        color="C_fF",
+        title="Cryo run: resonance vs JJ inductance and capacitance",
+        labels={
+            "L_nH": "JJ inductance (nH)",
+            "residual_feature_ghz": "Feature frequency (GHz)",
+            "C_fF": "JJ capacitance (fF)",
+        },
+    )
+    fig.add_vline(x=lj_ground * 1e9, line_dash="dash", line_color="green")
+    fig.add_vline(x=lj_excited * 1e9, line_dash="dash", line_color="orange")
+    write_plotly_html(fig, output_dir / "jj_parallel_lc_shift.html")
+
+    pivot = sweep_df.pivot(index="L_nH", columns="C_fF", values="residual_feature_ghz")
+    fig = px.imshow(
+        pivot,
+        aspect="auto",
+        origin="lower",
+        labels={"x": "JJ capacitance (fF)", "y": "JJ inductance (nH)", "color": "Feature frequency (GHz)"},
+        title="Cryo run: JJ parallel LC resonance heatmap",
+    )
+    write_plotly_html(fig, output_dir / "jj_parallel_lc_heatmap.html")
+
+    physical_df = sweep_df[sweep_df["C_fF"].isin([0.5, 1.0, 2.0, 4.0])]
+    fig = px.line(
+        physical_df,
+        x="L_nH",
+        y="delta_vs_open_mhz",
+        color="C_fF",
+        title="Cryo run: resonance shift vs open JJ",
+        labels={
+            "L_nH": "JJ inductance (nH)",
+            "delta_vs_open_mhz": "Shift from open (MHz)",
+            "C_fF": "JJ capacitance (fF)",
+        },
+    )
+    write_plotly_html(fig, output_dir / "jj_physical_window.html")
+    physical_csv = output_dir / "jj_physical_window.csv"
+    physical_df.to_csv(physical_csv, index=False)
+
+    local_analysis = {
+        "output_dir": str(output_dir),
+        "artifacts": {
+            "scenario_summary_csv": str(scenario_csv),
+            "exploratory_postprocessing_json": str(exploratory_json),
+            "raw_3port_overview_html": str(output_dir / "raw_3port_overview.html"),
+            "jj_reference_terminations_html": str(output_dir / "jj_reference_terminations.html"),
+            "qubit_port_terminations_full_html": str(output_dir / "qubit_port_terminations_full.html"),
+            "qubit_port_terminations_zoom_html": str(output_dir / "qubit_port_terminations_zoom.html"),
+            "feedline_port_terminations_full_html": str(output_dir / "feedline_port_terminations_full.html"),
+            "feedline_port_terminations_zoom_html": str(output_dir / "feedline_port_terminations_zoom.html"),
+            "jj_parallel_lc_sweep_csv": str(sweep_csv),
+            "jj_shift_thresholds_csv": str(output_dir / "jj_shift_thresholds.csv"),
+            "jj_parallel_lc_shift_html": str(output_dir / "jj_parallel_lc_shift.html"),
+            "jj_parallel_lc_heatmap_html": str(output_dir / "jj_parallel_lc_heatmap.html"),
+            "jj_physical_window_csv": str(physical_csv),
+            "jj_physical_window_html": str(output_dir / "jj_physical_window.html"),
+        },
+        "reference_extracted": summary["extracted"],
+        "exploratory_postprocessing": exploratory,
+    }
+    dump_json(output_dir / "local_analysis_summary.json", local_analysis)
+    return local_analysis
+
+
+def display_local_analysis_summary(local_analysis: dict[str, Any]) -> None:
+    output_dir = Path(local_analysis["output_dir"]).resolve()
+    scenario_df = pd.read_csv(local_analysis["artifacts"]["scenario_summary_csv"])
+    exploratory_rows = pd.DataFrame(local_analysis["exploratory_postprocessing"]).T.reset_index()
+    exploratory_rows = exploratory_rows.rename(columns={"index": "method"})
+
+    display(exploratory_rows)
+    display(scenario_df)
+
+    iframe_specs = [
+        ("JJ reference terminations", output_dir / "jj_reference_terminations.html"),
+        ("JJ parallel LC shift", output_dir / "jj_parallel_lc_shift.html"),
+        ("JJ parallel LC heatmap", output_dir / "jj_parallel_lc_heatmap.html"),
+        ("Qubit-port termination zoom", output_dir / "qubit_port_terminations_zoom.html"),
+    ]
+    for title, html_path in iframe_specs:
+        resolved_path = html_path.resolve()
+        display(
+            HTML(
+                f"<h4>{title}</h4>"
+                f"<p><a href='file://{resolved_path.as_posix()}' target='_blank'>{resolved_path}</a></p>"
+                f"<iframe src='file://{resolved_path.as_posix()}' "
+                "width='100%' height='520' style='border: 1px solid #ccc;'></iframe>"
+            )
+        )
 
 
 def load_reference_row(resonator_type: str, index: int) -> pd.Series:
@@ -846,7 +1257,11 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
 
     if stage_is_complete(manifest_path, "postprocessed") and not FORCE_RERUN and summary_path.exists():
         print(f"[{request.metadata['run_id']}] Reusing checkpointed postprocessed outputs from {run_dir}")
-        return json.loads(summary_path.read_text())
+        summary = json.loads(summary_path.read_text())
+        if "local_analysis" not in summary:
+            summary["local_analysis"] = generate_local_analysis_artifacts(summary)
+            dump_json(summary_path, summary)
+        return summary
 
     if (
         stage_is_complete(manifest_path, "artifacts_exported")
@@ -1097,6 +1512,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
             "comparison_csv": str(artifacts_dir / "comparison.csv"),
         },
     }
+    summary["local_analysis"] = generate_local_analysis_artifacts(summary)
     dump_json(summary_path, summary)
     mark_stage_complete(manifest_path, "postprocessed")
     return summary
@@ -1202,10 +1618,14 @@ def main() -> None:
     run_dir = Path(coupled_result["run_dir"])
     layer_stack_df = pd.read_csv(run_dir / "artifacts" / "layer_stack.csv")
     display(layer_stack_df)
+    display_local_analysis_summary(coupled_result["local_analysis"])
 
     print("Run directory:", run_dir)
     print("Artifacts:")
     for name, value in coupled_result["artifacts"].items():
+        print(f"  - {name}: {value}")
+    print("Local analysis:")
+    for name, value in coupled_result["local_analysis"]["artifacts"].items():
         print(f"  - {name}: {value}")
 
 

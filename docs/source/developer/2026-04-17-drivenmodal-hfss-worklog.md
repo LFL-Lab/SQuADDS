@@ -74,6 +74,8 @@ This file is the single source of truth for active implementation status, handof
 - `tests/test_drivenmodal_design.py`
 - `tests/test_drivenmodal_hfss_data.py`
 - `tests/test_drivenmodal_qubit_admittance.py`
+- `tests/test_tutorial11_local_analysis.py`
+- `tests/test_tutorial12_workflow.py`
 - `tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py`
 - `tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py`
 - `tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py`
@@ -209,6 +211,51 @@ Add newly touched files here as implementation progresses.
     - `R_J = 10 kΩ` -> same `f_r`, `kappa ≈ 0.127802 MHz`
     - `R_J = 1 kΩ` -> `f_r` finally shifts by `≈ -136 kHz`, `kappa ≈ 0.630695 MHz`
   - Interpretation: a configurable `R_J` is physically reasonable and useful as a loss knob, but it is not the main explanation for the current resonance mismatch. Tutorial 12 should therefore support `R_J`, while treating `L_J` and `C_J` as the dominant frequency-setting terms.
+- Windows/Ansys validation for Tutorial 11 `tutorial11-quarter-000-v6-zoom-8to9-22000-cryo1145-fix4` on 2026-04-18:
+  - The cryogenic rerun with `epsilon_r = 11.45` and the dense `8-9 GHz` / `22000` point interpolating sweep finished cleanly.
+  - Current extracted values from `summary.json`:
+    - `cavity_frequency_ghz ≈ 8.775989818`
+    - `kappa_mhz ≈ 0.119937233`
+    - `g_mhz ≈ 59.853779131`
+    - `chi_mhz ≈ -0.045456612`
+    - `qubit_frequency_ghz ≈ 3.887708322`
+    - `anharmonicity_mhz ≈ -128.737708533`
+  - Comparison to the active SQuADDS quarter-wave reference row:
+    - `f_r`: `-2.09%`
+    - `kappa`: `-57.62%`
+    - `g`: `+14.42%`
+    - `f_q` / `alpha`: effectively exact because they are inherited from the same transmon-side model
+  - This is the first quarter-wave Tutorial 11 run with:
+    - no sweep-edge warning,
+    - finite linewidth extraction,
+    - resolved nonzero `chi`, and
+    - a self-consistent local `skrf`/`scqubits` checkpoint bundle.
+- Tutorial 11 notebook-local analysis integration on 2026-04-18:
+  - `tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py` now generates the local Plotly/CSV analysis bundle itself as part of the tutorial flow instead of relying on a one-off external script.
+  - The tutorial now:
+    - regenerates the local-analysis bundle even when reusing a cached `summary.json`,
+    - stores the bundle under `tutorials/runtime/drivenmodal_coupled_system/local_analysis/<run-id>/`,
+    - records the generated paths back into `summary["local_analysis"]`, and
+    - displays the exploratory comparison table plus the key Plotly HTML artifacts inline in notebook usage.
+  - The integrated local-analysis bundle includes:
+    - raw 3-port overview,
+    - qubit/feedline termination sweeps,
+    - JJ reference termination zoom,
+    - parallel `L || C` sweep CSV/heatmap/shift plot,
+    - scenario summary CSV,
+    - exploratory postprocessing JSON,
+    - a local-analysis summary JSON.
+- Tutorial 12 runtime status on 2026-04-18:
+  - Tutorial 12 now inherits Tutorial 11's stable geometry/render/HFSS/export flow and adds discovery + final zoom logic for the qubit-port `Y33` extraction path.
+  - The first Windows validation run was launched as `tutorial12-quarter-000-v1-discovery-01` and reached the actual HFSS solve stage:
+    - `Design: dm_c6da22b2 [Solution type: HFSS Hybrid Modal Network]`
+    - `Analyzing setup DrivenModalSetup : DrivenModalSweep`
+  - Another agent can continue from that checkpoint/run state rather than rebuilding the Tutorial 12 control flow from scratch.
+- `uv run pytest tests/test_tutorial11_local_analysis.py tests/test_drivenmodal_qubit_admittance.py tests/test_tutorial12_workflow.py tests/imports_test.py -q --tb=short` -> pass, 35 passed, 4 upstream Qiskit Metal warnings
+- `uv run python -m py_compile tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py` -> pass
+- `uv run --extra dev ruff check tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py tests/test_tutorial11_local_analysis.py tests/test_drivenmodal_qubit_admittance.py tests/test_tutorial12_workflow.py tests/imports_test.py squadds/simulations/drivenmodal/qubit_admittance.py` -> pass
+- `uv run --extra dev ruff format --check tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py tests/test_tutorial11_local_analysis.py tests/test_drivenmodal_qubit_admittance.py tests/test_tutorial12_workflow.py tests/imports_test.py squadds/simulations/drivenmodal/qubit_admittance.py` -> pass
+- `uv run python - <<'PY' ... generate_local_analysis_artifacts(summary) ... PY` against `tutorials/runtime/drivenmodal_coupled_system/local_analysis/tutorial11-quarter-000-v6-zoom-8to9-22000-cryo1145-fix4/summary.json` -> pass, regenerated the bundled local-analysis artifacts on the real cryogenic run and reproduced `g_mhz ≈ 59.853779131`, `chi_mhz ≈ -0.045456612`
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 
