@@ -29,6 +29,8 @@ This file is the single source of truth for active implementation status, handof
   - correct the driven-modal port model so capacitance extractions only declare active conductors plus JJ ports, not a fake ground port
   - add reusable helpers for capacitance-matrix expansion and coupled-system port termination
   - land runnable `tutorials/*.py` files for capacitance extraction and coupled-system post-processing
+  - extend the qubit-admittance narrative so Tutorial 12 records the model-sweep and termination-sensitivity analysis directly in the tutorial output
+  - land a combined Tutorial 13 flow that reuses one driven-modal geometry/setup to extract the full Hamiltonian from segmented sweeps
 
 ## Status checklist
 
@@ -79,6 +81,8 @@ This file is the single source of truth for active implementation status, handof
 - `tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.py`
 - `tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py`
 - `tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py`
+- `tutorials/Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py`
+- `tests/test_tutorial13_workflow.py`
 
 Add newly touched files here as implementation progresses.
 
@@ -251,11 +255,41 @@ Add newly touched files here as implementation progresses.
     - `Design: dm_c6da22b2 [Solution type: HFSS Hybrid Modal Network]`
     - `Analyzing setup DrivenModalSetup : DrivenModalSweep`
   - Another agent can continue from that checkpoint/run state rather than rebuilding the Tutorial 12 control flow from scratch.
+- Tutorial 12 qubit-admittance interpretation update on 2026-04-18:
+  - The saved Tutorial 12 Windows run now has a repo-native interpretation pass rather than ad-hoc local notes.
+  - `qubit_admittance.py` now includes a terminated-port reduction helper so the JJ-port environment can be reduced with explicit feedline loads instead of relying on raw `Y33`, whose default meaning implies shorted non-target ports.
+  - Tutorial 12 now writes and displays:
+    - `qubit_model_agreement.csv`
+    - `feedline_termination_sensitivity.csv`
+    - the selected-model comparison table
+    - the best-agreement rows
+    - the feedline-termination sensitivity table
+    - the existing Plotly zero-crossing / parameter-sweep figures
+  - Replay of the saved Tutorial 12 HFSS dataset showed that the qubit extraction is effectively insensitive to `open`, `50 ohm`, and `1 Mohm` feedline reductions on the current coupled-system example, so the remaining mismatch is not a trivial port-termination bookkeeping bug.
+- Tutorial 13 combined Hamiltonian tutorial scaffold on 2026-04-18:
+  - Added `tutorials/Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py`.
+  - The tutorial is structured as a notebook-style narrative with `# %% [markdown]` sections explaining:
+    - querying the target design from SQuADDS,
+    - why the sweep is segmented into qubit / bridge / resonator bands,
+    - how `Y33` produces `f_q` and `alpha`,
+    - how loaded cavity notch fitting produces `f_r`, `kappa`, `chi`, and `g`,
+    - and how the final Hamiltonian comparison table should be interpreted.
+  - Runtime design:
+    - render the geometry once,
+    - reuse one driven-modal setup,
+    - execute three named sweeps,
+    - export per-band artifacts,
+    - post-process the qubit and resonator windows separately,
+    - merge them into one Hamiltonian-comparison dataframe with signed and percentage errors.
 - `uv run pytest tests/test_tutorial11_local_analysis.py tests/test_drivenmodal_qubit_admittance.py tests/test_tutorial12_workflow.py tests/imports_test.py -q --tb=short` -> pass, 35 passed, 4 upstream Qiskit Metal warnings
 - `uv run python -m py_compile tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py` -> pass
 - `uv run --extra dev ruff check tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py tests/test_tutorial11_local_analysis.py tests/test_drivenmodal_qubit_admittance.py tests/test_tutorial12_workflow.py tests/imports_test.py squadds/simulations/drivenmodal/qubit_admittance.py` -> pass
 - `uv run --extra dev ruff format --check tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py tests/test_tutorial11_local_analysis.py tests/test_drivenmodal_qubit_admittance.py tests/test_tutorial12_workflow.py tests/imports_test.py squadds/simulations/drivenmodal/qubit_admittance.py` -> pass
 - `uv run python - <<'PY' ... generate_local_analysis_artifacts(summary) ... PY` against `tutorials/runtime/drivenmodal_coupled_system/local_analysis/tutorial11-quarter-000-v6-zoom-8to9-22000-cryo1145-fix4/summary.json` -> pass, regenerated the bundled local-analysis artifacts on the real cryogenic run and reproduced `g_mhz ≈ 59.853779131`, `chi_mhz ≈ -0.045456612`
+- `uv run pytest tests/test_tutorial13_workflow.py tests/test_tutorial12_workflow.py tests/test_drivenmodal_qubit_admittance.py -q --tb=short` -> pass, 12 passed, 4 upstream Qiskit Metal warnings
+- `uv run python -m py_compile tutorials/Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py squadds/simulations/drivenmodal/qubit_admittance.py` -> pass
+- `uv run --extra dev ruff check tutorials/Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py squadds/simulations/drivenmodal/qubit_admittance.py tests/test_tutorial13_workflow.py tests/test_tutorial12_workflow.py tests/test_drivenmodal_qubit_admittance.py` -> pass
+- `uv run --extra dev ruff format --check tutorials/Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py squadds/simulations/drivenmodal/qubit_admittance.py tests/test_tutorial13_workflow.py tests/test_tutorial12_workflow.py tests/test_drivenmodal_qubit_admittance.py` -> pass
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 

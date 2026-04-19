@@ -8,6 +8,7 @@ from squadds.simulations.drivenmodal.qubit_admittance import (
     extract_qubit_from_port_admittance,
     jj_parallel_admittance,
     jj_parallel_impedance,
+    reduce_terminated_port_admittance,
 )
 
 
@@ -88,3 +89,31 @@ def test_combine_port_admittance_with_jj_adds_environment_and_junction_terms():
     jj_only = jj_parallel_admittance(freqs_hz, lj_h=12e-9, cj_f=0.0, rj_ohms=math.inf)
 
     np.testing.assert_allclose(combined, y_env + jj_only)
+
+
+def test_reduce_terminated_port_admittance_removes_short_circuit_loading_from_coupling_caps():
+    c_qubit_f = 80e-15
+    c_couple_f = 25e-15
+    freqs_hz = np.linspace(4e9, 6e9, 5)
+    omega = 2 * np.pi * freqs_hz
+    y_couple = 1j * omega * c_couple_f
+    y_qubit = 1j * omega * c_qubit_f
+
+    y_matrices = np.zeros((len(freqs_hz), 3, 3), dtype=complex)
+    y_matrices[:, 0, 0] = y_couple
+    y_matrices[:, 1, 1] = y_couple
+    y_matrices[:, 2, 2] = y_qubit + 2 * y_couple
+    y_matrices[:, 0, 2] = -y_couple
+    y_matrices[:, 2, 0] = -y_couple
+    y_matrices[:, 1, 2] = -y_couple
+    y_matrices[:, 2, 1] = -y_couple
+
+    raw_y33 = y_matrices[:, 2, 2]
+    reduced_open = reduce_terminated_port_admittance(
+        y_matrices,
+        target_port=2,
+        terminated_port_impedances={0: np.inf, 1: np.inf},
+    )
+
+    np.testing.assert_allclose(np.imag(raw_y33), omega * (c_qubit_f + 2 * c_couple_f))
+    np.testing.assert_allclose(np.imag(reduced_open), omega * c_qubit_f, rtol=1e-9, atol=1e-18)

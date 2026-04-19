@@ -28,12 +28,14 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from scipy import constants
 
 from squadds.core.json_utils import deserialize_json_like
 from squadds.simulations.drivenmodal.hfss_data import parameter_dataframe_to_tensor
 from squadds.simulations.drivenmodal.qubit_admittance import (
     combine_port_admittance_with_jj,
     extract_qubit_from_port_admittance,
+    reduce_terminated_port_admittance,
 )
 
 try:
@@ -88,6 +90,12 @@ JJ_CAPACITANCE_FF = 2.0
 JJ_RESISTANCE_OHMS = 50_000.0
 JJ_CAP_SWEEP_FF = [0.0, 0.5, 1.0, 2.0, 4.0]
 JJ_RES_SWEEP_OHMS = [math.inf, 1e6, 1e5, 5e4, 1e4]
+FEEDLINE_TERMINATION_OHMS = 50.0
+FEEDLINE_TERMINATION_CASES = {
+    "open": {0: np.inf, 1: np.inf},
+    "50 ohm": {0: 50.0, 1: 50.0},
+    "1 Mohm": {0: 1e6, 1: 1e6},
+}
 
 RUNTIME_ROOT = Path("tutorials/runtime/drivenmodal_qubit_admittance")
 CHECKPOINT_ROOT = RUNTIME_ROOT / "checkpoints"
@@ -261,6 +269,90 @@ def build_comparison_rows(extracted: dict[str, float], reference: dict[str, floa
     return pd.DataFrame(rows)
 
 
+def reference_alpha_to_capacitance_fF(reference: dict[str, float]) -> float:
+    alpha_hz = abs(reference["alpha_hz"])
+    c_total_f = constants.e**2 / (2 * constants.h * alpha_hz)
+    return float(c_total_f * 1e15)
+
+
+def build_model_agreement_table(model_df: pd.DataFrame, reference: dict[str, float]) -> pd.DataFrame:
+    agreement_df = model_df.copy()
+    agreement_df["reference_qubit_frequency_ghz"] = reference["qubit_frequency_ghz"]
+    agreement_df["reference_anharmonicity_mhz"] = reference["anharmonicity_mhz"]
+    agreement_df["reference_effective_capacitance_fF"] = reference_alpha_to_capacitance_fF(reference)
+    agreement_df["fq_abs_err_mhz"] = (
+        agreement_df["qubit_frequency_ghz"] - agreement_df["reference_qubit_frequency_ghz"]
+    ).abs() * 1e3
+    agreement_df["alpha_abs_err_mhz"] = (
+        agreement_df["anharmonicity_mhz"] - agreement_df["reference_anharmonicity_mhz"]
+    ).abs()
+    agreement_df["cap_abs_err_fF"] = (
+        agreement_df["effective_capacitance_fF"] - agreement_df["reference_effective_capacitance_fF"]
+    ).abs()
+    agreement_df["score"] = (
+        agreement_df["fq_abs_err_mhz"] + agreement_df["alpha_abs_err_mhz"] + agreement_df["cap_abs_err_fF"]
+    )
+    return agreement_df.sort_values("score").reset_index(drop=True)
+
+
+def build_feedline_termination_sensitivity(
+    freqs_hz: np.ndarray,
+    y_matrices: np.ndarray,
+    *,
+    bare_lj_h: float,
+    center_hint_hz: float,
+) -> pd.DataFrame:
+    rows: list[dict[str, float | str]] = []
+    for label, terminated_port_impedances in FEEDLINE_TERMINATION_CASES.items():
+        y33_env = reduce_terminated_port_admittance(
+            y_matrices,
+            target_port=2,
+            terminated_port_impedances=terminated_port_impedances,
+        )
+        extracted = extract_qubit_from_port_admittance(
+            freqs_hz,
+            y33_env,
+            lj_h=bare_lj_h,
+            cj_f=JJ_CAPACITANCE_FF * 1e-15,
+            rj_ohms=JJ_RESISTANCE_OHMS,
+            center_hint_hz=center_hint_hz,
+        )
+        rows.append(
+            {
+                "feedline_termination": label,
+                "linear_resonance_ghz": extracted["linear_resonance_hz"] / 1e9,
+                "effective_capacitance_fF": extracted["effective_capacitance_f"] * 1e15,
+                "qubit_frequency_ghz": extracted["qubit_frequency_hz"] / 1e9,
+                "anharmonicity_mhz": extracted["anharmonicity_hz"] / 1e6,
+                "real_admittance_uS": extracted["real_admittance_s"] * 1e6,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def display_qubit_analysis_summary(
+    *,
+    final_result: dict[str, Any],
+    model_df: pd.DataFrame,
+    agreement_df: pd.DataFrame,
+    termination_df: pd.DataFrame,
+    artifacts_dir: Path,
+) -> None:
+    display(pd.DataFrame(final_result["comparison_rows"]))
+    display(pd.DataFrame([final_result["selected_model_extracted"]]))
+    display(agreement_df.head(10))
+    display(termination_df)
+    display(model_df)
+
+    for html_name in [
+        "y33_zero_crossing.html",
+        "qubit_frequency_sweep.html",
+        "anharmonicity_sweep.html",
+        "linear_mode_sweep.html",
+    ]:
+        display(HTML((artifacts_dir / html_name).read_text()))
+
+
 def save_plots(
     *,
     artifacts_dir: Path,
@@ -408,7 +500,14 @@ def run_qubit_demo(
 
     y_df = pd.read_pickle(artifacts_dir / "y_parameters.pkl")
     freqs_hz, y_matrices = parameter_dataframe_to_tensor(y_df, matrix_size=3, parameter_prefix="Y")
-    y33_env = y_matrices[:, 2, 2]
+    y33_env = reduce_terminated_port_admittance(
+        y_matrices,
+        target_port=2,
+        terminated_port_impedances={
+            0: FEEDLINE_TERMINATION_OHMS,
+            1: FEEDLINE_TERMINATION_OHMS,
+        },
+    )
 
     extracted_summary, extraction_warning = summarize_selected_model_extraction(
         freqs_hz,
@@ -425,6 +524,17 @@ def run_qubit_demo(
         else center_hint_hz,
     )
     model_df.to_csv(artifacts_dir / "qubit_model_sweep.csv", index=False)
+    agreement_df = build_model_agreement_table(model_df, reference_summary)
+    agreement_df.to_csv(artifacts_dir / "qubit_model_agreement.csv", index=False)
+    termination_df = build_feedline_termination_sensitivity(
+        freqs_hz,
+        y_matrices,
+        bare_lj_h=bare_lj_h,
+        center_hint_hz=(extracted_summary["linear_resonance_ghz"] * 1e9)
+        if not np.isnan(extracted_summary["linear_resonance_ghz"])
+        else center_hint_hz,
+    )
+    termination_df.to_csv(artifacts_dir / "feedline_termination_sensitivity.csv", index=False)
 
     comparison_df = build_comparison_rows(extracted_summary, reference_summary)
     comparison_df.to_csv(artifacts_dir / "qubit_comparison.csv", index=False)
@@ -439,12 +549,17 @@ def run_qubit_demo(
         },
         "selected_model_extracted": extracted_summary,
         "comparison_rows": comparison_df.to_dict(orient="records"),
+        "reference_effective_capacitance_fF": reference_alpha_to_capacitance_fF(reference_summary),
+        "best_model_rows": agreement_df.head(10).to_dict(orient="records"),
+        "feedline_termination_rows": termination_df.to_dict(orient="records"),
         "qubit_extraction_warning": extraction_warning,
         "artifacts": {
             "raw_touchstone": coupled_result["artifacts"]["raw_touchstone"],
             "y_pickle": str(artifacts_dir / "y_parameters.pkl"),
             "model_sweep_csv": str(artifacts_dir / "qubit_model_sweep.csv"),
+            "model_agreement_csv": str(artifacts_dir / "qubit_model_agreement.csv"),
             "comparison_csv": str(artifacts_dir / "qubit_comparison.csv"),
+            "feedline_termination_csv": str(artifacts_dir / "feedline_termination_sensitivity.csv"),
             "y33_zero_crossing_plot": str(artifacts_dir / "y33_zero_crossing.html"),
         },
     }
@@ -483,7 +598,45 @@ def qubit_discovery_boundary_direction(summary: dict[str, Any], sweep) -> str | 
 
 
 # %% [markdown]
-# ## Run the HFSS sweep and analyze `Y33`
+# ## Run the HFSS sweep and analyze the JJ-port admittance
+#
+# The first dataframe below compares the selected JJ model against the SQuADDS
+# reference `f_q` and `alpha`. The next tables answer the practical questions:
+#
+# - which `C_J` / `R_J` choice best matches the reference row?
+# - how much of the extracted result is sensitive to the feedline termination?
+# - how close is the extracted effective capacitance to the capacitance implied
+#   by the reference anharmonicity?
+#
+# For the current quarter-wave validation run, the useful takeaway is that the
+# extraction is dominated by the capacitive part of the qubit environment. The
+# result barely changes between `open`, `50 ohm`, and `1 Mohm` feedline loads,
+# so any remaining mismatch is not a trivial port-termination bookkeeping bug.
+
+# %% [markdown]
+# ## How to read the Tutorial 12 outputs
+#
+# There are four complementary views in the final notebook output:
+#
+# 1. the comparison table:
+#    this is the user-facing summary for the selected `R || L || C` JJ model.
+# 2. the selected-model row:
+#    this exposes the linear qubit-mode frequency, effective capacitance, and
+#    the `scqubits`-derived `f01` / `alpha` produced by that model.
+# 3. the agreement and termination tables:
+#    these tell us whether the remaining mismatch is coming from the JJ model
+#    choice or from how the feedline ports are terminated during reduction.
+# 4. the Plotly figures:
+#    these make it easy to see whether the extracted mode is well resolved and
+#    whether the model trends are smooth enough to trust physically.
+#
+# In practice, the most important sanity checks are:
+#
+# - the zero crossing should sit well inside the final zoom band,
+# - the extracted capacitance should be in the same ballpark as the transmon
+#   capacitance implied by the reference anharmonicity, and
+# - the result should not jump wildly when we change the feedline termination
+#   from `open` to `50 ohm` to `1 Mohm`.
 
 
 # %%
@@ -566,15 +719,20 @@ def main() -> None:
     run_dir = Path(final_result["run_dir"])
     artifacts_dir = run_dir / "artifacts"
     model_df = pd.read_csv(artifacts_dir / "qubit_model_sweep.csv")
-    comparison_df = pd.DataFrame(final_result["comparison_rows"])
+    agreement_df = pd.read_csv(artifacts_dir / "qubit_model_agreement.csv")
+    termination_df = pd.read_csv(artifacts_dir / "feedline_termination_sensitivity.csv")
 
-    display(comparison_df)
-    display(model_df)
+    display_qubit_analysis_summary(
+        final_result=final_result,
+        model_df=model_df,
+        agreement_df=agreement_df,
+        termination_df=termination_df,
+        artifacts_dir=artifacts_dir,
+    )
     print("Run directory:", run_dir)
     print("Artifacts:")
     for name, value in final_result["artifacts"].items():
         print(f"  - {name}: {value}")
-    display(HTML((artifacts_dir / "y33_zero_crossing.html").read_text()))
 
 
 if __name__ == "__main__":

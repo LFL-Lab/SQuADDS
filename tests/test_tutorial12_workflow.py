@@ -73,3 +73,36 @@ def test_build_final_qubit_setup_and_sweep_recenters_window():
     assert setup.freq_ghz == 4.35
     assert sweep.start_ghz < 4.35 < sweep.stop_ghz
     assert sweep.count == module.QUBIT_FINAL_SWEEP_COUNT
+
+
+def test_build_model_agreement_table_sorts_best_match_first():
+    module = load_tutorial12_module()
+    model_df = module.pd.DataFrame(
+        [
+            {
+                "jj_capacitance_fF": 0.0,
+                "jj_resistance_ohms": float("inf"),
+                "qubit_frequency_ghz": 3.75,
+                "anharmonicity_mhz": -119.0,
+                "effective_capacitance_fF": 175.0,
+            },
+            {
+                "jj_capacitance_fF": 2.0,
+                "jj_resistance_ohms": 50_000.0,
+                "qubit_frequency_ghz": 3.885,
+                "anharmonicity_mhz": -128.2,
+                "effective_capacitance_fF": 151.0,
+            },
+        ]
+    )
+    reference = {
+        "qubit_frequency_ghz": 3.8877083222541025,
+        "anharmonicity_mhz": -128.7377085331389,
+        "alpha_hz": -128737708.53316557,
+    }
+
+    agreement_df = module.build_model_agreement_table(model_df, reference)
+
+    assert agreement_df.iloc[0]["jj_capacitance_fF"] == 2.0
+    assert agreement_df.iloc[0]["fq_abs_err_mhz"] < agreement_df.iloc[1]["fq_abs_err_mhz"]
+    assert agreement_df.iloc[0]["cap_abs_err_fF"] < agreement_df.iloc[1]["cap_abs_err_fF"]

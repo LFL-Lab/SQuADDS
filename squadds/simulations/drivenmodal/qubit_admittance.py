@@ -9,6 +9,15 @@ import scqubits as scq
 from scipy import constants
 
 
+def _normalize_impedance_trace(impedance, *, count: int) -> np.ndarray:
+    if np.isscalar(impedance):
+        return np.full(count, impedance, dtype=complex)
+    trace = np.asarray(impedance, dtype=complex)
+    if trace.shape != (count,):
+        raise ValueError("Frequency-dependent impedances must match the number of frequency samples.")
+    return trace
+
+
 def bare_lj_to_ej_ghz(lj_h: float) -> float:
     """Convert a bare Josephson inductance into EJ in GHz for scqubits."""
     if lj_h <= 0:
@@ -86,6 +95,54 @@ def combine_port_admittance_with_jj(
     if y_env.shape != np.asarray(freqs_hz).shape:
         raise ValueError("freqs_hz and y33_env must have the same shape.")
     return y_env + jj_parallel_admittance(freqs_hz, lj_h=lj_h, cj_f=cj_f, rj_ohms=rj_ohms)
+
+
+def reduce_terminated_port_admittance(
+    y_matrices: np.ndarray,
+    *,
+    target_port: int,
+    terminated_port_impedances: dict[int, complex | np.ndarray],
+) -> np.ndarray:
+    """Reduce a multiport admittance tensor to one port with explicit terminations.
+
+    Raw Y-parameters are defined with the other ports shorted. For the qubit
+    port we instead want the environment admittance with the feedline ports
+    terminated in their physical loads, so we eliminate those ports via a
+    Schur complement.
+    """
+    y_tensor = np.asarray(y_matrices, dtype=complex)
+    if y_tensor.ndim != 3 or y_tensor.shape[1] != y_tensor.shape[2]:
+        raise ValueError("y_matrices must be a (n_freq, n_port, n_port) tensor.")
+    n_freq, n_port, _ = y_tensor.shape
+    if not 0 <= target_port < n_port:
+        raise ValueError("target_port is out of range.")
+
+    terminated_ports = sorted(terminated_port_impedances)
+    if target_port in terminated_ports:
+        raise ValueError("target_port cannot also be a terminated port.")
+    if any(port < 0 or port >= n_port for port in terminated_ports):
+        raise ValueError("terminated port index is out of range.")
+    if not terminated_ports:
+        return y_tensor[:, target_port, target_port].copy()
+
+    load_admittances = np.zeros((n_freq, len(terminated_ports)), dtype=complex)
+    for index, port in enumerate(terminated_ports):
+        z_trace = _normalize_impedance_trace(terminated_port_impedances[port], count=n_freq)
+        y_load = np.zeros_like(z_trace, dtype=complex)
+        finite_mask = np.isfinite(z_trace) & (np.abs(z_trace) > 0)
+        y_load[finite_mask] = 1.0 / z_trace[finite_mask]
+        load_admittances[:, index] = y_load
+
+    reduced = np.zeros(n_freq, dtype=complex)
+    for freq_index in range(n_freq):
+        y_freq = y_tensor[freq_index]
+        y_tt = y_freq[target_port, target_port]
+        y_ta = y_freq[target_port, terminated_ports]
+        y_at = y_freq[terminated_ports, target_port]
+        y_aa = y_freq[np.ix_(terminated_ports, terminated_ports)]
+        termination_matrix = np.diag(load_admittances[freq_index])
+        reduced[freq_index] = y_tt - y_ta @ np.linalg.solve(y_aa + termination_matrix, y_at)
+    return reduced
 
 
 def _interpolate_zero_crossing(
@@ -233,4 +290,5 @@ __all__ = [
     "extract_qubit_from_port_admittance",
     "jj_parallel_admittance",
     "jj_parallel_impedance",
+    "reduce_terminated_port_admittance",
 ]
