@@ -1,3 +1,4 @@
+import warnings
 from collections import OrderedDict
 
 from qiskit_metal import Dict
@@ -55,11 +56,15 @@ class QubitCavity(QComponent):
         self.make_qubit()
         self.make_cavity()
         self.make_pins()
-        print(
-            'There might be "kinks" in the CPW, which is a known issue in `qiskit-metal`.\n'
-            "To resolve this, try adjusting the `start_straight` or `end_straight` parameters.\n"
-            "For more details and resolution tips, check out this guide:\n"
-            "https://qiskit-community.github.io/qiskit-metal/tut/2-From-components-to-chip/2.12-Simple-Meander.html"
+        warnings.warn(
+            "QubitCavity is a convenience wrapper for quick visualization only. "
+            "For production designs, build components individually (TransmonCross, "
+            "CoupledLineTee, RouteMeander) to control trace widths, fillets, and "
+            "lead straights. See SQuADDS Tutorial 5 or the MCP layout-guide resource. "
+            "If you see CPW kinks, increase 'lead.start_straight' / 'lead.end_straight' "
+            "on the RouteMeander (try 75um / 50um).",
+            UserWarning,
+            stacklevel=2,
         )
 
     def make_qubit(self):
@@ -74,10 +79,12 @@ class QubitCavity(QComponent):
         qubit_opts = Dict()
         self.copier(qubit_opts, p.qubit_options)
         qubit_opts["pos_y"] = 0
-        try:
-            qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options["cpw_opts"].total_length > 2.500 else "-1000um"
-        except:
-            qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options["cpw_options"].total_length > 2.500 else "-1000um"
+        cpw_opts = (
+            p.cavity_claw_options["cpw_opts"]
+            if "cpw_opts" in p.cavity_claw_options
+            else p.cavity_claw_options["cpw_options"]
+        )
+        qubit_opts["pos_x"] = "-1500um" if cpw_opts.total_length > 2.500 else "-1000um"
         self.qubit = TransmonCross(self.design, f"{self.name}_xmon", options=qubit_opts)
 
     def make_cavity(self):
@@ -98,10 +105,12 @@ class QubitCavity(QComponent):
         p = self.p
 
         temp_opts = Dict()
-        try:
-            self.copier(temp_opts, p.cavity_claw_options["coupler_options"])
-        except:
-            self.copier(temp_opts, p.cavity_claw_options["cplr_opts"])
+        coupler_options = (
+            p.cavity_claw_options["coupler_options"]
+            if "coupler_options" in p.cavity_claw_options
+            else p.cavity_claw_options["cplr_opts"]
+        )
+        self.copier(temp_opts, coupler_options)
 
         if p.cavity_claw_options["coupler_type"].upper() == "CLT":
             from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
@@ -126,10 +135,11 @@ class QubitCavity(QComponent):
         from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
 
         p = self.p
-        try:
-            p.cpw_opts = p.cavity_claw_options["cpw_opts"]
-        except:
-            p.cpw_opts = p.cavity_claw_options["cpw_options"]
+        p.cpw_opts = (
+            p.cavity_claw_options["cpw_opts"]
+            if "cpw_opts" in p.cavity_claw_options
+            else p.cavity_claw_options["cpw_options"]
+        )
 
         left_opts = Dict()
         left_opts.update(
@@ -171,6 +181,17 @@ class QubitCavity(QComponent):
             "asymmetry",
             f"{adj_distance / (3)}um",  # need this to make CPW asymmetry half of the coupling length
         )
+        try:
+            meander_spacing_mm = float(str(meander_opts["spacing"]).replace("um", "")) / 1000
+        except Exception:
+            meander_spacing_mm = 0.100
+        raw_fillet = meander_opts.get("fillet", "49.9um")
+        try:
+            fillet_mm = float(str(raw_fillet).replace("um", "")) / 1000
+        except Exception:
+            fillet_mm = 0.0499
+        safe_fillet_um = min(fillet_mm, meander_spacing_mm / 2.1) * 1000
+        meander_opts["fillet"] = f"{safe_fillet_um:.3f}".rstrip("0").rstrip(".") + "um"
         left_opts.update({"meander": meander_opts})  # if not, sharp kinks occur in CPW :(
         # cpw = RouteMeander(design, 'cpw', options = opts)
 
@@ -181,6 +202,25 @@ class QubitCavity(QComponent):
         left_opts["pin_inputs"]["end_pin"].update({"pin": "second_end"})
 
         self.LeftMeander = RouteMeander(self.design, f"{self.name}_left_cpw", options=left_opts)
+
+        # --- Trace width matching ---
+        # Ensure the RouteMeander trace_width matches the qubit claw's CPW width
+        # to avoid impedance discontinuities at the connection point.
+        qubit_conn_name = list(self.qubit.options["connection_pads"].keys())[0]
+        qubit_conn_opts = self.qubit.options["connection_pads"][qubit_conn_name]
+        claw_cpw_w = qubit_conn_opts.get("claw_cpw_width", None)
+        meander_trace_w = self.LeftMeander.options.get("trace_width", None)
+        if claw_cpw_w is not None and meander_trace_w is not None:
+            if str(claw_cpw_w) != str(meander_trace_w):
+                warnings.warn(
+                    f"Trace width mismatch: qubit claw_cpw_width={claw_cpw_w} "
+                    f"but RouteMeander trace_width={meander_trace_w}. "
+                    f"Setting RouteMeander trace_width to {claw_cpw_w} to match. "
+                    f"Override by explicitly setting trace_width in cpw_opts.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+                self.LeftMeander.options["trace_width"] = str(claw_cpw_w)
 
         if p.cavity_claw_options["coupler_type"] == "inductive":
             right_opts = Dict()

@@ -6,6 +6,16 @@ Version 0.4.4 (2026-04-17)
 
 * **Alpha Version 0.4.4**
 
+**MCP Server**
+
+- Added a built-in `Model Context Protocol (MCP) <https://modelcontextprotocol.io>`_ server that lets AI coding assistants (Claude, Cursor, VS Code Copilot, Gemini, Codex) interact with the SQuADDS database through the standardized MCP protocol.
+- **16 MCP Tools**: Database browsing, design search (``find_closest_designs``), physics-based interpolation (``interpolate_design``), Qiskit-Metal code snippet generation (``get_qiskit_metal_snippet``), contributor info, and more.
+- **6 MCP Resources**: Version info, citation, component lists, dataset summaries, and a comprehensive CPW layout guide (``squadds://layout-guide``) specifying impedance matching, feedline topology, and airbridge generation.
+- **3 MCP Prompts**: Guided workflow templates for designing fab-ready qubit-cavity chips (``design_fab_ready_chip``), exploring the database, and finding optimal designs.
+- Run with ``uv run squadds-mcp`` (stdio) or ``SQUADDS_MCP_TRANSPORT=streamable-http uv run squadds-mcp`` (HTTP).
+- Works with Claude Desktop, Claude Code, Cursor, VS Code, Antigravity, Gemini CLI, and OpenAI Codex.
+- Full documentation: `MCP_README.md <https://github.com/LFL-Lab/SQuADDS/blob/master/MCP_README.md>`_ and `MCP_DEVELOPER_GUIDE.md <https://github.com/LFL-Lab/SQuADDS/blob/master/MCP_DEVELOPER_GUIDE.md>`_.
+- Added CI workflows for MCP testing (nightly compatibility checks against latest PyPI SQuADDS) and automated sync notifications on new releases.
 **Refactor and Maintainability**
 
 - Refactored large internal modules into smaller helper modules while preserving the public SQuADDS APIs.
@@ -22,10 +32,12 @@ Version 0.4.4 (2026-04-17)
 
 - Added notebook-backed driven-modal tutorials for HFSS capacitance extraction and combined Hamiltonian extraction to the docsite tutorial index.
 - Published the combined driven-modal workflow as a docsite-facing Tutorial 11 so the public tutorial sequence cleanly introduces the new feature area.
+- Added MCP server unit tests (43 tests covering schemas, utilities, and server creation).
 
 **Dependencies**
 
 - Updated the `datasets` floor and lockfile so live Hugging Face metadata with `Json` feature types remains compatible during MVP smoke tests.
+- Added optional ``mcp`` dependency group: ``mcp[cli]>=1.9``, ``pydantic>=2.0``.
 
 **Bug Fixes**
 

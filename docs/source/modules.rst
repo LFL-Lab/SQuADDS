@@ -1,5 +1,5 @@
 SQuADDS
-=======
+========
 
 .. toctree::
    :maxdepth: 4
