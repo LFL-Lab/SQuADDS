@@ -171,9 +171,15 @@ class AnsysSimulator:
             self.console.print("[yellow]Unknown parameters detected:[/yellow]")
             for setup_key, params in unknown_params.items():
                 for param, value in params:
-                    self.console.print(f"  • [cyan]{param}[/cyan] = {value} (not in [bold]{setup_key}[/bold])")
+                    self.console.print(f"  - [cyan]{param}[/cyan] = {value} (not in [bold]{setup_key}[/bold])")
 
-            response = input("\n[?] Would you like to add these new parameters? (y/n): ").strip().lower()
+            try:
+                response = input("\n[?] Would you like to add these new parameters? (y/n): ").strip().lower()
+            except EOFError:
+                self.console.print(
+                    "[yellow]Non-interactive session detected; adding unknown parameters automatically.[/yellow]"
+                )
+                response = "y"
             if response != "y":
                 self.console.print("[dim]Skipping unknown parameters. Only updating existing ones.[/dim]")
                 # Filter out unknown parameters
