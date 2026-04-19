@@ -181,7 +181,7 @@ class AnsysSimulator:
                 updated_keys.append(key)
 
         if updated_keys:
-            self.console.print(f"[green]✓ Updated {', '.join(updated_keys)}: {list(kwargs.keys())}[/green]")
+            self.console.print(f"[green]Updated {', '.join(updated_keys)}: {list(kwargs.keys())}[/green]")
 
     def _get_setup_targets(self, target):
         """
