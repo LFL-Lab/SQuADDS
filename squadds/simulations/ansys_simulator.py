@@ -390,7 +390,7 @@ class AnsysSimulator:
         return_df = {}
         try:
             # Print simulation plan
-            self.console.print("\n[bold blue]═══ Simulation Plan ═══[/bold blue]")
+            self.console.print("\n[bold blue]=== Simulation Plan ===[/bold blue]")
 
             if isinstance(self.analyzer.selected_system, list):
                 # Coupled system
@@ -414,7 +414,7 @@ class AnsysSimulator:
                 self.console.print("[cyan]Simulation Types:[/cyan]")
                 self.console.print("  1. [green]LOM (Capacitance)[/green]")
 
-            self.console.print("[bold blue]═══════════════════════[/bold blue]\n")
+            self.console.print("[bold blue]=======================[/bold blue]\n")
 
             # Print simulation parameters for verification
             self.console.print("[bold blue]Simulation Parameters:[/bold blue]")
