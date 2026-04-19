@@ -123,9 +123,10 @@ def export_notebook(spec: NotebookExport) -> None:
     notebook = build_notebook(apply_replacements_to_cells(cells, spec.replacements))
     tutorial_out = TUTORIALS_DIR / spec.notebook_name
     docs_out = DOCS_TUTORIALS_DIR / spec.notebook_name
+    notebook_text = json.dumps(notebook, indent=1) + "\n"
 
-    tutorial_out.write_text(json.dumps(notebook, indent=1))
-    docs_out.write_text(json.dumps(notebook, indent=1))
+    tutorial_out.write_text(notebook_text)
+    docs_out.write_text(notebook_text)
     print(f"Wrote {tutorial_out}")
     print(f"Wrote {docs_out}")
 

@@ -75,12 +75,8 @@ def resolve_chip_metadata(spec: DrivenModalLayerStackSpec) -> dict[str, str]:
         raise ValueError(f"Unknown layer-stack preset: {spec.preset}")
 
     substrate_thickness = _format_um(spec.substrate_thickness_um)
-    sample_holder_top = _format_um(
-        spec.substrate_thickness_um + DEFAULT_SAMPLE_HOLDER_TOP_CLEARANCE_UM
-    )
-    sample_holder_bottom = _format_um(
-        spec.substrate_thickness_um + DEFAULT_SAMPLE_HOLDER_BOTTOM_CLEARANCE_UM
-    )
+    sample_holder_top = _format_um(spec.substrate_thickness_um + DEFAULT_SAMPLE_HOLDER_TOP_CLEARANCE_UM)
+    sample_holder_bottom = _format_um(spec.substrate_thickness_um + DEFAULT_SAMPLE_HOLDER_BOTTOM_CLEARANCE_UM)
 
     return {
         "material": "silicon",
