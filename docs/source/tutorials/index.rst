@@ -19,5 +19,4 @@ Tutorials
 
 .. note::
 
-   The driven-modal tutorial sequence starts here with Tutorial 10 for
-   capacitance extraction and Tutorial 11 for unified Hamiltonian extraction.
+   More tutorials coming soon!
