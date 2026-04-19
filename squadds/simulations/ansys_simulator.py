@@ -150,6 +150,15 @@ class AnsysSimulator:
 
         for key in target_keys:
             if key in self.device_dict:
+                if self.device_dict[key] is None:
+                    self.device_dict[key] = {}
+
+                if not isinstance(self.device_dict[key], dict):
+                    continue
+
+                if not self.device_dict[key]:
+                    continue
+
                 # Check which parameters are unknown
                 for param, value in kwargs.items():
                     if param not in self.device_dict[key]:

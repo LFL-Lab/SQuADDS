@@ -49,6 +49,22 @@ def test_update_simulation_setup_respects_unknown_parameter_prompt(headless_qisk
     assert "brand_new" not in simulator.device_dict["setup_qubit"]
 
 
+def test_update_simulation_setup_initializes_missing_setup_dict_without_prompt(headless_qiskit_environment):
+    simulator = AnsysSimulator(
+        DummyAnalyzer(["qubit", "cavity_claw"]),
+        {
+            "design_options_qubit": {"cross_length": "200um"},
+            "design_options_cavity_claw": {"cpw_opts": {"total_length": "4000um"}},
+            "setup_qubit": None,
+            "setup_cavity_claw": {"max_passes": 11},
+        },
+    )
+
+    simulator.update_simulation_setup(target="qubit", max_passes=20, min_passes=1)
+
+    assert simulator.device_dict["setup_qubit"] == {"max_passes": 20, "min_passes": 1}
+
+
 def test_normalize_device_dict_deserializes_json_like_payloads(headless_qiskit_environment):
     simulator = AnsysSimulator(
         DummyAnalyzer(["qubit", "cavity_claw"]),
