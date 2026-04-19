@@ -1,3 +1,5 @@
+import pytest
+
 from squadds.simulations.drivenmodal.ports import (
     build_capacitance_port_specs,
     build_coupled_system_port_specs,
@@ -54,3 +56,40 @@ def test_build_coupled_system_port_specs_has_feedline_and_jj_ports():
     assert [spec.kind for spec in port_specs] == ["feedline_input", "feedline_output", "jj"]
     assert port_list == [("ReadoutLine", "in", 50.0), ("ReadoutLine", "out", 50.0)]
     assert jj_to_port == [("Q1", "jj", 50.0, False)]
+
+
+def test_build_port_specs_reject_invalid_metadata_mappings():
+    with pytest.raises(ValueError, match="metadata for port 'top' must be a mapping"):
+        build_capacitance_port_specs(
+            "ncap",
+            {
+                "port_mapping": {
+                    "top": {"component": "NCapCoupler", "pin": "top", "metadata": "not-a-mapping"},
+                    "bottom": {"component": "NCapCoupler", "pin": "bottom"},
+                }
+            },
+        )
+
+
+def test_build_port_specs_require_non_empty_string_component_and_pin():
+    with pytest.raises(ValueError, match="component for port 'feedline_input' must be a non-empty string"):
+        build_coupled_system_port_specs(
+            {
+                "port_mapping": {
+                    "feedline_input": {"component": None, "pin": "in"},
+                    "feedline_output": {"component": "ReadoutLine", "pin": "out"},
+                    "jj": {"component": "Q1", "pin": "jj"},
+                }
+            },
+        )
+
+    with pytest.raises(ValueError, match="pin for port 'jj' must be a non-empty string"):
+        build_coupled_system_port_specs(
+            {
+                "port_mapping": {
+                    "feedline_input": {"component": "ReadoutLine", "pin": "in"},
+                    "feedline_output": {"component": "ReadoutLine", "pin": "out"},
+                    "jj": {"component": "Q1", "pin": ""},
+                }
+            },
+        )

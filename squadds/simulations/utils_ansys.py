@@ -103,6 +103,27 @@ class _LiveMaterialApp:
         return self._oproject.GetDefinitionManager()
 
 
+def _resolve_material(materials: Any, material_name: str):
+    candidate = None
+    if hasattr(materials, "checkifmaterialexists"):
+        try:
+            candidate = materials.checkifmaterialexists(material_name)
+        except Exception:
+            candidate = None
+        if hasattr(candidate, "permittivity") and hasattr(candidate, "dielectric_loss_tangent"):
+            return candidate
+
+    if hasattr(materials, "exists_material"):
+        try:
+            candidate = materials.exists_material(material_name)
+        except Exception:
+            candidate = None
+        if hasattr(candidate, "permittivity") and hasattr(candidate, "dielectric_loss_tangent"):
+            return candidate
+
+    return None
+
+
 def _apply_live_material_properties(
     renderer: Any,
     *,
@@ -123,16 +144,12 @@ def _apply_live_material_properties(
             Materials = None
         materials_factory = Materials
 
-    if materials_factory is None:
+    if materials_factory is None or (live_app.oproject is None and live_app.odesign is None):
         return False
 
     try:
         live_materials = materials_factory(live_app)
-        silicon = None
-        if hasattr(live_materials, "exists_material"):
-            silicon = live_materials.exists_material("silicon")
-        if not silicon and hasattr(live_materials, "checkifmaterialexists"):
-            silicon = live_materials.checkifmaterialexists("silicon")
+        silicon = _resolve_material(live_materials, "silicon")
         if not silicon:
             return False
         silicon.permittivity = permittivity
@@ -190,11 +207,7 @@ def setMaterialProperties(
 
 def ultra_cold_silicon(aedt, *, permittivity: float = 11.45, loss_tangent: float = 1e-7):
     materials = aedt.materials
-    silicon = None
-    if hasattr(materials, "exists_material"):
-        silicon = materials.exists_material("silicon")
-    if not silicon and hasattr(materials, "checkifmaterialexists"):
-        silicon = materials.checkifmaterialexists("silicon")
+    silicon = _resolve_material(materials, "silicon")
     if not silicon:
         raise AttributeError("Could not resolve the silicon material on the active AEDT session.")
     silicon.permittivity = permittivity

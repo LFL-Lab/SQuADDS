@@ -163,6 +163,26 @@ def apply_cryo_silicon_material_properties(
         def evaluate_expression(self, expression):
             return expression
 
+    def _resolve_material(materials: Any, material_name: str):
+        candidate = None
+        if hasattr(materials, "checkifmaterialexists"):
+            try:
+                candidate = materials.checkifmaterialexists(material_name)
+            except Exception:
+                candidate = None
+            if hasattr(candidate, "permittivity") and hasattr(candidate, "dielectric_loss_tangent"):
+                return candidate
+
+        if hasattr(materials, "exists_material"):
+            try:
+                candidate = materials.exists_material(material_name)
+            except Exception:
+                candidate = None
+            if hasattr(candidate, "permittivity") and hasattr(candidate, "dielectric_loss_tangent"):
+                return candidate
+
+        return None
+
     if materials_factory is None:
         try:
             from ansys.aedt.core.modules.material_lib import Materials
@@ -234,10 +254,10 @@ def apply_cryo_silicon_material_properties(
         definition_manager.EditMaterial("silicon", _cryo_silicon_args())
         return result
 
-    if materials_factory is not None:
+    if materials_factory is not None and (live_app.oproject is not None or live_app.odesign is not None):
         try:
             live_materials = materials_factory(live_app)
-            silicon = live_materials.exists_material("silicon")
+            silicon = _resolve_material(live_materials, "silicon")
             if silicon:
                 silicon.permittivity = permittivity
                 silicon.dielectric_loss_tangent = loss_tangent
@@ -263,9 +283,9 @@ def apply_cryo_silicon_material_properties(
             new_desktop=False,
             close_on_exit=False,
         )
-        silicon = aedt.materials.exists_material("silicon")
+        silicon = _resolve_material(aedt.materials, "silicon")
         if not silicon:
-            silicon = aedt.materials.checkifmaterialexists("silicon")
+            raise AttributeError("Could not resolve the silicon material on the active AEDT session.")
         silicon.permittivity = permittivity
         silicon.dielectric_loss_tangent = loss_tangent
         return result

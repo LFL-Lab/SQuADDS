@@ -146,21 +146,50 @@ def test_apply_cryo_silicon_material_properties_updates_active_hfss_material():
     }
     assert silicon.permittivity == 11.45
     assert silicon.dielectric_loss_tangent == 1e-7
-    assert calls == [
-        (
-            "init",
-            {
-                "project": "Project1",
-                "design": "dm_test",
-                "solution_type": "DrivenModal",
-                "new_desktop": False,
-                "close_on_exit": False,
-            },
-        ),
-        ("exists", "silicon"),
-        ("check", "silicon"),
-        ("release", False, False),
-    ]
+    assert calls[0] == (
+        "init",
+        {
+            "project": "Project1",
+            "design": "dm_test",
+            "solution_type": "DrivenModal",
+            "new_desktop": False,
+            "close_on_exit": False,
+        },
+    )
+    assert ("check", "silicon") in calls
+    assert calls[-1] == ("release", False, False)
+
+
+def test_apply_cryo_silicon_material_properties_handles_boolean_material_lookup_results():
+    class FakeSilicon:
+        def __init__(self):
+            self.permittivity = 11.9
+            self.dielectric_loss_tangent = 1e-3
+
+    silicon = FakeSilicon()
+
+    class FakeMaterials:
+        def exists_material(self, material_name):
+            assert material_name == "silicon"
+            return True
+
+        def checkifmaterialexists(self, material_name):
+            assert material_name == "silicon"
+            return silicon
+
+    class FakeHfss:
+        def __init__(self, **kwargs):
+            self.materials = FakeMaterials()
+
+        def release_desktop(self, close_projects=False, close_desktop=False):
+            return None
+
+    renderer = SimpleNamespace(pinfo=SimpleNamespace(project_name="Project1", design_name="dm_test"))
+
+    apply_cryo_silicon_material_properties(renderer, hfss_factory=FakeHfss)
+
+    assert silicon.permittivity == 11.45
+    assert silicon.dielectric_loss_tangent == 1e-7
 
 
 def test_apply_cryo_silicon_material_properties_prefers_live_renderer_session():
@@ -205,6 +234,43 @@ def test_apply_cryo_silicon_material_properties_prefers_live_renderer_session():
     assert "11.45" in calls[1][2]
     assert "dielectric_loss_tangent:=" in calls[1][2]
     assert "1e-07" in calls[1][2]
+
+
+def test_apply_cryo_silicon_material_properties_live_materials_handle_boolean_exists_results():
+    silicon = SimpleNamespace(permittivity=11.9, dielectric_loss_tangent=1e-3)
+
+    class FakeProject:
+        def GetDefinitionManager(self):
+            return None
+
+    class FakeMaterials:
+        def exists_material(self, material_name):
+            assert material_name == "silicon"
+            return True
+
+        def checkifmaterialexists(self, material_name):
+            assert material_name == "silicon"
+            return silicon
+
+    renderer = SimpleNamespace(
+        logger=SimpleNamespace(info=lambda *args, **kwargs: None),
+        pinfo=SimpleNamespace(
+            project_name="Project1",
+            design_name="dm_test",
+            desktop=SimpleNamespace(_desktop=object()),
+            project=SimpleNamespace(_project=FakeProject(), parent=SimpleNamespace(_desktop=object())),
+            design=SimpleNamespace(_design=object()),
+        ),
+    )
+
+    apply_cryo_silicon_material_properties(
+        renderer,
+        materials_factory=lambda _app: FakeMaterials(),
+        hfss_factory=lambda **kwargs: (_ for _ in ()).throw(AssertionError("fallback should not run")),
+    )
+
+    assert silicon.permittivity == 11.45
+    assert silicon.dielectric_loss_tangent == 1e-7
 
 
 def test_ensure_perfect_e_boundary_prefers_pinfo_design_api():

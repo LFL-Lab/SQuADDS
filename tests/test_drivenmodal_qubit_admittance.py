@@ -117,3 +117,29 @@ def test_reduce_terminated_port_admittance_removes_short_circuit_loading_from_co
 
     np.testing.assert_allclose(np.imag(raw_y33), omega * (c_qubit_f + 2 * c_couple_f))
     np.testing.assert_allclose(np.imag(reduced_open), omega * c_qubit_f, rtol=1e-9, atol=1e-18)
+
+
+def test_reduce_terminated_port_admittance_treats_zero_ohm_as_short():
+    c_qubit_f = 80e-15
+    c_couple_f = 25e-15
+    freqs_hz = np.linspace(4e9, 6e9, 5)
+    omega = 2 * np.pi * freqs_hz
+    y_couple = 1j * omega * c_couple_f
+    y_qubit = 1j * omega * c_qubit_f
+
+    y_matrices = np.zeros((len(freqs_hz), 3, 3), dtype=complex)
+    y_matrices[:, 0, 0] = y_couple
+    y_matrices[:, 1, 1] = y_couple
+    y_matrices[:, 2, 2] = y_qubit + 2 * y_couple
+    y_matrices[:, 0, 2] = -y_couple
+    y_matrices[:, 2, 0] = -y_couple
+    y_matrices[:, 1, 2] = -y_couple
+    y_matrices[:, 2, 1] = -y_couple
+
+    reduced_short = reduce_terminated_port_admittance(
+        y_matrices,
+        target_port=2,
+        terminated_port_impedances={0: 0.0, 1: 0.0},
+    )
+
+    np.testing.assert_allclose(reduced_short, y_matrices[:, 2, 2], rtol=1e-12, atol=1e-18)

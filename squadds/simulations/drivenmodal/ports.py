@@ -21,10 +21,15 @@ def _build_port_spec(kind: str, port_mapping: Mapping[str, object]) -> DrivenMod
 
     component = raw_spec.get("component")
     pin = raw_spec.get("pin")
+    if not isinstance(component, str) or not component.strip():
+        raise ValueError(f"component for port '{kind}' must be a non-empty string.")
+    if not isinstance(pin, str) or not pin.strip():
+        raise ValueError(f"pin for port '{kind}' must be a non-empty string.")
     impedance_ohms = float(raw_spec.get("impedance_ohms", 50.0))
-    metadata = dict(raw_spec.get("metadata", {}))
-    if not isinstance(metadata, Mapping):
+    metadata_raw = raw_spec.get("metadata", {})
+    if not isinstance(metadata_raw, Mapping):
         raise ValueError(f"metadata for port '{kind}' must be a mapping.")
+    metadata = dict(metadata_raw)
     if kind in {"cross", "jj"}:
         metadata.setdefault("hfss_target", "junction")
         metadata.setdefault("draw_inductor", False)
@@ -33,8 +38,8 @@ def _build_port_spec(kind: str, port_mapping: Mapping[str, object]) -> DrivenMod
 
     return DrivenModalPortSpec(
         kind=kind,
-        component=str(component),
-        pin=str(pin),
+        component=component,
+        pin=pin,
         impedance_ohms=impedance_ohms,
         metadata=metadata,
     )

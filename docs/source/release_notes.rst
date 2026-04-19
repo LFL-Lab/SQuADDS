@@ -6,8 +6,28 @@ Version 0.4.4 (2026-04-17)
 
 * **Alpha Version 0.4.4**
 
-**Drivenmodal Simulations**
-- API added to run drivenmodal simulations and postprocessing analysis to get capacitance matrices for IDCs and qubit-claw systems and full Hamiltonian parameters for coupled qubit-cavity systems
+**Driven-Modal HFSS Simulations**
+
+- Added a new ``squadds.simulations.drivenmodal`` subpackage that provides a stable, production-ready API for HFSS driven-modal workflows on three SQuADDS geometry families: NCap interdigital couplers, qubit-claw structures, and quarter/half-wave qubit-cavity-feedline coupled systems.
+- Added typed request/result/spec models (``CapacitanceExtractionRequest``, ``CapacitanceExtractionResult``, ``CoupledSystemDrivenModalRequest``, ``CoupledSystemDrivenModalResult``, ``DrivenModalSetupSpec``, ``DrivenModalSweepSpec``, ``DrivenModalLayerStackSpec``, ``DrivenModalArtifactPolicy``, ``DrivenModalPortSpec``, ``DrivenModalRunManifest``) so driven-modal jobs can be specified, serialized, and resumed without ad-hoc dictionaries.
+- Added an explicit, user-visible Qiskit-Metal layer-stack profile (``squadds_hfss_v1``) with thickness-only overrides; substrate/metal materials remain fixed by preset. Layer stacks are emitted as CSV alongside every run and re-attached on restart.
+- Added an ``AnsysSimulator.run_drivenmodal(request, *, checkpoint_dir=None, export_artifacts=True)`` entrypoint that initializes a checkpointed driven-modal run from a typed request without bypassing the existing ``AnsysSimulator`` lifecycle.
+- Added resumable artifact/checkpoint manifests (``squadds.simulations.drivenmodal.artifacts``) so a crash or restart does not require re-solving sweep points whose Touchstone/parquet artifacts are already on disk.
+- Added port-spec builders (``build_capacitance_port_specs``, ``build_coupled_system_port_specs``, ``split_rendered_ports``) that produce Qiskit-Metal-compatible ``port_list`` / ``jj_to_port`` payloads from declarative port mappings, with strict validation of ``component`` / ``pin`` / ``metadata`` inputs.
+- Added pure post-processing helpers for coupled systems (``calculate_chi_hz``, ``calculate_g_from_chi``, ``calculate_kappa_hz``, ``calculate_loaded_q``, ``y_to_s``, ``terminate_port_y``) that operate on raw Y-parameter tensors and return SQuADDS-native Hamiltonian quantities.
+- Added admittance-to-capacitance helpers (``capacitance_matrix_from_y``, ``capacitance_dataframe_from_y_sweep``, ``maxwell_capacitance_dataframe``) for NCap and qubit-claw extraction.
+- Added a JJ-port admittance toolkit (``squadds.simulations.drivenmodal.qubit_admittance``) with parallel ``R || L || C`` JJ models, terminated-port admittance reduction (Schur-complement based, with explicit short-circuit handling), zero-crossing extraction of the linear qubit pole, and ``scqubits``-backed transmon ``f_q`` / ``alpha`` extraction from saved ``Y33`` data.
+- Added HFSS-data plumbing (``parameter_dataframe_to_tensor``, ``network_from_parameter_dataframe``, ``write_touchstone_from_dataframe``) that converts pyEPR parameter tables into dense complex tensors and exports first-class Touchstone artifacts via ``scikit-rf``.
+- Added live-design helpers (``create_multiplanar_design``, ``write_qiskit_layer_stack_csv``, ``apply_cryo_silicon_material_properties``) that align driven-modal HFSS with the existing eigenmode/Q3D convention of cryogenic silicon (``epsilon_r = 11.45``, ``loss_tangent = 1e-7``) instead of the AEDT room-temperature default.
+- Exposed the new request/result/spec models as top-level ``squadds.simulations`` exports so users can compose driven-modal runs without importing private modules.
+
+**AnsysSimulator Improvements**
+
+- Hardened ``AnsysSimulator.update_simulation_setup`` against ``None``, empty, and non-``dict`` setup payloads in both the unknown-parameter discovery loop and the final update loop, so malformed entries are skipped with a warning instead of raising.
+- Made ``update_simulation_setup`` non-interactive friendly: when ``input()`` raises ``EOFError`` (e.g. CI, scripts, MCP), unknown parameters are auto-accepted with a clear console message instead of crashing.
+- Replaced non-ASCII glyphs in the ``AnsysSimulator`` console output (simulation plan banners, status checks, parameter prompts) with ASCII so Windows ``cp1252`` consoles no longer mangle the logs.
+- Refactored ``setMaterialProperties`` to prefer the live HFSS renderer's already-open project/design when patching cryogenic silicon, with safe ``ansys.aedt.core`` fallbacks; added DI-friendly ``materials_factory`` / ``hfss_factory`` hooks for testability.
+- Hardened material lookups against PyAEDT versions where ``Materials.exists_material(...)`` returns a boolean rather than the material object: helpers now try ``checkifmaterialexists`` first and only mutate values that actually expose ``permittivity`` / ``dielectric_loss_tangent``.
 
 **MCP Server**
 
@@ -19,6 +39,7 @@ Version 0.4.4 (2026-04-17)
 - Works with Claude Desktop, Claude Code, Cursor, VS Code, Antigravity, Gemini CLI, and OpenAI Codex.
 - Full documentation: `MCP_README.md <https://github.com/LFL-Lab/SQuADDS/blob/master/MCP_README.md>`_ and `MCP_DEVELOPER_GUIDE.md <https://github.com/LFL-Lab/SQuADDS/blob/master/MCP_DEVELOPER_GUIDE.md>`_.
 - Added CI workflows for MCP testing (nightly compatibility checks against latest PyPI SQuADDS) and automated sync notifications on new releases.
+
 **Refactor and Maintainability**
 
 - Refactored large internal modules into smaller helper modules while preserving the public SQuADDS APIs.
@@ -33,20 +54,37 @@ Version 0.4.4 (2026-04-17)
 
 **Documentation**
 
-- Added notebook-backed driven-modal tutorials for HFSS capacitance extraction and combined Hamiltonian extraction to the docsite tutorial index.
-- Published the combined driven-modal workflow as a docsite-facing Tutorial 11 so the public tutorial sequence cleanly introduces the new feature area.
+- Added runnable driven-modal tutorial scripts to ``tutorials/``:
+   - ``Tutorial-10_DrivenModal_Capacitance_Extraction.py`` (NCap and qubit-claw capacitance extraction from driven-modal Y-parameters).
+   - ``Tutorial-12_DrivenModal_Qubit_Port_Admittance.py`` (qubit ``Y33`` extraction with model-sweep / feedline-termination sensitivity analysis).
+   - ``Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py`` (single render, segmented qubit/bridge/resonator sweeps, end-to-end Hamiltonian comparison table).
+- Added a ``tutorials/export_docsite_notebooks.py`` utility that converts the ``# %%`` script tutorials into ``.ipynb`` notebooks for both the ``tutorials/`` directory and the public docsite.
+- Published the two production-ready notebooks to the docsite tutorial index:
+   - ``Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb``.
+   - ``Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb`` (docsite-facing renumbering of Tutorial 13).
+- Added a regression test (``tests/test_drivenmodal_tutorial_docs.py``) that fails if the shipped notebook artifacts disappear or lose the Tutorial 5-style title/license/footer cell structure.
 - Added MCP server unit tests (43 tests covering schemas, utilities, and server creation).
 
 **Dependencies**
 
+- Added ``scikit-rf>=1.2`` as a runtime dependency to support Touchstone export and ``Network``-based post-processing for driven-modal coupled systems.
 - Updated the `datasets` floor and lockfile so live Hugging Face metadata with `Json` feature types remains compatible during MVP smoke tests.
 - Added optional ``mcp`` dependency group: ``mcp[cli]>=1.9``, ``pydantic>=2.0``.
 
 **Bug Fixes**
 
+- ``Analyzer.find_closest`` now recomputes when any of the requested ``target_params`` columns are absent from the cached dataframe instead of raising ``KeyError`` mid-search.
+- ``QubitCavity.make_cpws`` now preserves caller-provided ``lead`` and ``meander`` overrides (using ``setdefault`` instead of unconditional assignment), and actually applies the previously-discarded ``min(fillet, spacing/2.1)`` clamp so meander geometries stop self-intersecting on the Windows/Ansys validation machine.
+- ``QubitCavity.make_qubit`` / ``make_cavity`` / ``make_cpws`` now use explicit key checks for ``cpw_opts`` / ``cpw_options`` and ``coupler_options`` / ``cplr_opts`` instead of bare ``except`` blocks, so the underlying ``KeyError`` is raised cleanly when neither alias is present.
+- Tutorial driven-modal flows now work around a ``pyEPR.load_ansys_project(...)`` path-duplication bug when ``QHFSSRenderer`` is initialized with both ``project_path`` and ``project_name``.
 - Fixed a `ScalingInterpolator` regression where NumPy was not imported during interpolation scaling.
 - Fixed half-wave parquet output writing so reruns overwrite expected artifacts even when the destination directory already exists.
 - Fixed helper edge cases found during refactor review, including option-key detection, sweep chunk key preservation, optional merger-term handling, contributor token fallback behavior, and live dataset setup/design payload normalization.
+
+**Backwards-Compatibility Notes**
+
+- ``QubitCavity.make_cpws`` default ``lead.start_straight`` changed from ``"75um"`` to ``"150um"`` (carried over from the QubitCavity geometry fix). Users who previously did not specify ``lead.start_straight`` in ``cavity_claw_options.cpw_opts.left_options`` will see a longer initial straight section in the meandered CPW. Pass an explicit ``lead.start_straight`` override to restore the prior geometry.
+- The fillet on the meandered CPW is now actually clamped to ``min(provided_fillet, spacing/2.1)``; previously this calculation was performed but its result was discarded. Geometries that relied on the unclamped fillet may render slightly differently.
 
 ---
 

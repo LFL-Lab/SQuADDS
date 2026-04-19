@@ -70,3 +70,59 @@ def test_get_freq_Q_kappa_passes_live_renderer_to_material_patch(monkeypatch):
         "solution_type": "Eigenmode",
         "renderer": renderer,
     }
+
+
+def test_ultra_cold_silicon_handles_boolean_exists_material_result():
+    silicon = SimpleNamespace(permittivity=11.9, dielectric_loss_tangent=1e-3)
+
+    class FakeMaterials:
+        def exists_material(self, material_name):
+            assert material_name == "silicon"
+            return True
+
+        def checkifmaterialexists(self, material_name):
+            assert material_name == "silicon"
+            return silicon
+
+    aedt = SimpleNamespace(materials=FakeMaterials())
+
+    utils_ansys.ultra_cold_silicon(aedt)
+
+    assert silicon.permittivity == 11.45
+    assert silicon.dielectric_loss_tangent == 1e-7
+
+
+def test_setMaterialProperties_live_materials_factory_handles_boolean_exists_result():
+    silicon = SimpleNamespace(permittivity=11.9, dielectric_loss_tangent=1e-3)
+
+    class FakeLiveMaterials:
+        def exists_material(self, material_name):
+            assert material_name == "silicon"
+            return True
+
+        def checkifmaterialexists(self, material_name):
+            assert material_name == "silicon"
+            return silicon
+
+    class FakeProject:
+        def GetDefinitionManager(self):
+            return None
+
+    renderer = SimpleNamespace(
+        pinfo=SimpleNamespace(
+            project_name="Project1",
+            design_name="CavitySweep_hfss",
+            desktop=SimpleNamespace(_desktop=object()),
+            project=SimpleNamespace(_project=FakeProject(), parent=SimpleNamespace(_desktop=object())),
+            design=SimpleNamespace(_design=object()),
+        )
+    )
+
+    utils_ansys.setMaterialProperties(
+        renderer=renderer,
+        materials_factory=lambda _app: FakeLiveMaterials(),
+        hfss_factory=lambda **kwargs: (_ for _ in ()).throw(AssertionError("fallback should not run")),
+    )
+
+    assert silicon.permittivity == 11.45
+    assert silicon.dielectric_loss_tangent == 1e-7

@@ -87,6 +87,23 @@ def test_update_simulation_setup_accepts_unknown_params_when_input_is_unavailabl
     assert simulator.device_dict["setup_cavity_claw"]["max_delta_f"] == 0.05
 
 
+def test_update_simulation_setup_skips_non_dict_payloads_in_update_loop(headless_qiskit_environment):
+    simulator = AnsysSimulator(
+        DummyAnalyzer(["qubit", "cavity_claw"]),
+        {
+            "design_options_qubit": {"cross_length": "200um"},
+            "design_options_cavity_claw": {"cpw_opts": {"total_length": "4000um"}},
+            "setup_qubit": ["unexpected", "list", "payload"],
+            "setup_cavity_claw": {"max_passes": 11},
+        },
+    )
+
+    simulator.update_simulation_setup(target="all", max_passes=42)
+
+    assert simulator.device_dict["setup_qubit"] == ["unexpected", "list", "payload"]
+    assert simulator.device_dict["setup_cavity_claw"]["max_passes"] == 42
+
+
 def test_normalize_device_dict_deserializes_json_like_payloads(headless_qiskit_environment):
     simulator = AnsysSimulator(
         DummyAnalyzer(["qubit", "cavity_claw"]),

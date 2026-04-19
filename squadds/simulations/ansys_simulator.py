@@ -191,9 +191,13 @@ class AnsysSimulator:
 
         # Update the parameters
         for key in target_keys:
-            if key in self.device_dict:
-                self.device_dict[key].update(kwargs)
-                updated_keys.append(key)
+            if key not in self.device_dict:
+                continue
+            payload = self.device_dict[key]
+            if not isinstance(payload, dict):
+                continue
+            payload.update(kwargs)
+            updated_keys.append(key)
 
         if updated_keys:
             self.console.print(f"[green]Updated {', '.join(updated_keys)}: {list(kwargs.keys())}[/green]")

@@ -125,22 +125,31 @@ def reduce_terminated_port_admittance(
     if not terminated_ports:
         return y_tensor[:, target_port, target_port].copy()
 
-    load_admittances = np.zeros((n_freq, len(terminated_ports)), dtype=complex)
-    for index, port in enumerate(terminated_ports):
-        z_trace = _normalize_impedance_trace(terminated_port_impedances[port], count=n_freq)
-        y_load = np.zeros_like(z_trace, dtype=complex)
-        finite_mask = np.isfinite(z_trace) & (np.abs(z_trace) > 0)
-        y_load[finite_mask] = 1.0 / z_trace[finite_mask]
-        load_admittances[:, index] = y_load
+    normalized_impedances = {
+        port: _normalize_impedance_trace(terminated_port_impedances[port], count=n_freq) for port in terminated_ports
+    }
 
     reduced = np.zeros(n_freq, dtype=complex)
     for freq_index in range(n_freq):
         y_freq = y_tensor[freq_index]
         y_tt = y_freq[target_port, target_port]
-        y_ta = y_freq[target_port, terminated_ports]
-        y_at = y_freq[terminated_ports, target_port]
-        y_aa = y_freq[np.ix_(terminated_ports, terminated_ports)]
-        termination_matrix = np.diag(load_admittances[freq_index])
+        active_ports: list[int] = []
+        active_loads: list[complex] = []
+        for port in terminated_ports:
+            z_value = normalized_impedances[port][freq_index]
+            if np.isfinite(z_value) and np.abs(z_value) == 0:
+                # Y-parameters already assume other ports are shorted. A zero-ohm
+                # termination therefore contributes no extra Schur-complement term.
+                continue
+            active_ports.append(port)
+            active_loads.append(0.0 if not np.isfinite(z_value) else 1.0 / z_value)
+        if not active_ports:
+            reduced[freq_index] = y_tt
+            continue
+        y_ta = y_freq[target_port, active_ports]
+        y_at = y_freq[active_ports, target_port]
+        y_aa = y_freq[np.ix_(active_ports, active_ports)]
+        termination_matrix = np.diag(active_loads)
         reduced[freq_index] = y_tt - y_ta @ np.linalg.solve(y_aa + termination_matrix, y_at)
     return reduced
 
