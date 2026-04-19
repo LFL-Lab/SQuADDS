@@ -165,7 +165,9 @@ def test_find_closest_recomputes_when_target_columns_are_missing(monkeypatch):
 
     monkeypatch.setattr(analyzer, "_add_target_params_columns", fake_add_target_params_columns)
     monkeypatch.setattr(analyzer, "_outside_bounds", lambda df, params, display=True: False)
-    monkeypatch.setattr(analyzer, "set_metric_strategy", lambda strategy: setattr(analyzer, "metric_strategy", strategy))
+    monkeypatch.setattr(
+        analyzer, "set_metric_strategy", lambda strategy: setattr(analyzer, "metric_strategy", strategy)
+    )
 
     closest = analyzer.find_closest(
         {"cavity_frequency_GHz": 7.0, "kappa_kHz": 120.0, "resonator_type": "quarter"},
