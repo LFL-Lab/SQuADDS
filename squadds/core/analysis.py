@@ -319,7 +319,10 @@ class Analyzer:
             self.selected_resonator_type,
             missing_ok=True,
         )
-        if (skip_df_gen) or (not self.params_computed):
+        target_params_list = list(self.target_params.keys())
+        missing_target_columns = [column for column in target_params_list if column not in self.df.columns]
+
+        if (skip_df_gen) or (not self.params_computed) or missing_target_columns:
             self._add_target_params_columns()
         elif self.selected_resonator_type == "quarter":
             pass
@@ -328,7 +331,6 @@ class Analyzer:
                 "Either `skip_df_gen` flag is set to True or all target params have been precomputed at an earlier step. Using `df` from memory.\nPlease set this to False if `target_parameters` have changed."
             )
 
-        target_params_list = list(self.target_params.keys())
         filtered_df = self.df[target_params_list]
         self._outside_bounds(df=filtered_df, params=target_params, display=display)
 

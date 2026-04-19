@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from squadds.core.analysis import Analyzer
 from squadds.core.analysis_search import (
     SUPPORTED_METRICS,
     filter_df_by_target_params,
@@ -139,3 +140,37 @@ def test_rank_closest_indices_orders_by_metric_distance():
     ranked_indices = rank_closest_indices(df, target_params, strategy, num_top=2)
 
     assert ranked_indices.tolist() == [22, 11]
+
+
+def test_find_closest_recomputes_when_target_columns_are_missing(monkeypatch):
+    analyzer = Analyzer.__new__(Analyzer)
+    analyzer.__supported_metrics__ = Analyzer.__supported_metrics__
+    analyzer.selected_resonator_type = "quarter"
+    analyzer.selected_system = "cavity_claw"
+    analyzer.params_computed = True
+    analyzer.metric_weights = None
+    analyzer.custom_metric_func = None
+    analyzer.closest_design_found = False
+    analyzer.df = pd.DataFrame({"placeholder": [1]})
+
+    def fake_add_target_params_columns():
+        analyzer.df = pd.DataFrame(
+            {
+                "cavity_frequency_GHz": [7.0],
+                "kappa_kHz": [120.0],
+                "resonator_type": ["quarter"],
+                "design_options": [{"name": "design-a"}],
+            }
+        )
+
+    monkeypatch.setattr(analyzer, "_add_target_params_columns", fake_add_target_params_columns)
+    monkeypatch.setattr(analyzer, "_outside_bounds", lambda df, params, display=True: False)
+    monkeypatch.setattr(analyzer, "set_metric_strategy", lambda strategy: setattr(analyzer, "metric_strategy", strategy))
+
+    closest = analyzer.find_closest(
+        {"cavity_frequency_GHz": 7.0, "kappa_kHz": 120.0, "resonator_type": "quarter"},
+        num_top=1,
+        display=False,
+    )
+
+    assert closest.iloc[0]["design_options"] == {"name": "design-a"}
