@@ -1,8 +1,8 @@
 # %% [markdown]
 # # Tutorial 13: Unified Driven-Modal Hamiltonian Extraction
 #
-# This tutorial combines the core ideas of Tutorial 11 and Tutorial 12 into one
-# end-to-end workflow:
+# This tutorial combines the cavity-postprocessing and qubit-admittance ideas
+# into one end-to-end workflow:
 #
 # 1. query a quarter/half-wave qubit-cavity design from SQuADDS for a target
 #    Hamiltonian point,
@@ -22,6 +22,26 @@
 #
 # - `Y33` around the qubit band for `f_q` and `alpha`
 # - loaded `S21` around the cavity band for `f_r`, `kappa`, `chi`, and `g`
+
+# %% [markdown]
+# ## Physics idea and software idea
+#
+# This tutorial is intentionally pedagogical in two directions at once.
+#
+# **Physics idea.**
+# A single 3-port driven-modal solve contains both the qubit-side and
+# resonator-side linear response. We do not need separate electromagnetic
+# geometries for the qubit and the cavity. Instead, we interrogate different
+# parts of the same dataset:
+#
+# - the JJ-port admittance around the qubit band, and
+# - the loaded feedline transmission around the cavity band.
+#
+# **Software idea.**
+# The reusable SQuADDS driven-modal API should make that workflow explicit:
+# one declared design, one declared layer stack, one setup, multiple named
+# sweeps, and post-processing helpers that can be re-run locally from the saved
+# artifacts without having to re-open HFSS.
 
 # %%
 from __future__ import annotations
@@ -499,7 +519,7 @@ def run_combined_demo(
                 T11.save_render_debug_artifacts(
                     design=design,
                     artifacts_dir=artifacts_dir,
-                    title=f"Tutorial 13 {RESONATOR_TYPE}-wave Qiskit Metal layout",
+                    title=f"Driven-modal combined {RESONATOR_TYPE}-wave Qiskit Metal layout",
                     selection=selection,
                     port_mapping=request.design_payload["port_mapping"],
                     port_list=port_list,
@@ -714,3 +734,16 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# %% [markdown]
+# ## License
+#
+# <div style='width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px'>
+#     <h3>This code is a part of SQuADDS</h3>
+#     <p>Developed by Sadman Ahmed Shanto</p>
+#     <p>This tutorial is written by Sadman Ahmed Shanto and OpenAI Codex</p>
+#     <p>&copy; Copyright Sadman Ahmed Shanto & Eli Levenson-Falk 2024.</p>
+#     <p>This code is licensed under the MIT License. You may<br> obtain a copy of this license in the LICENSE.txt file in the root directory<br> of this source tree.</p>
+#     <p>Any modifications or derivative works of this code must retain this<br>copyright notice, and modified files need to carry a notice indicating<br>that they have been altered from the originals.</p>
+# </div>

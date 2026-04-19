@@ -18,6 +18,11 @@ Version 0.4.4 (2026-04-17)
 - Restored visible MVP smoke-test output in CI logs so collaborators can inspect the merged dataframe, closest-match result, interpolated design, and setup payloads directly.
 - Improved test logging for integration debugging by using explicit pytest tracebacks/output settings in CI.
 
+**Documentation**
+
+- Added notebook-backed driven-modal tutorials for HFSS capacitance extraction and combined Hamiltonian extraction to the docsite tutorial index.
+- Published the combined driven-modal workflow as a docsite-facing Tutorial 11 so the public tutorial sequence cleanly introduces the new feature area.
+
 **Dependencies**
 
 - Updated the `datasets` floor and lockfile so live Hugging Face metadata with `Json` feature types remains compatible during MVP smoke tests.

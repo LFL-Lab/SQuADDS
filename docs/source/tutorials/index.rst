@@ -14,7 +14,10 @@ Tutorials
    Tutorial-7_Simulate_designs_with_palace.ipynb
    Tutorial-8_ML_interpolation_in_SQuADDS.ipynb
    Tutorial-9_Learing_the_Inverse_Design_Map.ipynb
+   Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb
+   Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb
 
 .. note::
 
-   More Tutorials Coming Soon!
+   The driven-modal tutorial sequence starts here with Tutorial 10 for
+   capacitance extraction and Tutorial 11 for unified Hamiltonian extraction.

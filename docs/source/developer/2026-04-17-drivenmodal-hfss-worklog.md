@@ -290,6 +290,19 @@ Add newly touched files here as implementation progresses.
 - `uv run python -m py_compile tutorials/Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py squadds/simulations/drivenmodal/qubit_admittance.py` -> pass
 - `uv run --extra dev ruff check tutorials/Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py squadds/simulations/drivenmodal/qubit_admittance.py tests/test_tutorial13_workflow.py tests/test_tutorial12_workflow.py tests/test_drivenmodal_qubit_admittance.py` -> pass
 - `uv run --extra dev ruff format --check tutorials/Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py squadds/simulations/drivenmodal/qubit_admittance.py tests/test_tutorial13_workflow.py tests/test_tutorial12_workflow.py tests/test_drivenmodal_qubit_admittance.py` -> pass
+- Public tutorial packaging checkpoint:
+  - Generated notebook-backed public docs artifacts for:
+    - `tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb`
+    - `tutorials/Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb`
+  - Mirrored those notebooks into:
+    - `docs/source/tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb`
+    - `docs/source/tutorials/Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb`
+  - Updated `docs/source/tutorials/index.rst` so the public docsite now exposes only the two driven-modal entrypoints we want to ship first:
+    - Tutorial 10: capacitance extraction
+    - Tutorial 11: combined Hamiltonian extraction
+  - Added a regression test:
+    - `tests/test_drivenmodal_tutorial_docs.py`
+    - Purpose: fail if the shipped notebook files disappear, are not mirrored into the docs tree, or lose the Tutorial 5-style license/footer structure.
 
 Update this section after every meaningful verification run with the exact command and a one-line outcome.
 

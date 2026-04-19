@@ -21,6 +21,26 @@
 # VS Code, Spyder, Jupyter, or as a plain Python script on the Windows machine
 # that has Ansys HFSS installed.
 
+# %% [markdown]
+# ## Physics viewpoint and API viewpoint
+#
+# There are two complementary stories in this tutorial:
+#
+# 1. **Physics story.**
+#    A driven-modal multiport solve gives us a frequency-dependent admittance
+#    matrix. In the low-loss, low-frequency limit, the imaginary part of that
+#    admittance behaves like an effective capacitance network. That lets us ask
+#    whether HFSS driven-modal can reproduce the same Maxwell capacitance
+#    picture that SQuADDS normally stores from Q3D.
+#
+# 2. **API story.**
+#    We want a reusable, restart-safe workflow that does not hard-code one
+#    geometry. The request/setup/sweep/artifact objects in
+#    `squadds.simulations.drivenmodal.*` are therefore treated as first-class
+#    pieces of the tutorial, not hidden internals. The notebook shows how to
+#    assemble them, run the solve, checkpoint the artifacts, and inspect the
+#    results.
+
 # %%
 from __future__ import annotations
 
@@ -658,3 +678,15 @@ display(ncap_layer_stack)
 # - small reusable postprocessing helpers to load S/Y data, compute
 #   capacitance-vs-frequency, export Touchstone files, and compare against
 #   existing Q3D-backed records.
+
+# %% [markdown]
+# ## License
+#
+# <div style='width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px'>
+#     <h3>This code is a part of SQuADDS</h3>
+#     <p>Developed by Sadman Ahmed Shanto</p>
+#     <p>This tutorial is written by Sadman Ahmed Shanto and OpenAI Codex</p>
+#     <p>&copy; Copyright Sadman Ahmed Shanto & Eli Levenson-Falk 2024.</p>
+#     <p>This code is licensed under the MIT License. You may<br> obtain a copy of this license in the LICENSE.txt file in the root directory<br> of this source tree.</p>
+#     <p>Any modifications or derivative works of this code must retain this<br>copyright notice, and modified files need to carry a notice indicating<br>that they have been altered from the originals.</p>
+# </div>
