@@ -32,6 +32,28 @@ def test_extract_parallel_mode_from_total_admittance_finds_parallel_lc_zero_cros
     assert abs(extracted["linear_resonance_hz"] - expected_f_hz) < 1e6
     assert abs(extracted["effective_capacitance_f"] - capacitance_f) < 2e-15
     assert extracted["slope_imag_y_per_rad_s"] > 0
+    assert extracted["resonance_at_sweep_edge"] is False
+
+
+def test_extract_parallel_mode_from_total_admittance_marks_edge_crossing():
+    capacitance_f = 80e-15
+    inductance_h = 10e-9
+    expected_f_hz = 1.0 / (2 * np.pi * math.sqrt(inductance_h * capacitance_f))
+    freqs_hz = np.array(
+        [
+            expected_f_hz * 0.99,
+            expected_f_hz * 1.01,
+            expected_f_hz * 1.08,
+            expected_f_hz * 1.15,
+            expected_f_hz * 1.22,
+        ]
+    )
+    omega = 2 * np.pi * freqs_hz
+    y_total = 1j * omega * capacitance_f + 1 / (1j * omega * inductance_h)
+
+    extracted = extract_parallel_mode_from_total_admittance(freqs_hz, y_total)
+
+    assert extracted["resonance_at_sweep_edge"] is True
 
 
 def test_extract_qubit_from_port_admittance_uses_total_capacitance_with_jj_cap():

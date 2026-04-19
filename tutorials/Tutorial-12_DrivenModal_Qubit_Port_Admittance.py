@@ -75,8 +75,12 @@ REFERENCE_INDEX = 0
 RUN_TAG = "v1"
 FORCE_RERUN = False
 
-QUBIT_SWEEP_PADDING_GHZ = 1.0
-QUBIT_SWEEP_COUNT = 22000
+QUBIT_DISCOVERY_SWEEP_PADDING_GHZ = 1.0
+QUBIT_DISCOVERY_SWEEP_COUNT = 12000
+QUBIT_DISCOVERY_CENTER_SHIFT_GHZ = 0.75
+QUBIT_MAX_DISCOVERY_ATTEMPTS = 4
+QUBIT_FINAL_SWEEP_PADDING_GHZ = 0.25
+QUBIT_FINAL_SWEEP_COUNT = 22000
 QUBIT_MAX_DELTA_S = 0.005
 QUBIT_MIN_CONVERGED = 5
 
@@ -133,8 +137,7 @@ def format_resistance_label(rj_ohms: float) -> str:
     return f"{rj_ohms:g} ohm"
 
 
-def build_qubit_setup_and_sweep(reference_summary: dict[str, float]):
-    center_ghz = reference_summary["qubit_frequency_ghz"]
+def build_qubit_setup_and_sweep(center_ghz: float, *, padding_ghz: float, count: int):
     setup = T11.DrivenModalSetupSpec(
         name=T11.SETUP_TEMPLATE.name,
         freq_ghz=center_ghz,
@@ -147,15 +150,31 @@ def build_qubit_setup_and_sweep(reference_summary: dict[str, float]):
     )
     sweep = T11.DrivenModalSweepSpec(
         name=T11.SWEEP_TEMPLATE.name,
-        start_ghz=max(1.0, center_ghz - QUBIT_SWEEP_PADDING_GHZ),
-        stop_ghz=center_ghz + QUBIT_SWEEP_PADDING_GHZ,
-        count=QUBIT_SWEEP_COUNT,
+        start_ghz=max(1.0, center_ghz - padding_ghz),
+        stop_ghz=center_ghz + padding_ghz,
+        count=count,
         sweep_type=T11.SWEEP_TEMPLATE.sweep_type,
         save_fields=T11.SWEEP_TEMPLATE.save_fields,
         interpolation_tol=T11.SWEEP_TEMPLATE.interpolation_tol,
         interpolation_max_solutions=T11.SWEEP_TEMPLATE.interpolation_max_solutions,
     )
     return setup, sweep
+
+
+def build_qubit_discovery_setup_and_sweep(center_ghz: float):
+    return build_qubit_setup_and_sweep(
+        center_ghz,
+        padding_ghz=QUBIT_DISCOVERY_SWEEP_PADDING_GHZ,
+        count=QUBIT_DISCOVERY_SWEEP_COUNT,
+    )
+
+
+def build_final_qubit_setup_and_sweep(center_ghz: float):
+    return build_qubit_setup_and_sweep(
+        center_ghz,
+        padding_ghz=QUBIT_FINAL_SWEEP_PADDING_GHZ,
+        count=QUBIT_FINAL_SWEEP_COUNT,
+    )
 
 
 def build_request(row: pd.Series, *, setup, sweep, run_suffix: str):
@@ -174,10 +193,9 @@ def build_model_sweep_dataframe(
     y33_env: np.ndarray,
     *,
     bare_lj_h: float,
-    reference_summary: dict[str, float],
+    center_hint_hz: float,
 ) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
-    center_hint_hz = reference_summary["qubit_frequency_ghz"] * 1e9
     for c_ff in JJ_CAP_SWEEP_FF:
         for rj_ohms in JJ_RES_SWEEP_OHMS:
             try:
@@ -271,7 +289,8 @@ def save_plots(
         )
     )
     fig.add_hline(y=0.0, line_dash="dash")
-    fig.add_vline(x=extracted["linear_resonance_ghz"], line_dash="dot")
+    if not np.isnan(extracted["linear_resonance_ghz"]):
+        fig.add_vline(x=extracted["linear_resonance_ghz"], line_dash="dot")
     fig.update_layout(
         title="Qubit-port admittance zero crossing",
         xaxis_title="Frequency (GHz)",
@@ -326,27 +345,63 @@ def save_plots(
     write_plotly_html(fig, artifacts_dir / "linear_mode_sweep.html")
 
 
-# %% [markdown]
-# ## Run the HFSS sweep and analyze `Y33`
+def summarize_selected_model_extraction(
+    freqs_hz: np.ndarray,
+    y33_env: np.ndarray,
+    *,
+    bare_lj_h: float,
+    center_hint_hz: float,
+) -> tuple[dict[str, float], str | None]:
+    try:
+        extracted = extract_qubit_from_port_admittance(
+            freqs_hz,
+            y33_env,
+            lj_h=bare_lj_h,
+            cj_f=JJ_CAPACITANCE_FF * 1e-15,
+            rj_ohms=JJ_RESISTANCE_OHMS,
+            center_hint_hz=center_hint_hz,
+        )
+    except ValueError as exc:
+        return (
+            {
+                "linear_resonance_ghz": np.nan,
+                "effective_capacitance_fF": np.nan,
+                "qubit_frequency_ghz": np.nan,
+                "anharmonicity_mhz": np.nan,
+                "ej_ghz": np.nan,
+                "ec_ghz": np.nan,
+                "real_admittance_uS": np.nan,
+                "jj_capacitance_fF": JJ_CAPACITANCE_FF,
+                "jj_resistance_ohms": JJ_RESISTANCE_OHMS,
+                "resonance_at_sweep_edge": False,
+            },
+            str(exc),
+        )
+
+    return (
+        {
+            "linear_resonance_ghz": extracted["linear_resonance_hz"] / 1e9,
+            "effective_capacitance_fF": extracted["effective_capacitance_f"] * 1e15,
+            "qubit_frequency_ghz": extracted["qubit_frequency_hz"] / 1e9,
+            "anharmonicity_mhz": extracted["anharmonicity_hz"] / 1e6,
+            "ej_ghz": extracted["ej_ghz"],
+            "ec_ghz": extracted["ec_ghz"],
+            "real_admittance_uS": extracted["real_admittance_s"] * 1e6,
+            "jj_capacitance_fF": JJ_CAPACITANCE_FF,
+            "jj_resistance_ohms": JJ_RESISTANCE_OHMS,
+            "resonance_at_sweep_edge": bool(extracted["resonance_at_sweep_edge"]),
+        },
+        None,
+    )
 
 
-# %%
-def main() -> None:
-    ensure_runtime_dirs()
-    T11.ensure_runtime_dirs()
-
-    reference_row = T11.load_reference_row(RESONATOR_TYPE, REFERENCE_INDEX)
-    reference_summary = T11.build_reference_summary(reference_row)
-    bare_lj_h = load_bare_lj_h(reference_row)
-    setup, sweep = build_qubit_setup_and_sweep(reference_summary)
-
-    print("Selected resonator type:", RESONATOR_TYPE)
-    print("Coupler type:", reference_row["coupler_type"])
-    request = build_request(reference_row, setup=setup, sweep=sweep, run_suffix="qubit-y33")
-    print("Run ID:", request.metadata["run_id"])
-    print("Reference design options:")
-    print(json.dumps(deserialize_json_like(request.design_payload["design_options"]), indent=2))
-
+def run_qubit_demo(
+    request,
+    *,
+    reference_summary: dict[str, float],
+    bare_lj_h: float,
+    center_hint_hz: float,
+) -> dict[str, Any]:
     coupled_result = T11.run_coupled_demo(request, reference_summary)
     run_dir = Path(coupled_result["run_dir"])
     artifacts_dir = run_dir / "artifacts"
@@ -355,31 +410,19 @@ def main() -> None:
     freqs_hz, y_matrices = parameter_dataframe_to_tensor(y_df, matrix_size=3, parameter_prefix="Y")
     y33_env = y_matrices[:, 2, 2]
 
-    extracted = extract_qubit_from_port_admittance(
+    extracted_summary, extraction_warning = summarize_selected_model_extraction(
         freqs_hz,
         y33_env,
-        lj_h=bare_lj_h,
-        cj_f=JJ_CAPACITANCE_FF * 1e-15,
-        rj_ohms=JJ_RESISTANCE_OHMS,
-        center_hint_hz=reference_summary["qubit_frequency_ghz"] * 1e9,
+        bare_lj_h=bare_lj_h,
+        center_hint_hz=center_hint_hz,
     )
-    extracted_summary = {
-        "linear_resonance_ghz": extracted["linear_resonance_hz"] / 1e9,
-        "effective_capacitance_fF": extracted["effective_capacitance_f"] * 1e15,
-        "qubit_frequency_ghz": extracted["qubit_frequency_hz"] / 1e9,
-        "anharmonicity_mhz": extracted["anharmonicity_hz"] / 1e6,
-        "ej_ghz": extracted["ej_ghz"],
-        "ec_ghz": extracted["ec_ghz"],
-        "real_admittance_uS": extracted["real_admittance_s"] * 1e6,
-        "jj_capacitance_fF": JJ_CAPACITANCE_FF,
-        "jj_resistance_ohms": JJ_RESISTANCE_OHMS,
-    }
-
     model_df = build_model_sweep_dataframe(
         freqs_hz,
         y33_env,
         bare_lj_h=bare_lj_h,
-        reference_summary=reference_summary,
+        center_hint_hz=(extracted_summary["linear_resonance_ghz"] * 1e9)
+        if not np.isnan(extracted_summary["linear_resonance_ghz"])
+        else center_hint_hz,
     )
     model_df.to_csv(artifacts_dir / "qubit_model_sweep.csv", index=False)
 
@@ -394,8 +437,9 @@ def main() -> None:
             "jj_capacitance_fF": JJ_CAPACITANCE_FF,
             "jj_resistance_ohms": JJ_RESISTANCE_OHMS,
         },
-        "extracted": extracted_summary,
+        "selected_model_extracted": extracted_summary,
         "comparison_rows": comparison_df.to_dict(orient="records"),
+        "qubit_extraction_warning": extraction_warning,
         "artifacts": {
             "raw_touchstone": coupled_result["artifacts"]["raw_touchstone"],
             "y_pickle": str(artifacts_dir / "y_parameters.pkl"),
@@ -413,12 +457,122 @@ def main() -> None:
         extracted=extracted_summary,
         model_df=model_df,
     )
+    return summary
+
+
+def select_qubit_followup_frequency(summary: dict[str, Any]) -> float | None:
+    extracted = summary.get("selected_model_extracted", {})
+    frequency_ghz = extracted.get("linear_resonance_ghz")
+    if frequency_ghz is None or np.isnan(frequency_ghz):
+        return None
+    return float(frequency_ghz)
+
+
+def qubit_discovery_boundary_direction(summary: dict[str, Any], sweep) -> str | None:
+    extracted = summary.get("selected_model_extracted", {})
+    if not extracted.get("resonance_at_sweep_edge", False):
+        return None
+    frequency_ghz = extracted.get("linear_resonance_ghz")
+    if frequency_ghz is None or np.isnan(frequency_ghz):
+        return None
+    if abs(frequency_ghz - sweep.start_ghz) <= 1e-6:
+        return "lower"
+    if abs(frequency_ghz - sweep.stop_ghz) <= 1e-6:
+        return "upper"
+    return None
+
+
+# %% [markdown]
+# ## Run the HFSS sweep and analyze `Y33`
+
+
+# %%
+def main() -> None:
+    ensure_runtime_dirs()
+    T11.ensure_runtime_dirs()
+
+    reference_row = T11.load_reference_row(RESONATOR_TYPE, REFERENCE_INDEX)
+    reference_summary = T11.build_reference_summary(reference_row)
+    bare_lj_h = load_bare_lj_h(reference_row)
+    discovery_center_ghz = reference_summary["qubit_frequency_ghz"]
+
+    print("Selected resonator type:", RESONATOR_TYPE)
+    print("Coupler type:", reference_row["coupler_type"])
+    initial_setup, initial_sweep = build_qubit_discovery_setup_and_sweep(discovery_center_ghz)
+    initial_request = build_request(reference_row, setup=initial_setup, sweep=initial_sweep, run_suffix="discovery-01")
+    print("Run ID:", initial_request.metadata["run_id"])
+    print("Reference design options:")
+    print(json.dumps(deserialize_json_like(initial_request.design_payload["design_options"]), indent=2))
+
+    qubit_result = None
+    followup_frequency_ghz = None
+    center_hint_hz = reference_summary["qubit_frequency_ghz"] * 1e9
+    for attempt in range(1, QUBIT_MAX_DISCOVERY_ATTEMPTS + 1):
+        discovery_setup, discovery_sweep = build_qubit_discovery_setup_and_sweep(discovery_center_ghz)
+        request = build_request(
+            reference_row, setup=discovery_setup, sweep=discovery_sweep, run_suffix=f"discovery-{attempt:02d}"
+        )
+        print(
+            f"\nRunning qubit discovery sweep attempt {attempt}/{QUBIT_MAX_DISCOVERY_ATTEMPTS} "
+            f"from {discovery_sweep.start_ghz:.6f} to {discovery_sweep.stop_ghz:.6f} GHz..."
+        )
+        qubit_result = run_qubit_demo(
+            request,
+            reference_summary=reference_summary,
+            bare_lj_h=bare_lj_h,
+            center_hint_hz=center_hint_hz,
+        )
+        comparison_df = pd.DataFrame(qubit_result["comparison_rows"])
+        display(comparison_df)
+
+        followup_frequency_ghz = select_qubit_followup_frequency(qubit_result)
+        if followup_frequency_ghz is None:
+            break
+
+        direction = qubit_discovery_boundary_direction(qubit_result, discovery_sweep)
+        if direction is None:
+            break
+
+        center_hint_hz = followup_frequency_ghz * 1e9
+        if direction == "lower":
+            discovery_center_ghz = max(
+                1.0 + QUBIT_DISCOVERY_SWEEP_PADDING_GHZ,
+                discovery_center_ghz - QUBIT_DISCOVERY_CENTER_SHIFT_GHZ,
+            )
+        else:
+            discovery_center_ghz += QUBIT_DISCOVERY_CENTER_SHIFT_GHZ
+        print(
+            "Qubit-mode zero crossing remained on the "
+            f"{direction} sweep boundary; shifting the discovery center to {discovery_center_ghz:.6f} GHz."
+        )
+
+    if followup_frequency_ghz is None:
+        final_result = qubit_result
+        print("Discovery sweeps did not isolate a qubit-mode zero crossing well enough for a final zoom sweep.")
+    else:
+        print(f"Discovery sweep located the linear qubit mode near {followup_frequency_ghz:.6f} GHz")
+        final_setup, final_sweep = build_final_qubit_setup_and_sweep(followup_frequency_ghz)
+        final_request = build_request(reference_row, setup=final_setup, sweep=final_sweep, run_suffix="final")
+        print("Running final high-resolution qubit sweep...")
+        final_result = run_qubit_demo(
+            final_request,
+            reference_summary=reference_summary,
+            bare_lj_h=bare_lj_h,
+            center_hint_hz=followup_frequency_ghz * 1e9,
+        )
+        comparison_df = pd.DataFrame(final_result["comparison_rows"])
+        display(comparison_df)
+
+    run_dir = Path(final_result["run_dir"])
+    artifacts_dir = run_dir / "artifacts"
+    model_df = pd.read_csv(artifacts_dir / "qubit_model_sweep.csv")
+    comparison_df = pd.DataFrame(final_result["comparison_rows"])
 
     display(comparison_df)
     display(model_df)
     print("Run directory:", run_dir)
     print("Artifacts:")
-    for name, value in summary["artifacts"].items():
+    for name, value in final_result["artifacts"].items():
         print(f"  - {name}: {value}")
     display(HTML((artifacts_dir / "y33_zero_crossing.html").read_text()))
 

@@ -168,7 +168,8 @@ def extract_parallel_mode_from_total_admittance(
                 "effective_capacitance_f": float(effective_capacitance_f),
                 "slope_imag_y_per_rad_s": float(slope),
                 "real_admittance_s": float(real_zero),
-                "crossing_index": float(index),
+                "crossing_index": int(index),
+                "resonance_at_sweep_edge": bool(index == 0 or index == len(frequencies) - 2),
             }
         )
 
