@@ -87,6 +87,27 @@ def test_update_simulation_setup_accepts_unknown_params_when_input_is_unavailabl
     assert simulator.device_dict["setup_cavity_claw"]["max_delta_f"] == 0.05
 
 
+def test_update_simulation_setup_opt_out_is_scoped_per_setup(headless_qiskit_environment):
+    # max_passes is unknown in setup_qubit but already known in setup_cavity_claw,
+    # so declining the prompt should still update setup_cavity_claw while leaving
+    # setup_qubit untouched.
+    simulator = AnsysSimulator(
+        DummyAnalyzer(["qubit", "cavity_claw"]),
+        {
+            "setup_qubit": {"min_passes": 1},
+            "setup_cavity_claw": {"max_passes": 11},
+            "setup_coupler": {"max_passes": 12},
+        },
+    )
+
+    with patch("builtins.input", return_value="n"):
+        simulator.update_simulation_setup(target="all", max_passes=42)
+
+    assert "max_passes" not in simulator.device_dict["setup_qubit"]
+    assert simulator.device_dict["setup_cavity_claw"]["max_passes"] == 42
+    assert simulator.device_dict["setup_coupler"]["max_passes"] == 42
+
+
 def test_update_simulation_setup_skips_non_dict_payloads_in_update_loop(headless_qiskit_environment):
     simulator = AnsysSimulator(
         DummyAnalyzer(["qubit", "cavity_claw"]),

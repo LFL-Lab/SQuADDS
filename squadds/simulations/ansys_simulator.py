@@ -166,7 +166,10 @@ class AnsysSimulator:
                             unknown_params[key] = []
                         unknown_params[key].append((param, value))
 
-        # If there are unknown parameters, ask for confirmation
+        # If there are unknown parameters, ask for confirmation. The opt-out is
+        # applied per-setup so that a parameter unknown in setup A but already
+        # present in setup B still gets updated in B.
+        skip_unknown_per_setup: dict[str, set[str]] = {}
         if unknown_params:
             self.console.print("[yellow]Unknown parameters detected:[/yellow]")
             for setup_key, params in unknown_params.items():
@@ -182,21 +185,22 @@ class AnsysSimulator:
                 response = "y"
             if response != "y":
                 self.console.print("[dim]Skipping unknown parameters. Only updating existing ones.[/dim]")
-                # Filter out unknown parameters
-                kwargs = {
-                    k: v
-                    for k, v in kwargs.items()
-                    if not any(k in [p[0] for p in params] for params in unknown_params.values())
+                skip_unknown_per_setup = {
+                    setup_key: {param for param, _ in params} for setup_key, params in unknown_params.items()
                 }
 
-        # Update the parameters
+        # Update the parameters per setup so that opt-outs are scoped correctly.
         for key in target_keys:
             if key not in self.device_dict:
                 continue
             payload = self.device_dict[key]
             if not isinstance(payload, dict):
                 continue
-            payload.update(kwargs)
+            skipped_for_key = skip_unknown_per_setup.get(key, set())
+            scoped_kwargs = {k: v for k, v in kwargs.items() if k not in skipped_for_key}
+            if not scoped_kwargs:
+                continue
+            payload.update(scoped_kwargs)
             updated_keys.append(key)
 
         if updated_keys:
