@@ -22,6 +22,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 - Write a comprehensive tutorial on how to use Palace for simulations
 - Make Ansys simulation handle arbitrary geometries for eigenmode and cap matrix simulations
 - Provide compute resources to run simulations covering sparse regions of the Hamiltonian space
+- Add MCP tooling for driven-modal HFSS simulations (expose `run_drivenmodal`, capacitance/coupled-system port builders, checkpoint/artifact discovery, and admittance/Hamiltonian post-processing as MCP tools so agents can drive Tutorials 10–13 end-to-end)
 
 ## Core:
 
