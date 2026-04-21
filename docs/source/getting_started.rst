@@ -134,6 +134,16 @@ Accessing the Database
 
 **A:** If you encounter errors upon instantiating the `SQuADDS_DB` class, there may be a caching issue. Delete the ``SQuADDS`` dataset from the huggingface cache directory on your local machine. The cache directory is typically located at ``~/.cache/huggingface/datasets/``.
 
+**Q:** ``db.select_qubit("TransmonCross")`` **raises** ``TypeError: argument of type 'NoneType' is not iterable`` **and** ``db.supported_components()`` **returns** ``[]`` **. What is going on?**
+
+**A:** This happens on environments where the installed ``datasets`` package is older than ``4.7.0`` (typically ``SQuADDS <= 0.4.3`` installs that pulled ``datasets>=2.19`` via the loose version pin). The ``SQuADDS_DB`` dataset's auto-generated schema on the Hugging Face datasets-server uses the new ``Json()`` feature type (introduced in ``datasets==4.7.0``) to describe columns whose values mix dicts and JSON strings. Older clients crash or silently fall back to a single ``['default']`` config, which then fails the ``count("-") == 2`` filter in ``load_supported_config_names`` and leaves ``supported_components()`` empty. Upgrade in your environment:
+
+.. code-block:: bash
+
+   pip install --upgrade "datasets>=4.7" "huggingface_hub>=0.25"
+
+``SQuADDS >= 0.4.4`` pins ``datasets>=4.8.1`` so new installs are unaffected.
+
 ``.env`` File
 -------------
 
