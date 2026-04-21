@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'SQuADDS'
 copyright = '2026, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
+version = "0.4.4"
 release = "0.4.4"
 
 # General configuration

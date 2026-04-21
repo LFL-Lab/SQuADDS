@@ -32,12 +32,12 @@ jobs:
           pyproject_version=$(grep 'version = ' pyproject.toml | head -1 | cut -d'"' -f2)
           echo "Version in pyproject.toml: $pyproject_version"
 
-          # Check conf.py
-          conf_version=$(grep "version = " docs/conf.py | cut -d"'" -f2)
+          # Check conf.py (docs/conf.py defines both `version` and `release`; use `version`)
+          conf_version=$(grep '^version = ' docs/conf.py | cut -d'"' -f2)
           echo "Version in conf.py: $conf_version"
 
-          # Check __init__.py
-          init_version=$(grep "__version__" squadds/__init__.py | cut -d"'" -f2)
+          # Check __init__.py (anchor to the assignment line so `__all__` entries aren't matched)
+          init_version=$(grep "^__version__ = " squadds/__init__.py | cut -d'"' -f2)
           echo "Version in __init__.py: $init_version"
 
           # Check if versions match
