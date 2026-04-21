@@ -593,7 +593,11 @@
                 <article class="bd-article">
                   
   <h1>Source code for squadds.simulations.utils_ansys</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ansys.aedt.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hfss</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ansys.aedt.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hfss</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.utils_geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">calculate_center_and_dimensions</span>
 
@@ -605,37 +609,221 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_cryo_silicon_args</span><span class="p">(</span><span class="n">permittivity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">loss_tangent</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="s2">&quot;NAME:silicon&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;CoordinateSystemType:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Cartesian&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;BulkOrSurfaceType:=&quot;</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="p">[</span>
+            <span class="s2">&quot;NAME:PhysicsTypes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;set:=&quot;</span><span class="p">,</span>
+            <span class="p">[</span><span class="s2">&quot;Electromagnetic&quot;</span><span class="p">,</span> <span class="s2">&quot;Thermal&quot;</span><span class="p">,</span> <span class="s2">&quot;Structural&quot;</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="s2">&quot;NAME:AttachedData&quot;</span><span class="p">,</span>
+            <span class="p">[</span>
+                <span class="s2">&quot;NAME:MatAppearanceData&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;property_data:=&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;appearance_data&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Red:=&quot;</span><span class="p">,</span>
+                <span class="mi">210</span><span class="p">,</span>
+                <span class="s2">&quot;Green:=&quot;</span><span class="p">,</span>
+                <span class="mi">105</span><span class="p">,</span>
+                <span class="s2">&quot;Blue:=&quot;</span><span class="p">,</span>
+                <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">&quot;Transparency:=&quot;</span><span class="p">,</span>
+                <span class="mi">0</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;permittivity:=&quot;</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">permittivity</span><span class="p">),</span>
+        <span class="s2">&quot;permeability:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;conductivity:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dielectric_loss_tangent:=&quot;</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">loss_tangent</span><span class="p">),</span>
+        <span class="s2">&quot;magnetic_loss_tangent:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;thermal_conductivity:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0.01&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mass_density:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;specific_heat:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;thermal_expansion_coefficient:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;youngs_modulus:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;poissons_ratio:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;diffusivity:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0.8&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;molecular_mass:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;viscosity:=&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_LiveMaterialApp</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_renderer</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+        <span class="n">live_pinfo</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source_renderer</span><span class="p">,</span> <span class="s2">&quot;pinfo&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">live_project</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">live_pinfo</span><span class="p">,</span> <span class="s2">&quot;project&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">live_design</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">live_pinfo</span><span class="p">,</span> <span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">live_desktop</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">live_pinfo</span><span class="p">,</span> <span class="s2">&quot;desktop&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_oproject</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">live_project</span><span class="p">,</span> <span class="s2">&quot;_project&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_odesign</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">live_design</span><span class="p">,</span> <span class="s2">&quot;_design&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_desktop</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">live_desktop</span><span class="p">,</span> <span class="s2">&quot;_desktop&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_desktop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_desktop</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">live_project</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">&quot;_desktop&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design_type</span> <span class="o">=</span> <span class="s2">&quot;HFSS&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">odesktop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_desktop</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">oproject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_oproject</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">odesign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_odesign</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">odefinition_manager</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_oproject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_oproject</span><span class="o">.</span><span class="n">GetDefinitionManager</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_material</span><span class="p">(</span><span class="n">materials</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">material_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">candidate</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">materials</span><span class="p">,</span> <span class="s2">&quot;checkifmaterialexists&quot;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="n">materials</span><span class="o">.</span><span class="n">checkifmaterialexists</span><span class="p">(</span><span class="n">material_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="s2">&quot;permittivity&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="s2">&quot;dielectric_loss_tangent&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">candidate</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">materials</span><span class="p">,</span> <span class="s2">&quot;exists_material&quot;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="n">materials</span><span class="o">.</span><span class="n">exists_material</span><span class="p">(</span><span class="n">material_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="s2">&quot;permittivity&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="s2">&quot;dielectric_loss_tangent&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">candidate</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_apply_live_material_properties</span><span class="p">(</span>
+    <span class="n">renderer</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">permittivity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">loss_tangent</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">materials_factory</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="n">live_app</span> <span class="o">=</span> <span class="n">_LiveMaterialApp</span><span class="p">(</span><span class="n">renderer</span><span class="p">)</span>
+    <span class="n">definition_manager</span> <span class="o">=</span> <span class="n">live_app</span><span class="o">.</span><span class="n">odefinition_manager</span>
+    <span class="k">if</span> <span class="n">definition_manager</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">definition_manager</span><span class="p">,</span> <span class="s2">&quot;EditMaterial&quot;</span><span class="p">):</span>
+        <span class="n">definition_manager</span><span class="o">.</span><span class="n">EditMaterial</span><span class="p">(</span><span class="s2">&quot;silicon&quot;</span><span class="p">,</span> <span class="n">_cryo_silicon_args</span><span class="p">(</span><span class="n">permittivity</span><span class="p">,</span> <span class="n">loss_tangent</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">materials_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">ansys.aedt.core.modules.material_lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Materials</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">Materials</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">materials_factory</span> <span class="o">=</span> <span class="n">Materials</span>
+
+    <span class="k">if</span> <span class="n">materials_factory</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">live_app</span><span class="o">.</span><span class="n">oproject</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">live_app</span><span class="o">.</span><span class="n">odesign</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">live_materials</span> <span class="o">=</span> <span class="n">materials_factory</span><span class="p">(</span><span class="n">live_app</span><span class="p">)</span>
+        <span class="n">silicon</span> <span class="o">=</span> <span class="n">_resolve_material</span><span class="p">(</span><span class="n">live_materials</span><span class="p">,</span> <span class="s2">&quot;silicon&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">silicon</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">silicon</span><span class="o">.</span><span class="n">permittivity</span> <span class="o">=</span> <span class="n">permittivity</span>
+        <span class="n">silicon</span><span class="o">.</span><span class="n">dielectric_loss_tangent</span> <span class="o">=</span> <span class="n">loss_tangent</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
 <div class="viewcode-block" id="setMaterialProperties">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.setMaterialProperties">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">setMaterialProperties</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="n">designname</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">):</span>
-    <span class="n">aedt</span> <span class="o">=</span> <span class="n">Hfss</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setMaterialProperties</span><span class="p">(</span>
+    <span class="n">projectname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">designname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">renderer</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">permittivity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">11.45</span><span class="p">,</span>
+    <span class="n">loss_tangent</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-7</span><span class="p">,</span>
+    <span class="n">hfss_factory</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">materials_factory</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">renderer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pinfo</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="s2">&quot;pinfo&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">projectname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">projectname</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">pinfo</span><span class="p">,</span> <span class="s2">&quot;project_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">designname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">designname</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">pinfo</span><span class="p">,</span> <span class="s2">&quot;design_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_apply_live_material_properties</span><span class="p">(</span>
+            <span class="n">renderer</span><span class="p">,</span>
+            <span class="n">permittivity</span><span class="o">=</span><span class="n">permittivity</span><span class="p">,</span>
+            <span class="n">loss_tangent</span><span class="o">=</span><span class="n">loss_tangent</span><span class="p">,</span>
+            <span class="n">materials_factory</span><span class="o">=</span><span class="n">materials_factory</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">projectname</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">designname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Project and design names are required when no live renderer session is available.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">hfss_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">hfss_factory</span> <span class="o">=</span> <span class="n">Hfss</span>
+
+    <span class="n">aedt</span> <span class="o">=</span> <span class="n">hfss_factory</span><span class="p">(</span>
         <span class="n">projectname</span><span class="o">=</span><span class="n">projectname</span><span class="p">,</span>
         <span class="n">designname</span><span class="o">=</span><span class="n">designname</span><span class="p">,</span>
         <span class="n">solution_type</span><span class="o">=</span><span class="n">solutiontype</span><span class="p">,</span>
         <span class="n">new_desktop_session</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">close_on_exit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">ultra_cold_silicon</span><span class="p">(</span><span class="n">aedt</span><span class="p">)</span>
-    <span class="n">delete_old_setups</span><span class="p">(</span><span class="n">aedt</span><span class="p">)</span>
-    <span class="n">aedt</span><span class="o">.</span><span class="n">release_desktop</span><span class="p">(</span><span class="n">close_projects</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">close_desktop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ultra_cold_silicon</span><span class="p">(</span><span class="n">aedt</span><span class="p">,</span> <span class="n">permittivity</span><span class="o">=</span><span class="n">permittivity</span><span class="p">,</span> <span class="n">loss_tangent</span><span class="o">=</span><span class="n">loss_tangent</span><span class="p">)</span>
+        <span class="n">delete_old_setups</span><span class="p">(</span><span class="n">aedt</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">aedt</span><span class="p">,</span> <span class="s2">&quot;release_desktop&quot;</span><span class="p">):</span>
+            <span class="n">aedt</span><span class="o">.</span><span class="n">release_desktop</span><span class="p">(</span><span class="n">close_projects</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">close_desktop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="ultra_cold_silicon">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.ultra_cold_silicon">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ultra_cold_silicon</span><span class="p">(</span><span class="n">aedt</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ultra_cold_silicon</span><span class="p">(</span><span class="n">aedt</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">permittivity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">11.45</span><span class="p">,</span> <span class="n">loss_tangent</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-7</span><span class="p">):</span>
     <span class="n">materials</span> <span class="o">=</span> <span class="n">aedt</span><span class="o">.</span><span class="n">materials</span>
-    <span class="n">silicon</span> <span class="o">=</span> <span class="n">materials</span><span class="o">.</span><span class="n">checkifmaterialexists</span><span class="p">(</span><span class="s2">&quot;silicon&quot;</span><span class="p">)</span>
-    <span class="n">silicon</span><span class="o">.</span><span class="n">permittivity</span> <span class="o">=</span> <span class="mf">11.45</span>
-    <span class="n">silicon</span><span class="o">.</span><span class="n">dielectric_loss_tangent</span> <span class="o">=</span> <span class="mf">1e-7</span></div>
+    <span class="n">silicon</span> <span class="o">=</span> <span class="n">_resolve_material</span><span class="p">(</span><span class="n">materials</span><span class="p">,</span> <span class="s2">&quot;silicon&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">silicon</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Could not resolve the silicon material on the active AEDT session.&quot;</span><span class="p">)</span>
+    <span class="n">silicon</span><span class="o">.</span><span class="n">permittivity</span> <span class="o">=</span> <span class="n">permittivity</span>
+    <span class="n">silicon</span><span class="o">.</span><span class="n">dielectric_loss_tangent</span> <span class="o">=</span> <span class="n">loss_tangent</span></div>
 
 
 
 <div class="viewcode-block" id="delete_old_setups">
 <a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.delete_old_setups">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">delete_old_setups</span><span class="p">(</span><span class="n">aedt</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aedt</span><span class="o">.</span><span class="n">setups</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">aedt</span><span class="o">.</span><span class="n">setups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
+    <span class="n">setups</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">aedt</span><span class="p">,</span> <span class="s2">&quot;setups&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="n">setups</span><span class="p">:</span>
+        <span class="n">setups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
 
 
 
@@ -644,7 +832,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">get_freq</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">test_hfss</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">project_name</span> <span class="o">=</span> <span class="n">test_hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">project_name</span>
     <span class="n">design_name</span> <span class="o">=</span> <span class="n">test_hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">design_name</span>
-    <span class="n">setMaterialProperties</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">)</span>
+    <span class="n">setMaterialProperties</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">,</span> <span class="n">renderer</span><span class="o">=</span><span class="n">test_hfss</span><span class="p">)</span>
     <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">_analyze</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">generate_plots</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
@@ -666,7 +854,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">get_freq_Q_kappa</span><span class="p">(</span><span class="n">epra</span><span class="p">,</span> <span class="n">test_hfss</span><span class="p">,</span> <span class="n">generate_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">project_name</span> <span class="o">=</span> <span class="n">test_hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">project_name</span>
     <span class="n">design_name</span> <span class="o">=</span> <span class="n">test_hfss</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">design_name</span>
-    <span class="n">setMaterialProperties</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">)</span>
+    <span class="n">setMaterialProperties</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">solutiontype</span><span class="o">=</span><span class="s2">&quot;Eigenmode&quot;</span><span class="p">,</span> <span class="n">renderer</span><span class="o">=</span><span class="n">test_hfss</span><span class="p">)</span>
     <span class="n">epra</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">_analyze</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">generate_plots</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>

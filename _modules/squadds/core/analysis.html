@@ -942,7 +942,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span><span class="p">,</span>
             <span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">skip_df_gen</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">params_computed</span><span class="p">):</span>
+        <span class="n">target_params_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">missing_target_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">target_params_list</span> <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">skip_df_gen</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">params_computed</span><span class="p">)</span> <span class="ow">or</span> <span class="n">missing_target_columns</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_add_target_params_columns</span><span class="p">()</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_resonator_type</span> <span class="o">==</span> <span class="s2">&quot;quarter&quot;</span><span class="p">:</span>
             <span class="k">pass</span>
@@ -951,7 +954,6 @@
                 <span class="s2">&quot;Either `skip_df_gen` flag is set to True or all target params have been precomputed at an earlier step. Using `df` from memory.</span><span class="se">\n</span><span class="s2">Please set this to False if `target_parameters` have changed.&quot;</span>
             <span class="p">)</span>
 
-        <span class="n">target_params_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="n">filtered_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">target_params_list</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_outside_bounds</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">filtered_df</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="n">display</span><span class="p">)</span>
 

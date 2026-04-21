@@ -603,6 +603,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.json_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">deserialize_json_like</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">merge_dfs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_unified_design_options</span>
 
@@ -656,6 +657,14 @@
         <span class="n">merged_df</span> <span class="o">=</span> <span class="n">merge_dfs</span><span class="p">(</span><span class="n">qubit_df</span><span class="p">,</span> <span class="n">cavity_df</span><span class="p">,</span> <span class="n">merger_terms</span><span class="p">)</span>
 
     <span class="n">merged_df</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">create_unified_design_options</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Inflate any JSON-string sub-payloads (e.g. `cplr_opts`, `meander`, `lead`)</span>
+    <span class="c1"># that the HuggingFace dataset stores as strings, so consumers that mutate</span>
+    <span class="c1"># `design_options_qubit` / `design_options_cavity_claw` / `design_options`</span>
+    <span class="c1"># via nested dict access always see dicts instead of raw JSON strings.</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">merged_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">merged_df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">deserialize_json_like</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">merged_df</span></div>
 
 </pre></div>

@@ -684,10 +684,12 @@
         <span class="n">qubit_opts</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">copier</span><span class="p">(</span><span class="n">qubit_opts</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">qubit_options</span><span class="p">)</span>
         <span class="n">qubit_opts</span><span class="p">[</span><span class="s2">&quot;pos_y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">qubit_opts</span><span class="p">[</span><span class="s2">&quot;pos_x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-1500um&quot;</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_length</span> <span class="o">&gt;</span> <span class="mf">2.500</span> <span class="k">else</span> <span class="s2">&quot;-1000um&quot;</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">qubit_opts</span><span class="p">[</span><span class="s2">&quot;pos_x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-1500um&quot;</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;cpw_options&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_length</span> <span class="o">&gt;</span> <span class="mf">2.500</span> <span class="k">else</span> <span class="s2">&quot;-1000um&quot;</span>
+        <span class="n">cpw_opts</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;cpw_opts&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span>
+            <span class="k">else</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;cpw_options&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">qubit_opts</span><span class="p">[</span><span class="s2">&quot;pos_x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-1500um&quot;</span> <span class="k">if</span> <span class="n">cpw_opts</span><span class="o">.</span><span class="n">total_length</span> <span class="o">&gt;</span> <span class="mf">2.500</span> <span class="k">else</span> <span class="s2">&quot;-1000um&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qubit</span> <span class="o">=</span> <span class="n">TransmonCross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_xmon&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">qubit_opts</span><span class="p">)</span></div>
 
 
@@ -714,10 +716,12 @@
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
 
         <span class="n">temp_opts</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">()</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">copier</span><span class="p">(</span><span class="n">temp_opts</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">])</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">copier</span><span class="p">(</span><span class="n">temp_opts</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">])</span>
+        <span class="n">coupler_options</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;coupler_options&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;coupler_options&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span>
+            <span class="k">else</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;cplr_opts&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copier</span><span class="p">(</span><span class="n">temp_opts</span><span class="p">,</span> <span class="n">coupler_options</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;CLT&quot;</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoupledLineTee</span>
@@ -745,10 +749,11 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.meandered</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMeander</span>
 
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">cpw_opts</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">]</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">cpw_opts</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;cpw_options&quot;</span><span class="p">]</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">cpw_opts</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;cpw_opts&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;cpw_opts&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span>
+            <span class="k">else</span> <span class="n">p</span><span class="o">.</span><span class="n">cavity_claw_options</span><span class="p">[</span><span class="s2">&quot;cpw_options&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="n">left_opts</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">()</span>
         <span class="n">left_opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
@@ -769,18 +774,12 @@
             <span class="n">adj_distance</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">jogs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="n">jogs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;R90&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">adj_distance</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">]</span>
-
-        <span class="c1"># Compute a safe fillet from the meander spacing to avoid self-intersecting curves.</span>
-        <span class="n">meander_spacing</span> <span class="o">=</span> <span class="mf">0.100</span>  <span class="c1"># default 100um in mm</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s2">&quot;cpw_opts&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">cpw_opts</span><span class="p">,</span> <span class="s2">&quot;left_options&quot;</span><span class="p">):</span>
-            <span class="n">fillet_val</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">cpw_opts</span><span class="o">.</span><span class="n">left_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fillet&quot;</span><span class="p">,</span> <span class="mf">0.0499</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fillet_val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">fillet_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fillet_val</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;um&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1000</span>
-            <span class="nb">min</span><span class="p">(</span><span class="n">fillet_val</span><span class="p">,</span> <span class="n">meander_spacing</span> <span class="o">/</span> <span class="mf">2.1</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">min</span><span class="p">(</span><span class="mf">0.0499</span><span class="p">,</span> <span class="n">meander_spacing</span> <span class="o">/</span> <span class="mf">2.1</span><span class="p">)</span>
-
-        <span class="n">left_opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;lead&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span><span class="n">start_straight</span><span class="o">=</span><span class="s2">&quot;75um&quot;</span><span class="p">,</span> <span class="n">end_straight</span><span class="o">=</span><span class="s2">&quot;50um&quot;</span><span class="p">,</span> <span class="n">start_jogged_extension</span><span class="o">=</span><span class="n">jogs</span><span class="p">)})</span>
+        <span class="n">lead_opts</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copier</span><span class="p">(</span><span class="n">lead_opts</span><span class="p">,</span> <span class="n">left_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lead&quot;</span><span class="p">,</span> <span class="n">Dict</span><span class="p">()))</span>
+        <span class="n">lead_opts</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;start_straight&quot;</span><span class="p">,</span> <span class="s2">&quot;150um&quot;</span><span class="p">)</span>
+        <span class="n">lead_opts</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;end_straight&quot;</span><span class="p">,</span> <span class="s2">&quot;50um&quot;</span><span class="p">)</span>
+        <span class="n">lead_opts</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;start_jogged_extension&quot;</span><span class="p">,</span> <span class="n">jogs</span><span class="p">)</span>
+        <span class="n">left_opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;lead&quot;</span><span class="p">:</span> <span class="n">lead_opts</span><span class="p">})</span>
         <span class="n">left_opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;pin_inputs&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span>
@@ -789,14 +788,25 @@
                 <span class="p">)</span>
             <span class="p">}</span>
         <span class="p">)</span>
-        <span class="n">left_opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;meander&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span>
-                    <span class="n">spacing</span><span class="o">=</span><span class="s2">&quot;100um&quot;</span><span class="p">,</span>
-                    <span class="n">asymmetry</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">adj_distance</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span>  <span class="c1"># need this to make CPW asymmetry half of the coupling length</span>
-                <span class="p">)</span>
-            <span class="p">}</span>
-        <span class="p">)</span>  <span class="c1"># if not, sharp kinks occur in CPW :(</span>
+        <span class="n">meander_opts</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copier</span><span class="p">(</span><span class="n">meander_opts</span><span class="p">,</span> <span class="n">left_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;meander&quot;</span><span class="p">,</span> <span class="n">Dict</span><span class="p">()))</span>
+        <span class="n">meander_opts</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;spacing&quot;</span><span class="p">,</span> <span class="s2">&quot;100um&quot;</span><span class="p">)</span>
+        <span class="n">meander_opts</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+            <span class="s2">&quot;asymmetry&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">adj_distance</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span>  <span class="c1"># need this to make CPW asymmetry half of the coupling length</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">meander_spacing_mm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">meander_opts</span><span class="p">[</span><span class="s2">&quot;spacing&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;um&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1000</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">meander_spacing_mm</span> <span class="o">=</span> <span class="mf">0.100</span>
+        <span class="n">raw_fillet</span> <span class="o">=</span> <span class="n">meander_opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fillet&quot;</span><span class="p">,</span> <span class="s2">&quot;49.9um&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fillet_mm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">raw_fillet</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;um&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1000</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">fillet_mm</span> <span class="o">=</span> <span class="mf">0.0499</span>
+        <span class="n">safe_fillet_um</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">fillet_mm</span><span class="p">,</span> <span class="n">meander_spacing_mm</span> <span class="o">/</span> <span class="mf">2.1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">meander_opts</span><span class="p">[</span><span class="s2">&quot;fillet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">safe_fillet_um</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;um&quot;</span>
+        <span class="n">left_opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;meander&quot;</span><span class="p">:</span> <span class="n">meander_opts</span><span class="p">})</span>  <span class="c1"># if not, sharp kinks occur in CPW :(</span>
         <span class="c1"># cpw = RouteMeander(design, &#39;cpw&#39;, options = opts)</span>
 
         <span class="n">left_opts</span><span class="p">[</span><span class="s2">&quot;pin_inputs&quot;</span><span class="p">][</span><span class="s2">&quot;start_pin&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubit</span><span class="o">.</span><span class="n">name</span><span class="p">})</span>

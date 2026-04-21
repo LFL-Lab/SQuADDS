@@ -596,6 +596,7 @@
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.json_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">deserialize_json_like</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.core.utils_converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_numpy</span>
 
 
@@ -627,9 +628,12 @@
 <div class="viewcode-block" id="create_unified_design_options">
 <a class="viewcode-back" href="../../../source/squadds.core.html#squadds.core.utils.create_unified_design_options">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_unified_design_options</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
-    <span class="n">cavity_dict</span> <span class="o">=</span> <span class="n">convert_numpy</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">])</span>
+    <span class="c1"># Deserialize any JSON-string payloads (e.g. `cplr_opts`, `meander`, `lead`)</span>
+    <span class="c1"># that the HuggingFace dataset stores as strings so the unified output</span>
+    <span class="c1"># always contains fully-nested dicts.</span>
+    <span class="n">cavity_dict</span> <span class="o">=</span> <span class="n">convert_numpy</span><span class="p">(</span><span class="n">deserialize_json_like</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">]))</span>
     <span class="n">coupler_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">]</span>
-    <span class="n">qubit_dict</span> <span class="o">=</span> <span class="n">convert_numpy</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">])</span>
+    <span class="n">qubit_dict</span> <span class="o">=</span> <span class="n">convert_numpy</span><span class="p">(</span><span class="n">deserialize_json_like</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">]))</span>
 
     <span class="n">qubit_dict</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_cpw_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
     <span class="n">qubit_dict</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_cpw_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0um&quot;</span>
