@@ -133,15 +133,23 @@ def update_readme(readme_path, rst_file_path):
     with open(readme_path) as file:
         content = file.read()
 
-    # Replace the Contributors and Developers sections
+    # Replace the Contributors and Developers sections. Note: we deliberately
+    # do NOT append an extra "\n" to the replacement here — the original file
+    # already ends with a single newline that sits outside the matched span,
+    # and adding another newline would re-introduce a trailing blank line
+    # that `end-of-file-fixer` flags on every subsequent PR.
     new_content = re.sub(
-        r"## Contributors.*?## Developers.*?(\n---|\Z)",  # Match from '## Contributors' to the '## Developers' section and its end
-        combined_contributors + "\n",  # Replace with the updated Contributors and Developers sections
+        r"## Contributors.*?## Developers.*?(\n---|\Z)",
+        combined_contributors,
         content,
-        flags=re.DOTALL,  # Enable matching across multiple lines
+        flags=re.DOTALL,
     )
 
-    # Write the updated content back to README.md
+    # Normalize trailing whitespace to exactly one final newline so the
+    # pre-commit `end-of-file-fixer` hook stays happy regardless of what
+    # this script stitches in.
+    new_content = new_content.rstrip("\n") + "\n"
+
     with open(readme_path, "w") as file:
         file.write(new_content)
 
