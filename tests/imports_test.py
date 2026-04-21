@@ -8,6 +8,18 @@ MODULES = [
     "squadds.core",
     "squadds.database",
     "squadds.interpolations",
+    "squadds.simulations",
+    "squadds.simulations.drivenmodal",
+    "squadds.simulations.drivenmodal.ports",
+    "squadds.simulations.drivenmodal.artifacts",
+    "squadds.simulations.drivenmodal.hfss_runner",
+    "squadds.simulations.drivenmodal.design",
+    "squadds.simulations.drivenmodal.hfss_data",
+    "squadds.simulations.drivenmodal.capacitance",
+    "squadds.simulations.drivenmodal.coupled_postprocess",
+    "squadds.simulations.drivenmodal.qubit_admittance",
+    "squadds.simulations.drivenmodal.models",
+    "squadds.simulations.drivenmodal.layer_stack",
     "squadds.core.utils",
     "squadds.core.design_patterns",
     "squadds.core.analysis",
@@ -21,3 +33,15 @@ MODULES = [
 @pytest.mark.parametrize("module_name", MODULES)
 def test_module_imports(module_name):
     importlib.import_module(module_name)
+
+
+def test_drivenmodal_package_exports():
+    from squadds.simulations.drivenmodal import (
+        CapacitanceExtractionRequest,
+        CoupledSystemDrivenModalRequest,
+        DrivenModalLayerStackSpec,
+    )
+
+    assert CapacitanceExtractionRequest is not None
+    assert CoupledSystemDrivenModalRequest is not None
+    assert DrivenModalLayerStackSpec is not None

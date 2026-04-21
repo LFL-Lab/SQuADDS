@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from squadds.core.json_utils import deserialize_json_like
 from squadds.core.utils_converters import convert_numpy
 
 
@@ -24,9 +25,12 @@ def get_sim_results_keys(dataframes):
 
 
 def create_unified_design_options(row):
-    cavity_dict = convert_numpy(row["design_options_cavity_claw"])
+    # Deserialize any JSON-string payloads (e.g. `cplr_opts`, `meander`, `lead`)
+    # that the HuggingFace dataset stores as strings so the unified output
+    # always contains fully-nested dicts.
+    cavity_dict = convert_numpy(deserialize_json_like(row["design_options_cavity_claw"]))
     coupler_type = row["coupler_type"]
-    qubit_dict = convert_numpy(row["design_options_qubit"])
+    qubit_dict = convert_numpy(deserialize_json_like(row["design_options_qubit"]))
 
     qubit_dict["connection_pads"]["readout"]["claw_cpw_width"] = "0um"
     qubit_dict["connection_pads"]["readout"]["claw_cpw_length"] = "0um"

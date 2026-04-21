@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+from squadds.core.json_utils import deserialize_json_like
 from squadds.core.processing import merge_dfs
 from squadds.core.utils import create_unified_design_options
 
@@ -56,4 +57,12 @@ def create_qubit_cavity_dataframe(
         merged_df = merge_dfs(qubit_df, cavity_df, merger_terms)
 
     merged_df["design_options"] = merged_df.apply(create_unified_design_options, axis=1)
+
+    # Inflate any JSON-string sub-payloads (e.g. `cplr_opts`, `meander`, `lead`)
+    # that the HuggingFace dataset stores as strings, so consumers that mutate
+    # `design_options_qubit` / `design_options_cavity_claw` / `design_options`
+    # via nested dict access always see dicts instead of raw JSON strings.
+    for col in ("design_options_qubit", "design_options_cavity_claw", "design_options"):
+        if col in merged_df.columns:
+            merged_df[col] = merged_df[col].map(deserialize_json_like)
     return merged_df

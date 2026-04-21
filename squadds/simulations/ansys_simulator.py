@@ -12,6 +12,7 @@ from rich.console import Console
 
 from squadds.components.coupled_systems import QubitCavity
 from squadds.core.json_utils import deserialize_json_like, normalize_setup_payload
+from squadds.simulations.drivenmodal.hfss_runner import run_drivenmodal_request
 from squadds.simulations.objects import (
     run_qubit_cavity_sweep,
     run_sweep,
@@ -149,6 +150,15 @@ class AnsysSimulator:
 
         for key in target_keys:
             if key in self.device_dict:
+                if self.device_dict[key] is None:
+                    self.device_dict[key] = {}
+
+                if not isinstance(self.device_dict[key], dict):
+                    continue
+
+                if not self.device_dict[key]:
+                    continue
+
                 # Check which parameters are unknown
                 for param, value in kwargs.items():
                     if param not in self.device_dict[key]:
@@ -156,31 +166,45 @@ class AnsysSimulator:
                             unknown_params[key] = []
                         unknown_params[key].append((param, value))
 
-        # If there are unknown parameters, ask for confirmation
+        # If there are unknown parameters, ask for confirmation. The opt-out is
+        # applied per-setup so that a parameter unknown in setup A but already
+        # present in setup B still gets updated in B.
+        skip_unknown_per_setup: dict[str, set[str]] = {}
         if unknown_params:
             self.console.print("[yellow]Unknown parameters detected:[/yellow]")
             for setup_key, params in unknown_params.items():
                 for param, value in params:
-                    self.console.print(f"  • [cyan]{param}[/cyan] = {value} (not in [bold]{setup_key}[/bold])")
+                    self.console.print(f"  - [cyan]{param}[/cyan] = {value} (not in [bold]{setup_key}[/bold])")
 
-            response = input("\n[?] Would you like to add these new parameters? (y/n): ").strip().lower()
+            try:
+                response = input("\n[?] Would you like to add these new parameters? (y/n): ").strip().lower()
+            except EOFError:
+                self.console.print(
+                    "[yellow]Non-interactive session detected; adding unknown parameters automatically.[/yellow]"
+                )
+                response = "y"
             if response != "y":
                 self.console.print("[dim]Skipping unknown parameters. Only updating existing ones.[/dim]")
-                # Filter out unknown parameters
-                kwargs = {
-                    k: v
-                    for k, v in kwargs.items()
-                    if not any(k in [p[0] for p in params] for params in unknown_params.values())
+                skip_unknown_per_setup = {
+                    setup_key: {param for param, _ in params} for setup_key, params in unknown_params.items()
                 }
 
-        # Update the parameters
+        # Update the parameters per setup so that opt-outs are scoped correctly.
         for key in target_keys:
-            if key in self.device_dict:
-                self.device_dict[key].update(kwargs)
-                updated_keys.append(key)
+            if key not in self.device_dict:
+                continue
+            payload = self.device_dict[key]
+            if not isinstance(payload, dict):
+                continue
+            skipped_for_key = skip_unknown_per_setup.get(key, set())
+            scoped_kwargs = {k: v for k, v in kwargs.items() if k not in skipped_for_key}
+            if not scoped_kwargs:
+                continue
+            payload.update(scoped_kwargs)
+            updated_keys.append(key)
 
         if updated_keys:
-            self.console.print(f"[green]✓ Updated {', '.join(updated_keys)}: {list(kwargs.keys())}[/green]")
+            self.console.print(f"[green]Updated {', '.join(updated_keys)}: {list(kwargs.keys())}[/green]")
 
     def _get_setup_targets(self, target):
         """
@@ -389,7 +413,7 @@ class AnsysSimulator:
         return_df = {}
         try:
             # Print simulation plan
-            self.console.print("\n[bold blue]═══ Simulation Plan ═══[/bold blue]")
+            self.console.print("\n[bold blue]=== Simulation Plan ===[/bold blue]")
 
             if isinstance(self.analyzer.selected_system, list):
                 # Coupled system
@@ -413,7 +437,7 @@ class AnsysSimulator:
                 self.console.print("[cyan]Simulation Types:[/cyan]")
                 self.console.print("  1. [green]LOM (Capacitance)[/green]")
 
-            self.console.print("[bold blue]═══════════════════════[/bold blue]\n")
+            self.console.print("[bold blue]=======================[/bold blue]\n")
 
             # Print simulation parameters for verification
             self.console.print("[bold blue]Simulation Parameters:[/bold blue]")
@@ -484,6 +508,14 @@ class AnsysSimulator:
             self.epr_analysis_obj.sim.save_screenshot()
         if self.lom_analysis_obj is not None:
             self.lom_analysis_obj.sim.save_screenshot()
+
+    def run_drivenmodal(self, request, *, checkpoint_dir=None, export_artifacts=True):
+        """Initialize a checkpointed driven-modal run from a typed request."""
+        return run_drivenmodal_request(
+            request,
+            checkpoint_dir=checkpoint_dir,
+            export_artifacts=export_artifacts,
+        )
 
     def get_xmon_info(self, xmon_dict):
         """

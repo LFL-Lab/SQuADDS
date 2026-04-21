@@ -79,10 +79,12 @@ class QubitCavity(QComponent):
         qubit_opts = Dict()
         self.copier(qubit_opts, p.qubit_options)
         qubit_opts["pos_y"] = 0
-        try:
-            qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options["cpw_opts"].total_length > 2.500 else "-1000um"
-        except:
-            qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options["cpw_options"].total_length > 2.500 else "-1000um"
+        cpw_opts = (
+            p.cavity_claw_options["cpw_opts"]
+            if "cpw_opts" in p.cavity_claw_options
+            else p.cavity_claw_options["cpw_options"]
+        )
+        qubit_opts["pos_x"] = "-1500um" if cpw_opts.total_length > 2.500 else "-1000um"
         self.qubit = TransmonCross(self.design, f"{self.name}_xmon", options=qubit_opts)
 
     def make_cavity(self):
@@ -103,10 +105,12 @@ class QubitCavity(QComponent):
         p = self.p
 
         temp_opts = Dict()
-        try:
-            self.copier(temp_opts, p.cavity_claw_options["coupler_options"])
-        except:
-            self.copier(temp_opts, p.cavity_claw_options["cplr_opts"])
+        coupler_options = (
+            p.cavity_claw_options["coupler_options"]
+            if "coupler_options" in p.cavity_claw_options
+            else p.cavity_claw_options["cplr_opts"]
+        )
+        self.copier(temp_opts, coupler_options)
 
         if p.cavity_claw_options["coupler_type"].upper() == "CLT":
             from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
@@ -131,10 +135,11 @@ class QubitCavity(QComponent):
         from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
 
         p = self.p
-        try:
-            p.cpw_opts = p.cavity_claw_options["cpw_opts"]
-        except:
-            p.cpw_opts = p.cavity_claw_options["cpw_options"]
+        p.cpw_opts = (
+            p.cavity_claw_options["cpw_opts"]
+            if "cpw_opts" in p.cavity_claw_options
+            else p.cavity_claw_options["cpw_options"]
+        )
 
         left_opts = Dict()
         left_opts.update(
@@ -155,18 +160,12 @@ class QubitCavity(QComponent):
             adj_distance = 0
         jogs = OrderedDict()
         jogs[0] = ["R90", f"{adj_distance / (1.5)}um"]
-
-        # Compute a safe fillet from the meander spacing to avoid self-intersecting curves.
-        meander_spacing = 0.100  # default 100um in mm
-        if hasattr(p, "cpw_opts") and hasattr(p.cpw_opts, "left_options"):
-            fillet_val = p.cpw_opts.left_options.get("fillet", 0.0499)
-            if isinstance(fillet_val, str):
-                fillet_val = float(fillet_val.replace("um", "")) / 1000
-            min(fillet_val, meander_spacing / 2.1)
-        else:
-            min(0.0499, meander_spacing / 2.1)
-
-        left_opts.update({"lead": Dict(start_straight="75um", end_straight="50um", start_jogged_extension=jogs)})
+        lead_opts = Dict()
+        self.copier(lead_opts, left_opts.get("lead", Dict()))
+        lead_opts.setdefault("start_straight", "150um")
+        lead_opts.setdefault("end_straight", "50um")
+        lead_opts.setdefault("start_jogged_extension", jogs)
+        left_opts.update({"lead": lead_opts})
         left_opts.update(
             {
                 "pin_inputs": Dict(
@@ -175,14 +174,25 @@ class QubitCavity(QComponent):
                 )
             }
         )
-        left_opts.update(
-            {
-                "meander": Dict(
-                    spacing="100um",
-                    asymmetry=f"{adj_distance / (3)}um",  # need this to make CPW asymmetry half of the coupling length
-                )
-            }
-        )  # if not, sharp kinks occur in CPW :(
+        meander_opts = Dict()
+        self.copier(meander_opts, left_opts.get("meander", Dict()))
+        meander_opts.setdefault("spacing", "100um")
+        meander_opts.setdefault(
+            "asymmetry",
+            f"{adj_distance / (3)}um",  # need this to make CPW asymmetry half of the coupling length
+        )
+        try:
+            meander_spacing_mm = float(str(meander_opts["spacing"]).replace("um", "")) / 1000
+        except Exception:
+            meander_spacing_mm = 0.100
+        raw_fillet = meander_opts.get("fillet", "49.9um")
+        try:
+            fillet_mm = float(str(raw_fillet).replace("um", "")) / 1000
+        except Exception:
+            fillet_mm = 0.0499
+        safe_fillet_um = min(fillet_mm, meander_spacing_mm / 2.1) * 1000
+        meander_opts["fillet"] = f"{safe_fillet_um:.3f}".rstrip("0").rstrip(".") + "um"
+        left_opts.update({"meander": meander_opts})  # if not, sharp kinks occur in CPW :(
         # cpw = RouteMeander(design, 'cpw', options = opts)
 
         left_opts["pin_inputs"]["start_pin"].update({"component": self.qubit.name})
