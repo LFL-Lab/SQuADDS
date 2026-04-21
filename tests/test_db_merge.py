@@ -80,3 +80,61 @@ def test_create_qubit_cavity_dataframe_accepts_none_merger_terms():
 
     assert merged_df["index_qc"].tolist() == [0]
     assert "design_options" in merged_df.columns
+
+
+def _build_cavity_df_with_json_string_payloads():
+    # Mirrors the HuggingFace dataset schema where nested sub-payloads such as
+    # `cplr_opts`, `lead`, and `meander` arrive as JSON strings rather than dicts.
+    return pd.DataFrame(
+        {
+            "design_options": [
+                {
+                    "claw_opts": {
+                        "connection_pads": {
+                            "readout": {
+                                "claw_length": "30um",
+                                "ground_spacing": "10um",
+                            }
+                        }
+                    },
+                    "cplr_opts": '{"prime_width":"11.7um","prime_gap":"5.1um","coupling_length":"100um"}',
+                    "cpw_opts": {
+                        "total_length": "4000um",
+                        "trace_gap": "6um",
+                        "trace_width": "10um",
+                        "lead": '{"start_straight":"50um"}',
+                        "meander": '{"spacing":"100um","asymmetry":"-50.0um"}',
+                    },
+                }
+            ],
+            "coupler_type": ["CLT"],
+            "cavity_frequency_GHz": [7.0],
+        }
+    )
+
+
+def test_create_qubit_cavity_dataframe_inflates_json_string_subpayloads():
+    # Regression test: downstream ML/tutorial workflows mutate
+    # `design_options_cavity_claw` via nested dict access, so any JSON-string
+    # sub-payloads in the upstream dataset must be inflated to real dicts.
+    merged_df = create_qubit_cavity_dataframe(
+        _build_qubit_df(),
+        _build_cavity_df_with_json_string_payloads(),
+        merger_terms=["claw_length"],
+        parallelize=False,
+    )
+
+    cavity_payload = merged_df.iloc[0]["design_options_cavity_claw"]
+    assert isinstance(cavity_payload["cplr_opts"], dict)
+    assert cavity_payload["cplr_opts"]["prime_width"] == "11.7um"
+    assert isinstance(cavity_payload["cpw_opts"]["lead"], dict)
+    assert cavity_payload["cpw_opts"]["lead"]["start_straight"] == "50um"
+    assert isinstance(cavity_payload["cpw_opts"]["meander"], dict)
+    assert cavity_payload["cpw_opts"]["meander"]["spacing"] == "100um"
+
+    # The unified design_options column should be consistent with the inflated
+    # source columns (no lingering JSON strings to trip up consumers).
+    unified = merged_df.iloc[0]["design_options"]
+    assert isinstance(unified["cavity_claw_options"]["coupler_options"], dict)
+    assert unified["cavity_claw_options"]["coupler_options"]["prime_width"] == "11.7um"
+    assert isinstance(unified["cavity_claw_options"]["cpw_opts"]["left_options"]["meander"], dict)

@@ -73,6 +73,7 @@ Version 0.4.4 (2026-04-17)
 
 **Bug Fixes**
 
+- ``SQuADDS_DB.create_system_df`` (and therefore any ``Analyzer``-derived dataframe for the qubit+cavity coupled system) now inflates JSON-string sub-payloads in ``design_options_qubit`` / ``design_options_cavity_claw`` / ``design_options`` into real dicts. Previously, datasets that stored ``cplr_opts`` / ``lead`` / ``meander`` as JSON strings (current HuggingFace dataset schema) broke downstream workflows that mutate those fields via nested dict access (e.g. ``pred_df.design_options_cavity_claw.iloc[0]["cplr_opts"][key] = value``).
 - ``Analyzer.find_closest`` now recomputes when any of the requested ``target_params`` columns are absent from the cached dataframe instead of raising ``KeyError`` mid-search.
 - ``QubitCavity.make_cpws`` now preserves caller-provided ``lead`` and ``meander`` overrides (using ``setdefault`` instead of unconditional assignment), and actually applies the previously-discarded ``min(fillet, spacing/2.1)`` clamp so meander geometries stop self-intersecting on the Windows/Ansys validation machine.
 - ``QubitCavity.make_qubit`` / ``make_cavity`` / ``make_cpws`` now use explicit key checks for ``cpw_opts`` / ``cpw_options`` and ``coupler_options`` / ``cplr_opts`` instead of bare ``except`` blocks, so the underlying ``KeyError`` is raised cleanly when neither alias is present.
