@@ -27,6 +27,7 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
   - [Run using Docker](#run-using-docker)
 - [Tutorials](#tutorials)
 - [MCP Server (AI Agent Integration)](#mcp-server-ai-agent-integration)
+- [ML Models](#ml-models)
 - [Contributing](#contributing)
 - [License](#license)
 - [FAQs](#faqs)
@@ -197,6 +198,8 @@ The following tutorials are available to help you get started with `SQuADDS`:
 - [Tutorial 7: Simulate designs with palace](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-7_Simulate_designs_with_palace.html)
 - [Tutorial 8: ML Interpolation in SQuADDS](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-8_ML_interpolation_in_SQuADDS.html)
 - [Tutorial 9: Learning the Inverse Map](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-9_Learing_the_Inverse_Design_Map.html)
+- [Tutorial 10: HFSS Driven-Modal Capacitance Extraction](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.html)
+- [Tutorial 11: Unified Driven-Modal Hamiltonian Extraction](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.html)
 
 ---
 
@@ -380,6 +383,39 @@ With `mcp.json`:
 
 ---
 
+## ML Models
+
+We host ML models trained on SQuADDS on our [Hugging Face org](https://huggingface.co/SQuADDS), served through the [SQuADDS ML Inference API Space](https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api). Docsite page: [ML Models](https://lfl-lab.github.io/SQuADDS/source/ml_models.html).
+
+Our first production model is a **qubit-claw (TransmonCross) Hamiltonian-to-geometry inverse** model, developed in collaboration with Taylor Patti, Nicola Pancotti, Enectali Figueroa-Feliciano, Sara Sussman, Olivia Seidel, Firas Abouzahr, Eli Levenson-Falk, and Sadman Ahmed Shanto — with **Olivia Seidel and Firas Abouzahr** as the primary trainers.
+
+<details>
+<summary><strong>transmon_cross_hamiltonian_inverse — usage</strong></summary>
+
+- Model repo: <https://huggingface.co/SQuADDS/transmon-cross-hamiltonian-inverse>
+- Space / live API: <https://squadds-squadds-ml-inference-api.hf.space>
+- Routes: `GET /health`, `GET /models`, `POST /predict`
+
+Recommended agent flow: `GET /models` → pick a model with `status="ready"` → `POST /predict` with that `model_id` and the exact input keys it advertises.
+
+```bash
+curl -X POST \
+  https://squadds-squadds-ml-inference-api.hf.space/predict \
+  -H 'Content-Type: application/json' \
+  -d '{"model_id":"transmon_cross_hamiltonian_inverse","inputs":{"qubit_frequency_GHz":4.85,"anharmonicity_MHz":-205.0}}'
+```
+
+Inputs: `qubit_frequency_GHz`, `anharmonicity_MHz`.
+Outputs (SI units, meters): `design_options.connection_pads.readout.claw_length`, `design_options.connection_pads.readout.ground_spacing`, `design_options.cross_length`. Feed those straight into SQuADDS / Qiskit Metal downstream flows.
+
+Full contract, sample response, and manifest: see the [model repo README](https://huggingface.co/SQuADDS/transmon-cross-hamiltonian-inverse) and the [Space README](https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api).
+
+</details>
+
+More models are coming — resonator and qubit-cavity coupled-system inverses are next (the deployment tooling already knows about these families, so they drop in once checkpoints land). **If you've trained a well-performing SQuADDS-based model, please PR it in** — open an issue or PR against [SQuADDS/squadds-ml-inference-api](https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api) and we'll get it on the model page.
+
+---
+
 ## Contributing
 
 We welcome contributions from the community! Here is our [work wish list](wish_list.md).
@@ -441,4 +477,3 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 - [ethanzhen7](https://github.com/ethanzhen7) - 1 contributions
 - [PCodeShark25](https://github.com/PCodeShark25) - 1 contributions
 ---
-
