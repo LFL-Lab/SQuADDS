@@ -101,7 +101,7 @@ Full per-model contract (``X_names``, output order, scalers, ``inference_manifes
 Acknowledgments
 ---------------
 
-The first live model (``transmon_cross_hamiltonian_inverse``) was developed in collaboration with Taylor Patti, Nicola Pancotti, Enectali Figueroa-Feliciano, Sara Sussman, Olivia Seidel, Firas Abouzahr, Eli Levenson-Falk, and Sadman Ahmed Shanto — with **Olivia Seidel and Firas Abouzahr** as the primary trainers.
+The first live model (``transmon_cross_hamiltonian_inverse``) was developed in collaboration with Taylor Patti, Nicola Pancotti, Enectali Figueroa-Feliciano, Sara Sussman, Abhishek Chakraborty, Olivia Seidel, Firas Abouzahr, Eli Levenson-Falk, and Sadman Ahmed Shanto — with **Olivia Seidel and Firas Abouzahr** as the primary trainers.
 
 
 Current Limitations
