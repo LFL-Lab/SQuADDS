@@ -20,6 +20,7 @@ SQuADDS is an open-source platform aimed at speeding up the design loop in the c
    Installation <source/getting_started>
    Tutorials <source/tutorials/index>
    MCP Server <source/mcp_server>
+   ML Models <source/ml_models>
    Documentation <source/apidocs/index>
    Contributions <source/resources/contribute>
    Developer Notes <source/developer/index>
@@ -61,6 +62,7 @@ Quick Links
 - `Getting Started Guide <https://lfl-lab.github.io/SQuADDS/source/getting_started.html>`_: Learn how to set up and start using SQuADDS.
 - `Tutorials <https://lfl-lab.github.io/SQuADDS/source/tutorials/index.html>`_: Step-by-step guides for common workflows and use cases.
 - `MCP Server <https://lfl-lab.github.io/SQuADDS/source/mcp_server.html>`_: Connect AI coding assistants to the SQuADDS database.
+- `ML Models <https://lfl-lab.github.io/SQuADDS/source/ml_models.html>`_: Hosted SQuADDS ML inverse-design models on Hugging Face.
 - `Chat with the Codebase <https://deepwiki.com/LFL-Lab/SQuADDS>`_: Chat with the codebase using DeepWiki.
 - `API Reference <https://lfl-lab.github.io/SQuADDS/source/apidocs/index.html>`_: Explore the full API documentation for SQuADDS.
 - `Contribution Portal <https://squadds-portal.vercel.app/>`_: Contribute to SQuADDS in seconds.
