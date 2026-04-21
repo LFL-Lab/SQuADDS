@@ -52,6 +52,7 @@ Refer to [contribution guidelines](CONTRIBUTING.md) for more information on how 
 ## Machine Learning (ML):
 
 - Develop an architecture/framework for deploying ML models on SQuADDS (via HuggingFace endpoints/spaces, in code, etc.)
+- Add MCP tooling for hosted SQuADDS ML models (wrap the [SQuADDS ML Inference API](https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api) as MCP tools so agents can discover available models via `GET /models` and run inverse-design predictions via `POST /predict` without hand-writing HTTP calls)
 - Provide APIs (modules/methods) for incorporating ML interpolation features into SQuADDS
 - Utilize HuggingFace Tasks for ML applications
 - Identify relevant design space variables for any system given a set of $\hat{H}$ parameters using encoders
