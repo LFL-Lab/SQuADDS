@@ -387,7 +387,7 @@ With `mcp.json`:
 
 We host ML models trained on SQuADDS on our [Hugging Face org](https://huggingface.co/SQuADDS), served through the [SQuADDS ML Inference API Space](https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api). Docsite page: [ML Models](https://lfl-lab.github.io/SQuADDS/source/ml_models.html).
 
-Our first production model is a **qubit-claw (TransmonCross) Hamiltonian-to-geometry inverse** model, developed in collaboration with Taylor Patti, Nicola Pancotti, Enectali Figueroa-Feliciano, Sara Sussman, Olivia Seidel, Firas Abouzahr, Eli Levenson-Falk, and Sadman Ahmed Shanto — with **Olivia Seidel and Firas Abouzahr** as the primary trainers.
+Our first production model is a **qubit-claw (TransmonCross) Hamiltonian-to-geometry inverse** model, developed in collaboration with Taylor Patti, Nicola Pancotti, Enectali Figueroa-Feliciano, Sara Sussman, Abhishek Chakraborty, Olivia Seidel, Firas Abouzahr, Eli Levenson-Falk, and Sadman Ahmed Shanto — with **Olivia Seidel and Firas Abouzahr** as the primary trainers.
 
 <details>
 <summary><strong>transmon_cross_hamiltonian_inverse — usage</strong></summary>
