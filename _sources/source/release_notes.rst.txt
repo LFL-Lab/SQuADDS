@@ -1,8 +1,8 @@
 Release Notes
 =============
 
-Version 0.4.5 (Unreleased)
---------------------------
+Version 0.4.5
+--------------
 
 **Bug Fixes**
 
