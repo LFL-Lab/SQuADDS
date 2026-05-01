@@ -6,16 +6,11 @@ Validates that all schemas serialize/deserialize correctly and
 enforce their constraints.
 """
 
-from squadds_mcp.schemas import (
-    ClosestDesignsResult,
-    ComponentListResult,
-    DatasetResult,
-    DesignResult,
-    HamiltonianKeysResult,
-    InterpolatedDesignResult,
-    TargetParams,
-    VersionResult,
-)
+from squadds_mcp.schemas import (ClosestDesignsResult, ComponentListResult,
+                                 DatasetResult, DesignResult,
+                                 HamiltonianKeysResult,
+                                 InterpolatedDesignResult, TargetParams,
+                                 VersionResult)
 
 
 class TestTargetParams:
@@ -153,11 +148,11 @@ class TestVersionResult:
 
     def test_basic(self):
         result = VersionResult(
-            squadds_version="0.4.4",
+            squadds_version="0.4.5",
             mcp_server_version="0.1.0",
             repo_name="SQuADDS/SQuADDS_DB",
         )
-        assert result.squadds_version == "0.4.4"
+        assert result.squadds_version == "0.4.5"
 
 
 class TestSerializationRoundtrip:
