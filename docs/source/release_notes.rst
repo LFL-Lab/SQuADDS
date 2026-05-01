@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.4.5 (Unreleased)
+--------------------------
+
+**Bug Fixes**
+
+- Capped ``pandas`` below 3.0 because ``pyEPR`` still uses the removed
+  ``read_csv(delim_whitespace=...)`` argument when parsing Q3D exported
+  capacitance matrices. Fresh installs could otherwise solve successfully in
+  Ansys, fail while loading the matrix, and surface as a confusing
+  ``NoneType`` simulation result.
+- ``AnsysSimulator.simulate`` now raises a clear ``RuntimeError`` if a
+  low-level simulation path returns no result payload, instead of printing
+  ``Simulation Completed Successfully!`` and returning ``None``.
+
 Version 0.4.4 (2026-04-19)
 --------------------------
 

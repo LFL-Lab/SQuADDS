@@ -2,6 +2,9 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
+import squadds.simulations.ansys_simulator as ansys_simulator_module
 from squadds.simulations.ansys_simulator import AnsysSimulator
 from squadds.simulations.drivenmodal.models import (
     CapacitanceExtractionRequest,
@@ -149,6 +152,24 @@ def test_normalize_device_dict_deserializes_json_like_payloads(headless_qiskit_e
     assert simulator.device_dict["design_options_qubit"]["cross_length"] == "200um"
     assert simulator.device_dict["design_options_cavity_claw"]["cpw_opts"]["total_length"] == "4000um"
     assert simulator.device_dict["setup_cavity_claw"] == {"max_passes": 15}
+
+
+def test_simulate_raises_when_low_level_simulation_returns_none(monkeypatch, headless_qiskit_environment):
+    simulator = AnsysSimulator(
+        DummyAnalyzer("qubit"),
+        {
+            "design_options": {"cross_length": "200um"},
+            "setup": {"max_passes": 1},
+        },
+    )
+
+    def fake_simulate_single_design(*args, **kwargs):
+        return None, None, None
+
+    monkeypatch.setattr(ansys_simulator_module, "simulate_single_design", fake_simulate_single_design)
+
+    with pytest.raises(RuntimeError, match="completed without a result payload"):
+        simulator.simulate()
 
 
 def test_run_drivenmodal_initializes_checkpoint_manifest(headless_qiskit_environment, tmp_path: Path):

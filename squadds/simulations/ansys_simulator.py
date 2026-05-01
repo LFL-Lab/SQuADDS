@@ -401,6 +401,11 @@ class AnsysSimulator:
         self.console.rule("[bold cyan]Starting Simulation[/bold cyan]")
         try:
             result = self._run_simulation(device_dict)
+            if result is None:
+                raise RuntimeError(
+                    "Ansys simulation completed without a result payload. "
+                    "Check the Q3D/HFSS logs above for the root error."
+                )
             self.console.print("[bold green]Simulation Completed Successfully![/bold green]")
             return result
         except Exception as e:
