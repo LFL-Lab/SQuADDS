@@ -6,11 +6,16 @@ Validates that all schemas serialize/deserialize correctly and
 enforce their constraints.
 """
 
-from squadds_mcp.schemas import (ClosestDesignsResult, ComponentListResult,
-                                 DatasetResult, DesignResult,
-                                 HamiltonianKeysResult,
-                                 InterpolatedDesignResult, TargetParams,
-                                 VersionResult)
+from squadds_mcp.schemas import (
+    ClosestDesignsResult,
+    ComponentListResult,
+    DatasetResult,
+    DesignResult,
+    HamiltonianKeysResult,
+    InterpolatedDesignResult,
+    TargetParams,
+    VersionResult,
+)
 
 
 class TestTargetParams:
