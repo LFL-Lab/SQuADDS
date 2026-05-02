@@ -46,7 +46,8 @@ jobs:
       name: pypi
       url: https://pypi.org/p/SQuADDS
     permissions:
-      id-token: write
+      contents: read
+      actions: read
 
     steps:
       - name: Download distribution packages
@@ -55,11 +56,13 @@ jobs:
           name: python-package-distributions
           path: dist/
 
-      - name: Publish to PyPI (Trusted Publishing)
+      # Uses API token. Add PYPI_API_TOKEN to this repo's `pypi` environment (or repo secrets).
+      # To use Trusted Publishing instead, remove `password`, restore `permissions: id-token: write`,
+      # and register the workflow on PyPI (owner/repo/workflow/environment must match).
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        # Note: If trusted publishing is not configured, use PYPI_API_TOKEN secret instead:
-        # with:
-        #   password: ${{ secrets.PYPI_API_TOKEN }}
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
   draft-release-notes:
     name: Draft Release Notes
