@@ -72,6 +72,9 @@ jobs:
     runs-on: ubuntu-latest
     # Only run on schedule and manual dispatch — not on every push
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      issues: write
 
     steps:
       - name: Checkout repository
@@ -132,21 +135,23 @@ jobs:
             \`\`\`
             `;
 
-            // Check for existing open issues to avoid duplicates
-            const existingIssues = await github.rest.issues.listForRepo({
-              owner, repo,
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner,
+              repo,
               state: 'open',
-              labels: 'mcp-sync',
+              per_page: 100,
             });
-
-            const hasDuplicate = existingIssues.data.some(
-              issue => issue.title.includes('MCP Compatibility')
+            const compatTitle = 'MCP Compatibility: Tests failed against latest SQuADDS';
+            const hasDuplicate = openIssues.some((issue) =>
+              issue.title.includes(compatTitle),
             );
 
             if (!hasDuplicate) {
               await github.rest.issues.create({
-                owner, repo, title, body,
-                labels: ['mcp-sync', 'bug', 'automated'],
+                owner,
+                repo,
+                title,
+                body,
               });
               console.log('Created compatibility failure issue');
             } else {
