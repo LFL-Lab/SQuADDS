@@ -15,6 +15,9 @@ jobs:
   notify-mcp:
     name: Generate MCP Sync Report
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
 
     steps:
       - name: Checkout repository
@@ -109,26 +112,20 @@ jobs:
             AFFECTED_MCP_MODULES="${AFFECTED_MCP_MODULES}schemas.py, "
           fi
 
-          # Save outputs
+          # Multiline bodies must not flow through GITHUB_OUTPUT (breaks github-script
+          # template literals); write sidecar files instead.
+          printf '%b' "${AFFECTED_FILES}" > /tmp/affected_files.txt
+
           {
             echo "changes_found=${CHANGES_FOUND}"
             echo "affected_mcp_modules=${AFFECTED_MCP_MODULES}"
-
-            # Save the full diff summary (multiline)
-            echo "api_changes_md<<EOF"
-            cat /tmp/api_changes.md
-            echo "EOF"
-
-            # Save affected files list
-            echo "affected_files<<EOF"
-            echo -e "$AFFECTED_FILES"
-            echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
       - name: Create MCP sync issue
         uses: actions/github-script@v7
         with:
           script: |
+            const fs = require('fs');
             const { owner, repo } = context.repo;
             const currentTag = '${{ steps.release_info.outputs.current_tag }}';
             const prevTag = '${{ steps.release_info.outputs.prev_tag }}';
@@ -136,11 +133,10 @@ jobs:
             const releaseName = '${{ steps.release_info.outputs.release_name }}';
             const changesFound = '${{ steps.api_changes.outputs.changes_found }}' === 'true';
             const affectedModules = '${{ steps.api_changes.outputs.affected_mcp_modules }}';
-            const affectedFiles = `${{ steps.api_changes.outputs.affected_files }}`.trim();
-            const apiChangesMd = `${{ steps.api_changes.outputs.api_changes_md }}`;
+            const apiChangesMd = fs.readFileSync('/tmp/api_changes.md', 'utf8');
+            const affectedFiles = fs.readFileSync('/tmp/affected_files.txt', 'utf8').trim();
 
             const priority = changesFound ? '🟡 Review Required' : '🟢 Low Risk';
-            const breakingLabel = changesFound ? 'breaking-change' : 'non-breaking';
 
             const title = `🔄 MCP Sync: SQuADDS ${currentTag} released — ${priority}`;
 
@@ -197,21 +193,23 @@ jobs:
             - [ ] Update \`squadds_mcp/__init__.py\` version if needed
             `;
 
-            // Check for duplicate open issues
-            const existingIssues = await github.rest.issues.listForRepo({
-              owner, repo,
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner,
+              repo,
               state: 'open',
-              labels: 'mcp-sync',
+              per_page: 100,
             });
-
-            const hasDuplicate = existingIssues.data.some(
-              issue => issue.title.includes(currentTag)
+            const titleMarker = `MCP Sync: SQuADDS ${currentTag} released`;
+            const hasDuplicate = openIssues.some((issue) =>
+              issue.title.includes(titleMarker),
             );
 
             if (!hasDuplicate) {
               const issue = await github.rest.issues.create({
-                owner, repo, title, body,
-                labels: ['mcp-sync', breakingLabel, 'automated'],
+                owner,
+                repo,
+                title,
+                body,
               });
               console.log(`Created sync issue #${issue.data.number}`);
             } else {
