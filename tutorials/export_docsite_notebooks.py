@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import argparse
+import contextlib
 import hashlib
+import io
 import json
+import os
+import traceback
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -118,9 +123,58 @@ def build_notebook(cells: list[dict]) -> dict:
     }
 
 
-def export_notebook(spec: NotebookExport) -> None:
+def execute_notebook_in_process(notebook: dict, *, cwd: Path) -> dict:
+    """Execute simple tutorial notebooks and attach captured text outputs.
+
+    These notebooks are percent-script exports, not arbitrary user notebooks.
+    Running the code in process keeps the generated docsite outputs tied to the
+    same uv environment that exported the notebook, without relying on a local
+    Jupyter kernelspec.
+    """
+    namespace: dict[str, object] = {"__name__": "__notebook__", "__file__": str(cwd)}
+    execution_count = 0
+    old_cwd = Path.cwd()
+    os.chdir(cwd)
+    try:
+        for cell in notebook["cells"]:
+            if cell["cell_type"] != "code":
+                continue
+            execution_count += 1
+            cell["execution_count"] = execution_count
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            source = "".join(cell["source"])
+            try:
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    exec(compile(source, "<notebook-cell>", "exec"), namespace)
+            except Exception as exc:  # pragma: no cover - exercised by failed exports
+                if stdout.getvalue():
+                    cell["outputs"].append({"name": "stdout", "output_type": "stream", "text": stdout.getvalue()})
+                if stderr.getvalue():
+                    cell["outputs"].append({"name": "stderr", "output_type": "stream", "text": stderr.getvalue()})
+                cell["outputs"].append(
+                    {
+                        "ename": type(exc).__name__,
+                        "evalue": str(exc),
+                        "output_type": "error",
+                        "traceback": traceback.format_exc().splitlines(),
+                    }
+                )
+                raise
+            if stdout.getvalue():
+                cell["outputs"].append({"name": "stdout", "output_type": "stream", "text": stdout.getvalue()})
+            # Successful docsite outputs should focus on tutorial results, not
+            # transient dataset-download progress bars or logging noise.
+    finally:
+        os.chdir(old_cwd)
+    return notebook
+
+
+def export_notebook(spec: NotebookExport, *, execute: bool = False) -> None:
     cells = parse_percent_script(spec.source_py)
     notebook = build_notebook(apply_replacements_to_cells(cells, spec.replacements))
+    if execute:
+        notebook = execute_notebook_in_process(notebook, cwd=ROOT)
     tutorial_out = TUTORIALS_DIR / spec.notebook_name
     docs_out = DOCS_TUTORIALS_DIR / spec.notebook_name
     notebook_text = json.dumps(notebook, indent=1) + "\n"
@@ -132,9 +186,17 @@ def export_notebook(spec: NotebookExport) -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Export selected percent-script tutorials to docsite notebooks.")
+    parser.add_argument(
+        "--execute",
+        action="store_true",
+        help="Execute tutorial code cells in-process and save their text outputs.",
+    )
+    args = parser.parse_args()
+
     DOCS_TUTORIALS_DIR.mkdir(parents=True, exist_ok=True)
     for spec in EXPORTS:
-        export_notebook(spec)
+        export_notebook(spec, execute=args.execute)
 
 
 if __name__ == "__main__":

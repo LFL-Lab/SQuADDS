@@ -8,7 +8,13 @@
 # 2. an `NCap` interdigital coupler.
 #
 # The goal is not to teach every Ansys scripting detail. SQuADDS should carry
-# that weight. By the end, you should know how to:
+# that weight. Instead, this notebook teaches the SQuADDS contract for this
+# workflow: a validated database row becomes a portable driven-modal request,
+# the request renders the same physical network into HFSS, and the resulting
+# Y-parameters are converted back into the capacitance quantities users already
+# know from the Q3D datasets.
+#
+# By the end, you should know how to:
 #
 # - pull a Q3D reference row from the SQuADDS database,
 # - build the equivalent driven-modal request,
@@ -49,6 +55,18 @@ except ImportError:  # pragma: no cover
 #
 # We start from already-validated SQuADDS rows. This is useful because the Q3D
 # capacitance matrix in each row gives us a trusted comparison target.
+#
+# `see_dataset(...)` returns the raw table behind one SQuADDS dataset. The
+# important inputs are:
+#
+# - `component`: the high-level object family, for example `"qubit"` or
+#   `"coupler"`.
+# - `component_name`: the concrete Qiskit Metal component stored in the dataset.
+# - `data_type`: the simulated observable we want from the database. Here it is
+#   `"cap_matrix"` because we want Q3D capacitances for comparison.
+#
+# In a real study you would usually pick the row returned by an inverse-design
+# query. For a tutorial, choosing fixed rows keeps the notebook deterministic.
 
 # %%
 db = SQuADDS_DB()
@@ -77,12 +95,34 @@ display(ncap_row[["design_options", "top_to_bottom", "top_to_ground"]])
 # A driven-modal capacitance extraction is a frequency-domain multiport solve.
 # SQuADDS wraps the bookkeeping in a `CapacitanceExtractionRequest`.
 #
+# Behind the scenes, `build_capacitance_request(...)` does four things:
+#
+# - It reads the selected row's `design_options` and keeps the geometry tied to
+#   the database reference.
+# - It declares which Qiskit Metal pins become HFSS lumped ports. For the
+#   qubit-claw case these are the transmon cross/JJ node and the readout claw;
+#   for the NCap case these are the top and bottom capacitor terminals.
+# - It attaches a SQuADDS layer-stack preset where metal is rendered as PEC and
+#   the substrate metadata matches the Ansys renderer expectations.
+# - It stores the HFSS adaptive setup, frequency sweep, and artifact policy in a
+#   serializable object that can be sent to the Windows Ansys machine.
+#
 # The only choices we make here are the ones a user should care about:
 #
 # - which geometry row to render,
 # - which physical ports define the capacitance network,
 # - which setup/sweep settings to use, and
 # - where checkpointed artifacts should be stored.
+#
+# `default_capacitance_setup(freq_ghz=5.0)` is the adaptive HFSS setup. The
+# frequency is not "the extracted capacitance frequency"; it is the frequency at
+# which HFSS builds the adaptive mesh. The default uses `max_delta_s=0.005`,
+# `min_converged=5`, and mixed basis order because those settings gave stable
+# agreement with the corresponding Q3D workflow.
+#
+# `default_capacitance_sweep(...)` is the frequency grid where HFSS exports the
+# network data. The 1-10 GHz interpolating sweep is broad enough to catch
+# frequency dependence while still being cheap enough for a validation pass.
 
 # %%
 setup = default_capacitance_setup(freq_ghz=5.0)
@@ -114,6 +154,12 @@ display(pd.DataFrame([qubit_request.to_dict(), ncap_request.to_dict()]))
 # folder. The notebook can then be re-opened later and the post-processing can
 # be repeated without re-solving.
 #
+# `run_drivenmodal_request(...)` is intentionally the only Ansys-facing API used
+# here. It renders the Qiskit Metal geometry, creates the HFSS driven-modal
+# setup, assigns the lumped ports from the request, exports Touchstone/Y data,
+# and writes checkpoint files. If a run is interrupted, the artifact policy can
+# resume from completed stages instead of starting from zero.
+#
 # The cell below is intentionally guarded. Leave `RUN_ANSYS = False` when you
 # are reading the tutorial on a laptop or in CI.
 
@@ -137,6 +183,20 @@ if RUN_ANSYS:
 # After the solve, the driven-modal post-processing writes a compact summary
 # dictionary. The comparison table below is the only table a typical user needs
 # to inspect.
+#
+# The conversion used by the helper is the small-signal capacitor relation:
+#
+# $$Y(\omega) = j \omega C.$$
+#
+# Therefore SQuADDS computes the active-node capacitance matrix from the
+# imaginary part of the exported admittance matrix:
+#
+# $$C(\omega) = \frac{\operatorname{Im}(Y(\omega))}{\omega}.$$
+#
+# The example below uses the Q3D row as a stand-in so the docsite can show the
+# table without launching HFSS. In an actual run, replace
+# `example_qubit_drivenmodal` and `example_ncap_drivenmodal` with
+# `summary["drivenmodal_summary_fF"]` from the completed checkpoint.
 
 # %%
 qubit_q3d = capacitance_reference_summary(qubit_row, system_kind="qubit_claw")
@@ -157,15 +217,11 @@ display(capacitance_comparison_table(drivenmodal_fF=example_ncap_drivenmodal, q3
 # The diagonal entries are not extra capacitances to add on top of all pair
 # terms. For a two-node qubit-claw model, the transmon shunt capacitance is:
 #
-# \[
-# C_\Sigma = C_{\text{cross-ground}} + C_{\text{cross-claw}}
-# \]
+# $$C_\Sigma = C_{\text{cross-ground}} + C_{\text{cross-claw}}.$$
 #
 # not:
 #
-# \[
-# C_{\text{cross-cross}} + C_{\text{cross-ground}} + C_{\text{cross-claw}}.
-# \]
+# $$C_{\text{cross-cross}} + C_{\text{cross-ground}} + C_{\text{cross-claw}}.$$
 #
 # SQuADDS' Hamiltonian extraction uses the first expression, so the mutual
 # capacitance is not double-counted.

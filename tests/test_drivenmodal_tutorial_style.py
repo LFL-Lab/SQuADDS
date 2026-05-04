@@ -36,3 +36,21 @@ def test_drivenmodal_tutorials_keep_code_cells_reader_sized():
             if cell["cell_type"] != "code":
                 continue
             assert len(cell["source"]) <= 35, f"{notebook_path} cell {index} is too large for a tutorial"
+
+
+def test_drivenmodal_tutorials_use_dollar_math_delimiters():
+    bracket_math_delimiters = ["\\[", "\\]", "\\(", "\\)"]
+
+    for notebook_path in DRIVENMODAL_NOTEBOOKS:
+        markdown = "\n".join(
+            "".join(cell["source"]) for cell in load_notebook(notebook_path)["cells"] if cell["cell_type"] == "markdown"
+        )
+        for delimiter in bracket_math_delimiters:
+            assert delimiter not in markdown, f"Use $ math delimiters in {notebook_path}, found {delimiter}"
+
+
+def test_drivenmodal_tutorials_ship_reader_visible_outputs():
+    for notebook_path in DRIVENMODAL_NOTEBOOKS:
+        notebook = load_notebook(notebook_path)
+        outputs = [output for cell in notebook["cells"] if cell["cell_type"] == "code" for output in cell["outputs"]]
+        assert outputs, f"Notebook should include saved outputs for docsite readers: {notebook_path}"
