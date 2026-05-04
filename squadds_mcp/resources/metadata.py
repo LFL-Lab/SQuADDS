@@ -171,6 +171,14 @@ Read `squadds://chip-design-reference` for the complete workflow from
 SQuADDS search results to a GDS file ready for fabrication. Use the
 `design_fab_ready_chip` prompt for a guided step-by-step walkthrough.
 
+### HFSS Driven-Modal Simulations (local Ansys workflow)
+Agents cannot launch HFSS through MCP; read these before reproducing Tutorial-10/11:
+
+- **`squadds://drivenmodal-workflow`** — narrative on lumped ports, Z-ref vs uniform `y_to_s`, skrf pipelines, JJ admittance, scqubits hooks.
+- **`squadds://drivenmodal-playbook`** — JSON outline mirroring **`get_drivenmodal_playbook_json`**.
+- **`get_maxwell_capacitance_conventions`** — prevents Maxwell-matrix double-counting when reporting capacitors.
+- Use **`repeat_drivenmodal_tutorial_via_mcp` prompt plus local Metal/AEDT** once parameters are fetched.
+
 ### DO NOT Use QubitCavity for Production
 The `QubitCavity` class (`squadds.components.coupled_systems`) is a
 convenience wrapper for quick visualization only. It has known geometry

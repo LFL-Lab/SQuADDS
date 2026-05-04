@@ -270,3 +270,51 @@ Use `RouteAnchors` to avoid forced 90° turns.
 4. Export: `a_gds.export_to_gds("filename.gds")`
 5. Run DRC before sending to fab
 """
+
+    @mcp.prompt()
+    def repeat_drivenmodal_tutorial_via_mcp(
+        tutorial_focus: str = "capacitance",
+    ) -> str:
+        """Guide HFSS Tutorial-10/11 parity using MCP docs + Python entry points.
+
+        MCP cannot invoke Ansys. This prompt directs agents through resources/tools
+        (`squadds://drivenmodal-workflow`, `get_drivenmodal_playbook_json`, Maxwell helper)
+        and then summarizes what must run locally in Metal/AEDT.
+        """
+        return f"""# Reproduce Driven-Modal Tutorials ({tutorial_focus} track)
+
+You are documenting or coding along with SQuADDS HFSS notebooks. MCP provides knowledge,
+not HFSS RPC. Execute solvers ONLY on the user's workstation with AEDT/qiskit-metal installed.
+
+---
+
+## Mandatory Read Order
+1. `squadds://drivenmodal-workflow` → conceptual map (ports, normalization, pipelines).
+2. `squadds://drivenmodal-playbook` *or* `get_drivenmodal_playbook_json` → identical structured JSON playbook.
+3. `get_maxwell_capacitance_conventions` if the task mentions capacitors / Maxwell matrices.
+
+---
+
+## MCP Data Steps (still valid here)
+Use standard tools to locate a dataframe row aligned with `{tutorial_focus}` goals:
+- `find_closest_designs` / `get_dataset`
+- Respect `resonator_type` for coupled workloads.
+
+---
+
+## Translation to `squadds.simulations.drivenmodal`
+1. Imports live under `squadds.simulations.drivenmodal`; prefer workflow helpers (`build_capacitance_request`,
+   `build_coupled_system_request`, `segmented_hamiltonian_sweeps`, ...).
+2. Instantiate `AnsysSimulator` plus `run_drivenmodal` to scaffold manifests/checkpoints.
+3. Rendering / sweeps rely on `render_drivenmodal_design`, `ensure_drivenmodal_setup`, `run_drivenmodal_sweep`.
+4. Post HFSS exports:
+   - `parameter_dataframe_to_tensor` → `network_from_parameter_dataframe` (skrf) for Touchstones.
+   - `terminate_port_y`, `y_to_s` when reducing feeds before resonance fitting.
+   - `qubit_admittance.*` merges JJ small-signal models into port Y traces.
+   - `transmon_state_inductances` / Hamiltonian comparisons finish the story next to datasets.
+
+Explain every lumped-port mapping (component/pin/metadata) you inherit from tutorials so junior readers
+mirror the workbook exactly—including why JJ ports avoid drawing explicit inductors in Metal.
+
+Never claim MCP solved HFSS unless the human shows local logs; always segregate MCP knowledge vs AEDT batches.
+"""
