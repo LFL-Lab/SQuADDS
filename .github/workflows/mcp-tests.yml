@@ -41,6 +41,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install headless libs for Qt/Matplotlib via qiskit_metal imports
+        run: sudo apt-get update && sudo apt-get install -y xvfb libegl1 libxkbcommon0
+
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
@@ -53,14 +56,14 @@ jobs:
         run: uv sync --extra mcp --extra dev
 
       - name: Run MCP schema tests
-        run: uv run pytest tests/test_mcp_schemas.py -v --tb=short
+        run: xvfb-run -a uv run pytest tests/test_mcp_schemas.py -v --tb=short
 
       - name: Run MCP tool & utility tests
-        run: uv run pytest tests/test_mcp_tools.py -v --tb=short
+        run: xvfb-run -a uv run pytest tests/test_mcp_tools.py tests/test_mcp_drivenmodal.py tests/test_mcp_simulations.py -v --tb=short
 
       - name: Verify MCP server can be created
         run: |
-          uv run python -c "
+          xvfb-run -a uv run python -c "
           from squadds_mcp.server import create_server
           server = create_server()
           print(f'✅ Server created: {server.name}')
@@ -80,6 +83,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install headless libs for Qt/Matplotlib via qiskit_metal imports
+        run: sudo apt-get update && sudo apt-get install -y xvfb libegl1 libxkbcommon0
+
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
@@ -97,7 +103,7 @@ jobs:
       - name: Run MCP tests against latest SQuADDS
         id: compat_test
         continue-on-error: true
-        run: uv run pytest tests/test_mcp_schemas.py tests/test_mcp_tools.py -v --tb=long
+        run: xvfb-run -a uv run pytest tests/test_mcp_schemas.py tests/test_mcp_tools.py tests/test_mcp_drivenmodal.py tests/test_mcp_simulations.py -v --tb=long
 
       - name: Create issue on failure
         if: steps.compat_test.outcome == 'failure'

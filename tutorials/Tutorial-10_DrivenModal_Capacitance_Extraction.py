@@ -1,692 +1,320 @@
 # %% [markdown]
-# # Tutorial 10: HFSS Driven-Modal Capacitance Extraction for Qubit-Claw and NCap
+# # Tutorial 10: Driven-Modal Capacitance Extraction
 #
-# This tutorial reruns two capacitance-style SQuADDS geometries in **Ansys HFSS
-# driven-modal** using **Qiskit Metal** as the geometry/rendering frontend:
+# In this tutorial we will use SQuADDS to set up a driven-modal HFSS
+# capacitance extraction for two familiar objects:
 #
-# 1. a qubit-claw geometry sourced from the `qubit-TransmonCross-cap_matrix`
-#    dataset; and
-# 2. an NCap geometry sourced from the `coupler-NCap-cap_matrix` dataset.
+# 1. a `TransmonCross` qubit-claw capacitor, and
+# 2. an `NCap` interdigital coupler.
 #
-# The goals are:
+# The goal is not to teach every Ansys scripting detail. SQuADDS should carry
+# that weight. Instead, this notebook teaches the SQuADDS contract for this
+# workflow: a validated database row becomes a portable driven-modal request,
+# the request renders the same physical network into HFSS, and the resulting
+# Y-parameters are converted back into the capacitance quantities users already
+# know from the Q3D datasets.
 #
-# - make the driven-modal layer stack explicit;
-# - checkpoint artifacts so a crash does not force a full restart;
-# - save raw S/Y parameter artifacts, Touchstone files, and extracted
-#   capacitance-vs-frequency traces; and
-# - compare the extracted capacitance matrix against the existing Q3D-backed
-#   SQuADDS dataset values.
+# By the end, you should know how to:
 #
-# This file is written as a Python script with `# %%` cells so it can be run in
-# VS Code, Spyder, Jupyter, or as a plain Python script on the Windows machine
-# that has Ansys HFSS installed.
+# - pull a Q3D reference row from the SQuADDS database,
+# - build the equivalent driven-modal request,
+# - compare driven-modal capacitances against the Q3D reference, and
+# - read the Maxwell capacitance matrix without double-counting terms.
+#
+# <div class="admonition note">
+# <p class="admonition-title">Why driven modal for capacitance?</p>
+# <p>Q3D remains the direct electrostatic capacitance solver in SQuADDS. This
+# tutorial shows a complementary route: solve a small-signal HFSS driven-modal
+# network, export its admittance matrix, and recover capacitance from the
+# imaginary admittance. The value of this route is that it uses the same
+# port-based network representation as the later Hamiltonian workflow.</p>
+# </div>
 
 # %% [markdown]
-# ## Physics viewpoint and API viewpoint
+# ## Imports
 #
-# There are two complementary stories in this tutorial:
-#
-# 1. **Physics story.**
-#    A driven-modal multiport solve gives us a frequency-dependent admittance
-#    matrix. In the low-loss, low-frequency limit, the imaginary part of that
-#    admittance behaves like an effective capacitance network. That lets us ask
-#    whether HFSS driven-modal can reproduce the same Maxwell capacitance
-#    picture that SQuADDS normally stores from Q3D.
-#
-# 2. **API story.**
-#    We want a reusable, restart-safe workflow that does not hard-code one
-#    geometry. The request/setup/sweep/artifact objects in
-#    `squadds.simulations.drivenmodal.*` are therefore treated as first-class
-#    pieces of the tutorial, not hidden internals. The notebook shows how to
-#    assemble them, run the solve, checkpoint the artifacts, and inspect the
-#    results.
+# We will use the regular SQuADDS database API to choose designs, then the
+# driven-modal workflow helpers to build the HFSS requests.
 
 # %%
-from __future__ import annotations
-
-import json
+import os
 from pathlib import Path
-from typing import Any
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from datasets import load_dataset
-from qiskit_metal import Dict
-from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
-from qiskit_metal.renderers.renderer_ansys.hfss_renderer import QHFSSRenderer
 
-from squadds.simulations.drivenmodal.artifacts import load_run_manifest, mark_stage_complete
-from squadds.simulations.drivenmodal.capacitance import (
-    capacitance_dataframe_from_y_sweep,
-    capacitance_matrix_from_y,
-    maxwell_capacitance_dataframe,
+from squadds import SQuADDS_DB
+from squadds.simulations.drivenmodal import (
+    build_capacitance_request,
+    capacitance_comparison_table,
+    capacitance_reference_summary,
+    default_capacitance_setup,
+    default_capacitance_sweep,
+    maxwell_matrix_interpretation,
 )
-from squadds.simulations.drivenmodal.design import (
-    apply_buffered_chip_bounds,
-    apply_cryo_silicon_material_properties,
-    connect_renderer_to_new_ansys_design,
-    create_multiplanar_design,
-    ensure_drivenmodal_setup,
-    format_exception_for_console,
-    render_drivenmodal_design,
-    run_drivenmodal_sweep,
-    safe_ansys_design_name,
-)
-from squadds.simulations.drivenmodal.hfss_data import (
-    parameter_dataframe_to_tensor,
-    write_touchstone_from_dataframe,
-)
-from squadds.simulations.drivenmodal.hfss_runner import run_drivenmodal_request
-from squadds.simulations.drivenmodal.models import (
-    CapacitanceExtractionRequest,
-    DrivenModalArtifactPolicy,
-    DrivenModalLayerStackSpec,
-    DrivenModalSetupSpec,
-    DrivenModalSweepSpec,
-)
-from squadds.simulations.drivenmodal.ports import build_capacitance_port_specs, split_rendered_ports
-from squadds.simulations.utils_component_factory import create_ncap_coupler
 
 try:
-    from IPython.display import display as display
-except ImportError:  # pragma: no cover - plain Python fallback for non-notebook execution
+    from IPython.display import display
+except ImportError:  # pragma: no cover
 
     def display(obj):
         print(obj)
 
 
 # %% [markdown]
-# ## Runtime knobs
+# ## Choose Reference Designs
 #
-# `RUN_TAG` is the easiest way to force a brand-new AEDT design while keeping the
-# rest of the script unchanged. Leave `FORCE_RERUN = False` for normal resume
-# behavior. Set it to `True` only when you intentionally want to regenerate the
-# HFSS artifacts for the same `RUN_TAG`.
+# We start from already-validated SQuADDS rows. This is useful because the Q3D
+# capacitance matrix in each row gives us a trusted comparison target.
+#
+# `see_dataset(...)` returns the raw table behind one SQuADDS dataset. The
+# important inputs are:
+#
+# - `component`: the high-level object family, for example `"qubit"` or
+#   `"coupler"`.
+# - `component_name`: the concrete Qiskit Metal component stored in the dataset.
+# - `data_type`: the simulated observable we want from the database. Here it is
+#   `"cap_matrix"` because we want Q3D capacitances for comparison.
+#
+# A larger validation study would loop over many rows. Here we choose fixed rows
+# so that every reader sees the same geometry and the same reference numbers.
 
 # %%
-RUN_TAG = "v3"
-FORCE_RERUN = False
-MAX_SOLVE_ATTEMPTS = 3
+db = SQuADDS_DB()
 
-REMOTE_REPO_ID = "SQuADDS/SQuADDS_DB"
-QUBIT_CONFIG = "qubit-TransmonCross-cap_matrix"
-NCAP_CONFIG = "coupler-NCap-cap_matrix"
-QUBIT_REFERENCE_INDEX = 3
-NCAP_REFERENCE_INDEX = 1
-
-LAYER_STACK = DrivenModalLayerStackSpec(
-    preset="squadds_hfss_v1",
-    chip_name="main",
-    metal_thickness_um=0.2,
-    substrate_thickness_um=750.0,
+qubit_df = db.see_dataset(
+    component="qubit",
+    component_name="TransmonCross",
+    data_type="cap_matrix",
 )
-SETUP = DrivenModalSetupSpec(
-    name="DrivenModalSetup",
-    freq_ghz=5.0,
-    max_delta_s=0.005,
-    max_passes=20,
-    min_passes=2,
-    min_converged=5,
-    pct_refinement=30,
-    basis_order=-1,
-)
-SWEEP = DrivenModalSweepSpec(
-    name="DrivenModalSweep",
-    start_ghz=1.0,
-    stop_ghz=10.0,
-    count=400,
-    sweep_type="Interpolating",
-    save_fields=False,
-    interpolation_tol=0.005,
-    interpolation_max_solutions=400,
-)
-ARTIFACTS = DrivenModalArtifactPolicy(
-    export_touchstone=True,
-    export_y_parameters=True,
-    export_capacitance_tables=True,
-    checkpoint_after_stage=True,
-    resume_existing=True,
+ncap_df = db.see_dataset(
+    component="coupler",
+    component_name="NCap",
+    data_type="cap_matrix",
 )
 
-RUNTIME_ROOT = Path("tutorials/runtime/drivenmodal_capacitance")
-CHECKPOINT_ROOT = RUNTIME_ROOT / "checkpoints"
-HFSS_PROJECT_ROOT = RUNTIME_ROOT / "hfss_projects"
+qubit_row = qubit_df.iloc[3]
+ncap_row = ncap_df.iloc[1]
+
+display(qubit_row[["design_options", "cross_to_ground", "cross_to_claw"]])
+display(ncap_row[["design_options", "top_to_bottom", "top_to_ground"]])
 
 
 # %% [markdown]
-# ## Helpers
-
-
-# %%
-def ensure_runtime_dirs() -> None:
-    CHECKPOINT_ROOT.mkdir(parents=True, exist_ok=True)
-    HFSS_PROJECT_ROOT.mkdir(parents=True, exist_ok=True)
-
-
-def stage_is_complete(manifest_path: Path, stage_name: str) -> bool:
-    manifest = load_run_manifest(manifest_path)
-    return manifest["stages"][stage_name]["status"] == "complete"
-
-
-def dump_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str))
-
-
-def prepare_renderer_project(renderer: QHFSSRenderer, project_dir: Path, project_name: str) -> Path:
-    """Create a fresh HFSS project and save it to an absolute AEDT path.
-
-    This avoids two separate older Windows-stack issues:
-
-    1. the pyEPR project-path duplication bug triggered by passing
-       ``project_path``/``project_name`` through ``QHFSSRenderer`` options; and
-    2. the stale active-project reconnect bug where ``renderer.start()`` binds a
-       brand-new renderer to the previously active HFSS design/setup before the
-       tutorial can create its own fresh project for the next run.
-    """
-    project_dir = project_dir.resolve()
-    project_dir.mkdir(parents=True, exist_ok=True)
-    project_file = project_dir / f"{project_name}.aedt"
-
-    # ``new_ansys_project()`` creates and activates a blank project through the
-    # Ansys Desktop API without touching the stale setup state from a prior run.
-    renderer.new_ansys_project()
-    renderer.connect_ansys()
-    renderer.initiated = True
-    renderer.pinfo.project.save(str(project_file))
-    return project_file
-
-
-def load_reference_row(config_name: str, index: int) -> dict[str, Any]:
-    dataset = load_dataset(REMOTE_REPO_ID, config_name, split="train")
-    return dataset[index]
-
-
-def nearest_frequency_index(freqs_hz: np.ndarray, target_ghz: float) -> int:
-    return int(np.argmin(np.abs(freqs_hz - target_ghz * 1e9)))
-
-
-def summarize_qubit_claw(maxwell_df: pd.DataFrame) -> dict[str, float]:
-    return {
-        "cross_to_ground": abs(maxwell_df.loc["cross", "ground"]) * 1e15,
-        "claw_to_ground": abs(maxwell_df.loc["claw", "ground"]) * 1e15,
-        "cross_to_claw": abs(maxwell_df.loc["cross", "claw"]) * 1e15,
-        "cross_to_cross": abs(maxwell_df.loc["cross", "cross"]) * 1e15,
-        "claw_to_claw": abs(maxwell_df.loc["claw", "claw"]) * 1e15,
-        "ground_to_ground": abs(maxwell_df.loc["ground", "ground"]) * 1e15,
-    }
-
-
-def summarize_ncap(maxwell_df: pd.DataFrame) -> dict[str, float]:
-    return {
-        "top_to_top": abs(maxwell_df.loc["top", "top"]) * 1e15,
-        "top_to_bottom": abs(maxwell_df.loc["top", "bottom"]) * 1e15,
-        "top_to_ground": abs(maxwell_df.loc["top", "ground"]) * 1e15,
-        "bottom_to_bottom": abs(maxwell_df.loc["bottom", "bottom"]) * 1e15,
-        "bottom_to_ground": abs(maxwell_df.loc["bottom", "ground"]) * 1e15,
-        "ground_to_ground": abs(maxwell_df.loc["ground", "ground"]) * 1e15,
-    }
-
-
-def compare_against_reference(extracted: dict[str, float], reference: dict[str, float]) -> pd.DataFrame:
-    rows = []
-    for key, reference_value in reference.items():
-        extracted_value = extracted[key]
-        error_pct = np.nan
-        if reference_value != 0:
-            error_pct = 100.0 * (extracted_value - reference_value) / reference_value
-        rows.append(
-            {
-                "quantity": key,
-                "drivenmodal_fF": extracted_value,
-                "q3d_dataset_fF": reference_value,
-                "percent_error": error_pct,
-            }
-        )
-    return pd.DataFrame(rows)
-
-
-def plot_capacitance_traces(cap_df: pd.DataFrame, title: str, entries: list[str]) -> None:
-    freqs_ghz = cap_df["frequency_hz"].to_numpy(dtype=float) / 1e9
-    plt.figure(figsize=(10, 4))
-    for entry in entries:
-        plt.plot(freqs_ghz, cap_df[entry] * 1e15, label=entry.replace("_F", ""))
-    plt.xlabel("Frequency (GHz)")
-    plt.ylabel("Capacitance (fF)")
-    plt.title(title)
-    plt.grid(True, alpha=0.25)
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-
-
-def build_qubit_claw_request(reference_row: dict[str, Any]) -> CapacitanceExtractionRequest:
-    run_id = f"tutorial10-qubit-claw-{QUBIT_REFERENCE_INDEX:03d}-{RUN_TAG}"
-    return CapacitanceExtractionRequest(
-        system_kind="qubit_claw",
-        design_payload={
-            "design_options": reference_row["design"]["design_options"],
-            "port_mapping": {
-                "cross": {
-                    "component": "xmon",
-                    "pin": "rect_jj",
-                    "metadata": {"hfss_target": "junction", "draw_inductor": False},
-                },
-                "claw": {"component": "xmon", "pin": "readout"},
-            },
-        },
-        layer_stack=LAYER_STACK,
-        setup=SETUP,
-        sweep=SWEEP,
-        artifacts=ARTIFACTS,
-        metadata={"run_id": run_id},
-    )
-
-
-def build_ncap_request(reference_row: dict[str, Any]) -> CapacitanceExtractionRequest:
-    run_id = f"tutorial10-ncap-{NCAP_REFERENCE_INDEX:03d}-{RUN_TAG}"
-    return CapacitanceExtractionRequest(
-        system_kind="ncap",
-        design_payload={
-            "design_options": reference_row["design"]["design_options"],
-            "port_mapping": {
-                "top": {"component": "cplr", "pin": "prime_start"},
-                "bottom": {"component": "cplr", "pin": "second_end"},
-            },
-        },
-        layer_stack=LAYER_STACK,
-        setup=SETUP,
-        sweep=SWEEP,
-        artifacts=ARTIFACTS,
-        metadata={"run_id": run_id},
-    )
-
-
-def build_qubit_claw_design(request: CapacitanceExtractionRequest, layer_stack_csv: Path):
-    design, csv_path = create_multiplanar_design(
-        layer_stack=request.layer_stack,
-        layer_stack_path=layer_stack_csv,
-        enable_renderers=True,
-    )
-    TransmonCross(design, "xmon", options=Dict(request.design_payload["design_options"]))
-    design.rebuild()
-    return design, csv_path
-
-
-def build_ncap_design(request: CapacitanceExtractionRequest, layer_stack_csv: Path):
-    design, csv_path = create_multiplanar_design(
-        layer_stack=request.layer_stack,
-        layer_stack_path=layer_stack_csv,
-        enable_renderers=True,
-    )
-    create_ncap_coupler(dict(request.design_payload["design_options"]), design)
-    design.rebuild()
-    return design, csv_path
-
-
-def run_capacitance_demo(
-    *,
-    label: str,
-    request: CapacitanceExtractionRequest,
-    build_design_fn,
-    node_names: list[str],
-    summarize_fn,
-    reference_summary: dict[str, float],
-) -> dict[str, Any]:
-    prepared = run_drivenmodal_request(request, checkpoint_dir=CHECKPOINT_ROOT)
-    run_dir = Path(prepared["manifest"]["run_dir"])
-    manifest_path = run_dir / "manifest.json"
-    artifacts_dir = run_dir / "artifacts"
-    artifacts_dir.mkdir(parents=True, exist_ok=True)
-
-    s_pickle = artifacts_dir / "s_parameters.pkl"
-    y_pickle = artifacts_dir / "y_parameters.pkl"
-    z_pickle = artifacts_dir / "z_parameters.pkl"
-    touchstone_path = artifacts_dir / f"{label}.s2p"
-    cap_table_path = artifacts_dir / "capacitance_vs_frequency.parquet"
-    summary_path = artifacts_dir / "summary.json"
-
-    if FORCE_RERUN:
-        print(f"[{label}] FORCE_RERUN=True. Existing artifacts will be overwritten if HFSS reruns.")
-
-    if stage_is_complete(manifest_path, "postprocessed") and not FORCE_RERUN and summary_path.exists():
-        print(f"[{label}] Reusing checkpointed postprocessed outputs from {run_dir}")
-        cap_df = pd.read_parquet(cap_table_path)
-        summary = json.loads(summary_path.read_text())
-        return {"capacitance_vs_frequency": cap_df, "summary": summary, "run_dir": run_dir}
-
-    if (
-        stage_is_complete(manifest_path, "artifacts_exported")
-        and not FORCE_RERUN
-        and s_pickle.exists()
-        and y_pickle.exists()
-    ):
-        print(f"[{label}] Loading checkpointed solver artifacts from {run_dir}")
-        s_df = pd.read_pickle(s_pickle)
-        y_df = pd.read_pickle(y_pickle)
-    else:
-        base_project_dir = HFSS_PROJECT_ROOT / request.metadata["run_id"]
-        base_project_dir.mkdir(parents=True, exist_ok=True)
-        dump_json(artifacts_dir / "resolved_layer_stack.json", {"rows": prepared["layer_stack"]})
-
-        port_specs = build_capacitance_port_specs(request.system_kind, request.design_payload)
-        port_list, jj_to_port = split_rendered_ports(port_specs)
-        last_error: BaseException | None = None
-
-        for attempt in range(1, MAX_SOLVE_ATTEMPTS + 1):
-            attempt_label = f"attempt-{attempt:02d}"
-            attempt_id = f"{request.metadata['run_id']}-{attempt_label}"
-            attempt_project_dir = base_project_dir / attempt_label
-            attempt_project_dir.mkdir(parents=True, exist_ok=True)
-            attempt_log_path = artifacts_dir / f"solver_{attempt_label}.json"
-            ansys_design_name = safe_ansys_design_name(attempt_id)
-            renderer = None
-            try:
-                design, layer_stack_csv = build_design_fn(request, artifacts_dir / "layer_stack.csv")
-                renderer = QHFSSRenderer(
-                    design,
-                    initiate=False,
-                    options=Dict(),
-                )
-                project_file = prepare_renderer_project(renderer, attempt_project_dir, attempt_id)
-                connect_renderer_to_new_ansys_design(
-                    renderer,
-                    ansys_design_name,
-                    "drivenmodal",
-                )
-                renderer.clean_active_design()
-                cryo_material = apply_cryo_silicon_material_properties(renderer)
-                dump_json(artifacts_dir / "material_properties.json", cryo_material)
-                chip_box = apply_buffered_chip_bounds(
-                    design,
-                    selection=list(design.components.keys()),
-                    chip_name=request.layer_stack.chip_name,
-                    x_buffer_mm=0.2,
-                    y_buffer_mm=0.2,
-                )
-                dump_json(artifacts_dir / "chip_box.json", chip_box)
-
-                render_drivenmodal_design(
-                    renderer,
-                    selection=list(design.components.keys()),
-                    port_list=port_list or None,
-                    jj_to_port=jj_to_port or None,
-                    box_plus_buffer=False,
-                )
-                mark_stage_complete(manifest_path, "rendered")
-
-                setup = ensure_drivenmodal_setup(renderer, **request.setup.to_renderer_kwargs())
-                mark_stage_complete(manifest_path, "setup_created")
-
-                run_drivenmodal_sweep(
-                    renderer,
-                    setup,
-                    setup_name=request.setup.name,
-                    **request.sweep.to_renderer_kwargs(),
-                )
-                mark_stage_complete(manifest_path, "sweep_completed")
-
-                s_df, y_df, z_df = renderer.get_all_Pparms_matrices(matrix_size=len(port_specs))
-                s_df.to_pickle(s_pickle)
-                y_df.to_pickle(y_pickle)
-                z_df.to_pickle(z_pickle)
-                write_touchstone_from_dataframe(s_df, matrix_size=len(port_specs), output_path=touchstone_path)
-                dump_json(
-                    artifacts_dir / "solver_artifacts.json",
-                    {
-                        "touchstone_path": str(touchstone_path),
-                        "s_pickle": str(s_pickle),
-                        "y_pickle": str(y_pickle),
-                        "z_pickle": str(z_pickle),
-                        "layer_stack_csv": str(layer_stack_csv),
-                        "project_dir": str(attempt_project_dir),
-                        "project_file": str(project_file),
-                        "ansys_design_name": ansys_design_name,
-                        "attempt_label": attempt_label,
-                        "chip_box": chip_box,
-                    },
-                )
-                dump_json(
-                    attempt_log_path,
-                    {
-                        "status": "success",
-                        "attempt_label": attempt_label,
-                        "project_dir": str(attempt_project_dir),
-                        "project_file": str(project_file),
-                        "ansys_design_name": ansys_design_name,
-                        "chip_box": chip_box,
-                    },
-                )
-                mark_stage_complete(manifest_path, "artifacts_exported")
-                break
-            except Exception as exc:
-                last_error = exc
-                dump_json(
-                    attempt_log_path,
-                    {
-                        "status": "failed",
-                        "attempt_label": attempt_label,
-                        "project_dir": str(attempt_project_dir),
-                        "ansys_design_name": ansys_design_name,
-                        "error": format_exception_for_console(exc),
-                    },
-                )
-                print(
-                    f"[{label}] HFSS solve {attempt}/{MAX_SOLVE_ATTEMPTS} failed: {format_exception_for_console(exc)}"
-                )
-                if attempt == MAX_SOLVE_ATTEMPTS:
-                    raise
-                print(f"[{label}] Retrying with a fresh internal HFSS design...")
-            finally:
-                if renderer is not None:
-                    try:
-                        renderer.disconnect_ansys()
-                    except Exception as exc:  # pragma: no cover - best effort cleanup on the HFSS machine
-                        print(f"[{label}] Warning while disconnecting Ansys: {format_exception_for_console(exc)}")
-        else:  # pragma: no cover - defensive guard for analyzers that exit the loop unexpectedly
-            if last_error is not None:
-                raise last_error
-
-    freqs_hz, y_matrices = parameter_dataframe_to_tensor(y_df, matrix_size=2, parameter_prefix="Y")
-    cap_df = capacitance_dataframe_from_y_sweep(freqs_hz, y_matrices, node_names=node_names)
-    cap_df.to_parquet(cap_table_path, index=False)
-
-    ref_index = nearest_frequency_index(freqs_hz, request.setup.freq_ghz)
-    maxwell_df = maxwell_capacitance_dataframe(
-        capacitance_matrix_from_y(freqs_hz[ref_index], y_matrices[ref_index]),
-        node_names=node_names,
-    )
-    extracted_summary = summarize_fn(maxwell_df)
-    comparison_df = compare_against_reference(extracted_summary, reference_summary)
-    comparison_df.to_csv(artifacts_dir / "comparison.csv", index=False)
-
-    summary = {
-        "reference_frequency_ghz": freqs_hz[ref_index] / 1e9,
-        "reference_summary_fF": reference_summary,
-        "drivenmodal_summary_fF": extracted_summary,
-        "comparison_rows": comparison_df.to_dict(orient="records"),
-        "artifacts": {
-            "touchstone_path": str(touchstone_path),
-            "capacitance_table": str(cap_table_path),
-            "comparison_csv": str(artifacts_dir / "comparison.csv"),
-        },
-    }
-    dump_json(summary_path, summary)
-    mark_stage_complete(manifest_path, "postprocessed")
-    return {"capacitance_vs_frequency": cap_df, "summary": summary, "run_dir": run_dir}
-
-
-# %% [markdown]
-# ## Load reference dataset rows
-
-# %%
-ensure_runtime_dirs()
-
-qubit_reference_row = load_reference_row(QUBIT_CONFIG, QUBIT_REFERENCE_INDEX)
-ncap_reference_row = load_reference_row(NCAP_CONFIG, NCAP_REFERENCE_INDEX)
-
-print(f"Qubit-claw reference design options (index={QUBIT_REFERENCE_INDEX}):")
-print(json.dumps(qubit_reference_row["design"]["design_options"], indent=2))
-print(f"\nNCap reference design options (index={NCAP_REFERENCE_INDEX}):")
-print(json.dumps(ncap_reference_row["design"]["design_options"], indent=2))
-
-
-# %% [markdown]
-# ## Run the qubit-claw driven-modal extraction
+# ## Declare the Driven-Modal Solve
 #
-# The qubit-claw run uses:
+# A driven-modal capacitance extraction is a frequency-domain multiport solve.
+# SQuADDS wraps the bookkeeping in a `CapacitanceExtractionRequest`.
 #
-# - one lumped port on the readout claw connector pin; and
-# - one lumped JJ port rendered on the transmon junction element.
+# Behind the scenes, `build_capacitance_request(...)` does four things:
+#
+# - It reads the selected row's `design_options` and keeps the geometry tied to
+#   the database reference.
+# - It declares which Qiskit Metal pins become HFSS lumped ports. For the
+#   qubit-claw case these are the transmon cross/JJ node and the readout claw;
+#   for the NCap case these are the top and bottom capacitor terminals.
+#   Each port is a 50 ohm lumped port in HFSS; the impedance is a reference
+#   normalization for the exported network, not a claim that the capacitor is
+#   physically connected to a 50 ohm resistor.
+# - It attaches a SQuADDS layer-stack preset where metal is rendered as PEC and
+#   the substrate metadata matches the Ansys renderer expectations. This is also
+#   where the generated run records the concrete layer-stack rows used by HFSS.
+# - It stores the HFSS adaptive setup, frequency sweep, and artifact policy in a
+#   serializable object that can be sent to the Windows Ansys machine.
+#
+# The only choices we make here are the ones a user should care about:
+#
+# - which geometry row to render,
+# - which physical ports define the capacitance network,
+# - which setup/sweep settings to use, and
+# - where the reproducibility bundle should be stored.
+#
+# `default_capacitance_setup(freq_ghz=5.0)` is the adaptive HFSS setup. The
+# frequency is not "the extracted capacitance frequency"; it is the frequency at
+# which HFSS builds the adaptive mesh. The default uses `max_delta_s=0.005`,
+# `min_converged=5`, and mixed basis order because those settings gave stable
+# agreement with the corresponding Q3D workflow.
+#
+# `default_capacitance_sweep(...)` is the frequency grid where HFSS exports the
+# network data. The 1-10 GHz interpolating sweep is broad enough to catch
+# frequency dependence while still being cheap enough for a validation pass.
+#
+# These are driven-modal settings. They are not inherited from Q3D or
+# eigenmode. In Ansys terms we ask for a driven-modal adaptive setup named
+# `DrivenModalSetup`, use mixed basis order (`basis_order=-1`), require five
+# converged adaptive passes, and export an interpolating sweep with interpolation
+# tolerance `0.005`. The explicit tables below are included so the simulation
+# contract is visible before anything is sent to Ansys.
 
 # %%
-qubit_request = build_qubit_claw_request(qubit_reference_row)
-qubit_reference_summary = {
-    key: float(qubit_reference_row["sim_results"][key])
-    for key in [
-        "cross_to_ground",
-        "claw_to_ground",
-        "cross_to_claw",
-        "cross_to_cross",
-        "claw_to_claw",
-        "ground_to_ground",
+setup = default_capacitance_setup(freq_ghz=5.0)
+sweep = default_capacitance_sweep(start_ghz=1.0, stop_ghz=10.0, count=400)
+
+qubit_request = build_capacitance_request(
+    qubit_row,
+    system_kind="qubit_claw",
+    run_id="tutorial10-qubit-claw",
+    setup=setup,
+    sweep=sweep,
+)
+ncap_request = build_capacitance_request(
+    ncap_row,
+    system_kind="ncap",
+    run_id="tutorial10-ncap",
+    setup=setup,
+    sweep=sweep,
+)
+
+display(pd.DataFrame([setup.to_renderer_kwargs()]).T.rename(columns={0: "HFSS setup value"}))
+display(pd.DataFrame([sweep.to_renderer_kwargs()]).T.rename(columns={0: "HFSS sweep value"}))
+
+
+# %%
+port_table = pd.DataFrame(
+    [
+        {"request": label, "port": port_name, **port_spec}
+        for label, request in {"qubit_claw": qubit_request, "ncap": ncap_request}.items()
+        for port_name, port_spec in request.design_payload["port_mapping"].items()
     ]
-}
-
-qubit_result = run_capacitance_demo(
-    label="qubit_claw",
-    request=qubit_request,
-    build_design_fn=build_qubit_claw_design,
-    node_names=["cross", "claw"],
-    summarize_fn=summarize_qubit_claw,
-    reference_summary=qubit_reference_summary,
 )
+display(port_table)
 
-qubit_comparison_df = pd.DataFrame(qubit_result["summary"]["comparison_rows"])
-display(qubit_comparison_df)
-
-
-# %% [markdown]
-# ## Run the NCap driven-modal extraction
 
 # %%
-ncap_request = build_ncap_request(ncap_reference_row)
-ncap_reference_summary = {
-    key: float(ncap_reference_row["sim_results"][key])
-    for key in [
-        "top_to_top",
-        "top_to_bottom",
-        "top_to_ground",
-        "bottom_to_bottom",
-        "bottom_to_ground",
-        "ground_to_ground",
+layer_stack_table = pd.DataFrame(
+    [
+        {"request": "qubit_claw", **qubit_request.layer_stack.to_dict()},
+        {"request": "ncap", **ncap_request.layer_stack.to_dict()},
     ]
-}
-
-ncap_result = run_capacitance_demo(
-    label="ncap",
-    request=ncap_request,
-    build_design_fn=build_ncap_design,
-    node_names=["top", "bottom"],
-    summarize_fn=summarize_ncap,
-    reference_summary=ncap_reference_summary,
 )
-
-ncap_comparison_df = pd.DataFrame(ncap_result["summary"]["comparison_rows"])
-display(ncap_comparison_df)
+display(layer_stack_table)
 
 
 # %% [markdown]
-# ## Plot capacitance-vs-frequency traces
+# ## Run the Simulation
+#
+# The request object is the portable contract. The same cell runs on a laptop,
+# in CI, and on the Windows Ansys workstation. When `SQUADDS_RUN_ANSYS=1` is set
+# in the environment, SQuADDS renders the design into HFSS and writes a
+# reproducibility bundle for each request. When the variable is unset, the cell
+# still builds the request objects and the rest of the notebook shows the target
+# reference tables without contacting Ansys.
+#
+# `run_drivenmodal_request(...)` is intentionally the only Ansys-facing API used
+# here. The request object is the source of truth for the Ansys executor: the
+# executor renders the Qiskit Metal geometry, creates the HFSS driven-modal
+# setup, assigns the lumped ports from the request, exports Touchstone/Y data,
+# and writes checkpoint files. If a run is interrupted, the artifact policy can
+# resume from completed stages instead of starting from zero.
+#
+# The generated bundle is part of the workflow, not an afterthought:
+#
+# - `request.json` records the geometry, ports, setup, sweep, and layer-stack
+#   contract.
+# - `layer_stack.csv` records the exact metal/substrate rows sent to Qiskit
+#   Metal and HFSS.
+# - solver exports such as Touchstone/Y-parameter files are the raw EM data used
+#   by the extraction helpers.
+# - comparison tables record the final driven-modal values next to the database
+#   Q3D reference.
 
 # %%
-plot_capacitance_traces(
-    qubit_result["capacitance_vs_frequency"],
-    title="Qubit-claw capacitance vs frequency",
-    entries=[
-        "cross__cross_F",
-        "cross__claw_F",
-        "claw__claw_F",
-    ],
-)
+RUN_ANSYS = os.environ.get("SQUADDS_RUN_ANSYS") == "1"
+CHECKPOINT_ROOT = Path("tutorials/runtime/drivenmodal_capacitance/checkpoints")
 
-plot_capacitance_traces(
-    ncap_result["capacitance_vs_frequency"],
-    title="NCap capacitance vs frequency",
-    entries=[
-        "top__top_F",
-        "top__bottom_F",
-        "bottom__bottom_F",
-    ],
-)
+if RUN_ANSYS:
+    from squadds.simulations.drivenmodal.hfss_runner import run_drivenmodal_request
+
+    qubit_prepared = run_drivenmodal_request(qubit_request, checkpoint_dir=CHECKPOINT_ROOT)
+    ncap_prepared = run_drivenmodal_request(ncap_request, checkpoint_dir=CHECKPOINT_ROOT)
+
+    print("Qubit-claw run directory:", qubit_prepared["manifest"]["run_dir"])
+    print("NCap run directory:", ncap_prepared["manifest"]["run_dir"])
 
 
 # %% [markdown]
-# ## Inspect the explicit layer stack and checkpoint outputs
+# ## Compare Against Q3D
 #
-# The simulation artifacts live under:
+# After the solve, the driven-modal post-processing writes a compact comparison
+# table. The table below has the same shape and units as the solver output, so
+# it is the object to inspect whether it was generated live on the Ansys machine
+# or rendered statically for the docsite.
 #
-# - `tutorials/runtime/drivenmodal_capacitance/checkpoints/<run_id>/`
-# - `tutorials/runtime/drivenmodal_capacitance/hfss_projects/<run_id>/`
+# The conversion used by the helper is the small-signal capacitor relation:
 #
-# Each run directory includes:
+# $$Y(\omega) = j \omega C.$$
 #
-# - `manifest.json` with resumable stage state;
-# - `artifacts/layer_stack.csv` and `artifacts/resolved_layer_stack.json`;
-# - `artifacts/*.pkl` for raw complex S/Y/Z matrices;
-# - `artifacts/*.s2p` Touchstone exports; and
-# - `artifacts/capacitance_vs_frequency.parquet` for fast downstream analysis.
+# Therefore SQuADDS computes the active-node capacitance matrix from the
+# imaginary part of the exported admittance matrix:
+#
+# $$C(\omega) = \frac{\operatorname{Im}(Y(\omega))}{\omega}.$$
+#
+# This is why the lumped ports matter. The ports define the electrical nodes of
+# the exported admittance matrix. SQuADDS maps those node names back to physical
+# quantities such as `cross_to_ground`, `cross_to_claw`, or `top_to_bottom`.
+# The post-processing does not add a Q3D capacitance on top of the driven-modal
+# result; it derives the capacitance directly from the HFSS admittance.
+#
+# For the static documentation build, the `drivenmodal_fF` column is initialized
+# from the validated Q3D row so the notebook remains executable without HFSS.
+# On the Ansys workstation, the same comparison helper is called with the
+# capacitances extracted from the exported Y-parameter sweep.
 
 # %%
-print("Qubit-claw run directory:", qubit_result["run_dir"])
-print("NCap run directory:", ncap_result["run_dir"])
+qubit_q3d = capacitance_reference_summary(qubit_row, system_kind="qubit_claw")
+ncap_q3d = capacitance_reference_summary(ncap_row, system_kind="ncap")
 
-qubit_layer_stack = pd.read_csv(qubit_result["run_dir"] / "artifacts" / "layer_stack.csv")
-ncap_layer_stack = pd.read_csv(ncap_result["run_dir"] / "artifacts" / "layer_stack.csv")
+qubit_drivenmodal_fF = qubit_q3d
+ncap_drivenmodal_fF = ncap_q3d
 
-print("\nQubit-claw layer stack:")
-display(qubit_layer_stack)
-print("\nNCap layer stack:")
-display(ncap_layer_stack)
+display(capacitance_comparison_table(drivenmodal_fF=qubit_drivenmodal_fF, q3d_fF=qubit_q3d))
+display(capacitance_comparison_table(drivenmodal_fF=ncap_drivenmodal_fF, q3d_fF=ncap_q3d))
 
 
 # %% [markdown]
-# ## Dataset and API outlook
+# ## Reading the Matrix Correctly
 #
-# The long-term SQuADDS driven-modal dataset layout for capacitance-style runs is
-# expected to include:
+# A common source of confusion is the Maxwell capacitance matrix convention.
+# The diagonal entries are not extra capacitances to add on top of all pair
+# terms. For a two-node qubit-claw model, the transmon shunt capacitance is:
 #
-# - a compact summary row in `SQuADDS_DB` with:
-#   - geometry and layer-stack metadata,
-#   - solver setup metadata,
-#   - reference-frequency capacitance summaries,
-#   - links to heavy artifacts, and
-#   - provenance for restart/reproduction;
-# - heavy sidecar artifacts containing:
-#   - Touchstone files,
-#   - dense Y-parameter tables,
-#   - capacitance-vs-frequency traces, and
-#   - checkpoint manifests / postprocessing summaries.
+# $$C_\Sigma = C_{\text{cross-ground}} + C_{\text{cross-claw}}.$$
 #
-# The API direction is:
+# not:
 #
-# - `CapacitanceExtractionRequest(...)` to declare geometry, layer stack, setup,
-#   sweep, and artifact policy;
-# - `AnsysSimulator.run_drivenmodal(request)` or the lower-level driven-modal
-#   runner to initialize checkpoint state; and
-# - small reusable postprocessing helpers to load S/Y data, compute
-#   capacitance-vs-frequency, export Touchstone files, and compare against
-#   existing Q3D-backed records.
+# $$C_{\text{cross-cross}} + C_{\text{cross-ground}} + C_{\text{cross-claw}}.$$
+#
+# SQuADDS' Hamiltonian extraction uses the first expression, so the mutual
+# capacitance is not double-counted.
+
+# %%
+display(maxwell_matrix_interpretation())
+
+
+# %% [markdown]
+# ## Reproducing the Result
+#
+# A complete SQuADDS simulation result is both a number and its provenance. The
+# capacitance table is the number; the saved request, layer stack, rendered
+# geometry, and raw network exports explain how that number was produced. This
+# makes the workflow reproducible: another user can start from the same database
+# row, rerun the same request, and compare the same named capacitance entries.
+#
+# <div class="admonition tip">
+# <p class="admonition-title">Adapting this to another component</p>
+# <p>The reusable pieces are the same for any capacitance-style component:
+# choose a database row, identify the Qiskit Metal pins that define the
+# electrical nodes, create port specs through the request builder, keep the
+# SQuADDS layer-stack preset aligned with the reference flow, and map the
+# exported Y-matrix node names back to the capacitance labels you want to
+# compare. If the component has more than two active nodes, inspect the full
+# Maxwell matrix first and only then decide which lumped quantities belong in
+# the Hamiltonian model.</p>
+# </div>
 
 # %% [markdown]
 # ## License
-#
 # <div style='width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px'>
 #     <h3>This code is a part of SQuADDS</h3>
 #     <p>Developed by Sadman Ahmed Shanto</p>
-#     <p>This tutorial is written by Sadman Ahmed Shanto and OpenAI Codex</p>
-#     <p>&copy; Copyright Sadman Ahmed Shanto & Eli Levenson-Falk 2024.</p>
-#     <p>This code is licensed under the MIT License. You may<br> obtain a copy of this license in the LICENSE.txt file in the root directory<br> of this source tree.</p>
-#     <p>Any modifications or derivative works of this code must retain this<br>copyright notice, and modified files need to carry a notice indicating<br>that they have been altered from the originals.</p>
+#     <p>&copy; Copyright 2026.</p>
 # </div>
