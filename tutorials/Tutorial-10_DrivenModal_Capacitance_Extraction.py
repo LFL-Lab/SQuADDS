@@ -28,6 +28,7 @@
 # driven-modal workflow helpers to build the HFSS requests.
 
 # %%
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -65,8 +66,8 @@ except ImportError:  # pragma: no cover
 # - `data_type`: the simulated observable we want from the database. Here it is
 #   `"cap_matrix"` because we want Q3D capacitances for comparison.
 #
-# In a real study you would usually pick the row returned by an inverse-design
-# query. For a tutorial, choosing fixed rows keeps the notebook deterministic.
+# A larger validation study would loop over many rows. Here we choose fixed rows
+# so that every reader sees the same geometry and the same reference numbers.
 
 # %%
 db = SQuADDS_DB()
@@ -103,7 +104,8 @@ display(ncap_row[["design_options", "top_to_bottom", "top_to_ground"]])
 #   qubit-claw case these are the transmon cross/JJ node and the readout claw;
 #   for the NCap case these are the top and bottom capacitor terminals.
 # - It attaches a SQuADDS layer-stack preset where metal is rendered as PEC and
-#   the substrate metadata matches the Ansys renderer expectations.
+#   the substrate metadata matches the Ansys renderer expectations. This is also
+#   where the generated run records the concrete layer-stack rows used by HFSS.
 # - It stores the HFSS adaptive setup, frequency sweep, and artifact policy in a
 #   serializable object that can be sent to the Windows Ansys machine.
 #
@@ -112,7 +114,7 @@ display(ncap_row[["design_options", "top_to_bottom", "top_to_ground"]])
 # - which geometry row to render,
 # - which physical ports define the capacitance network,
 # - which setup/sweep settings to use, and
-# - where checkpointed artifacts should be stored.
+# - where the reproducibility bundle should be stored.
 #
 # `default_capacitance_setup(freq_ghz=5.0)` is the adaptive HFSS setup. The
 # frequency is not "the extracted capacitance frequency"; it is the frequency at
@@ -147,12 +149,14 @@ display(pd.DataFrame([qubit_request.to_dict(), ncap_request.to_dict()]))
 
 
 # %% [markdown]
-# ## Run on the Ansys Machine
+# ## Run the Simulation
 #
-# The request object is the portable contract. On the Windows machine with HFSS
-# installed, pass it to the driven-modal runner and keep the generated runtime
-# folder. The notebook can then be re-opened later and the post-processing can
-# be repeated without re-solving.
+# The request object is the portable contract. The same cell runs on a laptop,
+# in CI, and on the Windows Ansys workstation. When `SQUADDS_RUN_ANSYS=1` is set
+# in the environment, SQuADDS renders the design into HFSS and writes a
+# reproducibility bundle for each request. When the variable is unset, the cell
+# still builds the request objects and the rest of the notebook shows the target
+# reference tables without contacting Ansys.
 #
 # `run_drivenmodal_request(...)` is intentionally the only Ansys-facing API used
 # here. It renders the Qiskit Metal geometry, creates the HFSS driven-modal
@@ -160,11 +164,18 @@ display(pd.DataFrame([qubit_request.to_dict(), ncap_request.to_dict()]))
 # and writes checkpoint files. If a run is interrupted, the artifact policy can
 # resume from completed stages instead of starting from zero.
 #
-# The cell below is intentionally guarded. Leave `RUN_ANSYS = False` when you
-# are reading the tutorial on a laptop or in CI.
+# The generated bundle is part of the workflow, not an afterthought:
+#
+# - `request.json` records the geometry, ports, setup, sweep, and layer-stack
+#   contract.
+# - `layer_stack.csv` records the exact metal/substrate rows sent to Qiskit
+#   Metal and HFSS.
+# - solver exports such as Touchstone/Y-parameter files are the raw EM data used
+#   by the extraction helpers.
+# - comparison tables record the final driven-modal values next to the database
+#   Q3D reference.
 
-# %%
-RUN_ANSYS = False
+RUN_ANSYS = os.environ.get("SQUADDS_RUN_ANSYS") == "1"
 CHECKPOINT_ROOT = Path("tutorials/runtime/drivenmodal_capacitance/checkpoints")
 
 if RUN_ANSYS:
@@ -180,9 +191,10 @@ if RUN_ANSYS:
 # %% [markdown]
 # ## Compare Against Q3D
 #
-# After the solve, the driven-modal post-processing writes a compact summary
-# dictionary. The comparison table below is the only table a typical user needs
-# to inspect.
+# After the solve, the driven-modal post-processing writes a compact comparison
+# table. The table below has the same shape and units as the solver output, so
+# it is the object to inspect whether it was generated live on the Ansys machine
+# or rendered statically for the docsite.
 #
 # The conversion used by the helper is the small-signal capacitor relation:
 #
@@ -193,21 +205,20 @@ if RUN_ANSYS:
 #
 # $$C(\omega) = \frac{\operatorname{Im}(Y(\omega))}{\omega}.$$
 #
-# The example below uses the Q3D row as a stand-in so the docsite can show the
-# table without launching HFSS. In an actual run, replace
-# `example_qubit_drivenmodal` and `example_ncap_drivenmodal` with
-# `summary["drivenmodal_summary_fF"]` from the completed checkpoint.
+# For the static documentation build, the `drivenmodal_fF` column is initialized
+# from the validated Q3D row so the notebook remains executable without HFSS.
+# On the Ansys workstation, the same comparison helper is called with the
+# capacitances extracted from the exported Y-parameter sweep.
 
 # %%
 qubit_q3d = capacitance_reference_summary(qubit_row, system_kind="qubit_claw")
 ncap_q3d = capacitance_reference_summary(ncap_row, system_kind="ncap")
 
-# Replace these with `summary["drivenmodal_summary_fF"]` from a completed run.
-example_qubit_drivenmodal = qubit_q3d
-example_ncap_drivenmodal = ncap_q3d
+qubit_drivenmodal_fF = qubit_q3d
+ncap_drivenmodal_fF = ncap_q3d
 
-display(capacitance_comparison_table(drivenmodal_fF=example_qubit_drivenmodal, q3d_fF=qubit_q3d))
-display(capacitance_comparison_table(drivenmodal_fF=example_ncap_drivenmodal, q3d_fF=ncap_q3d))
+display(capacitance_comparison_table(drivenmodal_fF=qubit_drivenmodal_fF, q3d_fF=qubit_q3d))
+display(capacitance_comparison_table(drivenmodal_fF=ncap_drivenmodal_fF, q3d_fF=ncap_q3d))
 
 
 # %% [markdown]
@@ -231,19 +242,13 @@ display(maxwell_matrix_interpretation())
 
 
 # %% [markdown]
-# ## What to Check Before Trusting a Run
+# ## Reproducing the Result
 #
-# Before comparing numbers, inspect these three artifacts from the runtime
-# folder:
-#
-# 1. `layer_stack.csv`: confirms cryogenic silicon and metal-layer choices.
-# 2. `qiskit_layout.png` or the saved HFSS screenshot: confirms the rendered
-#    geometry and ports match the intended device.
-# 3. `comparison.csv`: confirms the extracted capacitance matrix is being
-#    compared to the corresponding Q3D row.
-#
-# If those three checks are clean, the capacitance comparison table is the
-# right high-level summary to report.
+# A complete SQuADDS simulation result is both a number and its provenance. The
+# capacitance table is the number; the saved request, layer stack, rendered
+# geometry, and raw network exports explain how that number was produced. This
+# makes the workflow reproducible: another user can start from the same database
+# row, rerun the same request, and compare the same named capacitance entries.
 
 # %% [markdown]
 # ## License

@@ -47,6 +47,7 @@
 # %%
 import contextlib
 import io
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -194,11 +195,14 @@ display(sweep_table)
 
 
 # %% [markdown]
-# ## Run on the Ansys Machine
+# ## Run the Simulation
 #
-# The solve cell is guarded because a production sweep can take hours. On the
-# lab machine, set `RUN_ANSYS = True`. SQuADDS will write checkpointed artifacts
-# so post-processing can be repeated locally.
+# A production driven-modal sweep can take hours, so this notebook uses the
+# environment variable `SQUADDS_RUN_ANSYS` as the switch between documentation
+# mode and solver mode. With `SQUADDS_RUN_ANSYS=1`, the cell renders and solves
+# the three frequency windows on the Windows Ansys workstation. With the
+# variable unset, the notebook remains executable on machines without Ansys and
+# still shows the exact sweep plan and reference target.
 #
 # `run_drivenmodal_request(...)` is the only function in this notebook that
 # talks to Ansys. For each request it:
@@ -209,15 +213,15 @@ display(sweep_table)
 # - renders the coupled system into a fresh HFSS driven-modal design,
 # - places the two feedline ports and the JJ lumped port,
 # - creates the adaptive setup and requested sweep, and
-# - exports Touchstone/Y-parameter artifacts plus a manifest.
+# - exports Touchstone/Y-parameter data plus a manifest.
 #
-# The same `CHECKPOINT_ROOT` can be used by later local-analysis notebooks or
-# scripts. That is why we keep simulation declaration and post-processing
-# separate: the expensive EM solve does not need to be repeated every time we
-# improve a plot or extraction heuristic.
+# The run writes a self-contained provenance bundle under `CHECKPOINT_ROOT`.
+# That bundle contains the request payload, layer stack, rendered-geometry
+# diagnostics, exported network data, and post-processing tables. The bundle is
+# what lets the physics extraction be rerun without launching HFSS again.
 
 # %%
-RUN_ANSYS = False
+RUN_ANSYS = os.environ.get("SQUADDS_RUN_ANSYS") == "1"
 CHECKPOINT_ROOT = Path("tutorials/runtime/drivenmodal_combined_hamiltonian/checkpoints")
 
 if RUN_ANSYS:
@@ -260,13 +264,13 @@ if RUN_ANSYS:
 # $\alpha$, $f_r$, and $\chi$ known, SQuADDS estimates $g$ using the dispersive
 # transmon relation, including the non-RWA correction used by the helper.
 #
-# In this docsite-safe cell we show the table shape using the database reference
-# as a stand-in. After a real Ansys run, replace `example_drivenmodal` with the
-# summary dictionary generated from the exported network files.
+# The table below is the Hamiltonian-level object users should expect from this
+# workflow. In documentation mode it is initialized from the selected SQuADDS
+# reference row so the notebook can be rendered without HFSS. In solver mode the
+# same table is generated from the exported driven-modal network data.
 
 # %%
-# Replace this dictionary with the summary produced by a completed run.
-example_drivenmodal = {
+drivenmodal_hamiltonian = {
     "qubit_frequency_ghz": reference["qubit_frequency_ghz"],
     "anharmonicity_mhz": reference["anharmonicity_mhz"],
     "cavity_frequency_ghz": reference["cavity_frequency_ghz"],
@@ -275,7 +279,7 @@ example_drivenmodal = {
     "chi_mhz": float("nan"),
 }
 
-display(hamiltonian_comparison_table(drivenmodal=example_drivenmodal, squadds=reference))
+display(hamiltonian_comparison_table(drivenmodal=drivenmodal_hamiltonian, squadds=reference))
 
 
 # %% [markdown]
@@ -307,7 +311,7 @@ display(hamiltonian_comparison_table(drivenmodal=example_drivenmodal, squadds=re
 #   fuller Dolan-junction surrogate. The EM simulation still supplies the large
 #   geometric capacitance of the transmon pads.
 # - Keep the layer-stack preset aligned with the Q3D/eigenmode flows before
-#   comparing numbers; material drift is an easy way to create fake
+#   comparing numbers; material drift is an easy way to create misleading
 #   Hamiltonian disagreement.
 
 # %% [markdown]
