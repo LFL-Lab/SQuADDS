@@ -672,6 +672,7 @@
     <span class="n">default_capacitance_setup</span><span class="p">,</span>
     <span class="n">default_capacitance_sweep</span><span class="p">,</span>
     <span class="n">maxwell_matrix_interpretation</span><span class="p">,</span>
+    <span class="n">pair_capacitances_fF_from_run_dir</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -881,6 +882,8 @@ interpolation_max_solutions               400
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">RUN_ANSYS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SQUADDS_RUN_ANSYS&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span>
 <span class="n">CHECKPOINT_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorials/runtime/drivenmodal_capacitance/checkpoints&quot;</span><span class="p">)</span>
 
+<span class="n">qubit_prepared</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">ncap_prepared</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="k">if</span> <span class="n">RUN_ANSYS</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.hfss_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_drivenmodal_request</span>
 
@@ -904,41 +907,33 @@ interpolation_max_solutions               400
 \[C(\omega) = \frac{\operatorname{Im}(Y(\omega))}{\omega}.\]</div>
 <p>This is why the lumped ports matter. The ports define the electrical nodes of the exported admittance matrix. SQuADDS maps those node names back to physical quantities such as <code class="docutils literal notranslate"><span class="pre">cross_to_ground</span></code>, <code class="docutils literal notranslate"><span class="pre">cross_to_claw</span></code>, or <code class="docutils literal notranslate"><span class="pre">top_to_bottom</span></code>. The post-processing does not add a Q3D capacitance on top of the driven-modal result; it derives the capacitance directly from the HFSS admittance.</p>
 <p>For the static documentation build, the <code class="docutils literal notranslate"><span class="pre">drivenmodal_fF</span></code> column is initialized from the validated Q3D row so the notebook remains executable without HFSS. On the Ansys workstation, the same comparison helper is called with the capacitances extracted from the exported Y-parameter sweep.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_q3d</span> <span class="o">=</span> <span class="n">capacitance_reference_summary</span><span class="p">(</span><span class="n">qubit_row</span><span class="p">,</span> <span class="n">system_kind</span><span class="o">=</span><span class="s2">&quot;qubit_claw&quot;</span><span class="p">)</span>
 <span class="n">ncap_q3d</span> <span class="o">=</span> <span class="n">capacitance_reference_summary</span><span class="p">(</span><span class="n">ncap_row</span><span class="p">,</span> <span class="n">system_kind</span><span class="o">=</span><span class="s2">&quot;ncap&quot;</span><span class="p">)</span>
 
-<span class="n">qubit_drivenmodal_fF</span> <span class="o">=</span> <span class="n">qubit_q3d</span>
-<span class="n">ncap_drivenmodal_fF</span> <span class="o">=</span> <span class="n">ncap_q3d</span>
+<span class="n">extraction_freq_ghz</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">freq_ghz</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">RUN_ANSYS</span><span class="p">:</span>
+    <span class="n">qubit_drivenmodal_fF</span> <span class="o">=</span> <span class="n">pair_capacitances_fF_from_run_dir</span><span class="p">(</span>
+        <span class="n">qubit_prepared</span><span class="p">[</span><span class="s2">&quot;manifest&quot;</span><span class="p">][</span><span class="s2">&quot;run_dir&quot;</span><span class="p">],</span>
+        <span class="n">system_kind</span><span class="o">=</span><span class="s2">&quot;qubit_claw&quot;</span><span class="p">,</span>
+        <span class="n">extraction_freq_ghz</span><span class="o">=</span><span class="n">extraction_freq_ghz</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ncap_drivenmodal_fF</span> <span class="o">=</span> <span class="n">pair_capacitances_fF_from_run_dir</span><span class="p">(</span>
+        <span class="n">ncap_prepared</span><span class="p">[</span><span class="s2">&quot;manifest&quot;</span><span class="p">][</span><span class="s2">&quot;run_dir&quot;</span><span class="p">],</span>
+        <span class="n">system_kind</span><span class="o">=</span><span class="s2">&quot;ncap&quot;</span><span class="p">,</span>
+        <span class="n">extraction_freq_ghz</span><span class="o">=</span><span class="n">extraction_freq_ghz</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">qubit_drivenmodal_fF</span> <span class="o">=</span> <span class="n">qubit_q3d</span>
+    <span class="n">ncap_drivenmodal_fF</span> <span class="o">=</span> <span class="n">ncap_q3d</span>
 
 <span class="n">display</span><span class="p">(</span><span class="n">capacitance_comparison_table</span><span class="p">(</span><span class="n">drivenmodal_fF</span><span class="o">=</span><span class="n">qubit_drivenmodal_fF</span><span class="p">,</span> <span class="n">q3d_fF</span><span class="o">=</span><span class="n">qubit_q3d</span><span class="p">))</span>
 <span class="n">display</span><span class="p">(</span><span class="n">capacitance_comparison_table</span><span class="p">(</span><span class="n">drivenmodal_fF</span><span class="o">=</span><span class="n">ncap_drivenmodal_fF</span><span class="p">,</span> <span class="n">q3d_fF</span><span class="o">=</span><span class="n">ncap_q3d</span><span class="p">))</span>
-<br/><br/><br/></pre></div>
+</pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-           quantity  drivenmodal_fF     q3d_fF  percent_error
-0   cross_to_ground       174.13928  174.13928            0.0
-1    claw_to_ground        97.22405   97.22405            0.0
-2     cross_to_claw         5.77590    5.77590            0.0
-3    cross_to_cross       174.13928  174.13928            0.0
-4      claw_to_claw       103.37057  103.37057            0.0
-5  ground_to_ground       335.31609  335.31609            0.0
-           quantity  drivenmodal_fF     q3d_fF  percent_error
-0        top_to_top        65.85844   65.85844            0.0
-1     top_to_bottom        36.28408   36.28408            0.0
-2     top_to_ground        29.22434   29.22434            0.0
-3  bottom_to_bottom        94.96956   94.96956            0.0
-4  bottom_to_ground        58.07364   58.07364            0.0
-5  ground_to_ground       124.18885  124.18885            0.0
-</pre></div></div>
 </div>
 </section>
 <section id="Reading-the-Matrix-Correctly">
@@ -950,27 +945,6 @@ interpolation_max_solutions               400
 <div class="math notranslate nohighlight">
 \[C_{\text{cross-cross}} + C_{\text{cross-ground}} + C_{\text{cross-claw}}.\]</div>
 <p>SQuADDS’ Hamiltonian extraction uses the first expression, so the mutual capacitance is not double-counted.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">maxwell_matrix_interpretation</span><span class="p">())</span>
-<br/><br/><br/></pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-                             entry  ...                                 do_not_add_again
-0                  C[cross, cross]  ...          includes mutual capacitance to the claw
-1                   C[cross, claw]  ...  use abs(...) only when naming pair capacitances
-2  cross_to_ground + cross_to_claw  ...                   do not also add cross_to_cross
-
-[3 rows x 3 columns]
-</pre></div></div>
-</div>
 </section>
 <section id="Reproducing-the-Result">
 <h2>Reproducing the Result<a class="headerlink" href="#Reproducing-the-Result" title="Link to this heading">#</a></h2>

@@ -679,6 +679,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analyzer</span><span class="p">,</span> <span class="n">SQuADDS_DB</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">build_segmented_coupled_system_requests</span><span class="p">,</span>
+    <span class="n">coupled_hamiltonian_from_prepared_runs</span><span class="p">,</span>
     <span class="n">coupled_reference_summary</span><span class="p">,</span>
     <span class="n">default_hamiltonian_setup</span><span class="p">,</span>
     <span class="n">hamiltonian_comparison_table</span><span class="p">,</span>
@@ -889,6 +890,11 @@ basis_order                   -1
 [3 rows x 4 columns]
 </pre></div></div>
 </div>
+</section>
+<section id="State-dependent-Josephson-inductance">
+<h2>State-dependent Josephson inductance<a class="headerlink" href="#State-dependent-Josephson-inductance" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">LJ_bare_nH</span></code> is the linear Josephson inductance from the transmon design options (<code class="docutils literal notranslate"><span class="pre">aedt_q3d_inductance</span></code> / <code class="docutils literal notranslate"><span class="pre">Lj</span></code> / <code class="docutils literal notranslate"><span class="pre">LJ</span></code>). The ground-state and excited-state columns use the same workflow as <code class="docutils literal notranslate"><span class="pre">coupled_reference_summary(...)</span></code>: helper <code class="docutils literal notranslate"><span class="pre">transmon_state_inductances(...)</span></code> in <code class="docutils literal notranslate"><span class="pre">squadds.simulations.drivenmodal.workflows</span></code> builds a zero-temperature <code class="docutils literal notranslate"><span class="pre">scqubits.Transmon</span></code> with <span class="math notranslate nohighlight">\(E_J\)</span> from the bare <span class="math notranslate nohighlight">\(L_J\)</span> and <span class="math notranslate nohighlight">\(E_C\)</span> from the qubit shunt capacitance (via the database
+<code class="docutils literal notranslate"><span class="pre">cross_to_ground</span></code> and <code class="docutils literal notranslate"><span class="pre">cross_to_claw</span></code> pair capacitances in fF). It then evaluates the transmon <code class="docutils literal notranslate"><span class="pre">cos_phi_operator</span></code> in the ground and first-excited eigenstates. The effective inductances are <span class="math notranslate nohighlight">\(L_J^{(g)} = L_{J,\mathrm{bare}} / \langle \cos\phi \rangle_g\)</span> and <span class="math notranslate nohighlight">\(L_J^{(e)} = L_{J,\mathrm{bare}} / \langle \cos\phi \rangle_e\)</span>, matching how the coupled driven-modal workflow assigns JJ terminations when it reduces the exported multiport network.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -939,6 +945,7 @@ basis_order                   -1
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">RUN_ANSYS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SQUADDS_RUN_ANSYS&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span>
 <span class="n">CHECKPOINT_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorials/runtime/drivenmodal_combined_hamiltonian/checkpoints&quot;</span><span class="p">)</span>
 
+<span class="n">prepared_runs</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="k">if</span> <span class="n">RUN_ANSYS</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.hfss_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_drivenmodal_request</span>
 
@@ -972,36 +979,25 @@ basis_order                   -1
 <h3>3. Coupling from chi<a class="headerlink" href="#3.-Coupling-from-chi" title="Link to this heading">#</a></h3>
 <p>SQuADDS repeats the feedline reduction twice: once with the ground-state effective inductance and once with the excited-state effective inductance. The resonance positions of those two <span class="math notranslate nohighlight">\(S_{21}\)</span> traces give the dispersive shift <span class="math notranslate nohighlight">\(\chi\)</span>. With <span class="math notranslate nohighlight">\(f_q\)</span>, <span class="math notranslate nohighlight">\(\alpha\)</span>, <span class="math notranslate nohighlight">\(f_r\)</span>, and <span class="math notranslate nohighlight">\(\chi\)</span> known, SQuADDS estimates <span class="math notranslate nohighlight">\(g\)</span> using the dispersive transmon relation, including the non-RWA correction used by the helper.</p>
 <p>The table below is the Hamiltonian-level object users should expect from this workflow. In documentation mode it is initialized from the selected SQuADDS reference row so the notebook can be rendered without HFSS. In solver mode the same table is generated from the exported driven-modal network data.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">drivenmodal_hamiltonian</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;kappa_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;kappa_mhz&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;g_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;g_mhz&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;chi_mhz&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span>
-<span class="p">}</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">RUN_ANSYS</span><span class="p">:</span>
+    <span class="n">drivenmodal_hamiltonian</span> <span class="o">=</span> <span class="n">coupled_hamiltonian_from_prepared_runs</span><span class="p">(</span><span class="n">prepared_runs</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">drivenmodal_hamiltonian</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;kappa_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;kappa_mhz&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;g_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;g_mhz&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;chi_mhz&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span>
+    <span class="p">}</span>
 
 <span class="n">display</span><span class="p">(</span><span class="n">hamiltonian_comparison_table</span><span class="p">(</span><span class="n">drivenmodal</span><span class="o">=</span><span class="n">drivenmodal_hamiltonian</span><span class="p">,</span> <span class="n">squadds</span><span class="o">=</span><span class="n">reference</span><span class="p">))</span>
-<br/><br/><br/></pre></div>
+</pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-               quantity  drivenmodal     squadds  percent_error
-0   qubit_frequency_ghz     3.968333    3.968333            0.0
-1     anharmonicity_mhz  -127.794520 -127.794520           -0.0
-2  cavity_frequency_ghz     9.076342    9.076342            0.0
-3             kappa_mhz     0.299441    0.299441            0.0
-4                 g_mhz    50.116660   50.116660            0.0
-5               chi_mhz          NaN         NaN            NaN
-</pre></div></div>
 </div>
 </section>
 </section>
@@ -1084,6 +1080,7 @@ basis_order                   -1
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Query-a-Target-Design">Query a Target Design</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Build-the-Driven-Modal-Requests">Build the Driven-Modal Requests</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#State-dependent-Josephson-inductance">State-dependent Josephson inductance</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Run-the-Simulation">Run the Simulation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Post-Process-the-Same-Network">Post-Process the Same Network</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Resonator-frequency-and-kappa">1. Resonator frequency and kappa</a></li>
