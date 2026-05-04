@@ -12,7 +12,6 @@ from typing import Literal
 
 from mcp.server.fastmcp import FastMCP
 
-from squadds.simulations.drivenmodal.workflows import maxwell_matrix_interpretation
 from squadds_mcp.drivenmodal_playbook import build_drivenmodal_playbook
 from squadds_mcp.simulation_playbook import (
     build_simulation_playbook_full,
@@ -67,6 +66,9 @@ def register_simulation_tools(mcp: FastMCP) -> None:
         Returns:
             JSON list of row dicts sourced from ``maxwell_matrix_interpretation()`` DataFrame rows.
         """
+        # Import lazily so importing ``squadds_mcp.tools.simulations`` does not eagerly load qiskit_metal/Qt.
+        from squadds.simulations.drivenmodal.workflows import maxwell_matrix_interpretation
+
         frame = maxwell_matrix_interpretation()
         records = sanitize_for_json(frame.to_dict(orient="records"))
         return json.dumps(
