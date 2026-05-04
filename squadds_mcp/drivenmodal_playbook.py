@@ -210,5 +210,7 @@ def build_drivenmodal_playbook() -> dict[str, Any]:
         "documentation_uris": {
             "narrative_guide": "squadds://drivenmodal-workflow",
             "machine_playbook_mirror": "squadds://drivenmodal-playbook",
+            "umbrella_ansys_overview": "squadds://ansys-simulation-overview",
+            "simulation_summary_playbook_uri": "squadds://simulation-playbook-summary",
         },
     }

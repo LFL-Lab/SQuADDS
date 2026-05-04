@@ -289,6 +289,7 @@ not HFSS RPC. Execute solvers ONLY on the user's workstation with AEDT/qiskit-me
 ---
 
 ## Mandatory Read Order
+0. `squadds://ansys-simulation-overview` — classical Q3D + eigenmode + sweep context beside driven-modal (`AnsysSimulator.simulate`).
 1. `squadds://drivenmodal-workflow` → conceptual map (ports, normalization, pipelines).
 2. `squadds://drivenmodal-playbook` *or* `get_drivenmodal_playbook_json` → identical structured JSON playbook.
 3. `get_maxwell_capacitance_conventions` if the task mentions capacitors / Maxwell matrices.
@@ -317,4 +318,64 @@ Explain every lumped-port mapping (component/pin/metadata) you inherit from tuto
 mirror the workbook exactly—including why JJ ports avoid drawing explicit inductors in Metal.
 
 Never claim MCP solved HFSS unless the human shows local logs; always segregate MCP knowledge vs AEDT batches.
+"""
+
+    @mcp.prompt()
+    def navigate_local_ansys_squadds_workflows(primary_flow: str) -> str:
+        """Orient agents toward the right MCP playbook for local Q3D vs eigenmode vs sweeps vs driven-modal.
+
+        Args:
+            primary_flow: Short token such as ``q3d``, ``eigenmode``, ``coupled``, ``sweep``,
+                or ``driven_modal`` describing the dominant tutorial path."""
+        lowered = primary_flow.strip().lower()
+        focus_lines: list[str] = []
+        if "q3d" in lowered or "lom" in lowered or "cap" in lowered:
+            focus_lines.append(
+                "**Q3D / LOM** — skim `squadds://ansys-simulation-overview` §2 plus JSON keys "
+                "`legacy_ansys.solver_families.q3d_lom_capacitance` inside "
+                "`get_squadds_simulation_playbook(playbook_variant='summary')`. "
+                "Symbols: `run_xmon_LOM`, `run_capn_LOM`, `LOManalysis(...,'q3d')`."
+            )
+        if "eigen" in lowered or "cavity" in lowered or "mode" in lowered:
+            focus_lines.append(
+                "**HFSS eigenmode** — overview §3, JSON lane `solver_families.hfss_eigenmode_epr`, "
+                "entry `squadds.simulations.objects.run_eigenmode`."
+            )
+        if "coupled" in lowered or "whole" in lowered:
+            focus_lines.append(
+                "**Coupled merges** — overview §4, JSON `legacy_ansys.orchestration.simulate_whole_device`; "
+                "class entry `AnsysSimulator.simulate` when `analyzer.selected_system` lists qubit + cavity claw."
+            )
+        if "sweep" in lowered:
+            focus_lines.append(
+                "**Parameter sweeps** — JSON `legacy_ansys.orchestration.parameter_sweeps`; "
+                "tools `AnsysSimulator.sweep` & `squadds.simulations.objects.run_sweep`."
+            )
+        if "driven" in lowered or "modal" in lowered or "touchstone" in lowered:
+            focus_lines.append(
+                "**HFSS driven-modal** — `squadds://drivenmodal-workflow`, `get_drivenmodal_playbook_json`, Maxwell helper. "
+                "Mega JSON blob: `get_squadds_simulation_playbook(playbook_variant='full')`."
+            )
+        if not focus_lines:
+            focus_lines.append(
+                "Unrecognized token; default to **`squadds://ansys-simulation-overview`** then "
+                "`get_squadds_simulation_playbook(playbook_variant='summary')` before specializing."
+            )
+
+        focus_block = "\n".join(f"- {line}" for line in focus_lines)
+
+        return f"""# Local Ansys Simulation Navigation (requested focus: `{primary_flow}`)
+
+MCP NEVER launches solvers—it only emits documentation. Humans run Metal/AEDT themselves.
+
+## Global steps
+1. Read **`squadds://ansys-simulation-overview`** (10-minute orientation).
+2. Fetch compact JSON **`squadds://simulation-playbook-summary`** or call **`get_squadds_simulation_playbook`**
+   with **`playbook_variant`** = **`summary`**.
+3. Upgrade to **`playbook_variant`** = **`full`** when you must embed driven-modal JSON alongside classics.
+
+## Flow-specific MCP pointers
+{focus_block}
+
+Never promise finished HFSS matrices without transcripts from the local solver run.
 """

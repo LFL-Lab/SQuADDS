@@ -171,8 +171,19 @@ Read `squadds://chip-design-reference` for the complete workflow from
 SQuADDS search results to a GDS file ready for fabrication. Use the
 `design_fab_ready_chip` prompt for a guided step-by-step walkthrough.
 
-### HFSS Driven-Modal Simulations (local Ansys workflow)
-Agents cannot launch HFSS through MCP; read these before reproducing Tutorial-10/11:
+### HFSS / Ansys-class simulations (local Metal + AEDT)
+
+MCP does **not** execute Q3D or HFSS. Use **`squadds://ansys-simulation-overview`** for the umbrella map covering:
+
+- classical **Q3D** capacitance via Metal **`LOManalysis(..., 'q3d')`** (**`run_xmon_LOM`**, **`run_capn_LOM`**),
+- cavity **HFSS eigenmode** pipelines (**`run_eigenmode`**, **`EPRanalysis`**),
+- coupled merges (**`simulate_whole_device`** / **`AnsysSimulator.simulate`**),
+- **`run_sweep` / AnsysSimulator.sweep** grids,
+- and the separate **typed HFSS driven-modal** lineage.
+
+Structured JSON summary: **`squadds://simulation-playbook-summary`**. Nested driven-modal subtree + summary in one blob: **`get_squadds_simulation_playbook`** with **`playbook_variant`** = **`full`**.
+Prompt **`navigate_local_ansys_squadds_workflows(primary_flow)`** helps pick lanes (`q3d`, `eigenmode`, etc.).
+Deep driven-modal prose + URIs **`squadds://drivenmodal-workflow`** / playbook / Maxwell helper / replay prompt **`repeat_drivenmodal_tutorial_via_mcp`** (see bullets below).
 
 - **`squadds://drivenmodal-workflow`** — narrative on lumped ports, Z-ref vs uniform `y_to_s`, skrf pipelines, JJ admittance, scqubits hooks.
 - **`squadds://drivenmodal-playbook`** — JSON outline mirroring **`get_drivenmodal_playbook_json`**.

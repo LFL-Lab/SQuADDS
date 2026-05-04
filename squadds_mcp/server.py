@@ -15,8 +15,9 @@ Architecture:
     │  Server      │
     ├─────────────┤
     │  Tools       │  database.py, analysis.py, interpolation.py, contribution.py,
-    │              │  generation.py, drivenmodal.py (HFSS driven-modal playbook helpers)
-    │  Resources   │  metadata.py, layout_guide.py, drivenmodal_guide.py
+    │              │  generation.py, simulations.py (unified playbook: Q3D, eigenmode, driven-modal)
+    │  Resources   │  metadata.py, layout_guide.py, drivenmodal_guide.py,
+    │              │  ansys_simulation_guide.py
     │  Prompts     │  workflows.py
     ├─────────────┤
     │  Lifespan    │  Initializes SQuADDS_DB once at startup
@@ -129,8 +130,9 @@ def create_server() -> FastMCP:
             "SQuADDS MCP Server — Access the Superconducting Qubit And Device "
             "Design and Simulation Database. Use this server to search for "
             "quantum device designs matching target Hamiltonian parameters, "
-            "explore the database, get interpolated layouts, AND follow documented "
-            "HFSS driven-modal workflows (`squadds://drivenmodal-workflow`). "
+            "explore the database, get interpolated layouts, and follow documented "
+            "Ansys-class simulations (Q3D LOM capacitance, HFSS eigenmode, driven-modal) via "
+            "`squadds://ansys-simulation-overview` plus `get_squadds_simulation_playbook`. "
             "Start by reading `squadds://guide` for MCP tool orientation."
         ),
         lifespan=app_lifespan,
@@ -140,24 +142,26 @@ def create_server() -> FastMCP:
     from squadds_mcp.tools.analysis import register_analysis_tools
     from squadds_mcp.tools.contribution import register_contribution_tools
     from squadds_mcp.tools.database import register_database_tools
-    from squadds_mcp.tools.drivenmodal import register_drivenmodal_tools
     from squadds_mcp.tools.generation import register_generation_tools
     from squadds_mcp.tools.interpolation import register_interpolation_tools
+    from squadds_mcp.tools.simulations import register_simulation_tools
 
     register_database_tools(mcp)
     register_analysis_tools(mcp)
     register_interpolation_tools(mcp)
     register_contribution_tools(mcp)
     register_generation_tools(mcp)
-    register_drivenmodal_tools(mcp)
+    register_simulation_tools(mcp)
 
     # -- Register resources --
+    from squadds_mcp.resources.ansys_simulation_guide import register_ansys_simulation_resources
     from squadds_mcp.resources.drivenmodal_guide import register_drivenmodal_resources
     from squadds_mcp.resources.layout_guide import register_layout_resources
     from squadds_mcp.resources.metadata import register_metadata_resources
 
     register_metadata_resources(mcp)
     register_layout_resources(mcp)
+    register_ansys_simulation_resources(mcp)
     register_drivenmodal_resources(mcp)
 
     # -- Register prompts --

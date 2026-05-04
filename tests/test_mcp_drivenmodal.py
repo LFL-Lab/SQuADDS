@@ -32,6 +32,8 @@ class TestDrivenmodalPlaybook:
         docs = data["documentation_uris"]
         assert docs["narrative_guide"] == "squadds://drivenmodal-workflow"
         assert docs["machine_playbook_mirror"] == "squadds://drivenmodal-playbook"
+        assert docs["umbrella_ansys_overview"] == "squadds://ansys-simulation-overview"
+        assert docs["simulation_summary_playbook_uri"] == "squadds://simulation-playbook-summary"
 
 
 class TestMaxwellInterpretationLinkage:

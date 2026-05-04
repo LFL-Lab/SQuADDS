@@ -21,6 +21,8 @@ from squadds_mcp.drivenmodal_playbook import build_drivenmodal_playbook
 
 DRIVENMODAL_WORKFLOW_GUIDE_MARKDOWN = """# SQuADDS HFSS Driven-Modal Workflow (Agent Reference)
 
+**Sibling overview (classical Q3D + eigenmode + sweeps):** `squadds://ansys-simulation-overview` and `squadds://simulation-playbook-summary`.
+
 Full machine-readable outlines also live at `squadds://drivenmodal-playbook` and the MCP tool
 `get_drivenmodal_playbook_json`.
 
