@@ -26,6 +26,16 @@
 # - **Physics extraction**: read the exported S/Y-parameters, terminate the
 #   unused ports in physically meaningful ways, and convert the resulting
 #   resonances into Hamiltonian parameters.
+#
+# <div class="admonition note">
+# <p class="admonition-title">Why this tutorial exists</p>
+# <p>Earlier SQuADDS tutorials teach the traditional split workflow:
+# capacitances from Q3D and mode frequencies/couplings from eigenmode
+# simulations. This tutorial shows the driven-modal alternative. We render one
+# coupled qubit-cavity-feedline network, keep all three physical ports in the
+# exported HFSS network, and use post-processing to ask several physics
+# questions of the same EM data.</p>
+# </div>
 
 # %% [markdown]
 # ## Imports
@@ -43,6 +53,11 @@
 #   provide tested defaults, while still leaving the important knobs visible.
 # - `hamiltonian_comparison_table(...)` formats the final driven-modal versus
 #   SQuADDS comparison.
+#
+# The lower-level heavy lifting is still visible through these objects:
+# `DrivenModalSetupSpec` maps to the HFSS adaptive setup, `DrivenModalSweepSpec`
+# maps to the exported frequency sweep, and the request payload contains the
+# Qiskit Metal component options, layer stack, and port mapping.
 
 # %%
 import contextlib
@@ -129,6 +144,11 @@ display(results.head(3))
 # These are not three separate devices. They are three ports on one rendered
 # qubit-claw-resonator-feedline geometry. SQuADDS uses the port mapping inside
 # the request to connect the feedline ends and the JJ cut to HFSS lumped ports.
+# The ports are created as 50 ohm renormalizable lumped ports. That reference
+# impedance is how HFSS normalizes the exported S-parameters; because the full
+# multiport network is exported, SQuADDS can later change external loads,
+# short/open a port, or attach a Josephson-junction surrogate in post-processing
+# without rerendering the geometry.
 #
 # `coupled_reference_summary(reference_row)` extracts the database reference
 # values in a consistent unit convention:
@@ -143,8 +163,9 @@ display(results.head(3))
 # `default_hamiltonian_setup(...)` controls the adaptive mesh. The important
 # knobs are `freq_ghz`, `max_delta_s`, `min_converged`, `max_passes`, and
 # `basis_order`. The default centers the adaptive solve near the expected
-# cavity frequency and uses the same convergence settings we validated for the
-# Tutorial 10 driven-modal capacitance extraction.
+# cavity frequency and uses the production driven-modal settings validated for
+# this flow: `max_delta_s=0.005`, `min_converged=7`, `basis_order=-1`
+# (mixed order), and up to 20 adaptive passes.
 #
 # `segmented_hamiltonian_sweeps(...)` controls the exported frequency samples.
 # This is where the dense/coarse/dense structure is declared:
@@ -159,6 +180,14 @@ display(results.head(3))
 #
 # The dataframe printed after the cell is worth reading carefully: it is the
 # explicit frequency plan that will be sent to HFSS.
+#
+# <div class="admonition important">
+# <p class="admonition-title">One EM model, segmented sweeps</p>
+# <p>The physics object is one 3-port coupled system. SQuADDS stores the qubit,
+# bridge, and resonator windows as separate request records so each window can
+# be checkpointed, inspected, and rerun independently. On the Ansys side these
+# records use the same geometry, layer stack, ports, and adaptive setup.</p>
+# </div>
 
 # %%
 reference = coupled_reference_summary(reference_row)
@@ -194,6 +223,35 @@ sweep_table = pd.DataFrame(
 display(sweep_table)
 
 
+# %%
+display(pd.DataFrame([setup.to_renderer_kwargs()]).T.rename(columns={0: "HFSS setup value"}))
+
+
+# %%
+port_table = pd.DataFrame(
+    [
+        {"port": port_name, **port_spec}
+        for port_name, port_spec in next(iter(requests.values())).design_payload["port_mapping"].items()
+    ]
+)
+display(port_table)
+
+
+# %%
+jj_table = pd.DataFrame(
+    [
+        {
+            "EJ_GHz": reference["ej_ghz"],
+            "EC_GHz": reference["ec_ghz"],
+            "LJ_bare_nH": 1e9 * reference["lj_bare_h"],
+            "LJ_ground_nH": 1e9 * reference["lj_ground_h"],
+            "LJ_excited_nH": 1e9 * reference["lj_excited_h"],
+        }
+    ]
+)
+display(jj_table)
+
+
 # %% [markdown]
 # ## Run the Simulation
 #
@@ -204,8 +262,9 @@ display(sweep_table)
 # variable unset, the notebook remains executable on machines without Ansys and
 # still shows the exact sweep plan and reference target.
 #
-# `run_drivenmodal_request(...)` is the only function in this notebook that
-# talks to Ansys. For each request it:
+# `run_drivenmodal_request(...)` is the notebook-facing entry point for the
+# Ansys execution contract. For each request, the Ansys executor uses that
+# contract to:
 #
 # - builds the Qiskit Metal `QubitCavity` layout from the selected SQuADDS row,
 # - applies the SQuADDS HFSS layer-stack preset with PEC metal and cryogenic
@@ -214,6 +273,13 @@ display(sweep_table)
 # - places the two feedline ports and the JJ lumped port,
 # - creates the adaptive setup and requested sweep, and
 # - exports Touchstone/Y-parameter data plus a manifest.
+#
+# The Touchstone export is where `scikit-rf` enters the workflow. HFSS gives us
+# frequency-dependent S/Y/Z matrices; `scikit-rf` preserves the frequency axis,
+# port order, complex S-parameters, and reference impedance metadata in a
+# standard multiport `Network`. SQuADDS uses that representation to write `.s3p`
+# files, reduce the 3-port network into loaded 2-port or 1-port views, and keep
+# the port normalization explicit rather than hidden in a plot.
 #
 # The run writes a self-contained provenance bundle under `CHECKPOINT_ROOT`.
 # That bundle contains the request payload, layer stack, rendered-geometry
@@ -235,15 +301,26 @@ if RUN_ANSYS:
 
 
 # %% [markdown]
-# ## Post-Process the Same Network in Two Ways
+# ## Post-Process the Same Network
 #
 # The HFSS output is a frequency-dependent 3-port network. SQuADDS post-processes
-# the same exported data in two complementary ways.
+# the same exported data in three views. The views are different mathematical
+# reductions of one exported network, not three unrelated simulations.
 #
-# **Qubit extraction.** The qubit mode is read from the JJ port. Raw
-# Y-parameters assume all other ports are shorted, so SQuADDS first terminates
-# the feedline ports with the intended external loads using a Schur-complement
-# network reduction. It then adds the linear JJ surrogate admittance
+# ### 1. Resonator frequency and kappa
+#
+# The readout mode is read from feedline transmission. SQuADDS terminates the JJ
+# port with a chosen JJ load, converts the reduced admittance back to a 2-port
+# S-parameter network, and searches the loaded $S_{21}$ response for the
+# resonance feature. The feature position gives $f_r$ and the linewidth gives
+# $\kappa$.
+#
+# ### 2. Qubit frequency and anharmonicity
+#
+# The qubit mode is read from the JJ port. Raw Y-parameters assume all other
+# ports are shorted, so SQuADDS first terminates the feedline ports with the
+# intended external loads using a Schur-complement network reduction. It then
+# adds the linear JJ surrogate admittance
 #
 # $$Y_\mathrm{JJ}(\omega) = \frac{1}{R_J} + j\omega C_J + \frac{1}{j\omega L_J}.$$
 #
@@ -253,16 +330,21 @@ if RUN_ANSYS:
 #
 # $$C_\Sigma = \frac{1}{2}\frac{\partial \operatorname{Im}(Y)}{\partial \omega}.$$
 #
-# SQuADDS then passes $E_J$ and $E_C$ to `scqubits.Transmon`. We use scqubits for
-# $f_q$ and $\alpha$ rather than relying on a hand-written transmon expansion.
+# SQuADDS then passes $E_J$ and $E_C$ to `scqubits.Transmon`. We use scqubits
+# for $f_q$ and $\alpha$ rather than relying on a hand-written transmon
+# expansion. The state-dependent inductances in the table above also come from
+# scqubits: SQuADDS evaluates the transmon `cos_phi_operator` in the ground and
+# excited eigenstates and uses those expectation values to turn the bare
+# Josephson inductance into effective ground/excited loads.
 #
-# **Resonator extraction.** The readout mode is read from feedline transmission.
-# SQuADDS terminates the JJ port twice: once with the ground-state effective
-# inductance and once with the excited-state effective inductance. The resonance
-# positions of the two resulting $S_{21}$ traces give the dispersive shift
-# $\chi$. The linewidth of the loaded resonance gives $\kappa$. With $f_q$,
-# $\alpha$, $f_r$, and $\chi$ known, SQuADDS estimates $g$ using the dispersive
-# transmon relation, including the non-RWA correction used by the helper.
+# ### 3. Coupling from chi
+#
+# SQuADDS repeats the feedline reduction twice: once with the ground-state
+# effective inductance and once with the excited-state effective inductance.
+# The resonance positions of those two $S_{21}$ traces give the dispersive shift
+# $\chi$. With $f_q$, $\alpha$, $f_r$, and $\chi$ known, SQuADDS estimates $g$
+# using the dispersive transmon relation, including the non-RWA correction used
+# by the helper.
 #
 # The table below is the Hamiltonian-level object users should expect from this
 # workflow. In documentation mode it is initialized from the selected SQuADDS
@@ -301,6 +383,13 @@ display(hamiltonian_comparison_table(drivenmodal=drivenmodal_hamiltonian, squadd
 # that is not automatically a bug: the driven-modal model includes capacitive
 # loading from the qubit.
 #
+# The port-normalization point is worth repeating. HFSS exports the network
+# normalized to the 50 ohm port references. During post-processing SQuADDS
+# converts between S and Y representations, changes the mathematical load on a
+# port, and then converts back to whichever view is most useful. That is why we
+# can ask "what does the feedline see when the JJ is in its ground-state
+# inductive load?" without rerunning HFSS.
+#
 # Useful customization points:
 #
 # - Increase `qubit_count` or `resonator_count` when the resonance is narrow and
@@ -313,11 +402,21 @@ display(hamiltonian_comparison_table(drivenmodal=drivenmodal_hamiltonian, squadd
 # - Keep the layer-stack preset aligned with the Q3D/eigenmode flows before
 #   comparing numbers; material drift is an easy way to create misleading
 #   Hamiltonian disagreement.
+#
+# <div class="admonition warning">
+# <p class="admonition-title">Geometry sanity checks are not optional</p>
+# <p>Before trusting a driven-modal Hamiltonian table, inspect the rendered
+# Qiskit Metal and HFSS screenshots. The coupled qubit, claw, resonator, and
+# feedline must all be present; metal sheets must be assigned to PEC; the
+# substrate should use the cryogenic silicon permittivity $11.45$; and the
+# lumped ports should land on the feedline ends and the JJ cut, not on launchers
+# or unrelated metal.</p>
+# </div>
 
 # %% [markdown]
 # ## License
 # <div style='width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px'>
 #     <h3>This code is a part of SQuADDS</h3>
 #     <p>Developed by Sadman Ahmed Shanto</p>
-#     <p>&copy; Copyright 2023.</p>
+#     <p>&copy; Copyright 2026.</p>
 # </div>

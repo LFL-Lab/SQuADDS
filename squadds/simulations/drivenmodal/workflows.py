@@ -133,7 +133,7 @@ def default_hamiltonian_setup(*, freq_ghz: float) -> DrivenModalSetupSpec:
         max_delta_s=0.005,
         max_passes=20,
         min_passes=2,
-        min_converged=5,
+        min_converged=7,
         pct_refinement=30,
         basis_order=-1,
     )

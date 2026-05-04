@@ -114,6 +114,14 @@ def test_segmented_hamiltonian_sweeps_cover_qubit_bridge_and_resonator_windows()
     assert sweeps["bridge_band"].sweep_type == "Fast"
 
 
+def test_default_hamiltonian_setup_uses_validated_drivenmodal_settings():
+    setup = default_hamiltonian_setup(freq_ghz=8.0)
+
+    assert setup.max_delta_s == 0.005
+    assert setup.min_converged == 7
+    assert setup.basis_order == -1
+
+
 def test_build_segmented_coupled_system_requests_share_setup_and_use_named_sweeps():
     row = pd.Series(
         {

@@ -20,6 +20,15 @@
 # - build the equivalent driven-modal request,
 # - compare driven-modal capacitances against the Q3D reference, and
 # - read the Maxwell capacitance matrix without double-counting terms.
+#
+# <div class="admonition note">
+# <p class="admonition-title">Why driven modal for capacitance?</p>
+# <p>Q3D remains the direct electrostatic capacitance solver in SQuADDS. This
+# tutorial shows a complementary route: solve a small-signal HFSS driven-modal
+# network, export its admittance matrix, and recover capacitance from the
+# imaginary admittance. The value of this route is that it uses the same
+# port-based network representation as the later Hamiltonian workflow.</p>
+# </div>
 
 # %% [markdown]
 # ## Imports
@@ -103,6 +112,9 @@ display(ncap_row[["design_options", "top_to_bottom", "top_to_ground"]])
 # - It declares which Qiskit Metal pins become HFSS lumped ports. For the
 #   qubit-claw case these are the transmon cross/JJ node and the readout claw;
 #   for the NCap case these are the top and bottom capacitor terminals.
+#   Each port is a 50 ohm lumped port in HFSS; the impedance is a reference
+#   normalization for the exported network, not a claim that the capacitor is
+#   physically connected to a 50 ohm resistor.
 # - It attaches a SQuADDS layer-stack preset where metal is rendered as PEC and
 #   the substrate metadata matches the Ansys renderer expectations. This is also
 #   where the generated run records the concrete layer-stack rows used by HFSS.
@@ -125,6 +137,13 @@ display(ncap_row[["design_options", "top_to_bottom", "top_to_ground"]])
 # `default_capacitance_sweep(...)` is the frequency grid where HFSS exports the
 # network data. The 1-10 GHz interpolating sweep is broad enough to catch
 # frequency dependence while still being cheap enough for a validation pass.
+#
+# These are driven-modal settings. They are not inherited from Q3D or
+# eigenmode. In Ansys terms we ask for a driven-modal adaptive setup named
+# `DrivenModalSetup`, use mixed basis order (`basis_order=-1`), require five
+# converged adaptive passes, and export an interpolating sweep with interpolation
+# tolerance `0.005`. The explicit tables below are included so the simulation
+# contract is visible before anything is sent to Ansys.
 
 # %%
 setup = default_capacitance_setup(freq_ghz=5.0)
@@ -145,7 +164,29 @@ ncap_request = build_capacitance_request(
     sweep=sweep,
 )
 
-display(pd.DataFrame([qubit_request.to_dict(), ncap_request.to_dict()]))
+display(pd.DataFrame([setup.to_renderer_kwargs()]).T.rename(columns={0: "HFSS setup value"}))
+display(pd.DataFrame([sweep.to_renderer_kwargs()]).T.rename(columns={0: "HFSS sweep value"}))
+
+
+# %%
+port_table = pd.DataFrame(
+    [
+        {"request": label, "port": port_name, **port_spec}
+        for label, request in {"qubit_claw": qubit_request, "ncap": ncap_request}.items()
+        for port_name, port_spec in request.design_payload["port_mapping"].items()
+    ]
+)
+display(port_table)
+
+
+# %%
+layer_stack_table = pd.DataFrame(
+    [
+        {"request": "qubit_claw", **qubit_request.layer_stack.to_dict()},
+        {"request": "ncap", **ncap_request.layer_stack.to_dict()},
+    ]
+)
+display(layer_stack_table)
 
 
 # %% [markdown]
@@ -159,7 +200,8 @@ display(pd.DataFrame([qubit_request.to_dict(), ncap_request.to_dict()]))
 # reference tables without contacting Ansys.
 #
 # `run_drivenmodal_request(...)` is intentionally the only Ansys-facing API used
-# here. It renders the Qiskit Metal geometry, creates the HFSS driven-modal
+# here. The request object is the source of truth for the Ansys executor: the
+# executor renders the Qiskit Metal geometry, creates the HFSS driven-modal
 # setup, assigns the lumped ports from the request, exports Touchstone/Y data,
 # and writes checkpoint files. If a run is interrupted, the artifact policy can
 # resume from completed stages instead of starting from zero.
@@ -175,6 +217,7 @@ display(pd.DataFrame([qubit_request.to_dict(), ncap_request.to_dict()]))
 # - comparison tables record the final driven-modal values next to the database
 #   Q3D reference.
 
+# %%
 RUN_ANSYS = os.environ.get("SQUADDS_RUN_ANSYS") == "1"
 CHECKPOINT_ROOT = Path("tutorials/runtime/drivenmodal_capacitance/checkpoints")
 
@@ -204,6 +247,12 @@ if RUN_ANSYS:
 # imaginary part of the exported admittance matrix:
 #
 # $$C(\omega) = \frac{\operatorname{Im}(Y(\omega))}{\omega}.$$
+#
+# This is why the lumped ports matter. The ports define the electrical nodes of
+# the exported admittance matrix. SQuADDS maps those node names back to physical
+# quantities such as `cross_to_ground`, `cross_to_claw`, or `top_to_bottom`.
+# The post-processing does not add a Q3D capacitance on top of the driven-modal
+# result; it derives the capacitance directly from the HFSS admittance.
 #
 # For the static documentation build, the `drivenmodal_fF` column is initialized
 # from the validated Q3D row so the notebook remains executable without HFSS.
@@ -249,11 +298,23 @@ display(maxwell_matrix_interpretation())
 # geometry, and raw network exports explain how that number was produced. This
 # makes the workflow reproducible: another user can start from the same database
 # row, rerun the same request, and compare the same named capacitance entries.
+#
+# <div class="admonition tip">
+# <p class="admonition-title">Adapting this to another component</p>
+# <p>The reusable pieces are the same for any capacitance-style component:
+# choose a database row, identify the Qiskit Metal pins that define the
+# electrical nodes, create port specs through the request builder, keep the
+# SQuADDS layer-stack preset aligned with the reference flow, and map the
+# exported Y-matrix node names back to the capacitance labels you want to
+# compare. If the component has more than two active nodes, inspect the full
+# Maxwell matrix first and only then decide which lumped quantities belong in
+# the Hamiltonian model.</p>
+# </div>
 
 # %% [markdown]
 # ## License
 # <div style='width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px'>
 #     <h3>This code is a part of SQuADDS</h3>
 #     <p>Developed by Sadman Ahmed Shanto</p>
-#     <p>&copy; Copyright 2023.</p>
+#     <p>&copy; Copyright 2026.</p>
 # </div>
