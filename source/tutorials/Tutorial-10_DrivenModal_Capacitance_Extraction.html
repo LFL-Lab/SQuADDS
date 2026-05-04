@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Tutorial 10: HFSS Driven-Modal Capacitance Extraction for Qubit-Claw and NCap &#8212; SQuADDS v0.4.5</title>
+    <title>Tutorial 10: Driven-Modal Capacitance Extraction &#8212; SQuADDS v0.4.5</title>
   
   
   
@@ -573,7 +573,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-7_Simulate_designs_with_palace.html">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-8_ML_interpolation_in_SQuADDS.html">Tutorial 8: Machine Learning with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-9_Learing_the_Inverse_Design_Map.html">Tutorial 9: Learning the Inverse Design Map</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial 10: HFSS Driven-Modal Capacitance Extraction for Qubit-Claw and NCap</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial 10: Driven-Modal Capacitance Extraction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.html">Tutorial 11: Unified Driven-Modal Hamiltonian Extraction</a></li>
 </ul>
 </div>
@@ -618,7 +618,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">Tutorials</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial 10: HFSS Driven-Modal Capacitance Extraction for Qubit-Claw and NCap</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial 10: Driven-Modal Capacitance Extraction</span></li>
   </ul>
 </nav>
 </div>
@@ -635,82 +635,48 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="Tutorial-10:-HFSS-Driven-Modal-Capacitance-Extraction-for-Qubit-Claw-and-NCap">
-<h1>Tutorial 10: HFSS Driven-Modal Capacitance Extraction for Qubit-Claw and NCap<a class="headerlink" href="#Tutorial-10:-HFSS-Driven-Modal-Capacitance-Extraction-for-Qubit-Claw-and-NCap" title="Link to this heading">#</a></h1>
-<p><strong>Note from Shanto: I made AI write these tutorials and they are terrible…. will make them easy to read for humans soon</strong></p>
-<p>This tutorial reruns two capacitance-style SQuADDS geometries in <strong>Ansys HFSS driven-modal</strong> using <strong>Qiskit Metal</strong> as the geometry/rendering frontend:</p>
+  <section id="Tutorial-10:-Driven-Modal-Capacitance-Extraction">
+<h1>Tutorial 10: Driven-Modal Capacitance Extraction<a class="headerlink" href="#Tutorial-10:-Driven-Modal-Capacitance-Extraction" title="Link to this heading">#</a></h1>
+<p>In this tutorial we will use SQuADDS to set up a driven-modal HFSS capacitance extraction for two familiar objects:</p>
 <ol class="arabic simple">
-<li><p>a qubit-claw geometry sourced from the <code class="docutils literal notranslate"><span class="pre">qubit-TransmonCross-cap_matrix</span></code> dataset; and</p></li>
-<li><p>an NCap geometry sourced from the <code class="docutils literal notranslate"><span class="pre">coupler-NCap-cap_matrix</span></code> dataset.</p></li>
+<li><p>a <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> qubit-claw capacitor, and</p></li>
+<li><p>an <code class="docutils literal notranslate"><span class="pre">NCap</span></code> interdigital coupler.</p></li>
 </ol>
-<p>The goals are:</p>
+<p>The goal is not to teach every Ansys scripting detail. SQuADDS should carry that weight. Instead, this notebook teaches the SQuADDS contract for this workflow: a validated database row becomes a portable driven-modal request, the request renders the same physical network into HFSS, and the resulting Y-parameters are converted back into the capacitance quantities users already know from the Q3D datasets.</p>
+<p>By the end, you should know how to:</p>
 <ul class="simple">
-<li><p>make the driven-modal layer stack explicit;</p></li>
-<li><p>checkpoint artifacts so a crash does not force a full restart;</p></li>
-<li><p>save raw S/Y parameter artifacts, Touchstone files, and extracted capacitance-vs-frequency traces; and</p></li>
-<li><p>compare the extracted capacitance matrix against the existing Q3D-backed SQuADDS dataset values.</p></li>
+<li><p>pull a Q3D reference row from the SQuADDS database,</p></li>
+<li><p>build the equivalent driven-modal request,</p></li>
+<li><p>compare driven-modal capacitances against the Q3D reference, and</p></li>
+<li><p>read the Maxwell capacitance matrix without double-counting terms.</p></li>
 </ul>
-<p>This file is written as a Python script with <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">%%</span></code> cells so it can be run in VS Code, Spyder, Jupyter, or as a plain Python script on the Windows machine that has Ansys HFSS installed.</p>
-<section id="Physics-viewpoint-and-API-viewpoint">
-<h2>Physics viewpoint and API viewpoint<a class="headerlink" href="#Physics-viewpoint-and-API-viewpoint" title="Link to this heading">#</a></h2>
-<p>There are two complementary stories in this tutorial:</p>
-<ol class="arabic simple">
-<li><p><strong>Physics story.</strong> A driven-modal multiport solve gives us a frequency-dependent admittance matrix. In the low-loss, low-frequency limit, the imaginary part of that admittance behaves like an effective capacitance network. That lets us ask whether HFSS driven-modal can reproduce the same Maxwell capacitance picture that SQuADDS normally stores from Q3D.</p></li>
-<li><p><strong>API story.</strong> We want a reusable, restart-safe workflow that does not hard-code one geometry. The request/setup/sweep/artifact objects in <code class="docutils literal notranslate"><span class="pre">squadds.simulations.drivenmodal.*</span></code> are therefore treated as first-class pieces of the tutorial, not hidden internals. The notebook shows how to assemble them, run the solve, checkpoint the artifacts, and inspect the results.</p></li>
-</ol>
+<div class="admonition note"><p class="admonition-title"><p>Why driven modal for capacitance?</p>
+</p><p><p>Q3D remains the direct electrostatic capacitance solver in SQuADDS. This tutorial shows a complementary route: solve a small-signal HFSS driven-modal network, export its admittance matrix, and recover capacitance from the imaginary admittance. The value of this route is that it uses the same port-based network representation as the later Hamiltonian workflow.</p>
+</p></div><section id="Imports">
+<h2>Imports<a class="headerlink" href="#Imports" title="Link to this heading">#</a></h2>
+<p>We will use the regular SQuADDS database API to choose designs, then the driven-modal workflow helpers to build the HFSS requests.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.qubits.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCross</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.renderers.renderer_ansys.hfss_renderer</span><span class="w"> </span><span class="kn">import</span> <span class="n">QHFSSRenderer</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.artifacts</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_run_manifest</span><span class="p">,</span> <span class="n">mark_stage_complete</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.capacitance</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">capacitance_dataframe_from_y_sweep</span><span class="p">,</span>
-    <span class="n">capacitance_matrix_from_y</span><span class="p">,</span>
-    <span class="n">maxwell_capacitance_dataframe</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQuADDS_DB</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">build_capacitance_request</span><span class="p">,</span>
+    <span class="n">capacitance_comparison_table</span><span class="p">,</span>
+    <span class="n">capacitance_reference_summary</span><span class="p">,</span>
+    <span class="n">default_capacitance_setup</span><span class="p">,</span>
+    <span class="n">default_capacitance_sweep</span><span class="p">,</span>
+    <span class="n">maxwell_matrix_interpretation</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.design</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">apply_buffered_chip_bounds</span><span class="p">,</span>
-    <span class="n">apply_cryo_silicon_material_properties</span><span class="p">,</span>
-    <span class="n">connect_renderer_to_new_ansys_design</span><span class="p">,</span>
-    <span class="n">create_multiplanar_design</span><span class="p">,</span>
-    <span class="n">ensure_drivenmodal_setup</span><span class="p">,</span>
-    <span class="n">format_exception_for_console</span><span class="p">,</span>
-    <span class="n">render_drivenmodal_design</span><span class="p">,</span>
-    <span class="n">run_drivenmodal_sweep</span><span class="p">,</span>
-    <span class="n">safe_ansys_design_name</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.hfss_data</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">parameter_dataframe_to_tensor</span><span class="p">,</span>
-    <span class="n">write_touchstone_from_dataframe</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.hfss_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_drivenmodal_request</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">CapacitanceExtractionRequest</span><span class="p">,</span>
-    <span class="n">DrivenModalArtifactPolicy</span><span class="p">,</span>
-    <span class="n">DrivenModalLayerStackSpec</span><span class="p">,</span>
-    <span class="n">DrivenModalSetupSpec</span><span class="p">,</span>
-    <span class="n">DrivenModalSweepSpec</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_capacitance_port_specs</span><span class="p">,</span> <span class="n">split_rendered_ports</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.utils_component_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_ncap_coupler</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span> <span class="k">as</span> <span class="n">display</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover - plain Python fallback for non-notebook execution</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">display</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
@@ -718,621 +684,306 @@
 </div>
 </div>
 </section>
-<section id="Runtime-knobs">
-<h2>Runtime knobs<a class="headerlink" href="#Runtime-knobs" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">RUN_TAG</span></code> is the easiest way to force a brand-new AEDT design while keeping the rest of the script unchanged. Leave <code class="docutils literal notranslate"><span class="pre">FORCE_RERUN</span> <span class="pre">=</span> <span class="pre">False</span></code> for normal resume behavior. Set it to <code class="docutils literal notranslate"><span class="pre">True</span></code> only when you intentionally want to regenerate the HFSS artifacts for the same <code class="docutils literal notranslate"><span class="pre">RUN_TAG</span></code>.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">RUN_TAG</span> <span class="o">=</span> <span class="s2">&quot;v3&quot;</span>
-<span class="n">FORCE_RERUN</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="n">MAX_SOLVE_ATTEMPTS</span> <span class="o">=</span> <span class="mi">3</span>
-
-<span class="n">REMOTE_REPO_ID</span> <span class="o">=</span> <span class="s2">&quot;SQuADDS/SQuADDS_DB&quot;</span>
-<span class="n">QUBIT_CONFIG</span> <span class="o">=</span> <span class="s2">&quot;qubit-TransmonCross-cap_matrix&quot;</span>
-<span class="n">NCAP_CONFIG</span> <span class="o">=</span> <span class="s2">&quot;coupler-NCap-cap_matrix&quot;</span>
-<span class="n">QUBIT_REFERENCE_INDEX</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="n">NCAP_REFERENCE_INDEX</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="n">LAYER_STACK</span> <span class="o">=</span> <span class="n">DrivenModalLayerStackSpec</span><span class="p">(</span>
-    <span class="n">preset</span><span class="o">=</span><span class="s2">&quot;squadds_hfss_v1&quot;</span><span class="p">,</span>
-    <span class="n">chip_name</span><span class="o">=</span><span class="s2">&quot;main&quot;</span><span class="p">,</span>
-    <span class="n">metal_thickness_um</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-    <span class="n">substrate_thickness_um</span><span class="o">=</span><span class="mf">750.0</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">SETUP</span> <span class="o">=</span> <span class="n">DrivenModalSetupSpec</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;DrivenModalSetup&quot;</span><span class="p">,</span>
-    <span class="n">freq_ghz</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
-    <span class="n">max_delta_s</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span>
-    <span class="n">max_passes</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-    <span class="n">min_passes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-    <span class="n">min_converged</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-    <span class="n">pct_refinement</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">basis_order</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">SWEEP</span> <span class="o">=</span> <span class="n">DrivenModalSweepSpec</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;DrivenModalSweep&quot;</span><span class="p">,</span>
-    <span class="n">start_ghz</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">stop_ghz</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
-    <span class="n">count</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
-    <span class="n">sweep_type</span><span class="o">=</span><span class="s2">&quot;Interpolating&quot;</span><span class="p">,</span>
-    <span class="n">save_fields</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">interpolation_tol</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span>
-    <span class="n">interpolation_max_solutions</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="n">DrivenModalArtifactPolicy</span><span class="p">(</span>
-    <span class="n">export_touchstone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">export_y_parameters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">export_capacitance_tables</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">checkpoint_after_stage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">resume_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">RUNTIME_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorials/runtime/drivenmodal_capacitance&quot;</span><span class="p">)</span>
-<span class="n">CHECKPOINT_ROOT</span> <span class="o">=</span> <span class="n">RUNTIME_ROOT</span> <span class="o">/</span> <span class="s2">&quot;checkpoints&quot;</span>
-<span class="n">HFSS_PROJECT_ROOT</span> <span class="o">=</span> <span class="n">RUNTIME_ROOT</span> <span class="o">/</span> <span class="s2">&quot;hfss_projects&quot;</span>
-<br/><br/><br/></pre></div>
-</div>
-</div>
-</section>
-<section id="Helpers">
-<h2>Helpers<a class="headerlink" href="#Helpers" title="Link to this heading">#</a></h2>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">ensure_runtime_dirs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">CHECKPOINT_ROOT</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">HFSS_PROJECT_ROOT</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">stage_is_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">stage_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="n">manifest</span> <span class="o">=</span> <span class="n">load_run_manifest</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;stages&quot;</span><span class="p">][</span><span class="n">stage_name</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;complete&quot;</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">dump_json</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">))</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">prepare_renderer_project</span><span class="p">(</span><span class="n">renderer</span><span class="p">:</span> <span class="n">QHFSSRenderer</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">project_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a fresh HFSS project and save it to an absolute AEDT path.</span>
-
-<span class="sd">    This avoids two separate older Windows-stack issues:</span>
-
-<span class="sd">    1. the pyEPR project-path duplication bug triggered by passing</span>
-<span class="sd">       ``project_path``/``project_name`` through ``QHFSSRenderer`` options; and</span>
-<span class="sd">    2. the stale active-project reconnect bug where ``renderer.start()`` binds a</span>
-<span class="sd">       brand-new renderer to the previously active HFSS design/setup before the</span>
-<span class="sd">       tutorial can create its own fresh project for the next run.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">project_dir</span> <span class="o">=</span> <span class="n">project_dir</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-    <span class="n">project_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">project_file</span> <span class="o">=</span> <span class="n">project_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_name</span><span class="si">}</span><span class="s2">.aedt&quot;</span>
-
-    <span class="c1"># ``new_ansys_project()`` creates and activates a blank project through the</span>
-    <span class="c1"># Ansys Desktop API without touching the stale setup state from a prior run.</span>
-    <span class="n">renderer</span><span class="o">.</span><span class="n">new_ansys_project</span><span class="p">()</span>
-    <span class="n">renderer</span><span class="o">.</span><span class="n">connect_ansys</span><span class="p">()</span>
-    <span class="n">renderer</span><span class="o">.</span><span class="n">initiated</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">renderer</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">project_file</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">project_file</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">load_reference_row</span><span class="p">(</span><span class="n">config_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-    <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">REMOTE_REPO_ID</span><span class="p">,</span> <span class="n">config_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">dataset</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">nearest_frequency_index</span><span class="p">(</span><span class="n">freqs_hz</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">target_ghz</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">freqs_hz</span> <span class="o">-</span> <span class="n">target_ghz</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">)))</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">summarize_qubit_claw</span><span class="p">(</span><span class="n">maxwell_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;cross_to_ground&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;cross&quot;</span><span class="p">,</span> <span class="s2">&quot;ground&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-        <span class="s2">&quot;claw_to_ground&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;claw&quot;</span><span class="p">,</span> <span class="s2">&quot;ground&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-        <span class="s2">&quot;cross_to_claw&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;cross&quot;</span><span class="p">,</span> <span class="s2">&quot;claw&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-        <span class="s2">&quot;cross_to_cross&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;cross&quot;</span><span class="p">,</span> <span class="s2">&quot;cross&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-        <span class="s2">&quot;claw_to_claw&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;claw&quot;</span><span class="p">,</span> <span class="s2">&quot;claw&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-        <span class="s2">&quot;ground_to_ground&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;ground&quot;</span><span class="p">,</span> <span class="s2">&quot;ground&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-    <span class="p">}</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">summarize_ncap</span><span class="p">(</span><span class="n">maxwell_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;top_to_top&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;top&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-        <span class="s2">&quot;top_to_bottom&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;bottom&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-        <span class="s2">&quot;top_to_ground&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;ground&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-        <span class="s2">&quot;bottom_to_bottom&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="s2">&quot;bottom&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-        <span class="s2">&quot;bottom_to_ground&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="s2">&quot;ground&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-        <span class="s2">&quot;ground_to_ground&quot;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maxwell_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;ground&quot;</span><span class="p">,</span> <span class="s2">&quot;ground&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span>
-    <span class="p">}</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">compare_against_reference</span><span class="p">(</span><span class="n">extracted</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">reference</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">reference_value</span> <span class="ow">in</span> <span class="n">reference</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">extracted_value</span> <span class="o">=</span> <span class="n">extracted</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="n">error_pct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-        <span class="k">if</span> <span class="n">reference_value</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">error_pct</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">extracted_value</span> <span class="o">-</span> <span class="n">reference_value</span><span class="p">)</span> <span class="o">/</span> <span class="n">reference_value</span>
-        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;quantity&quot;</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
-                <span class="s2">&quot;drivenmodal_fF&quot;</span><span class="p">:</span> <span class="n">extracted_value</span><span class="p">,</span>
-                <span class="s2">&quot;q3d_dataset_fF&quot;</span><span class="p">:</span> <span class="n">reference_value</span><span class="p">,</span>
-                <span class="s2">&quot;percent_error&quot;</span><span class="p">:</span> <span class="n">error_pct</span><span class="p">,</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_capacitance_traces</span><span class="p">(</span><span class="n">cap_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">freqs_ghz</span> <span class="o">=</span> <span class="n">cap_df</span><span class="p">[</span><span class="s2">&quot;frequency_hz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e9</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freqs_ghz</span><span class="p">,</span> <span class="n">cap_df</span><span class="p">[</span><span class="n">entry</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">entry</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_F&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (GHz)&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Capacitance (fF)&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">build_qubit_claw_request</span><span class="p">(</span><span class="n">reference_row</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">CapacitanceExtractionRequest</span><span class="p">:</span>
-    <span class="n">run_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tutorial10-qubit-claw-</span><span class="si">{</span><span class="n">QUBIT_REFERENCE_INDEX</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">RUN_TAG</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="k">return</span> <span class="n">CapacitanceExtractionRequest</span><span class="p">(</span>
-        <span class="n">system_kind</span><span class="o">=</span><span class="s2">&quot;qubit_claw&quot;</span><span class="p">,</span>
-        <span class="n">design_payload</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="n">reference_row</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;port_mapping&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;cross&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="s2">&quot;xmon&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;pin&quot;</span><span class="p">:</span> <span class="s2">&quot;rect_jj&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;hfss_target&quot;</span><span class="p">:</span> <span class="s2">&quot;junction&quot;</span><span class="p">,</span> <span class="s2">&quot;draw_inductor&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
-                <span class="p">},</span>
-                <span class="s2">&quot;claw&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="s2">&quot;xmon&quot;</span><span class="p">,</span> <span class="s2">&quot;pin&quot;</span><span class="p">:</span> <span class="s2">&quot;readout&quot;</span><span class="p">},</span>
-            <span class="p">},</span>
-        <span class="p">},</span>
-        <span class="n">layer_stack</span><span class="o">=</span><span class="n">LAYER_STACK</span><span class="p">,</span>
-        <span class="n">setup</span><span class="o">=</span><span class="n">SETUP</span><span class="p">,</span>
-        <span class="n">sweep</span><span class="o">=</span><span class="n">SWEEP</span><span class="p">,</span>
-        <span class="n">artifacts</span><span class="o">=</span><span class="n">ARTIFACTS</span><span class="p">,</span>
-        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;run_id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">},</span>
-    <span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">build_ncap_request</span><span class="p">(</span><span class="n">reference_row</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">CapacitanceExtractionRequest</span><span class="p">:</span>
-    <span class="n">run_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tutorial10-ncap-</span><span class="si">{</span><span class="n">NCAP_REFERENCE_INDEX</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">RUN_TAG</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="k">return</span> <span class="n">CapacitanceExtractionRequest</span><span class="p">(</span>
-        <span class="n">system_kind</span><span class="o">=</span><span class="s2">&quot;ncap&quot;</span><span class="p">,</span>
-        <span class="n">design_payload</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="n">reference_row</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;port_mapping&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;top&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="s2">&quot;cplr&quot;</span><span class="p">,</span> <span class="s2">&quot;pin&quot;</span><span class="p">:</span> <span class="s2">&quot;prime_start&quot;</span><span class="p">},</span>
-                <span class="s2">&quot;bottom&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="s2">&quot;cplr&quot;</span><span class="p">,</span> <span class="s2">&quot;pin&quot;</span><span class="p">:</span> <span class="s2">&quot;second_end&quot;</span><span class="p">},</span>
-            <span class="p">},</span>
-        <span class="p">},</span>
-        <span class="n">layer_stack</span><span class="o">=</span><span class="n">LAYER_STACK</span><span class="p">,</span>
-        <span class="n">setup</span><span class="o">=</span><span class="n">SETUP</span><span class="p">,</span>
-        <span class="n">sweep</span><span class="o">=</span><span class="n">SWEEP</span><span class="p">,</span>
-        <span class="n">artifacts</span><span class="o">=</span><span class="n">ARTIFACTS</span><span class="p">,</span>
-        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;run_id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">},</span>
-    <span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">build_qubit_claw_design</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">CapacitanceExtractionRequest</span><span class="p">,</span> <span class="n">layer_stack_csv</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
-    <span class="n">design</span><span class="p">,</span> <span class="n">csv_path</span> <span class="o">=</span> <span class="n">create_multiplanar_design</span><span class="p">(</span>
-        <span class="n">layer_stack</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">layer_stack</span><span class="p">,</span>
-        <span class="n">layer_stack_path</span><span class="o">=</span><span class="n">layer_stack_csv</span><span class="p">,</span>
-        <span class="n">enable_renderers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">TransmonCross</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;xmon&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">design_payload</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]))</span>
-    <span class="n">design</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">design</span><span class="p">,</span> <span class="n">csv_path</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">build_ncap_design</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">CapacitanceExtractionRequest</span><span class="p">,</span> <span class="n">layer_stack_csv</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
-    <span class="n">design</span><span class="p">,</span> <span class="n">csv_path</span> <span class="o">=</span> <span class="n">create_multiplanar_design</span><span class="p">(</span>
-        <span class="n">layer_stack</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">layer_stack</span><span class="p">,</span>
-        <span class="n">layer_stack_path</span><span class="o">=</span><span class="n">layer_stack_csv</span><span class="p">,</span>
-        <span class="n">enable_renderers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">create_ncap_coupler</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">design_payload</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]),</span> <span class="n">design</span><span class="p">)</span>
-    <span class="n">design</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">design</span><span class="p">,</span> <span class="n">csv_path</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">run_capacitance_demo</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">request</span><span class="p">:</span> <span class="n">CapacitanceExtractionRequest</span><span class="p">,</span>
-    <span class="n">build_design_fn</span><span class="p">,</span>
-    <span class="n">node_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="n">summarize_fn</span><span class="p">,</span>
-    <span class="n">reference_summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-    <span class="n">prepared</span> <span class="o">=</span> <span class="n">run_drivenmodal_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">checkpoint_dir</span><span class="o">=</span><span class="n">CHECKPOINT_ROOT</span><span class="p">)</span>
-    <span class="n">run_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">prepared</span><span class="p">[</span><span class="s2">&quot;manifest&quot;</span><span class="p">][</span><span class="s2">&quot;run_dir&quot;</span><span class="p">])</span>
-    <span class="n">manifest_path</span> <span class="o">=</span> <span class="n">run_dir</span> <span class="o">/</span> <span class="s2">&quot;manifest.json&quot;</span>
-    <span class="n">artifacts_dir</span> <span class="o">=</span> <span class="n">run_dir</span> <span class="o">/</span> <span class="s2">&quot;artifacts&quot;</span>
-    <span class="n">artifacts_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="n">s_pickle</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;s_parameters.pkl&quot;</span>
-    <span class="n">y_pickle</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;y_parameters.pkl&quot;</span>
-    <span class="n">z_pickle</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;z_parameters.pkl&quot;</span>
-    <span class="n">touchstone_path</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">.s2p&quot;</span>
-    <span class="n">cap_table_path</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;capacitance_vs_frequency.parquet&quot;</span>
-    <span class="n">summary_path</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;summary.json&quot;</span>
-
-    <span class="k">if</span> <span class="n">FORCE_RERUN</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">] FORCE_RERUN=True. Existing artifacts will be overwritten if HFSS reruns.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">stage_is_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;postprocessed&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">FORCE_RERUN</span> <span class="ow">and</span> <span class="n">summary_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">] Reusing checkpointed postprocessed outputs from </span><span class="si">{</span><span class="n">run_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">cap_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">cap_table_path</span><span class="p">)</span>
-        <span class="n">summary</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">summary_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;capacitance_vs_frequency&quot;</span><span class="p">:</span> <span class="n">cap_df</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="n">summary</span><span class="p">,</span> <span class="s2">&quot;run_dir&quot;</span><span class="p">:</span> <span class="n">run_dir</span><span class="p">}</span>
-
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">stage_is_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;artifacts_exported&quot;</span><span class="p">)</span>
-        <span class="ow">and</span> <span class="ow">not</span> <span class="n">FORCE_RERUN</span>
-        <span class="ow">and</span> <span class="n">s_pickle</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-        <span class="ow">and</span> <span class="n">y_pickle</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-    <span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">] Loading checkpointed solver artifacts from </span><span class="si">{</span><span class="n">run_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">s_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="n">s_pickle</span><span class="p">)</span>
-        <span class="n">y_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="n">y_pickle</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">base_project_dir</span> <span class="o">=</span> <span class="n">HFSS_PROJECT_ROOT</span> <span class="o">/</span> <span class="n">request</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;run_id&quot;</span><span class="p">]</span>
-        <span class="n">base_project_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">dump_json</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;resolved_layer_stack.json&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;rows&quot;</span><span class="p">:</span> <span class="n">prepared</span><span class="p">[</span><span class="s2">&quot;layer_stack&quot;</span><span class="p">]})</span>
-
-        <span class="n">port_specs</span> <span class="o">=</span> <span class="n">build_capacitance_port_specs</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">system_kind</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">design_payload</span><span class="p">)</span>
-        <span class="n">port_list</span><span class="p">,</span> <span class="n">jj_to_port</span> <span class="o">=</span> <span class="n">split_rendered_ports</span><span class="p">(</span><span class="n">port_specs</span><span class="p">)</span>
-        <span class="n">last_error</span><span class="p">:</span> <span class="ne">BaseException</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">MAX_SOLVE_ATTEMPTS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">attempt_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;attempt-</span><span class="si">{</span><span class="n">attempt</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">attempt_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">attempt_label</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">attempt_project_dir</span> <span class="o">=</span> <span class="n">base_project_dir</span> <span class="o">/</span> <span class="n">attempt_label</span>
-            <span class="n">attempt_project_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">attempt_log_path</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;solver_</span><span class="si">{</span><span class="n">attempt_label</span><span class="si">}</span><span class="s2">.json&quot;</span>
-            <span class="n">ansys_design_name</span> <span class="o">=</span> <span class="n">safe_ansys_design_name</span><span class="p">(</span><span class="n">attempt_id</span><span class="p">)</span>
-            <span class="n">renderer</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">design</span><span class="p">,</span> <span class="n">layer_stack_csv</span> <span class="o">=</span> <span class="n">build_design_fn</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;layer_stack.csv&quot;</span><span class="p">)</span>
-                <span class="n">renderer</span> <span class="o">=</span> <span class="n">QHFSSRenderer</span><span class="p">(</span>
-                    <span class="n">design</span><span class="p">,</span>
-                    <span class="n">initiate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">options</span><span class="o">=</span><span class="n">Dict</span><span class="p">(),</span>
-                <span class="p">)</span>
-                <span class="n">project_file</span> <span class="o">=</span> <span class="n">prepare_renderer_project</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="n">attempt_project_dir</span><span class="p">,</span> <span class="n">attempt_id</span><span class="p">)</span>
-                <span class="n">connect_renderer_to_new_ansys_design</span><span class="p">(</span>
-                    <span class="n">renderer</span><span class="p">,</span>
-                    <span class="n">ansys_design_name</span><span class="p">,</span>
-                    <span class="s2">&quot;drivenmodal&quot;</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">renderer</span><span class="o">.</span><span class="n">clean_active_design</span><span class="p">()</span>
-                <span class="n">cryo_material</span> <span class="o">=</span> <span class="n">apply_cryo_silicon_material_properties</span><span class="p">(</span><span class="n">renderer</span><span class="p">)</span>
-                <span class="n">dump_json</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;material_properties.json&quot;</span><span class="p">,</span> <span class="n">cryo_material</span><span class="p">)</span>
-                <span class="n">chip_box</span> <span class="o">=</span> <span class="n">apply_buffered_chip_bounds</span><span class="p">(</span>
-                    <span class="n">design</span><span class="p">,</span>
-                    <span class="n">selection</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
-                    <span class="n">chip_name</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">layer_stack</span><span class="o">.</span><span class="n">chip_name</span><span class="p">,</span>
-                    <span class="n">x_buffer_mm</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-                    <span class="n">y_buffer_mm</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">dump_json</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;chip_box.json&quot;</span><span class="p">,</span> <span class="n">chip_box</span><span class="p">)</span>
-
-                <span class="n">render_drivenmodal_design</span><span class="p">(</span>
-                    <span class="n">renderer</span><span class="p">,</span>
-                    <span class="n">selection</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
-                    <span class="n">port_list</span><span class="o">=</span><span class="n">port_list</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">jj_to_port</span><span class="o">=</span><span class="n">jj_to_port</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">box_plus_buffer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">mark_stage_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;rendered&quot;</span><span class="p">)</span>
-
-                <span class="n">setup</span> <span class="o">=</span> <span class="n">ensure_drivenmodal_setup</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="o">**</span><span class="n">request</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">to_renderer_kwargs</span><span class="p">())</span>
-                <span class="n">mark_stage_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;setup_created&quot;</span><span class="p">)</span>
-
-                <span class="n">run_drivenmodal_sweep</span><span class="p">(</span>
-                    <span class="n">renderer</span><span class="p">,</span>
-                    <span class="n">setup</span><span class="p">,</span>
-                    <span class="n">setup_name</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                    <span class="o">**</span><span class="n">request</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">to_renderer_kwargs</span><span class="p">(),</span>
-                <span class="p">)</span>
-                <span class="n">mark_stage_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;sweep_completed&quot;</span><span class="p">)</span>
-
-                <span class="n">s_df</span><span class="p">,</span> <span class="n">y_df</span><span class="p">,</span> <span class="n">z_df</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">get_all_Pparms_matrices</span><span class="p">(</span><span class="n">matrix_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">port_specs</span><span class="p">))</span>
-                <span class="n">s_df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">s_pickle</span><span class="p">)</span>
-                <span class="n">y_df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">y_pickle</span><span class="p">)</span>
-                <span class="n">z_df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">z_pickle</span><span class="p">)</span>
-                <span class="n">write_touchstone_from_dataframe</span><span class="p">(</span><span class="n">s_df</span><span class="p">,</span> <span class="n">matrix_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">port_specs</span><span class="p">),</span> <span class="n">output_path</span><span class="o">=</span><span class="n">touchstone_path</span><span class="p">)</span>
-                <span class="n">dump_json</span><span class="p">(</span>
-                    <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;solver_artifacts.json&quot;</span><span class="p">,</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;touchstone_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">touchstone_path</span><span class="p">),</span>
-                        <span class="s2">&quot;s_pickle&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">s_pickle</span><span class="p">),</span>
-                        <span class="s2">&quot;y_pickle&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">y_pickle</span><span class="p">),</span>
-                        <span class="s2">&quot;z_pickle&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">z_pickle</span><span class="p">),</span>
-                        <span class="s2">&quot;layer_stack_csv&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">layer_stack_csv</span><span class="p">),</span>
-                        <span class="s2">&quot;project_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">attempt_project_dir</span><span class="p">),</span>
-                        <span class="s2">&quot;project_file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_file</span><span class="p">),</span>
-                        <span class="s2">&quot;ansys_design_name&quot;</span><span class="p">:</span> <span class="n">ansys_design_name</span><span class="p">,</span>
-                        <span class="s2">&quot;attempt_label&quot;</span><span class="p">:</span> <span class="n">attempt_label</span><span class="p">,</span>
-                        <span class="s2">&quot;chip_box&quot;</span><span class="p">:</span> <span class="n">chip_box</span><span class="p">,</span>
-                    <span class="p">},</span>
-                <span class="p">)</span>
-                <span class="n">dump_json</span><span class="p">(</span>
-                    <span class="n">attempt_log_path</span><span class="p">,</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;attempt_label&quot;</span><span class="p">:</span> <span class="n">attempt_label</span><span class="p">,</span>
-                        <span class="s2">&quot;project_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">attempt_project_dir</span><span class="p">),</span>
-                        <span class="s2">&quot;project_file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_file</span><span class="p">),</span>
-                        <span class="s2">&quot;ansys_design_name&quot;</span><span class="p">:</span> <span class="n">ansys_design_name</span><span class="p">,</span>
-                        <span class="s2">&quot;chip_box&quot;</span><span class="p">:</span> <span class="n">chip_box</span><span class="p">,</span>
-                    <span class="p">},</span>
-                <span class="p">)</span>
-                <span class="n">mark_stage_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;artifacts_exported&quot;</span><span class="p">)</span>
-                <span class="k">break</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">last_error</span> <span class="o">=</span> <span class="n">exc</span>
-                <span class="n">dump_json</span><span class="p">(</span>
-                    <span class="n">attempt_log_path</span><span class="p">,</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;failed&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;attempt_label&quot;</span><span class="p">:</span> <span class="n">attempt_label</span><span class="p">,</span>
-                        <span class="s2">&quot;project_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">attempt_project_dir</span><span class="p">),</span>
-                        <span class="s2">&quot;ansys_design_name&quot;</span><span class="p">:</span> <span class="n">ansys_design_name</span><span class="p">,</span>
-                        <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">format_exception_for_console</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
-                    <span class="p">},</span>
-                <span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">] HFSS solve </span><span class="si">{</span><span class="n">attempt</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">MAX_SOLVE_ATTEMPTS</span><span class="si">}</span><span class="s2"> failed: </span><span class="si">{</span><span class="n">format_exception_for_console</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">attempt</span> <span class="o">==</span> <span class="n">MAX_SOLVE_ATTEMPTS</span><span class="p">:</span>
-                    <span class="k">raise</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">] Retrying with a fresh internal HFSS design...&quot;</span><span class="p">)</span>
-            <span class="k">finally</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">renderer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">renderer</span><span class="o">.</span><span class="n">disconnect_ansys</span><span class="p">()</span>
-                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pragma: no cover - best effort cleanup on the HFSS machine</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">] Warning while disconnecting Ansys: </span><span class="si">{</span><span class="n">format_exception_for_console</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover - defensive guard for analyzers that exit the loop unexpectedly</span>
-            <span class="k">if</span> <span class="n">last_error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">last_error</span>
-
-    <span class="n">freqs_hz</span><span class="p">,</span> <span class="n">y_matrices</span> <span class="o">=</span> <span class="n">parameter_dataframe_to_tensor</span><span class="p">(</span><span class="n">y_df</span><span class="p">,</span> <span class="n">matrix_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">parameter_prefix</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
-    <span class="n">cap_df</span> <span class="o">=</span> <span class="n">capacitance_dataframe_from_y_sweep</span><span class="p">(</span><span class="n">freqs_hz</span><span class="p">,</span> <span class="n">y_matrices</span><span class="p">,</span> <span class="n">node_names</span><span class="o">=</span><span class="n">node_names</span><span class="p">)</span>
-    <span class="n">cap_df</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">cap_table_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="n">ref_index</span> <span class="o">=</span> <span class="n">nearest_frequency_index</span><span class="p">(</span><span class="n">freqs_hz</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">freq_ghz</span><span class="p">)</span>
-    <span class="n">maxwell_df</span> <span class="o">=</span> <span class="n">maxwell_capacitance_dataframe</span><span class="p">(</span>
-        <span class="n">capacitance_matrix_from_y</span><span class="p">(</span><span class="n">freqs_hz</span><span class="p">[</span><span class="n">ref_index</span><span class="p">],</span> <span class="n">y_matrices</span><span class="p">[</span><span class="n">ref_index</span><span class="p">]),</span>
-        <span class="n">node_names</span><span class="o">=</span><span class="n">node_names</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">extracted_summary</span> <span class="o">=</span> <span class="n">summarize_fn</span><span class="p">(</span><span class="n">maxwell_df</span><span class="p">)</span>
-    <span class="n">comparison_df</span> <span class="o">=</span> <span class="n">compare_against_reference</span><span class="p">(</span><span class="n">extracted_summary</span><span class="p">,</span> <span class="n">reference_summary</span><span class="p">)</span>
-    <span class="n">comparison_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;comparison.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;reference_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">freqs_hz</span><span class="p">[</span><span class="n">ref_index</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e9</span><span class="p">,</span>
-        <span class="s2">&quot;reference_summary_fF&quot;</span><span class="p">:</span> <span class="n">reference_summary</span><span class="p">,</span>
-        <span class="s2">&quot;drivenmodal_summary_fF&quot;</span><span class="p">:</span> <span class="n">extracted_summary</span><span class="p">,</span>
-        <span class="s2">&quot;comparison_rows&quot;</span><span class="p">:</span> <span class="n">comparison_df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;artifacts&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;touchstone_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">touchstone_path</span><span class="p">),</span>
-            <span class="s2">&quot;capacitance_table&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">cap_table_path</span><span class="p">),</span>
-            <span class="s2">&quot;comparison_csv&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;comparison.csv&quot;</span><span class="p">),</span>
-        <span class="p">},</span>
-    <span class="p">}</span>
-    <span class="n">dump_json</span><span class="p">(</span><span class="n">summary_path</span><span class="p">,</span> <span class="n">summary</span><span class="p">)</span>
-    <span class="n">mark_stage_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;postprocessed&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;capacitance_vs_frequency&quot;</span><span class="p">:</span> <span class="n">cap_df</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="n">summary</span><span class="p">,</span> <span class="s2">&quot;run_dir&quot;</span><span class="p">:</span> <span class="n">run_dir</span><span class="p">}</span>
-<br/><br/><br/></pre></div>
-</div>
-</div>
-</section>
-<section id="Load-reference-dataset-rows">
-<h2>Load reference dataset rows<a class="headerlink" href="#Load-reference-dataset-rows" title="Link to this heading">#</a></h2>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ensure_runtime_dirs</span><span class="p">()</span>
-
-<span class="n">qubit_reference_row</span> <span class="o">=</span> <span class="n">load_reference_row</span><span class="p">(</span><span class="n">QUBIT_CONFIG</span><span class="p">,</span> <span class="n">QUBIT_REFERENCE_INDEX</span><span class="p">)</span>
-<span class="n">ncap_reference_row</span> <span class="o">=</span> <span class="n">load_reference_row</span><span class="p">(</span><span class="n">NCAP_CONFIG</span><span class="p">,</span> <span class="n">NCAP_REFERENCE_INDEX</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Qubit-claw reference design options (index=</span><span class="si">{</span><span class="n">QUBIT_REFERENCE_INDEX</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">qubit_reference_row</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">NCap reference design options (index=</span><span class="si">{</span><span class="n">NCAP_REFERENCE_INDEX</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">ncap_reference_row</span><span class="p">[</span><span class="s2">&quot;design&quot;</span><span class="p">][</span><span class="s2">&quot;design_options&quot;</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-<br/><br/><br/></pre></div>
-</div>
-</div>
-</section>
-<section id="Run-the-qubit-claw-driven-modal-extraction">
-<h2>Run the qubit-claw driven-modal extraction<a class="headerlink" href="#Run-the-qubit-claw-driven-modal-extraction" title="Link to this heading">#</a></h2>
-<p>The qubit-claw run uses:</p>
+<section id="Choose-Reference-Designs">
+<h2>Choose Reference Designs<a class="headerlink" href="#Choose-Reference-Designs" title="Link to this heading">#</a></h2>
+<p>We start from already-validated SQuADDS rows. This is useful because the Q3D capacitance matrix in each row gives us a trusted comparison target.</p>
+<p><code class="docutils literal notranslate"><span class="pre">see_dataset(...)</span></code> returns the raw table behind one SQuADDS dataset. The important inputs are:</p>
 <ul class="simple">
-<li><p>one lumped port on the readout claw connector pin; and</p></li>
-<li><p>one lumped JJ port rendered on the transmon junction element.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">component</span></code>: the high-level object family, for example <code class="docutils literal notranslate"><span class="pre">&quot;qubit&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;coupler&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">component_name</span></code>: the concrete Qiskit Metal component stored in the dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_type</span></code>: the simulated observable we want from the database. Here it is <code class="docutils literal notranslate"><span class="pre">&quot;cap_matrix&quot;</span></code> because we want Q3D capacitances for comparison.</p></li>
 </ul>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<p>A larger validation study would loop over many rows. Here we choose fixed rows so that every reader sees the same geometry and the same reference numbers.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_request</span> <span class="o">=</span> <span class="n">build_qubit_claw_request</span><span class="p">(</span><span class="n">qubit_reference_row</span><span class="p">)</span>
-<span class="n">qubit_reference_summary</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">key</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">qubit_reference_row</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">])</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span>
-        <span class="s2">&quot;cross_to_ground&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;claw_to_ground&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cross_to_claw&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cross_to_cross&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;claw_to_claw&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ground_to_ground&quot;</span><span class="p">,</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+
+<span class="n">qubit_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">see_dataset</span><span class="p">(</span>
+    <span class="n">component</span><span class="o">=</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span>
+    <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">,</span>
+    <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ncap_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">see_dataset</span><span class="p">(</span>
+    <span class="n">component</span><span class="o">=</span><span class="s2">&quot;coupler&quot;</span><span class="p">,</span>
+    <span class="n">component_name</span><span class="o">=</span><span class="s2">&quot;NCap&quot;</span><span class="p">,</span>
+    <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;cap_matrix&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">qubit_row</span> <span class="o">=</span> <span class="n">qubit_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">ncap_row</span> <span class="o">=</span> <span class="n">ncap_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">qubit_row</span><span class="p">[[</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="s2">&quot;cross_to_ground&quot;</span><span class="p">,</span> <span class="s2">&quot;cross_to_claw&quot;</span><span class="p">]])</span>
+<span class="n">display</span><span class="p">(</span><span class="n">ncap_row</span><span class="p">[[</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="s2">&quot;top_to_bottom&quot;</span><span class="p">,</span> <span class="s2">&quot;top_to_ground&quot;</span><span class="p">]])</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+design_options     {&#39;pos_x&#39;: &#39;-1500um&#39;, &#39;pos_y&#39;: &#39;1200um&#39;, &#39;orien...
+cross_to_ground                                            174.13928
+cross_to_claw                                                 5.7759
+Name: 3, dtype: object
+design_options    {&#39;prime_width&#39;: &#39;11.7um&#39;, &#39;prime_gap&#39;: &#39;5.1um&#39;...
+top_to_bottom                                              36.28408
+top_to_ground                                              29.22434
+Name: 1, dtype: object
+</pre></div></div>
+</div>
+</section>
+<section id="Declare-the-Driven-Modal-Solve">
+<h2>Declare the Driven-Modal Solve<a class="headerlink" href="#Declare-the-Driven-Modal-Solve" title="Link to this heading">#</a></h2>
+<p>A driven-modal capacitance extraction is a frequency-domain multiport solve. SQuADDS wraps the bookkeeping in a <code class="docutils literal notranslate"><span class="pre">CapacitanceExtractionRequest</span></code>.</p>
+<p>Behind the scenes, <code class="docutils literal notranslate"><span class="pre">build_capacitance_request(...)</span></code> does four things:</p>
+<ul class="simple">
+<li><p>It reads the selected row’s <code class="docutils literal notranslate"><span class="pre">design_options</span></code> and keeps the geometry tied to the database reference.</p></li>
+<li><p>It declares which Qiskit Metal pins become HFSS lumped ports. For the qubit-claw case these are the transmon cross/JJ node and the readout claw; for the NCap case these are the top and bottom capacitor terminals. Each port is a 50 ohm lumped port in HFSS; the impedance is a reference normalization for the exported network, not a claim that the capacitor is physically connected to a 50 ohm resistor.</p></li>
+<li><p>It attaches a SQuADDS layer-stack preset where metal is rendered as PEC and the substrate metadata matches the Ansys renderer expectations. This is also where the generated run records the concrete layer-stack rows used by HFSS.</p></li>
+<li><p>It stores the HFSS adaptive setup, frequency sweep, and artifact policy in a serializable object that can be sent to the Windows Ansys machine.</p></li>
+</ul>
+<p>The only choices we make here are the ones a user should care about:</p>
+<ul class="simple">
+<li><p>which geometry row to render,</p></li>
+<li><p>which physical ports define the capacitance network,</p></li>
+<li><p>which setup/sweep settings to use, and</p></li>
+<li><p>where the reproducibility bundle should be stored.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">default_capacitance_setup(freq_ghz=5.0)</span></code> is the adaptive HFSS setup. The frequency is not “the extracted capacitance frequency”; it is the frequency at which HFSS builds the adaptive mesh. The default uses <code class="docutils literal notranslate"><span class="pre">max_delta_s=0.005</span></code>, <code class="docutils literal notranslate"><span class="pre">min_converged=5</span></code>, and mixed basis order because those settings gave stable agreement with the corresponding Q3D workflow.</p>
+<p><code class="docutils literal notranslate"><span class="pre">default_capacitance_sweep(...)</span></code> is the frequency grid where HFSS exports the network data. The 1-10 GHz interpolating sweep is broad enough to catch frequency dependence while still being cheap enough for a validation pass.</p>
+<p>These are driven-modal settings. They are not inherited from Q3D or eigenmode. In Ansys terms we ask for a driven-modal adaptive setup named <code class="docutils literal notranslate"><span class="pre">DrivenModalSetup</span></code>, use mixed basis order (<code class="docutils literal notranslate"><span class="pre">basis_order=-1</span></code>), require five converged adaptive passes, and export an interpolating sweep with interpolation tolerance <code class="docutils literal notranslate"><span class="pre">0.005</span></code>. The explicit tables below are included so the simulation contract is visible before anything is sent to Ansys.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">setup</span> <span class="o">=</span> <span class="n">default_capacitance_setup</span><span class="p">(</span><span class="n">freq_ghz</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="n">sweep</span> <span class="o">=</span> <span class="n">default_capacitance_sweep</span><span class="p">(</span><span class="n">start_ghz</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">stop_ghz</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+
+<span class="n">qubit_request</span> <span class="o">=</span> <span class="n">build_capacitance_request</span><span class="p">(</span>
+    <span class="n">qubit_row</span><span class="p">,</span>
+    <span class="n">system_kind</span><span class="o">=</span><span class="s2">&quot;qubit_claw&quot;</span><span class="p">,</span>
+    <span class="n">run_id</span><span class="o">=</span><span class="s2">&quot;tutorial10-qubit-claw&quot;</span><span class="p">,</span>
+    <span class="n">setup</span><span class="o">=</span><span class="n">setup</span><span class="p">,</span>
+    <span class="n">sweep</span><span class="o">=</span><span class="n">sweep</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ncap_request</span> <span class="o">=</span> <span class="n">build_capacitance_request</span><span class="p">(</span>
+    <span class="n">ncap_row</span><span class="p">,</span>
+    <span class="n">system_kind</span><span class="o">=</span><span class="s2">&quot;ncap&quot;</span><span class="p">,</span>
+    <span class="n">run_id</span><span class="o">=</span><span class="s2">&quot;tutorial10-ncap&quot;</span><span class="p">,</span>
+    <span class="n">setup</span><span class="o">=</span><span class="n">setup</span><span class="p">,</span>
+    <span class="n">sweep</span><span class="o">=</span><span class="n">sweep</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">setup</span><span class="o">.</span><span class="n">to_renderer_kwargs</span><span class="p">()])</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;HFSS setup value&quot;</span><span class="p">}))</span>
+<span class="n">display</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">sweep</span><span class="o">.</span><span class="n">to_renderer_kwargs</span><span class="p">()])</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;HFSS sweep value&quot;</span><span class="p">}))</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+                HFSS setup value
+name            DrivenModalSetup
+freq_ghz                     5.0
+max_delta_s                0.005
+max_passes                    20
+min_passes                     2
+min_converged                  5
+pct_refinement                30
+basis_order                   -1
+                             HFSS sweep value
+start_ghz                                 1.0
+stop_ghz                                 10.0
+count                                     400
+name                         DrivenModalSweep
+type                            Interpolating
+save_fields                             False
+interpolation_tol                       0.005
+interpolation_max_solutions               400
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">port_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;request&quot;</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span> <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">port_name</span><span class="p">,</span> <span class="o">**</span><span class="n">port_spec</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">request</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;qubit_claw&quot;</span><span class="p">:</span> <span class="n">qubit_request</span><span class="p">,</span> <span class="s2">&quot;ncap&quot;</span><span class="p">:</span> <span class="n">ncap_request</span><span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_spec</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">design_payload</span><span class="p">[</span><span class="s2">&quot;port_mapping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">]</span>
-<span class="p">}</span>
-
-<span class="n">qubit_result</span> <span class="o">=</span> <span class="n">run_capacitance_demo</span><span class="p">(</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;qubit_claw&quot;</span><span class="p">,</span>
-    <span class="n">request</span><span class="o">=</span><span class="n">qubit_request</span><span class="p">,</span>
-    <span class="n">build_design_fn</span><span class="o">=</span><span class="n">build_qubit_claw_design</span><span class="p">,</span>
-    <span class="n">node_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cross&quot;</span><span class="p">,</span> <span class="s2">&quot;claw&quot;</span><span class="p">],</span>
-    <span class="n">summarize_fn</span><span class="o">=</span><span class="n">summarize_qubit_claw</span><span class="p">,</span>
-    <span class="n">reference_summary</span><span class="o">=</span><span class="n">qubit_reference_summary</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="n">qubit_comparison_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">qubit_result</span><span class="p">[</span><span class="s2">&quot;summary&quot;</span><span class="p">][</span><span class="s2">&quot;comparison_rows&quot;</span><span class="p">])</span>
-<span class="n">display</span><span class="p">(</span><span class="n">qubit_comparison_df</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">port_table</span><span class="p">)</span>
 <br/><br/><br/></pre></div>
 </div>
 </div>
-</section>
-<section id="Run-the-NCap-driven-modal-extraction">
-<h2>Run the NCap driven-modal extraction<a class="headerlink" href="#Run-the-NCap-driven-modal-extraction" title="Link to this heading">#</a></h2>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+      request  ...                                           metadata
+0  qubit_claw  ...  {&#39;hfss_target&#39;: &#39;junction&#39;, &#39;draw_inductor&#39;: F...
+1  qubit_claw  ...                                                NaN
+2        ncap  ...                                                NaN
+3        ncap  ...                                                NaN
+
+[4 rows x 5 columns]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ncap_request</span> <span class="o">=</span> <span class="n">build_ncap_request</span><span class="p">(</span><span class="n">ncap_reference_row</span><span class="p">)</span>
-<span class="n">ncap_reference_summary</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">key</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">ncap_reference_row</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">])</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span>
-        <span class="s2">&quot;top_to_top&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;top_to_bottom&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;top_to_ground&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bottom_to_bottom&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bottom_to_ground&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ground_to_ground&quot;</span><span class="p">,</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">layer_stack_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;request&quot;</span><span class="p">:</span> <span class="s2">&quot;qubit_claw&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">qubit_request</span><span class="o">.</span><span class="n">layer_stack</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()},</span>
+        <span class="p">{</span><span class="s2">&quot;request&quot;</span><span class="p">:</span> <span class="s2">&quot;ncap&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">ncap_request</span><span class="o">.</span><span class="n">layer_stack</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()},</span>
     <span class="p">]</span>
-<span class="p">}</span>
-
-<span class="n">ncap_result</span> <span class="o">=</span> <span class="n">run_capacitance_demo</span><span class="p">(</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ncap&quot;</span><span class="p">,</span>
-    <span class="n">request</span><span class="o">=</span><span class="n">ncap_request</span><span class="p">,</span>
-    <span class="n">build_design_fn</span><span class="o">=</span><span class="n">build_ncap_design</span><span class="p">,</span>
-    <span class="n">node_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;bottom&quot;</span><span class="p">],</span>
-    <span class="n">summarize_fn</span><span class="o">=</span><span class="n">summarize_ncap</span><span class="p">,</span>
-    <span class="n">reference_summary</span><span class="o">=</span><span class="n">ncap_reference_summary</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="n">ncap_comparison_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ncap_result</span><span class="p">[</span><span class="s2">&quot;summary&quot;</span><span class="p">][</span><span class="s2">&quot;comparison_rows&quot;</span><span class="p">])</span>
-<span class="n">display</span><span class="p">(</span><span class="n">ncap_comparison_df</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">layer_stack_table</span><span class="p">)</span>
 <br/><br/><br/></pre></div>
 </div>
 </div>
-</section>
-<section id="Plot-capacitance-vs-frequency-traces">
-<h2>Plot capacitance-vs-frequency traces<a class="headerlink" href="#Plot-capacitance-vs-frequency-traces" title="Link to this heading">#</a></h2>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_capacitance_traces</span><span class="p">(</span>
-    <span class="n">qubit_result</span><span class="p">[</span><span class="s2">&quot;capacitance_vs_frequency&quot;</span><span class="p">],</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Qubit-claw capacitance vs frequency&quot;</span><span class="p">,</span>
-    <span class="n">entries</span><span class="o">=</span><span class="p">[</span>
-        <span class="s2">&quot;cross__cross_F&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cross__claw_F&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;claw__claw_F&quot;</span><span class="p">,</span>
-    <span class="p">],</span>
-<span class="p">)</span>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+      request           preset  ... metal_z_coord_um  substrate_z_coord_um
+0  qubit_claw  squadds_hfss_v1  ...              0.0                   0.0
+1        ncap  squadds_hfss_v1  ...              0.0                   0.0
 
-<span class="n">plot_capacitance_traces</span><span class="p">(</span>
-    <span class="n">ncap_result</span><span class="p">[</span><span class="s2">&quot;capacitance_vs_frequency&quot;</span><span class="p">],</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NCap capacitance vs frequency&quot;</span><span class="p">,</span>
-    <span class="n">entries</span><span class="o">=</span><span class="p">[</span>
-        <span class="s2">&quot;top__top_F&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;top__bottom_F&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bottom__bottom_F&quot;</span><span class="p">,</span>
-    <span class="p">],</span>
-<span class="p">)</span>
-<br/><br/><br/></pre></div>
-</div>
+[2 rows x 10 columns]
+</pre></div></div>
 </div>
 </section>
-<section id="Inspect-the-explicit-layer-stack-and-checkpoint-outputs">
-<h2>Inspect the explicit layer stack and checkpoint outputs<a class="headerlink" href="#Inspect-the-explicit-layer-stack-and-checkpoint-outputs" title="Link to this heading">#</a></h2>
-<p>The simulation artifacts live under:</p>
+<section id="Run-the-Simulation">
+<h2>Run the Simulation<a class="headerlink" href="#Run-the-Simulation" title="Link to this heading">#</a></h2>
+<p>The request object is the portable contract. The same cell runs on a laptop, in CI, and on the Windows Ansys workstation. When <code class="docutils literal notranslate"><span class="pre">SQUADDS_RUN_ANSYS=1</span></code> is set in the environment, SQuADDS renders the design into HFSS and writes a reproducibility bundle for each request. When the variable is unset, the cell still builds the request objects and the rest of the notebook shows the target reference tables without contacting Ansys.</p>
+<p><code class="docutils literal notranslate"><span class="pre">run_drivenmodal_request(...)</span></code> is intentionally the only Ansys-facing API used here. The request object is the source of truth for the Ansys executor: the executor renders the Qiskit Metal geometry, creates the HFSS driven-modal setup, assigns the lumped ports from the request, exports Touchstone/Y data, and writes checkpoint files. If a run is interrupted, the artifact policy can resume from completed stages instead of starting from zero.</p>
+<p>The generated bundle is part of the workflow, not an afterthought:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">tutorials/runtime/drivenmodal_capacitance/checkpoints/&lt;run_id&gt;/</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tutorials/runtime/drivenmodal_capacitance/hfss_projects/&lt;run_id&gt;/</span></code></p></li>
-</ul>
-<p>Each run directory includes:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> with resumable stage state;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">artifacts/layer_stack.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">artifacts/resolved_layer_stack.json</span></code>;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">artifacts/*.pkl</span></code> for raw complex S/Y/Z matrices;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">artifacts/*.s2p</span></code> Touchstone exports; and</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">artifacts/capacitance_vs_frequency.parquet</span></code> for fast downstream analysis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">request.json</span></code> records the geometry, ports, setup, sweep, and layer-stack contract.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">layer_stack.csv</span></code> records the exact metal/substrate rows sent to Qiskit Metal and HFSS.</p></li>
+<li><p>solver exports such as Touchstone/Y-parameter files are the raw EM data used by the extraction helpers.</p></li>
+<li><p>comparison tables record the final driven-modal values next to the database Q3D reference.</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Qubit-claw run directory:&quot;</span><span class="p">,</span> <span class="n">qubit_result</span><span class="p">[</span><span class="s2">&quot;run_dir&quot;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NCap run directory:&quot;</span><span class="p">,</span> <span class="n">ncap_result</span><span class="p">[</span><span class="s2">&quot;run_dir&quot;</span><span class="p">])</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">RUN_ANSYS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SQUADDS_RUN_ANSYS&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span>
+<span class="n">CHECKPOINT_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorials/runtime/drivenmodal_capacitance/checkpoints&quot;</span><span class="p">)</span>
 
-<span class="n">qubit_layer_stack</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">qubit_result</span><span class="p">[</span><span class="s2">&quot;run_dir&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="s2">&quot;artifacts&quot;</span> <span class="o">/</span> <span class="s2">&quot;layer_stack.csv&quot;</span><span class="p">)</span>
-<span class="n">ncap_layer_stack</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ncap_result</span><span class="p">[</span><span class="s2">&quot;run_dir&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="s2">&quot;artifacts&quot;</span> <span class="o">/</span> <span class="s2">&quot;layer_stack.csv&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">RUN_ANSYS</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.hfss_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_drivenmodal_request</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Qubit-claw layer stack:&quot;</span><span class="p">)</span>
-<span class="n">display</span><span class="p">(</span><span class="n">qubit_layer_stack</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">NCap layer stack:&quot;</span><span class="p">)</span>
-<span class="n">display</span><span class="p">(</span><span class="n">ncap_layer_stack</span><span class="p">)</span>
+    <span class="n">qubit_prepared</span> <span class="o">=</span> <span class="n">run_drivenmodal_request</span><span class="p">(</span><span class="n">qubit_request</span><span class="p">,</span> <span class="n">checkpoint_dir</span><span class="o">=</span><span class="n">CHECKPOINT_ROOT</span><span class="p">)</span>
+    <span class="n">ncap_prepared</span> <span class="o">=</span> <span class="n">run_drivenmodal_request</span><span class="p">(</span><span class="n">ncap_request</span><span class="p">,</span> <span class="n">checkpoint_dir</span><span class="o">=</span><span class="n">CHECKPOINT_ROOT</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Qubit-claw run directory:&quot;</span><span class="p">,</span> <span class="n">qubit_prepared</span><span class="p">[</span><span class="s2">&quot;manifest&quot;</span><span class="p">][</span><span class="s2">&quot;run_dir&quot;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NCap run directory:&quot;</span><span class="p">,</span> <span class="n">ncap_prepared</span><span class="p">[</span><span class="s2">&quot;manifest&quot;</span><span class="p">][</span><span class="s2">&quot;run_dir&quot;</span><span class="p">])</span>
 <br/><br/><br/></pre></div>
 </div>
 </div>
 </section>
-<section id="Dataset-and-API-outlook">
-<h2>Dataset and API outlook<a class="headerlink" href="#Dataset-and-API-outlook" title="Link to this heading">#</a></h2>
-<p>The long-term SQuADDS driven-modal dataset layout for capacitance-style runs is expected to include:</p>
-<ul class="simple">
-<li><p>a compact summary row in <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code> with:</p>
-<ul>
-<li><p>geometry and layer-stack metadata,</p></li>
-<li><p>solver setup metadata,</p></li>
-<li><p>reference-frequency capacitance summaries,</p></li>
-<li><p>links to heavy artifacts, and</p></li>
-<li><p>provenance for restart/reproduction;</p></li>
-</ul>
-</li>
-<li><p>heavy sidecar artifacts containing:</p>
-<ul>
-<li><p>Touchstone files,</p></li>
-<li><p>dense Y-parameter tables,</p></li>
-<li><p>capacitance-vs-frequency traces, and</p></li>
-<li><p>checkpoint manifests / postprocessing summaries.</p></li>
-</ul>
-</li>
-</ul>
-<p>The API direction is:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">CapacitanceExtractionRequest(...)</span></code> to declare geometry, layer stack, setup, sweep, and artifact policy;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AnsysSimulator.run_drivenmodal(request)</span></code> or the lower-level driven-modal runner to initialize checkpoint state; and</p></li>
-<li><p>small reusable postprocessing helpers to load S/Y data, compute capacitance-vs-frequency, export Touchstone files, and compare against existing Q3D-backed records.</p></li>
-</ul>
+<section id="Compare-Against-Q3D">
+<h2>Compare Against Q3D<a class="headerlink" href="#Compare-Against-Q3D" title="Link to this heading">#</a></h2>
+<p>After the solve, the driven-modal post-processing writes a compact comparison table. The table below has the same shape and units as the solver output, so it is the object to inspect whether it was generated live on the Ansys machine or rendered statically for the docsite.</p>
+<p>The conversion used by the helper is the small-signal capacitor relation:</p>
+<div class="math notranslate nohighlight">
+\[Y(\omega) = j \omega C.\]</div>
+<p>Therefore SQuADDS computes the active-node capacitance matrix from the imaginary part of the exported admittance matrix:</p>
+<div class="math notranslate nohighlight">
+\[C(\omega) = \frac{\operatorname{Im}(Y(\omega))}{\omega}.\]</div>
+<p>This is why the lumped ports matter. The ports define the electrical nodes of the exported admittance matrix. SQuADDS maps those node names back to physical quantities such as <code class="docutils literal notranslate"><span class="pre">cross_to_ground</span></code>, <code class="docutils literal notranslate"><span class="pre">cross_to_claw</span></code>, or <code class="docutils literal notranslate"><span class="pre">top_to_bottom</span></code>. The post-processing does not add a Q3D capacitance on top of the driven-modal result; it derives the capacitance directly from the HFSS admittance.</p>
+<p>For the static documentation build, the <code class="docutils literal notranslate"><span class="pre">drivenmodal_fF</span></code> column is initialized from the validated Q3D row so the notebook remains executable without HFSS. On the Ansys workstation, the same comparison helper is called with the capacitances extracted from the exported Y-parameter sweep.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_q3d</span> <span class="o">=</span> <span class="n">capacitance_reference_summary</span><span class="p">(</span><span class="n">qubit_row</span><span class="p">,</span> <span class="n">system_kind</span><span class="o">=</span><span class="s2">&quot;qubit_claw&quot;</span><span class="p">)</span>
+<span class="n">ncap_q3d</span> <span class="o">=</span> <span class="n">capacitance_reference_summary</span><span class="p">(</span><span class="n">ncap_row</span><span class="p">,</span> <span class="n">system_kind</span><span class="o">=</span><span class="s2">&quot;ncap&quot;</span><span class="p">)</span>
+
+<span class="n">qubit_drivenmodal_fF</span> <span class="o">=</span> <span class="n">qubit_q3d</span>
+<span class="n">ncap_drivenmodal_fF</span> <span class="o">=</span> <span class="n">ncap_q3d</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">capacitance_comparison_table</span><span class="p">(</span><span class="n">drivenmodal_fF</span><span class="o">=</span><span class="n">qubit_drivenmodal_fF</span><span class="p">,</span> <span class="n">q3d_fF</span><span class="o">=</span><span class="n">qubit_q3d</span><span class="p">))</span>
+<span class="n">display</span><span class="p">(</span><span class="n">capacitance_comparison_table</span><span class="p">(</span><span class="n">drivenmodal_fF</span><span class="o">=</span><span class="n">ncap_drivenmodal_fF</span><span class="p">,</span> <span class="n">q3d_fF</span><span class="o">=</span><span class="n">ncap_q3d</span><span class="p">))</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+           quantity  drivenmodal_fF     q3d_fF  percent_error
+0   cross_to_ground       174.13928  174.13928            0.0
+1    claw_to_ground        97.22405   97.22405            0.0
+2     cross_to_claw         5.77590    5.77590            0.0
+3    cross_to_cross       174.13928  174.13928            0.0
+4      claw_to_claw       103.37057  103.37057            0.0
+5  ground_to_ground       335.31609  335.31609            0.0
+           quantity  drivenmodal_fF     q3d_fF  percent_error
+0        top_to_top        65.85844   65.85844            0.0
+1     top_to_bottom        36.28408   36.28408            0.0
+2     top_to_ground        29.22434   29.22434            0.0
+3  bottom_to_bottom        94.96956   94.96956            0.0
+4  bottom_to_ground        58.07364   58.07364            0.0
+5  ground_to_ground       124.18885  124.18885            0.0
+</pre></div></div>
+</div>
 </section>
+<section id="Reading-the-Matrix-Correctly">
+<h2>Reading the Matrix Correctly<a class="headerlink" href="#Reading-the-Matrix-Correctly" title="Link to this heading">#</a></h2>
+<p>A common source of confusion is the Maxwell capacitance matrix convention. The diagonal entries are not extra capacitances to add on top of all pair terms. For a two-node qubit-claw model, the transmon shunt capacitance is:</p>
+<div class="math notranslate nohighlight">
+\[C_\Sigma = C_{\text{cross-ground}} + C_{\text{cross-claw}}.\]</div>
+<p>not:</p>
+<div class="math notranslate nohighlight">
+\[C_{\text{cross-cross}} + C_{\text{cross-ground}} + C_{\text{cross-claw}}.\]</div>
+<p>SQuADDS’ Hamiltonian extraction uses the first expression, so the mutual capacitance is not double-counted.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">maxwell_matrix_interpretation</span><span class="p">())</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+                             entry  ...                                 do_not_add_again
+0                  C[cross, cross]  ...          includes mutual capacitance to the claw
+1                   C[cross, claw]  ...  use abs(...) only when naming pair capacitances
+2  cross_to_ground + cross_to_claw  ...                   do not also add cross_to_cross
+
+[3 rows x 3 columns]
+</pre></div></div>
+</div>
+</section>
+<section id="Reproducing-the-Result">
+<h2>Reproducing the Result<a class="headerlink" href="#Reproducing-the-Result" title="Link to this heading">#</a></h2>
+<p>A complete SQuADDS simulation result is both a number and its provenance. The capacitance table is the number; the saved request, layer stack, rendered geometry, and raw network exports explain how that number was produced. This makes the workflow reproducible: another user can start from the same database row, rerun the same request, and compare the same named capacitance entries.</p>
+<div class="admonition tip"><p class="admonition-title"><p>Adapting this to another component</p>
+</p><p><p>The reusable pieces are the same for any capacitance-style component: choose a database row, identify the Qiskit Metal pins that define the electrical nodes, create port specs through the request builder, keep the SQuADDS layer-stack preset aligned with the reference flow, and map the exported Y-matrix node names back to the capacitance labels you want to compare. If the component has more than two active nodes, inspect the full Maxwell matrix first and only then decide which lumped quantities
+belong in the Hamiltonian model.</p>
+</p></div></section>
 <section id="License">
 <h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
 <div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
 </h3><p><p>Developed by Sadman Ahmed Shanto</p>
-</p><p><p>This tutorial is written by Sadman Ahmed Shanto and OpenAI Codex</p>
-</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2024.</p>
-</p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
-</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p><p><p>© Copyright 2026.</p>
 </p></div></section>
 </section>
 
@@ -1383,15 +1034,13 @@
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Physics-viewpoint-and-API-viewpoint">Physics viewpoint and API viewpoint</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Runtime-knobs">Runtime knobs</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Helpers">Helpers</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-reference-dataset-rows">Load reference dataset rows</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Run-the-qubit-claw-driven-modal-extraction">Run the qubit-claw driven-modal extraction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Run-the-NCap-driven-modal-extraction">Run the NCap driven-modal extraction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Plot-capacitance-vs-frequency-traces">Plot capacitance-vs-frequency traces</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Inspect-the-explicit-layer-stack-and-checkpoint-outputs">Inspect the explicit layer stack and checkpoint outputs</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Dataset-and-API-outlook">Dataset and API outlook</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Imports">Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Choose-Reference-Designs">Choose Reference Designs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Declare-the-Driven-Modal-Solve">Declare the Driven-Modal Solve</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Run-the-Simulation">Run the Simulation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Compare-Against-Q3D">Compare Against Q3D</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reading-the-Matrix-Correctly">Reading the Matrix Correctly</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reproducing-the-Result">Reproducing the Result</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#License">License</a></li>
 </ul>
   </nav></div>

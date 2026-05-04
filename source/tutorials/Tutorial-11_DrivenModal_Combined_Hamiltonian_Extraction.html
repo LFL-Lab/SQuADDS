@@ -59,7 +59,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="MCP Server (AI Agent Integration)" href="../mcp_server.html" />
-    <link rel="prev" title="Tutorial 10: HFSS Driven-Modal Capacitance Extraction for Qubit-Claw and NCap" href="Tutorial-10_DrivenModal_Capacitance_Extraction.html" />
+    <link rel="prev" title="Tutorial 10: Driven-Modal Capacitance Extraction" href="Tutorial-10_DrivenModal_Capacitance_Extraction.html" />
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
 <script>
@@ -573,7 +573,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-7_Simulate_designs_with_palace.html">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-8_ML_interpolation_in_SQuADDS.html">Tutorial 8: Machine Learning with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial-9_Learing_the_Inverse_Design_Map.html">Tutorial 9: Learning the Inverse Design Map</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Tutorial-10_DrivenModal_Capacitance_Extraction.html">Tutorial 10: HFSS Driven-Modal Capacitance Extraction for Qubit-Claw and NCap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial-10_DrivenModal_Capacitance_Extraction.html">Tutorial 10: Driven-Modal Capacitance Extraction</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial 11: Unified Driven-Modal Hamiltonian Extraction</a></li>
 </ul>
 </div>
@@ -637,734 +637,400 @@
                   
   <section id="Tutorial-11:-Unified-Driven-Modal-Hamiltonian-Extraction">
 <h1>Tutorial 11: Unified Driven-Modal Hamiltonian Extraction<a class="headerlink" href="#Tutorial-11:-Unified-Driven-Modal-Hamiltonian-Extraction" title="Link to this heading">#</a></h1>
-<p><strong>Note from Shanto: I made AI write these tutorials and they are terrible…. will make them easy to read for humans soon</strong></p>
-<p>This tutorial combines the cavity-postprocessing and qubit-admittance ideas into one end-to-end workflow:</p>
+<p>In Tutorial 10 we used driven-modal HFSS to reproduce capacitance-style quantities. Here we use the same idea for a complete qubit-cavity system. The point of this tutorial is not just to press “solve” in Ansys. The point is to show how SQuADDS turns one database geometry into one electromagnetic network model, and how different post-processing views of that same network recover the Hamiltonian parameters users care about.</p>
+<p>The workflow is:</p>
 <ol class="arabic simple">
-<li><p>query a quarter/half-wave qubit-cavity design from SQuADDS for a target Hamiltonian point,</p></li>
-<li><p>render that geometry into HFSS once,</p></li>
-<li><p>run a single driven-modal setup with three named sweeps:</p>
-<ul class="simple">
-<li><p>a fine qubit band,</p></li>
-<li><p>a coarse bridge band, and</p></li>
-<li><p>a fine resonator band,</p></li>
-</ul>
-</li>
-<li><p>extract the qubit frequency and anharmonicity from the JJ-port admittance,</p></li>
-<li><p>extract the resonator frequency and linewidth from the loaded <code class="docutils literal notranslate"><span class="pre">S21</span></code> notch,</p></li>
-<li><p>recover <code class="docutils literal notranslate"><span class="pre">chi</span></code> and <code class="docutils literal notranslate"><span class="pre">g</span></code>, and</p></li>
-<li><p>compare the full driven-modal Hamiltonian against the SQuADDS reference.</p></li>
+<li><p>ask SQuADDS for a qubit-cavity design near a target Hamiltonian,</p></li>
+<li><p>render that one coupled geometry into HFSS,</p></li>
+<li><p>sweep finely around the qubit band and the resonator band,</p></li>
+<li><p>extract <span class="math notranslate nohighlight">\(f_q\)</span>, <span class="math notranslate nohighlight">\(\alpha\)</span>, <span class="math notranslate nohighlight">\(f_r\)</span>, <span class="math notranslate nohighlight">\(\kappa\)</span>, <span class="math notranslate nohighlight">\(\chi\)</span>, and <span class="math notranslate nohighlight">\(g\)</span>, and</p></li>
+<li><p>compare the driven-modal result against the SQuADDS reference row.</p></li>
 </ol>
-<p>The point of this tutorial is not just to produce one number. It shows the user how the same raw 3-port HFSS dataset can be post-processed in two different ways:</p>
+<p>The docsite labels this as Tutorial 11, because the intermediate development notebooks are intentionally not part of the public tutorial sequence.</p>
+<p>The workflow is deliberately split into two phases:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">Y33</span></code> around the qubit band for <code class="docutils literal notranslate"><span class="pre">f_q</span></code> and <code class="docutils literal notranslate"><span class="pre">alpha</span></code></p></li>
-<li><p>loaded <code class="docutils literal notranslate"><span class="pre">S21</span></code> around the cavity band for <code class="docutils literal notranslate"><span class="pre">f_r</span></code>, <code class="docutils literal notranslate"><span class="pre">kappa</span></code>, <code class="docutils literal notranslate"><span class="pre">chi</span></code>, and <code class="docutils literal notranslate"><span class="pre">g</span></code></p></li>
+<li><p><strong>Simulation declaration</strong>: choose the geometry, layer stack, ports, adaptive setup, and frequency sweeps. This produces portable request objects.</p></li>
+<li><p><strong>Physics extraction</strong>: read the exported S/Y-parameters, terminate the unused ports in physically meaningful ways, and convert the resulting resonances into Hamiltonian parameters.</p></li>
 </ul>
-<section id="Physics-idea-and-software-idea">
-<h2>Physics idea and software idea<a class="headerlink" href="#Physics-idea-and-software-idea" title="Link to this heading">#</a></h2>
-<p>This tutorial is intentionally pedagogical in two directions at once.</p>
-<p><strong>Physics idea.</strong> A single 3-port driven-modal solve contains both the qubit-side and resonator-side linear response. We do not need separate electromagnetic geometries for the qubit and the cavity. Instead, we interrogate different parts of the same dataset:</p>
+<div class="admonition note"><p class="admonition-title"><p>Why this tutorial exists</p>
+</p><p><p>Earlier SQuADDS tutorials teach the traditional split workflow: capacitances from Q3D and mode frequencies/couplings from eigenmode simulations. This tutorial shows the driven-modal alternative. We render one coupled qubit-cavity-feedline network, keep all three physical ports in the exported HFSS network, and use post-processing to ask several physics questions of the same EM data.</p>
+</p></div><section id="Imports">
+<h2>Imports<a class="headerlink" href="#Imports" title="Link to this heading">#</a></h2>
+<p>The important point is that the notebook uses SQuADDS-level objects. We do not build Qiskit Metal components or Ansys COM calls by hand here.</p>
+<p>The imported helper functions are the public API surface for this tutorial:</p>
 <ul class="simple">
-<li><p>the JJ-port admittance around the qubit band, and</p></li>
-<li><p>the loaded feedline transmission around the cavity band.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">build_segmented_coupled_system_requests(...)</span></code> creates the HFSS request objects for the qubit, bridge, and resonator frequency windows.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">coupled_reference_summary(...)</span></code> normalizes the SQuADDS row into the reference Hamiltonian fields and JJ quantities needed for post-processing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default_hamiltonian_setup(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">segmented_hamiltonian_sweeps(...)</span></code> provide tested defaults, while still leaving the important knobs visible.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hamiltonian_comparison_table(...)</span></code> formats the final driven-modal versus SQuADDS comparison.</p></li>
 </ul>
-<p><strong>Software idea.</strong> The reusable SQuADDS driven-modal API should make that workflow explicit: one declared design, one declared layer stack, one setup, multiple named sweeps, and post-processing helpers that can be re-run locally from the saved artifacts without having to re-open HFSS.</p>
+<p>The lower-level heavy lifting is still visible through these objects: <code class="docutils literal notranslate"><span class="pre">DrivenModalSetupSpec</span></code> maps to the HFSS adaptive setup, <code class="docutils literal notranslate"><span class="pre">DrivenModalSweepSpec</span></code> maps to the exported frequency sweep, and the request payload contains the Qiskit Metal component options, layer stack, and port mapping.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">importlib.util</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analyzer</span><span class="p">,</span> <span class="n">SQuADDS_DB</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">build_segmented_coupled_system_requests</span><span class="p">,</span>
+    <span class="n">coupled_reference_summary</span><span class="p">,</span>
+    <span class="n">default_hamiltonian_setup</span><span class="p">,</span>
+    <span class="n">hamiltonian_comparison_table</span><span class="p">,</span>
+    <span class="n">segmented_hamiltonian_sweeps</span><span class="p">,</span>
+<span class="p">)</span>
+
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">display</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover - plain Python fallback for non-notebook execution</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">display</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">HTML</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">value</span>
-
-
-<span class="n">THIS_FILE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-<span class="n">TUTORIAL11_PATH</span> <span class="o">=</span> <span class="n">THIS_FILE</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">&quot;Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py&quot;</span><span class="p">)</span>
-<span class="n">TUTORIAL12_PATH</span> <span class="o">=</span> <span class="n">THIS_FILE</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">&quot;Tutorial-12_DrivenModal_Qubit_Port_Admittance.py&quot;</span><span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">load_module</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">spec</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">spec</span><span class="o">.</span><span class="n">loader</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not load module from </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">module_from_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
-    <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">module</span>
-
-
-<span class="n">T11</span> <span class="o">=</span> <span class="n">load_module</span><span class="p">(</span><span class="n">TUTORIAL11_PATH</span><span class="p">,</span> <span class="s2">&quot;tutorial11_dm&quot;</span><span class="p">)</span>
-<span class="n">T12</span> <span class="o">=</span> <span class="n">load_module</span><span class="p">(</span><span class="n">TUTORIAL12_PATH</span><span class="p">,</span> <span class="s2">&quot;tutorial12_dm&quot;</span><span class="p">)</span>
 <br/><br/><br/></pre></div>
 </div>
 </div>
 </section>
-<section id="Runtime-knobs">
-<h2>Runtime knobs<a class="headerlink" href="#Runtime-knobs" title="Link to this heading">#</a></h2>
-<p>The qubit and cavity bands are swept densely, while the middle band is only there to show how the same HFSS setup spans the full frequency interval between them. The single HFSS design therefore produces three response datasets that can later be stitched or analyzed independently.</p>
-</section>
-<section id="What-this-tutorial-is-trying-to-prove">
-<h2>What this tutorial is trying to prove<a class="headerlink" href="#What-this-tutorial-is-trying-to-prove" title="Link to this heading">#</a></h2>
-<p>The standard SQuADDS workflow recovers Hamiltonian parameters from a mix of Q3D, eigenmode, and transmon-side modeling. Here we test the stronger claim: one driven-modal HFSS geometry, one setup, and three carefully chosen sweeps can recover the same qubit-cavity Hamiltonian story in one place.</p>
-<p>We therefore keep the rendered system fixed and only change which frequency window and which post-processing view we use:</p>
+<section id="Query-a-Target-Design">
+<h2>Query a Target Design<a class="headerlink" href="#Query-a-Target-Design" title="Link to this heading">#</a></h2>
+<p>This follows the same pattern as Tutorial 1 and Tutorial 5: select a system, choose target Hamiltonian parameters, and let the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> return the best matching SQuADDS design.</p>
+<p>The database calls below define the design family:</p>
 <ul class="simple">
-<li><p>JJ-port admittance around the qubit mode for <code class="docutils literal notranslate"><span class="pre">f_q</span></code> and <code class="docutils literal notranslate"><span class="pre">alpha</span></code></p></li>
-<li><p>loaded cavity transmission around the resonator mode for <code class="docutils literal notranslate"><span class="pre">f_r</span></code>, <code class="docutils literal notranslate"><span class="pre">kappa</span></code>, <code class="docutils literal notranslate"><span class="pre">chi</span></code>, and <code class="docutils literal notranslate"><span class="pre">g</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_system([&quot;qubit&quot;,</span> <span class="pre">&quot;cavity_claw&quot;])</span></code> asks for a coupled qubit-resonator dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_qubit(&quot;TransmonCross&quot;)</span></code> fixes the transmon layout component.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_cavity_claw(&quot;RouteMeander&quot;)</span></code> fixes the readout resonator family.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_resonator_type(&quot;quarter&quot;)</span></code> selects a quarter-wave resonator.</p></li>
 </ul>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<p><code class="docutils literal notranslate"><span class="pre">Analyzer.find_closest(...)</span></code> then searches that system dataframe for rows whose simulated Hamiltonian parameters are close to <code class="docutils literal notranslate"><span class="pre">target_params</span></code>. The returned row contains both the Qiskit Metal design options and the reference simulation results that we will compare against later.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">RESONATOR_TYPE</span> <span class="o">=</span> <span class="s2">&quot;quarter&quot;</span>
-<span class="n">REFERENCE_INDEX</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">RUN_TAG</span> <span class="o">=</span> <span class="s2">&quot;v1&quot;</span>
-<span class="n">FORCE_RERUN</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="n">MAX_SOLVE_ATTEMPTS</span> <span class="o">=</span> <span class="mi">3</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
 
-<span class="n">QUBIT_BAND_PADDING_GHZ</span> <span class="o">=</span> <span class="mf">0.5</span>
-<span class="n">QUBIT_BAND_COUNT</span> <span class="o">=</span> <span class="mi">22000</span>
-<span class="n">BRIDGE_BAND_COUNT</span> <span class="o">=</span> <span class="mi">4001</span>
-<span class="n">RESONATOR_BAND_PADDING_GHZ</span> <span class="o">=</span> <span class="mf">0.5</span>
-<span class="n">RESONATOR_BAND_COUNT</span> <span class="o">=</span> <span class="mi">22000</span>
+<span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stdout</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()):</span>
+    <span class="n">system_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
 
-<span class="n">RUNTIME_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorials/runtime/drivenmodal_combined_hamiltonian&quot;</span><span class="p">)</span>
-<span class="n">CHECKPOINT_ROOT</span> <span class="o">=</span> <span class="n">RUNTIME_ROOT</span> <span class="o">/</span> <span class="s2">&quot;checkpoints&quot;</span>
-<span class="n">HFSS_PROJECT_ROOT</span> <span class="o">=</span> <span class="n">RUNTIME_ROOT</span> <span class="o">/</span> <span class="s2">&quot;hfss_projects&quot;</span>
-<span class="n">LOCAL_ANALYSIS_ROOT</span> <span class="o">=</span> <span class="n">RUNTIME_ROOT</span> <span class="o">/</span> <span class="s2">&quot;local_analysis&quot;</span>
+<span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">4.0</span><span class="p">,</span>
+    <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">130</span><span class="p">,</span>
+    <span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">8.9</span><span class="p">,</span>
+    <span class="s2">&quot;kappa_kHz&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+    <span class="s2">&quot;g_MHz&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="s2">&quot;resonator_type&quot;</span><span class="p">:</span> <span class="s2">&quot;quarter&quot;</span><span class="p">,</span>
+<span class="p">}</span>
 
+<span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stdout</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()):</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span> <span class="n">num_top</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">)</span>
+<span class="n">reference_row</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">configure_tutorial11_runtime</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">module</span><span class="o">.</span><span class="n">RESONATOR_TYPE</span> <span class="o">=</span> <span class="n">RESONATOR_TYPE</span>
-    <span class="n">module</span><span class="o">.</span><span class="n">REFERENCE_INDEX</span> <span class="o">=</span> <span class="n">REFERENCE_INDEX</span>
-    <span class="n">module</span><span class="o">.</span><span class="n">RUN_TAG</span> <span class="o">=</span> <span class="n">RUN_TAG</span>
-    <span class="n">module</span><span class="o">.</span><span class="n">FORCE_RERUN</span> <span class="o">=</span> <span class="n">FORCE_RERUN</span>
-    <span class="n">module</span><span class="o">.</span><span class="n">RUNTIME_ROOT</span> <span class="o">=</span> <span class="n">RUNTIME_ROOT</span>
-    <span class="n">module</span><span class="o">.</span><span class="n">CHECKPOINT_ROOT</span> <span class="o">=</span> <span class="n">CHECKPOINT_ROOT</span>
-    <span class="n">module</span><span class="o">.</span><span class="n">HFSS_PROJECT_ROOT</span> <span class="o">=</span> <span class="n">HFSS_PROJECT_ROOT</span>
-    <span class="n">module</span><span class="o">.</span><span class="n">LOCAL_ANALYSIS_ROOT</span> <span class="o">=</span> <span class="n">LOCAL_ANALYSIS_ROOT</span>
+<span class="n">display</span><span class="p">(</span><span class="n">system_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+<span class="n">display</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+   index_qc  ...                                     design_options
+0         0  ...  {&#39;cavity_claw_options&#39;: {&#39;coupler_type&#39;: &#39;CLT&#39;...
+1         0  ...  {&#39;cavity_claw_options&#39;: {&#39;coupler_type&#39;: &#39;CLT&#39;...
+2         0  ...  {&#39;cavity_claw_options&#39;: {&#39;coupler_type&#39;: &#39;CLT&#39;...
+3         0  ...  {&#39;cavity_claw_options&#39;: {&#39;coupler_type&#39;: &#39;CLT&#39;...
+4         0  ...  {&#39;cavity_claw_options&#39;: {&#39;coupler_type&#39;: &#39;CLT&#39;...
 
+[5 rows x 31 columns]
+       index_qc  cross_to_ground  ...  anharmonicity_MHz      g_MHz
+16088      1402        159.52633  ...        -127.794520  50.116660
+16093      1402        159.52633  ...        -127.794520  50.150523
+14776      1288        153.31148  ...        -133.068055  51.685967
 
-<span class="n">configure_tutorial11_runtime</span><span class="p">(</span><span class="n">T11</span><span class="p">)</span>
+[3 rows x 36 columns]
+</pre></div></div>
+</div>
+</section>
+<section id="Build-the-Driven-Modal-Requests">
+<h2>Build the Driven-Modal Requests<a class="headerlink" href="#Build-the-Driven-Modal-Requests" title="Link to this heading">#</a></h2>
+<p>A coupled-system driven-modal solve is a 3-port network:</p>
+<ol class="arabic simple">
+<li><p>feedline input,</p></li>
+<li><p>feedline output, and</p></li>
+<li><p>the Josephson junction port.</p></li>
+</ol>
+<p>These are not three separate devices. They are three ports on one rendered qubit-claw-resonator-feedline geometry. SQuADDS uses the port mapping inside the request to connect the feedline ends and the JJ cut to HFSS lumped ports. The ports are created as 50 ohm renormalizable lumped ports. That reference impedance is how HFSS normalizes the exported S-parameters; because the full multiport network is exported, SQuADDS can later change external loads, short/open a port, or attach a
+Josephson-junction surrogate in post-processing without rerendering the geometry.</p>
+<p><code class="docutils literal notranslate"><span class="pre">coupled_reference_summary(reference_row)</span></code> extracts the database reference values in a consistent unit convention:</p>
+<ul class="simple">
+<li><p>qubit frequency in GHz,</p></li>
+<li><p>anharmonicity in MHz,</p></li>
+<li><p>cavity frequency in GHz,</p></li>
+<li><p>linewidth <span class="math notranslate nohighlight">\(\kappa / 2\pi\)</span> in MHz,</p></li>
+<li><p>coupling <span class="math notranslate nohighlight">\(g / 2\pi\)</span> in MHz, and</p></li>
+<li><p>the bare and state-dependent JJ inductance values used for terminations.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">default_hamiltonian_setup(...)</span></code> controls the adaptive mesh. The important knobs are <code class="docutils literal notranslate"><span class="pre">freq_ghz</span></code>, <code class="docutils literal notranslate"><span class="pre">max_delta_s</span></code>, <code class="docutils literal notranslate"><span class="pre">min_converged</span></code>, <code class="docutils literal notranslate"><span class="pre">max_passes</span></code>, and <code class="docutils literal notranslate"><span class="pre">basis_order</span></code>. The default centers the adaptive solve near the expected cavity frequency and uses the production driven-modal settings validated for this flow: <code class="docutils literal notranslate"><span class="pre">max_delta_s=0.005</span></code>, <code class="docutils literal notranslate"><span class="pre">min_converged=7</span></code>, <code class="docutils literal notranslate"><span class="pre">basis_order=-1</span></code> (mixed order), and up to 20 adaptive passes.</p>
+<p><code class="docutils literal notranslate"><span class="pre">segmented_hamiltonian_sweeps(...)</span></code> controls the exported frequency samples. This is where the dense/coarse/dense structure is declared:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">qubit_count</span></code> samples the qubit band where the JJ-port admittance crossing determines <span class="math notranslate nohighlight">\(f_q\)</span> and <span class="math notranslate nohighlight">\(\alpha\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bridge_count</span></code> samples the middle band more coarsely. It keeps the exported network continuous without spending most of the solve budget away from the resonances.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resonator_count</span></code> samples the readout band where the feedline response gives <span class="math notranslate nohighlight">\(f_r\)</span>, <span class="math notranslate nohighlight">\(\kappa\)</span>, <span class="math notranslate nohighlight">\(\chi\)</span>, and <span class="math notranslate nohighlight">\(g\)</span>.</p></li>
+</ul>
+<p>The dataframe printed after the cell is worth reading carefully: it is the explicit frequency plan that will be sent to HFSS.</p>
+<div class="admonition important"><p class="admonition-title"><p>One EM model, segmented sweeps</p>
+</p><p><p>The physics object is one 3-port coupled system. SQuADDS stores the qubit, bridge, and resonator windows as separate request records so each window can be checkpointed, inspected, and rerun independently. On the Ansys side these records use the same geometry, layer stack, ports, and adaptive setup.</p>
+</p></div><div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reference</span> <span class="o">=</span> <span class="n">coupled_reference_summary</span><span class="p">(</span><span class="n">reference_row</span><span class="p">)</span>
+
+<span class="n">setup</span> <span class="o">=</span> <span class="n">default_hamiltonian_setup</span><span class="p">(</span><span class="n">freq_ghz</span><span class="o">=</span><span class="n">reference</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">])</span>
+<span class="n">sweeps</span> <span class="o">=</span> <span class="n">segmented_hamiltonian_sweeps</span><span class="p">(</span>
+    <span class="n">reference</span><span class="p">,</span>
+    <span class="n">qubit_count</span><span class="o">=</span><span class="mi">22_000</span><span class="p">,</span>
+    <span class="n">bridge_count</span><span class="o">=</span><span class="mi">4_001</span><span class="p">,</span>
+    <span class="n">resonator_count</span><span class="o">=</span><span class="mi">22_000</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">requests</span> <span class="o">=</span> <span class="n">build_segmented_coupled_system_requests</span><span class="p">(</span>
+    <span class="n">reference_row</span><span class="p">,</span>
+    <span class="n">resonator_type</span><span class="o">=</span><span class="s2">&quot;quarter&quot;</span><span class="p">,</span>
+    <span class="n">run_id</span><span class="o">=</span><span class="s2">&quot;tutorial11-quarter-wave&quot;</span><span class="p">,</span>
+    <span class="n">reference</span><span class="o">=</span><span class="n">reference</span><span class="p">,</span>
+    <span class="n">setup</span><span class="o">=</span><span class="n">setup</span><span class="p">,</span>
+    <span class="n">sweeps</span><span class="o">=</span><span class="n">sweeps</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">sweep_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;band&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;start_GHz&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">start_ghz</span><span class="p">,</span>
+            <span class="s2">&quot;stop_GHz&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">stop_ghz</span><span class="p">,</span>
+            <span class="s2">&quot;points&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">count</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">sweep_type</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">request</span> <span class="ow">in</span> <span class="n">requests</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">sweep_table</span><span class="p">)</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+             band  start_GHz  stop_GHz  points           type
+0      qubit_band   3.468333  4.468333   22000  Interpolating
+1     bridge_band   4.468333  8.576342    4001           Fast
+2  resonator_band   8.576342  9.576342   22000  Interpolating
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">setup</span><span class="o">.</span><span class="n">to_renderer_kwargs</span><span class="p">()])</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;HFSS setup value&quot;</span><span class="p">}))</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+                HFSS setup value
+name            DrivenModalSetup
+freq_ghz                9.076342
+max_delta_s                0.005
+max_passes                    20
+min_passes                     2
+min_converged                  7
+pct_refinement                30
+basis_order                   -1
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">port_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">port_name</span><span class="p">,</span> <span class="o">**</span><span class="n">port_spec</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_spec</span> <span class="ow">in</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">design_payload</span><span class="p">[</span><span class="s2">&quot;port_mapping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">port_table</span><span class="p">)</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+              port  ...                                           metadata
+0   feedline_input  ...                                                NaN
+1  feedline_output  ...                                                NaN
+2               jj  ...  {&#39;hfss_target&#39;: &#39;junction&#39;, &#39;draw_inductor&#39;: F...
+
+[3 rows x 4 columns]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">jj_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;EJ_GHz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;ej_ghz&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;EC_GHz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;ec_ghz&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;LJ_bare_nH&quot;</span><span class="p">:</span> <span class="mf">1e9</span> <span class="o">*</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;lj_bare_h&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;LJ_ground_nH&quot;</span><span class="p">:</span> <span class="mf">1e9</span> <span class="o">*</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;lj_ground_h&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;LJ_excited_nH&quot;</span><span class="p">:</span> <span class="mf">1e9</span> <span class="o">*</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;lj_excited_h&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">jj_table</span><span class="p">)</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+      EJ_GHz    EC_GHz  LJ_bare_nH  LJ_ground_nH  LJ_excited_nH
+0  16.346151  0.118811        10.0     10.641689      12.209995
+</pre></div></div>
+</div>
+</section>
+<section id="Run-the-Simulation">
+<h2>Run the Simulation<a class="headerlink" href="#Run-the-Simulation" title="Link to this heading">#</a></h2>
+<p>A production driven-modal sweep can take hours, so this notebook uses the environment variable <code class="docutils literal notranslate"><span class="pre">SQUADDS_RUN_ANSYS</span></code> as the switch between documentation mode and solver mode. With <code class="docutils literal notranslate"><span class="pre">SQUADDS_RUN_ANSYS=1</span></code>, the cell renders and solves the three frequency windows on the Windows Ansys workstation. With the variable unset, the notebook remains executable on machines without Ansys and still shows the exact sweep plan and reference target.</p>
+<p><code class="docutils literal notranslate"><span class="pre">run_drivenmodal_request(...)</span></code> is the notebook-facing entry point for the Ansys execution contract. For each request, the Ansys executor uses that contract to:</p>
+<ul class="simple">
+<li><p>builds the Qiskit Metal <code class="docutils literal notranslate"><span class="pre">QubitCavity</span></code> layout from the selected SQuADDS row,</p></li>
+<li><p>applies the SQuADDS HFSS layer-stack preset with PEC metal and cryogenic silicon metadata,</p></li>
+<li><p>renders the coupled system into a fresh HFSS driven-modal design,</p></li>
+<li><p>places the two feedline ports and the JJ lumped port,</p></li>
+<li><p>creates the adaptive setup and requested sweep, and</p></li>
+<li><p>exports Touchstone/Y-parameter data plus a manifest.</p></li>
+</ul>
+<p>The Touchstone export is where <code class="docutils literal notranslate"><span class="pre">scikit-rf</span></code> enters the workflow. HFSS gives us frequency-dependent S/Y/Z matrices; <code class="docutils literal notranslate"><span class="pre">scikit-rf</span></code> preserves the frequency axis, port order, complex S-parameters, and reference impedance metadata in a standard multiport <code class="docutils literal notranslate"><span class="pre">Network</span></code>. SQuADDS uses that representation to write <code class="docutils literal notranslate"><span class="pre">.s3p</span></code> files, reduce the 3-port network into loaded 2-port or 1-port views, and keep the port normalization explicit rather than hidden in a plot.</p>
+<p>The run writes a self-contained provenance bundle under <code class="docutils literal notranslate"><span class="pre">CHECKPOINT_ROOT</span></code>. That bundle contains the request payload, layer stack, rendered-geometry diagnostics, exported network data, and post-processing tables. The bundle is what lets the physics extraction be rerun without launching HFSS again.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">RUN_ANSYS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SQUADDS_RUN_ANSYS&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span>
+<span class="n">CHECKPOINT_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorials/runtime/drivenmodal_combined_hamiltonian/checkpoints&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">RUN_ANSYS</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.hfss_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_drivenmodal_request</span>
+
+    <span class="n">prepared_runs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">band</span><span class="p">:</span> <span class="n">run_drivenmodal_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">checkpoint_dir</span><span class="o">=</span><span class="n">CHECKPOINT_ROOT</span><span class="p">)</span> <span class="k">for</span> <span class="n">band</span><span class="p">,</span> <span class="n">request</span> <span class="ow">in</span> <span class="n">requests</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">band</span><span class="p">,</span> <span class="n">prepared</span> <span class="ow">in</span> <span class="n">prepared_runs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">prepared</span><span class="p">[</span><span class="s1">&#39;manifest&#39;</span><span class="p">][</span><span class="s1">&#39;run_dir&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <br/><br/><br/></pre></div>
 </div>
 </div>
 </section>
-<section id="Helpers">
-<h2>Helpers<a class="headerlink" href="#Helpers" title="Link to this heading">#</a></h2>
-<section id="Query-a-target-design-from-SQuADDS">
-<h3>Query a target design from SQuADDS<a class="headerlink" href="#Query-a-target-design-from-SQuADDS" title="Link to this heading">#</a></h3>
-<p>The tutorial starts from the same kind of reference row a user would query in practice: pick a quarter-wave or half-wave family, choose a database entry whose Hamiltonian is close to the target, and use that exact geometry as the driven-modal validation case.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<section id="Post-Process-the-Same-Network">
+<h2>Post-Process the Same Network<a class="headerlink" href="#Post-Process-the-Same-Network" title="Link to this heading">#</a></h2>
+<p>The HFSS output is a frequency-dependent 3-port network. SQuADDS post-processes the same exported data in three views. The views are different mathematical reductions of one exported network, not three unrelated simulations.</p>
+<section id="1.-Resonator-frequency-and-kappa">
+<h3>1. Resonator frequency and kappa<a class="headerlink" href="#1.-Resonator-frequency-and-kappa" title="Link to this heading">#</a></h3>
+<p>The readout mode is read from feedline transmission. SQuADDS terminates the JJ port with a chosen JJ load, converts the reduced admittance back to a 2-port S-parameter network, and searches the loaded <span class="math notranslate nohighlight">\(S_{21}\)</span> response for the resonance feature. The feature position gives <span class="math notranslate nohighlight">\(f_r\)</span> and the linewidth gives <span class="math notranslate nohighlight">\(\kappa\)</span>.</p>
+</section>
+<section id="2.-Qubit-frequency-and-anharmonicity">
+<h3>2. Qubit frequency and anharmonicity<a class="headerlink" href="#2.-Qubit-frequency-and-anharmonicity" title="Link to this heading">#</a></h3>
+<p>The qubit mode is read from the JJ port. Raw Y-parameters assume all other ports are shorted, so SQuADDS first terminates the feedline ports with the intended external loads using a Schur-complement network reduction. It then adds the linear JJ surrogate admittance</p>
+<div class="math notranslate nohighlight">
+\[Y_\mathrm{JJ}(\omega) = \frac{1}{R_J} + j\omega C_J + \frac{1}{j\omega L_J}.\]</div>
+<p>The linear qubit resonance is the positive-slope zero crossing of <span class="math notranslate nohighlight">\(\operatorname{Im}(Y_\mathrm{env} + Y_\mathrm{JJ})\)</span>. The local slope gives the effective shunt capacitance seen by the junction,</p>
+<div class="math notranslate nohighlight">
+\[C_\Sigma = \frac{1}{2}\frac{\partial \operatorname{Im}(Y)}{\partial \omega}.\]</div>
+<p>SQuADDS then passes <span class="math notranslate nohighlight">\(E_J\)</span> and <span class="math notranslate nohighlight">\(E_C\)</span> to <code class="docutils literal notranslate"><span class="pre">scqubits.Transmon</span></code>. We use scqubits for <span class="math notranslate nohighlight">\(f_q\)</span> and <span class="math notranslate nohighlight">\(\alpha\)</span> rather than relying on a hand-written transmon expansion. The state-dependent inductances in the table above also come from scqubits: SQuADDS evaluates the transmon <code class="docutils literal notranslate"><span class="pre">cos_phi_operator</span></code> in the ground and excited eigenstates and uses those expectation values to turn the bare Josephson inductance into effective ground/excited loads.</p>
+</section>
+<section id="3.-Coupling-from-chi">
+<h3>3. Coupling from chi<a class="headerlink" href="#3.-Coupling-from-chi" title="Link to this heading">#</a></h3>
+<p>SQuADDS repeats the feedline reduction twice: once with the ground-state effective inductance and once with the excited-state effective inductance. The resonance positions of those two <span class="math notranslate nohighlight">\(S_{21}\)</span> traces give the dispersive shift <span class="math notranslate nohighlight">\(\chi\)</span>. With <span class="math notranslate nohighlight">\(f_q\)</span>, <span class="math notranslate nohighlight">\(\alpha\)</span>, <span class="math notranslate nohighlight">\(f_r\)</span>, and <span class="math notranslate nohighlight">\(\chi\)</span> known, SQuADDS estimates <span class="math notranslate nohighlight">\(g\)</span> using the dispersive transmon relation, including the non-RWA correction used by the helper.</p>
+<p>The table below is the Hamiltonian-level object users should expect from this workflow. In documentation mode it is initialized from the selected SQuADDS reference row so the notebook can be rendered without HFSS. In solver mode the same table is generated from the exported driven-modal network data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">ensure_runtime_dirs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">CHECKPOINT_ROOT</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">HFSS_PROJECT_ROOT</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">LOCAL_ANALYSIS_ROOT</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">drivenmodal_hamiltonian</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;kappa_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;kappa_mhz&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;g_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;g_mhz&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;chi_mhz&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span>
+<span class="p">}</span>
 
-
-<span class="k">def</span><span class="w"> </span><span class="nf">dump_json</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">))</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">build_combined_setup</span><span class="p">(</span><span class="n">reference_summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
-    <span class="k">return</span> <span class="n">T11</span><span class="o">.</span><span class="n">DrivenModalSetupSpec</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SETUP_TEMPLATE</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-        <span class="n">freq_ghz</span><span class="o">=</span><span class="n">reference_summary</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">],</span>
-        <span class="n">max_delta_s</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SETUP_TEMPLATE</span><span class="o">.</span><span class="n">max_delta_s</span><span class="p">,</span>
-        <span class="n">max_passes</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SETUP_TEMPLATE</span><span class="o">.</span><span class="n">max_passes</span><span class="p">,</span>
-        <span class="n">min_passes</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SETUP_TEMPLATE</span><span class="o">.</span><span class="n">min_passes</span><span class="p">,</span>
-        <span class="n">min_converged</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SETUP_TEMPLATE</span><span class="o">.</span><span class="n">min_converged</span><span class="p">,</span>
-        <span class="n">pct_refinement</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SETUP_TEMPLATE</span><span class="o">.</span><span class="n">pct_refinement</span><span class="p">,</span>
-        <span class="n">basis_order</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SETUP_TEMPLATE</span><span class="o">.</span><span class="n">basis_order</span><span class="p">,</span>
-    <span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">build_segmented_sweeps</span><span class="p">(</span><span class="n">reference_summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-    <span class="n">qubit_center</span> <span class="o">=</span> <span class="n">reference_summary</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">]</span>
-    <span class="n">resonator_center</span> <span class="o">=</span> <span class="n">reference_summary</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">]</span>
-    <span class="n">qubit_stop</span> <span class="o">=</span> <span class="n">qubit_center</span> <span class="o">+</span> <span class="n">QUBIT_BAND_PADDING_GHZ</span>
-    <span class="n">resonator_start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">qubit_stop</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">resonator_center</span> <span class="o">-</span> <span class="n">RESONATOR_BAND_PADDING_GHZ</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;qubit_band&quot;</span><span class="p">:</span> <span class="n">T11</span><span class="o">.</span><span class="n">DrivenModalSweepSpec</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;QubitFineSweep&quot;</span><span class="p">,</span>
-            <span class="n">start_ghz</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">qubit_center</span> <span class="o">-</span> <span class="n">QUBIT_BAND_PADDING_GHZ</span><span class="p">),</span>
-            <span class="n">stop_ghz</span><span class="o">=</span><span class="n">qubit_stop</span><span class="p">,</span>
-            <span class="n">count</span><span class="o">=</span><span class="n">QUBIT_BAND_COUNT</span><span class="p">,</span>
-            <span class="n">sweep_type</span><span class="o">=</span><span class="s2">&quot;Interpolating&quot;</span><span class="p">,</span>
-            <span class="n">save_fields</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">interpolation_tol</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SWEEP_TEMPLATE</span><span class="o">.</span><span class="n">interpolation_tol</span><span class="p">,</span>
-            <span class="n">interpolation_max_solutions</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SWEEP_TEMPLATE</span><span class="o">.</span><span class="n">interpolation_max_solutions</span><span class="p">,</span>
-        <span class="p">),</span>
-        <span class="s2">&quot;bridge_band&quot;</span><span class="p">:</span> <span class="n">T11</span><span class="o">.</span><span class="n">DrivenModalSweepSpec</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;BridgeSweep&quot;</span><span class="p">,</span>
-            <span class="n">start_ghz</span><span class="o">=</span><span class="n">qubit_stop</span><span class="p">,</span>
-            <span class="n">stop_ghz</span><span class="o">=</span><span class="n">resonator_start</span><span class="p">,</span>
-            <span class="n">count</span><span class="o">=</span><span class="n">BRIDGE_BAND_COUNT</span><span class="p">,</span>
-            <span class="n">sweep_type</span><span class="o">=</span><span class="s2">&quot;Fast&quot;</span><span class="p">,</span>
-            <span class="n">save_fields</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">),</span>
-        <span class="s2">&quot;resonator_band&quot;</span><span class="p">:</span> <span class="n">T11</span><span class="o">.</span><span class="n">DrivenModalSweepSpec</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ResonatorFineSweep&quot;</span><span class="p">,</span>
-            <span class="n">start_ghz</span><span class="o">=</span><span class="n">resonator_start</span><span class="p">,</span>
-            <span class="n">stop_ghz</span><span class="o">=</span><span class="n">resonator_center</span> <span class="o">+</span> <span class="n">RESONATOR_BAND_PADDING_GHZ</span><span class="p">,</span>
-            <span class="n">count</span><span class="o">=</span><span class="n">RESONATOR_BAND_COUNT</span><span class="p">,</span>
-            <span class="n">sweep_type</span><span class="o">=</span><span class="s2">&quot;Interpolating&quot;</span><span class="p">,</span>
-            <span class="n">save_fields</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">interpolation_tol</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SWEEP_TEMPLATE</span><span class="o">.</span><span class="n">interpolation_tol</span><span class="p">,</span>
-            <span class="n">interpolation_max_solutions</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">SWEEP_TEMPLATE</span><span class="o">.</span><span class="n">interpolation_max_solutions</span><span class="p">,</span>
-        <span class="p">),</span>
-    <span class="p">}</span>
+<span class="n">display</span><span class="p">(</span><span class="n">hamiltonian_comparison_table</span><span class="p">(</span><span class="n">drivenmodal</span><span class="o">=</span><span class="n">drivenmodal_hamiltonian</span><span class="p">,</span> <span class="n">squadds</span><span class="o">=</span><span class="n">reference</span><span class="p">))</span>
 <br/><br/><br/></pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+               quantity  drivenmodal     squadds  percent_error
+0   qubit_frequency_ghz     3.968333    3.968333            0.0
+1     anharmonicity_mhz  -127.794520 -127.794520           -0.0
+2  cavity_frequency_ghz     9.076342    9.076342            0.0
+3             kappa_mhz     0.299441    0.299441            0.0
+4                 g_mhz    50.116660   50.116660            0.0
+5               chi_mhz          NaN         NaN            NaN
+</pre></div></div>
+</div>
 </section>
-<section id="Why-the-sweep-is-segmented">
-<h3>Why the sweep is segmented<a class="headerlink" href="#Why-the-sweep-is-segmented" title="Link to this heading">#</a></h3>
-<p>The qubit and cavity signatures live on very different scales. A single dense sweep over the whole band would be expensive and still waste most of its points where we do not need them. Instead, we use:</p>
+</section>
+<section id="What-the-Comparison-Means">
+<h2>What the Comparison Means<a class="headerlink" href="#What-the-Comparison-Means" title="Link to this heading">#</a></h2>
+<p>The SQuADDS row is the pre-simulated reference. The driven-modal row is a full-wave re-simulation of the same geometry with a different electromagnetic observable.</p>
+<p>A good result should satisfy three sanity checks:</p>
+<ol class="arabic simple">
+<li><p>the rendered HFSS geometry includes the qubit, claw, resonator, and feedline ports,</p></li>
+<li><p>silicon is set to the cryogenic value used by the Q3D/eigenmode flows, and</p></li>
+<li><p>the Hamiltonian table agrees within the accuracy expected from the sweep resolution and the chosen JJ termination model.</p></li>
+</ol>
+<p>If the resonator frequency shifts below the bare SQuADDS cavity frequency, that is not automatically a bug: the driven-modal model includes capacitive loading from the qubit.</p>
+<p>The port-normalization point is worth repeating. HFSS exports the network normalized to the 50 ohm port references. During post-processing SQuADDS converts between S and Y representations, changes the mathematical load on a port, and then converts back to whichever view is most useful. That is why we can ask “what does the feedline see when the JJ is in its ground-state inductive load?” without rerunning HFSS.</p>
+<p>Useful customization points:</p>
 <ul class="simple">
-<li><p>a fine qubit-band sweep for the admittance zero-crossing and its slope,</p></li>
-<li><p>a coarse bridge sweep through the middle of the spectrum, and</p></li>
-<li><p>a fine resonator-band sweep for notch fitting and qubit-state splitting.</p></li>
+<li><p>Increase <code class="docutils literal notranslate"><span class="pre">qubit_count</span></code> or <code class="docutils literal notranslate"><span class="pre">resonator_count</span></code> when the resonance is narrow and the fitted frequency is resolution-limited.</p></li>
+<li><p>Increase the frequency padding when the resonance is outside the expected band.</p></li>
+<li><p>Use a finite <code class="docutils literal notranslate"><span class="pre">cj_f</span></code> or <code class="docutils literal notranslate"><span class="pre">rj_ohms</span></code> in the local post-processing if you want a fuller Dolan-junction surrogate. The EM simulation still supplies the large geometric capacitance of the transmon pads.</p></li>
+<li><p>Keep the layer-stack preset aligned with the Q3D/eigenmode flows before comparing numbers; material drift is an easy way to create misleading Hamiltonian disagreement.</p></li>
 </ul>
-<p>All three sweeps are executed on the same rendered HFSS design, so the geometry, materials, boundaries, and seed meshes stay consistent.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">build_request</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">sweep</span><span class="p">,</span> <span class="n">run_suffix</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="n">request</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">build_request</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">setup</span><span class="o">=</span><span class="n">setup</span><span class="p">,</span> <span class="n">sweep</span><span class="o">=</span><span class="n">sweep</span><span class="p">,</span> <span class="n">run_suffix</span><span class="o">=</span><span class="n">run_suffix</span><span class="p">)</span>
-    <span class="n">request</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;run_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;run_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;tutorial11-&quot;</span><span class="p">,</span> <span class="s2">&quot;tutorial13-&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">request</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">export_current_sweep_artifacts</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">band_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-    <span class="n">band_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">s_df</span><span class="p">,</span> <span class="n">y_df</span><span class="p">,</span> <span class="n">z_df</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">get_all_Pparms_matrices</span><span class="p">(</span><span class="n">matrix_size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-    <span class="n">s_pickle</span> <span class="o">=</span> <span class="n">band_dir</span> <span class="o">/</span> <span class="s2">&quot;s_parameters.pkl&quot;</span>
-    <span class="n">y_pickle</span> <span class="o">=</span> <span class="n">band_dir</span> <span class="o">/</span> <span class="s2">&quot;y_parameters.pkl&quot;</span>
-    <span class="n">z_pickle</span> <span class="o">=</span> <span class="n">band_dir</span> <span class="o">/</span> <span class="s2">&quot;z_parameters.pkl&quot;</span>
-    <span class="n">raw_touchstone</span> <span class="o">=</span> <span class="n">band_dir</span> <span class="o">/</span> <span class="s2">&quot;raw_coupled_system.s3p&quot;</span>
-
-    <span class="n">s_df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">s_pickle</span><span class="p">)</span>
-    <span class="n">y_df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">y_pickle</span><span class="p">)</span>
-    <span class="n">z_df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">z_pickle</span><span class="p">)</span>
-    <span class="n">T11</span><span class="o">.</span><span class="n">write_touchstone_from_dataframe</span><span class="p">(</span><span class="n">s_df</span><span class="p">,</span> <span class="n">matrix_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">raw_touchstone</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;s_pickle&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">s_pickle</span><span class="p">),</span>
-        <span class="s2">&quot;y_pickle&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">y_pickle</span><span class="p">),</span>
-        <span class="s2">&quot;z_pickle&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">z_pickle</span><span class="p">),</span>
-        <span class="s2">&quot;raw_touchstone&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_touchstone</span><span class="p">),</span>
-    <span class="p">}</span>
-<br/></pre></div>
-</div>
-</div>
-</section>
-<section id="Qubit-extraction-from-the-JJ-port-admittance">
-<h3>Qubit extraction from the JJ-port admittance<a class="headerlink" href="#Qubit-extraction-from-the-JJ-port-admittance" title="Link to this heading">#</a></h3>
-<p>The qubit-band processing mirrors Tutorial 12. We reduce the 3-port environment to the JJ port with explicit feedline terminations, attach a small signal <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">||</span> <span class="pre">L</span> <span class="pre">||</span> <span class="pre">C</span></code> JJ model, and then locate the linear mode from the <code class="docutils literal notranslate"><span class="pre">Im[Y_total]</span> <span class="pre">=</span> <span class="pre">0</span></code> crossing. <code class="docutils literal notranslate"><span class="pre">scqubits</span></code> then converts that linear environment into the dressed <code class="docutils literal notranslate"><span class="pre">f01</span></code> and anharmonicity.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">postprocess_qubit_band</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">y_pickle_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-    <span class="n">artifacts_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-    <span class="n">reference_summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-    <span class="n">bare_lj_h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-    <span class="n">y_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="n">y_pickle_path</span><span class="p">)</span>
-    <span class="n">freqs_hz</span><span class="p">,</span> <span class="n">y_matrices</span> <span class="o">=</span> <span class="n">T12</span><span class="o">.</span><span class="n">parameter_dataframe_to_tensor</span><span class="p">(</span><span class="n">y_df</span><span class="p">,</span> <span class="n">matrix_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">parameter_prefix</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
-    <span class="n">y33_env</span> <span class="o">=</span> <span class="n">T12</span><span class="o">.</span><span class="n">reduce_terminated_port_admittance</span><span class="p">(</span>
-        <span class="n">y_matrices</span><span class="p">,</span>
-        <span class="n">target_port</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">terminated_port_impedances</span><span class="o">=</span><span class="p">{</span>
-            <span class="mi">0</span><span class="p">:</span> <span class="n">T12</span><span class="o">.</span><span class="n">FEEDLINE_TERMINATION_OHMS</span><span class="p">,</span>
-            <span class="mi">1</span><span class="p">:</span> <span class="n">T12</span><span class="o">.</span><span class="n">FEEDLINE_TERMINATION_OHMS</span><span class="p">,</span>
-        <span class="p">},</span>
-    <span class="p">)</span>
-    <span class="n">center_hint_hz</span> <span class="o">=</span> <span class="n">reference_summary</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e9</span>
-    <span class="n">extracted_summary</span><span class="p">,</span> <span class="n">extraction_warning</span> <span class="o">=</span> <span class="n">T12</span><span class="o">.</span><span class="n">summarize_selected_model_extraction</span><span class="p">(</span>
-        <span class="n">freqs_hz</span><span class="p">,</span>
-        <span class="n">y33_env</span><span class="p">,</span>
-        <span class="n">bare_lj_h</span><span class="o">=</span><span class="n">bare_lj_h</span><span class="p">,</span>
-        <span class="n">center_hint_hz</span><span class="o">=</span><span class="n">center_hint_hz</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">model_df</span> <span class="o">=</span> <span class="n">T12</span><span class="o">.</span><span class="n">build_model_sweep_dataframe</span><span class="p">(</span>
-        <span class="n">freqs_hz</span><span class="p">,</span>
-        <span class="n">y33_env</span><span class="p">,</span>
-        <span class="n">bare_lj_h</span><span class="o">=</span><span class="n">bare_lj_h</span><span class="p">,</span>
-        <span class="n">center_hint_hz</span><span class="o">=</span><span class="n">extracted_summary</span><span class="p">[</span><span class="s2">&quot;linear_resonance_ghz&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">model_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;qubit_model_sweep.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">agreement_df</span> <span class="o">=</span> <span class="n">T12</span><span class="o">.</span><span class="n">build_model_agreement_table</span><span class="p">(</span><span class="n">model_df</span><span class="p">,</span> <span class="n">reference_summary</span><span class="p">)</span>
-    <span class="n">agreement_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;qubit_model_agreement.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">termination_df</span> <span class="o">=</span> <span class="n">T12</span><span class="o">.</span><span class="n">build_feedline_termination_sensitivity</span><span class="p">(</span>
-        <span class="n">freqs_hz</span><span class="p">,</span>
-        <span class="n">y_matrices</span><span class="p">,</span>
-        <span class="n">bare_lj_h</span><span class="o">=</span><span class="n">bare_lj_h</span><span class="p">,</span>
-        <span class="n">center_hint_hz</span><span class="o">=</span><span class="n">extracted_summary</span><span class="p">[</span><span class="s2">&quot;linear_resonance_ghz&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">termination_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;feedline_termination_sensitivity.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">comparison_df</span> <span class="o">=</span> <span class="n">T12</span><span class="o">.</span><span class="n">build_comparison_rows</span><span class="p">(</span><span class="n">extracted_summary</span><span class="p">,</span> <span class="n">reference_summary</span><span class="p">)</span>
-    <span class="n">comparison_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;qubit_comparison.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">T12</span><span class="o">.</span><span class="n">save_plots</span><span class="p">(</span>
-        <span class="n">artifacts_dir</span><span class="o">=</span><span class="n">artifacts_dir</span><span class="p">,</span>
-        <span class="n">freqs_hz</span><span class="o">=</span><span class="n">freqs_hz</span><span class="p">,</span>
-        <span class="n">y33_env</span><span class="o">=</span><span class="n">y33_env</span><span class="p">,</span>
-        <span class="n">bare_lj_h</span><span class="o">=</span><span class="n">bare_lj_h</span><span class="p">,</span>
-        <span class="n">extracted</span><span class="o">=</span><span class="n">extracted_summary</span><span class="p">,</span>
-        <span class="n">model_df</span><span class="o">=</span><span class="n">model_df</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;reference&quot;</span><span class="p">:</span> <span class="n">reference_summary</span><span class="p">,</span>
-        <span class="s2">&quot;selected_model&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;jj_capacitance_fF&quot;</span><span class="p">:</span> <span class="n">T12</span><span class="o">.</span><span class="n">JJ_CAPACITANCE_FF</span><span class="p">,</span>
-            <span class="s2">&quot;jj_resistance_ohms&quot;</span><span class="p">:</span> <span class="n">T12</span><span class="o">.</span><span class="n">JJ_RESISTANCE_OHMS</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;selected_model_extracted&quot;</span><span class="p">:</span> <span class="n">extracted_summary</span><span class="p">,</span>
-        <span class="s2">&quot;reference_effective_capacitance_fF&quot;</span><span class="p">:</span> <span class="n">T12</span><span class="o">.</span><span class="n">reference_alpha_to_capacitance_fF</span><span class="p">(</span><span class="n">reference_summary</span><span class="p">),</span>
-        <span class="s2">&quot;comparison_rows&quot;</span><span class="p">:</span> <span class="n">comparison_df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;best_model_rows&quot;</span><span class="p">:</span> <span class="n">agreement_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;feedline_termination_rows&quot;</span><span class="p">:</span> <span class="n">termination_df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;qubit_extraction_warning&quot;</span><span class="p">:</span> <span class="n">extraction_warning</span><span class="p">,</span>
-        <span class="s2">&quot;artifacts&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;comparison_csv&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;qubit_comparison.csv&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;model_sweep_csv&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;qubit_model_sweep.csv&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;model_agreement_csv&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;qubit_model_agreement.csv&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;feedline_termination_csv&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;feedline_termination_sensitivity.csv&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;y33_zero_crossing_plot&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;y33_zero_crossing.html&quot;</span><span class="p">),</span>
-        <span class="p">},</span>
-    <span class="p">}</span>
-    <span class="n">dump_json</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;qubit_admittance_summary.json&quot;</span><span class="p">,</span> <span class="n">summary</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">summary</span>
-<br/></pre></div>
-</div>
-</div>
-</section>
-<section id="Resonator-extraction-from-the-loaded-cavity-response">
-<h3>Resonator extraction from the loaded cavity response<a class="headerlink" href="#Resonator-extraction-from-the-loaded-cavity-response" title="Link to this heading">#</a></h3>
-<p>The resonator-band processing mirrors Tutorial 11. We terminate the JJ port with the ground-state and excited-state inductances, convert the resulting reduced networks back to loaded two-port <code class="docutils literal notranslate"><span class="pre">S</span></code>-parameters, and fit the cavity notch. That gives us:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">f_r</span></code> from the loaded notch center,</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">kappa</span></code> from the linewidth,</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">chi</span></code> from the ground/excited resonance split, and</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">g</span></code> from the standard dispersive relation.</p></li>
-</ul>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">postprocess_resonator_band</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">run_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-    <span class="n">y_pickle_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-    <span class="n">raw_touchstone_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-    <span class="n">artifacts_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-    <span class="n">reference_summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-    <span class="n">y_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="n">y_pickle_path</span><span class="p">)</span>
-    <span class="n">freqs_hz</span><span class="p">,</span> <span class="n">y_matrices</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">parameter_dataframe_to_tensor</span><span class="p">(</span><span class="n">y_df</span><span class="p">,</span> <span class="n">matrix_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">parameter_prefix</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
-    <span class="n">ground_load</span> <span class="o">=</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freqs_hz</span> <span class="o">*</span> <span class="n">reference_summary</span><span class="p">[</span><span class="s2">&quot;lj_ground_h&quot;</span><span class="p">]</span>
-    <span class="n">excited_load</span> <span class="o">=</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freqs_hz</span> <span class="o">*</span> <span class="n">reference_summary</span><span class="p">[</span><span class="s2">&quot;lj_excited_h&quot;</span><span class="p">]</span>
-
-    <span class="n">y_ground</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">terminate_port_y</span><span class="p">(</span><span class="n">y_matrices</span><span class="p">,</span> <span class="n">terminated_port</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">load_impedance_ohms</span><span class="o">=</span><span class="n">ground_load</span><span class="p">)</span>
-    <span class="n">y_excited</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">terminate_port_y</span><span class="p">(</span><span class="n">y_matrices</span><span class="p">,</span> <span class="n">terminated_port</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">load_impedance_ohms</span><span class="o">=</span><span class="n">excited_load</span><span class="p">)</span>
-    <span class="n">s_ground</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">y_to_s</span><span class="p">(</span><span class="n">y_ground</span><span class="p">,</span> <span class="n">z0_ohms</span><span class="o">=</span><span class="mf">50.0</span><span class="p">)</span>
-    <span class="n">s_excited</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">y_to_s</span><span class="p">(</span><span class="n">y_excited</span><span class="p">,</span> <span class="n">z0_ohms</span><span class="o">=</span><span class="mf">50.0</span><span class="p">)</span>
-
-    <span class="n">ground_network</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">network_from_sweep</span><span class="p">(</span><span class="n">freqs_hz</span><span class="p">,</span> <span class="n">s_ground</span><span class="p">)</span>
-    <span class="n">excited_network</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">network_from_sweep</span><span class="p">(</span><span class="n">freqs_hz</span><span class="p">,</span> <span class="n">s_excited</span><span class="p">)</span>
-    <span class="n">ground_touchstone</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;loaded_ground.s2p&quot;</span>
-    <span class="n">excited_touchstone</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;loaded_excited.s2p&quot;</span>
-    <span class="n">T11</span><span class="o">.</span><span class="n">write_network_touchstone</span><span class="p">(</span><span class="n">ground_network</span><span class="p">,</span> <span class="n">ground_touchstone</span><span class="p">)</span>
-    <span class="n">T11</span><span class="o">.</span><span class="n">write_network_touchstone</span><span class="p">(</span><span class="n">excited_network</span><span class="p">,</span> <span class="n">excited_touchstone</span><span class="p">)</span>
-
-    <span class="n">ground_metrics</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">extract_notch_metrics</span><span class="p">(</span><span class="n">freqs_hz</span><span class="p">,</span> <span class="n">s_ground</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-    <span class="n">excited_metrics</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">extract_notch_metrics</span><span class="p">(</span><span class="n">freqs_hz</span><span class="p">,</span> <span class="n">s_excited</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-    <span class="n">postprocessing_warning</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">build_postprocessing_warning</span><span class="p">(</span><span class="n">ground_metrics</span><span class="p">,</span> <span class="n">excited_metrics</span><span class="p">)</span>
-    <span class="n">extracted</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
-        <span class="s2">&quot;kappa_mhz&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
-        <span class="s2">&quot;g_mhz&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
-        <span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">reference_summary</span><span class="p">[</span><span class="s2">&quot;f_q_hz&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e9</span><span class="p">,</span>
-        <span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">:</span> <span class="n">reference_summary</span><span class="p">[</span><span class="s2">&quot;alpha_hz&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span>
-        <span class="s2">&quot;chi_mhz&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
-    <span class="p">}</span>
-    <span class="k">if</span> <span class="n">postprocessing_warning</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">chi_hz</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">calculate_chi_hz</span><span class="p">(</span><span class="n">ground_metrics</span><span class="p">[</span><span class="s2">&quot;f_res_hz&quot;</span><span class="p">],</span> <span class="n">excited_metrics</span><span class="p">[</span><span class="s2">&quot;f_res_hz&quot;</span><span class="p">])</span>
-        <span class="n">loaded_q</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">calculate_loaded_q</span><span class="p">(</span><span class="n">f_res_hz</span><span class="o">=</span><span class="n">ground_metrics</span><span class="p">[</span><span class="s2">&quot;f_res_hz&quot;</span><span class="p">],</span> <span class="n">fwhm_hz</span><span class="o">=</span><span class="n">ground_metrics</span><span class="p">[</span><span class="s2">&quot;fwhm_hz&quot;</span><span class="p">])</span>
-        <span class="n">kappa_hz</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">calculate_kappa_hz</span><span class="p">(</span><span class="n">f_res_hz</span><span class="o">=</span><span class="n">ground_metrics</span><span class="p">[</span><span class="s2">&quot;f_res_hz&quot;</span><span class="p">],</span> <span class="n">loaded_q</span><span class="o">=</span><span class="n">loaded_q</span><span class="p">)</span>
-        <span class="n">g_rad_s</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">calculate_g_from_chi</span><span class="p">(</span>
-            <span class="n">f_r_hz</span><span class="o">=</span><span class="n">ground_metrics</span><span class="p">[</span><span class="s2">&quot;f_res_hz&quot;</span><span class="p">],</span>
-            <span class="n">f_q_hz</span><span class="o">=</span><span class="n">reference_summary</span><span class="p">[</span><span class="s2">&quot;f_q_hz&quot;</span><span class="p">],</span>
-            <span class="n">chi_hz</span><span class="o">=</span><span class="n">chi_hz</span><span class="p">,</span>
-            <span class="n">alpha_hz</span><span class="o">=</span><span class="n">reference_summary</span><span class="p">[</span><span class="s2">&quot;alpha_hz&quot;</span><span class="p">],</span>
-        <span class="p">)</span>
-        <span class="n">extracted</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">ground_metrics</span><span class="p">[</span><span class="s2">&quot;f_res_hz&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e9</span><span class="p">,</span>
-                <span class="s2">&quot;kappa_mhz&quot;</span><span class="p">:</span> <span class="n">kappa_hz</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span>
-                <span class="s2">&quot;g_mhz&quot;</span><span class="p">:</span> <span class="n">g_rad_s</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">1e6</span><span class="p">),</span>
-                <span class="s2">&quot;chi_mhz&quot;</span><span class="p">:</span> <span class="n">chi_hz</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-
-    <span class="n">comparison_df</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">compare_metrics</span><span class="p">(</span><span class="n">extracted</span><span class="p">,</span> <span class="n">reference_summary</span><span class="p">)</span>
-    <span class="n">comparison_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;comparison.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;run_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">run_dir</span><span class="p">),</span>
-        <span class="s2">&quot;reference&quot;</span><span class="p">:</span> <span class="n">reference_summary</span><span class="p">,</span>
-        <span class="s2">&quot;extracted&quot;</span><span class="p">:</span> <span class="n">extracted</span><span class="p">,</span>
-        <span class="s2">&quot;ground_metrics&quot;</span><span class="p">:</span> <span class="n">ground_metrics</span><span class="p">,</span>
-        <span class="s2">&quot;excited_metrics&quot;</span><span class="p">:</span> <span class="n">excited_metrics</span><span class="p">,</span>
-        <span class="s2">&quot;comparison_rows&quot;</span><span class="p">:</span> <span class="n">comparison_df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;postprocessing_warning&quot;</span><span class="p">:</span> <span class="n">postprocessing_warning</span><span class="p">,</span>
-        <span class="s2">&quot;artifacts&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;raw_touchstone&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_touchstone_path</span><span class="p">),</span>
-            <span class="s2">&quot;loaded_ground_touchstone&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ground_touchstone</span><span class="p">),</span>
-            <span class="s2">&quot;loaded_excited_touchstone&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">excited_touchstone</span><span class="p">),</span>
-            <span class="s2">&quot;comparison_csv&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;comparison.csv&quot;</span><span class="p">),</span>
-        <span class="p">},</span>
-    <span class="p">}</span>
-    <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;local_analysis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">generate_local_analysis_artifacts</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
-    <span class="n">dump_json</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;summary.json&quot;</span><span class="p">,</span> <span class="n">summary</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">summary</span>
-<br/></pre></div>
-</div>
-</div>
-</section>
-<section id="Final-Hamiltonian-comparison">
-<h3>Final Hamiltonian comparison<a class="headerlink" href="#Final-Hamiltonian-comparison" title="Link to this heading">#</a></h3>
-<p>Once both post-processing branches are complete, we merge them into one user-facing comparison table. This is the final checkpoint for the tutorial: the full set of extracted driven-modal Hamiltonian parameters, the SQuADDS reference values, and the signed/percentage errors for each quantity.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">build_combined_hamiltonian_table</span><span class="p">(</span><span class="n">qubit_summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">resonator_summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="n">reference</span> <span class="o">=</span> <span class="n">resonator_summary</span><span class="p">[</span><span class="s2">&quot;reference&quot;</span><span class="p">]</span>
-    <span class="n">extracted</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">qubit_summary</span><span class="p">[</span><span class="s2">&quot;selected_model_extracted&quot;</span><span class="p">][</span><span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">:</span> <span class="n">qubit_summary</span><span class="p">[</span><span class="s2">&quot;selected_model_extracted&quot;</span><span class="p">][</span><span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">resonator_summary</span><span class="p">[</span><span class="s2">&quot;extracted&quot;</span><span class="p">][</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;kappa_mhz&quot;</span><span class="p">:</span> <span class="n">resonator_summary</span><span class="p">[</span><span class="s2">&quot;extracted&quot;</span><span class="p">][</span><span class="s2">&quot;kappa_mhz&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;chi_mhz&quot;</span><span class="p">:</span> <span class="n">resonator_summary</span><span class="p">[</span><span class="s2">&quot;extracted&quot;</span><span class="p">][</span><span class="s2">&quot;chi_mhz&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;g_mhz&quot;</span><span class="p">:</span> <span class="n">resonator_summary</span><span class="p">[</span><span class="s2">&quot;extracted&quot;</span><span class="p">][</span><span class="s2">&quot;g_mhz&quot;</span><span class="p">],</span>
-    <span class="p">}</span>
-    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">reference_value</span> <span class="ow">in</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">,</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">]),</span>
-        <span class="p">(</span><span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">,</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">]),</span>
-        <span class="p">(</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">,</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">]),</span>
-        <span class="p">(</span><span class="s2">&quot;kappa_mhz&quot;</span><span class="p">,</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;kappa_mhz&quot;</span><span class="p">]),</span>
-        <span class="p">(</span><span class="s2">&quot;g_mhz&quot;</span><span class="p">,</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;g_mhz&quot;</span><span class="p">]),</span>
-        <span class="p">(</span><span class="s2">&quot;chi_mhz&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span>
-    <span class="p">]:</span>
-        <span class="n">extracted_value</span> <span class="o">=</span> <span class="n">extracted</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span>
-        <span class="n">error</span> <span class="o">=</span> <span class="n">extracted_value</span> <span class="o">-</span> <span class="n">reference_value</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">reference_value</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-        <span class="n">percent_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">reference_value</span><span class="p">)</span> <span class="ow">or</span> <span class="n">reference_value</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">error</span> <span class="o">/</span> <span class="n">reference_value</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
-        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;quantity&quot;</span><span class="p">:</span> <span class="n">quantity</span><span class="p">,</span>
-                <span class="s2">&quot;reference&quot;</span><span class="p">:</span> <span class="n">reference_value</span><span class="p">,</span>
-                <span class="s2">&quot;drivenmodal&quot;</span><span class="p">:</span> <span class="n">extracted_value</span><span class="p">,</span>
-                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">error</span><span class="p">,</span>
-                <span class="s2">&quot;percent_error&quot;</span><span class="p">:</span> <span class="n">percent_error</span><span class="p">,</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">run_combined_demo</span><span class="p">(</span>
-    <span class="n">request</span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">band_sweeps</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-    <span class="n">reference_summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-    <span class="n">bare_lj_h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-    <span class="n">prepared</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">run_drivenmodal_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">checkpoint_dir</span><span class="o">=</span><span class="n">CHECKPOINT_ROOT</span><span class="p">)</span>
-    <span class="n">run_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">prepared</span><span class="p">[</span><span class="s2">&quot;manifest&quot;</span><span class="p">][</span><span class="s2">&quot;run_dir&quot;</span><span class="p">])</span>
-    <span class="n">manifest_path</span> <span class="o">=</span> <span class="n">run_dir</span> <span class="o">/</span> <span class="s2">&quot;manifest.json&quot;</span>
-    <span class="n">artifacts_dir</span> <span class="o">=</span> <span class="n">run_dir</span> <span class="o">/</span> <span class="s2">&quot;artifacts&quot;</span>
-    <span class="n">artifacts_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">summary_path</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;summary.json&quot;</span>
-
-    <span class="k">if</span> <span class="n">T11</span><span class="o">.</span><span class="n">stage_is_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;postprocessed&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">FORCE_RERUN</span> <span class="ow">and</span> <span class="n">summary_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">summary_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-
-    <span class="n">band_artifacts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">T11</span><span class="o">.</span><span class="n">stage_is_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;artifacts_exported&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">FORCE_RERUN</span><span class="p">:</span>
-        <span class="n">base_project_dir</span> <span class="o">=</span> <span class="n">HFSS_PROJECT_ROOT</span> <span class="o">/</span> <span class="n">request</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;run_id&quot;</span><span class="p">]</span>
-        <span class="n">base_project_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">dump_json</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;resolved_layer_stack.json&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;rows&quot;</span><span class="p">:</span> <span class="n">prepared</span><span class="p">[</span><span class="s2">&quot;layer_stack&quot;</span><span class="p">]})</span>
-        <span class="n">port_specs</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">build_coupled_system_port_specs</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">design_payload</span><span class="p">)</span>
-        <span class="n">port_list</span><span class="p">,</span> <span class="n">jj_to_port</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">split_rendered_ports</span><span class="p">(</span><span class="n">port_specs</span><span class="p">)</span>
-        <span class="n">open_pins</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">last_error</span><span class="p">:</span> <span class="ne">BaseException</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">MAX_SOLVE_ATTEMPTS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">attempt_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;attempt-</span><span class="si">{</span><span class="n">attempt</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">attempt_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">attempt_label</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">attempt_project_dir</span> <span class="o">=</span> <span class="n">base_project_dir</span> <span class="o">/</span> <span class="n">attempt_label</span>
-            <span class="n">attempt_project_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">renderer</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">ansys_design_name</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">safe_ansys_design_name</span><span class="p">(</span><span class="n">attempt_id</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">design</span><span class="p">,</span> <span class="n">layer_stack_csv</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">build_coupled_design</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;layer_stack.csv&quot;</span><span class="p">)</span>
-                <span class="n">selection</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">build_render_selection</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">include_launchers</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">RENDER_LAUNCHERS</span><span class="p">)</span>
-                <span class="n">chip_bounds</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">apply_buffered_chip_bounds</span><span class="p">(</span>
-                    <span class="n">design</span><span class="p">,</span>
-                    <span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span>
-                    <span class="n">chip_name</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">layer_stack</span><span class="o">.</span><span class="n">chip_name</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">T11</span><span class="o">.</span><span class="n">save_render_debug_artifacts</span><span class="p">(</span>
-                    <span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span>
-                    <span class="n">artifacts_dir</span><span class="o">=</span><span class="n">artifacts_dir</span><span class="p">,</span>
-                    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Driven-modal combined </span><span class="si">{</span><span class="n">RESONATOR_TYPE</span><span class="si">}</span><span class="s2">-wave Qiskit Metal layout&quot;</span><span class="p">,</span>
-                    <span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span>
-                    <span class="n">port_mapping</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">design_payload</span><span class="p">[</span><span class="s2">&quot;port_mapping&quot;</span><span class="p">],</span>
-                    <span class="n">port_list</span><span class="o">=</span><span class="n">port_list</span><span class="p">,</span>
-                    <span class="n">jj_to_port</span><span class="o">=</span><span class="n">jj_to_port</span><span class="p">,</span>
-                    <span class="n">open_pins</span><span class="o">=</span><span class="n">open_pins</span><span class="p">,</span>
-                    <span class="n">chip_bounds</span><span class="o">=</span><span class="n">chip_bounds</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">renderer</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">QHFSSRenderer</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">initiate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">T11</span><span class="o">.</span><span class="n">Dict</span><span class="p">())</span>
-                <span class="n">project_file</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">prepare_renderer_project</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="n">attempt_project_dir</span><span class="p">,</span> <span class="n">attempt_id</span><span class="p">)</span>
-                <span class="n">T11</span><span class="o">.</span><span class="n">connect_renderer_to_new_ansys_design</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="n">ansys_design_name</span><span class="p">,</span> <span class="s2">&quot;drivenmodal&quot;</span><span class="p">)</span>
-                <span class="n">renderer</span><span class="o">.</span><span class="n">clean_active_design</span><span class="p">()</span>
-                <span class="n">cryo_material</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">apply_cryo_silicon_material_properties</span><span class="p">(</span><span class="n">renderer</span><span class="p">)</span>
-                <span class="n">dump_json</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;material_properties.json&quot;</span><span class="p">,</span> <span class="n">cryo_material</span><span class="p">)</span>
-                <span class="n">T11</span><span class="o">.</span><span class="n">render_drivenmodal_design</span><span class="p">(</span>
-                    <span class="n">renderer</span><span class="p">,</span>
-                    <span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span>
-                    <span class="n">open_pins</span><span class="o">=</span><span class="n">open_pins</span><span class="p">,</span>
-                    <span class="n">port_list</span><span class="o">=</span><span class="n">port_list</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">jj_to_port</span><span class="o">=</span><span class="n">jj_to_port</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">box_plus_buffer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">assigned_perf_e</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">ensure_perfect_e_boundary</span><span class="p">(</span>
-                    <span class="n">renderer</span><span class="p">,</span>
-                    <span class="nb">getattr</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="s2">&quot;assign_perfE&quot;</span><span class="p">,</span> <span class="p">[]),</span>
-                    <span class="n">boundary_name</span><span class="o">=</span><span class="s2">&quot;PerfE_Metal&quot;</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">boundary_snapshot</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">snapshot_boundary_assignments</span><span class="p">(</span><span class="n">renderer</span><span class="p">)</span>
-                <span class="n">T11</span><span class="o">.</span><span class="n">save_renderer_project</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="n">project_file</span><span class="p">)</span>
-                <span class="n">dump_json</span><span class="p">(</span>
-                    <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;hfss_render_</span><span class="si">{</span><span class="n">attempt_label</span><span class="si">}</span><span class="s2">.json&quot;</span><span class="p">,</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;attempt_label&quot;</span><span class="p">:</span> <span class="n">attempt_label</span><span class="p">,</span>
-                        <span class="s2">&quot;ansys_design_name&quot;</span><span class="p">:</span> <span class="n">ansys_design_name</span><span class="p">,</span>
-                        <span class="s2">&quot;project_file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_file</span><span class="p">),</span>
-                        <span class="s2">&quot;assign_perfE&quot;</span><span class="p">:</span> <span class="n">assigned_perf_e</span><span class="p">,</span>
-                        <span class="s2">&quot;boundaries&quot;</span><span class="p">:</span> <span class="n">boundary_snapshot</span><span class="p">,</span>
-                    <span class="p">},</span>
-                <span class="p">)</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">renderer</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;hfss_render_</span><span class="si">{</span><span class="n">attempt_label</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                    <span class="n">dump_json</span><span class="p">(</span>
-                        <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;hfss_render_</span><span class="si">{</span><span class="n">attempt_label</span><span class="si">}</span><span class="s2">_screenshot_error.json&quot;</span><span class="p">,</span>
-                        <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">T11</span><span class="o">.</span><span class="n">format_exception_for_console</span><span class="p">(</span><span class="n">exc</span><span class="p">)},</span>
-                    <span class="p">)</span>
-                <span class="n">T11</span><span class="o">.</span><span class="n">mark_stage_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;rendered&quot;</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="s2">&quot;options&quot;</span><span class="p">):</span>
-                    <span class="n">renderer</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">max_mesh_length_port</span> <span class="o">=</span> <span class="s2">&quot;7um&quot;</span>
-                <span class="n">mesh_lengths</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">build_coupled_seed_mesh_lengths</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
-                <span class="n">modeler</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">pinfo</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">modeler</span>
-                <span class="n">mesh_error</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">T11</span><span class="o">.</span><span class="n">mesh_objects</span><span class="p">(</span><span class="n">modeler</span><span class="p">,</span> <span class="n">mesh_lengths</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                    <span class="n">mesh_error</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">format_exception_for_console</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
-                <span class="n">dump_json</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;mesh_lengths.json&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;targets&quot;</span><span class="p">:</span> <span class="n">mesh_lengths</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">mesh_error</span><span class="p">})</span>
-
-                <span class="n">setup</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">ensure_drivenmodal_setup</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="o">**</span><span class="n">request</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">to_renderer_kwargs</span><span class="p">())</span>
-                <span class="n">T11</span><span class="o">.</span><span class="n">save_renderer_project</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="n">project_file</span><span class="p">)</span>
-                <span class="n">T11</span><span class="o">.</span><span class="n">mark_stage_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;setup_created&quot;</span><span class="p">)</span>
-
-                <span class="n">band_artifacts</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="k">for</span> <span class="n">band_name</span><span class="p">,</span> <span class="n">sweep</span> <span class="ow">in</span> <span class="n">band_sweeps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">T11</span><span class="o">.</span><span class="n">run_drivenmodal_sweep</span><span class="p">(</span>
-                        <span class="n">renderer</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">setup_name</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">sweep</span><span class="o">.</span><span class="n">to_renderer_kwargs</span><span class="p">()</span>
-                    <span class="p">)</span>
-                    <span class="n">T11</span><span class="o">.</span><span class="n">save_renderer_project</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="n">project_file</span><span class="p">)</span>
-                    <span class="n">band_dir</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="n">band_name</span>
-                    <span class="n">band_artifacts</span><span class="p">[</span><span class="n">band_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">export_current_sweep_artifacts</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="n">band_dir</span><span class="o">=</span><span class="n">band_dir</span><span class="p">)</span>
-                <span class="n">dump_json</span><span class="p">(</span>
-                    <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;solver_artifacts.json&quot;</span><span class="p">,</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;band_artifacts&quot;</span><span class="p">:</span> <span class="n">band_artifacts</span><span class="p">,</span>
-                        <span class="s2">&quot;layer_stack_csv&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">layer_stack_csv</span><span class="p">),</span>
-                        <span class="s2">&quot;project_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">attempt_project_dir</span><span class="p">),</span>
-                        <span class="s2">&quot;project_file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_file</span><span class="p">),</span>
-                        <span class="s2">&quot;ansys_design_name&quot;</span><span class="p">:</span> <span class="n">ansys_design_name</span><span class="p">,</span>
-                        <span class="s2">&quot;attempt_label&quot;</span><span class="p">:</span> <span class="n">attempt_label</span><span class="p">,</span>
-                    <span class="p">},</span>
-                <span class="p">)</span>
-                <span class="n">T11</span><span class="o">.</span><span class="n">mark_stage_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;sweep_completed&quot;</span><span class="p">)</span>
-                <span class="n">T11</span><span class="o">.</span><span class="n">mark_stage_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;artifacts_exported&quot;</span><span class="p">)</span>
-                <span class="k">break</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">last_error</span> <span class="o">=</span> <span class="n">exc</span>
-                <span class="n">dump_json</span><span class="p">(</span>
-                    <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;solver_</span><span class="si">{</span><span class="n">attempt_label</span><span class="si">}</span><span class="s2">.json&quot;</span><span class="p">,</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;failed&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;attempt_label&quot;</span><span class="p">:</span> <span class="n">attempt_label</span><span class="p">,</span>
-                        <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">T11</span><span class="o">.</span><span class="n">format_exception_for_console</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
-                    <span class="p">},</span>
-                <span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">] HFSS solve </span><span class="si">{</span><span class="n">attempt</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">MAX_SOLVE_ATTEMPTS</span><span class="si">}</span><span class="s2"> failed: &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">T11</span><span class="o">.</span><span class="n">format_exception_for_console</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">attempt</span> <span class="o">==</span> <span class="n">MAX_SOLVE_ATTEMPTS</span><span class="p">:</span>
-                    <span class="k">raise</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">] Retrying with a fresh internal HFSS design...&quot;</span><span class="p">)</span>
-            <span class="k">finally</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">renderer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">renderer</span><span class="o">.</span><span class="n">disconnect_ansys</span><span class="p">()</span>
-                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">] Warning while disconnecting Ansys: &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">T11</span><span class="o">.</span><span class="n">format_exception_for_console</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="p">)</span>
-                <span class="n">T11</span><span class="o">.</span><span class="n">reset_ansys_desktop_processes</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">last_error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">last_error</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">solver_artifacts</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">((</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;solver_artifacts.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-        <span class="n">band_artifacts</span> <span class="o">=</span> <span class="n">solver_artifacts</span><span class="p">[</span><span class="s2">&quot;band_artifacts&quot;</span><span class="p">]</span>
-
-    <span class="n">qubit_summary</span> <span class="o">=</span> <span class="n">postprocess_qubit_band</span><span class="p">(</span>
-        <span class="n">y_pickle_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">band_artifacts</span><span class="p">[</span><span class="s2">&quot;qubit_band&quot;</span><span class="p">][</span><span class="s2">&quot;y_pickle&quot;</span><span class="p">]),</span>
-        <span class="n">artifacts_dir</span><span class="o">=</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;qubit_band&quot;</span><span class="p">,</span>
-        <span class="n">reference_summary</span><span class="o">=</span><span class="n">reference_summary</span><span class="p">,</span>
-        <span class="n">bare_lj_h</span><span class="o">=</span><span class="n">bare_lj_h</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">resonator_summary</span> <span class="o">=</span> <span class="n">postprocess_resonator_band</span><span class="p">(</span>
-        <span class="n">run_dir</span><span class="o">=</span><span class="n">run_dir</span><span class="p">,</span>
-        <span class="n">y_pickle_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">band_artifacts</span><span class="p">[</span><span class="s2">&quot;resonator_band&quot;</span><span class="p">][</span><span class="s2">&quot;y_pickle&quot;</span><span class="p">]),</span>
-        <span class="n">raw_touchstone_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">band_artifacts</span><span class="p">[</span><span class="s2">&quot;resonator_band&quot;</span><span class="p">][</span><span class="s2">&quot;raw_touchstone&quot;</span><span class="p">]),</span>
-        <span class="n">artifacts_dir</span><span class="o">=</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;resonator_band&quot;</span><span class="p">,</span>
-        <span class="n">reference_summary</span><span class="o">=</span><span class="n">reference_summary</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">combined_df</span> <span class="o">=</span> <span class="n">build_combined_hamiltonian_table</span><span class="p">(</span><span class="n">qubit_summary</span><span class="p">,</span> <span class="n">resonator_summary</span><span class="p">)</span>
-    <span class="n">combined_csv</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;combined_hamiltonian_comparison.csv&quot;</span>
-    <span class="n">combined_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">combined_csv</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;run_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">run_dir</span><span class="p">),</span>
-        <span class="s2">&quot;reference&quot;</span><span class="p">:</span> <span class="n">reference_summary</span><span class="p">,</span>
-        <span class="s2">&quot;band_artifacts&quot;</span><span class="p">:</span> <span class="n">band_artifacts</span><span class="p">,</span>
-        <span class="s2">&quot;qubit_summary&quot;</span><span class="p">:</span> <span class="n">qubit_summary</span><span class="p">,</span>
-        <span class="s2">&quot;resonator_summary&quot;</span><span class="p">:</span> <span class="n">resonator_summary</span><span class="p">,</span>
-        <span class="s2">&quot;combined_comparison_rows&quot;</span><span class="p">:</span> <span class="n">combined_df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;artifacts&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;combined_comparison_csv&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">combined_csv</span><span class="p">),</span>
-            <span class="s2">&quot;qubit_summary_json&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;qubit_band&quot;</span> <span class="o">/</span> <span class="s2">&quot;qubit_admittance_summary.json&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;resonator_summary_json&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;resonator_band&quot;</span> <span class="o">/</span> <span class="s2">&quot;summary.json&quot;</span><span class="p">),</span>
-        <span class="p">},</span>
-    <span class="p">}</span>
-    <span class="n">dump_json</span><span class="p">(</span><span class="n">summary_path</span><span class="p">,</span> <span class="n">summary</span><span class="p">)</span>
-    <span class="n">T11</span><span class="o">.</span><span class="n">mark_stage_complete</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s2">&quot;postprocessed&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">summary</span>
-<br/></pre></div>
-</div>
-</div>
-</section>
-</section>
-<section id="Run-the-unified-HFSS-flow-and-extract-the-Hamiltonian">
-<h2>Run the unified HFSS flow and extract the Hamiltonian<a class="headerlink" href="#Run-the-unified-HFSS-flow-and-extract-the-Hamiltonian" title="Link to this heading">#</a></h2>
-<p>We reuse the same raw 3-port simulation data in two ways:</p>
-<ul class="simple">
-<li><p>the qubit-band sweep is reduced to the JJ-port environment admittance and fed through the Tutorial 12 <code class="docutils literal notranslate"><span class="pre">Y33</span></code> + JJ-model extraction, and</p></li>
-<li><p>the resonator-band sweep is terminated with the ground/excited junction inductances and fed through the Tutorial 11 notch extraction.</p></li>
-</ul>
-<p>The final dataframe below is the one-stop summary a user would care about: the driven-modal Hamiltonian parameters next to the SQuADDS reference row and their error percentages.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">ensure_runtime_dirs</span><span class="p">()</span>
-    <span class="n">T11</span><span class="o">.</span><span class="n">ensure_runtime_dirs</span><span class="p">()</span>
-
-    <span class="n">reference_row</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">load_reference_row</span><span class="p">(</span><span class="n">RESONATOR_TYPE</span><span class="p">,</span> <span class="n">REFERENCE_INDEX</span><span class="p">)</span>
-    <span class="n">reference_summary</span> <span class="o">=</span> <span class="n">T11</span><span class="o">.</span><span class="n">build_reference_summary</span><span class="p">(</span><span class="n">reference_row</span><span class="p">)</span>
-    <span class="n">bare_lj_h</span> <span class="o">=</span> <span class="n">T12</span><span class="o">.</span><span class="n">load_bare_lj_h</span><span class="p">(</span><span class="n">reference_row</span><span class="p">)</span>
-    <span class="n">setup</span> <span class="o">=</span> <span class="n">build_combined_setup</span><span class="p">(</span><span class="n">reference_summary</span><span class="p">)</span>
-    <span class="n">band_sweeps</span> <span class="o">=</span> <span class="n">build_segmented_sweeps</span><span class="p">(</span><span class="n">reference_summary</span><span class="p">)</span>
-    <span class="n">request</span> <span class="o">=</span> <span class="n">build_request</span><span class="p">(</span><span class="n">reference_row</span><span class="p">,</span> <span class="n">setup</span><span class="o">=</span><span class="n">setup</span><span class="p">,</span> <span class="n">sweep</span><span class="o">=</span><span class="n">band_sweeps</span><span class="p">[</span><span class="s2">&quot;qubit_band&quot;</span><span class="p">],</span> <span class="n">run_suffix</span><span class="o">=</span><span class="s2">&quot;combined&quot;</span><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected resonator type:&quot;</span><span class="p">,</span> <span class="n">RESONATOR_TYPE</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Run ID:&quot;</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;run_id&quot;</span><span class="p">])</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reference design options:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">T11</span><span class="o">.</span><span class="n">deserialize_json_like</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">design_payload</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-
-    <span class="n">combined_result</span> <span class="o">=</span> <span class="n">run_combined_demo</span><span class="p">(</span>
-        <span class="n">request</span><span class="p">,</span>
-        <span class="n">band_sweeps</span><span class="o">=</span><span class="n">band_sweeps</span><span class="p">,</span>
-        <span class="n">reference_summary</span><span class="o">=</span><span class="n">reference_summary</span><span class="p">,</span>
-        <span class="n">bare_lj_h</span><span class="o">=</span><span class="n">bare_lj_h</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="n">run_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">combined_result</span><span class="p">[</span><span class="s2">&quot;run_dir&quot;</span><span class="p">])</span>
-    <span class="n">artifacts_dir</span> <span class="o">=</span> <span class="n">run_dir</span> <span class="o">/</span> <span class="s2">&quot;artifacts&quot;</span>
-    <span class="n">combined_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">combined_result</span><span class="p">[</span><span class="s2">&quot;combined_comparison_rows&quot;</span><span class="p">])</span>
-    <span class="n">qubit_summary</span> <span class="o">=</span> <span class="n">combined_result</span><span class="p">[</span><span class="s2">&quot;qubit_summary&quot;</span><span class="p">]</span>
-    <span class="n">resonator_summary</span> <span class="o">=</span> <span class="n">combined_result</span><span class="p">[</span><span class="s2">&quot;resonator_summary&quot;</span><span class="p">]</span>
-
-    <span class="n">display</span><span class="p">(</span><span class="n">combined_df</span><span class="p">)</span>
-    <span class="n">display</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">qubit_summary</span><span class="p">[</span><span class="s2">&quot;selected_model_extracted&quot;</span><span class="p">]]))</span>
-    <span class="n">display</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">resonator_summary</span><span class="p">[</span><span class="s2">&quot;comparison_rows&quot;</span><span class="p">]))</span>
-    <span class="n">display</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">qubit_summary</span><span class="p">[</span><span class="s2">&quot;best_model_rows&quot;</span><span class="p">]))</span>
-    <span class="n">display</span><span class="p">(</span><span class="n">HTML</span><span class="p">((</span><span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;qubit_band&quot;</span> <span class="o">/</span> <span class="s2">&quot;y33_zero_crossing.html&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()))</span>
-    <span class="n">resonator_local_analysis</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">resonator_summary</span><span class="p">[</span><span class="s2">&quot;local_analysis&quot;</span><span class="p">][</span><span class="s2">&quot;artifacts&quot;</span><span class="p">][</span><span class="s2">&quot;jj_reference_terminations_html&quot;</span><span class="p">])</span>
-    <span class="n">display</span><span class="p">(</span><span class="n">HTML</span><span class="p">(</span><span class="n">resonator_local_analysis</span><span class="o">.</span><span class="n">read_text</span><span class="p">()))</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Run directory:&quot;</span><span class="p">,</span> <span class="n">run_dir</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Artifacts:&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">combined_result</span><span class="p">[</span><span class="s2">&quot;artifacts&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">()</span>
-<br/><br/><br/></pre></div>
-</div>
-</div>
-</section>
+<div class="admonition warning"><p class="admonition-title"><p>Geometry sanity checks are not optional</p>
+</p><p><p>Before trusting a driven-modal Hamiltonian table, inspect the rendered Qiskit Metal and HFSS screenshots. The coupled qubit, claw, resonator, and feedline must all be present; metal sheets must be assigned to PEC; the substrate should use the cryogenic silicon permittivity <span class="math notranslate nohighlight">\(11.45\)</span>; and the lumped ports should land on the feedline ends and the JJ cut, not on launchers or unrelated metal.</p>
+</p></div></section>
 <section id="License">
 <h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
 <div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
 </h3><p><p>Developed by Sadman Ahmed Shanto</p>
-</p><p><p>This tutorial is written by Sadman Ahmed Shanto and OpenAI Codex</p>
-</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2024.</p>
-</p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
-</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p><p><p>© Copyright 2026.</p>
 </p></div></section>
 </section>
 
@@ -1384,7 +1050,7 @@
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Tutorial 10: HFSS Driven-Modal Capacitance Extraction for Qubit-Claw and NCap</p>
+        <p class="prev-next-title">Tutorial 10: Driven-Modal Capacitance Extraction</p>
       </div>
     </a>
     <a class="right-next"
@@ -1415,18 +1081,17 @@
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Physics-idea-and-software-idea">Physics idea and software idea</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Runtime-knobs">Runtime knobs</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#What-this-tutorial-is-trying-to-prove">What this tutorial is trying to prove</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Helpers">Helpers</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Query-a-target-design-from-SQuADDS">Query a target design from SQuADDS</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Why-the-sweep-is-segmented">Why the sweep is segmented</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Qubit-extraction-from-the-JJ-port-admittance">Qubit extraction from the JJ-port admittance</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Resonator-extraction-from-the-loaded-cavity-response">Resonator extraction from the loaded cavity response</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Final-Hamiltonian-comparison">Final Hamiltonian comparison</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Imports">Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Query-a-Target-Design">Query a Target Design</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Build-the-Driven-Modal-Requests">Build the Driven-Modal Requests</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Run-the-Simulation">Run the Simulation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Post-Process-the-Same-Network">Post-Process the Same Network</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Resonator-frequency-and-kappa">1. Resonator frequency and kappa</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#2.-Qubit-frequency-and-anharmonicity">2. Qubit frequency and anharmonicity</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#3.-Coupling-from-chi">3. Coupling from chi</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Run-the-unified-HFSS-flow-and-extract-the-Hamiltonian">Run the unified HFSS flow and extract the Hamiltonian</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#What-the-Comparison-Means">What the Comparison Means</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#License">License</a></li>
 </ul>
   </nav></div>
