@@ -57,6 +57,7 @@ db.select_qubit("TransmonCross")
 db.select_cavity_claw("RouteMeander")
 db.select_resonator_type("quarter")
 
+system_df = db.create_system_df()
 analyzer = Analyzer(db)
 
 target_params = {
@@ -71,7 +72,8 @@ target_params = {
 results = analyzer.find_closest(target_params=target_params, num_top=3, metric="Euclidean")
 reference_row = results.iloc[0]
 
-display(results[["sim_results", "design_options"]].head(3))
+display(system_df.head())
+display(results.head(3))
 
 
 # %% [markdown]

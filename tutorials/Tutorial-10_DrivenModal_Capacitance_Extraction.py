@@ -67,8 +67,8 @@ ncap_df = db.see_dataset(
 qubit_row = qubit_df.iloc[3]
 ncap_row = ncap_df.iloc[1]
 
-display(qubit_row[["design_options", "sim_results"]])
-display(ncap_row[["design_options", "sim_results"]])
+display(qubit_row[["design_options", "cross_to_ground", "cross_to_claw"]])
+display(ncap_row[["design_options", "top_to_bottom", "top_to_ground"]])
 
 
 # %% [markdown]

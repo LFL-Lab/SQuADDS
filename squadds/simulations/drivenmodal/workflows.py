@@ -172,6 +172,22 @@ def _optional_row_value(row: Mapping[str, Any] | pd.Series, key: str, default: A
     return row.get(key, default)
 
 
+def _sim_mapping(row: Mapping[str, Any] | pd.Series) -> Mapping[str, Any]:
+    sim_results = _optional_row_value(row, "sim_results")
+    if isinstance(sim_results, Mapping):
+        return sim_results
+    return row
+
+
+def _sim_float(row: Mapping[str, Any] | pd.Series, *keys: str) -> float:
+    values = _sim_mapping(row)
+    for key in keys:
+        value = values.get(key) if hasattr(values, "get") else None
+        if value is not None:
+            return float(value)
+    raise KeyError(f"Could not find any of these simulation-result keys: {keys}")
+
+
 def _design_options_from_reference(row: Mapping[str, Any] | pd.Series) -> dict[str, Any]:
     design = _optional_row_value(row, "design")
     if isinstance(design, Mapping) and "design_options" in design:
@@ -232,9 +248,8 @@ def capacitance_reference_summary(
     system_kind: str,
 ) -> dict[str, float]:
     """Extract the SQuADDS Q3D capacitance summary from a reference row."""
-    sim_results = _row_value(row, "sim_results")
     keys = QUBIT_CLAW_CAPACITANCE_KEYS if system_kind == "qubit_claw" else NCAP_CAPACITANCE_KEYS
-    return {key: float(sim_results[key]) for key in keys}
+    return {key: _sim_float(row, key) for key in keys}
 
 
 def capacitance_comparison_table(
@@ -426,21 +441,20 @@ def transmon_state_inductances(
 
 def coupled_reference_summary(row: Mapping[str, Any] | pd.Series) -> dict[str, float]:
     """Extract the target/reference Hamiltonian and JJ data from a SQuADDS row."""
-    sim_results = _row_value(row, "sim_results")
     design_options = coupled_design_payload(row)
     qubit_options = deserialize_json_like(design_options["qubit_options"])
     lj_h = bare_lj_h_from_qubit_options(qubit_options)
     state_data = transmon_state_inductances(
         lj_h=lj_h,
-        cross_to_ground_fF=float(sim_results["cross_to_ground"]),
-        cross_to_claw_fF=float(sim_results["cross_to_claw"]),
+        cross_to_ground_fF=_sim_float(row, "cross_to_ground"),
+        cross_to_claw_fF=_sim_float(row, "cross_to_claw"),
     )
     return {
-        "qubit_frequency_ghz": float(sim_results["qubit_frequency_GHz"]),
-        "anharmonicity_mhz": float(sim_results["anharmonicity_MHz"]),
-        "cavity_frequency_ghz": float(sim_results["cavity_frequency_GHz"]),
-        "kappa_mhz": float(sim_results["kappa_kHz"]) / 1000.0,
-        "g_mhz": float(sim_results["g_MHz"]),
+        "qubit_frequency_ghz": _sim_float(row, "qubit_frequency_GHz", "qubit_frequency_ghz"),
+        "anharmonicity_mhz": _sim_float(row, "anharmonicity_MHz", "anharmonicity_mhz"),
+        "cavity_frequency_ghz": _sim_float(row, "cavity_frequency_GHz", "cavity_frequency_ghz"),
+        "kappa_mhz": _sim_float(row, "kappa_kHz", "kappa_khz") / 1000.0,
+        "g_mhz": _sim_float(row, "g_MHz", "g_mhz"),
         **state_data,
     }
 

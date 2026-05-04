@@ -40,6 +40,19 @@ def test_build_capacitance_request_uses_standard_qubit_claw_ports():
     assert capacitance_reference_summary(row, system_kind="qubit_claw")["cross_to_claw"] == 5.0
 
 
+def test_capacitance_reference_summary_accepts_flattened_squadds_rows():
+    row = {
+        "cross_to_ground": 80.0,
+        "claw_to_ground": 20.0,
+        "cross_to_claw": 5.0,
+        "cross_to_cross": 85.0,
+        "claw_to_claw": 25.0,
+        "ground_to_ground": 105.0,
+    }
+
+    assert capacitance_reference_summary(row, system_kind="qubit_claw")["cross_to_ground"] == 80.0
+
+
 def test_capacitance_comparison_table_reports_percent_error_without_double_counting():
     table = capacitance_comparison_table(
         drivenmodal_fF={"cross_to_ground": 82.0, "cross_to_claw": 4.0},
