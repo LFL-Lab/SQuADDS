@@ -53,12 +53,12 @@ except ImportError:  # pragma: no cover
 # %%
 db = SQuADDS_DB()
 
-qubit_df = db.get_dataset(
+qubit_df = db.see_dataset(
     component="qubit",
     component_name="TransmonCross",
     data_type="cap_matrix",
 )
-ncap_df = db.get_dataset(
+ncap_df = db.see_dataset(
     component="coupler",
     component_name="NCap",
     data_type="cap_matrix",
@@ -67,8 +67,8 @@ ncap_df = db.get_dataset(
 qubit_row = qubit_df.iloc[3]
 ncap_row = ncap_df.iloc[1]
 
-display(qubit_row[["design", "sim_results"]])
-display(ncap_row[["design", "sim_results"]])
+display(qubit_row[["design_options", "sim_results"]])
+display(ncap_row[["design_options", "sim_results"]])
 
 
 # %% [markdown]
