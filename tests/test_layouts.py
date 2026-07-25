@@ -1,10 +1,13 @@
+import numpy as np
 import pandas as pd
 import pytest
 
 from squadds.core.db import SQuADDS_DB
 from squadds.layouts import (
+    GeometryEmbeddingClient,
     LayoutClient,
     build_geometry_features,
+    build_geometry_vectors,
     canonical_design_id,
     parse_gds_polygons,
     parse_gds_summary,
@@ -97,6 +100,25 @@ def test_database_layout_bridge_derives_design_id_without_source_id():
     }
 
 
+def test_database_embedding_bridge_uses_resolved_layout():
+    class FakeLayoutClient:
+        def find(self, **kwargs):
+            assert kwargs == {"source_id": "exp7/cap_0001"}
+            return type("Reference", (), {"layout_id": "layout:one"})()
+
+    class FakeEmbeddingClient:
+        def get(self, layout_id):
+            return {"layout_id": layout_id, "embedding": [1.0]}
+
+    row = {"notes": {"source_id": "exp7/cap_0001"}}
+
+    assert SQuADDS_DB.get_layout_embedding(
+        row,
+        layout_client=FakeLayoutClient(),
+        embedding_client=FakeEmbeddingClient(),
+    ) == {"layout_id": "layout:one", "embedding": [1.0]}
+
+
 def test_geometry_features_are_layer_aware_and_model_ready():
     manifest = pd.DataFrame(
         [
@@ -125,6 +147,38 @@ def test_geometry_features_are_layer_aware_and_model_ready():
         {"layer": 1, "datatype": 10, "polygon_count": 2, "area_um2": 6.0},
         {"layer": 2, "datatype": 0, "polygon_count": 1, "area_um2": 4.0},
     ]
+
+
+def test_geometry_vectors_are_unit_normalized_and_searchable(tmp_path):
+    features = pd.DataFrame(
+        [
+            {
+                "layout_id": f"layout:{index}",
+                "artifact_id": f"sha256:{index}",
+                "component_name": "CapNInterdigitalTee",
+                "source_id": f"capn/{index}",
+                "bbox_width_um": 10.0 + index,
+                "bbox_height_um": 5.0,
+                "bbox_area_um2": 50.0 + 5.0 * index,
+                "bbox_aspect_ratio": (10.0 + index) / 5.0,
+                "total_area_um2": 40.0 + index,
+                "polygon_count": 2 + index,
+                "cell_count": 1,
+                "layer_count": 1,
+                "layer_features": [{"layer": 1, "datatype": 10, "area_um2": 40.0, "polygon_count": 2}],
+            }
+            for index in range(3)
+        ]
+    )
+    vectors, schema = build_geometry_vectors(features)
+    vector_path = tmp_path / "vectors.parquet"
+    vectors.to_parquet(vector_path, index=False)
+
+    client = GeometryEmbeddingClient(embedding_path=vector_path)
+
+    assert schema["dimensions"] == 11
+    assert np.linalg.norm(np.asarray(client.get("layout:0")["embedding"])) == pytest.approx(1.0)
+    assert len(client.nearest("layout:0", limit=2)) == 2
 
 
 def test_parse_gds_summary_extracts_layers_and_units(tmp_path):

@@ -893,6 +893,14 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         reference = SQuADDS_DB.get_layout_ref(row, layout_client=client)
         return client.download(reference)
 
+    @staticmethod
+    def get_layout_embedding(row, layout_client=None, embedding_client=None):
+        """Return the versioned geometry-vector embedding for a dataset row."""
+        from squadds.layouts import GeometryEmbeddingClient, LayoutClient
+
+        reference = SQuADDS_DB.get_layout_ref(row, layout_client=layout_client or LayoutClient())
+        return (embedding_client or GeometryEmbeddingClient()).get(reference.layout_id)
+
     def create_system_df(self, parallelize=False, num_cpu=None):
         """
         Creates and returns a DataFrame based on the selected system.

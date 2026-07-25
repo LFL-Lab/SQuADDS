@@ -223,6 +223,8 @@ class TestServerFactory:
             "get_layout",
             "get_layout_summary",
             "get_layout_features",
+            "get_layout_embedding",
+            "find_similar_layouts",
             "get_layout_polygons",
         ]
 

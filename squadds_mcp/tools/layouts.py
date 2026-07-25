@@ -6,7 +6,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from squadds.layouts import LayoutClient
+from squadds.layouts import GeometryEmbeddingClient, LayoutClient
 from squadds_mcp.utils import sanitize_for_json
 
 
@@ -59,6 +59,43 @@ def register_layout_tools(mcp: FastMCP) -> None:
         client = LayoutClient()
         reference = client.find(layout_id=layout_id, design_id=design_id, source_id=source_id)
         return sanitize_for_json(client.geometry_features(reference))
+
+    @mcp.tool()
+    async def get_layout_embedding(
+        layout_id: str | None = None,
+        design_id: str | None = None,
+        source_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Return the deterministic geometry-vector-v1 embedding for one layout.
+
+        This is a versioned numerical baseline derived from geometry features,
+        not a learned representation. Provide exactly one layout identifier.
+        """
+        reference = LayoutClient().find(layout_id=layout_id, design_id=design_id, source_id=source_id)
+        return sanitize_for_json(GeometryEmbeddingClient().get(reference.layout_id))
+
+    @mcp.tool()
+    async def find_similar_layouts(
+        layout_id: str | None = None,
+        design_id: str | None = None,
+        source_id: str | None = None,
+        limit: int = 10,
+        same_component_only: bool = True,
+    ) -> list[dict[str, Any]]:
+        """Find cosine-nearest layouts using the geometry-vector-v1 baseline.
+
+        The input layout itself is excluded. By default, results are restricted
+        to the same component family to avoid comparing incompatible designs.
+        """
+        reference = LayoutClient().find(layout_id=layout_id, design_id=design_id, source_id=source_id)
+        component_name = reference.component_name if same_component_only else None
+        return sanitize_for_json(
+            GeometryEmbeddingClient().nearest(
+                reference.layout_id,
+                limit=limit,
+                component_name=component_name,
+            )
+        )
 
     @mcp.tool()
     async def get_layout_polygons(
