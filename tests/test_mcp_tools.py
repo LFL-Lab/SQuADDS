@@ -202,6 +202,25 @@ class TestServerFactory:
         # Access the internal tool manager
         assert server is not None
 
+    def test_layout_tools_register(self):
+        """The layout API remains available without importing the GDS backend."""
+        from squadds_mcp.tools.layouts import register_layout_tools
+
+        class FakeMCP:
+            def __init__(self):
+                self.registered = []
+
+            def tool(self):
+                def decorator(function):
+                    self.registered.append(function.__name__)
+                    return function
+
+                return decorator
+
+        mcp = FakeMCP()
+        register_layout_tools(mcp)
+        assert mcp.registered == ["get_layout", "get_layout_summary", "get_layout_polygons"]
+
 
 # ---------------------------------------------------------------------------
 # Tests for analysis helper
