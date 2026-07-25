@@ -878,7 +878,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return client.find(source_id=source_id)
 
         design = row.get("design", {}) if hasattr(row, "get") else {}
-        component_name = design.get("component") if isinstance(design, dict) else None
+        component_name = None
+        if isinstance(design, dict):
+            component_name = design.get("component_name") or design.get("component") or design.get("coupler_type")
         design_options = design.get("design_options") if isinstance(design, dict) else None
         if not component_name or not isinstance(design_options, dict):
             raise ValueError("Dataset row has neither a layout source_id nor a component design definition.")
@@ -895,11 +897,11 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
     @staticmethod
     def get_layout_embedding(row, layout_client=None, embedding_client=None):
-        """Return the versioned geometry-vector embedding for a dataset row."""
-        from squadds.layouts import GeometryEmbeddingClient, LayoutClient
+        """Return the static-shape-v0 embedding for a dataset row."""
+        from squadds.layouts import LayoutClient, StaticEmbeddingClient
 
         reference = SQuADDS_DB.get_layout_ref(row, layout_client=layout_client or LayoutClient())
-        return (embedding_client or GeometryEmbeddingClient()).get(reference.layout_id)
+        return (embedding_client or StaticEmbeddingClient()).get(reference.layout_id)
 
     def create_system_df(self, parallelize=False, num_cpu=None):
         """

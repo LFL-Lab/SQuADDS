@@ -4,11 +4,12 @@ import pytest
 
 from squadds.core.db import SQuADDS_DB
 from squadds.layouts import (
-    GeometryEmbeddingClient,
     LayoutClient,
+    StaticEmbeddingClient,
     build_geometry_features,
-    build_geometry_vectors,
+    build_static_embeddings,
     canonical_design_id,
+    parameter_sum,
     parse_gds_polygons,
     parse_gds_summary,
 )
@@ -93,7 +94,7 @@ def test_database_layout_bridge_derives_design_id_without_source_id():
             return kwargs
 
     options = {"finger_count": "5", "finger_width": "10um"}
-    row = {"design": {"component": "CapNInterdigitalTee", "design_options": options}}
+    row = {"design": {"coupler_type": "CapNInterdigitalTee", "design_options": options}}
 
     assert SQuADDS_DB.get_layout_ref(row, layout_client=FakeLayoutClient()) == {
         "design_id": canonical_design_id("CapNInterdigitalTee", options)
@@ -149,36 +150,56 @@ def test_geometry_features_are_layer_aware_and_model_ready():
     ]
 
 
-def test_geometry_vectors_are_unit_normalized_and_searchable(tmp_path):
-    features = pd.DataFrame(
-        [
+def test_static_v0_embeddings_include_96x96_shape_and_are_searchable(tmp_path):
+    kdb = pytest.importorskip("klayout.db")
+    manifest_records = []
+    design_options = {}
+    paths = {}
+    for index in range(3):
+        layout = kdb.Layout()
+        layout.dbu = 0.001
+        top = layout.create_cell("TOP")
+        top.shapes(layout.layer(1, 10)).insert(kdb.Box(0, 0, 1000 + 200 * index, 2000))
+        path = tmp_path / f"layout_{index}.gds"
+        layout.write(str(path))
+        design_id = f"design:{index}"
+        manifest_records.append(
             {
                 "layout_id": f"layout:{index}",
                 "artifact_id": f"sha256:{index}",
+                "design_id": design_id,
                 "component_name": "CapNInterdigitalTee",
                 "source_id": f"capn/{index}",
-                "bbox_width_um": 10.0 + index,
-                "bbox_height_um": 5.0,
-                "bbox_area_um2": 50.0 + 5.0 * index,
-                "bbox_aspect_ratio": (10.0 + index) / 5.0,
-                "total_area_um2": 40.0 + index,
-                "polygon_count": 2 + index,
-                "cell_count": 1,
-                "layer_count": 1,
-                "layer_features": [{"layer": 1, "datatype": 10, "area_um2": 40.0, "polygon_count": 2}],
+                "gds_path": path.name,
             }
-            for index in range(3)
-        ]
+        )
+        design_options[design_id] = {"finger_width": f"{index + 1}um", "finger_count": index + 1}
+        paths[path.name] = path
+
+    vectors, schema = build_static_embeddings(
+        pd.DataFrame(manifest_records),
+        design_options,
+        lambda record: paths[record["gds_path"]],
     )
-    vectors, schema = build_geometry_vectors(features)
     vector_path = tmp_path / "vectors.parquet"
     vectors.to_parquet(vector_path, index=False)
 
-    client = GeometryEmbeddingClient(embedding_path=vector_path)
+    client = StaticEmbeddingClient(embedding_path=vector_path)
 
-    assert schema["dimensions"] == 11
+    assert schema["model"] == "static-shape-v0"
+    assert schema["blocks"]["shape_bitmap"]["shape"] == [96, 96]
+    assert schema["dimensions"] == 9227
+    assert len(client.get("layout:0")["embedding"]) == 9227
+    assert client.shape_bitmap("layout:0").shape == (96, 96)
     assert np.linalg.norm(np.asarray(client.get("layout:0")["embedding"])) == pytest.approx(1.0)
     assert len(client.nearest("layout:0", limit=2)) == 2
+
+
+def test_parameter_sum_is_permutation_and_dimension_invariant():
+    first = {"width": "10um", "nested": {"count": 3, "enabled": True}}
+    second = {"enabled": True, "count": 3, "width": "0.01mm"}
+
+    assert parameter_sum(first) == parameter_sum(second)
 
 
 def test_parse_gds_summary_extracts_layers_and_units(tmp_path):
