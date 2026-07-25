@@ -303,6 +303,10 @@ def register_database_tools(mcp: FastMCP) -> None:
         - Couplers: ``component='coupler'``, ``component_name='NCap'``
           → Contains CapNInterdigitalTee coupler geometry and capacitances.
           Used for half-wave resonator systems.
+        - Generalized couplers: ``component='coupler'``,
+          ``component_name='GeneralizedCapNInterdigital'``
+          → Contains generalized two-terminal interdigital capacitor geometry,
+          signed Maxwell matrices, and north/south pairwise capacitances.
 
         **Note:** Cavity/resonator data uses data_type='eigenmode', not 'cap_matrix'.
         Use ``get_dataset(component='cavity_claw', ..., data_type='eigenmode')`` for that.

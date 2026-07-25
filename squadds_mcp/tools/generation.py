@@ -30,6 +30,10 @@ SNIPPETS = {
     opts["orientation"] = "-90"
     return CapNInterdigitalTee(design, name, options=opts)
 """,
+    "generalized_ncap": """def create_generalized_ncap_coupler(name: str, design, opts: dict):
+    from squadds.components import GeneralizedCapNInterdigital
+    return GeneralizedCapNInterdigital(design, name, options=opts)
+""",
     "cpw": """def create_cpw(name: str, design, cplr_name: str, qubit_name: str, opts: dict):
     from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
     from qiskit_metal import Dict
@@ -126,6 +130,7 @@ def register_generation_tools(mcp: FastMCP) -> None:
                 - "qubit": TransmonCross
                 - "clt": CoupledLineTee
                 - "ncap": CapNInterdigitalTee
+                - "generalized_ncap": SQuADDS GeneralizedCapNInterdigital
                 - "cpw": RouteMeander
                 - "wirebond": LaunchpadWirebond
                 - "feedline": RouteStraight

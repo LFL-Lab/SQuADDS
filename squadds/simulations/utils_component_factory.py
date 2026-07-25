@@ -1,8 +1,8 @@
 from qiskit_metal import Dict
-from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import CapNInterdigitalTee
 from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
 from qiskit_metal.qlibrary.tlines.meandered import RouteMeander
 
+from squadds.components import create_coupler
 from squadds.components.claw_coupler import TransmonClaw
 from squadds.components.coupled_systems import QubitCavity
 
@@ -19,7 +19,13 @@ def create_claw(opts, cpw_length, design):
 
 def create_ncap_coupler(opts, design):
     opts["orientation"] = "-90"
-    return CapNInterdigitalTee(design, "cplr", options=opts)
+    return create_coupler("NCap", design, "cplr", opts)
+
+
+def create_generalized_ncap_coupler(opts, design):
+    """Create the SQuADDS generalized interdigital capacitor."""
+    opts["orientation"] = "-90"
+    return create_coupler("GeneralizedCapNInterdigital", design, "cplr", opts)
 
 
 def create_clt_coupler(opts, design):
