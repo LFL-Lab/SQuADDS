@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>squadds.simulations.utils_component_factory &#8212; SQuADDS v0.4.5</title>
+    <title>squadds.components.component_registry &#8212; SQuADDS v0.4.5</title>
   
   
   
@@ -52,7 +52,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/squadds/simulations/utils_component_factory';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/squadds/components/component_registry';</script>
     <link rel="icon" href="../../../_static/squadds_logo_dark.png"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -589,7 +589,7 @@
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">squadds.simulations.utils_component_factory</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">squadds.components.component_registry</span></li>
   </ul>
 </nav>
 </div>
@@ -606,71 +606,100 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <h1>Source code for squadds.simulations.utils_component_factory</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoupledLineTee</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.tlines.meandered</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouteMeander</span>
+  <h1>Source code for squadds.components.component_registry</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Resolve dataset component names to their Qiskit Metal implementations.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_coupler</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.claw_coupler</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonClaw</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.coupled_systems</span><span class="w"> </span><span class="kn">import</span> <span class="n">QubitCavity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-<div class="viewcode-block" id="create_qubitcavity">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_qubitcavity">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_qubitcavity</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">QubitCavity</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;qubitcavity&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span></div>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">QComponent</span>
 
 
+<div class="viewcode-block" id="CouplerSpec">
+<a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.component_registry.CouplerSpec">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CouplerSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Construction and pin roles for a supported coupler.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="create_claw">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_claw">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_claw</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">cpw_length</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
-    <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-90&quot;</span>
-    <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;pos_x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-1500um&quot;</span> <span class="k">if</span> <span class="n">cpw_length</span> <span class="o">&gt;</span> <span class="mi">2500</span> <span class="k">else</span> <span class="s2">&quot;-1000um&quot;</span>
-    <span class="k">return</span> <span class="n">TransmonClaw</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;claw&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span></div>
+    <span class="n">component_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">QComponent</span><span class="p">]</span>
+    <span class="n">route_pin</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">exposed_pins</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">instance_suffix</span><span class="p">:</span> <span class="nb">str</span></div>
 
 
 
-<div class="viewcode-block" id="create_ncap_coupler">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_ncap_coupler">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_ncap_coupler</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
-    <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-90&quot;</span>
-    <span class="k">return</span> <span class="n">create_coupler</span><span class="p">(</span><span class="s2">&quot;NCap&quot;</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="s2">&quot;cplr&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span></div>
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalized_component_name</span><span class="p">(</span><span class="n">component_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">component_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="get_coupler_spec">
+<a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.component_registry.get_coupler_spec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_coupler_spec</span><span class="p">(</span><span class="n">component_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CouplerSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the implementation and pin roles for a coupler name.&quot;&quot;&quot;</span>
+    <span class="n">normalized</span> <span class="o">=</span> <span class="n">_normalized_component_name</span><span class="p">(</span><span class="n">component_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">normalized</span> <span class="o">==</span> <span class="s2">&quot;generalizedcapninterdigital&quot;</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components.generalized_ncap_interdigital</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneralizedCapNInterdigital</span>
+
+        <span class="k">return</span> <span class="n">CouplerSpec</span><span class="p">(</span>
+            <span class="n">component_class</span><span class="o">=</span><span class="n">GeneralizedCapNInterdigital</span><span class="p">,</span>
+            <span class="n">route_pin</span><span class="o">=</span><span class="s2">&quot;south_end&quot;</span><span class="p">,</span>
+            <span class="n">exposed_pins</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;north_end&quot;</span><span class="p">,),</span>
+            <span class="n">instance_suffix</span><span class="o">=</span><span class="s2">&quot;generalized_ncap_coupler&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">normalized</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;capn&quot;</span><span class="p">,</span> <span class="s2">&quot;ncap&quot;</span><span class="p">,</span> <span class="s2">&quot;capninterdigitaltee&quot;</span><span class="p">}:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapNInterdigitalTee</span>
+
+        <span class="k">return</span> <span class="n">CouplerSpec</span><span class="p">(</span>
+            <span class="n">component_class</span><span class="o">=</span><span class="n">CapNInterdigitalTee</span><span class="p">,</span>
+            <span class="n">route_pin</span><span class="o">=</span><span class="s2">&quot;second_end&quot;</span><span class="p">,</span>
+            <span class="n">exposed_pins</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;prime_start&quot;</span><span class="p">,</span> <span class="s2">&quot;prime_end&quot;</span><span class="p">),</span>
+            <span class="n">instance_suffix</span><span class="o">=</span><span class="s2">&quot;capn_coupler&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">normalized</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;clt&quot;</span><span class="p">,</span> <span class="s2">&quot;coupledlinetee&quot;</span><span class="p">}:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.couplers.coupled_line_tee</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoupledLineTee</span>
+
+        <span class="k">return</span> <span class="n">CouplerSpec</span><span class="p">(</span>
+            <span class="n">component_class</span><span class="o">=</span><span class="n">CoupledLineTee</span><span class="p">,</span>
+            <span class="n">route_pin</span><span class="o">=</span><span class="s2">&quot;second_end&quot;</span><span class="p">,</span>
+            <span class="n">exposed_pins</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;prime_start&quot;</span><span class="p">,</span> <span class="s2">&quot;prime_end&quot;</span><span class="p">),</span>
+            <span class="n">instance_suffix</span><span class="o">=</span><span class="s2">&quot;CLT_coupler&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported coupler component: </span><span class="si">{</span><span class="n">component_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="create_generalized_ncap_coupler">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_generalized_ncap_coupler">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_generalized_ncap_coupler</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create the SQuADDS generalized interdigital capacitor.&quot;&quot;&quot;</span>
-    <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-90&quot;</span>
-    <span class="k">return</span> <span class="n">create_coupler</span><span class="p">(</span><span class="s2">&quot;GeneralizedCapNInterdigital&quot;</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="s2">&quot;cplr&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span></div>
+<div class="viewcode-block" id="create_coupler">
+<a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.component_registry.create_coupler">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_coupler</span><span class="p">(</span><span class="n">component_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QComponent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiate a named coupler using its registered implementation.&quot;&quot;&quot;</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">get_coupler_spec</span><span class="p">(</span><span class="n">component_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spec</span><span class="o">.</span><span class="n">component_class</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span> <span class="ow">or</span> <span class="p">{})</span></div>
 
 
 
-<div class="viewcode-block" id="create_clt_coupler">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_clt_coupler">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_clt_coupler</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
-    <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-90&quot;</span>
-    <span class="k">return</span> <span class="n">CoupledLineTee</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;cplr&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span></div>
+<div class="viewcode-block" id="build_component_from_design">
+<a class="viewcode-back" href="../../../source/squadds.components.html#squadds.components.component_registry.build_component_from_design">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_component_from_design</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cplr&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QComponent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the exact component declared by a SQuADDS dataset row.</span>
 
-
-
-<div class="viewcode-block" id="create_cpw">
-<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.utils.create_cpw">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_cpw</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">cplr</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
-    <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;lead&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span><span class="n">start_straight</span><span class="o">=</span><span class="s2">&quot;50um&quot;</span><span class="p">,</span> <span class="n">end_straight</span><span class="o">=</span><span class="s2">&quot;50um&quot;</span><span class="p">)})</span>
-    <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;pin_inputs&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span>
-                <span class="n">start_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="n">cplr</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s2">&quot;second_end&quot;</span><span class="p">),</span>
-                <span class="n">end_pin</span><span class="o">=</span><span class="n">Dict</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s2">&quot;claw&quot;</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="s2">&quot;readout&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
-        <span class="p">}</span>
+<span class="sd">    Both nested Hugging Face records and second-level flattened API records are</span>
+<span class="sd">    accepted. GeneralizedCapNInterdigital is intentionally resolved only from</span>
+<span class="sd">    ``squadds.components``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">design_record</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span>
+    <span class="n">component_name</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">design_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;component_class&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">design_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;component_name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">design_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;coupler_type&quot;</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;meander&quot;</span><span class="p">:</span> <span class="n">Dict</span><span class="p">(</span><span class="n">spacing</span><span class="o">=</span><span class="s2">&quot;100um&quot;</span><span class="p">)})</span>
-    <span class="k">return</span> <span class="n">RouteMeander</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;cpw&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">component_name</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Dataset row does not declare a component class or coupler type.&quot;</span><span class="p">)</span>
+
+    <span class="n">options</span> <span class="o">=</span> <span class="n">design_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+    <span class="k">return</span> <span class="n">create_coupler</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span></div>
 
 </pre></div>
 
