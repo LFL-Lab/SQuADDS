@@ -73,9 +73,7 @@ def build_component_from_design(design, row: dict[str, Any], name: str = "cplr")
     """
     design_record = row.get("design", row)
     component_name = (
-        design_record.get("component_class")
-        or design_record.get("component_name")
-        or design_record.get("coupler_type")
+        design_record.get("component_class") or design_record.get("component_name") or design_record.get("coupler_type")
     )
     if not component_name:
         raise ValueError("Dataset row does not declare a component class or coupler type.")
