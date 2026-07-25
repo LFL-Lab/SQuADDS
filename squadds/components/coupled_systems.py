@@ -5,6 +5,8 @@ from qiskit_metal import Dict
 from qiskit_metal.qlibrary.core import QComponent
 from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
 
+from squadds.components.component_registry import create_coupler, get_coupler_spec
+
 
 class QubitCavity(QComponent):
     """
@@ -59,7 +61,7 @@ class QubitCavity(QComponent):
         warnings.warn(
             "QubitCavity is a convenience wrapper for quick visualization only. "
             "For production designs, build components individually (TransmonCross, "
-            "CoupledLineTee, RouteMeander) to control trace widths, fillets, and "
+            "the selected coupler, RouteMeander) to control trace widths, fillets, and "
             "lead straights. See SQuADDS Tutorial 5 or the MCP layout-guide resource. "
             "If you see CPW kinks, increase 'lead.start_straight' / 'lead.end_straight' "
             "on the RouteMeander (try 75um / 50um).",
@@ -112,18 +114,14 @@ class QubitCavity(QComponent):
         )
         self.copier(temp_opts, coupler_options)
 
-        if p.cavity_claw_options["coupler_type"].upper() == "CLT":
-            from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
-
-            self.coupler = CoupledLineTee(self.design, f"{self.name}_CLT_coupler", options=temp_opts)
-        elif (
-            p.cavity_claw_options["coupler_type"].lower() == "capn"
-            or p.cavity_claw_options["coupler_type"].lower() == "ncap"
-            or p.cavity_claw_options["coupler_type"].lower() == "capninterdigitaltee"
-        ):
-            from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import CapNInterdigitalTee
-
-            self.coupler = CapNInterdigitalTee(self.design, f"{self.name}_capn_coupler", options=temp_opts)
+        coupler_type = p.cavity_claw_options["coupler_type"]
+        spec = get_coupler_spec(coupler_type)
+        self.coupler = create_coupler(
+            coupler_type,
+            self.design,
+            f"{self.name}_{spec.instance_suffix}",
+            temp_opts,
+        )
 
     def make_cpws(self):
         """
@@ -199,7 +197,9 @@ class QubitCavity(QComponent):
         left_opts["pin_inputs"]["start_pin"].update({"pin": list(self.qubit.options["connection_pads"].keys())[0]})
 
         left_opts["pin_inputs"]["end_pin"].update({"component": self.coupler.name})
-        left_opts["pin_inputs"]["end_pin"].update({"pin": "second_end"})
+        left_opts["pin_inputs"]["end_pin"].update(
+            {"pin": get_coupler_spec(p.cavity_claw_options["coupler_type"]).route_pin}
+        )
 
         self.LeftMeander = RouteMeander(self.design, f"{self.name}_left_cpw", options=left_opts)
 
@@ -251,10 +251,10 @@ class QubitCavity(QComponent):
         Returns:
             None
         """
-        start_dict = self.coupler.get_pin("prime_start")
-        end_dict = self.coupler.get_pin("prime_end")
-        self.add_pin("prime_start", start_dict["points"], start_dict["width"])
-        self.add_pin("prime_end", end_dict["points"], end_dict["width"])
+        spec = get_coupler_spec(self.p.cavity_claw_options["coupler_type"])
+        for pin_name in spec.exposed_pins:
+            pin = self.coupler.get_pin(pin_name)
+            self.add_pin(pin_name, pin["points"], pin["width"], gap=pin.get("gap"))
 
     def make_wirebond_pads(self):
         from qiskit_metal.qlibrary.terminations.launchpad_wb import LaunchpadWirebond

@@ -76,6 +76,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         view_component_names(component): Print the component names for a given component.
         view_datasets(): Print a table of available datasets.
         get_dataset_info(component, component_name, data_type): Print information about a specific dataset.
+        build_qiskit_metal_component(design, row, name): Build the component declared by a dataset row.
         view_all_contributors(): Print a table of all contributors.
         view_contributors_of_config(config): Print a table of contributors for a specific configuration.
         view_contributors_of(component, component_name, data_type): Print a table of contributors for a specific component, component name, and data type.
@@ -856,6 +857,13 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         except Exception as e:
             print(f"An error occurred while loading the dataset: {e}")
             return
+
+    @staticmethod
+    def build_qiskit_metal_component(design, row, name="component"):
+        """Instantiate the exact Qiskit Metal component declared by a dataset row."""
+        from squadds.components import build_component_from_design
+
+        return build_component_from_design(design, row, name=name)
 
     def create_system_df(self, parallelize=False, num_cpu=None):
         """

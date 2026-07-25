@@ -4,6 +4,7 @@ from qiskit_metal import Dict
 from qiskit_metal.qlibrary.core import QComponent
 
 from squadds.components.claw_coupler import TransmonClaw
+from squadds.components.component_registry import create_coupler, get_coupler_spec
 
 
 class CavityClaw(QComponent):
@@ -71,7 +72,7 @@ class CavityClaw(QComponent):
         qubit_opts["pos_y"] = 0
         try:
             qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options["cpw_opts"].total_length > 2.500 else "-1000um"
-        except:
+        except KeyError:
             qubit_opts["pos_x"] = "-1500um" if p.cavity_claw_options["cpw_options"].total_length > 2.500 else "-1000um"
         self.qubit = TransmonClaw(self.design, f"{self.name}_xmon", options=qubit_opts)
 
@@ -95,21 +96,17 @@ class CavityClaw(QComponent):
         temp_opts = Dict()
         try:
             self.copier(temp_opts, p.cavity_claw_options["coupler_options"])
-        except:
+        except KeyError:
             self.copier(temp_opts, p.cavity_claw_options["cplr_opts"])
 
-        if p.cavity_claw_options["coupler_type"].upper() == "CLT":
-            from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
-
-            self.coupler = CoupledLineTee(self.design, f"{self.name}_CLT_coupler", options=temp_opts)
-        elif (
-            p.cavity_claw_options["coupler_type"].lower() == "capn"
-            or p.cavity_claw_options["coupler_type"].lower() == "ncap"
-            or p.cavity_claw_options["coupler_type"].lower() == "capninterdigitaltee"
-        ):
-            from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import CapNInterdigitalTee
-
-            self.coupler = CapNInterdigitalTee(self.design, f"{self.name}_capn_coupler", options=temp_opts)
+        coupler_type = p.cavity_claw_options["coupler_type"]
+        spec = get_coupler_spec(coupler_type)
+        self.coupler = create_coupler(
+            coupler_type,
+            self.design,
+            f"{self.name}_{spec.instance_suffix}",
+            temp_opts,
+        )
 
     def make_cpws(self):
         """
@@ -123,7 +120,7 @@ class CavityClaw(QComponent):
         p = self.p
         try:
             p.cpw_opts = p.cavity_claw_options["cpw_opts"]
-        except:
+        except KeyError:
             p.cpw_opts = p.cavity_claw_options["cpw_options"]
 
         left_opts = Dict()
@@ -168,7 +165,9 @@ class CavityClaw(QComponent):
         left_opts["pin_inputs"]["start_pin"].update({"pin": list(self.qubit.options["connection_pads"].keys())[0]})
 
         left_opts["pin_inputs"]["end_pin"].update({"component": self.coupler.name})
-        left_opts["pin_inputs"]["end_pin"].update({"pin": "second_end"})
+        left_opts["pin_inputs"]["end_pin"].update(
+            {"pin": get_coupler_spec(p.cavity_claw_options["coupler_type"]).route_pin}
+        )
 
         self.LeftMeander = RouteMeander(self.design, f"{self.name}_left_cpw", options=left_opts)
 
@@ -201,10 +200,10 @@ class CavityClaw(QComponent):
         Returns:
             None
         """
-        start_dict = self.coupler.get_pin("prime_start")
-        end_dict = self.coupler.get_pin("prime_end")
-        self.add_pin("prime_start", start_dict["points"], start_dict["width"])
-        self.add_pin("prime_end", end_dict["points"], end_dict["width"])
+        spec = get_coupler_spec(self.p.cavity_claw_options["coupler_type"])
+        for pin_name in spec.exposed_pins:
+            pin = self.coupler.get_pin(pin_name)
+            self.add_pin(pin_name, pin["points"], pin["width"], gap=pin.get("gap"))
 
     def make_wirebond_pads(self):
         from qiskit_metal.qlibrary.terminations.launchpad_wb import LaunchpadWirebond

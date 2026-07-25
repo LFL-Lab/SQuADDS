@@ -129,5 +129,5 @@ Contributors
 | **Sara Sussman, PhD** (Fermilab) - Bug Hunter 🐛
 | **Priyangshu Chatterjee** (IIT Kharagpur) -  Documentation contributor 📄
 | **Abhishek Chakraborty** (Rigetti Computing) - Code contributor 💻
-| **Saikat Das** (University of Southern California) - Reviewer ✅
+| **Saikat Das** (University of Southern California) - Data contributor 📀 and Reviewer ✅
 | **Firas Abouzahr** (Northwestern) - Bug Hunter 🐛
