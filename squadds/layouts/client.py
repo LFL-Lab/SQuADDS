@@ -104,9 +104,7 @@ class LayoutClient:
                 )
             )
             self._geometry_features = pd.read_parquet(path)
-        matches = self._geometry_features.loc[
-            lambda frame: frame["layout_id"] == reference.layout_id
-        ]
+        matches = self._geometry_features.loc[lambda frame: frame["layout_id"] == reference.layout_id]
         if len(matches) != 1:
             raise LookupError(f"No unique geometry feature record for {reference.layout_id!r}.")
         return matches.iloc[0].to_dict()
