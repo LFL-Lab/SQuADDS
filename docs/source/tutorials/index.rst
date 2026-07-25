@@ -16,6 +16,7 @@ Tutorials
    Tutorial-9_Learing_the_Inverse_Design_Map.ipynb
    Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb
    Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb
+   Tutorial-14_Exploring_Static_Layout_Embeddings.ipynb
 
 .. note::
 
