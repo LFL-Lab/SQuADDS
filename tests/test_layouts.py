@@ -2,7 +2,13 @@ import pandas as pd
 import pytest
 
 from squadds.core.db import SQuADDS_DB
-from squadds.layouts import LayoutClient, canonical_design_id, parse_gds_polygons, parse_gds_summary
+from squadds.layouts import (
+    LayoutClient,
+    build_geometry_features,
+    canonical_design_id,
+    parse_gds_polygons,
+    parse_gds_summary,
+)
 
 
 def test_canonical_design_id_is_order_independent():
@@ -60,6 +66,36 @@ def test_database_layout_bridge_derives_design_id_without_source_id():
     assert SQuADDS_DB.get_layout_ref(row, layout_client=FakeLayoutClient()) == {
         "design_id": canonical_design_id("CapNInterdigitalTee", options)
     }
+
+
+def test_geometry_features_are_layer_aware_and_model_ready():
+    manifest = pd.DataFrame(
+        [
+            {
+                "layout_id": "layout:one",
+                "artifact_id": "sha256:one",
+                "component_name": "CapNInterdigitalTee",
+                "source_id": "generated/capn_0000",
+                "bbox_um": {"left": 0, "bottom": 0, "right": 10, "top": 5},
+                "polygon_count": 3,
+                "cell_count": 2,
+                "layers": [
+                    {"layer": 2, "datatype": 0, "polygon_count": 1, "area_um2": 4.0},
+                    {"layer": 1, "datatype": 10, "polygon_count": 2, "area_um2": 6.0},
+                ],
+            }
+        ]
+    )
+
+    feature = build_geometry_features(manifest).iloc[0]
+
+    assert feature["bbox_area_um2"] == 50.0
+    assert feature["bbox_aspect_ratio"] == 2.0
+    assert feature["total_area_um2"] == 10.0
+    assert feature["layer_features"] == [
+        {"layer": 1, "datatype": 10, "polygon_count": 2, "area_um2": 6.0},
+        {"layer": 2, "datatype": 0, "polygon_count": 1, "area_um2": 4.0},
+    ]
 
 
 def test_parse_gds_summary_extracts_layers_and_units(tmp_path):
