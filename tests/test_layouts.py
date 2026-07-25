@@ -45,6 +45,35 @@ def test_layout_client_finds_local_manifest_record(tmp_path):
     assert client.download(reference) == artifact
 
 
+def test_layout_client_reads_local_geometry_features(tmp_path):
+    manifest = tmp_path / "manifest.parquet"
+    features = tmp_path / "geometry-features.parquet"
+    pd.DataFrame(
+        [
+            {
+                "layout_id": "layout:sha256:layout",
+                "artifact_id": "sha256:artifact",
+                "gds_path": "raw/cap.gds",
+                "component_name": "GeneralizedCapNInterdigital",
+            }
+        ]
+    ).to_parquet(manifest, index=False)
+    pd.DataFrame(
+        [
+            {
+                "layout_id": "layout:sha256:layout",
+                "geometry_feature_schema_version": "1.0.0",
+                "polygon_count": 5,
+            }
+        ]
+    ).to_parquet(features, index=False)
+
+    client = LayoutClient(manifest_path=manifest, geometry_features_path=features)
+    reference = client.find(layout_id="layout:sha256:layout")
+
+    assert client.geometry_features(reference)["polygon_count"] == 5
+
+
 def test_database_layout_bridge_uses_source_id():
     class FakeLayoutClient:
         def find(self, **kwargs):

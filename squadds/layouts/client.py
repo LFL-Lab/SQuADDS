@@ -43,15 +43,20 @@ class LayoutClient:
         repo_id: str = DEFAULT_LAYOUT_REPOSITORY,
         revision: str = "main",
         manifest_filename: str = "metadata/manifest.parquet",
+        geometry_features_filename: str = "metadata/geometry-features-v1.parquet",
         manifest_path: str | Path | None = None,
+        geometry_features_path: str | Path | None = None,
         artifact_root: str | Path | None = None,
     ):
         self.repo_id = repo_id
         self.revision = revision
         self.manifest_filename = manifest_filename
+        self.geometry_features_filename = geometry_features_filename
         self.manifest_path = Path(manifest_path) if manifest_path else None
+        self.geometry_features_path = Path(geometry_features_path) if geometry_features_path else None
         self.artifact_root = Path(artifact_root) if artifact_root else None
         self._manifest: pd.DataFrame | None = None
+        self._geometry_features: pd.DataFrame | None = None
 
     def manifest(self) -> pd.DataFrame:
         """Load the compact manifest only; raw GDS files remain remote."""
@@ -86,6 +91,25 @@ class LayoutClient:
         if len(matches) > 1:
             raise LookupError(f"Multiple layouts found for {key}={value!r}; use layout_id instead.")
         return LayoutReference.from_record(matches.iloc[0].to_dict())
+
+    def geometry_features(self, reference: LayoutReference) -> dict[str, Any]:
+        """Return the versioned numerical geometry features for one layout."""
+        if self._geometry_features is None:
+            path = self.geometry_features_path or Path(
+                hf_hub_download(
+                    repo_id=self.repo_id,
+                    repo_type="dataset",
+                    filename=self.geometry_features_filename,
+                    revision=self.revision,
+                )
+            )
+            self._geometry_features = pd.read_parquet(path)
+        matches = self._geometry_features.loc[
+            lambda frame: frame["layout_id"] == reference.layout_id
+        ]
+        if len(matches) != 1:
+            raise LookupError(f"No unique geometry feature record for {reference.layout_id!r}.")
+        return matches.iloc[0].to_dict()
 
     def download(self, reference: LayoutReference, verify_checksum: bool = True) -> Path:
         """Download one GDS artifact and verify its immutable content checksum."""

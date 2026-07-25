@@ -219,7 +219,12 @@ class TestServerFactory:
 
         mcp = FakeMCP()
         register_layout_tools(mcp)
-        assert mcp.registered == ["get_layout", "get_layout_summary", "get_layout_polygons"]
+        assert mcp.registered == [
+            "get_layout",
+            "get_layout_summary",
+            "get_layout_features",
+            "get_layout_polygons",
+        ]
 
 
 # ---------------------------------------------------------------------------

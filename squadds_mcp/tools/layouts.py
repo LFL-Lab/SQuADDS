@@ -46,6 +46,21 @@ def register_layout_tools(mcp: FastMCP) -> None:
         return sanitize_for_json(client.summary(reference))
 
     @mcp.tool()
+    async def get_layout_features(
+        layout_id: str | None = None,
+        design_id: str | None = None,
+        source_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Return versioned numerical features for one layout without parsing its GDS.
+
+        The feature record includes bounds, areas, counts, and sparse per-layer
+        statistics. It is a deterministic input contract, not a learned embedding.
+        """
+        client = LayoutClient()
+        reference = client.find(layout_id=layout_id, design_id=design_id, source_id=source_id)
+        return sanitize_for_json(client.geometry_features(reference))
+
+    @mcp.tool()
     async def get_layout_polygons(
         layout_id: str | None = None,
         design_id: str | None = None,
