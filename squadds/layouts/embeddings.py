@@ -383,11 +383,90 @@ def write_static_embedding_dataset(
     artifact_resolver: Callable[[dict[str, Any]], Path],
     output_dir: str | Path,
 ) -> tuple[int, int]:
-    """Write static v0 vectors and schema JSON for a Hugging Face release."""
+    """Write static v0 vectors and schema JSON for a Hugging Face release.
+
+    The two-pass implementation keeps the catalogue-wide normalization exact
+    without retaining every 96 by 96 raster in memory.  This matters once a
+    release contains tens of thousands of layouts.
+    """
+    try:
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+    except ImportError as exc:
+        raise ImportError("Writing static embeddings requires pyarrow.") from exc
+
     output = Path(output_dir)
-    vectors, schema = build_static_embeddings(manifest, design_options_by_id, artifact_resolver)
     metadata = output / "metadata"
     metadata.mkdir(parents=True, exist_ok=True)
-    vectors.to_parquet(metadata / "static-embedding-v0.parquet", index=False)
+
+    records = manifest.to_dict(orient="records")
+    parameter_values = []
+    moment_values = []
+    for record in records:
+        design_id = record.get("design_id")
+        if design_id not in design_options_by_id:
+            raise LookupError(f"No design options found for {design_id!r}.")
+        _, moments, _ = rasterize_functional_shape(artifact_resolver(record), record["component_name"])
+        parameter_values.append(parameter_sum(design_options_by_id[design_id]))
+        moment_values.append(moments)
+
+    parameter_array = np.asarray(parameter_values, dtype=np.float64)
+    moment_array = np.asarray(moment_values, dtype=np.float64)
+    parameter_mean = float(parameter_array.mean())
+    parameter_std = float(parameter_array.std()) or 1.0
+    moment_mean = moment_array.mean(axis=0)
+    moment_std = moment_array.std(axis=0)
+    moment_std[moment_std == 0] = 1.0
+    schema = static_embedding_schema(parameter_mean, parameter_std, moment_mean, moment_std)
+
+    embedding_path = metadata / "static-embedding-v0.parquet"
+    writer = None
+    batch_size = 64
+    for start in range(0, len(records), batch_size):
+        batch = []
+        for index, record in enumerate(records[start : start + batch_size], start=start):
+            bitmap, moments, shape_metadata = rasterize_functional_shape(
+                artifact_resolver(record), record["component_name"]
+            )
+            parameter_block = np.asarray(
+                [math.tanh((parameter_values[index] - parameter_mean) / parameter_std)]
+            )
+            moment_block = np.clip((np.asarray(moments) - moment_mean) / moment_std, -5.0, 5.0)
+            moment_norm = np.linalg.norm(moment_block)
+            if moment_norm:
+                moment_block /= moment_norm
+            shape_block = bitmap.reshape(-1).astype(np.float64)
+            shape_norm = np.linalg.norm(shape_block)
+            if shape_norm:
+                shape_block /= shape_norm
+            embedding = np.concatenate([parameter_block, moment_block, shape_block])
+            embedding_norm = np.linalg.norm(embedding)
+            if embedding_norm:
+                embedding /= embedding_norm
+            batch.append(
+                {
+                    "layout_id": record["layout_id"],
+                    "artifact_id": record["artifact_id"],
+                    "design_id": record.get("design_id"),
+                    "component_name": record["component_name"],
+                    "source_id": record.get("source_id"),
+                    "embedding_model": STATIC_EMBEDDING_MODEL,
+                    "embedding_schema_version": STATIC_EMBEDDING_SCHEMA_VERSION,
+                    "parameter_sum": parameter_values[index],
+                    "geometric_moments": np.asarray(moments, dtype=np.float32).tolist(),
+                    "shape_bitmap_sha256": hashlib.sha256(
+                        bitmap.reshape(-1).astype(np.float32).tobytes()
+                    ).hexdigest(),
+                    "functional_bounds_um": shape_metadata["functional_bounds_um"],
+                    "embedding": embedding.astype(np.float32).tolist(),
+                }
+            )
+        table = pa.Table.from_pylist(batch)
+        if writer is None:
+            writer = pq.ParquetWriter(embedding_path, table.schema, compression="snappy")
+        writer.write_table(table)
+    if writer is None:
+        raise ValueError("Cannot write an empty embedding catalogue.")
+    writer.close()
     (metadata / "static-embedding-v0.schema.json").write_text(json.dumps(schema, indent=2) + "\n")
-    return len(vectors), schema["dimensions"]
+    return len(records), schema["dimensions"]
