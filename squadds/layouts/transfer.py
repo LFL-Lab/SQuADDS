@@ -68,6 +68,82 @@ class V0FeatureProjector:
 
 
 @dataclass
+class V0KernelFeatureProjector:
+    """Create deterministic nonlinear features from static v0 embeddings.
+
+    The projector keeps the standardized compact v0 block and appends random
+    Fourier features for an RBF kernel. Its median-distance bandwidth is fit
+    without simulation targets, so it is suitable for controlled transfer
+    studies without target leakage.
+    """
+
+    pooled_shape_size: int = 12
+    kernel_dimensions: int = 256
+    random_seed: int = 16
+    minimum_scale: float = 1e-6
+    mean_: np.ndarray | None = None
+    scale_: np.ndarray | None = None
+    gamma_: float | None = None
+    weights_: np.ndarray | None = None
+    phase_: np.ndarray | None = None
+
+    def fit(self, embeddings: Any) -> V0KernelFeatureProjector:
+        """Fit deterministic scaling and an unsupervised RBF bandwidth."""
+        return self.fit_compact(compress_v0_embeddings(embeddings, self.pooled_shape_size))
+
+    def fit_compact(self, compact_features: Any) -> V0KernelFeatureProjector:
+        """Fit from an already pooled v0 matrix to support streamed datasets."""
+        if self.kernel_dimensions < 1:
+            raise ValueError("kernel_dimensions must be positive.")
+        compact = _as_2d(compact_features, "compact_features")
+        self.mean_ = compact.mean(axis=0)
+        self.scale_ = compact.std(axis=0)
+        self.scale_[self.scale_ < self.minimum_scale] = 1.0
+        standardized = np.clip((compact - self.mean_) / self.scale_, -8.0, 8.0)
+
+        rng = np.random.default_rng(self.random_seed)
+        sample_size = min(1_000, len(standardized))
+        sample = standardized[rng.choice(len(standardized), size=sample_size, replace=False)]
+        pair_count = len(sample) // 2
+        if pair_count:
+            squared_distances = np.sum((sample[:pair_count] - sample[pair_count : 2 * pair_count]) ** 2, axis=1)
+            median_squared_distance = float(np.median(squared_distances))
+        else:
+            median_squared_distance = 1.0
+        self.gamma_ = 1.0 / max(2.0 * median_squared_distance, 1e-12)
+        self.weights_ = rng.normal(
+            0.0,
+            np.sqrt(2.0 * self.gamma_),
+            size=(standardized.shape[1], self.kernel_dimensions),
+        )
+        self.phase_ = rng.uniform(0.0, 2.0 * np.pi, size=self.kernel_dimensions)
+        return self
+
+    def transform(self, embeddings: Any) -> np.ndarray:
+        """Return standardized compact v0 plus deterministic kernel features."""
+        return self.transform_compact(compress_v0_embeddings(embeddings, self.pooled_shape_size))
+
+    def transform_compact(self, compact_features: Any) -> np.ndarray:
+        """Transform an already pooled v0 matrix without reopening shape pixels."""
+        if self.mean_ is None or self.scale_ is None or self.weights_ is None or self.phase_ is None:
+            raise RuntimeError("Fit the kernel feature projector before calling transform().")
+        compact = _as_2d(compact_features, "compact_features")
+        if compact.shape[1] != len(self.mean_):
+            raise ValueError("compact_features do not match the fitted feature dimensions.")
+        standardized = np.clip((compact - self.mean_) / self.scale_, -8.0, 8.0)
+        kernel = np.sqrt(2.0 / self.kernel_dimensions) * np.cos(standardized @ self.weights_ + self.phase_)
+        return np.column_stack([standardized, kernel])
+
+    def fit_transform(self, embeddings: Any) -> np.ndarray:
+        """Fit the unsupervised map and transform the same vectors."""
+        return self.fit(embeddings).transform(embeddings)
+
+    def fit_transform_compact(self, compact_features: Any) -> np.ndarray:
+        """Fit and transform an already pooled v0 feature matrix."""
+        return self.fit_compact(compact_features).transform_compact(compact_features)
+
+
+@dataclass
 class SourceFeatureProjector:
     """Standardize arbitrary features using source-domain statistics only."""
 
@@ -166,6 +242,25 @@ def target_to_source_similarity(source_embeddings: Any, target_embeddings: Any) 
     if np.any(target_norms <= 1e-12):
         raise ValueError("Target embeddings must have non-zero norm.")
     return (target @ centroid) / target_norms
+
+
+def mean_pairwise_cosine_similarity(first_embeddings: Any, second_embeddings: Any) -> float:
+    """Return the exact mean cosine across all cross-set vector pairs.
+
+    Computing the dot product of normalized set centroids avoids materializing
+    the potentially enormous pairwise similarity matrix.
+    """
+    first = _as_2d(first_embeddings, "first_embeddings")
+    second = _as_2d(second_embeddings, "second_embeddings")
+    if first.shape[1] != second.shape[1]:
+        raise ValueError("Embedding sets must have the same dimensions.")
+    first_norms = np.linalg.norm(first, axis=1)
+    second_norms = np.linalg.norm(second, axis=1)
+    if np.any(first_norms <= 1e-12) or np.any(second_norms <= 1e-12):
+        raise ValueError("Embeddings must have non-zero norm.")
+    first_centroid = np.mean(first / first_norms[:, None], axis=0)
+    second_centroid = np.mean(second / second_norms[:, None], axis=0)
+    return float(first_centroid @ second_centroid)
 
 
 def regression_scores(

@@ -6,10 +6,13 @@ from squadds.core.db import SQuADDS_DB
 from squadds.layouts import (
     LayoutClient,
     StaticEmbeddingClient,
+    V0KernelFeatureProjector,
     build_geometry_features,
     build_static_embeddings,
     canonical_design_id,
+    compress_v0_embeddings,
     infer_layout_component_name,
+    mean_pairwise_cosine_similarity,
     parameter_sum,
     parse_gds_polygons,
     parse_gds_summary,
@@ -264,6 +267,48 @@ def test_parameter_sum_is_permutation_and_dimension_invariant():
     second = {"enabled": True, "count": 3, "width": "0.01mm"}
 
     assert parameter_sum(first) == parameter_sum(second)
+
+
+def test_v0_kernel_projector_is_deterministic_and_nonlinear():
+    rng = np.random.default_rng(16)
+    embeddings = rng.normal(size=(8, 9227))
+    embeddings /= np.linalg.norm(embeddings, axis=1, keepdims=True)
+
+    first = V0KernelFeatureProjector(
+        pooled_shape_size=12,
+        kernel_dimensions=32,
+        random_seed=4,
+    ).fit_transform(embeddings)
+    second = V0KernelFeatureProjector(
+        pooled_shape_size=12,
+        kernel_dimensions=32,
+        random_seed=4,
+    ).fit_transform(embeddings)
+
+    assert first.shape == (8, 187)
+    assert np.allclose(first, second)
+    assert not np.allclose(first[:, -32:], 0.0)
+
+    compact = compress_v0_embeddings(embeddings, pooled_shape_size=12)
+    streamed = V0KernelFeatureProjector(
+        pooled_shape_size=12,
+        kernel_dimensions=32,
+        random_seed=4,
+    ).fit_transform_compact(compact)
+
+    assert streamed.shape == first.shape
+    assert np.allclose(streamed, first)
+
+
+def test_mean_pairwise_cosine_similarity_matches_explicit_matrix():
+    first = np.asarray([[1.0, 0.0], [1.0, 1.0]])
+    second = np.asarray([[0.0, 1.0], [1.0, -1.0]])
+    normalized_first = first / np.linalg.norm(first, axis=1, keepdims=True)
+    normalized_second = second / np.linalg.norm(second, axis=1, keepdims=True)
+
+    expected = float(np.mean(normalized_first @ normalized_second.T))
+
+    assert mean_pairwise_cosine_similarity(first, second) == pytest.approx(expected)
 
 
 def test_parse_gds_summary_extracts_layers_and_units(tmp_path):
