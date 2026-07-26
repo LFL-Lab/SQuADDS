@@ -67,6 +67,36 @@ class V0FeatureProjector:
         return self.fit(embeddings).transform(embeddings)
 
 
+@dataclass
+class SourceFeatureProjector:
+    """Standardize arbitrary features using source-domain statistics only."""
+
+    minimum_scale: float = 1e-6
+    mean_: np.ndarray | None = None
+    scale_: np.ndarray | None = None
+
+    def fit(self, features: Any) -> SourceFeatureProjector:
+        """Fit source-domain feature normalization."""
+        matrix = _as_2d(features, "features")
+        self.mean_ = matrix.mean(axis=0)
+        self.scale_ = matrix.std(axis=0)
+        self.scale_[self.scale_ < self.minimum_scale] = 1.0
+        return self
+
+    def transform(self, features: Any) -> np.ndarray:
+        """Standardize features with the fitted source-domain statistics."""
+        if self.mean_ is None or self.scale_ is None:
+            raise RuntimeError("Fit the feature projector before calling transform().")
+        matrix = _as_2d(features, "features")
+        if matrix.shape[1] != len(self.mean_):
+            raise ValueError("features do not match the fitted feature dimensions.")
+        return (matrix - self.mean_) / self.scale_
+
+    def fit_transform(self, features: Any) -> np.ndarray:
+        """Fit source-domain statistics and transform the same features."""
+        return self.fit(features).transform(features)
+
+
 class TransferRidgeRegressor:
     """Multi-output ridge regression with an optional source-model prior."""
 
@@ -274,7 +304,16 @@ def summarize_learning_curve(
         raise ValueError("confidence must be between 0 and 1.")
     group_columns = [
         column
-        for column in ("similarity_band", "similarity_mean", "method", "sample_size", "target")
+        for column in (
+            "source_domain",
+            "target_domain",
+            "representation",
+            "similarity_band",
+            "similarity_mean",
+            "method",
+            "sample_size",
+            "target",
+        )
         if column in curves
     ]
     tail = (1.0 - confidence) / 2.0
@@ -302,7 +341,17 @@ def required_target_samples(
     """Estimate M as the first sample size whose lower confidence bound reaches D."""
     summary = summarize_learning_curve(curves, metric=metric, confidence=confidence)
     filtered = summary.loc[(summary["method"] == method) & (summary["target"] == target)].copy()
-    group_columns = [column for column in ("similarity_band", "similarity_mean") if column in filtered]
+    group_columns = [
+        column
+        for column in (
+            "source_domain",
+            "target_domain",
+            "representation",
+            "similarity_band",
+            "similarity_mean",
+        )
+        if column in filtered
+    ]
     groups = [((), filtered)] if not group_columns else filtered.groupby(group_columns, dropna=False)
 
     records = []
@@ -466,3 +515,215 @@ class V0TransferLearningStudy:
             frame.insert(3, "similarity_max", float(np.max(self.target_similarity[mask])))
             frames.append(frame)
         return pd.concat(frames, ignore_index=True)
+
+
+class PartitionTransferStudy:
+    """Compare one foundation domain with multiple target-domain specialists."""
+
+    def __init__(
+        self,
+        features: Any,
+        targets: Any,
+        domains: Any,
+        source_domain: Any,
+        *,
+        target_names: list[str] | None = None,
+        alpha: float = 10.0,
+    ):
+        self.features = _as_2d(features, "features")
+        self.targets = _as_2d(targets, "targets")
+        self.domains = np.asarray(domains)
+        if self.domains.ndim != 1 or len(self.domains) != len(self.features):
+            raise ValueError("domains must be one-dimensional and match the feature rows.")
+        if len(self.targets) != len(self.features):
+            raise ValueError("features and targets must contain the same number of rows.")
+        if source_domain not in set(self.domains):
+            raise ValueError(f"Unknown source domain: {source_domain!r}.")
+        if len(pd.unique(self.domains)) < 2:
+            raise ValueError("A partition transfer study requires at least two domains.")
+        self.source_domain = source_domain
+        self.target_names = target_names or [f"target_{index}" for index in range(self.targets.shape[1])]
+        if len(self.target_names) != self.targets.shape[1]:
+            raise ValueError("target_names must match the number of target columns.")
+        if alpha <= 0:
+            raise ValueError("alpha must be positive.")
+        self.alpha = float(alpha)
+
+    @property
+    def target_domains(self) -> list[Any]:
+        """Return target domains in their original encounter order."""
+        return [domain for domain in pd.unique(self.domains) if domain != self.source_domain]
+
+    def domain_counts(self) -> pd.DataFrame:
+        """Count source and target rows in every domain."""
+        counts = pd.Series(self.domains).value_counts(sort=False)
+        return pd.DataFrame(
+            {
+                "domain": counts.index,
+                "rows": counts.to_numpy(),
+                "role": ["source" if domain == self.source_domain else "target" for domain in counts.index],
+            }
+        )
+
+    def _domain_arrays(self, target_domain: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        if target_domain not in self.target_domains:
+            raise ValueError(f"Unknown target domain: {target_domain!r}.")
+        source_mask = self.domains == self.source_domain
+        target_mask = self.domains == target_domain
+        return (
+            self.features[source_mask],
+            self.targets[source_mask],
+            self.features[target_mask],
+            self.targets[target_mask],
+        )
+
+    @staticmethod
+    def _fraction_sizes(
+        target_rows: int,
+        fractions: list[float],
+        test_fraction: float,
+    ) -> tuple[list[int], int]:
+        if not fractions or any(not 0 < float(fraction) <= 1 for fraction in fractions):
+            raise ValueError("fractions must contain values greater than 0 and at most 1.")
+        if not 0 < test_fraction < 1:
+            raise ValueError("test_fraction must be between 0 and 1.")
+        test_count = max(1, int(round(target_rows * test_fraction)))
+        pool_size = target_rows - test_count
+        if pool_size < 1:
+            raise ValueError("Each target domain must leave at least one adaptation row.")
+        sizes = sorted({max(1, min(pool_size, int(round(pool_size * fraction)))) for fraction in fractions})
+        return sizes, pool_size
+
+    def learning_curves(
+        self,
+        fractions: list[float],
+        *,
+        repeats: int = 12,
+        test_fraction: float = 0.3,
+        random_seed: int = 16,
+    ) -> pd.DataFrame:
+        """Evaluate percentage-based transfer curves for every target domain."""
+        frames = []
+        for domain_index, target_domain in enumerate(self.target_domains):
+            x_source, y_source, x_target, y_target = self._domain_arrays(target_domain)
+            sizes, pool_size = self._fraction_sizes(len(x_target), fractions, test_fraction)
+            frame = evaluate_transfer_learning(
+                x_source,
+                y_source,
+                x_target,
+                y_target,
+                sizes,
+                target_names=self.target_names,
+                alpha=self.alpha,
+                repeats=repeats,
+                test_fraction=test_fraction,
+                random_seed=random_seed + 1_000 * domain_index,
+            )
+            frame.insert(0, "source_domain", self.source_domain)
+            frame.insert(1, "target_domain", target_domain)
+            frame.insert(2, "sample_fraction", frame["sample_size"] / pool_size)
+            frame.insert(3, "target_pool_size", pool_size)
+            frames.append(frame)
+        return pd.concat(frames, ignore_index=True)
+
+    def dedicated_benchmarks(
+        self,
+        *,
+        test_fraction: float = 0.3,
+        random_seed: int = 16,
+    ) -> pd.DataFrame:
+        """Fit each target specialist with its complete adaptation pool."""
+        if not 0 < test_fraction < 1:
+            raise ValueError("test_fraction must be between 0 and 1.")
+        records = []
+        method_names = {
+            "zero-shot": "zero-shot",
+            "target-only": "dedicated-full",
+            "transfer": "transfer-full",
+        }
+        for domain_index, target_domain in enumerate(self.target_domains):
+            x_source, y_source, x_target, y_target = self._domain_arrays(target_domain)
+            order = np.random.default_rng(random_seed + 1_000 * domain_index).permutation(len(x_target))
+            test_count = max(1, int(round(len(order) * test_fraction)))
+            if test_count >= len(order):
+                raise ValueError("Each target domain must leave at least one adaptation row.")
+            test_indices = order[:test_count]
+            pool_indices = order[test_count:]
+            source_model = TransferRidgeRegressor(self.alpha).fit(x_source, y_source)
+            scores = _evaluate_models(
+                source_model,
+                x_target[pool_indices],
+                y_target[pool_indices],
+                x_target[test_indices],
+                y_target[test_indices],
+                self.alpha,
+                self.target_names,
+            )
+            for method, frame in scores.items():
+                for record in frame.to_dict(orient="records"):
+                    records.append(
+                        {
+                            "source_domain": self.source_domain,
+                            "target_domain": target_domain,
+                            "method": method_names[method],
+                            "sample_size": len(pool_indices) if method != "zero-shot" else 0,
+                            "sample_fraction": 1.0 if method != "zero-shot" else 0.0,
+                            "target_pool_size": len(pool_indices),
+                            **record,
+                        }
+                    )
+        return pd.DataFrame(records)
+
+
+class V0PartitionTransferStudy(PartitionTransferStudy):
+    """Run partition transfer studies from a shared v0 embedding catalogue."""
+
+    def __init__(
+        self,
+        embeddings: Any,
+        targets: Any,
+        domains: Any,
+        source_domain: Any,
+        *,
+        target_names: list[str] | None = None,
+        pooled_shape_size: int = 12,
+        alpha: float = 10.0,
+    ):
+        self.embeddings = _as_2d(embeddings, "embeddings")
+        domain_array = np.asarray(domains)
+        if domain_array.ndim != 1 or len(domain_array) != len(self.embeddings):
+            raise ValueError("domains must be one-dimensional and match the embedding rows.")
+        source_mask = domain_array == source_domain
+        if not np.any(source_mask):
+            raise ValueError(f"Unknown source domain: {source_domain!r}.")
+        self.projector = V0FeatureProjector(pooled_shape_size).fit(self.embeddings[source_mask])
+        features = self.projector.transform(self.embeddings)
+        super().__init__(
+            features,
+            targets,
+            domain_array,
+            source_domain,
+            target_names=target_names,
+            alpha=alpha,
+        )
+
+    def domain_similarity(self) -> pd.DataFrame:
+        """Summarize each target domain's raw-v0 cosine similarity to the source."""
+        source_embeddings = self.embeddings[self.domains == self.source_domain]
+        records = []
+        for target_domain in self.target_domains:
+            similarities = target_to_source_similarity(
+                source_embeddings,
+                self.embeddings[self.domains == target_domain],
+            )
+            records.append(
+                {
+                    "source_domain": self.source_domain,
+                    "target_domain": target_domain,
+                    "minimum": float(np.min(similarities)),
+                    "median": float(np.median(similarities)),
+                    "mean": float(np.mean(similarities)),
+                    "maximum": float(np.max(similarities)),
+                }
+            )
+        return pd.DataFrame(records)

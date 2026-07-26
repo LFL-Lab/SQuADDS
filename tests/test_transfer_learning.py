@@ -8,7 +8,10 @@ import pytest
 
 from squadds.layouts import (
     EMBEDDING_DIMENSIONS,
+    PartitionTransferStudy,
+    SourceFeatureProjector,
     TransferRidgeRegressor,
+    V0PartitionTransferStudy,
     V0TransferLearningStudy,
     compress_v0_embeddings,
     regression_scores,
@@ -117,3 +120,65 @@ def test_required_target_samples_uses_the_lower_confidence_bound():
 
     assert requirements["required_samples"].tolist()[:2] == [8, 16]
     assert pd.isna(requirements.iloc[2]["required_samples"])
+
+
+def test_partition_study_reports_fractional_curves_and_full_specialists():
+    values = np.linspace(0.1, 1.0, 90)
+    domains = np.repeat(["small", "medium", "large"], 30)
+    features = np.column_stack([values, values**2])
+    targets = np.column_stack([2.0 * values + 0.1, values**2 + 0.2])
+    projector = SourceFeatureProjector().fit(features[domains == "small"])
+    study = PartitionTransferStudy(
+        projector.transform(features),
+        targets,
+        domains,
+        "small",
+        target_names=["linear", "quadratic"],
+        alpha=3.0,
+    )
+
+    curves = study.learning_curves(
+        [0.1, 0.5],
+        repeats=2,
+        test_fraction=0.2,
+        random_seed=16,
+    )
+    benchmarks = study.dedicated_benchmarks(test_fraction=0.2, random_seed=16)
+
+    assert study.target_domains == ["medium", "large"]
+    assert study.domain_counts()["rows"].tolist() == [30, 30, 30]
+    assert set(curves["target_domain"]) == {"medium", "large"}
+    assert set(curves["method"]) == {"zero-shot", "target-only", "transfer"}
+    assert set(curves["sample_size"]) == {2, 12}
+    assert set(benchmarks["method"]) == {"zero-shot", "dedicated-full", "transfer-full"}
+    assert set(benchmarks["sample_size"]) == {0, 24}
+
+
+def test_v0_partition_study_normalizes_from_source_and_reports_similarity():
+    values = np.linspace(0.1, 1.0, 60)
+    domains = np.repeat(["source", "target"], 30)
+    embeddings = _synthetic_v0_embeddings(values)
+    targets = values[:, None]
+
+    study = V0PartitionTransferStudy(
+        embeddings,
+        targets,
+        domains,
+        "source",
+        target_names=["response"],
+        pooled_shape_size=12,
+        alpha=3.0,
+    )
+
+    similarities = study.domain_similarity()
+    curves = study.learning_curves(
+        [0.25],
+        repeats=2,
+        test_fraction=0.2,
+        random_seed=17,
+    )
+
+    assert study.features.shape == (60, 155)
+    assert similarities.iloc[0]["target_domain"] == "target"
+    assert -1 <= similarities.iloc[0]["mean"] <= 1
+    assert curves["sample_size"].unique().tolist() == [6]

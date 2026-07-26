@@ -202,6 +202,8 @@ The following tutorials are available to help you get started with `SQuADDS`:
 - [Tutorial 11: Unified Driven-Modal Hamiltonian Extraction](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.html)
 - [Tutorial 14: Exploring Static Layout Embeddings](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-14_Exploring_Static_Layout_Embeddings.html)
 - [Tutorial 15: Transfer Learning with Static Layout Embeddings](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-15_Transfer_Learning_with_Static_Embeddings.html)
+- [Tutorial 16: Transfer Learning Across GeneralizedNCap Geometry Regimes](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-16_Geometry_Domain_Transfer_Learning.html)
+- [Tutorial 17: Transfer Learning Across Component Classes](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-17_Cross_Component_Transfer_Learning.html)
 
 ---
 
