@@ -9,7 +9,7 @@ NOTEBOOK = Path("tutorials/Tutorial-15_Transfer_Learning_with_Static_Embeddings.
 
 
 def test_transfer_learning_tutorial_is_executed_and_visual():
-    notebook = json.loads(NOTEBOOK.read_text())
+    notebook = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
     code_cells = [cell for cell in notebook["cells"] if cell["cell_type"] == "code"]
     hidden_plot_cells = [cell for cell in code_cells if "hide-input" in cell["metadata"].get("tags", [])]
     outputs = [output for cell in code_cells for output in cell["outputs"]]
