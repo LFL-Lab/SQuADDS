@@ -174,9 +174,7 @@ def main() -> None:
         parser.error("--workers must be at least 1")
 
     spec = SPECS[args.kind]
-    source_json = args.source_json or Path(
-        hf_hub_download("SQuADDS/SQuADDS_DB", spec.filename, repo_type="dataset")
-    )
+    source_json = args.source_json or Path(hf_hub_download("SQuADDS/SQuADDS_DB", spec.filename, repo_type="dataset"))
     generated, skipped, failures = generate(
         args.kind,
         args.output_dir,
