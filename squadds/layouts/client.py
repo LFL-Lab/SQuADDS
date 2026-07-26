@@ -89,7 +89,13 @@ class LayoutClient:
         if len(matches) == 0:
             raise LookupError(f"No layout found for {key}={value!r}.")
         if len(matches) > 1:
-            raise LookupError(f"Multiple layouts found for {key}={value!r}; use layout_id instead.")
+            if key == "design_id" and matches["layout_id"].nunique() == 1:
+                # Some historical simulation rows repeat an identical design.
+                # They legitimately share one geometry identity, so return the
+                # first deterministic manifest record rather than rejecting it.
+                matches = matches.sort_values("gds_path").head(1)
+            else:
+                raise LookupError(f"Multiple layouts found for {key}={value!r}; use layout_id instead.")
         return LayoutReference.from_record(matches.iloc[0].to_dict())
 
     def geometry_features(self, reference: LayoutReference) -> dict[str, Any]:

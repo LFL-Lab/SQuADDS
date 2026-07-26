@@ -868,7 +868,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
     @staticmethod
     def get_layout_ref(row, layout_client=None):
         """Resolve the GDS artifact associated with a simulation dataset row."""
-        from squadds.layouts import LayoutClient, canonical_design_id
+        from squadds.layouts import LayoutClient, canonical_design_id, infer_layout_component_name
 
         notes = row.get("notes", {}) if hasattr(row, "get") else {}
         source_id = notes.get("source_id") if isinstance(notes, dict) else None
@@ -878,9 +878,15 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             return client.find(source_id=source_id)
 
         design = row.get("design", {}) if hasattr(row, "get") else {}
-        component_name = None
-        if isinstance(design, dict):
-            component_name = design.get("component_name") or design.get("component") or design.get("coupler_type")
+        if not isinstance(design, dict) or not design:
+            design_options = row.get("design_options") if hasattr(row, "get") else None
+            if isinstance(design_options, dict):
+                design = {
+                    "design_options": design_options,
+                    "component_name": row.get("component_name") if hasattr(row, "get") else None,
+                    "coupler_type": row.get("coupler_type") if hasattr(row, "get") else None,
+                }
+        component_name = infer_layout_component_name(design) if isinstance(design, dict) else None
         design_options = design.get("design_options") if isinstance(design, dict) else None
         if not component_name or not isinstance(design_options, dict):
             raise ValueError("Dataset row has neither a layout source_id nor a component design definition.")

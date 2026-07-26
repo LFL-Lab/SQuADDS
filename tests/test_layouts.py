@@ -9,6 +9,7 @@ from squadds.layouts import (
     build_geometry_features,
     build_static_embeddings,
     canonical_design_id,
+    infer_layout_component_name,
     parameter_sum,
     parse_gds_polygons,
     parse_gds_summary,
@@ -47,6 +48,33 @@ def test_layout_client_finds_local_manifest_record(tmp_path):
     assert reference.gds_path == "raw/cap.gds"
     assert reference.component_name == "GeneralizedCapNInterdigital"
     assert client.download(reference) == artifact
+
+
+def test_layout_client_resolves_repeated_design_rows_with_one_geometry(tmp_path):
+    manifest = tmp_path / "manifest.parquet"
+    pd.DataFrame(
+        [
+            {
+                "layout_id": "layout:shared",
+                "artifact_id": "sha256:first",
+                "gds_path": "raw/first.gds",
+                "component_name": "CavityClawRouteMeander",
+                "design_id": "design:shared",
+            },
+            {
+                "layout_id": "layout:shared",
+                "artifact_id": "sha256:second",
+                "gds_path": "raw/second.gds",
+                "component_name": "CavityClawRouteMeander",
+                "design_id": "design:shared",
+            },
+        ]
+    ).to_parquet(manifest, index=False)
+
+    reference = LayoutClient(manifest_path=manifest).find(design_id="design:shared")
+
+    assert reference.layout_id == "layout:shared"
+    assert reference.gds_path == "raw/first.gds"
 
 
 def test_layout_client_reads_local_geometry_features(tmp_path):
@@ -98,6 +126,39 @@ def test_database_layout_bridge_derives_design_id_without_source_id():
 
     assert SQuADDS_DB.get_layout_ref(row, layout_client=FakeLayoutClient()) == {
         "design_id": canonical_design_id("CapNInterdigitalTee", options)
+    }
+
+
+def test_database_layout_bridge_infers_cavity_and_transmon_layout_families():
+    class FakeLayoutClient:
+        def find(self, **kwargs):
+            return kwargs
+
+    cavity_options = {"claw_opts": {}, "cpw_opts": {}, "cplr_opts": {}}
+    cavity_row = {"design": {"design_options": cavity_options, "coupler_type": "CLT"}}
+    transmon_options = {"cross_width": "30um", "cross_length": "300um", "cross_gap": "20um"}
+    transmon_row = {"design": {"design_options": transmon_options}}
+
+    assert infer_layout_component_name(cavity_row["design"]) == "CavityClawRouteMeander"
+    assert infer_layout_component_name(transmon_row["design"]) == "TransmonCross"
+    assert SQuADDS_DB.get_layout_ref(cavity_row, layout_client=FakeLayoutClient()) == {
+        "design_id": canonical_design_id("CavityClawRouteMeander", cavity_options)
+    }
+    assert SQuADDS_DB.get_layout_ref(transmon_row, layout_client=FakeLayoutClient()) == {
+        "design_id": canonical_design_id("TransmonCross", transmon_options)
+    }
+
+
+def test_database_layout_bridge_infers_flattened_simulation_rows():
+    class FakeLayoutClient:
+        def find(self, **kwargs):
+            return kwargs
+
+    options = {"cross_width": "30um", "cross_length": "300um", "cross_gap": "20um"}
+    row = {"design_options": options}
+
+    assert SQuADDS_DB.get_layout_ref(row, layout_client=FakeLayoutClient()) == {
+        "design_id": canonical_design_id("TransmonCross", options)
     }
 
 
@@ -181,6 +242,8 @@ def test_static_v0_embeddings_include_96x96_shape_and_are_searchable(tmp_path):
         design_options,
         lambda record: paths[record["gds_path"]],
     )
+    duplicate = vectors.iloc[[0]].assign(source_id="capn/duplicate")
+    vectors = pd.concat([vectors, duplicate], ignore_index=True)
     vector_path = tmp_path / "vectors.parquet"
     vectors.to_parquet(vector_path, index=False)
 
@@ -190,6 +253,7 @@ def test_static_v0_embeddings_include_96x96_shape_and_are_searchable(tmp_path):
     assert schema["blocks"]["shape_bitmap"]["shape"] == [96, 96]
     assert schema["dimensions"] == 9227
     assert len(client.get("layout:0")["embedding"]) == 9227
+    assert client.get("layout:0")["source_id"] == "capn/0"
     assert client.shape_bitmap("layout:0").shape == (96, 96)
     assert np.linalg.norm(np.asarray(client.get("layout:0")["embedding"])) == pytest.approx(1.0)
     assert len(client.nearest("layout:0", limit=2)) == 2

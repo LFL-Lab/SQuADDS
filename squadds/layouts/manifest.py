@@ -27,6 +27,28 @@ def canonical_design_id(component_name: str, design_options: dict[str, Any]) -> 
     return f"design:sha256:{_sha256(_canonical_json(payload).encode())}"
 
 
+def infer_layout_component_name(design: dict[str, Any]) -> str | None:
+    """Infer the canonical layout family represented by a SQuADDS DB row.
+
+    Simulation datasets predate the layout registry and do not consistently
+    store a component class.  Recognize their stable design-option schemas
+    before falling back to the explicit component metadata used by couplers.
+    """
+    options = design.get("design_options")
+    if not isinstance(options, dict):
+        return None
+    if {"claw_opts", "cpw_opts", "cplr_opts"}.issubset(options):
+        return "CavityClawRouteMeander"
+    if {"cross_width", "cross_length", "cross_gap"}.issubset(options):
+        return "TransmonCross"
+    return (
+        design.get("component_class")
+        or design.get("component_name")
+        or design.get("component")
+        or design.get("coupler_type")
+    )
+
+
 def sha256_file(path: str | Path) -> str:
     """Return the SHA-256 checksum of an exact artifact file."""
     digest = hashlib.sha256()
@@ -157,6 +179,7 @@ def build_layout_record(
     path: str | Path,
     *,
     component_name: str,
+    component: str = "coupler",
     gds_path: str,
     source_id: str | None = None,
     design_options: dict[str, Any] | None = None,
@@ -170,7 +193,7 @@ def build_layout_record(
         "layout_id": summary.pop("layout_id"),
         "artifact_id": f"sha256:{sha256_file(artifact_path)}",
         "design_id": canonical_design_id(component_name, design_options) if design_options else None,
-        "component": "coupler",
+        "component": component,
         "component_name": component_name,
         "artifact_format": "gds",
         "gds_path": gds_path,

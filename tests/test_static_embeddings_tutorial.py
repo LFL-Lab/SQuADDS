@@ -26,7 +26,7 @@ def test_static_embedding_tutorial_is_executed_and_visual():
     assert rendered.count("Plotly.newPlot") >= 7
     assert len(hidden_plot_cells) == 7
     assert all(cell["metadata"].get("jupyter", {}).get("source_hidden") for cell in hidden_plot_cells)
-    assert "4577" in rendered
+    assert "7727" in rendered
     assert "CapNInterdigitalTee" in rendered
     assert "GeneralizedCapNInterdigital" in rendered
     assert "StaticEmbeddingClient" in source

@@ -77,7 +77,7 @@ def _functional_role(component_name: str, layer: int, datatype: int) -> str | No
     """Map GDS layers to the single signed bitmap used by static-shape-v0."""
     if (layer, datatype) == (1, 10):
         return "conductor"
-    if component_name == "CapNInterdigitalTee" and (layer, datatype) == (1, 11):
+    if component_name in {"CapNInterdigitalTee", "CavityClawRouteMeander"} and (layer, datatype) == (1, 11):
         return "etch"
     if component_name == "GeneralizedCapNInterdigital" and layer in {2, 3}:
         return "port"
@@ -337,8 +337,13 @@ class StaticEmbeddingClient:
     def get(self, layout_id: str) -> dict[str, Any]:
         """Return one static v0 embedding record by stable layout identity."""
         matches = self.embeddings().loc[lambda frame: frame["layout_id"] == layout_id]
-        if len(matches) != 1:
+        if matches.empty:
             raise LookupError(f"No unique embedding record for {layout_id!r}.")
+        if len(matches) > 1:
+            vectors = matches["embedding"].map(tuple).nunique()
+            if vectors != 1:
+                raise LookupError(f"Conflicting embedding records for {layout_id!r}.")
+            matches = matches.sort_values("source_id").head(1)
         return matches.iloc[0].to_dict()
 
     def shape_bitmap(self, layout_id: str) -> np.ndarray:
@@ -358,7 +363,7 @@ class StaticEmbeddingClient:
             raise ValueError("limit must be between 1 and 100.")
         frame = self.embeddings()
         query = self.get(layout_id)
-        candidates = frame.loc[frame["layout_id"] != layout_id].copy()
+        candidates = frame.loc[frame["layout_id"] != layout_id].drop_duplicates("layout_id").copy()
         if component_name is not None:
             candidates = candidates.loc[candidates["component_name"] == component_name]
         if candidates.empty:

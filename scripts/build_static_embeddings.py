@@ -36,10 +36,16 @@ def _artifact_resolver(gds_sources: list[tuple[str, Path]]):
         gds_path = record["gds_path"]
         for prefix, source_dir in sources:
             if gds_path.startswith(prefix + "/"):
-                path = source_dir / Path(gds_path).name
-                if not path.is_file():
-                    raise FileNotFoundError(f"Missing GDS artifact for {gds_path}: {path}")
-                return path
+                relative_path = Path(gds_path)
+                candidates = (
+                    source_dir / relative_path,
+                    source_dir / relative_path.relative_to(prefix),
+                    source_dir / relative_path.name,
+                )
+                for path in candidates:
+                    if path.is_file():
+                        return path
+                raise FileNotFoundError(f"Missing GDS artifact for {gds_path}: {candidates[0]}")
         raise LookupError(f"No --gds-source mapping covers {gds_path!r}.")
 
     return resolve
