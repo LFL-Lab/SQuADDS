@@ -33,10 +33,11 @@ def test_static_embedding_tutorial_is_executed_and_visual():
     assert "SQuADDS_DB.get_layout_embedding" in source
     assert "component_name=None" in source
     assert "go.Scattergl(" in source
-    assert '"Finger count"' in source
-    assert '"Finger length (um)"' in source
-    assert '"Finger width (um)"' in source
-    assert '"Log functional area"' in source
+    assert '"Polygon count"' in source
+    assert '"Log bounding-box aspect ratio"' in source
+    assert "finger_length_um" in source
+    assert "finger_width_um" in source
+    assert '"Functional log area"' in source
     assert '"Shape occupancy"' in source
     assert "raw_prediction = algebra_vectors" in source
     assert "finger_delta" in source
