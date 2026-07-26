@@ -201,6 +201,7 @@ The following tutorials are available to help you get started with `SQuADDS`:
 - [Tutorial 10: HFSS Driven-Modal Capacitance Extraction](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.html)
 - [Tutorial 11: Unified Driven-Modal Hamiltonian Extraction](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.html)
 - [Tutorial 14: Exploring Static Layout Embeddings](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-14_Exploring_Static_Layout_Embeddings.html)
+- [Tutorial 15: Transfer Learning with Static Layout Embeddings](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-15_Transfer_Learning_with_Static_Embeddings.html)
 
 ---
 
