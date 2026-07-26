@@ -428,9 +428,7 @@ def write_static_embedding_dataset(
             bitmap, moments, shape_metadata = rasterize_functional_shape(
                 artifact_resolver(record), record["component_name"]
             )
-            parameter_block = np.asarray(
-                [math.tanh((parameter_values[index] - parameter_mean) / parameter_std)]
-            )
+            parameter_block = np.asarray([math.tanh((parameter_values[index] - parameter_mean) / parameter_std)])
             moment_block = np.clip((np.asarray(moments) - moment_mean) / moment_std, -5.0, 5.0)
             moment_norm = np.linalg.norm(moment_block)
             if moment_norm:
@@ -454,9 +452,7 @@ def write_static_embedding_dataset(
                     "embedding_schema_version": STATIC_EMBEDDING_SCHEMA_VERSION,
                     "parameter_sum": parameter_values[index],
                     "geometric_moments": np.asarray(moments, dtype=np.float32).tolist(),
-                    "shape_bitmap_sha256": hashlib.sha256(
-                        bitmap.reshape(-1).astype(np.float32).tobytes()
-                    ).hexdigest(),
+                    "shape_bitmap_sha256": hashlib.sha256(bitmap.reshape(-1).astype(np.float32).tobytes()).hexdigest(),
                     "functional_bounds_um": shape_metadata["functional_bounds_um"],
                     "embedding": embedding.astype(np.float32).tolist(),
                 }
