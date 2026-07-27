@@ -33,18 +33,18 @@ def test_partition_transfer_tutorial_is_executed_and_visual(number, minimum_plot
     assert all(cell["metadata"].get("jupyter", {}).get("source_hidden") for cell in hidden_plot_cells)
 
 
-def test_tutorial_16_uses_balanced_geometry_domains_and_fractional_api():
+def test_tutorial_16_uses_exact_domains_two_generalists_and_foundation_sweep():
     notebook = TUTORIALS[16].read_text(encoding="utf-8")
 
-    assert "2-4 fingers" in notebook
-    assert "5-7 fingers" in notebook
-    assert "8-10 fingers" in notebook
-    assert "V0PartitionTransferStudy" in notebook
-    assert "study.learning_curves" in notebook
-    assert "study.dedicated_benchmarks" in notebook
-    assert "same_budget_gain" in notebook
-    assert "specialist_gap" in notebook
-    assert "Claim audit" in notebook
+    assert "13 exact finger-count domains" in notebook
+    assert "coverage-matched generalist" in notebook
+    assert "budget-matched generalist" in notebook
+    assert "partition_splits" in notebook
+    assert "source-prior adaptation" in notebook
+    assert "applicability score" in notebook
+    assert "Sweep every finger count as the foundation" in notebook
+    assert "fingerprinted checkpoint" in notebook
+    assert "Final interactive foundation snapshot" in notebook
 
 
 def test_tutorial_17_compares_schema_baseline_with_cross_class_v0_transfer():
