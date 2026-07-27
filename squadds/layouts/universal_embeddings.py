@@ -489,8 +489,7 @@ def write_universal_embedding_dataset(
         "rows": len(records),
         "dimensions": schema["dimensions"],
         "files": {
-            name: {"sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
-            for name, path in release_files.items()
+            name: {"sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for name, path in release_files.items()
         },
     }
     (model_dir / "release-manifest.json").write_text(json.dumps(release_manifest, indent=2) + "\n")
