@@ -19,6 +19,14 @@ from .manifest import parse_gds_polygons
 DEFAULT_EMBEDDING_REPOSITORY = "SQuADDS/SQuADDS_Layout_Embeddings"
 STATIC_EMBEDDING_MODEL = "static-shape-v0"
 STATIC_EMBEDDING_SCHEMA_VERSION = "0.1.0"
+EMBEDDING_FILENAMES = {
+    "v0": "metadata/static-embedding-v0.parquet",
+    "v1": "metadata/universal-geometry-v1.parquet",
+}
+EMBEDDING_SCHEMA_FILENAMES = {
+    "v0": "metadata/static-embedding-v0.schema.json",
+    "v1": "models/universal-geometry-v1/schema.json",
+}
 SHAPE_SIZE = 96
 GEOMETRIC_MOMENT_NAMES = [
     "log1p_functional_area_um2",
@@ -304,21 +312,37 @@ def build_static_embeddings(
     return pd.DataFrame(embeddings), schema
 
 
-class StaticEmbeddingClient:
-    """Load static v0 vectors lazily and search by cosine similarity."""
+class LayoutEmbeddingClient:
+    """Load one versioned layout-embedding standard and search it."""
 
     def __init__(
         self,
+        version: str = "v0",
         repo_id: str = DEFAULT_EMBEDDING_REPOSITORY,
         revision: str = "main",
-        filename: str = "metadata/static-embedding-v0.parquet",
+        filename: str | None = None,
         embedding_path: str | Path | None = None,
+        schema_path: str | Path | None = None,
+        control_map_path: str | Path | None = None,
     ):
+        if version not in EMBEDDING_FILENAMES:
+            choices = ", ".join(sorted(EMBEDDING_FILENAMES))
+            raise ValueError(f"Unknown embedding version {version!r}; choose one of: {choices}.")
+        self.version = version
         self.repo_id = repo_id
         self.revision = revision
-        self.filename = filename
+        self.filename = filename or EMBEDDING_FILENAMES[version]
         self.embedding_path = Path(embedding_path) if embedding_path else None
+        self.schema_path = Path(schema_path) if schema_path else None
+        self.control_map_path = Path(control_map_path) if control_map_path else None
         self._embeddings: pd.DataFrame | None = None
+        self._schema: dict[str, Any] | None = None
+        self._control_map: pd.DataFrame | None = None
+
+    @staticmethod
+    def available_versions() -> tuple[str, ...]:
+        """Return embedding standards supported by this client."""
+        return tuple(EMBEDDING_FILENAMES)
 
     def embeddings(self) -> pd.DataFrame:
         """Load the vector table; raw GDS artifacts remain remote."""
@@ -334,8 +358,38 @@ class StaticEmbeddingClient:
             self._embeddings = pd.read_parquet(path)
         return self._embeddings.copy()
 
+    def schema(self) -> dict[str, Any]:
+        """Load the machine-readable schema for the selected standard."""
+        if self._schema is None:
+            path = self.schema_path or Path(
+                hf_hub_download(
+                    repo_id=self.repo_id,
+                    repo_type="dataset",
+                    filename=EMBEDDING_SCHEMA_FILENAMES[self.version],
+                    revision=self.revision,
+                )
+            )
+            self._schema = json.loads(path.read_text())
+        return dict(self._schema)
+
+    def control_map(self) -> pd.DataFrame:
+        """Load v1's auditable map from layout parameters to control channels."""
+        if self.version != "v1":
+            raise ValueError("control_map() is only available for v1.")
+        if self._control_map is None:
+            path = self.control_map_path or Path(
+                hf_hub_download(
+                    repo_id=self.repo_id,
+                    repo_type="dataset",
+                    filename="models/universal-geometry-v1/control-map.parquet",
+                    revision=self.revision,
+                )
+            )
+            self._control_map = pd.read_parquet(path)
+        return self._control_map.copy()
+
     def get(self, layout_id: str) -> dict[str, Any]:
-        """Return one static v0 embedding record by stable layout identity."""
+        """Return one embedding record by stable layout identity."""
         matches = self.embeddings().loc[lambda frame: frame["layout_id"] == layout_id]
         if matches.empty:
             raise LookupError(f"No unique embedding record for {layout_id!r}.")
@@ -348,6 +402,8 @@ class StaticEmbeddingClient:
 
     def shape_bitmap(self, layout_id: str) -> np.ndarray:
         """Recover the 96x96 signed shape bitmap from a v0 embedding."""
+        if self.version != "v0":
+            raise ValueError("shape_bitmap() is only available for v0; v1 stores a compact shape descriptor.")
         embedding = np.asarray(self.get(layout_id)["embedding"], dtype=np.float32)
         return embedding[PARAMETER_BLOCK_SIZE + MOMENT_BLOCK_SIZE :].reshape(SHAPE_SIZE, SHAPE_SIZE)
 
@@ -358,7 +414,7 @@ class StaticEmbeddingClient:
         component_name: str | None = None,
         include_embeddings: bool = False,
     ) -> list[dict[str, Any]]:
-        """Return cosine-nearest v0 layouts, optionally within one component family."""
+        """Return cosine-nearest layouts, optionally within one component family."""
         if limit < 1 or limit > 100:
             raise ValueError("limit must be between 1 and 100.")
         frame = self.embeddings()
@@ -375,6 +431,27 @@ class StaticEmbeddingClient:
         if not include_embeddings:
             result = result.drop(columns=["embedding"])
         return result.to_dict(orient="records")
+
+
+class StaticEmbeddingClient(LayoutEmbeddingClient):
+    """Backward-compatible client for the static-shape-v0 standard."""
+
+    def __init__(
+        self,
+        repo_id: str = DEFAULT_EMBEDDING_REPOSITORY,
+        revision: str = "main",
+        filename: str = EMBEDDING_FILENAMES["v0"],
+        embedding_path: str | Path | None = None,
+        schema_path: str | Path | None = None,
+    ):
+        super().__init__(
+            version="v0",
+            repo_id=repo_id,
+            revision=revision,
+            filename=filename,
+            embedding_path=embedding_path,
+            schema_path=schema_path,
+        )
 
 
 def write_static_embedding_dataset(

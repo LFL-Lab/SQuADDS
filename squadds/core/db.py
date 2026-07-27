@@ -902,12 +902,13 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         return client.download(reference)
 
     @staticmethod
-    def get_layout_embedding(row, layout_client=None, embedding_client=None):
-        """Return the static-shape-v0 embedding for a dataset row."""
-        from squadds.layouts import LayoutClient, StaticEmbeddingClient
+    def get_layout_embedding(row, layout_client=None, embedding_client=None, embedding_version="v0"):
+        """Return a versioned layout embedding for a dataset row."""
+        from squadds.layouts import LayoutClient, LayoutEmbeddingClient
 
         reference = SQuADDS_DB.get_layout_ref(row, layout_client=layout_client or LayoutClient())
-        return (embedding_client or StaticEmbeddingClient()).get(reference.layout_id)
+        client = embedding_client or LayoutEmbeddingClient(version=embedding_version)
+        return client.get(reference.layout_id)
 
     def create_system_df(self, parallelize=False, num_cpu=None):
         """

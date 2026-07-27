@@ -1,4 +1,4 @@
-"""Regression checks for the executed static embedding tutorial."""
+"""Regression checks for the executed versioned embedding tutorial."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 NOTEBOOK = Path("tutorials/Tutorial-14_Exploring_Static_Layout_Embeddings.ipynb")
 
 
-def test_static_embedding_tutorial_is_executed_and_visual():
+def test_static_embedding_tutorial_is_executed_visual_and_versioned():
     notebook = json.loads(NOTEBOOK.read_text())
     code_cells = [cell for cell in notebook["cells"] if cell["cell_type"] == "code"]
     hidden_plot_cells = [cell for cell in code_cells if "hide-input" in cell["metadata"].get("tags", [])]
@@ -23,22 +23,24 @@ def test_static_embedding_tutorial_is_executed_and_visual():
     }
     assert all(cell["execution_count"] is not None for cell in code_cells)
     assert not [output for output in outputs if output["output_type"] == "error"]
-    assert rendered.count("Plotly.newPlot") >= 7
+    plotly_outputs = [output for output in outputs if "application/vnd.plotly.v1+json" in output.get("data", {})]
+    assert len(plotly_outputs) >= 7
     assert len(hidden_plot_cells) == 7
     assert all(cell["metadata"].get("jupyter", {}).get("source_hidden") for cell in hidden_plot_cells)
-    assert "7727" in rendered
-    assert "CapNInterdigitalTee" in rendered
-    assert "GeneralizedCapNInterdigital" in rendered
-    assert "StaticEmbeddingClient" in source
+    assert "20,062" in rendered
+    assert "9,227" in rendered
+    assert "512" in rendered
+    assert "universal-geometry-v1" in rendered
+    assert "GeneralizedCapNInterdigital" in source
+    assert 'LayoutEmbeddingClient(version="v0")' in source
+    assert 'LayoutEmbeddingClient(version="v1")' in source
     assert "SQuADDS_DB.get_layout_embedding" in source
-    assert "component_name=None" in source
+    assert "v1_client.schema()" in source
+    assert "v1_client.control_map()" in source
+    assert "all_parameter_names" in source
+    assert "capacitance_names" in source
     assert "go.Scattergl(" in source
-    assert '"Polygon count"' in source
-    assert '"Log bounding-box aspect ratio"' in source
-    assert "finger_length_um" in source
-    assert "finger_width_um" in source
-    assert '"Functional log area"' in source
-    assert '"Shape occupancy"' in source
-    assert "raw_prediction = algebra_vectors" in source
-    assert "finger_delta" in source
-    assert "Embedding algebra" in source
+    assert "cosine similarity" in source
+    assert "signed distance" in source
+    assert "Nearest-neighbor error" in source
+    assert "parameter-control channel" in source

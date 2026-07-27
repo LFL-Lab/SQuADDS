@@ -1,10 +1,14 @@
+import json
+
 import numpy as np
 import pandas as pd
 import pytest
 
 from squadds.core.db import SQuADDS_DB
 from squadds.layouts import (
+    UNIVERSAL_EMBEDDING_DIMENSIONS,
     LayoutClient,
+    LayoutEmbeddingClient,
     StaticEmbeddingClient,
     V0KernelFeatureProjector,
     build_geometry_features,
@@ -13,9 +17,11 @@ from squadds.layouts import (
     compress_v0_embeddings,
     infer_layout_component_name,
     mean_pairwise_cosine_similarity,
+    parameter_channels,
     parameter_sum,
     parse_gds_polygons,
     parse_gds_summary,
+    write_universal_embedding_dataset,
 )
 
 
@@ -267,6 +273,92 @@ def test_parameter_sum_is_permutation_and_dimension_invariant():
     second = {"enabled": True, "count": 3, "width": "0.01mm"}
 
     assert parameter_sum(first) == parameter_sum(second)
+
+
+def test_universal_v1_embeddings_are_compact_versioned_and_controllable(tmp_path):
+    kdb = pytest.importorskip("klayout.db")
+    manifest_records = []
+    design_options = {}
+    paths = {}
+    for index in range(3):
+        layout = kdb.Layout()
+        layout.dbu = 0.001
+        top = layout.create_cell("TOP")
+        top.shapes(layout.layer(1, 10)).insert(kdb.Box(0, 0, 1000 + 200 * index, 2000))
+        top.shapes(layout.layer(2, 0)).insert(kdb.Box(400, 2000, 600, 2200))
+        path = tmp_path / f"universal_{index}.gds"
+        layout.write(str(path))
+        design_id = f"universal-design:{index}"
+        manifest_records.append(
+            {
+                "layout_id": f"universal-layout:{index}",
+                "artifact_id": f"sha256:universal-{index}",
+                "design_id": design_id,
+                "component_name": "GeneralizedCapNInterdigital",
+                "source_id": f"generalized/{index}",
+                "gds_path": path.name,
+            }
+        )
+        design_options[design_id] = {
+            "finger_width": f"{index + 1}um",
+            "finger_count": index + 2,
+        }
+        paths[path.name] = path
+
+    output = tmp_path / "release"
+    count, dimensions = write_universal_embedding_dataset(
+        pd.DataFrame(manifest_records),
+        design_options,
+        lambda record: paths[record["gds_path"]],
+        output,
+        component_name="GeneralizedCapNInterdigital",
+    )
+    vector_path = output / "metadata" / "universal-geometry-v1.parquet"
+    client = LayoutEmbeddingClient(
+        version="v1",
+        embedding_path=vector_path,
+        schema_path=output / "models" / "universal-geometry-v1" / "schema.json",
+        control_map_path=output / "models" / "universal-geometry-v1" / "control-map.parquet",
+    )
+    record = client.get("universal-layout:0")
+
+    assert count == 3
+    assert dimensions == UNIVERSAL_EMBEDDING_DIMENSIONS == 512
+    assert record["embedding_version"] == "v1"
+    assert record["embedding_model"] == "universal-geometry-v1"
+    assert len(record["geometry_metrics"]) == 32
+    assert len(record["embedding"]) == 512
+    assert np.linalg.norm(np.asarray(record["embedding"])) == pytest.approx(1.0)
+    assert list(record["parameter_names"]) == ["finger_count", "finger_width"]
+    assert len(client.nearest("universal-layout:0", limit=2)) == 2
+    assert client.schema()["dimensions"] == 512
+    assert set(client.control_map()["parameter_name"]) == {"finger_count", "finger_width"}
+    assert client.available_versions() == ("v0", "v1")
+    assert (output / "models" / "universal-geometry-v1" / "schema.json").is_file()
+    assert (output / "models" / "universal-geometry-v1" / "control-map.parquet").is_file()
+    release_manifest = json.loads((output / "models" / "universal-geometry-v1" / "release-manifest.json").read_text())
+    assert release_manifest["rows"] == 3
+    assert release_manifest["dimensions"] == 512
+    with pytest.raises(ValueError, match="only available for v0"):
+        client.shape_bitmap("universal-layout:0")
+
+
+def test_v1_parameter_channels_keep_name_identity_and_order_invariance():
+    first = {"finger_width": "4um", "finger_count": 8}
+    second = {"finger_count": 8, "finger_width": "0.004mm"}
+
+    first_vector, first_names, first_values, first_indices, _ = parameter_channels(first)
+    second_vector, second_names, second_values, second_indices, _ = parameter_channels(second)
+
+    assert np.array_equal(first_vector, second_vector)
+    assert first_names == second_names == ["finger_count", "finger_width"]
+    assert first_values == second_values == [8.0, 4.0]
+    assert first_indices == second_indices
+
+
+def test_embedding_client_rejects_unknown_versions():
+    with pytest.raises(ValueError, match="Unknown embedding version"):
+        LayoutEmbeddingClient(version="future")
 
 
 def test_v0_kernel_projector_is_deterministic_and_nonlinear():

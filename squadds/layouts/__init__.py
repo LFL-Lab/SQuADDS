@@ -3,8 +3,11 @@
 from .client import LayoutClient, LayoutReference
 from .embeddings import (
     EMBEDDING_DIMENSIONS,
+    EMBEDDING_FILENAMES,
+    EMBEDDING_SCHEMA_FILENAMES,
     SHAPE_SIZE,
     STATIC_EMBEDDING_MODEL,
+    LayoutEmbeddingClient,
     StaticEmbeddingClient,
     build_static_embeddings,
     parameter_sum,
@@ -36,12 +39,24 @@ from .transfer import (
     summarize_learning_curve,
     target_to_source_similarity,
 )
+from .universal_embeddings import (
+    UNIVERSAL_EMBEDDING_DIMENSIONS,
+    UNIVERSAL_EMBEDDING_MODEL,
+    UNIVERSAL_EMBEDDING_SCHEMA_VERSION,
+    UNIVERSAL_METRIC_NAMES,
+    parameter_channels,
+    universal_embedding_schema,
+    write_universal_embedding_dataset,
+)
 
 __all__ = [
     "DEFAULT_LAYOUT_REPOSITORY",
+    "EMBEDDING_FILENAMES",
+    "EMBEDDING_SCHEMA_FILENAMES",
     "EMBEDDING_DIMENSIONS",
     "GEOMETRY_FEATURE_SCHEMA_VERSION",
     "LayoutClient",
+    "LayoutEmbeddingClient",
     "LayoutReference",
     "PartitionTransferStudy",
     "SourceFeatureProjector",
@@ -49,6 +64,10 @@ __all__ = [
     "SHAPE_SIZE",
     "STATIC_EMBEDDING_MODEL",
     "StaticEmbeddingClient",
+    "UNIVERSAL_EMBEDDING_DIMENSIONS",
+    "UNIVERSAL_EMBEDDING_MODEL",
+    "UNIVERSAL_EMBEDDING_SCHEMA_VERSION",
+    "UNIVERSAL_METRIC_NAMES",
     "TransferRidgeRegressor",
     "V0FeatureProjector",
     "V0KernelFeatureProjector",
@@ -63,6 +82,7 @@ __all__ = [
     "infer_layout_component_name",
     "geometry_feature_record",
     "parameter_sum",
+    "parameter_channels",
     "rasterize_functional_shape",
     "regression_scores",
     "required_target_samples",
@@ -71,4 +91,6 @@ __all__ = [
     "parse_gds_polygons",
     "parse_gds_summary",
     "write_manifest",
+    "write_universal_embedding_dataset",
+    "universal_embedding_schema",
 ]

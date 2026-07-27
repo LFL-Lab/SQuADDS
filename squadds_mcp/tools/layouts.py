@@ -6,7 +6,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from squadds.layouts import LayoutClient, StaticEmbeddingClient
+from squadds.layouts import LayoutClient, LayoutEmbeddingClient
 from squadds_mcp.utils import sanitize_for_json
 
 
@@ -65,15 +65,16 @@ def register_layout_tools(mcp: FastMCP) -> None:
         layout_id: str | None = None,
         design_id: str | None = None,
         source_id: str | None = None,
+        embedding_version: str = "v0",
     ) -> dict[str, Any]:
-        """Return the static-shape-v0 embedding for one layout.
+        """Return one versioned embedding for a layout.
 
-        The vector concatenates a parameter sum, geometric moments, and the
-        normalized flattened 96x96 functional-shape bitmap. Provide exactly
-        one layout identifier.
+        Choose ``v0`` for the 96x96 static-shape baseline or ``v1`` for the
+        compact universal geometry, shape, and parameter-control standard.
+        Provide exactly one layout identifier.
         """
         reference = LayoutClient().find(layout_id=layout_id, design_id=design_id, source_id=source_id)
-        return sanitize_for_json(StaticEmbeddingClient().get(reference.layout_id))
+        return sanitize_for_json(LayoutEmbeddingClient(version=embedding_version).get(reference.layout_id))
 
     @mcp.tool()
     async def find_similar_layouts(
@@ -82,16 +83,17 @@ def register_layout_tools(mcp: FastMCP) -> None:
         source_id: str | None = None,
         limit: int = 10,
         same_component_only: bool = True,
+        embedding_version: str = "v0",
     ) -> list[dict[str, Any]]:
-        """Find cosine-nearest layouts using the static-shape-v0 model.
+        """Find cosine-nearest layouts using one embedding standard.
 
         The input layout itself is excluded. By default, results are restricted
-        to the same component family to avoid comparing incompatible designs.
+        to the same component family. Choose ``v0`` or ``v1`` explicitly.
         """
         reference = LayoutClient().find(layout_id=layout_id, design_id=design_id, source_id=source_id)
         component_name = reference.component_name if same_component_only else None
         return sanitize_for_json(
-            StaticEmbeddingClient().nearest(
+            LayoutEmbeddingClient(version=embedding_version).nearest(
                 reference.layout_id,
                 limit=limit,
                 component_name=component_name,
