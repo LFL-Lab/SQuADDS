@@ -1,7 +1,12 @@
 # Layout Embeddings v1 release
 
 `universal-geometry-v1` is additive. It does not replace or rewrite
-`static-shape-v0`.
+`static-embedding-v0`.
+
+The reviewed release is staged in
+[SQuADDS_Layout_Embeddings PR #2](https://huggingface.co/datasets/SQuADDS/SQuADDS_Layout_Embeddings/discussions/2).
+It combines the expanded v0 catalogue with the first v1 configuration so the
+dataset card and both versioned tables can be reviewed as one atomic release.
 
 ## Hugging Face file layout
 
@@ -48,7 +53,14 @@ hf upload SQuADDS/SQuADDS_Layout_Embeddings \
   --create-pr
 ```
 
-After review, update the dataset card in the same Hugging Face pull request.
+## Merge order
+
+Merge the Hugging Face dataset pull request before the SQuADDS code pull
+request. Then smoke-test `LayoutEmbeddingClient(version="v1")` against the
+dataset's `main` revision before merging the code. This order prevents a window
+where the released API advertises v1 but the default dataset revision does not
+yet contain its parquet table and model metadata.
+
 The SQuADDS API defaults to `v0`; users opt into v1 explicitly:
 
 ```python
