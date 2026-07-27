@@ -407,6 +407,41 @@ class LayoutEmbeddingClient:
         embedding = np.asarray(self.get(layout_id)["embedding"], dtype=np.float32)
         return embedding[PARAMETER_BLOCK_SIZE + MOMENT_BLOCK_SIZE :].reshape(SHAPE_SIZE, SHAPE_SIZE)
 
+    def shape_rasters(self, layout_id: str) -> dict[str, np.ndarray]:
+        """Reconstruct v1's functional raster channels from its spectral block."""
+        if self.version != "v1":
+            raise ValueError("shape_rasters() is only available for v1.")
+        try:
+            from scipy.fft import idctn
+        except ImportError as exc:
+            raise ImportError("Reconstructing v1 shape rasters requires scipy.") from exc
+
+        record = self.get(layout_id)
+        schema = self.schema()
+        block = schema["blocks"]["multiscale_shape"]
+        start = int(block["offset"])
+        stop = start + int(block["dimensions"])
+        shape_block = np.asarray(record["embedding"][start:stop], dtype=np.float32)
+        block_norm = float(np.linalg.norm(shape_block))
+        if block_norm > 0:
+            shape_block /= block_norm
+        descriptor = shape_block * float(record["shape_descriptor_norm"])
+        normalization = schema["normalization"]
+        shape_mean = np.asarray(normalization["shape_mean"], dtype=np.float32)
+        shape_std = np.asarray(normalization["shape_std"], dtype=np.float32)
+        power = float(normalization["shape_whitening_power"])
+        selected_coefficients = descriptor * np.power(shape_std, power) + shape_mean
+        height, width = block["raster_resolution"]
+        coefficients = {channel: np.zeros((height, width), dtype=np.float32) for channel in block["channels"]}
+        for value, frequency in zip(selected_coefficients, block["selected_frequencies"]):
+            coefficients[frequency["channel"]][
+                frequency["row_frequency"],
+                frequency["column_frequency"],
+            ] = value
+        return {
+            channel: idctn(values, type=2, norm="ortho").astype(np.float32) for channel, values in coefficients.items()
+        }
+
     def nearest(
         self,
         layout_id: str,

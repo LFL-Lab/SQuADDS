@@ -29,7 +29,7 @@ def test_static_embedding_tutorial_is_executed_visual_and_versioned():
     assert all(cell["metadata"].get("jupyter", {}).get("source_hidden") for cell in hidden_plot_cells)
     assert "20,062" in rendered
     assert "9,227" in rendered
-    assert "512" in rendered
+    assert "1024" in rendered
     assert "universal-geometry-v1" in rendered
     assert "GeneralizedCapNInterdigital" in source
     assert 'LayoutEmbeddingClient(version="v0")' in source
@@ -43,4 +43,6 @@ def test_static_embedding_tutorial_is_executed_visual_and_versioned():
     assert "cosine similarity" in source
     assert "signed distance" in source
     assert "Nearest-neighbor error" in source
+    assert "acceptance" in source
+    assert "v1 must pass every gate" in source
     assert "parameter-control channel" in source

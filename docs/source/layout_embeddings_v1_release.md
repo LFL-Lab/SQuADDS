@@ -30,6 +30,34 @@ The first v1 table contains only `GeneralizedCapNInterdigital`. Its stable
 `layout_id` values join directly to both `SQuADDS_Layouts` and `SQuADDS_DB`.
 Simulation targets are intentionally excluded from the embedding inputs.
 
+The accepted v1.1 schema has 1,024 dimensions:
+
+- 32 centered physical and morphological metrics;
+- 768 variance-selected full-spectrum shape coefficients at 96 by 96 resolution;
+- 224 centered, named parameter-control channels.
+
+The rejected 512-dimensional v1.0 candidate is not a release. It lost finger
+detail through an 8 by 8 low-pass DCT crop and collapsed cosine similarities
+through constant availability and uncentered-control offsets.
+
+## Acceptance benchmark
+
+Run the paired benchmark before publishing any regenerated v1 table:
+
+```bash
+uv run python scripts/benchmark_universal_embeddings.py \
+  /path/to/static-embedding-v0.parquet \
+  /path/to/universal-geometry-v1.parquet \
+  /path/to/coupler-GeneralizedCapNInterdigital-cap_matrix.json
+```
+
+V1 must pass every gate: topology retrieval must match or beat v0, full
+parameter distance must improve by at least 10%, normalized shape distance may
+regress by no more than 10%, held-out mutual-capacitance locality must improve,
+and random-pair cosine similarity must retain at least 60% of v0's standard
+deviation. Simulation targets are evaluated only after the geometry-only model
+is frozen.
+
 ## Review and publish
 
 Generate into a staging directory, verify the files, and open a dataset pull

@@ -34,7 +34,7 @@ notebook["metadata"] = {
 notebook["cells"] = [
     markdown(
         """
-# Tutorial 14: From static-shape-v0 to universal-geometry-v1
+# Tutorial 14: From static-embedding-v0 to universal-geometry-v1
 
 This tutorial develops intuition for two **versioned layout embedding standards**.
 We use the complete 20,062-design `GeneralizedCapNInterdigital` sweep so that every
@@ -47,7 +47,7 @@ By the end, you will be able to:
 2. switch standards through the SQuADDS API;
 3. inspect how geometry and capacitance organize in either latent space;
 4. use cosine similarity to retrieve physically related layouts; and
-5. understand why v1 is the stronger foundation for cross-tool ML and inverse design.
+5. test whether v1 actually improves on v0 using explicit acceptance gates.
 
 > **Important:** capacitance is used only to evaluate the embedding. It is never
 > included in either embedding vector.
@@ -129,7 +129,7 @@ print(f"v1 dimensions: {len(v1.iloc[0]['embedding']):,}")
         """
 ## 2. Two standards, two design philosophies
 
-`static-shape-v0` is deliberately transparent: one summed parameter, ten geometric
+`static-embedding-v0` is deliberately transparent: one summed parameter, ten geometric
 moments, and every pixel of a 96 by 96 signed bitmap. It proved that layout geometry
 can be joined to simulation data, but the sum destroys parameter names and the raw
 bitmap is large.
@@ -137,14 +137,16 @@ bitmap is large.
 `universal-geometry-v1` accepts only a GDS file, a small layer-role mapping, and the
 native parameter dictionary from **any** layout tool. It separates:
 
-- **64 geometry metrics:** 32 physical/morphological values plus 32 availability bits;
-- **320 shape coefficients:** low-frequency 2D DCT coefficients from five 64 by 64
-  functional channels, including a signed-distance field;
-- **128 control channels:** stable signed hashing of parameter paths and unit-normalized
-  values, with a sidecar map back to the layout knobs.
+- **32 geometry metrics:** scale-aware physical and morphological values; availability
+  remains metadata and cannot inflate cosine similarity;
+- **768 shape coefficients:** variance-selected full-spectrum 2D DCT coefficients from
+  signed material and boundary-distance rasters at 96 by 96 resolution;
+- **224 control channels:** stable signed hashing of parameter paths after each named
+  control is centered and scaled, with a sidecar map back to the layout knobs.
 
-Each block is normalized separately, so no large block wins merely because it has
-more dimensions.
+Each block is normalized and explicitly weighted. The fitted statistics and selected
+frequencies use geometry and layout parameters only; capacitance is held out for
+evaluation.
 """
     ),
     code(
@@ -164,14 +166,14 @@ fig.add_trace(
     go.Bar(
         name="v1",
         x=["parameter controls", "geometry metrics", "shape"],
-        y=[128, 64, 320],
+        y=[224, 32, 768],
         marker_color="#00798C",
-        text=[128, 64, 320],
+        text=[224, 32, 768],
         textposition="outside",
     )
 )
 fig.update_layout(
-    title="Embedding anatomy: 9,227 dimensions become 512 structured dimensions",
+    title="Embedding anatomy: 9,227 dimensions become 1,024 structured dimensions",
     yaxis_title="dimensions (log scale)",
     yaxis_type="log",
     barmode="group",
@@ -184,32 +186,27 @@ fig.show()
     ),
     markdown(
         """
-## 3. Shape is compressed, not discarded
+## 3. Shape detail must survive compression
 
-The v0 panel below is its bitmap block. The v1 panels invert only the retained
-low-frequency DCT coefficients for two of its five channels. They are intentionally
-smooth: v1 keeps device-scale topology and distances while rejecting pixel-level
-aliasing. Absolute width, area, perimeter, and other physical scale information live
-in the metric block rather than being inferred from pixels.
+The v0 panel below is its bitmap block. V1 reconstructs its signed material and
+boundary-distance channels through the public API using the exact selected frequencies,
+centering statistics, partial whitening, and row norm stored by the standard.
+
+Unlike the rejected v1.0 candidate, v1.1 does not crop the spectrum to an 8 by 8
+low-pass square. Its target-blind variance selection can retain the higher frequencies
+that encode finger count, narrow gaps, and edge curvature.
 """
     ),
     code(
         """
-from scipy.fft import idctn
-
 example_id = paired.iloc[len(paired) // 3]["layout_id"]
 v0_record = v0_client.get(example_id)
-v1_record = v1_client.get(example_id)
 v0_bitmap = np.asarray(v0_record["embedding"], dtype=np.float32)[11:].reshape(96, 96)
-v1_embedding = np.asarray(v1_record["embedding"], dtype=np.float32)
-shape_block = v1_embedding[64:384] * np.sqrt(3.0)
-shape_channels = shape_block.reshape(5, 8, 8)
-
-reconstructed = []
-for index in (3, 4):
-    coefficients = np.zeros((64, 64), dtype=np.float32)
-    coefficients[:8, :8] = shape_channels[index]
-    reconstructed.append(idctn(coefficients, type=2, norm="ortho"))
+v1_rasters = v1_client.shape_rasters(example_id)
+reconstructed = [
+    v1_rasters["signed_functional_material"],
+    v1_rasters["signed_distance_to_functional_boundary"],
+]
 
 fig = make_subplots(
     rows=1,
@@ -229,8 +226,9 @@ fig.show()
         """
 ## 4. Explore geometry and capacitance in both latent spaces
 
-We use a fixed, evenly spaced sample for a responsive browser. The same sample and
-the same randomized projection are used for both standards. Open the dropdown to
+We use a fixed, target-blind random sample for a responsive browser and reproducible
+acceptance benchmark. The same sample and the same randomized projection are used for
+both standards. Open the dropdown to
 color by **every numeric layout parameter and capacitance result present in the
 dataset**. Smooth color gradients indicate that nearby vectors preserve that
 quantity; abrupt mixing reveals a weakly represented factor.
@@ -281,8 +279,10 @@ for name in capacitance_names:
         numeric(row_by_source[source]["sim_results"].get(name)) for source in catalogue["source_id"]
     ]
 
-sample_size = min(1600, len(catalogue))
-sample_indices = np.linspace(0, len(catalogue) - 1, sample_size, dtype=int)
+sample_size = min(2000, len(catalogue))
+sample_indices = np.random.default_rng(1401).choice(
+    len(catalogue), size=sample_size, replace=False
+)
 sample = catalogue.iloc[sample_indices].reset_index(drop=True)
 v0_lookup = v0.set_index("layout_id")
 v1_lookup = v1.set_index("layout_id")
@@ -324,7 +324,7 @@ hover = np.column_stack(
     ]
 )
 
-fig = make_subplots(rows=1, cols=2, subplot_titles=("static-shape-v0", "universal-geometry-v1"))
+fig = make_subplots(rows=1, cols=2, subplot_titles=("static-embedding-v0", "universal-geometry-v1"))
 for column, xy in enumerate((v0_xy, v1_xy), start=1):
     fig.add_trace(
         go.Scattergl(
@@ -390,9 +390,10 @@ fig.show()
 
 Cosine similarity compares vector directions. A value near one means that the
 standard considers two layouts close; it does **not** by itself prove equal physics.
-Because v0 is dominated by raster pixels, its random-pair similarities occupy a
-narrower shape-driven range. V1 balances physical metrics, topology, and named
-controls, producing a more discriminating geometry space.
+The rejected v1.0 candidate collapsed most random pairs near cosine similarity one:
+constant availability bits, uncentered controls, and duplicate low-frequency channels
+created a large common direction. V1.1 removes those offsets. A healthy distribution
+must retain meaningful dynamic range rather than merely looking compact.
 """
     ),
     code(
@@ -497,20 +498,21 @@ fig.show()
         """
 ## 7. Quantify local faithfulness
 
-For 100 query layouts we retrieve one non-self neighbor from the same 1,600-layout
+For 300 query layouts we retrieve one non-self neighbor from the same 2,000-layout
 pool. Lower error is better. We report:
 
 - absolute finger-count difference;
 - standardized distance across all numeric geometry controls;
+- distance between normalized 96 by 96 signed shape rasters;
 - absolute mutual-capacitance difference as a physics proxy.
 
 This is a strict paired comparison. V1 never saw capacitance, so any improvement in
-the third metric comes from a more faithful geometry neighborhood.
+the fourth metric comes from a more faithful geometry neighborhood.
 """
     ),
     code(
         """
-query_indices = np.linspace(0, sample_size - 1, 100, dtype=int)
+query_indices = np.linspace(0, sample_size - 1, 300, dtype=int)
 v0_query_scores = v0_matrix[query_indices] @ v0_matrix.T
 v1_query_scores = v1_matrix[query_indices] @ v1_matrix.T
 v0_query_scores[np.arange(len(query_indices)), query_indices] = -np.inf
@@ -526,6 +528,8 @@ stds = np.where(stds > 1e-12, stds, 1.0)
 standardized_geometry = np.nan_to_num((geometry_values - means) / stds)
 finger_values = sample["geometry: finger_count"].to_numpy()
 cap_values = sample["capacitance: north_to_south (fF)"].to_numpy()
+shape_values = v0_matrix[:, 11:].copy()
+shape_values /= np.maximum(np.linalg.norm(shape_values, axis=1, keepdims=True), 1e-12)
 
 def retrieval_metrics(neighbors):
     return [
@@ -535,16 +539,22 @@ def retrieval_metrics(neighbors):
                 standardized_geometry[query_indices] - standardized_geometry[neighbors], axis=1
             )
         ),
+        np.mean(np.linalg.norm(shape_values[query_indices] - shape_values[neighbors], axis=1)),
         np.mean(np.abs(cap_values[query_indices] - cap_values[neighbors])),
     ]
 
 v0_quality = retrieval_metrics(v0_nearest)
 v1_quality = retrieval_metrics(v1_nearest)
-metric_labels = ["finger count MAE", "geometry distance", "mutual C MAE (fF)"]
+metric_labels = [
+    "finger count MAE",
+    "geometry distance",
+    "shape distance",
+    "mutual C MAE (fF)",
+]
 quality = pd.DataFrame({"metric": metric_labels, "v0": v0_quality, "v1": v1_quality})
 display(quality.round(4))
 
-fig = make_subplots(rows=1, cols=3, subplot_titles=metric_labels)
+fig = make_subplots(rows=1, cols=4, subplot_titles=metric_labels)
 for column, metric in enumerate(metric_labels, start=1):
     values = quality.loc[quality["metric"] == metric, ["v0", "v1"]].iloc[0]
     fig.add_trace(
@@ -565,18 +575,36 @@ fig.update_layout(
     height=460,
 )
 fig.show()
+
+v0_finger_exact = np.mean(finger_values[query_indices] == finger_values[v0_nearest])
+v1_finger_exact = np.mean(finger_values[query_indices] == finger_values[v1_nearest])
+acceptance = pd.DataFrame(
+    [
+        ("topology", v0_finger_exact, v1_finger_exact, v1_finger_exact >= v0_finger_exact),
+        ("all parameters", v0_quality[1], v1_quality[1], v1_quality[1] <= 0.90 * v0_quality[1]),
+        ("shape", v0_quality[2], v1_quality[2], v1_quality[2] <= 1.10 * v0_quality[2]),
+        ("physics proxy", v0_quality[3], v1_quality[3], v1_quality[3] <= v0_quality[3]),
+        (
+            "similarity dynamic range",
+            np.std(v0_similarity),
+            np.std(v1_similarity),
+            np.std(v1_similarity) >= 0.60 * np.std(v0_similarity),
+        ),
+    ],
+    columns=["gate", "v0 reference", "v1 result", "passed"],
+)
+display(acceptance.round(4))
+assert acceptance["passed"].all(), "v1 must pass every gate before it is described as better"
 """,
         hidden=True,
     ),
     markdown(
         """
-The balanced v1 neighborhood improves the aggregate geometry distance by about 19%
-and the mutual-capacitance proxy by about 11% in this run. V0 is better on the
-single finger-count metric. That is not a contradiction: v0's dense silhouette makes
-finger repetition especially prominent, while v1 deliberately balances forty named
-controls with scale, morphology, and topology. For a finger-count-only application,
-use that explicit v1 control field or a task-specific block weighting; for general
-geometry and physics locality, the balanced v1 vector is stronger here.
+The claim is intentionally conditional: **v1 is accepted only when every row in the
+executed gate table passes**. Compactness alone is not a quality metric. The topology
+gate prevents visibly different finger patterns from being called neighbors, the
+shape gate prevents excessive compression loss, and capacitance remains a genuinely
+held-out physics check.
 """
     ),
     markdown(
@@ -630,7 +658,8 @@ fig.show()
         """
 ## 9. Choose v0 or v1 explicitly through the API
 
-The default remains v0 for backward compatibility. New work should select v1. Both
+The default remains v0 for backward compatibility. New work can select the accepted
+v1.1 standard explicitly. Both
 standards use the same `layout_id`, so changing versions does not change how a
 simulation row resolves to its GDS. The MCP tools `get_layout_embedding` and
 `find_similar_layouts` expose the same `embedding_version="v0" | "v1"` argument
@@ -668,8 +697,9 @@ print("nearest cosine similarities:", [round(item["cosine_similarity"], 4) for i
 
 **Why v1 is the better ML substrate**
 
-- It is about 18 times smaller while retaining physical scale and functional shape.
-- Metric, shape, and controls receive balanced influence.
+- It is about 9 times smaller while retaining physical scale and functional shape.
+- Metric, shape, and controls receive explicit, audited influence rather than equal
+  weight by assumption.
 - Parameter identity survives, enabling gradients or generated proposals to be
   translated back into the originating layout tool.
 - A foreign institution needs only GDS, its native parameter dictionary, and a tiny
@@ -679,10 +709,10 @@ print("nearest cosine similarities:", [round(item["cosine_similarity"], 4) for i
 **What remains for later v1 releases**
 
 This first frozen v1 release is calibrated on GeneralizedCapNInterdigital only.
-The algorithm already accepts arbitrary layouts, but a truly universal reference
-normalization must be refit once on the union of all SQuADDS component families and
-then frozen. Cross-tool invariance, rotations, hierarchy-aware topology, and learned
-contrastive objectives should be benchmarked before calling it a foundation encoder.
+The algorithm already accepts arbitrary layouts, but the frozen normalization and
+frequency selection must be validated on the union of all SQuADDS component families.
+Cross-tool invariance, rotations, hierarchy-aware topology, and learned contrastive
+objectives should be benchmarked before calling it a foundation encoder.
 
 That distinction matters: this tutorial demonstrates a robust standard and a complete
 proof of principle, not an unsupported claim that one component family spans every

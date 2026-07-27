@@ -18,8 +18,8 @@ from .embeddings import _draw_mask, _functional_role, _polygon_perimeter
 from .manifest import parse_gds_polygons
 
 UNIVERSAL_EMBEDDING_MODEL = "universal-geometry-v1"
-UNIVERSAL_EMBEDDING_SCHEMA_VERSION = "1.0.0"
-UNIVERSAL_SHAPE_SIZE = 64
+UNIVERSAL_EMBEDDING_SCHEMA_VERSION = "1.1.0"
+UNIVERSAL_SHAPE_SIZE = 96
 UNIVERSAL_METRIC_NAMES = [
     "log1p_total_area_um2",
     "log1p_total_perimeter_um",
@@ -55,18 +55,26 @@ UNIVERSAL_METRIC_NAMES = [
     "port_centroid_y",
 ]
 UNIVERSAL_METRIC_VALUE_DIMENSIONS = len(UNIVERSAL_METRIC_NAMES)
-UNIVERSAL_METRIC_DIMENSIONS = 2 * UNIVERSAL_METRIC_VALUE_DIMENSIONS
+UNIVERSAL_METRIC_DIMENSIONS = UNIVERSAL_METRIC_VALUE_DIMENSIONS
 UNIVERSAL_SHAPE_CHANNELS = [
-    "conductor_occupancy",
-    "etch_occupancy",
-    "port_occupancy",
     "signed_functional_material",
     "signed_distance_to_functional_boundary",
 ]
-UNIVERSAL_DCT_SIZE = 8
-UNIVERSAL_SHAPE_DIMENSIONS = len(UNIVERSAL_SHAPE_CHANNELS) * UNIVERSAL_DCT_SIZE**2
-UNIVERSAL_CONTROL_DIMENSIONS = 128
+UNIVERSAL_DCT_CANDIDATE_SIZE = UNIVERSAL_SHAPE_SIZE
+UNIVERSAL_SHAPE_CANDIDATE_DIMENSIONS = len(UNIVERSAL_SHAPE_CHANNELS) * UNIVERSAL_DCT_CANDIDATE_SIZE**2
+UNIVERSAL_SHAPE_DIMENSIONS = 768
+UNIVERSAL_SHAPE_CHANNEL_DIMENSIONS = {
+    "signed_functional_material": 640,
+    "signed_distance_to_functional_boundary": 128,
+}
+UNIVERSAL_CONTROL_DIMENSIONS = 224
 UNIVERSAL_EMBEDDING_DIMENSIONS = UNIVERSAL_METRIC_DIMENSIONS + UNIVERSAL_SHAPE_DIMENSIONS + UNIVERSAL_CONTROL_DIMENSIONS
+UNIVERSAL_BLOCK_WEIGHTS = {
+    "geometry_metrics": 0.10,
+    "multiscale_shape": 0.55,
+    "parameter_controls": 0.45,
+}
+UNIVERSAL_SHAPE_WHITENING_POWER = 0.5
 
 _NUMBER_WITH_UNIT = re.compile(r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*([A-Za-zµμ]*)\s*$")
 _UNIT_SCALE = {
@@ -156,11 +164,16 @@ def _shape_descriptor(masks: dict[str, np.ndarray]) -> tuple[np.ndarray, np.ndar
     occupied = np.abs(signed) > 1e-3
     signed_distance = distance_transform_edt(occupied) - distance_transform_edt(~occupied)
     signed_distance /= max(float(np.max(np.abs(signed_distance))), 1.0)
-    channels = np.stack([conductor, etch, port, signed, signed_distance]).astype(np.float32)
+    channels = np.stack([signed, signed_distance]).astype(np.float32)
     coefficients = []
     for channel in channels:
         transformed = dctn(channel, type=2, norm="ortho")
-        coefficients.append(transformed[:UNIVERSAL_DCT_SIZE, :UNIVERSAL_DCT_SIZE].reshape(-1))
+        coefficients.append(
+            transformed[
+                :UNIVERSAL_DCT_CANDIDATE_SIZE,
+                :UNIVERSAL_DCT_CANDIDATE_SIZE,
+            ].reshape(-1)
+        )
     return np.concatenate(coefficients).astype(np.float32), signed.astype(np.float32)
 
 
@@ -247,6 +260,7 @@ def _parameter_scalars(value: Any, prefix: str = "") -> Iterable[tuple[str, floa
 
 def parameter_channels(
     design_options: dict[str, Any],
+    statistics: Mapping[str, tuple[float, float]] | None = None,
 ) -> tuple[np.ndarray, list[str], list[float], list[int], list[int]]:
     """Encode named layout controls without depending on a design-tool schema."""
     vector = np.zeros(UNIVERSAL_CONTROL_DIMENSIONS, dtype=np.float32)
@@ -255,7 +269,12 @@ def parameter_channels(
         digest = hashlib.sha256(name.encode("utf-8")).digest()
         index = int.from_bytes(digest[:8], "big") % UNIVERSAL_CONTROL_DIMENSIONS
         sign = 1 if digest[8] & 1 else -1
-        bounded = math.tanh(math.copysign(math.log1p(abs(value)), value) / 4.0)
+        if statistics is not None and name in statistics:
+            mean, standard_deviation = statistics[name]
+            standardized = (value - mean) / standard_deviation if standard_deviation > 1e-8 else 0.0
+            bounded = float(np.clip(standardized, -6.0, 6.0))
+        else:
+            bounded = math.tanh(math.copysign(math.log1p(abs(value)), value) / 4.0)
         vector[index] += sign * bounded
         names.append(name)
         values.append(float(value))
@@ -264,8 +283,29 @@ def parameter_channels(
     return vector, names, values, indices, signs
 
 
-def universal_embedding_schema(metric_mean: np.ndarray, metric_std: np.ndarray) -> dict[str, Any]:
+def universal_embedding_schema(
+    metric_mean: np.ndarray,
+    metric_std: np.ndarray,
+    shape_indices: np.ndarray | None = None,
+    shape_mean: np.ndarray | None = None,
+    shape_std: np.ndarray | None = None,
+) -> dict[str, Any]:
     """Return the frozen, machine-readable universal-geometry-v1 contract."""
+    if shape_indices is None:
+        shape_indices = np.arange(UNIVERSAL_SHAPE_DIMENSIONS)
+    if shape_mean is None:
+        shape_mean = np.zeros(UNIVERSAL_SHAPE_DIMENSIONS)
+    if shape_std is None:
+        shape_std = np.ones(UNIVERSAL_SHAPE_DIMENSIONS)
+    candidate_area = UNIVERSAL_DCT_CANDIDATE_SIZE**2
+    selected_frequencies = [
+        {
+            "channel": UNIVERSAL_SHAPE_CHANNELS[int(index) // candidate_area],
+            "row_frequency": int(index % candidate_area) // UNIVERSAL_DCT_CANDIDATE_SIZE,
+            "column_frequency": int(index % UNIVERSAL_DCT_CANDIDATE_SIZE),
+        }
+        for index in shape_indices
+    ]
     return {
         "model": UNIVERSAL_EMBEDDING_MODEL,
         "embedding_schema_version": UNIVERSAL_EMBEDDING_SCHEMA_VERSION,
@@ -281,28 +321,40 @@ def universal_embedding_schema(metric_mean: np.ndarray, metric_std: np.ndarray) 
                 "offset": 0,
                 "dimensions": UNIVERSAL_METRIC_DIMENSIONS,
                 "values": UNIVERSAL_METRIC_NAMES,
-                "availability_mask_offset": UNIVERSAL_METRIC_VALUE_DIMENSIONS,
+                "availability": "stored as row metadata; excluded from cosine distance",
             },
             "multiscale_shape": {
                 "offset": UNIVERSAL_METRIC_DIMENSIONS,
                 "dimensions": UNIVERSAL_SHAPE_DIMENSIONS,
                 "channels": UNIVERSAL_SHAPE_CHANNELS,
                 "raster_resolution": [UNIVERSAL_SHAPE_SIZE, UNIVERSAL_SHAPE_SIZE],
-                "transform": f"orthonormal 2D DCT, lowest {UNIVERSAL_DCT_SIZE}x{UNIVERSAL_DCT_SIZE} frequencies",
+                "candidate_transform": (
+                    "orthonormal 2D DCT over the lowest "
+                    f"{UNIVERSAL_DCT_CANDIDATE_SIZE}x{UNIVERSAL_DCT_CANDIDATE_SIZE} "
+                    "frequencies of each channel"
+                ),
+                "selection": "largest reference-catalogue variance; simulation targets are not used",
+                "selected_frequencies": selected_frequencies,
             },
             "parameter_controls": {
                 "offset": UNIVERSAL_METRIC_DIMENSIONS + UNIVERSAL_SHAPE_DIMENSIONS,
                 "dimensions": UNIVERSAL_CONTROL_DIMENSIONS,
-                "transform": "signed SHA-256 feature hashing of canonical parameter paths and bounded unit-normalized values",
+                "transform": (
+                    "signed SHA-256 feature hashing of canonical parameter paths and per-parameter standardized values"
+                ),
             },
         },
         "normalization": {
             "metric_mean": metric_mean.astype(float).tolist(),
             "metric_std": metric_std.astype(float).tolist(),
-            "metrics": "available values z-scored and clipped to [-6, 6], then concatenated with availability mask",
-            "shape": "each DCT channel L2 normalized",
-            "controls": "signed-log bounded values accumulated by stable parameter-name hash",
-            "blocks": "each block L2 normalized; concatenation divided by sqrt(3)",
+            "shape_mean": shape_mean.astype(float).tolist(),
+            "shape_std": shape_std.astype(float).tolist(),
+            "shape_whitening_power": UNIVERSAL_SHAPE_WHITENING_POWER,
+            "metrics": "available values z-scored and clipped to [-6, 6]",
+            "shape": "selected coefficients centered, partially whitened, and L2 normalized",
+            "controls": "per-parameter z-scores accumulated by stable parameter-name hash",
+            "block_weights": UNIVERSAL_BLOCK_WEIGHTS,
+            "blocks": "each block L2 normalized, weighted, concatenated, and L2 normalized",
         },
         "invariances": {
             "translation": "geometry is cropped to functional bounds and centered",
@@ -319,16 +371,25 @@ def _assemble_embedding(
     controls: np.ndarray,
     metric_mean: np.ndarray,
     metric_std: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, float]:
     standardized = np.where(available > 0, (metrics - metric_mean) / metric_std, 0.0)
     standardized = np.clip(standardized, -6.0, 6.0)
-    metric_block = _safe_unit_vector(np.concatenate([standardized, available]).astype(np.float32))
-    shape_channels = shape.reshape(len(UNIVERSAL_SHAPE_CHANNELS), -1)
-    shape_block = np.concatenate([_safe_unit_vector(channel) for channel in shape_channels])
-    shape_block = _safe_unit_vector(shape_block.astype(np.float32))
+    metric_block = _safe_unit_vector(standardized.astype(np.float32))
+    shape_norm = float(np.linalg.norm(shape))
+    shape_block = _safe_unit_vector(shape.astype(np.float32))
     control_block = _safe_unit_vector(controls.astype(np.float32))
-    embedding = np.concatenate([metric_block, shape_block, control_block]) / math.sqrt(3.0)
-    return _safe_unit_vector(embedding.astype(np.float32)), standardized.astype(np.float32)
+    embedding = np.concatenate(
+        [
+            UNIVERSAL_BLOCK_WEIGHTS["geometry_metrics"] * metric_block,
+            UNIVERSAL_BLOCK_WEIGHTS["multiscale_shape"] * shape_block,
+            UNIVERSAL_BLOCK_WEIGHTS["parameter_controls"] * control_block,
+        ]
+    )
+    return (
+        _safe_unit_vector(embedding.astype(np.float32)),
+        standardized.astype(np.float32),
+        shape_norm,
+    )
 
 
 def write_universal_embedding_dataset(
@@ -378,13 +439,7 @@ def write_universal_embedding_dataset(
             temporary_path / "shape.f32",
             mode="w+",
             dtype=np.float32,
-            shape=(len(records), UNIVERSAL_SHAPE_DIMENSIONS),
-        )
-        control_store = np.memmap(
-            temporary_path / "controls.f32",
-            mode="w+",
-            dtype=np.float32,
-            shape=(len(records), UNIVERSAL_CONTROL_DIMENSIONS),
+            shape=(len(records), UNIVERSAL_SHAPE_CANDIDATE_DIMENSIONS),
         )
         bounds: list[dict[str, float]] = []
         parameter_metadata = []
@@ -396,11 +451,10 @@ def write_universal_embedding_dataset(
             metrics, available, shape, geometry_bounds = _raw_geometry(
                 artifact_resolver(record), record["component_name"], layer_roles
             )
-            controls, names, values, indices, signs = parameter_channels(design_options_by_id[design_id])
+            _, names, values, indices, signs = parameter_channels(design_options_by_id[design_id])
             metrics_store[index] = metrics
             available_store[index] = available
             shape_store[index] = shape
-            control_store[index] = controls
             bounds.append(geometry_bounds)
             parameter_metadata.append((names, values, indices, signs))
             for name, value in zip(names, values):
@@ -411,7 +465,38 @@ def write_universal_embedding_dataset(
         centered = (metrics_store - metric_mean) * available_store
         metric_std = np.sqrt(np.asarray((centered**2).sum(axis=0) / available_counts))
         metric_std[metric_std < 1e-8] = 1.0
-        schema = universal_embedding_schema(metric_mean, metric_std)
+        shape_candidate_mean = np.asarray(shape_store.mean(axis=0), dtype=np.float32)
+        shape_candidate_std = np.asarray(shape_store.std(axis=0), dtype=np.float32)
+        candidate_area = UNIVERSAL_DCT_CANDIDATE_SIZE**2
+        selected_by_channel = []
+        for channel_index, channel in enumerate(UNIVERSAL_SHAPE_CHANNELS):
+            start = channel_index * candidate_area
+            stop = start + candidate_area
+            channel_dimensions = UNIVERSAL_SHAPE_CHANNEL_DIMENSIONS[channel]
+            channel_indices = np.argsort(
+                shape_candidate_std[start:stop],
+                kind="stable",
+            )[-channel_dimensions:]
+            selected_by_channel.extend((channel_indices + start).tolist())
+        shape_indices = np.asarray(sorted(selected_by_channel), dtype=np.int64)
+        shape_mean = shape_candidate_mean[shape_indices]
+        shape_std = shape_candidate_std[shape_indices]
+        shape_std[shape_std < 1e-8] = 1.0
+        parameter_normalization = {
+            name: (float(np.mean(values)), max(float(np.std(values)), 1e-8))
+            for name, values in parameter_statistics.items()
+        }
+        schema = universal_embedding_schema(
+            metric_mean,
+            metric_std,
+            shape_indices,
+            shape_mean,
+            shape_std,
+        )
+        schema["normalization"]["parameter_statistics"] = {
+            name: {"mean": mean, "standard_deviation": standard_deviation}
+            for name, (mean, standard_deviation) in sorted(parameter_normalization.items())
+        }
 
         embedding_path = metadata_dir / "universal-geometry-v1.parquet"
         writer = None
@@ -419,11 +504,18 @@ def write_universal_embedding_dataset(
             batch = []
             for index in range(start, min(start + 128, len(records))):
                 record = records[index]
-                embedding, standardized = _assemble_embedding(
+                selected_shape = (shape_store[index, shape_indices] - shape_mean) / np.power(
+                    shape_std, UNIVERSAL_SHAPE_WHITENING_POWER
+                )
+                controls, _, _, _, _ = parameter_channels(
+                    design_options_by_id[record["design_id"]],
+                    parameter_normalization,
+                )
+                embedding, standardized, shape_norm = _assemble_embedding(
                     metrics_store[index],
                     available_store[index],
-                    shape_store[index],
-                    control_store[index],
+                    selected_shape,
+                    controls,
                     metric_mean,
                     metric_std,
                 )
@@ -446,6 +538,7 @@ def write_universal_embedding_dataset(
                         "parameter_values": values,
                         "parameter_hash_indices": indices,
                         "parameter_hash_signs": signs,
+                        "shape_descriptor_norm": shape_norm,
                         "shape_descriptor_sha256": hashlib.sha256(shape_store[index].tobytes()).hexdigest(),
                         "embedding": embedding.tolist(),
                     }
