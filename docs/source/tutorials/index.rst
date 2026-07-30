@@ -19,6 +19,7 @@ Tutorials
    Tutorial-14_Exploring_Static_Layout_Embeddings.ipynb
    Tutorial-15_Transfer_Learning_with_Static_Embeddings.ipynb
    Tutorial-16_Geometry_Domain_Transfer_Learning.ipynb
+   Tutorial-16b_Balanced_Geometry_Domain_Transfer_Learning.ipynb
    Tutorial-17_Cross_Component_Transfer_Learning.ipynb
 
 .. note::

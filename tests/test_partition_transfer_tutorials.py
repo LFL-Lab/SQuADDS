@@ -9,11 +9,15 @@ import pytest
 
 TUTORIALS = {
     16: Path("tutorials/Tutorial-16_Geometry_Domain_Transfer_Learning.ipynb"),
+    "16b": Path("tutorials/Tutorial-16b_Balanced_Geometry_Domain_Transfer_Learning.ipynb"),
     17: Path("tutorials/Tutorial-17_Cross_Component_Transfer_Learning.ipynb"),
 }
 
 
-@pytest.mark.parametrize(("number", "minimum_plots"), [(16, 5), (17, 5)])
+@pytest.mark.parametrize(
+    ("number", "minimum_plots"),
+    [(16, 5), ("16b", 5), (17, 5)],
+)
 def test_partition_transfer_tutorial_is_executed_and_visual(number, minimum_plots):
     notebook = json.loads(TUTORIALS[number].read_text(encoding="utf-8"))
     code_cells = [cell for cell in notebook["cells"] if cell["cell_type"] == "code"]
@@ -45,6 +49,19 @@ def test_tutorial_16_uses_exact_domains_two_generalists_and_foundation_sweep():
     assert "Sweep every finger count as the foundation" in notebook
     assert "fingerprinted checkpoint" in notebook
     assert "Final interactive foundation snapshot" in notebook
+
+
+def test_tutorial_16b_uses_one_balanced_cohort_for_every_analysis():
+    notebook = TUTORIALS["16b"].read_text(encoding="utf-8")
+
+    assert "BALANCED_ROWS_PER_DOMAIN = 1_260" in notebook
+    assert "EXPECTED_BALANCED_ROWS = 13 * BALANCED_ROWS_PER_DOMAIN" in notebook
+    assert "balanced_design_ids" in notebook
+    assert "design_id in balanced_design_ids" in notebook
+    assert "design_id not in balanced_design_ids" in notebook
+    assert "balanced_counts" in notebook
+    assert "same 945-row training pool" in notebook
+    assert "only scientific variable changed is domain size" in notebook
 
 
 def test_tutorial_17_compares_schema_baseline_with_cross_class_v0_transfer():
