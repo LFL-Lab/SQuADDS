@@ -204,6 +204,7 @@ The following tutorials are available to help you get started with `SQuADDS`:
 - [Tutorial 15: Transfer Learning with Static Layout Embeddings](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-15_Transfer_Learning_with_Static_Embeddings.html)
 - [Tutorial 16: Transfer Learning Across GeneralizedNCap Geometry Regimes](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-16_Geometry_Domain_Transfer_Learning.html)
 - [Tutorial 17: Transfer Learning Across Component Classes](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-17_Cross_Component_Transfer_Learning.html)
+- [Tutorial 18: Topology-General Transfer Learning for Capacitance](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-18_Topology_General_Transfer_Learning.html)
 
 ---
 

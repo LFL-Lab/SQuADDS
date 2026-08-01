@@ -21,6 +21,7 @@ Tutorials
    Tutorial-16_Geometry_Domain_Transfer_Learning.ipynb
    Tutorial-16b_Balanced_Geometry_Domain_Transfer_Learning.ipynb
    Tutorial-17_Cross_Component_Transfer_Learning.ipynb
+   Tutorial-18_Topology_General_Transfer_Learning.ipynb
 
 .. note::
 

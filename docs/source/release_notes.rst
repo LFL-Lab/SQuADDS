@@ -4,6 +4,25 @@ Release Notes
 Version 0.4.5
 --------------
 
+**Topology-General Capacitance ML**
+
+- Added the experimental ``squadds.ml.topocap`` API for representing
+  GDS-derived electrical conductor graphs, reconstructing signed Maxwell
+  capacitance matrices from positive shunt/mutual terms, and adapting source
+  models with evidence-gated residual learning.
+- Added checksum-bound feature and transfer-study pipelines with atomic,
+  resumable checkpoints; held-out morphology-domain evaluation; shuffled-label,
+  target-only, active-GDS, all-cached-descriptor, and compressed-v0 controls;
+  and physical/permutation property checks for variable matrix sizes.
+- Added a frozen support-conditioned retrieval ablation that selects exactly
+  2,048 source designs from target-support geometry alone, records the selected
+  source IDs and hashes in every checkpoint, and compares correct source labels
+  with a geometry-matched shuffled-label control.
+- Added Tutorial 18, an executed artifact-driven report covering the
+  ``GeneralizedCapNInterdigital`` to ``CapNInterdigitalTee`` exploratory study,
+  uncertainty and ablation diagnostics, the diffusion-model decision gate, and
+  a solver-ready topology-diverse data-collection brief for Saikat Das.
+
 **Bug Fixes**
 
 - Capped ``pandas`` below 3.0 because ``pyEPR`` still uses the removed
