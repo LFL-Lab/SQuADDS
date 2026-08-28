@@ -93,3 +93,16 @@ def test_tutorial_20_answers_the_new_contributor_question():
     assert "The question a new contributor actually asks" in source
     assert "About ten labels" in source
     assert "only helps if the representation aligns the classes" in source
+
+
+def test_tutorial_20_separates_predictive_from_transfer_blocks():
+    """A block that predicts well in-class need not transfer, and vice versa."""
+    source = _prose()
+
+    assert "Which block carries prediction, and which carries transfer" in source
+    assert "in-class prediction" in source
+    assert "cross-class, no labels" in source
+    assert "The block that predicts is not the block that transfers" in source
+    assert "block ablation is almost uninformative" in source
+    assert "The shape spectrum is the clearest reversal" in source
+    assert "Block ablation run only in-class is misleading" in source

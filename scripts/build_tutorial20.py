@@ -119,7 +119,7 @@ stand-in.
 """
 
 CONCLUSIONS = """
-## 9. What this experiment establishes
+## 10. What this experiment establishes
 
 **Established**
 
@@ -153,6 +153,11 @@ CONCLUSIONS = """
 - The physics-proxy residual target, proposed as a way to give every class one
   comparable quantity, is worse than predicting capacitance directly in every
   rotation.
+- Block ablation run only in-class is misleading. Every v2 block predicts
+  capacitance inside a single family at macro R2 0.987 or better, so that setting
+  cannot distinguish them; cross-class the same blocks span 0.960 to -3.53. The
+  shape spectrum reverses outright, going from one of the best in-class blocks to
+  by far the worst across classes.
 - Cross-class similarity is not uniformly trustworthy. v2 fixes the NCap-to-NCap
   pair, turning v0's misleading +0.321 into a useful -0.430, but both
   representations have the wrong sign on pairs involving the qubit class. Ranking
@@ -433,6 +438,172 @@ that aligns them, they are worth an order of magnitude in labels.
 representations are above 0.98 and the curves have converged. The value of a
 foundation representation is concentrated exactly where a new contributor lives:
 the first few dozen simulations.
+"""
+
+
+BLOCK_ROLES_INTRO = """
+## 8. Which block carries prediction, and which carries transfer?
+
+Tutorial 21 ablates v2's blocks inside a single component family and finds that
+the parameter block is nearly redundant: geometry alone matches the full vector.
+Section 6 above found the opposite across classes, where dropping the parameter
+block collapsed held-out performance.
+
+Those are not contradictory, and the resolution is worth measuring directly. We
+evaluate every block in three settings on the balanced cohort:
+
+1. **in-class prediction** - train and test inside one component family, the
+   ordinary supervised task;
+2. **cross-class with no labels** - train on two families, predict the third;
+3. **cross-class with ten labels** - the same, after adapting on ten designs
+   from the unseen family.
+
+The question is whether a block that helps you predict is the same block that
+helps you transfer.
+"""
+
+BLOCK_ROLES_CODE = """
+BLOCK_ROLES_PATH = RUN_DIR / "block_roles.parquet"
+COUPLING_STOP = METRIC_BLOCK_SIZE + COUPLING_BLOCK_SIZE
+SHAPE_STOP_ALL = COUPLING_STOP + SHAPE_BLOCK_SIZE
+PARAM_STOP = SHAPE_STOP_ALL + PARAMETER_BLOCK_SIZE
+FEW_SHOT = 10
+
+BLOCKS = {
+    "v2 full (512)": balanced_v2,
+    "v2 geometry only (416)": np.c_[balanced_v2[:, :SHAPE_STOP_ALL], balanced_v2[:, PARAM_STOP:V2_DIMENSIONS]],
+    "physical metrics (48)": balanced_v2[:, :METRIC_BLOCK_SIZE],
+    "coupling spectrum (192)": balanced_v2[:, METRIC_BLOCK_SIZE:COUPLING_STOP],
+    "shape spectrum (128)": balanced_v2[:, COUPLING_STOP:SHAPE_STOP_ALL],
+    "parameter statistics (96)": balanced_v2[:, SHAPE_STOP_ALL:PARAM_STOP],
+    "physics proxy (48)": balanced_v2[:, PARAM_STOP:V2_DIMENSIONS],
+    "v0 full (155)": balanced_v0,
+}
+
+if BLOCK_ROLES_PATH.exists():
+    block_roles = pd.read_parquet(BLOCK_ROLES_PATH)
+    print(f"Loaded block roles from {BLOCK_ROLES_PATH}")
+else:
+    records = []
+    for name, matrix in BLOCKS.items():
+        raw = matrix.astype(np.float64)
+        in_class = []
+        for component in sorted(CLASSES):
+            rows = np.flatnonzero(balanced_components == component)
+            projector = V0KernelFeatureProjector(kernel_dimensions=128, random_seed=SEED)
+            features = projector.fit_transform_compact(raw[rows])
+            local = balanced_y[rows]
+            for repeat in range(REPEATS):
+                order = np.random.default_rng(SEED + 17 * repeat).permutation(len(rows))
+                cut = int(0.3 * len(order))
+                test, train = order[:cut], order[cut:]
+                model = TransferRidgeRegressor(ALPHA).fit(features[train], local[train])
+                in_class.append(macro(local[test], model.predict(features[test]))["r2"])
+        records.append({"block": name, "setting": "in-class prediction", "r2": float(np.mean(in_class))})
+
+        zero_shot, few_shot = [], []
+        for held in sorted(CLASSES):
+            train = np.flatnonzero(balanced_components != held)
+            arriving = np.flatnonzero(balanced_components == held)
+            features = project(matrix, train)
+            foundation = TransferRidgeRegressor(ALPHA).fit(features[train], balanced_y[train])
+            for repeat in range(REPEATS):
+                order = np.random.default_rng(SEED + 91 * repeat).permutation(arriving)
+                cut = max(1, int(round(0.3 * len(order))))
+                test, pool = order[:cut], order[cut:]
+                zero_shot.append(macro(balanced_y[test], foundation.predict(features[test]))["r2"])
+                chosen = pool[:FEW_SHOT]
+                adapted = TransferRidgeRegressor(ALPHA).fit(
+                    features[chosen], balanced_y[chosen], prior=foundation
+                )
+                few_shot.append(macro(balanced_y[test], adapted.predict(features[test]))["r2"])
+        records.append({"block": name, "setting": "cross-class, no labels", "r2": float(np.mean(zero_shot))})
+        records.append({"block": name, "setting": f"cross-class, {FEW_SHOT} labels",
+                        "r2": float(np.mean(few_shot))})
+    block_roles = pd.DataFrame(records)
+    block_roles.to_parquet(BLOCK_ROLES_PATH, index=False)
+
+block_roles.pivot(index="block", columns="setting", values="r2").reindex(list(BLOCKS)).round(4)
+"""
+
+BLOCK_ROLES_FIGURE = """
+# %% hide input
+order = list(BLOCKS)
+colors = ["#00798C", "#2A9D8F", "#F4A261", "#4C86A8", "#6A4C93", "#E9C46A", "#8AB17D", "#D1495B"]
+figure = make_subplots(
+    rows=1, cols=3,
+    subplot_titles=[
+        "in-class prediction<br><sub>every block works</sub>",
+        "cross-class, 10 labels<br><sub>the ranking changes</sub>",
+        "cross-class, no labels<br><sub>clipped at -60</sub>",
+    ],
+    horizontal_spacing=0.07,
+)
+panels = [
+    ("in-class prediction", 1, [0.98, 1.001]),
+    ("cross-class, 10 labels", 2, [-4.2, 1.15]),
+    ("cross-class, no labels", 3, [-62, 6]),
+]
+for setting, column, span in panels:
+    frame = block_roles.query("setting == @setting").set_index("block").reindex(order)
+    values = np.clip(frame["r2"].to_numpy(), span[0], None)
+    figure.add_trace(
+        go.Bar(
+            x=values, y=order, orientation="h", marker_color=colors, showlegend=False,
+            text=[f"{value:.3f}" if value > -10 else f"{value:.0f}" for value in frame["r2"].to_numpy()],
+            textposition="outside", cliponaxis=False,
+            hovertemplate="%{y}<br>" + setting + "<br>macro R2=%{text}<extra></extra>",
+        ),
+        row=1, col=column,
+    )
+    figure.update_xaxes(range=span, title_text="macro R2", row=1, col=column)
+    figure.add_vline(x=0, line_color="#1F2937", line_width=1, row=1, col=column)
+figure.update_yaxes(autorange="reversed")
+figure.update_yaxes(showticklabels=False, row=1, col=2)
+figure.update_yaxes(showticklabels=False, row=1, col=3)
+figure.update_layout(
+    title="The block that predicts is not the block that transfers",
+    template="plotly_white", height=520, margin={"l": 200},
+)
+figure.show()
+"""
+
+BLOCK_ROLES_READING = """
+### Reading the three settings
+
+**In-class, block ablation is almost uninformative.** Every single block reaches
+macro R2 0.987 or better on its own: the shape spectrum alone gets 0.9963, the
+physics proxy alone 0.9870, and even v0 gets 0.9921 against the full v2 vector's
+0.9998. Predicting capacitance inside one component family is easy enough that
+almost any faithful description of the geometry suffices. An ablation run only
+in this setting would conclude, wrongly, that the blocks are interchangeable.
+
+**Cross-class, the same blocks span three orders of magnitude.** With ten labels
+from the unseen family the physical-metric block reaches 0.960 and the shape
+spectrum reaches **-3.53**. The ranking is not a rescaling of the in-class
+ranking; it is a different ordering.
+
+**The shape spectrum is the clearest reversal.** It is among the best in-class
+blocks at 0.9963 and by far the worst cross-class at -56.2 with no labels and
+-3.53 with ten. That is physically sensible: two-point correlations and contour
+harmonics describe *what a family's geometry looks like*, and an interdigital
+comb and a transmon cross do not look alike. The block encodes exactly the
+information that does not generalize.
+
+**The physical metrics are the best transfer block**, at 0.960 with ten labels,
+ahead of the full 512-dimensional vector. Absolute area, perimeter, gap, and
+width in micrometres mean the same thing for a coupler and for a qubit, so they
+are the coordinates that survive a change of component class.
+
+**The parameter block earns its place here and not in Tutorial 21.** Full v2 at
+-0.219 zero-shot beats geometry-only at -5.239, a twenty-fold difference, and
+holds the advantage at ten labels. Inside one family, where every design shares a
+parameter schema, the typed order statistics are redundant with the geometry;
+across families they are one of the few things that stays comparable.
+
+The practical consequence is the same one Tutorial 21 reaches from a different
+direction: v2 should be published as blocks that a user can select, because the
+right subset depends on whether the task is prediction or transfer.
 """
 
 
@@ -1118,9 +1289,13 @@ figure.show()
     code(NEWCOMER_CODE),
     code(NEWCOMER_FIGURE),
     markdown(NEWCOMER_READING),
+    markdown(BLOCK_ROLES_INTRO),
+    code(BLOCK_ROLES_CODE),
+    code(BLOCK_ROLES_FIGURE),
+    markdown(BLOCK_ROLES_READING),
     markdown(
         """
-## 8. Does similarity mean anything across a class boundary?
+## 9. Does similarity mean anything across a class boundary?
 
 Accuracy is not the only thing a foundation representation owes us. The routing
 workflow needs cosine similarity to correlate with physical closeness even when
