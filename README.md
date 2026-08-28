@@ -207,6 +207,7 @@ The following tutorials are available to help you get started with `SQuADDS`:
 - [Tutorial 18: Universal Geometry v2 Layout Embeddings](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-18_Universal_Geometry_v2_Embeddings.html)
 - [Tutorial 19: How the Universal Geometry v2 Encoder Works](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-19_How_Universal_Geometry_v2_Works.html)
 - [Tutorial 20: Cross-Component-Class Transfer with Universal Geometry v2](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-20_Cross_Class_Transfer_with_v2.html)
+- [Tutorial 21: Balanced Geometry-Domain Transfer with Universal Geometry v2](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-21_Balanced_Geometry_Domains_with_v2.html)
 
 ---
 
