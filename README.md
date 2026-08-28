@@ -200,6 +200,14 @@ The following tutorials are available to help you get started with `SQuADDS`:
 - [Tutorial 9: Learning the Inverse Map](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-9_Learing_the_Inverse_Design_Map.html)
 - [Tutorial 10: HFSS Driven-Modal Capacitance Extraction](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.html)
 - [Tutorial 11: Unified Driven-Modal Hamiltonian Extraction](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.html)
+- [Tutorial 14: Exploring Static Layout Embeddings](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-14_Exploring_Static_Layout_Embeddings.html)
+- [Tutorial 15: Transfer Learning with Static Layout Embeddings](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-15_Transfer_Learning_with_Static_Embeddings.html)
+- [Tutorial 16: Transfer Learning Across GeneralizedNCap Geometry Regimes](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-16_Geometry_Domain_Transfer_Learning.html)
+- [Tutorial 17: Transfer Learning Across Component Classes](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-17_Cross_Component_Transfer_Learning.html)
+- [Tutorial 18: Universal Geometry v2 Layout Embeddings](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-18_Universal_Geometry_v2_Embeddings.html)
+- [Tutorial 19: How the Universal Geometry v2 Encoder Works](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-19_How_Universal_Geometry_v2_Works.html)
+- [Tutorial 20: Cross-Component-Class Transfer with Universal Geometry v2](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-20_Cross_Class_Transfer_with_v2.html)
+- [Tutorial 21: Balanced Geometry-Domain Transfer with Universal Geometry v2](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-21_Balanced_Geometry_Domains_with_v2.html)
 
 ---
 

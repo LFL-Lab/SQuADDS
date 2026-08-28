@@ -16,6 +16,15 @@ Tutorials
    Tutorial-9_Learing_the_Inverse_Design_Map.ipynb
    Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb
    Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb
+   Tutorial-14_Exploring_Static_Layout_Embeddings.ipynb
+   Tutorial-15_Transfer_Learning_with_Static_Embeddings.ipynb
+   Tutorial-16_Geometry_Domain_Transfer_Learning.ipynb
+   Tutorial-16b_Balanced_Geometry_Domain_Transfer_Learning.ipynb
+   Tutorial-17_Cross_Component_Transfer_Learning.ipynb
+   Tutorial-18_Universal_Geometry_v2_Embeddings.ipynb
+   Tutorial-19_How_Universal_Geometry_v2_Works.ipynb
+   Tutorial-20_Cross_Class_Transfer_with_v2.ipynb
+   Tutorial-21_Balanced_Geometry_Domains_with_v2.ipynb
 
 .. note::
 

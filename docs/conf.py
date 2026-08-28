@@ -1,6 +1,8 @@
 import os
 import sys
 
+import nbsphinx
+
 # Set the path to the root of the project
 sys.path.insert(0, os.path.abspath('../..'))
 
@@ -14,6 +16,7 @@ release = "0.4.5"
 # General configuration
 exclude_patterns = [
     "_build",
+    "build",
     "**.ipynb_checkpoints",
     "jupyter_execute",
     "setup.py",
@@ -120,6 +123,29 @@ autosummary_generate_overwrite = False
 
 # nbsphinx settings
 nbsphinx_execute = 'never'
+
+# nbsphinx overrides nbconvert's input template, so make its ``hide-input``
+# cell tag retain outputs while omitting the corresponding source blocks.
+_input_block_start = "{% block input -%}"
+_input_block_end = "{% endblock input %}"
+_hide_input_condition = (
+    "{%- if 'hide-input' not in cell.metadata.get('tags', []) %}"
+)
+if _hide_input_condition not in nbsphinx.RST_TEMPLATE:
+    if (
+        _input_block_start not in nbsphinx.RST_TEMPLATE
+        or _input_block_end not in nbsphinx.RST_TEMPLATE
+    ):
+        raise RuntimeError("Unable to configure nbsphinx hide-input support")
+    nbsphinx.RST_TEMPLATE = nbsphinx.RST_TEMPLATE.replace(
+        _input_block_start,
+        _input_block_start + "\n" + _hide_input_condition,
+        1,
+    ).replace(
+        _input_block_end,
+        "{%- endif %}\n" + _input_block_end,
+        1,
+    )
 
 # allow html
 nbsphinx_allow_html = True

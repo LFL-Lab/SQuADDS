@@ -6,6 +6,7 @@ These tests validate the MCP tool functions, utility helpers,
 and server creation without requiring a live HuggingFace connection.
 """
 
+import inspect
 import json
 
 import numpy as np
@@ -201,6 +202,36 @@ class TestServerFactory:
         # The server should have tool handlers registered
         # Access the internal tool manager
         assert server is not None
+
+    def test_layout_tools_register(self):
+        """The layout API remains available without importing the GDS backend."""
+        from squadds_mcp.tools.layouts import register_layout_tools
+
+        class FakeMCP:
+            def __init__(self):
+                self.registered = []
+                self.functions = {}
+
+            def tool(self):
+                def decorator(function):
+                    self.registered.append(function.__name__)
+                    self.functions[function.__name__] = function
+                    return function
+
+                return decorator
+
+        mcp = FakeMCP()
+        register_layout_tools(mcp)
+        assert mcp.registered == [
+            "get_layout",
+            "get_layout_summary",
+            "get_layout_features",
+            "get_layout_embedding",
+            "find_similar_layouts",
+            "get_layout_polygons",
+        ]
+        assert inspect.signature(mcp.functions["get_layout_embedding"]).parameters["embedding_version"].default == "v0"
+        assert inspect.signature(mcp.functions["find_similar_layouts"]).parameters["embedding_version"].default == "v0"
 
 
 # ---------------------------------------------------------------------------
