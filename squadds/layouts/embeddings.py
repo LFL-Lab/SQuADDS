@@ -27,6 +27,12 @@ EMBEDDING_FILENAMES = {
     "v1": "metadata/universal-geometry-v1.parquet",
     "v2": "metadata/universal-geometry-v2.parquet",
 }
+METRIC_FILENAMES = {
+    "v2": (
+        "models/universal-geometry-v2/metric-v1.json",
+        "models/universal-geometry-v2/metric-v1.npz",
+    ),
+}
 EMBEDDING_SCHEMA_FILENAMES = {
     "v0": "metadata/static-embedding-v0.schema.json",
     "v1": "models/universal-geometry-v1/schema.json",
@@ -391,6 +397,7 @@ class LayoutEmbeddingClient:
         self._embeddings: pd.DataFrame | None = None
         self._schema: dict[str, Any] | None = None
         self._control_map: pd.DataFrame | None = None
+        self._metric: dict[str, Any] | None = None
 
     @staticmethod
     def available_versions() -> tuple[str, ...]:
@@ -495,16 +502,86 @@ class LayoutEmbeddingClient:
             channel: idctn(values, type=2, norm="ortho").astype(np.float32) for channel, values in coefficients.items()
         }
 
+    def metric(self) -> dict[str, Any] | None:
+        """Load the frozen similarity metric for this standard, if one exists.
+
+        v2 vectors are non-negative log-magnitudes in absolute units, so they
+        share a large common direction and a raw cosine saturates.  The metric is
+        fitted once on the reference catalogue and published as frozen constants,
+        exactly so that two contributions stay comparable without either refitting
+        it.  Returns ``None`` when the standard has no published metric, which
+        includes older dataset revisions.
+        """
+        if self._metric is not None:
+            return self._metric or None
+        if self.version not in METRIC_FILENAMES:
+            self._metric = {}
+            return None
+        contract_name, array_name = METRIC_FILENAMES[self.version]
+        try:
+            contract = json.loads(
+                Path(
+                    hf_hub_download(
+                        repo_id=self.repo_id,
+                        repo_type="dataset",
+                        filename=contract_name,
+                        revision=self.revision,
+                    )
+                ).read_text()
+            )
+            arrays = np.load(
+                hf_hub_download(
+                    repo_id=self.repo_id,
+                    repo_type="dataset",
+                    filename=array_name,
+                    revision=self.revision,
+                )
+            )
+        except Exception:  # noqa: BLE001 - an older revision simply has no metric
+            self._metric = {}
+            return None
+        self._metric = {
+            "contract": contract,
+            "mean": arrays["mean"].astype(np.float64),
+            "scale": arrays["scale"].astype(np.float64),
+            "keep": arrays["keep"],
+            "whitening": arrays["whitening"].astype(np.float64),
+        }
+        return self._metric
+
+    def metric_transform(self, vectors: Any) -> np.ndarray:
+        """Project raw vectors into the frozen metric space.
+
+        Use this on locally encoded designs so they can be compared against the
+        published catalogue on identical terms.
+        """
+        matrix = np.atleast_2d(np.asarray(vectors, dtype=np.float64))
+        metric = self.metric()
+        if metric is None:
+            return matrix
+        keep = metric["keep"]
+        standardized = (matrix[:, keep] - metric["mean"][keep]) / metric["scale"][keep]
+        return standardized @ metric["whitening"]
+
     def nearest(
         self,
         layout_id: str,
         limit: int = 10,
         component_name: str | None = None,
         include_embeddings: bool = False,
+        metric: str = "auto",
     ) -> list[dict[str, Any]]:
-        """Return cosine-nearest layouts, optionally within one component family."""
+        """Return cosine-nearest layouts, optionally within one component family.
+
+        ``metric="auto"`` applies the published frozen metric when the standard
+        has one and falls back to the raw cosine otherwise.  ``metric="raw"``
+        forces the unwhitened cosine, which is the correct choice for v0 and v1
+        because their vectors are already unit normalized.
+        """
         if limit < 1 or limit > 100:
             raise ValueError("limit must be between 1 and 100.")
+        if metric not in {"auto", "raw", "whitened"}:
+            raise ValueError('metric must be one of "auto", "raw", or "whitened".')
         frame = self.embeddings()
         query = self.get(layout_id)
         candidates = frame.loc[frame["layout_id"] != layout_id].drop_duplicates("layout_id").copy()
@@ -512,8 +589,13 @@ class LayoutEmbeddingClient:
             candidates = candidates.loc[candidates["component_name"] == component_name]
         if candidates.empty:
             return []
-        matrix = np.vstack(candidates["embedding"].map(lambda value: np.asarray(value, dtype=np.float32)))
-        query_vector = np.asarray(query["embedding"], dtype=np.float32)
+        matrix = np.vstack(candidates["embedding"].map(lambda value: np.asarray(value, dtype=np.float64)))
+        query_vector = np.asarray(query["embedding"], dtype=np.float64)
+        if metric != "raw" and self.metric() is not None:
+            matrix = self.metric_transform(matrix)
+            query_vector = self.metric_transform(query_vector)[0]
+        elif metric == "whitened":
+            raise LookupError(f"No published metric for version {self.version!r}.")
         # Divide by the norms rather than assuming them.  v0 and v1 vectors are
         # unit normalized, so a bare dot product happened to equal the cosine;
         # v2 stores absolute physical measurements and is not unit normalized,

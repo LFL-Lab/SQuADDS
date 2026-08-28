@@ -268,3 +268,35 @@ def test_nearest_returns_a_true_cosine_for_unnormalized_vectors(tmp_path):
     similarities = [item["cosine_similarity"] for item in neighbours]
     assert all(-1.0001 <= value <= 1.0001 for value in similarities), similarities
     assert similarities == sorted(similarities, reverse=True)
+
+
+def test_metric_is_optional_and_raw_cosine_still_available(tmp_path):
+    """v0 and v1 have no published metric; nearest must still work on them."""
+    import pandas as pd
+
+    from squadds.layouts import LayoutEmbeddingClient
+
+    rng = np.random.default_rng(4)
+    rows = []
+    for index in range(6):
+        vector = (rng.normal(size=V2_DIMENSIONS) * 30.0).astype(np.float32)
+        rows.append(
+            {
+                "layout_id": f"layout:{index}",
+                "design_id": f"design:{index}",
+                "component_name": "GeneralizedCapNInterdigital",
+                "source_id": f"campaign/{index}",
+                "embedding": vector.tolist(),
+            }
+        )
+    path = tmp_path / "v2.parquet"
+    pd.DataFrame(rows).to_parquet(path, index=False)
+
+    client = LayoutEmbeddingClient(version="v2", embedding_path=path)
+    client._metric = {}  # emulate a revision that predates the published metric
+    neighbours = client.nearest("layout:0", limit=3, metric="raw")
+
+    assert len(neighbours) == 3
+    assert all(-1.0001 <= item["cosine_similarity"] <= 1.0001 for item in neighbours)
+    with pytest.raises(LookupError):
+        client.nearest("layout:0", limit=3, metric="whitened")
