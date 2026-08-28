@@ -30,6 +30,7 @@ def test_transmon_cross_export_roundtrips_qgeometry_and_orders_ports(tmp_path):
     from squadds.layouts.embeddings import rasterize_functional_shape
     from squadds.layouts.geometry_v2 import read_layer_geometry
     from squadds.layouts.qmetal_gds import (
+        GROUND_DOMAIN_PADDING_UM,
         export_qgeometry_gds,
         minimum_ground_clearance_um,
         transmon_cross_port_markers,
@@ -60,7 +61,7 @@ def test_transmon_cross_export_roundtrips_qgeometry_and_orders_ports(tmp_path):
     report = validate_ported_gds(design, path, markers, minimum_ground_clearance_um=clearance)
     assert report["valid"] is True
     assert report["ground_hole_count"] == 1
-    assert report["ground_scale"] == pytest.approx(5.8)
+    assert report["ground_padding_um"] == pytest.approx(GROUND_DOMAIN_PADDING_UM, rel=0.05)
     assert len(set(report["port_component_assignments"])) == 2
     assert report["port_conductor_distances_um"] == [0.0, 0.0]
     assert report["port_ground_distances_um"] == [0.0, 0.0]
@@ -100,6 +101,7 @@ def test_capn_export_includes_every_metal_path_ground_and_two_ports(tmp_path):
 
     from squadds.layouts.geometry_v2 import read_layer_geometry
     from squadds.layouts.qmetal_gds import (
+        GROUND_DOMAIN_PADDING_UM,
         capn_interdigital_tee_port_markers,
         export_qgeometry_gds,
         minimum_ground_clearance_um,
@@ -124,7 +126,7 @@ def test_capn_export_includes_every_metal_path_ground_and_two_ports(tmp_path):
     assert report["signal_component_count"] == 2
     assert len(set(report["port_component_assignments"])) == 2
     assert report["ground_hole_count"] == 1
-    assert report["ground_scale"] == pytest.approx(5.8)
+    assert report["ground_padding_um"] == pytest.approx(GROUND_DOMAIN_PADDING_UM, rel=0.05)
     assert report["port_ground_distances_um"] == [0.0, 0.0]
     assert set(read_layer_geometry(path)) == {(1, 0), (1, 10), (2, 0), (3, 0)}
 

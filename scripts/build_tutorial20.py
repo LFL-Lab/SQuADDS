@@ -58,26 +58,26 @@ HELDOUT_READING = """
 
 This is the strictest test in the SQuADDS tutorials. It is run here on the
 **unified** layout release, in which all three families share one convention: a
-ground plane sized to 5.8x the conductor extent, the etch expressed as a single
+ground plane at a fixed 169 um per-side margin, the etch expressed as a single
 hole in that plane rather than as its own layer, and two ordered ports that
 bridge the moat from each terminal to ground.
 
 | held out | v0 | v2 | v2 geometry only |
 | --- | ---: | ---: | ---: |
-| `CapNInterdigitalTee` | -48.21 | **+0.817** | +0.245 |
-| `GeneralizedCapNInterdigital` | -8.69 | **-0.031** | -1.674 |
-| `TransmonCross` | -13.14 | -5.618 | -3.322 |
+| `CapNInterdigitalTee` | -48.21 | **+0.824** | +0.125 |
+| `GeneralizedCapNInterdigital` | -8.69 | **-0.001** | -1.568 |
+| `TransmonCross` | -13.14 | -5.385 | -3.538 |
 
-**Holding out `CapNInterdigitalTee` works**, at +0.817 with no labels from it at
+**Holding out `CapNInterdigitalTee` works**, at +0.824 with no labels from it at
 all, where v0 gives -48.2 and the parameter baseline -106.3.
 
-**Holding out `GeneralizedCapNInterdigital` is now break-even** at -0.031, which
+**Holding out `GeneralizedCapNInterdigital` is now exactly break-even** at -0.001, which
 is the accuracy of predicting the mean. That is not a success, but it is a large
 repair: on the intermediate release, where CapN carried a 9 mm ground plane and
 TransmonCross had none, this rotation read **-3.998**. Giving all three families
-one reference frame recovered almost all of it.
+one reference frame recovered all of it.
 
-**`TransmonCross` remains the hard rotation** at -5.618. It improved from -6.149
+**`TransmonCross` remains the hard rotation** at -5.385. It improved from -6.149
 but is still far from usable, and it is the one family whose two terminals differ
 enormously in scale, a large cross against a small claw.
 
@@ -113,7 +113,7 @@ CONCLUSIONS = """
 ## 12. What this experiment establishes
 
 This run uses the **unified** layout release. All three families now share one
-convention: a ground plane sized to 5.8x the conductor extent and centred on it,
+convention: a ground plane at a fixed 169 um per-side margin and centred on it,
 the etch expressed as a single hole in that plane rather than as its own layer,
 and two ordered ports that bridge the moat from each terminal to ground. Only the
 `GeneralizedCapNInterdigital` rows come from the published sweep; the other two
@@ -128,10 +128,10 @@ were regenerated. Joining them is legitimate only because
 - Cross-family transfer into `CapNInterdigitalTee` is close to saturated: 13
   labeled designs reach macro R2 0.994, against 0.769 for v0 and 0.625 for the
   aligned parameter baseline.
-- Held-out `CapNInterdigitalTee` reaches **+0.817 with zero labels**.
-- On a class-balanced cohort **two of three rotations are positive**, at +0.559
-  and +0.534.
-- A brand-new component family needs roughly ten labels, reaching 0.944.
+- Held-out `CapNInterdigitalTee` reaches **+0.824 with zero labels**.
+- On a class-balanced cohort **two of three rotations are positive**, at +0.596
+  and +0.544.
+- A brand-new component family needs roughly ten labels, reaching 0.945.
 - The boundary-element physics proxy is the only block that predicts an unseen
   class with no labels at all, at **+0.661**, and it only does so once every
   family carries a correctly scaled ground plane.
@@ -139,12 +139,12 @@ were regenerated. Joining them is legitimate only because
   labels it lifts v2 from 0.629 to 0.894 and pushes v0 from 0.261 to -0.502.
 - Unifying the ground and port convention was worth a large repair. Held-out
   `GeneralizedCapNInterdigital` moved from -3.998 on the mismatched release to
-  -0.031, and averaged zero-shot from -2.58 to -0.667.
+  -0.001, and averaged zero-shot from -2.58 to -0.627.
 
 **Not established, and worth stating plainly**
 
-- **`TransmonCross` is still not predictable from the other two**, at -5.618 on
-  the full catalogue and -3.029 balanced. It is negative in both cohorts, so this
+- **`TransmonCross` is still not predictable from the other two**, at -5.385 on
+  the full catalogue and -2.961 balanced. It is negative in both cohorts, so this
   is not a class-size artefact. It is also the family whose two terminals differ
   most in scale, a large cross against a small claw, and the family with the
   lowest cross-family cosine, 0.044 against the generalized coupler.
@@ -286,13 +286,13 @@ BALANCED_READING = """
 
 | held out | v0 balanced | v2 balanced | v2 full catalogue |
 | --- | ---: | ---: | ---: |
-| `CapNInterdigitalTee` | -17.58 | **+0.559** | +0.817 |
-| `GeneralizedCapNInterdigital` | -7.66 | **+0.534** | -0.031 |
-| `TransmonCross` | -8.29 | -3.029 | -5.618 |
+| `CapNInterdigitalTee` | -17.58 | **+0.596** | +0.824 |
+| `GeneralizedCapNInterdigital` | -7.66 | **+0.544** | -0.001 |
+| `TransmonCross` | -8.29 | -2.961 | -5.385 |
 
 **On an equal-sized cohort, two of the three rotations are positive.** Balancing
-lifts the Generalized rotation from -0.031 to +0.534 and softens TransmonCross
-from -5.618 to -3.029, at the cost of some of the CapN margin. The full
+lifts the Generalized rotation from -0.001 to +0.544 and softens TransmonCross
+from -5.385 to -2.961, at the cost of some of the CapN margin. The full
 catalogue is dominated by 13,683 Generalized rows, so a head fit largely to one
 family transfers worse to the other two; equalizing removes that.
 
@@ -413,7 +413,7 @@ NEWCOMER_READING = """
 ### The practical answer
 
 **About ten labels.** With v2 and adaptation, five labeled designs from a
-completely unseen component family reach macro R2 **0.894**, ten reach **0.944**,
+completely unseen component family reach macro R2 **0.894**, ten reach **0.945**,
 and twenty-five reach 0.983. v0 needs roughly fifty to a hundred labels to reach
 what v2 reaches with five to ten.
 
@@ -423,7 +423,7 @@ the sharpest result in the notebook. At five labels, adaptation improves v2 from
 same splits, opposite signs.
 
 **Zero-shot is now nearly break-even rather than catastrophic.** Averaged over
-the three rotations the v2 foundation scores **-0.667** with no labels, against
+the three rotations the v2 foundation scores **-0.627** with no labels, against
 v0's -11.21; on the intermediate release the same figure was -2.58. Unifying the
 ground-plane convention is what moved it.
 
@@ -615,25 +615,49 @@ ROLE_COLORS = {"conductor": "#00798C", "etch": "#E9C46A", "port": "#D1495B", "do
 
 
 def build_gds_index():
-    \"\"\"Map design_id to a GDS file, preferring the port-complete regeneration.\"\"\"
+    \"\"\"Map design_id to a GDS source, preferring the port-complete regeneration.
+
+    Published files are resolved lazily through the hub rather than assumed to be
+    in a local snapshot, and any file that cannot be fetched is skipped instead of
+    aborting the notebook.  The layouts repository advertises more
+    GeneralizedCapNInterdigital artifacts than it actually stores.
+    \"\"\"
     index = {}
     published = pd.read_parquet(
         hf_hub_download("SQuADDS/SQuADDS_Layouts", "metadata/manifest.parquet", repo_type="dataset")
     )
-    root = Path(
-        hf_hub_download("SQuADDS/SQuADDS_Layouts", "metadata/manifest.parquet", repo_type="dataset")
-    ).parent.parent
     for row in published.itertuples():
-        index[row.design_id] = ("published", root / row.gds_path)
+        index[row.design_id] = ("published", row.gds_path)
     port_root = Path(PORT_COMPLETE_ROOT)
     manifest = port_root / "metadata/manifest.parquet"
     if manifest.is_file():
         for row in pd.read_parquet(manifest).itertuples():
-            index[row.design_id] = ("port-complete", port_root / row.gds_path)
+            index[row.design_id] = ("port-complete", str(port_root / row.gds_path))
     return index
 
 
 GDS_INDEX = build_gds_index()
+_RESOLVED = {}
+
+
+def resolve_gds(design_id):
+    \"\"\"Return (origin, path) for a design, or None when the file is unavailable.\"\"\"
+    if design_id in _RESOLVED:
+        return _RESOLVED[design_id]
+    entry = GDS_INDEX.get(design_id)
+    result = None
+    if entry is not None:
+        origin, location = entry
+        try:
+            if origin == "port-complete":
+                path = Path(location)
+                result = (origin, path) if path.is_file() else None
+            else:
+                result = (origin, Path(hf_hub_download("SQuADDS/SQuADDS_Layouts", location, repo_type="dataset")))
+        except Exception:  # noqa: BLE001 - advertised-but-absent artifacts are expected
+            result = None
+    _RESOLVED[design_id] = result
+    return result
 
 
 def polygon_traces(shape, name, color, *, opacity=0.75, show=True, paper="#FFFFFF"):
@@ -658,7 +682,10 @@ def polygon_traces(shape, name, color, *, opacity=0.75, show=True, paper="#FFFFF
 
 
 def role_traces(design_id, *, show_legend=False):
-    origin, path = GDS_INDEX[design_id]
+    resolved = resolve_gds(design_id)
+    if resolved is None:
+        return [], "unavailable", 0, 0
+    origin, path = resolved
     grouped = _role_geometry(read_layer_geometry(path), None)
     traces = []
     for role in ("domain", "etch", "conductor", "port"):
@@ -670,8 +697,13 @@ def role_traces(design_id, *, show_legend=False):
 
 representatives = {}
 for component in sorted(CLASSES):
-    subset = data[data.component_name == component]
-    representatives[component] = subset.iloc[len(subset) // 2]["design_id"]
+    subset = data[data.component_name == component].reset_index(drop=True)
+    order = [len(subset) // 2, *range(len(subset))]
+    for position in order:
+        candidate = subset.iloc[position]["design_id"]
+        if resolve_gds(candidate) is not None:
+            representatives[component] = candidate
+            break
 
 summary = []
 for component, design_id in representatives.items():
@@ -732,11 +764,20 @@ for i, first in enumerate(names):
         left, right = left[valid], right[valid]
         similarity = np.sum(UNIT[left] * UNIT[right], axis=1)
         mean_cosine[i, j] = mean_cosine[j, i] = float(similarity.mean())
-        best, worst = int(np.argmax(similarity)), int(np.argmin(similarity))
-        extremes[(first, second)] = {
-            "closest": (int(left[best]), int(right[best]), float(similarity[best])),
-            "farthest": (int(left[worst]), int(right[worst]), float(similarity[worst])),
-        }
+        # Walk inwards from each extreme until both endpoints can actually be
+        # drawn.  Only a handful of files are resolved, not the whole catalogue.
+        order = np.argsort(similarity)
+        entry = {}
+        for label, candidates in (("closest", order[::-1]), ("farthest", order)):
+            for position in candidates[:40]:
+                a, b = int(left[position]), int(right[position])
+                if resolve_gds(data.iloc[a]["design_id"]) and resolve_gds(data.iloc[b]["design_id"]):
+                    entry[label] = (a, b, float(similarity[position]))
+                    break
+            else:
+                position = int(candidates[0])
+                entry[label] = (int(left[position]), int(right[position]), float(similarity[position]))
+        extremes[(first, second)] = entry
 
 rows = []
 for (first, second), entry in extremes.items():

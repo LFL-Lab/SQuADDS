@@ -17,7 +17,15 @@ from typing import Any
 import numpy as np
 
 MM_TO_UM = 1000.0
-GROUND_DOMAIN_SCALE = 5.8
+#: Per-side ground-plane margin in micrometres.
+#:
+#: Measured from 120 published ``GeneralizedCapNInterdigital`` files, whose
+#: padding is essentially uncorrelated with conductor width (Pearson -0.10), so
+#: that sweep uses a fixed absolute margin rather than a multiple of the device.
+#: A proportional rule would place the ground plane furthest from the *largest*
+#: device, which is the opposite of what an absolutely anchored coupling
+#: spectrum needs.  169 um is the pooled median of the per-side paddings.
+GROUND_DOMAIN_PADDING_UM = 169.0
 PORT_LENGTH_UM = 2.0
 _BRIDGE_HALF_WIDTH_MM = 1e-6
 
@@ -273,7 +281,7 @@ def standardized_ground_geometry(
     markers: Iterable[PortMarker],
     *,
     minimum_clearance_um: float,
-    domain_scale: float = GROUND_DOMAIN_SCALE,
+    domain_padding_um: float = GROUND_DOMAIN_PADDING_UM,
 ) -> tuple[Any, Any]:
     """Return a centered dynamic ground and its single QMetal-derived hole.
 
@@ -304,10 +312,22 @@ def standardized_ground_geometry(
     left, bottom, right, top = conductor.bounds
     center_x = 0.5 * (left + right)
     center_y = 0.5 * (bottom + top)
-    side = float(domain_scale) * max(right - left, top - bottom)
-    if side <= 0:
+    padding_mm = float(domain_padding_um) / MM_TO_UM
+    if padding_mm <= 0 or max(right - left, top - bottom) <= 0:
         raise ValueError("Cannot size a ground plane around zero-span conductor geometry.")
-    half_side = side / 2
+    # A fixed per-side margin, matching the reference sweep.  The plane is square
+    # so the margin never depends on device orientation, and it must still clear
+    # the etch hole for devices whose subtractive geometry extends past the
+    # conductor bounds.
+    hole_left, hole_bottom, hole_right, hole_top = hole.bounds
+    half_side = padding_mm + 0.5 * max(right - left, top - bottom)
+    half_side = max(
+        half_side,
+        abs(hole_left - center_x),
+        abs(hole_right - center_x),
+        abs(hole_bottom - center_y),
+        abs(hole_top - center_y),
+    )
     domain = box(center_x - half_side, center_y - half_side, center_x + half_side, center_y + half_side)
     if not domain.contains(hole):
         raise ValueError("The dynamic ground domain does not contain the complete etch hole.")
@@ -406,7 +426,11 @@ def validate_ported_gds(
         expected = scale(expected_mm, xfact=MM_TO_UM, yfact=MM_TO_UM, origin=(0, 0))
         actual = geometry.get(key)
         if actual is None:
-            role_metrics[name] = {"expected_area_um2": float(expected.area), "actual_area_um2": 0.0, "xor_area_um2": float(expected.area)}
+            role_metrics[name] = {
+                "expected_area_um2": float(expected.area),
+                "actual_area_um2": 0.0,
+                "xor_area_um2": float(expected.area),
+            }
             checks[f"{name}_roundtrip"] = False
             continue
         xor_area = float(expected.symmetric_difference(actual).area)
@@ -427,9 +451,7 @@ def validate_ported_gds(
     expected_ground = scale(expected_ground_mm, xfact=MM_TO_UM, yfact=MM_TO_UM, origin=(0, 0))
     ground = geometry.get((1, 0))
     ground_xor = (
-        float(expected_ground.symmetric_difference(ground).area)
-        if ground is not None
-        else float(expected_ground.area)
+        float(expected_ground.symmetric_difference(ground).area) if ground is not None else float(expected_ground.area)
     )
     ground_tolerance = max(0.1, float(expected_ground.area) * 1e-7)
     role_metrics["ground"] = {
@@ -458,16 +480,20 @@ def validate_ported_gds(
         conductor_width = float(conductor.bounds[2] - conductor.bounds[0])
         conductor_height = float(conductor.bounds[3] - conductor.bounds[1])
         ground_aspect = ground_width / ground_height
-        ground_scale = max(ground_width, ground_height) / max(conductor_width, conductor_height)
+        # A fixed per-side margin, so validate the margin rather than a ratio.
+        ground_padding_um = 0.5 * (max(ground_width, ground_height) - max(conductor_width, conductor_height))
         ground_center_offset = [
             0.5 * (ground.bounds[0] + ground.bounds[2] - conductor.bounds[0] - conductor.bounds[2]),
             0.5 * (ground.bounds[1] + ground.bounds[3] - conductor.bounds[1] - conductor.bounds[3]),
         ]
     else:
-        ground_aspect = ground_scale = float("nan")
+        ground_aspect = ground_padding_um = float("nan")
         ground_center_offset = [float("nan"), float("nan")]
     checks["ground_aspect"] = 0.9 <= ground_aspect <= 2.0
-    checks["ground_scale"] = 4.2 <= ground_scale <= 8.0
+    # The published GeneralizedCapNInterdigital sweep spans 55 to 273 um per side;
+    # accept that band rather than a single value so the etch-clearance floor
+    # can enlarge the plane for devices with wide subtractive geometry.
+    checks["ground_padding"] = 50.0 <= ground_padding_um <= 400.0
     checks["ground_centered"] = max(abs(value) for value in ground_center_offset) <= 0.001
 
     checks["two_markers"] = len(markers) == 2 and all((marker.layer, marker.datatype) in geometry for marker in markers)
@@ -521,7 +547,7 @@ def validate_ported_gds(
         "port_conductor_distances_um": conductor_distances,
         "port_ground_distances_um": ground_distances,
         "ground_aspect": ground_aspect,
-        "ground_scale": ground_scale,
+        "ground_padding_um": ground_padding_um,
         "ground_center_offset_um": ground_center_offset,
         "ground_hole_count": len(ground_holes),
     }
