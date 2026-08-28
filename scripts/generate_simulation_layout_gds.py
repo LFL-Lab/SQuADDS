@@ -50,49 +50,12 @@ def _enable_qiskit_metal_pandas_compatibility() -> None:
         gpd.GeoDataFrame.append = gpd.GeoDataFrame._append  # type: ignore[attr-defined]
 
 
-def _each_polygon(geometry: Any):
-    """Yield polygonal leaves from a Shapely geometry."""
-    if geometry.is_empty:
-        return
-    if geometry.geom_type == "Polygon":
-        yield geometry
-    elif hasattr(geometry, "geoms"):
-        for child in geometry.geoms:
-            yield from _each_polygon(child)
-
-
-def _export_gds(design: Any, destination: Path) -> None:
-    """Write Qiskit Metal qgeometry without its simulation-domain ground plane."""
-    try:
-        import klayout.db as kdb
-    except ImportError as exc:
-        raise ImportError("GDS generation requires `uv sync --extra gds`.") from exc
-
-    layout = kdb.Layout()
-    layout.dbu = 0.001
-    top = layout.create_cell("TOP")
-    for table_name in ("poly", "path"):
-        table = design.qgeometry.tables[table_name]
-        for row in table.itertuples(index=False):
-            if row.helper:
-                continue
-            geometry = row.geometry
-            if table_name == "path":
-                geometry = geometry.buffer(float(row.width) / 2, cap_style="flat", join_style="round")
-            layer = layout.layer(int(row.layer), 11 if row.subtract else 10)
-            for polygon in _each_polygon(geometry):
-                points = [kdb.DPoint(float(x) * 1000, float(y) * 1000) for x, y in polygon.exterior.coords[:-1]]
-                if len(points) >= 3:
-                    top.shapes(layer).insert(kdb.DPolygon(points))
-    temporary = destination.with_suffix(".tmp.gds")
-    layout.write(str(temporary))
-    temporary.replace(destination)
-
-
 def export_row(kind: str, row: dict[str, Any], destination: Path) -> None:
     """Render one source row into an atomic GDS artifact."""
     _enable_qiskit_metal_pandas_compatibility()
     from qiskit_metal import designs
+
+    from squadds.layouts.qmetal_gds import export_qgeometry_gds, transmon_cross_port_markers
 
     options = row["design"]["design_options"]
     design = designs.DesignPlanar()
@@ -107,10 +70,11 @@ def export_row(kind: str, row: dict[str, Any], destination: Path) -> None:
     elif kind == "transmon-cross":
         from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
 
-        TransmonCross(design, "qubit", options=options)
+        component = TransmonCross(design, "qubit", options=options)
+        markers = transmon_cross_port_markers(component, design)
     else:
         raise ValueError(f"Unsupported simulation layout kind: {kind}")
-    _export_gds(design, destination)
+    export_qgeometry_gds(design, destination, markers=markers if kind == "transmon-cross" else ())
 
 
 def _worker(kind: str, row: dict[str, Any], destination: str) -> tuple[str, str | None]:

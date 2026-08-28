@@ -25,6 +25,11 @@ from .geometry_v2 import (
     encode,
     universal_v2_schema,
 )
+from .layer_semantics import (
+    LAYER_SEMANTICS,
+    LAYER_SEMANTICS_SCHEMA_VERSION,
+    write_layer_semantics,
+)
 from .manifest import (
     DEFAULT_LAYOUT_REPOSITORY,
     build_layout_record,
@@ -78,6 +83,8 @@ __all__ = [
     "LayoutClient",
     "LayoutEmbeddingClient",
     "LayoutReference",
+    "LAYER_SEMANTICS",
+    "LAYER_SEMANTICS_SCHEMA_VERSION",
     "PartitionTransferStudy",
     "SourceFeatureProjector",
     "build_layout_record",
@@ -111,6 +118,7 @@ __all__ = [
     "parse_gds_polygons",
     "parse_gds_summary",
     "write_manifest",
+    "write_layer_semantics",
     "write_universal_embedding_dataset",
     "universal_embedding_schema",
 ]

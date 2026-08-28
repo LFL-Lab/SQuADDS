@@ -10,7 +10,7 @@ from pathlib import Path
 
 from huggingface_hub import hf_hub_download
 
-from squadds.layouts import build_layout_record, write_manifest
+from squadds.layouts import build_layout_record, write_layer_semantics, write_manifest
 
 COMPONENT_NAME = "GeneralizedCapNInterdigital"
 SIMULATION_CONFIG = "coupler-GeneralizedCapNInterdigital-cap_matrix"
@@ -57,6 +57,7 @@ def build_dataset(
                 )
             )
     write_manifest(records, output_dir / "metadata" / "manifest.parquet")
+    write_layer_semantics(output_dir / "metadata" / "layer-semantics-v1.json")
     return len(records), skipped
 
 

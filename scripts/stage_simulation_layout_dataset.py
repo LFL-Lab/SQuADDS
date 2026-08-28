@@ -12,7 +12,7 @@ import pandas as pd
 from huggingface_hub import hf_hub_download
 
 from scripts.generate_simulation_layout_gds import SPECS
-from squadds.layouts import build_geometry_features, build_layout_record, write_manifest
+from squadds.layouts import build_geometry_features, build_layout_record, write_layer_semantics, write_manifest
 
 RELEASE_SPECS = {
     "cavity-claw": {
@@ -73,6 +73,7 @@ def stage(
         ] + records
     manifest_path = output_root / "metadata" / "manifest.parquet"
     write_manifest(records, manifest_path)
+    write_layer_semantics(output_root / "metadata" / "layer-semantics-v1.json")
     build_geometry_features(pd.read_parquet(manifest_path)).to_parquet(
         output_root / "metadata" / "geometry-features-v1.parquet", index=False
     )

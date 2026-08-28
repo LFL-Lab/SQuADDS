@@ -8,16 +8,22 @@ import json
 import shutil
 from pathlib import Path
 
+import pandas as pd
 from huggingface_hub import hf_hub_download
 
-from squadds.layouts import build_layout_record, write_manifest
+from squadds.layouts import build_geometry_features, build_layout_record, write_layer_semantics, write_manifest
 
 COMPONENT_NAME = "CapNInterdigitalTee"
 SIMULATION_CONFIG = "coupler-CapNInterdigitalTee-cap_matrix"
 CAMPAIGN = "generated_from_cap_matrix"
 
 
-def build_dataset(source_rows: list[dict], gds_dir: Path, output_dir: Path) -> int:
+def build_dataset(
+    source_rows: list[dict],
+    gds_dir: Path,
+    output_dir: Path,
+    existing_manifest: Path | None = None,
+) -> int:
     """Stage one deterministic GDS per source row, failing on a broken pairing."""
     records = []
     for index, row in enumerate(source_rows):
@@ -40,8 +46,18 @@ def build_dataset(source_rows: list[dict], gds_dir: Path, output_dir: Path) -> i
                 campaign=CAMPAIGN,
             )
         )
-    write_manifest(records, output_dir / "metadata" / "manifest.parquet")
-    return len(records)
+    new_count = len(records)
+    if existing_manifest is not None:
+        prior_records = pd.read_parquet(existing_manifest).to_dict(orient="records")
+        new_paths = {record["gds_path"] for record in records}
+        records = [record for record in prior_records if record["gds_path"] not in new_paths] + records
+    manifest_path = output_dir / "metadata" / "manifest.parquet"
+    write_manifest(records, manifest_path)
+    write_layer_semantics(output_dir / "metadata" / "layer-semantics-v1.json")
+    build_geometry_features(pd.read_parquet(manifest_path)).to_parquet(
+        output_dir / "metadata" / "geometry-features-v1.parquet", index=False
+    )
+    return new_count
 
 
 def main() -> None:
@@ -49,6 +65,7 @@ def main() -> None:
     parser.add_argument("output_dir", type=Path)
     parser.add_argument("--gds-dir", type=Path, required=True)
     parser.add_argument("--simulation-json", type=Path)
+    parser.add_argument("--existing-manifest", type=Path)
     args = parser.parse_args()
 
     simulation_json = args.simulation_json or Path(
@@ -58,7 +75,12 @@ def main() -> None:
             filename=f"{SIMULATION_CONFIG}.json",
         )
     )
-    count = build_dataset(json.loads(simulation_json.read_text()), args.gds_dir, args.output_dir)
+    count = build_dataset(
+        json.loads(simulation_json.read_text()),
+        args.gds_dir,
+        args.output_dir,
+        args.existing_manifest,
+    )
     print(f"Staged {count} {COMPONENT_NAME} GDS files.")
 
 

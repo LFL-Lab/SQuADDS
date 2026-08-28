@@ -11,19 +11,27 @@ from huggingface_hub import hf_hub_download
 from qiskit_metal import designs
 from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import CapNInterdigitalTee
 
+from scripts.generate_simulation_layout_gds import _enable_qiskit_metal_pandas_compatibility
+from squadds.layouts.qmetal_gds import (
+    capn_interdigital_tee_port_markers,
+    export_qgeometry_gds,
+)
+
 DEFAULT_DATASET = "SQuADDS/SQuADDS_DB"
 DEFAULT_FILENAME = "coupler-CapNInterdigitalTee-cap_matrix.json"
 
 
 def export_row(row: dict, output_path: Path) -> None:
     """Build one legacy coupler and write it atomically as a GDS artifact."""
+    _enable_qiskit_metal_pandas_compatibility()
     design = designs.DesignPlanar()
-    CapNInterdigitalTee(design, "cplr", options=row["design"]["design_options"])
-    design.renderers.gds.options["cheese"]["view_in_file"]["main"][1] = False
-    design.renderers.gds.options["no_cheese"]["view_in_file"]["main"][1] = False
-    temporary_path = output_path.with_suffix(".tmp.gds")
-    design.renderers.gds.export_to_gds(str(temporary_path))
-    temporary_path.replace(output_path)
+    component = CapNInterdigitalTee(design, "cplr", options=row["design"]["design_options"])
+    export_qgeometry_gds(
+        design,
+        output_path,
+        markers=capn_interdigital_tee_port_markers(component),
+        include_ground_domain=True,
+    )
 
 
 def generate(output_dir: Path, source_json: Path, limit: int | None = None, overwrite: bool = False) -> tuple[int, int]:
