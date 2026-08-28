@@ -5,6 +5,7 @@ from .embeddings import (
     EMBEDDING_DIMENSIONS,
     EMBEDDING_FILENAMES,
     EMBEDDING_SCHEMA_FILENAMES,
+    PORT_COMPLETE_STATIC_EMBEDDING_MODEL,
     SHAPE_SIZE,
     STATIC_EMBEDDING_MODEL,
     LayoutEmbeddingClient,
@@ -28,6 +29,9 @@ from .geometry_v2 import (
 from .layer_semantics import (
     LAYER_SEMANTICS,
     LAYER_SEMANTICS_SCHEMA_VERSION,
+    PORT_COMPLETE_ROLE_PROFILE,
+    PUBLISHED_ROLE_PROFILE,
+    functional_layer_roles,
     write_layer_semantics,
 )
 from .manifest import (
@@ -85,6 +89,9 @@ __all__ = [
     "LayoutReference",
     "LAYER_SEMANTICS",
     "LAYER_SEMANTICS_SCHEMA_VERSION",
+    "PORT_COMPLETE_ROLE_PROFILE",
+    "PORT_COMPLETE_STATIC_EMBEDDING_MODEL",
+    "PUBLISHED_ROLE_PROFILE",
     "PartitionTransferStudy",
     "SourceFeatureProjector",
     "build_layout_record",
@@ -108,6 +115,7 @@ __all__ = [
     "mean_pairwise_cosine_similarity",
     "infer_layout_component_name",
     "geometry_feature_record",
+    "functional_layer_roles",
     "parameter_sum",
     "parameter_channels",
     "rasterize_functional_shape",

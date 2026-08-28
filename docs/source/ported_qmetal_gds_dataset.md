@@ -26,6 +26,31 @@ renderer does not retain every positive CPW path on datatype 10 under the
 published SQuADDS role mapping. Regeneration corrects that legacy artifact while
 retaining the configured 9 mm by 6 mm simulation-domain ground plane.
 
+## Legacy v0 compatibility
+
+Published `static-shape-v0` intentionally remains frozen: its historical
+family-specific lookup ignores TransmonCross etch and the new Transmon/CapN
+ports. Use the explicit `layer-semantics-v1.2` profile to build the separately
+named `static-shape-v0-port-complete` variant:
+
+```python
+from squadds.layouts import PORT_COMPLETE_ROLE_PROFILE, build_static_embeddings
+
+embeddings, schema = build_static_embeddings(
+    manifest,
+    design_options_by_id,
+    artifact_resolver,
+    role_profile=PORT_COMPLETE_ROLE_PROFILE,
+)
+assert schema["model"] == "static-shape-v0-port-complete"
+```
+
+This profile consumes TransmonCross `(1,11)` as etch and `(2,0)` / `(3,0)` as
+ports. The default remains the published v0 behavior, so existing embeddings
+and comparisons do not silently change. Universal v1 can use
+`functional_layer_roles(component_name)` through its existing `layer_roles`
+argument; universal v2 already reads the versioned roles directly.
+
 ## Generate
 
 ```bash

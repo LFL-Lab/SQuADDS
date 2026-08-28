@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 
 LAYER_SEMANTICS_SCHEMA_VERSION = "1.2.0"
+PUBLISHED_ROLE_PROFILE = "published-v0"
+PORT_COMPLETE_ROLE_PROFILE = "layer-semantics-v1.2"
 
 LAYER_SEMANTICS = {
     "schema_version": LAYER_SEMANTICS_SCHEMA_VERSION,
@@ -36,6 +38,35 @@ LAYER_SEMANTICS = {
         ],
     },
 }
+
+_FUNCTIONAL_SEMANTIC_ROLES = {
+    "signal_conductors": "conductor",
+    "etch_cutout": "etch",
+    "north_port": "port",
+    "south_port": "port",
+    "prime_top_port": "port",
+    "second_bottom_port": "port",
+    "cross_junction_port": "port",
+    "readout_claw_port": "port",
+}
+
+
+def functional_layer_roles(component_name: str) -> dict[tuple[int, int], str]:
+    """Return conductor/etch/port roles from the versioned dataset contract.
+
+    The simulation-domain ground is deliberately omitted because v0/v1 crop
+    and rasterize only functional component geometry.
+    """
+    try:
+        entries = LAYER_SEMANTICS["components"][component_name]
+    except KeyError as exc:
+        choices = ", ".join(sorted(LAYER_SEMANTICS["components"]))
+        raise ValueError(f"No layer semantics for {component_name!r}; choose one of: {choices}.") from exc
+    return {
+        (int(entry["layer"]), int(entry["datatype"])): _FUNCTIONAL_SEMANTIC_ROLES[entry["semantic"]]
+        for entry in entries
+        if entry["semantic"] in _FUNCTIONAL_SEMANTIC_ROLES
+    }
 
 
 def write_layer_semantics(path: Path) -> None:

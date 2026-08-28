@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
-from squadds.layouts.layer_semantics import LAYER_SEMANTICS, LAYER_SEMANTICS_SCHEMA_VERSION
+from squadds.layouts.layer_semantics import (
+    LAYER_SEMANTICS,
+    LAYER_SEMANTICS_SCHEMA_VERSION,
+    PORT_COMPLETE_ROLE_PROFILE,
+    PUBLISHED_ROLE_PROFILE,
+    functional_layer_roles,
+)
 
 
 def _metal():
@@ -20,6 +27,7 @@ def test_transmon_cross_export_roundtrips_qgeometry_and_orders_ports(tmp_path):
     designs = _metal()
     from qiskit_metal.qlibrary.qubits.transmon_cross import TransmonCross
 
+    from squadds.layouts.embeddings import rasterize_functional_shape
     from squadds.layouts.geometry_v2 import read_layer_geometry
     from squadds.layouts.qmetal_gds import export_qgeometry_gds, transmon_cross_port_markers, validate_ported_gds
 
@@ -39,6 +47,24 @@ def test_transmon_cross_export_roundtrips_qgeometry_and_orders_ports(tmp_path):
     ]
     assert validate_ported_gds(design, path, markers)["valid"] is True
     assert set(read_layer_geometry(path)) == {(1, 10), (1, 11), (2, 0), (3, 0)}
+
+    published, _, published_metadata = rasterize_functional_shape(
+        path,
+        "TransmonCross",
+        role_profile=PUBLISHED_ROLE_PROFILE,
+    )
+    port_complete, _, port_complete_metadata = rasterize_functional_shape(
+        path,
+        "TransmonCross",
+        role_profile=PORT_COMPLETE_ROLE_PROFILE,
+    )
+    assert {entry["role"] for entry in published_metadata["functional_layers"]} == {"conductor"}
+    assert {entry["role"] for entry in port_complete_metadata["functional_layers"]} == {
+        "conductor",
+        "etch",
+        "port",
+    }
+    assert not np.array_equal(published, port_complete)
 
     repeat = tmp_path / "transmon-repeat.gds"
     export_qgeometry_gds(design, repeat, markers=markers)
@@ -70,6 +96,8 @@ def test_capn_export_includes_every_metal_path_ground_and_two_ports(tmp_path):
 
 
 def test_layer_semantics_declares_ordered_ports_for_both_retrofits():
+    from squadds.layouts.embeddings import static_embedding_schema
+
     assert LAYER_SEMANTICS_SCHEMA_VERSION == "1.2.0"
     components = LAYER_SEMANTICS["components"]
     assert [entry["semantic"] for entry in components["TransmonCross"][-2:]] == [
@@ -80,3 +108,18 @@ def test_layer_semantics_declares_ordered_ports_for_both_retrofits():
         "prime_top_port",
         "second_bottom_port",
     ]
+    assert functional_layer_roles("TransmonCross") == {
+        (1, 10): "conductor",
+        (1, 11): "etch",
+        (2, 0): "port",
+        (3, 0): "port",
+    }
+    schema = static_embedding_schema(
+        0.0,
+        1.0,
+        np.zeros(10),
+        np.ones(10),
+        role_profile=PORT_COMPLETE_ROLE_PROFILE,
+    )
+    assert schema["model"] == "static-shape-v0-port-complete"
+    assert schema["shape_rasterization"]["role_profile"] == PORT_COMPLETE_ROLE_PROFILE

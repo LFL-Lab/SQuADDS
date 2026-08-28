@@ -14,11 +14,14 @@ import numpy as np
 import pandas as pd
 from huggingface_hub import hf_hub_download
 
+from .layer_semantics import PORT_COMPLETE_ROLE_PROFILE, PUBLISHED_ROLE_PROFILE, functional_layer_roles
 from .manifest import parse_gds_polygons
 
 DEFAULT_EMBEDDING_REPOSITORY = "SQuADDS/SQuADDS_Layout_Embeddings"
 STATIC_EMBEDDING_MODEL = "static-shape-v0"
 STATIC_EMBEDDING_SCHEMA_VERSION = "0.1.0"
+PORT_COMPLETE_STATIC_EMBEDDING_MODEL = "static-shape-v0-port-complete"
+PORT_COMPLETE_STATIC_EMBEDDING_SCHEMA_VERSION = "0.1.0"
 EMBEDDING_FILENAMES = {
     "v0": "metadata/static-embedding-v0.parquet",
     "v1": "metadata/universal-geometry-v1.parquet",
@@ -94,6 +97,25 @@ def _functional_role(component_name: str, layer: int, datatype: int) -> str | No
     return None
 
 
+def _profiled_functional_role(component_name: str, layer: int, datatype: int, role_profile: str) -> str | None:
+    """Resolve a role without changing the frozen published-v0 behavior."""
+    if role_profile == PUBLISHED_ROLE_PROFILE:
+        return _functional_role(component_name, layer, datatype)
+    if role_profile == PORT_COMPLETE_ROLE_PROFILE:
+        return functional_layer_roles(component_name).get((layer, datatype))
+    choices = ", ".join((PUBLISHED_ROLE_PROFILE, PORT_COMPLETE_ROLE_PROFILE))
+    raise ValueError(f"Unknown functional role profile {role_profile!r}; choose one of: {choices}.")
+
+
+def _static_embedding_identity(role_profile: str) -> tuple[str, str]:
+    if role_profile == PUBLISHED_ROLE_PROFILE:
+        return STATIC_EMBEDDING_MODEL, STATIC_EMBEDDING_SCHEMA_VERSION
+    if role_profile == PORT_COMPLETE_ROLE_PROFILE:
+        return PORT_COMPLETE_STATIC_EMBEDDING_MODEL, PORT_COMPLETE_STATIC_EMBEDDING_SCHEMA_VERSION
+    _profiled_functional_role("TransmonCross", 1, 10, role_profile)
+    raise AssertionError("unreachable")
+
+
 def _polygon_perimeter(points: list[dict[str, float]]) -> float:
     perimeter = 0.0
     for first, second in zip(points, points[1:] + points[:1]):
@@ -139,13 +161,20 @@ def rasterize_functional_shape(
     path: str | Path,
     component_name: str,
     size: int = SHAPE_SIZE,
+    *,
+    role_profile: str = PUBLISHED_ROLE_PROFILE,
 ) -> tuple[np.ndarray, list[float], dict[str, Any]]:
     """Rasterize functional geometry and calculate the ten v0 moments."""
     polygons = parse_gds_polygons(path)
     by_role: dict[str, list[dict[str, Any]]] = {"conductor": [], "etch": [], "port": []}
     functional = []
     for polygon in polygons:
-        role = _functional_role(component_name, polygon["layer"], polygon["datatype"])
+        role = _profiled_functional_role(
+            component_name,
+            polygon["layer"],
+            polygon["datatype"],
+            role_profile,
+        )
         if role:
             by_role[role].append(polygon)
             functional.append(polygon)
@@ -195,6 +224,7 @@ def rasterize_functional_shape(
         eccentricity,
     ]
     metadata = {
+        "role_profile": role_profile,
         "functional_bounds_um": {"left": left, "bottom": bottom, "right": right, "top": top},
         "functional_layers": [
             {"layer": polygon["layer"], "datatype": polygon["datatype"], "role": role}
@@ -206,12 +236,18 @@ def rasterize_functional_shape(
 
 
 def static_embedding_schema(
-    parameter_mean: float, parameter_std: float, moment_mean: np.ndarray, moment_std: np.ndarray
+    parameter_mean: float,
+    parameter_std: float,
+    moment_mean: np.ndarray,
+    moment_std: np.ndarray,
+    *,
+    role_profile: str = PUBLISHED_ROLE_PROFILE,
 ) -> dict[str, Any]:
     """Describe every dimension and normalization operation in static-shape-v0."""
+    embedding_model, schema_version = _static_embedding_identity(role_profile)
     return {
-        "model": STATIC_EMBEDDING_MODEL,
-        "embedding_schema_version": STATIC_EMBEDDING_SCHEMA_VERSION,
+        "model": embedding_model,
+        "embedding_schema_version": schema_version,
         "dimensions": EMBEDDING_DIMENSIONS,
         "blocks": {
             "parameter_sum": {"offset": 0, "dimensions": 1},
@@ -228,6 +264,7 @@ def static_embedding_schema(
             },
         },
         "shape_rasterization": {
+            "role_profile": role_profile,
             "resolution": [SHAPE_SIZE, SHAPE_SIZE],
             "crop": "functional geometry bounds, aspect preserving, centered with 4-pixel margin",
             "supersampling": 4,
@@ -251,6 +288,8 @@ def build_static_embeddings(
     manifest: pd.DataFrame,
     design_options_by_id: dict[str, dict[str, Any]],
     artifact_resolver: Callable[[dict[str, Any]], Path],
+    *,
+    role_profile: str = PUBLISHED_ROLE_PROFILE,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Build screenshot-specified static v0 embeddings for all manifest rows."""
     raw_records = []
@@ -259,7 +298,11 @@ def build_static_embeddings(
         if design_id not in design_options_by_id:
             raise LookupError(f"No design options found for {design_id!r}.")
         path = artifact_resolver(record)
-        bitmap, moments, shape_metadata = rasterize_functional_shape(path, record["component_name"])
+        bitmap, moments, shape_metadata = rasterize_functional_shape(
+            path,
+            record["component_name"],
+            role_profile=role_profile,
+        )
         raw_records.append(
             {
                 "record": record,
@@ -277,7 +320,14 @@ def build_static_embeddings(
     moment_mean = moment_values.mean(axis=0)
     moment_std = moment_values.std(axis=0)
     moment_std[moment_std == 0] = 1.0
-    schema = static_embedding_schema(parameter_mean, parameter_std, moment_mean, moment_std)
+    schema = static_embedding_schema(
+        parameter_mean,
+        parameter_std,
+        moment_mean,
+        moment_std,
+        role_profile=role_profile,
+    )
+    embedding_model, schema_version = _static_embedding_identity(role_profile)
 
     embeddings = []
     for item in raw_records:
@@ -302,8 +352,9 @@ def build_static_embeddings(
                 "design_id": record.get("design_id"),
                 "component_name": record["component_name"],
                 "source_id": record.get("source_id"),
-                "embedding_model": STATIC_EMBEDDING_MODEL,
-                "embedding_schema_version": STATIC_EMBEDDING_SCHEMA_VERSION,
+                "embedding_model": embedding_model,
+                "embedding_schema_version": schema_version,
+                "role_profile": role_profile,
                 "parameter_sum": item["parameter_sum"],
                 "geometric_moments": item["moments"].astype(np.float32).tolist(),
                 "shape_bitmap_sha256": hashlib.sha256(item["bitmap"].astype(np.float32).tobytes()).hexdigest(),
@@ -501,6 +552,8 @@ def write_static_embedding_dataset(
     design_options_by_id: dict[str, dict[str, Any]],
     artifact_resolver: Callable[[dict[str, Any]], Path],
     output_dir: str | Path,
+    *,
+    role_profile: str = PUBLISHED_ROLE_PROFILE,
 ) -> tuple[int, int]:
     """Write static v0 vectors and schema JSON for a Hugging Face release.
 
@@ -525,7 +578,11 @@ def write_static_embedding_dataset(
         design_id = record.get("design_id")
         if design_id not in design_options_by_id:
             raise LookupError(f"No design options found for {design_id!r}.")
-        _, moments, _ = rasterize_functional_shape(artifact_resolver(record), record["component_name"])
+        _, moments, _ = rasterize_functional_shape(
+            artifact_resolver(record),
+            record["component_name"],
+            role_profile=role_profile,
+        )
         parameter_values.append(parameter_sum(design_options_by_id[design_id]))
         moment_values.append(moments)
 
@@ -536,16 +593,26 @@ def write_static_embedding_dataset(
     moment_mean = moment_array.mean(axis=0)
     moment_std = moment_array.std(axis=0)
     moment_std[moment_std == 0] = 1.0
-    schema = static_embedding_schema(parameter_mean, parameter_std, moment_mean, moment_std)
+    schema = static_embedding_schema(
+        parameter_mean,
+        parameter_std,
+        moment_mean,
+        moment_std,
+        role_profile=role_profile,
+    )
+    embedding_model, schema_version = _static_embedding_identity(role_profile)
 
-    embedding_path = metadata / "static-embedding-v0.parquet"
+    stem = "static-embedding-v0" if role_profile == PUBLISHED_ROLE_PROFILE else "static-embedding-v0-port-complete"
+    embedding_path = metadata / f"{stem}.parquet"
     writer = None
     batch_size = 64
     for start in range(0, len(records), batch_size):
         batch = []
         for index, record in enumerate(records[start : start + batch_size], start=start):
             bitmap, moments, shape_metadata = rasterize_functional_shape(
-                artifact_resolver(record), record["component_name"]
+                artifact_resolver(record),
+                record["component_name"],
+                role_profile=role_profile,
             )
             parameter_block = np.asarray([math.tanh((parameter_values[index] - parameter_mean) / parameter_std)])
             moment_block = np.clip((np.asarray(moments) - moment_mean) / moment_std, -5.0, 5.0)
@@ -567,8 +634,9 @@ def write_static_embedding_dataset(
                     "design_id": record.get("design_id"),
                     "component_name": record["component_name"],
                     "source_id": record.get("source_id"),
-                    "embedding_model": STATIC_EMBEDDING_MODEL,
-                    "embedding_schema_version": STATIC_EMBEDDING_SCHEMA_VERSION,
+                    "embedding_model": embedding_model,
+                    "embedding_schema_version": schema_version,
+                    "role_profile": role_profile,
                     "parameter_sum": parameter_values[index],
                     "geometric_moments": np.asarray(moments, dtype=np.float32).tolist(),
                     "shape_bitmap_sha256": hashlib.sha256(bitmap.reshape(-1).astype(np.float32).tobytes()).hexdigest(),
@@ -583,5 +651,5 @@ def write_static_embedding_dataset(
     if writer is None:
         raise ValueError("Cannot write an empty embedding catalogue.")
     writer.close()
-    (metadata / "static-embedding-v0.schema.json").write_text(json.dumps(schema, indent=2) + "\n")
+    (metadata / f"{stem}.schema.json").write_text(json.dumps(schema, indent=2) + "\n")
     return len(records), schema["dimensions"]
