@@ -149,6 +149,28 @@ print(f"simulated C(N,S) = {MEASURED['north_to_south']:.4f} fF")
     ),
     markdown(
         """
+### The pipeline at a glance
+
+Every step below is a measurement with an input, an operation, and a fixed slice
+of the output vector. Nothing is fitted and nothing depends on any other design.
+
+| # | Step | Reads | Produces | Coordinates |
+| --- | --- | --- | --- | --- |
+| 1 | Layer roles | `(layer, datatype)` pairs | conductor / etch / port / domain sets | - |
+| 2 | Terminals | conductor set | ordered list of connected components | - |
+| 3 | Physical metrics | terminals, raster | 48 named scalars in um | 0-47 |
+| 4 | Coupling spectrum | boundary samples, exact distances | facing length per separation bin | 48-239 |
+| 5 | Shape spectrum | raster FFT, contour FFT | correlations, widths, harmonics | 240-367 |
+| 6 | Parameter statistics | the option mapping | dimension-typed order statistics | 368-463 |
+| 7 | Physics proxy | boundary-element solve, dilation | 2D capacitance matrix, topology | 464-511 |
+
+Follow the coordinate column. By the end of section 8 every one of the 512 slots
+will have been accounted for, and section 8 replays the whole thing as a single
+interactive figure.
+"""
+    ),
+    markdown(
+        """
 ## 1. The input contract
 
 v2 takes exactly two things: a GDS file whose `(layer, datatype)` pairs follow
@@ -1046,8 +1068,169 @@ exactly where a textbook says it should. The right panel is the topology
 signature: the two terminals stay separate until the dilation radius reaches
 half the finger gap, then merge into one component. The radius at which that
 happens **is** the gap, read off without ever naming it.
+"""
+    ),
+    markdown(
+        """
+## 8. The whole algorithm in one interactive figure
 
-## 8. Assembling the vector
+Every piece has now been built separately. This figure replays them in order on
+the same capacitor. Drag the slider: the left panel shows what the encoder is
+looking at during that step, and the right panel shows which of the 512
+coordinates that step writes, with every other coordinate greyed out.
+
+Read it as the answer to "what does `encode` actually do". Each step consumes a
+different view of the same geometry and writes a disjoint slice of the output.
+"""
+    ),
+    code(
+        """
+# %% hide input
+BLOCKS = [
+    ("1-2. roles and terminals", None, None, "#C7CDD4"),
+    ("3. physical metrics", 0, METRIC_BLOCK_SIZE, "#F4A261"),
+    ("4. coupling spectrum", METRIC_BLOCK_SIZE, METRIC_BLOCK_SIZE + COUPLING_BLOCK_SIZE, "#00798C"),
+    ("5. shape spectrum", METRIC_BLOCK_SIZE + COUPLING_BLOCK_SIZE,
+     METRIC_BLOCK_SIZE + COUPLING_BLOCK_SIZE + SHAPE_BLOCK_SIZE, "#6A4C93"),
+    ("6. parameter statistics", METRIC_BLOCK_SIZE + COUPLING_BLOCK_SIZE + SHAPE_BLOCK_SIZE,
+     V2_DIMENSIONS - PHYSICS_BLOCK_SIZE, "#E9C46A"),
+    ("7. physics proxy", V2_DIMENSIONS - PHYSICS_BLOCK_SIZE, V2_DIMENSIONS, "#2A9D8F"),
+]
+
+walk = make_subplots(
+    rows=1, cols=2,
+    subplot_titles=["what the encoder looks at", "which coordinates it writes"],
+    horizontal_spacing=0.08, column_widths=[0.42, 0.58],
+)
+left_counts = []
+
+
+def add_left(traces):
+    for trace in traces:
+        walk.add_trace(trace, row=1, col=1)
+    left_counts.append(len(traces))
+
+
+step_traces = []
+for index, terminal in enumerate(terminals):
+    step_traces.extend(polygon_traces(terminal, f"terminal {index}", TERMINAL_COLORS[index], show=False))
+for _, port in grouped["port"]:
+    step_traces.extend(polygon_traces(port, "port", ROLE_COLORS["port"], opacity=1.0, show=False))
+add_left(step_traces)
+
+add_left([
+    go.Heatmap(
+        z=np.where(conductor_mask, interior, np.nan),
+        x=np.linspace(frame[0], frame[0] + frame[3], conductor_mask.shape[1]),
+        y=np.linspace(frame[1] + frame[3], frame[1], conductor_mask.shape[0]),
+        colorscale="Magma", showscale=False,
+        hovertemplate="half-width=%{z:.2f} um<extra></extra>",
+    )
+])
+
+add_left([
+    go.Scatter(
+        x=north_points[:, 0], y=north_points[:, 1], mode="markers",
+        marker={"size": 5, "color": north_distances, "colorscale": "Viridis",
+                "cmin": 0, "cmax": float(np.quantile(north_distances, 0.95))},
+        hovertemplate="separation=%{marker.color:.2f} um<extra></extra>", showlegend=False,
+    ),
+    go.Scatter(
+        x=south_points[:, 0], y=south_points[:, 1], mode="markers",
+        marker={"size": 5, "color": south_distances, "colorscale": "Viridis",
+                "cmin": 0, "cmax": float(np.quantile(north_distances, 0.95))},
+        hovertemplate="separation=%{marker.color:.2f} um<extra></extra>", showlegend=False,
+    ),
+])
+
+add_left([
+    go.Heatmap(
+        z=conductor_mask.astype(float),
+        x=np.linspace(frame[0], frame[0] + frame[3], conductor_mask.shape[1]),
+        y=np.linspace(frame[1] + frame[3], frame[1], conductor_mask.shape[0]),
+        colorscale=[[0, "#FFFFFF"], [1, "#6A4C93"]], showscale=False, hoverinfo="skip",
+    )
+])
+
+class_counts = classified_frame["dimension"].value_counts()
+add_left([
+    go.Bar(x=class_counts.index.tolist(), y=class_counts.to_numpy(), marker_color="#E9C46A",
+           showlegend=False, hovertemplate="%{x}: %{y} options<extra></extra>")
+])
+
+add_left([
+    go.Scatter(
+        x=points_matrix[:, 0], y=points_matrix[:, 1], mode="markers",
+        marker={"size": 7, "color": density, "colorscale": "RdBu", "cmid": 0,
+                "cmin": -limit, "cmax": limit},
+        hovertemplate="charge density=%{marker.color:.3g}<extra></extra>", showlegend=False,
+    )
+])
+
+for label, start, stop, colour in BLOCKS:
+    colours = ["#E5E7EB"] * V2_DIMENSIONS
+    if start is not None:
+        for index in range(start, stop):
+            colours[index] = colour
+    walk.add_trace(
+        go.Bar(x=np.arange(V2_DIMENSIONS), y=vector, marker_color=colours, showlegend=False,
+               hovertemplate="coordinate %{x}<br>value=%{y:.3f}<extra></extra>"),
+        row=1, col=2,
+    )
+
+total_left = sum(left_counts)
+steps = []
+for step_index, (label, start, stop, _) in enumerate(BLOCKS):
+    visible = [False] * (total_left + len(BLOCKS))
+    offset = sum(left_counts[:step_index])
+    for k in range(left_counts[step_index]):
+        visible[offset + k] = True
+    visible[total_left + step_index] = True
+    written = "no coordinates yet" if start is None else f"coordinates {start}-{stop - 1} ({stop - start} values)"
+    steps.append({
+        "label": label.split(".")[0],
+        "method": "update",
+        "args": [{"visible": visible}, {"title": f"step {label}  ->  {written}"}],
+    })
+
+for index in range(total_left + len(BLOCKS)):
+    walk.data[index].visible = False
+for k in range(left_counts[0]):
+    walk.data[k].visible = True
+walk.data[total_left].visible = True
+
+walk.update_yaxes(scaleanchor="x", scaleratio=1, row=1, col=1)
+walk.update_xaxes(title_text="coordinate", row=1, col=2)
+walk.update_yaxes(title_text="value", row=1, col=2)
+walk.update_layout(
+    title=f"step {BLOCKS[0][0]}  ->  no coordinates yet",
+    template="plotly_white", height=560, bargap=0,
+    sliders=[{"active": 0, "currentvalue": {"prefix": "step "}, "pad": {"t": 70}, "steps": steps}],
+)
+walk.show()
+"""
+    ),
+    markdown(
+        """
+Three things are worth noticing as you step through.
+
+**Each step reads a different view of the same geometry.** Step 3 reads a
+distance transform, step 4 reads exact boundary distances, step 5 reads a
+raster, step 7 reads a linear solve. None of them reads another design.
+
+**The slices are disjoint and fixed.** Step 4 always writes coordinates 48
+through 239, whatever the layout is. That is what makes coordinate 61 mean the
+same thing for every contributor.
+
+**Step 6 is the only one that does not look at the GDS file.** If a contributor
+supplies no design options, coordinates 368-463 are zero and everything else is
+unchanged. The geometry blocks never depend on the parameter mapping, which is
+why Tutorial 18 can strip the parameter block out and still evaluate the encoder.
+"""
+    ),
+    markdown(
+        """
+## 9. Assembling the vector
 
 Five blocks, concatenated in a fixed order. No normalization against a
 catalogue, no whitening, no learned projection - just the measurements.
@@ -1117,7 +1300,7 @@ constant column contributes nothing to a standardized regression - and it is
 what lets a four-terminal qubit-coupler share the vector layout with this
 two-terminal capacitor.
 
-## 9. Checking the invariances
+## 10. Checking the invariances
 
 The encoder claims a specific set of symmetries. Each one is checkable in a few
 lines, so here they are, checked.
@@ -1196,7 +1379,7 @@ its 3x copy have very different capacitance, so an encoder that maps them to the
 same vector has destroyed the answer. v2 moves, and it moves in a structured way
 - the whole coupling spectrum slides up by exactly $\\log 3$ in separation.
 
-## 10. The scenario this was all built for
+## 11. The scenario this was all built for
 
 Now the payoff. A group we have never met sends us one capacitor. It has a
 different outline, a different finger style, a surrounding guard ring, and **28
@@ -1379,7 +1562,7 @@ That is the whole proposition. The stranger did not have to adopt our design
 tool, our parameter names, or our component library. They had to emit a GDS file
 with documented layer roles, and the rest is measurement.
 
-## 11. Summary
+## 12. Summary
 
 | Step | Input | Output | Fitted to anything? |
 | --- | --- | --- | --- |
@@ -1390,24 +1573,117 @@ with documented layer roles, and the rest is measurement.
 | Parameter statistics | any option mapping | 96 typed coordinates | no |
 | Physics proxy | boundary-element solve | 48 coordinates | no |
 
-Nothing in that column changes, which is the property the whole design exists to
-guarantee. `encode` is a pure function: run it on one design or on a hundred
-thousand, in our lab or in someone else's, and coordinate 61 is always the
-facing boundary length between terminals 0 and 1 at a separation of about 1.7
-micrometers.
+Nothing in that last column changes, which is the property the whole design
+exists to guarantee. `encode` is a pure function: run it on one design or on a
+hundred thousand, in our lab or in someone else's, and coordinate 61 is always
+the facing boundary length between terminals 0 and 1 at a separation of about
+1.7 micrometres.
 
-Two honest caveats carried over from Tutorial 18. The raw cosine metric has a
-compressed spread, so the standardization used in section 10 should eventually be
-replaced by a published, frozen whitening transform rather than statistics taken
-from whatever catalogue happens to be loaded. And every measurement here is of
-one component family; the cross-class study remains to be run.
+## 13. Porting this to a different design family or a different simulation
+
+Suppose you want to build an embedding for a component family this encoder has
+never seen, with simulation outputs that are not capacitance. What actually has
+to change?
+
+### Nothing, if you only change the component
+
+This is the common case and it is worth stating first. A new capacitor, coupler,
+or qubit variant needs **no code change at all**. Terminals are found as
+connected components rather than declared, parameters are typed by physical
+dimension rather than matched by name, and every bin edge is an absolute length.
+Call `encode(your.gds, your_options)` and you are in the same 512-dimensional
+space. Tutorial 20 does exactly this for `CapNInterdigitalTee` and
+`TransmonCross` without touching the encoder.
+
+### The one thing you must supply: layer roles
+
+The encoder has to know which polygons are conductor, which are etch, which are
+port markers, and which are the simulation domain. If your GDS follows the
+published SQuADDS layer semantics this is automatic. If it does not, pass the
+mapping explicitly and nothing else changes:
+
+```python
+from squadds.layouts import encode
+
+vector = encode(
+    "foreign_device.gds",
+    design_options,
+    layer_roles={(10, 0): "conductor", (10, 1): "etch", (11, 0): "port", (1, 0): "domain"},
+)
+```
+
+This is the entire input contract. Get it wrong and every downstream block is
+measuring the wrong polygons, which is why it is the first thing to check when a
+foreign layout produces a strange vector.
+
+### Four things to check before trusting the result
+
+**1. Terminal count.** v2 reserves four terminals, giving six pairs. A device
+with five or more functional conductors will have the extras silently dropped by
+the area-ranked ordering. Check `metadata["terminal_count"]` against what you
+expect.
+
+**2. Terminal ordering.** Ordering is by port marker first, then descending area.
+A family with no port markers and two near-equal-area terminals can order
+inconsistently between designs, which scrambles the per-pair blocks. Add port
+markers on layers 2 through 5, or confirm the areas separate cleanly.
+
+**3. Length scale.** All distance bins span 0.1 um to 1000 um. A junction-scale
+feature below 0.1 um or a metre-scale resonator above 1000 um clips into the end
+bins and stops being resolved. Compare your minimum gap and bounding box against
+that range before assuming the spectrum is informative.
+
+**4. Whether the physics proxy means anything.** The boundary-element block
+solves a two-dimensional *electrostatic* problem. For an inductive or eigenmode
+target it is not wrong, it is simply uninformative, and it will sit in the vector
+as 48 coordinates of noise. It costs nothing statistically, but do not expect it
+to help.
+
+### What needs a new version of the standard
+
+The dividing line is simple: **changing an input needs nothing, changing the
+meaning of a coordinate needs a new version.**
+
+| Change | Needs a new standard? |
+| --- | --- |
+| New component family, new parameter names | no |
+| Custom layer-role mapping | no |
+| New simulation target | no, targets never enter the vector |
+| More than four terminals | yes, the block layout and dimension change |
+| Different distance range or bin count | yes, coordinate 61 would stop meaning what it means today |
+| Adding a magnetostatic or path-length block | yes, dimensions change |
+
+If you cross into the "yes" column, publish it as `universal-geometry-v3` with
+its own frozen schema rather than editing v2 in place. Existing vectors stay
+valid and comparable, which is the entire point of freezing the contract.
+
+### Different simulation or analysis results
+
+The encoder never sees results, so a new analysis type needs no encoder change
+whatsoever. What it needs is a **canonical target mapping**, and Tutorial 20
+shows the recipe:
+
+1. find the physically equivalent quantity across families - it named
+   `north_to_south`, `top_to_bottom`, and `cross_to_claw` all as "mutual
+   capacitance between the two functional conductors";
+2. write down that mapping explicitly, one field name per family;
+3. log-transform if the scales differ by decades across families, which they did;
+4. only then run the transfer study.
+
+For eigenmode data the analogous canonical target would be something like
+resonant frequency and external quality factor, mapped per family. Note the
+honest caveat from Tutorial 20: nothing yet demonstrates that a representation
+tuned on electrostatic problems carries over to eigenmode quantities. The
+encoder will happily produce vectors for `CavityClawRouteMeander`; whether they
+are *useful* for predicting `cavity_frequency` is an open experiment, and the
+physics-proxy block is the part most likely to need a companion.
 
 **Where to go next**
 
 - Tutorial 18 for the quantitative comparison against `static-shape-v0`.
-- Tutorial 17 for the cross-component transfer study that v2 has not yet repeated.
-- `squadds/layouts/geometry_v2.py` for the encoder itself, and
-  `universal_v2_schema()` for the machine-readable contract.
+- Tutorial 20 for the three-class cross-component study built on this encoder.
+- `squadds/layouts/geometry_v2.py` for the encoder, and `universal_v2_schema()`
+  for the machine-readable contract.
 """
     ),
 ]

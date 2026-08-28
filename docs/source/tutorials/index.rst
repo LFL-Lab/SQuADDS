@@ -23,6 +23,7 @@ Tutorials
    Tutorial-17_Cross_Component_Transfer_Learning.ipynb
    Tutorial-18_Universal_Geometry_v2_Embeddings.ipynb
    Tutorial-19_How_Universal_Geometry_v2_Works.ipynb
+   Tutorial-20_Cross_Class_Transfer_with_v2.ipynb
 
 .. note::
 

@@ -76,3 +76,29 @@ def test_walkthrough_runs_the_foreign_contributor_scenario():
     assert "none of which appear in our catalogue" in source
     assert "no name in the foreign schema matches ours" in source
     assert "assert np.isfinite(similarity).all()" in source
+
+
+def test_walkthrough_has_an_interactive_algorithm_replay():
+    """The step-by-step slider is the notebook's answer to what encode actually does."""
+    notebook = _notebook()
+    html = json.dumps(
+        [output for cell in notebook["cells"] if cell["cell_type"] == "code" for output in cell["outputs"]]
+    )
+    source = _prose()
+
+    assert "The whole algorithm in one interactive figure" in source
+    assert "The pipeline at a glance" in source
+    assert "currentvalue" in html
+    for step in ("roles and terminals", "physical metrics", "coupling spectrum", "physics proxy"):
+        assert step in html, step
+
+
+def test_walkthrough_explains_porting_to_a_new_family():
+    source = _prose()
+
+    assert "Porting this to a different design family" in source
+    assert "Nothing, if you only change the component" in source
+    assert "The one thing you must supply: layer roles" in source
+    assert "What needs a new version of the standard" in source
+    assert "Different simulation or analysis results" in source
+    assert "changing an input needs nothing, changing the meaning of a coordinate" in source
