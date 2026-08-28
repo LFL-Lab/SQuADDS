@@ -63,17 +63,22 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("output_dir", type=Path)
     parser.add_argument("--revision", default="main")
+    parser.add_argument(
+        "--from-parquet",
+        type=Path,
+        help="Fit on a local embedding table instead of the published one, so a metric can be "
+        "frozen against the exact vectors it ships beside.",
+    )
     parser.add_argument("--shrinkage", type=float, default=SHRINKAGE)
     arguments = parser.parse_args()
 
-    table = pd.read_parquet(
-        hf_hub_download(
-            "SQuADDS/SQuADDS_Layout_Embeddings",
-            "metadata/universal-geometry-v2.parquet",
-            repo_type="dataset",
-            revision=arguments.revision,
-        )
+    source = arguments.from_parquet or hf_hub_download(
+        "SQuADDS/SQuADDS_Layout_Embeddings",
+        "metadata/universal-geometry-v2.parquet",
+        repo_type="dataset",
+        revision=arguments.revision,
     )
+    table = pd.read_parquet(source)
     vectors = np.vstack(table["embedding"].to_numpy()).astype(np.float64)
     parameters = fit(vectors, arguments.shrinkage)
 
@@ -93,6 +98,7 @@ def main() -> None:
         "transform": "centre, scale, then shrinkage-regularized ZCA whitening, then cosine",
         "shrinkage": arguments.shrinkage,
         "fitted_rows": int(len(table)),
+        "fitted_on": ("local embedding table" if arguments.from_parquet else f"published revision {arguments.revision}"),
         "fitted_families": sorted(table["component_name"].unique().tolist()),
         "input_dimensions": int(vectors.shape[1]),
         "retained_dimensions": int(parameters["keep"].sum()),
