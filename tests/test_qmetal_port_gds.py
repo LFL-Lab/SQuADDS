@@ -29,7 +29,12 @@ def test_transmon_cross_export_roundtrips_qgeometry_and_orders_ports(tmp_path):
 
     from squadds.layouts.embeddings import rasterize_functional_shape
     from squadds.layouts.geometry_v2 import read_layer_geometry
-    from squadds.layouts.qmetal_gds import export_qgeometry_gds, transmon_cross_port_markers, validate_ported_gds
+    from squadds.layouts.qmetal_gds import (
+        export_qgeometry_gds,
+        minimum_ground_clearance_um,
+        transmon_cross_port_markers,
+        validate_ported_gds,
+    )
 
     design = designs.DesignPlanar()
     component = TransmonCross(
@@ -39,14 +44,27 @@ def test_transmon_cross_export_roundtrips_qgeometry_and_orders_ports(tmp_path):
     )
     markers = transmon_cross_port_markers(component, design)
     path = tmp_path / "transmon.gds"
-    export_qgeometry_gds(design, path, markers=markers)
+    clearance = minimum_ground_clearance_um(component)
+    export_qgeometry_gds(
+        design,
+        path,
+        markers=markers,
+        include_ground_domain=True,
+        minimum_ground_clearance_um=clearance,
+    )
 
     assert [(marker.layer, marker.semantic) for marker in markers] == [
         (2, "cross_junction_port"),
         (3, "readout_claw_port"),
     ]
-    assert validate_ported_gds(design, path, markers)["valid"] is True
-    assert set(read_layer_geometry(path)) == {(1, 10), (1, 11), (2, 0), (3, 0)}
+    report = validate_ported_gds(design, path, markers, minimum_ground_clearance_um=clearance)
+    assert report["valid"] is True
+    assert report["ground_hole_count"] == 1
+    assert report["ground_scale"] == pytest.approx(5.8)
+    assert len(set(report["port_component_assignments"])) == 2
+    assert report["port_conductor_distances_um"] == [0.0, 0.0]
+    assert report["port_ground_distances_um"] == [0.0, 0.0]
+    assert set(read_layer_geometry(path)) == {(1, 0), (1, 10), (2, 0), (3, 0)}
 
     published, _, published_metadata = rasterize_functional_shape(
         path,
@@ -61,13 +79,18 @@ def test_transmon_cross_export_roundtrips_qgeometry_and_orders_ports(tmp_path):
     assert {entry["role"] for entry in published_metadata["functional_layers"]} == {"conductor"}
     assert {entry["role"] for entry in port_complete_metadata["functional_layers"]} == {
         "conductor",
-        "etch",
         "port",
     }
     assert not np.array_equal(published, port_complete)
 
     repeat = tmp_path / "transmon-repeat.gds"
-    export_qgeometry_gds(design, repeat, markers=markers)
+    export_qgeometry_gds(
+        design,
+        repeat,
+        markers=markers,
+        include_ground_domain=True,
+        minimum_ground_clearance_um=clearance,
+    )
     assert path.read_bytes() == repeat.read_bytes()
 
 
@@ -79,26 +102,37 @@ def test_capn_export_includes_every_metal_path_ground_and_two_ports(tmp_path):
     from squadds.layouts.qmetal_gds import (
         capn_interdigital_tee_port_markers,
         export_qgeometry_gds,
+        minimum_ground_clearance_um,
         validate_ported_gds,
     )
 
     design = designs.DesignPlanar()
     component = CapNInterdigitalTee(design, "cplr", options={"orientation": "-90", "finger_count": "5"})
     markers = capn_interdigital_tee_port_markers(component)
+    clearance = minimum_ground_clearance_um(component)
     path = tmp_path / "capn.gds"
-    export_qgeometry_gds(design, path, markers=markers, include_ground_domain=True)
+    export_qgeometry_gds(
+        design,
+        path,
+        markers=markers,
+        include_ground_domain=True,
+        minimum_ground_clearance_um=clearance,
+    )
 
-    report = validate_ported_gds(design, path, markers)
+    report = validate_ported_gds(design, path, markers, minimum_ground_clearance_um=clearance)
     assert report["valid"] is True
     assert report["signal_component_count"] == 2
     assert len(set(report["port_component_assignments"])) == 2
-    assert set(read_layer_geometry(path)) == {(1, 0), (1, 10), (1, 11), (2, 0), (3, 0)}
+    assert report["ground_hole_count"] == 1
+    assert report["ground_scale"] == pytest.approx(5.8)
+    assert report["port_ground_distances_um"] == [0.0, 0.0]
+    assert set(read_layer_geometry(path)) == {(1, 0), (1, 10), (2, 0), (3, 0)}
 
 
 def test_layer_semantics_declares_ordered_ports_for_both_retrofits():
     from squadds.layouts.embeddings import static_embedding_schema
 
-    assert LAYER_SEMANTICS_SCHEMA_VERSION == "1.2.0"
+    assert LAYER_SEMANTICS_SCHEMA_VERSION == "1.3.0"
     components = LAYER_SEMANTICS["components"]
     assert [entry["semantic"] for entry in components["TransmonCross"][-2:]] == [
         "cross_junction_port",
@@ -110,7 +144,6 @@ def test_layer_semantics_declares_ordered_ports_for_both_retrofits():
     ]
     assert functional_layer_roles("TransmonCross") == {
         (1, 10): "conductor",
-        (1, 11): "etch",
         (2, 0): "port",
         (3, 0): "port",
     }

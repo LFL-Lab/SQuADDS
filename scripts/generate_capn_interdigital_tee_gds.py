@@ -15,6 +15,7 @@ from scripts.generate_simulation_layout_gds import _enable_qiskit_metal_pandas_c
 from squadds.layouts.qmetal_gds import (
     capn_interdigital_tee_port_markers,
     export_qgeometry_gds,
+    minimum_ground_clearance_um,
 )
 
 DEFAULT_DATASET = "SQuADDS/SQuADDS_DB"
@@ -31,6 +32,7 @@ def export_row(row: dict, output_path: Path) -> None:
         output_path,
         markers=capn_interdigital_tee_port_markers(component),
         include_ground_domain=True,
+        minimum_ground_clearance_um=minimum_ground_clearance_um(component),
     )
 
 

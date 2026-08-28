@@ -12,9 +12,10 @@ import numpy as np
 from huggingface_hub import hf_hub_download
 
 from scripts.generate_simulation_layout_gds import SPECS, _enable_qiskit_metal_pandas_compatibility
-from squadds.layouts.geometry_v2 import encode
+from squadds.layouts.geometry_v2 import TERMINAL_PAIRS, encode
 from squadds.layouts.qmetal_gds import (
     capn_interdigital_tee_port_markers,
+    minimum_ground_clearance_um,
     transmon_cross_port_markers,
     validate_ported_gds,
 )
@@ -44,7 +45,7 @@ def _build(kind: str, row: dict[str, Any]):
 
         component = CapNInterdigitalTee(design, "cplr", options=options)
         markers = capn_interdigital_tee_port_markers(component)
-    return design, markers
+    return design, component, markers
 
 
 def _sample_indices(total: int, count: int) -> list[int]:
@@ -72,14 +73,28 @@ def validate_sweep(
             results.append({"index": index, "path": str(path), "valid": False, "error": "missing GDS"})
             continue
         try:
-            design, markers = _build(kind, rows[index])
-            result = validate_ported_gds(design, path, markers)
+            design, component, markers = _build(kind, rows[index])
+            result = validate_ported_gds(
+                design,
+                path,
+                markers,
+                minimum_ground_clearance_um=minimum_ground_clearance_um(component),
+            )
             result["index"] = index
             if check_v2:
                 _, metadata = encode(path, rows[index]["design"]["design_options"], return_metadata=True)
                 result["v2_terminal_count"] = int(metadata["terminal_count"])
                 result["checks"]["v2_two_terminal_discovery"] = metadata["terminal_count"] == 2
-                result["valid"] = result["valid"] and result["checks"]["v2_two_terminal_discovery"]
+                ground_offset = len(TERMINAL_PAIRS)
+                ground_availability = metadata["coupling_availability"][ground_offset : ground_offset + 2]
+                result["v2_terminal_ground_availability"] = ground_availability
+                result["checks"]["v2_two_terminal_ground_spectra"] = ground_availability == [True, True]
+                result["valid"] = result["valid"] and all(
+                    (
+                        result["checks"]["v2_two_terminal_discovery"],
+                        result["checks"]["v2_two_terminal_ground_spectra"],
+                    )
+                )
             results.append(result)
         except Exception as exc:  # report every selected row instead of stopping at the first
             results.append(

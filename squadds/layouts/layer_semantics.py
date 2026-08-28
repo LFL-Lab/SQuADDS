@@ -5,9 +5,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-LAYER_SEMANTICS_SCHEMA_VERSION = "1.2.0"
+LAYER_SEMANTICS_SCHEMA_VERSION = "1.3.0"
 PUBLISHED_ROLE_PROFILE = "published-v0"
-PORT_COMPLETE_ROLE_PROFILE = "layer-semantics-v1.2"
+PORT_COMPLETE_ROLE_PROFILE = "layer-semantics-v1.3"
 
 LAYER_SEMANTICS = {
     "schema_version": LAYER_SEMANTICS_SCHEMA_VERSION,
@@ -21,7 +21,6 @@ LAYER_SEMANTICS = {
         ],
         "CapNInterdigitalTee": [
             {"layer": 1, "datatype": 10, "semantic": "signal_conductors"},
-            {"layer": 1, "datatype": 11, "semantic": "etch_cutout"},
             {"layer": 1, "datatype": 0, "semantic": "ground_simulation_domain"},
             {"layer": 2, "datatype": 0, "semantic": "prime_top_port"},
             {"layer": 3, "datatype": 0, "semantic": "second_bottom_port"},
@@ -32,7 +31,7 @@ LAYER_SEMANTICS = {
         ],
         "TransmonCross": [
             {"layer": 1, "datatype": 10, "semantic": "signal_conductors"},
-            {"layer": 1, "datatype": 11, "semantic": "etch_cutout"},
+            {"layer": 1, "datatype": 0, "semantic": "ground_simulation_domain"},
             {"layer": 2, "datatype": 0, "semantic": "cross_junction_port"},
             {"layer": 3, "datatype": 0, "semantic": "readout_claw_port"},
         ],

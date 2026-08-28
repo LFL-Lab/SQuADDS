@@ -55,7 +55,11 @@ def export_row(kind: str, row: dict[str, Any], destination: Path) -> None:
     _enable_qiskit_metal_pandas_compatibility()
     from qiskit_metal import designs
 
-    from squadds.layouts.qmetal_gds import export_qgeometry_gds, transmon_cross_port_markers
+    from squadds.layouts.qmetal_gds import (
+        export_qgeometry_gds,
+        minimum_ground_clearance_um,
+        transmon_cross_port_markers,
+    )
 
     options = row["design"]["design_options"]
     design = designs.DesignPlanar()
@@ -74,7 +78,15 @@ def export_row(kind: str, row: dict[str, Any], destination: Path) -> None:
         markers = transmon_cross_port_markers(component, design)
     else:
         raise ValueError(f"Unsupported simulation layout kind: {kind}")
-    export_qgeometry_gds(design, destination, markers=markers if kind == "transmon-cross" else ())
+    export_qgeometry_gds(
+        design,
+        destination,
+        markers=markers if kind == "transmon-cross" else (),
+        include_ground_domain=kind == "transmon-cross",
+        minimum_ground_clearance_um=(
+            minimum_ground_clearance_um(component) if kind == "transmon-cross" else None
+        ),
+    )
 
 
 def _worker(kind: str, row: dict[str, Any], destination: str) -> tuple[str, str | None]:

@@ -1,10 +1,10 @@
 """Faithful Qiskit Metal GDS export with explicit two-terminal port markers.
 
 Qiskit Metal stores component geometry in millimetres.  SQuADDS layout GDS
-files use micrometres and reserve ``(1, 10)`` for signal metal, ``(1, 11)``
-for subtractive etch, and ``(2, 0)`` / ``(3, 0)`` for the ordered terminals.
-The helpers here keep those concerns in one place so generated datasets and
-their validation use exactly the same geometry contract.
+files use micrometres and reserve ``(1, 0)`` for a ground plane with one etched
+hole, ``(1, 10)`` for signal metal, and ``(2, 0)`` / ``(3, 0)`` for the ordered
+terminals.  The helpers here keep those concerns in one place so generated
+datasets and their validation use exactly the same geometry contract.
 """
 
 from __future__ import annotations
@@ -17,7 +17,9 @@ from typing import Any
 import numpy as np
 
 MM_TO_UM = 1000.0
+GROUND_DOMAIN_SCALE = 5.8
 PORT_LENGTH_UM = 2.0
+_BRIDGE_HALF_WIDTH_MM = 1e-6
 
 
 @dataclass(frozen=True)
@@ -133,13 +135,26 @@ def marker_from_junction(
     return PortMarker(semantic=semantic, layer=layer, polygon=polygon, source=source)
 
 
+def _parsed_length_um(component: Any, value: Any) -> float:
+    """Parse one Qiskit Metal length option and return micrometres."""
+    length_um = float(component.design.parse_value(value)) * MM_TO_UM
+    if length_um <= 0:
+        raise ValueError(f"Expected a positive component clearance; got {value!r}.")
+    return length_um
+
+
 def transmon_cross_port_markers(component: Any, design: Any) -> list[PortMarker]:
-    """Return cross/junction then readout/claw markers for ``TransmonCross``."""
+    """Return native-clearance cross and claw bridges to ground."""
     junctions = design.qgeometry.tables["junction"]
     rows = junctions[(junctions.component == component.id) & (junctions.name == "rect_jj")]
     if len(rows) != 1:
         raise ValueError(f"Expected one rect_jj junction for {component.name!r}; found {len(rows)}.")
     row = rows.iloc[0]
+    cross_clearance_um = _parsed_length_um(component, component.options.cross_gap)
+    claw_clearance_um = _parsed_length_um(
+        component,
+        component.options.connection_pads["readout"]["claw_gap"],
+    )
     cross = marker_from_junction(
         row.geometry,
         qgeometry_role(design, subtract=False),
@@ -147,12 +162,14 @@ def transmon_cross_port_markers(component: Any, design: Any) -> list[PortMarker]
         semantic="cross_junction_port",
         layer=2,
         source="junction:rect_jj",
+        length_um=cross_clearance_um,
     )
     readout = marker_from_pin(
         component.pins["readout"],
         semantic="readout_claw_port",
         layer=3,
         source="pin:readout",
+        length_um=claw_clearance_um,
     )
     return [cross, readout]
 
@@ -170,14 +187,34 @@ def capn_interdigital_tee_port_markers(component: Any) -> list[PortMarker]:
             semantic="prime_top_port",
             layer=2,
             source="pin:prime_start",
+            length_um=_parsed_length_um(component, component.options.prime_gap),
         ),
         marker_from_pin(
             component.pins["second_end"],
             semantic="second_bottom_port",
             layer=3,
             source="pin:second_end",
+            length_um=_parsed_length_um(component, component.options.second_gap),
         ),
     ]
+
+
+def minimum_ground_clearance_um(component: Any) -> float:
+    """Return the smallest native signal-to-ground clearance for a component."""
+    if component.__class__.__name__ == "TransmonCross":
+        return min(
+            _parsed_length_um(component, component.options.cross_gap),
+            _parsed_length_um(component, component.options.connection_pads["readout"]["claw_gap"]),
+        )
+    if component.__class__.__name__ == "CapNInterdigitalTee":
+        clearance = component.options.get("cap_gap_ground")
+        if not isinstance(clearance, (str, int, float)):
+            clearance = min(
+                component.design.parse_value(component.options.prime_gap),
+                component.design.parse_value(component.options.second_gap),
+            )
+        return _parsed_length_um(component, clearance)
+    raise ValueError(f"No standardized ground clearance for {component.__class__.__name__!r}.")
 
 
 def _insert_polygon(cell: Any, layer_index: int, polygon: Any, kdb: Any) -> None:
@@ -201,17 +238,80 @@ def insert_port_markers(layout: Any, cell: Any, markers: Iterable[PortMarker]) -
             _insert_polygon(cell, layer_index, polygon, kdb)
 
 
-def _chip_ground_geometry(design: Any, etch: Any) -> Any:
-    """Return the planar main-chip ground after subtractive qgeometry is cut out."""
+def _single_connected_hole(geometry: Any) -> Any:
+    """Join disjoint QMetal etch polygons with grid-scale, minimum-length bridges."""
+    from shapely import union_all
+    from shapely.geometry import LineString
+    from shapely.ops import nearest_points
+
+    hole = geometry.buffer(0)
+    while hole.geom_type == "MultiPolygon":
+        parts = list(hole.geoms)
+        best: tuple[float, int, int] | None = None
+        for first in range(len(parts)):
+            for second in range(first + 1, len(parts)):
+                candidate = (float(parts[first].distance(parts[second])), first, second)
+                if best is None or candidate < best:
+                    best = candidate
+        if best is None:  # pragma: no cover - an empty MultiPolygon is not produced here
+            break
+        _, first, second = best
+        start, end = nearest_points(parts[first], parts[second])
+        bridge = LineString([start, end]).buffer(
+            _BRIDGE_HALF_WIDTH_MM,
+            cap_style="square",
+            join_style="mitre",
+        )
+        hole = union_all([hole, bridge]).buffer(0)
+    if hole.geom_type != "Polygon" or hole.is_empty or not hole.is_valid:
+        raise ValueError("The standardized subtractive geometry did not form one valid hole.")
+    return hole
+
+
+def standardized_ground_geometry(
+    design: Any,
+    markers: Iterable[PortMarker],
+    *,
+    minimum_clearance_um: float,
+    domain_scale: float = GROUND_DOMAIN_SCALE,
+) -> tuple[Any, Any]:
+    """Return a centered dynamic ground and its single QMetal-derived hole.
+
+    The native subtractive qgeometry remains authoritative.  A minimum buffer
+    closes the flat CPW ends emitted by Qiskit Metal, terminal bridge polygons
+    make the two lumped ports reach the ground boundary, and only disjoint etch
+    islands receive negligible-width bridges so the ground has one hole.
+    """
+    from shapely import union_all
     from shapely.geometry import box
 
-    size = design.parse_value(design.chips.main.size)
-    center_x = float(size["center_x"])
-    center_y = float(size["center_y"])
-    half_x = float(size["size_x"]) / 2
-    half_y = float(size["size_y"]) / 2
-    domain = box(center_x - half_x, center_y - half_y, center_x + half_x, center_y + half_y)
-    return domain.difference(etch)
+    conductor = qgeometry_role(design, subtract=False)
+    clearance_mm = float(minimum_clearance_um) / MM_TO_UM
+    if conductor.is_empty or clearance_mm <= 0:
+        raise ValueError("Standardized ground generation requires conductor geometry and positive clearance.")
+    native_etch = qgeometry_role(design, subtract=True)
+    marker_shapes = [marker.polygon for marker in markers]
+    hole = _single_connected_hole(
+        union_all(
+            [
+                native_etch,
+                conductor.buffer(clearance_mm, join_style="mitre"),
+                *marker_shapes,
+            ]
+        )
+    )
+
+    left, bottom, right, top = conductor.bounds
+    center_x = 0.5 * (left + right)
+    center_y = 0.5 * (bottom + top)
+    side = float(domain_scale) * max(right - left, top - bottom)
+    if side <= 0:
+        raise ValueError("Cannot size a ground plane around zero-span conductor geometry.")
+    half_side = side / 2
+    domain = box(center_x - half_side, center_y - half_side, center_x + half_side, center_y + half_side)
+    if not domain.contains(hole):
+        raise ValueError("The dynamic ground domain does not contain the complete etch hole.")
+    return domain.difference(hole), hole
 
 
 def _write_without_timestamps(layout: Any, path: Path, kdb: Any) -> None:
@@ -227,14 +327,18 @@ def export_qgeometry_gds(
     *,
     markers: Iterable[PortMarker] = (),
     include_ground_domain: bool = False,
+    minimum_ground_clearance_um: float | None = None,
 ) -> None:
     """Write Metal qgeometry and optional ordered terminal markers atomically.
 
-    When requested, the ground is the configured Qiskit Metal main-chip box
-    minus all subtractive qgeometry.  It is kept on ``(1, 0)`` and never mixed
-    with the explicit signal and etch roles.
+    When requested, the ground follows the GeneralizedCapNInterdigital
+    convention: a dynamic square domain on ``(1, 0)`` with one subtractive hole
+    and no filled ``(1, 11)`` etch layer.
     """
     kdb = _require_klayout()
+    markers = list(markers)
+    if include_ground_domain and minimum_ground_clearance_um is None:
+        raise ValueError("Ground-domain export requires minimum_ground_clearance_um.")
     layout = kdb.Layout()
     layout.dbu = 0.001
     top = layout.create_cell("TOP")
@@ -242,6 +346,8 @@ def export_qgeometry_gds(
         table = design.qgeometry.tables[table_name]
         for row in table.itertuples(index=False):
             if row.helper:
+                continue
+            if include_ground_domain and row.subtract:
                 continue
             geometry = row.geometry
             if table_name == "path":
@@ -251,7 +357,11 @@ def export_qgeometry_gds(
                 _insert_polygon(top, layer_index, polygon, kdb)
     if include_ground_domain:
         domain_layer = layout.layer(1, 0)
-        domain = _chip_ground_geometry(design, qgeometry_role(design, subtract=True))
+        domain, _ = standardized_ground_geometry(
+            design,
+            markers,
+            minimum_clearance_um=float(minimum_ground_clearance_um),
+        )
         for polygon in each_polygon(domain):
             _insert_polygon(top, domain_layer, polygon, kdb)
     insert_port_markers(layout, top, markers)
@@ -274,9 +384,16 @@ def add_port_markers_to_gds(source: Path, destination: Path, markers: Iterable[P
     temporary.replace(destination)
 
 
-def validate_ported_gds(design: Any, path: Path, markers: Iterable[PortMarker]) -> dict[str, Any]:
-    """Validate qgeometry fidelity and unambiguous two-terminal port assignment."""
+def validate_ported_gds(
+    design: Any,
+    path: Path,
+    markers: Iterable[PortMarker],
+    *,
+    minimum_ground_clearance_um: float,
+) -> dict[str, Any]:
+    """Validate the unified layer, ground-hole, and two-terminal contract."""
     from shapely.affinity import scale
+    from shapely.geometry import Polygon
 
     from squadds.layouts.geometry_v2 import read_layer_geometry
 
@@ -284,10 +401,7 @@ def validate_ported_gds(design: Any, path: Path, markers: Iterable[PortMarker]) 
     geometry = read_layer_geometry(path)
     checks: dict[str, bool] = {}
     role_metrics: dict[str, dict[str, float]] = {}
-    for name, key, subtract in (
-        ("conductor", (1, 10), False),
-        ("etch", (1, 11), True),
-    ):
+    for name, key, subtract in (("conductor", (1, 10), False),):
         expected_mm = qgeometry_role(design, subtract=subtract)
         expected = scale(expected_mm, xfact=MM_TO_UM, yfact=MM_TO_UM, origin=(0, 0))
         actual = geometry.get(key)
@@ -305,13 +419,64 @@ def validate_ported_gds(design: Any, path: Path, markers: Iterable[PortMarker]) 
         }
         checks[f"{name}_roundtrip"] = xor_area <= tolerance
 
+    expected_ground_mm, _ = standardized_ground_geometry(
+        design,
+        markers,
+        minimum_clearance_um=minimum_ground_clearance_um,
+    )
+    expected_ground = scale(expected_ground_mm, xfact=MM_TO_UM, yfact=MM_TO_UM, origin=(0, 0))
+    ground = geometry.get((1, 0))
+    ground_xor = (
+        float(expected_ground.symmetric_difference(ground).area)
+        if ground is not None
+        else float(expected_ground.area)
+    )
+    ground_tolerance = max(0.1, float(expected_ground.area) * 1e-7)
+    role_metrics["ground"] = {
+        "expected_area_um2": float(expected_ground.area),
+        "actual_area_um2": float(ground.area) if ground is not None else 0.0,
+        "xor_area_um2": ground_xor,
+        "tolerance_um2": ground_tolerance,
+    }
+    checks["ground_roundtrip"] = ground_xor <= ground_tolerance
+    checks["exact_layer_set"] = set(geometry) == {(1, 0), (1, 10), (2, 0), (3, 0)}
+    checks["etch_layer_absent"] = (1, 11) not in geometry
+
+    conductor = geometry.get((1, 10))
+    ground_polygons = list(getattr(ground, "geoms", [ground])) if ground is not None else []
+    ground_holes = [interior for polygon in ground_polygons for interior in getattr(polygon, "interiors", [])]
+    checks["one_ground_polygon"] = len(ground_polygons) == 1
+    checks["one_ground_hole"] = len(ground_holes) == 1
+    actual_hole = Polygon(ground_holes[0]) if len(ground_holes) == 1 else None
+    checks["hole_contains_conductor"] = (
+        conductor is not None and actual_hole is not None and bool(actual_hole.covers(conductor))
+    )
+
+    if ground is not None and conductor is not None:
+        ground_width = float(ground.bounds[2] - ground.bounds[0])
+        ground_height = float(ground.bounds[3] - ground.bounds[1])
+        conductor_width = float(conductor.bounds[2] - conductor.bounds[0])
+        conductor_height = float(conductor.bounds[3] - conductor.bounds[1])
+        ground_aspect = ground_width / ground_height
+        ground_scale = max(ground_width, ground_height) / max(conductor_width, conductor_height)
+        ground_center_offset = [
+            0.5 * (ground.bounds[0] + ground.bounds[2] - conductor.bounds[0] - conductor.bounds[2]),
+            0.5 * (ground.bounds[1] + ground.bounds[3] - conductor.bounds[1] - conductor.bounds[3]),
+        ]
+    else:
+        ground_aspect = ground_scale = float("nan")
+        ground_center_offset = [float("nan"), float("nan")]
+    checks["ground_aspect"] = 0.9 <= ground_aspect <= 2.0
+    checks["ground_scale"] = 4.2 <= ground_scale <= 8.0
+    checks["ground_centered"] = max(abs(value) for value in ground_center_offset) <= 0.001
+
     checks["two_markers"] = len(markers) == 2 and all((marker.layer, marker.datatype) in geometry for marker in markers)
     expected_layers = [(2, 0), (3, 0)]
     checks["ordered_layers"] = [(marker.layer, marker.datatype) for marker in markers] == expected_layers
 
-    conductor = geometry.get((1, 10))
     assignments: list[int] = []
-    distances: list[float] = []
+    conductor_distances: list[float] = []
+    ground_distances: list[float] = []
     component_count = 0
     if conductor is not None:
         parts = [part for part in getattr(conductor, "geoms", [conductor]) if part.area > 0]
@@ -322,10 +487,12 @@ def validate_ported_gds(design: Any, path: Path, markers: Iterable[PortMarker]) 
                 continue
             part_distances = [float(part.distance(port)) for part in parts]
             assignments.append(int(np.argmin(part_distances)))
-            distances.append(float(min(part_distances)))
+            conductor_distances.append(float(min(part_distances)))
+            ground_distances.append(float(ground.distance(port)) if ground is not None else float("inf"))
     checks["two_signal_terminals"] = component_count == 2
     checks["unique_terminal_assignment"] = len(assignments) == 2 and len(set(assignments)) == 2
-    checks["markers_touch_signal"] = len(distances) == 2 and max(distances) <= 0.001
+    checks["markers_touch_signal"] = len(conductor_distances) == 2 and max(conductor_distances) <= 0.001
+    checks["markers_touch_ground"] = len(ground_distances) == 2 and max(ground_distances) <= 0.001
 
     port_metrics = []
     for marker in markers:
@@ -351,5 +518,10 @@ def validate_ported_gds(design: Any, path: Path, markers: Iterable[PortMarker]) 
         "ports": port_metrics,
         "signal_component_count": component_count,
         "port_component_assignments": assignments,
-        "port_distances_um": distances,
+        "port_conductor_distances_um": conductor_distances,
+        "port_ground_distances_um": ground_distances,
+        "ground_aspect": ground_aspect,
+        "ground_scale": ground_scale,
+        "ground_center_offset_um": ground_center_offset,
+        "ground_hole_count": len(ground_holes),
     }
