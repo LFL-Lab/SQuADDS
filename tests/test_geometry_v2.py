@@ -231,3 +231,40 @@ def test_parameter_block_separates_dimension_classes():
     assert metadata["parameter_classes"].count("length") == 2
     assert metadata["parameter_classes"].count("count") == 1
     assert np.isfinite(lengths).all()
+
+
+def test_nearest_returns_a_true_cosine_for_unnormalized_vectors(tmp_path):
+    """v2 vectors are absolute measurements, not unit vectors.
+
+    ``nearest`` previously returned a bare dot product, which coincided with the
+    cosine only because v0 and v1 are unit normalized.  On v2 that reported
+    similarities in the thousands.
+    """
+    import pandas as pd
+
+    from squadds.layouts import LayoutEmbeddingClient
+
+    rng = np.random.default_rng(0)
+    rows = []
+    for index in range(6):
+        vector = (rng.normal(size=V2_DIMENSIONS) * 50.0).astype(np.float32)
+        rows.append(
+            {
+                "layout_id": f"layout:{index}",
+                "artifact_id": f"sha256:{index}",
+                "design_id": f"design:{index}",
+                "component_name": "GeneralizedCapNInterdigital",
+                "source_id": f"campaign/{index}",
+                "embedding": vector.tolist(),
+            }
+        )
+    path = tmp_path / "v2.parquet"
+    pd.DataFrame(rows).to_parquet(path, index=False)
+
+    client = LayoutEmbeddingClient(version="v2", embedding_path=path)
+    neighbours = client.nearest("layout:0", limit=5)
+
+    assert len(neighbours) == 5
+    similarities = [item["cosine_similarity"] for item in neighbours]
+    assert all(-1.0001 <= value <= 1.0001 for value in similarities), similarities
+    assert similarities == sorted(similarities, reverse=True)

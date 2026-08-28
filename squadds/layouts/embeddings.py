@@ -462,8 +462,13 @@ class LayoutEmbeddingClient:
         if candidates.empty:
             return []
         matrix = np.vstack(candidates["embedding"].map(lambda value: np.asarray(value, dtype=np.float32)))
-        similarities = matrix @ np.asarray(query["embedding"], dtype=np.float32)
-        candidates["cosine_similarity"] = similarities
+        query_vector = np.asarray(query["embedding"], dtype=np.float32)
+        # Divide by the norms rather than assuming them.  v0 and v1 vectors are
+        # unit normalized, so a bare dot product happened to equal the cosine;
+        # v2 stores absolute physical measurements and is not unit normalized,
+        # which made the same expression report values far outside [-1, 1].
+        scale = np.linalg.norm(matrix, axis=1) * np.linalg.norm(query_vector)
+        candidates["cosine_similarity"] = (matrix @ query_vector) / np.maximum(scale, 1e-12)
         result = candidates.nlargest(limit, "cosine_similarity")
         if not include_embeddings:
             result = result.drop(columns=["embedding"])
