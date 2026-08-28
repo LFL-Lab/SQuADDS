@@ -55,7 +55,8 @@ def test_tutorial_20_runs_the_held_out_class_experiment():
 
     assert "held_out" in source
     assert "predict the third with no labels from it" in source
-    assert "only representation that ever generalizes to an unseen component" in source
+    assert "Holding out `CapNInterdigitalTee` works" in source
+    assert "only representation that is ever positive" in source
 
 
 def test_tutorial_20_reports_the_negative_results():
@@ -64,9 +65,10 @@ def test_tutorial_20_reports_the_negative_results():
 
     assert "The residual idea does not work" in source
     assert "A proxy is a good feature and a bad denominator" in source
-    assert "Zero-shot cross-class prediction is still not reliable" in source
-    assert "not yet safe across one" in source
-    assert "Two rotations are positive" in source
+    assert "Zero-shot cross-class prediction is close to break-even, not reliable" in source
+    assert "Cross-class similarity is still not trustworthy" in source
+    assert "`TransmonCross` is still not predictable from the other two" in source
+    assert "Zero-shot cross-class prediction is close to break-even, not reliable" in source
 
 
 def test_tutorial_20_fits_the_feature_map_without_leakage():
@@ -84,7 +86,7 @@ def test_tutorial_20_includes_the_balanced_cohort():
     assert "BALANCED_PER_CLASS" in source
     assert "EXPECTED_BALANCED_ROWS" in source
     assert "only scientific variable that changes between rotations" in source
-    assert "two of three rotations instead of one" in source
+    assert "two of the three rotations are positive" in source
 
 
 def test_tutorial_20_answers_the_new_contributor_question():
@@ -106,3 +108,27 @@ def test_tutorial_20_separates_predictive_from_transfer_blocks():
     assert "block ablation is almost uninformative" in source
     assert "The shape spectrum is the clearest reversal" in source
     assert "Block ablation run only in-class is misleading" in source
+
+
+def test_tutorial_20_uses_the_port_complete_release():
+    """The regenerated CapN and TransmonCross rows must be distinguishable."""
+    source = _prose()
+
+    assert "LAYOUT_RELEASE" in source
+    assert "port-complete" in source
+    assert "matrix_sha256" in source, "checkpoint fingerprint must depend on the vectors"
+    assert "Ordered ports alone changed nothing measurable on `TransmonCross`" in source
+
+
+def test_tutorial_20_shows_the_geometry_and_similarity_extremes():
+    source = _prose()
+    outputs = json.dumps(
+        [output for cell in _notebook()["cells"] if cell["cell_type"] == "code" for output in cell["outputs"]]
+    )
+
+    assert "What the three families actually look like" in source
+    assert "The closest and farthest shapes, by cosine similarity" in source
+    assert "build_gds_index" in source
+    assert "role_traces" in source
+    assert "closest: design A" in outputs and "farthest: design B" in outputs
+    assert "Mean standardized cosine similarity" in outputs

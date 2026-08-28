@@ -39,59 +39,50 @@ TRANSFER_READING = """
 ### Reading the transfer curves
 
 **The representation, not the transfer mechanism, is doing the work.** At 2% of
-the `CapNInterdigitalTee` pool - about 13 labeled designs - a v2 model trained
-only on those 13 reaches macro R2 0.977, against 0.782 for v0 and 0.599 for the
-manually aligned parameter baseline. With the full pool the ordering holds:
-0.9999, 0.993, 0.810.
+the `CapNInterdigitalTee` pool - about 13 labeled designs - the v2 transfer model
+reaches macro R2 **0.994**, against 0.769 for v0 and 0.625 for the manually
+aligned parameter baseline. With the full pool the ordering holds: 0.9999, 0.993,
+0.811. The `TransmonCross` target reaches 0.976 at the same budget against v0's
+0.892.
 
-**The source prior adds little once the representation is good.** Transfer beats
-target-only by 0.985 against 0.977 at the smallest budget and the two are
-indistinguishable from 10% onward. This is the opposite of Tutorial 17's
-picture, and the reason is not that transfer got worse but that the target task
-got easy: thirteen labels are already enough to fit a v2 head. When someone asks
-whether we have a "foundation model", the honest answer from this experiment is
-that we have a foundation *representation*, and the pretrained weights on top of
-it are close to redundant.
+**Geometry alone is nearly enough here.** `v2 geometry only`, which sees no
+design parameters, reaches 0.993 on CapN at 2% labels, within 0.002 of the full
+vector.
 
-**Zero-shot still fails, for every representation.** The best cross-class
-zero-shot score anywhere in the table is v2's -1.38, and negative R2 means worse
-than predicting the mean. A model fit on interdigital capacitors does not know
-the capacitance of a transmon it has never seen. What v2 buys is that a handful
-of labels closes the gap, not that no labels are needed.
+**Zero-shot still fails for every representation in this section.** What v2 buys
+is that a handful of labels closes the gap, not that no labels are needed.
 """
 
 HELDOUT_READING = """
 ### Reading the held-out-class result
 
-This is the strictest test in the SQuADDS tutorials, and the numbers should be
-read with its asymmetry in mind: holding out `GeneralizedCapNInterdigital` means
-training on 2,827 rows and predicting 13,683, while holding out
-`CapNInterdigitalTee` means training on 15,616 and predicting 894.
+This is the strictest test in the SQuADDS tutorials. It is run here on the
+**unified** layout release, in which all three families share one convention: a
+ground plane sized to 5.8x the conductor extent, the etch expressed as a single
+hole in that plane rather than as its own layer, and two ordered ports that
+bridge the moat from each terminal to ground.
 
-**v2 is the only representation that ever generalizes to an unseen component
-class.** Holding out the Generalized NCap family entirely, a model trained only
-on Tee couplers and transmons reaches macro R2 **+0.440** on it, with no labels
-from that family at all. Every other representation is negative in every
-rotation.
+| held out | v0 | v2 | v2 geometry only |
+| --- | ---: | ---: | ---: |
+| `CapNInterdigitalTee` | -48.21 | **+0.817** | +0.245 |
+| `GeneralizedCapNInterdigital` | -8.69 | **-0.031** | -1.674 |
+| `TransmonCross` | -13.14 | -5.618 | -3.322 |
 
-**It does not work in the other two rotations.** Holding out
-`CapNInterdigitalTee` gives -0.117, essentially the accuracy of predicting the
-mean, and holding out `TransmonCross` gives -1.341. So the correct claim is that
-v2 sometimes crosses the class boundary with zero labels and the other
-representations never do - not that the problem is solved.
+**Holding out `CapNInterdigitalTee` works**, at +0.817 with no labels from it at
+all, where v0 gives -48.2 and the parameter baseline -106.3.
 
-Even where v2 is negative it is negative by one to two orders of magnitude less
-than the alternatives: -0.117 against v0's -48.2, and -1.341 against v0's -13.1
-and the parameter baseline's -143.6.
+**Holding out `GeneralizedCapNInterdigital` is now break-even** at -0.031, which
+is the accuracy of predicting the mean. That is not a success, but it is a large
+repair: on the intermediate release, where CapN carried a 9 mm ground plane and
+TransmonCross had none, this rotation read **-3.998**. Giving all three families
+one reference frame recovered almost all of it.
 
-**The parameter block earns its place here, and only here.** Tutorial 18 found
-that stripping v2's 96 parameter coordinates cost almost nothing within one
-class. Across classes it is decisive: geometry-only falls to -8.83 and -37.2
-where full v2 holds -0.117 and -1.341. The dimension-typed order statistics -
-the smallest length in the design, the largest, the count of each dimension
-class - are comparable across schemas in a way the raw geometry blocks alone
-apparently are not, and they pin down the absolute size regime of an unfamiliar
-device.
+**`TransmonCross` remains the hard rotation** at -5.618. It improved from -6.149
+but is still far from usable, and it is the one family whose two terminals differ
+enormously in scale, a large cross against a small claw.
+
+**v2 is the only representation that is ever positive.** The parameter baseline
+and v0 are negative in all three rotations by one to two orders of magnitude.
 """
 
 RESIDUAL_READING = """
@@ -119,73 +110,69 @@ stand-in.
 """
 
 CONCLUSIONS = """
-## 10. What this experiment establishes
+## 12. What this experiment establishes
+
+This run uses the **unified** layout release. All three families now share one
+convention: a ground plane sized to 5.8x the conductor extent and centred on it,
+the etch expressed as a single hole in that plane rather than as its own layer,
+and two ordered ports that bridge the moat from each terminal to ground. Only the
+`GeneralizedCapNInterdigital` rows come from the published sweep; the other two
+were regenerated. Joining them is legitimate only because
+`universal-geometry-v2` consults no catalogue statistics.
 
 **Established**
 
-- Three SQuADDS families share a mutual-capacitance target, not two. The
-  three-class study this enables was previously assumed impossible.
-- Across those three classes the design-tool vocabularies intersect in exactly
-  one name, `orientation`, a placement angle. A parameter-schema baseline for a
-  three-class model does not exist, so a geometry-derived contract is not merely
-  better here, it is the only option.
-- v2 transforms cross-class label efficiency. Thirteen labeled Tee couplers take
-  a v2 model to macro R2 0.977 where v0 reaches 0.782 and the aligned parameter
-  baseline reaches 0.599.
-- **v2 generalizes to a completely unseen component class in two of three
-  rotations** once class size is equalized, reaching +0.859 on held-out
-  Generalized NCaps and +0.422 on held-out Tee couplers. No other representation
-  is positive anywhere.
-- **A new component family needs roughly ten labels.** Five labeled designs from
-  an unseen class reach 0.887 and ten reach 0.943, against fifty to a hundred for
-  v0.
-- A source prior helps only when the representation aligns the classes. At five
-  labels adaptation lifts v2 from 0.610 to 0.887 and pushes v0 from 0.261 down to
-  -0.502.
-- v2's similarity is a much better applicability signal than v0's inside a class,
-  reaching Spearman -0.718 on Tee couplers against v0's -0.278.
+- Three SQuADDS families share a mutual-capacitance target, and across them the
+  design-option vocabularies intersect in exactly one name, `orientation`, a
+  placement angle. No parameter-schema baseline exists for a three-class model.
+- Cross-family transfer into `CapNInterdigitalTee` is close to saturated: 13
+  labeled designs reach macro R2 0.994, against 0.769 for v0 and 0.625 for the
+  aligned parameter baseline.
+- Held-out `CapNInterdigitalTee` reaches **+0.817 with zero labels**.
+- On a class-balanced cohort **two of three rotations are positive**, at +0.559
+  and +0.534.
+- A brand-new component family needs roughly ten labels, reaching 0.944.
+- The boundary-element physics proxy is the only block that predicts an unseen
+  class with no labels at all, at **+0.661**, and it only does so once every
+  family carries a correctly scaled ground plane.
+- A source prior helps only when the representation aligns the classes: at five
+  labels it lifts v2 from 0.629 to 0.894 and pushes v0 from 0.261 to -0.502.
+- Unifying the ground and port convention was worth a large repair. Held-out
+  `GeneralizedCapNInterdigital` moved from -3.998 on the mismatched release to
+  -0.031, and averaged zero-shot from -2.58 to -0.667.
 
 **Not established, and worth stating plainly**
 
-- Zero-shot cross-class prediction is still not reliable. Two rotations are
-  positive; `TransmonCross` stays at -1.891 balanced. The qubit class is
-  genuinely harder than the two coupler families, and nothing here fixes it.
-- The physics-proxy residual target, proposed as a way to give every class one
-  comparable quantity, is worse than predicting capacitance directly in every
-  rotation.
+- **`TransmonCross` is still not predictable from the other two**, at -5.618 on
+  the full catalogue and -3.029 balanced. It is negative in both cohorts, so this
+  is not a class-size artefact. It is also the family whose two terminals differ
+  most in scale, a large cross against a small claw, and the family with the
+  lowest cross-family cosine, 0.044 against the generalized coupler.
+- Zero-shot cross-class prediction is close to break-even, not reliable. One of
+  three rotations on the full catalogue is clearly positive.
+- Ordered ports alone changed nothing measurable on `TransmonCross`. Its
+  conductor geometry was byte-identical to the published release and its port
+  ordering never disagreed with the previous area-based fallback in any of 1,934
+  files. The gain here came from adding a ground plane and a moat, not from the
+  markers.
+- The physics-proxy residual target remains worse than predicting capacitance
+  directly in every rotation.
 - Block ablation run only in-class is misleading. Every v2 block predicts
-  capacitance inside a single family at macro R2 0.987 or better, so that setting
-  cannot distinguish them; cross-class the same blocks span 0.960 to -3.53. The
-  shape spectrum reverses outright, going from one of the best in-class blocks to
-  by far the worst across classes.
-- Cross-class similarity is not uniformly trustworthy. v2 fixes the NCap-to-NCap
-  pair, turning v0's misleading +0.321 into a useful -0.430, but both
-  representations have the wrong sign on pairs involving the qubit class. Ranking
-  an unfamiliar design against our catalogue is safe within a component family
-  and not yet safe across one.
-- Only one transfer direction was tested for the curves in section 4, always out
-  of the Generalized NCap family, because it is the only family large enough to
-  serve as a foundation on the full catalogue.
-- All three classes remain electrostatic. Nothing here shows that a capacitance
-  representation transfers to the eigenmode quantities `CavityClawRouteMeander`
-  reports, which is the next boundary worth crossing.
-- The balanced cohort uses 894 designs per class, so it is a smaller and noisier
-  experiment than the full catalogue even though it is a fairer one. Both are
-  reported above rather than choosing whichever looks better.
+  capacitance inside a single family at macro R2 0.988 or better, so that setting
+  cannot distinguish them; cross-class the same blocks span 0.966 down to 0.381.
+- Cross-class similarity is still not trustworthy: the largest cross-family
+  cosine is 0.343 for the two coupler families and 0.044 between the generalized
+  coupler and the transmon.
+- All three classes remain electrostatic; nothing here shows transfer to the
+  eigenmode quantities `CavityClawRouteMeander` reports.
 
 **What we would do next**
 
-Two things, in order. First, attack the applicability failure, because the
-routing workflow depends on it: fit and publish the frozen whitening transform
-that Tutorials 18 and 19 both flagged, then re-measure the per-pair similarity
-correlations under it. A metric learned across all four families is the obvious
-candidate for making the qubit boundary behave like the NCap one already does.
-
-Second, work out why `TransmonCross` resists. It is the one class whose two
-terminals are a large cross and a small claw at very different scales, and it is
-the one class where both the held-out prediction and the similarity metric fail.
-That is a specific, checkable hypothesis about terminal-scale asymmetry rather
-than a general shrug.
+Regenerate `GeneralizedCapNInterdigital` with the same unified exporter so all
+three families come from one pipeline rather than two. Then attack
+`TransmonCross` directly: it is the only rotation still failing, and the
+terminal-scale asymmetry hypothesis is now specific enough to test by
+conditioning the coupling spectrum on per-terminal scale.
 """
 
 
@@ -297,21 +284,24 @@ figure.show()
 BALANCED_READING = """
 ### What equalizing class size changes
 
-**v2 crosses the class boundary in two of three rotations instead of one.**
-Holding out the Tee couplers moves from -0.117 on the full catalogue to
-**+0.422** balanced, and holding out the Generalized NCaps moves from +0.440 to
-**+0.859**. Neither of those improvements is v2 getting better; it is the
-experiment getting fairer. On the full catalogue the model is dominated by
-13,683 Generalized rows, and a head fit largely to one family transfers worse to
-the other two.
+| held out | v0 balanced | v2 balanced | v2 full catalogue |
+| --- | ---: | ---: | ---: |
+| `CapNInterdigitalTee` | -17.58 | **+0.559** | +0.817 |
+| `GeneralizedCapNInterdigital` | -7.66 | **+0.534** | -0.031 |
+| `TransmonCross` | -8.29 | -3.029 | -5.618 |
 
-**`TransmonCross` stays negative** at -1.891. Two of three unseen classes are now
-predictable with zero labels from them, and the qubit is not. That is a stable
-finding across both cohorts and it is the honest boundary of the claim.
+**On an equal-sized cohort, two of the three rotations are positive.** Balancing
+lifts the Generalized rotation from -0.031 to +0.534 and softens TransmonCross
+from -5.618 to -3.029, at the cost of some of the CapN margin. The full
+catalogue is dominated by 13,683 Generalized rows, so a head fit largely to one
+family transfers worse to the other two; equalizing removes that.
 
-**v0 remains far outside the usable range in every rotation** at -17.6, -7.7, and
--8.3, and geometry-only v2 stays negative too. Only the full v2 vector crosses
-the boundary at all.
+**v0 remains far outside the usable range everywhere**, at -17.6, -7.7 and -8.3.
+No amount of balancing rescues it, because the deficit is in the representation
+rather than the cohort.
+
+`TransmonCross` is negative in both cohorts, which is the stable finding: it is
+not an artefact of class size.
 """
 
 NEWCOMER_INTRO = """
@@ -423,21 +413,22 @@ NEWCOMER_READING = """
 ### The practical answer
 
 **About ten labels.** With v2 and adaptation, five labeled designs from a
-completely unseen component family reach macro R2 0.887, ten reach 0.943, and
-twenty-five reach 0.979. For comparison v0 needs roughly fifty to a hundred
-labels to reach what v2 reaches with five to ten.
+completely unseen component family reach macro R2 **0.894**, ten reach **0.944**,
+and twenty-five reach 0.983. v0 needs roughly fifty to a hundred labels to reach
+what v2 reaches with five to ten.
 
 **A source prior only helps if the representation aligns the classes.** This is
-the sharpest result in the notebook. At five labels, adaptation *improves* v2
-from 0.610 to 0.887 and *destroys* v0, dropping it from 0.261 to -0.502. The
-same mechanism, the same code, opposite signs. Pretrained weights are worth
-nothing on a representation that puts the classes in unrelated regions; on one
-that aligns them, they are worth an order of magnitude in labels.
+the sharpest result in the notebook. At five labels, adaptation improves v2 from
+0.629 to 0.894 and destroys v0, dropping it from 0.261 to **-0.502**. Same code,
+same splits, opposite signs.
 
-**The advantage is a low-budget phenomenon.** By 400 labels all three
-representations are above 0.98 and the curves have converged. The value of a
-foundation representation is concentrated exactly where a new contributor lives:
-the first few dozen simulations.
+**Zero-shot is now nearly break-even rather than catastrophic.** Averaged over
+the three rotations the v2 foundation scores **-0.667** with no labels, against
+v0's -11.21; on the intermediate release the same figure was -2.58. Unifying the
+ground-plane convention is what moved it.
+
+**The advantage is a low-budget phenomenon.** By 400 labels every representation
+is above 0.98 and the curves have converged.
 """
 
 
@@ -571,39 +562,278 @@ figure.show()
 BLOCK_ROLES_READING = """
 ### Reading the three settings
 
-**In-class, block ablation is almost uninformative.** Every single block reaches
-macro R2 0.987 or better on its own: the shape spectrum alone gets 0.9963, the
-physics proxy alone 0.9870, and even v0 gets 0.9921 against the full v2 vector's
-0.9998. Predicting capacitance inside one component family is easy enough that
-almost any faithful description of the geometry suffices. An ablation run only
-in this setting would conclude, wrongly, that the blocks are interchangeable.
+**In-class, block ablation is almost uninformative.** Every block reaches macro
+R2 0.988 or better on its own: the shape spectrum alone gets 0.9961, the physics
+proxy alone 0.9881, and even v0 gets 0.9921 against the full v2 vector's 0.9998.
+Predicting capacitance inside one family is easy enough that almost any faithful
+description of the geometry suffices, so an ablation run only in this setting
+would conclude, wrongly, that the blocks are interchangeable.
 
-**Cross-class, the same blocks span three orders of magnitude.** With ten labels
-from the unseen family the physical-metric block reaches 0.960 and the shape
-spectrum reaches **-3.53**. The ranking is not a rescaling of the in-class
-ranking; it is a different ordering.
+**Cross-class, the same blocks span three orders of magnitude**, from the
+physical-metric block at 0.966 with ten labels down to the shape spectrum at
+0.381. The ranking is not a rescaling of the in-class ranking.
 
-**The shape spectrum is the clearest reversal.** It is among the best in-class
-blocks at 0.9963 and by far the worst cross-class at -56.2 with no labels and
--3.53 with ten. That is physically sensible: two-point correlations and contour
-harmonics describe *what a family's geometry looks like*, and an interdigital
-comb and a transmon cross do not look alike. The block encodes exactly the
-information that does not generalize.
+**The physics proxy is the one block that predicts an unseen class with no
+labels at all**, at **+0.661**, where every other block including the full vector
+is negative. A two-dimensional boundary-element estimate is dimensionally
+comparable across component classes in a way that shape descriptors are not - but
+only once every family carries a correctly scaled ground plane, since the proxy
+solves for charge at unit potential against that plane. On the earlier releases,
+where CapN's plane was 500x too far away and TransmonCross had none, the same
+block scored -6.06.
 
-**The physical metrics are the best transfer block**, at 0.960 with ten labels,
-ahead of the full 512-dimensional vector. Absolute area, perimeter, gap, and
-width in micrometres mean the same thing for a coupler and for a qubit, so they
-are the coordinates that survive a change of component class.
+**The shape spectrum is the clearest reversal**, among the best in-class at
+0.9961 and the worst cross-class at 0.381 with ten labels. Contour harmonics and
+two-point correlations describe what a family's geometry *looks like*, and a comb
+does not look like a cross.
 
-**The parameter block earns its place here and not in Tutorial 21.** Full v2 at
--0.219 zero-shot beats geometry-only at -5.239, a twenty-fold difference, and
-holds the advantage at ten labels. Inside one family, where every design shares a
-parameter schema, the typed order statistics are redundant with the geometry;
-across families they are one of the few things that stays comparable.
+The practical consequence: v2 should be published as blocks a user can select,
+because the right subset depends on whether the task is prediction or transfer.
+"""
 
-The practical consequence is the same one Tutorial 21 reaches from a different
-direction: v2 should be published as blocks that a user can select, because the
-right subset depends on whether the task is prediction or transfer.
+
+GALLERY_INTRO = """
+## 10. What the three families actually look like
+
+Every number above rests on the claim that one encoder reads three genuinely
+different devices. It is worth seeing them. The panels below are drawn directly
+from the GDS polygons of one representative design per family, coloured by the
+role the encoder assigns each layer.
+
+The `CapNInterdigitalTee` and `TransmonCross` files are the regenerated
+port-complete exports; `GeneralizedCapNInterdigital` is the published sweep,
+which already carried ordered ports. All three therefore expose the same
+`2/0` and `3/0` marker convention, which is what lets terminal 0 and terminal 1
+mean the same thing across families.
+"""
+
+GALLERY_CODE = """
+import shapely
+from squadds.layouts.geometry_v2 import _role_geometry, _terminals, read_layer_geometry
+
+ROLE_COLORS = {"conductor": "#00798C", "etch": "#E9C46A", "port": "#D1495B", "domain": "#C7CDD4"}
+
+
+def build_gds_index():
+    \"\"\"Map design_id to a GDS file, preferring the port-complete regeneration.\"\"\"
+    index = {}
+    published = pd.read_parquet(
+        hf_hub_download("SQuADDS/SQuADDS_Layouts", "metadata/manifest.parquet", repo_type="dataset")
+    )
+    root = Path(
+        hf_hub_download("SQuADDS/SQuADDS_Layouts", "metadata/manifest.parquet", repo_type="dataset")
+    ).parent.parent
+    for row in published.itertuples():
+        index[row.design_id] = ("published", root / row.gds_path)
+    port_root = Path(PORT_COMPLETE_ROOT)
+    manifest = port_root / "metadata/manifest.parquet"
+    if manifest.is_file():
+        for row in pd.read_parquet(manifest).itertuples():
+            index[row.design_id] = ("port-complete", port_root / row.gds_path)
+    return index
+
+
+GDS_INDEX = build_gds_index()
+
+
+def polygon_traces(shape, name, color, *, opacity=0.75, show=True, paper="#FFFFFF"):
+    traces, first = [], True
+    for polygon in getattr(shape, "geoms", [shape]):
+        if polygon.geom_type != "Polygon":
+            continue
+        x, y = polygon.exterior.xy
+        traces.append(go.Scatter(
+            x=list(x), y=list(y), mode="lines", fill="toself", fillcolor=color, opacity=opacity,
+            line={"color": color, "width": 1.0}, name=name, legendgroup=name,
+            showlegend=show and first, hoverinfo="skip",
+        ))
+        first = False
+        for interior in polygon.interiors:
+            hx, hy = interior.xy
+            traces.append(go.Scatter(
+                x=list(hx), y=list(hy), mode="lines", fill="toself", fillcolor=paper,
+                line={"color": color, "width": 0.6}, legendgroup=name, showlegend=False, hoverinfo="skip",
+            ))
+    return traces
+
+
+def role_traces(design_id, *, show_legend=False):
+    origin, path = GDS_INDEX[design_id]
+    grouped = _role_geometry(read_layer_geometry(path), None)
+    traces = []
+    for role in ("domain", "etch", "conductor", "port"):
+        for _, shape in grouped[role]:
+            traces.extend(polygon_traces(shape, role, ROLE_COLORS[role], show=show_legend))
+    conductor = shapely.union_all([shape for _, shape in grouped["conductor"]])
+    return traces, origin, len(_terminals(conductor, grouped["port"])), len(grouped["port"])
+
+
+representatives = {}
+for component in sorted(CLASSES):
+    subset = data[data.component_name == component]
+    representatives[component] = subset.iloc[len(subset) // 2]["design_id"]
+
+summary = []
+for component, design_id in representatives.items():
+    _, origin, terminals, ports = role_traces(design_id)
+    summary.append({"component": component, "gds source": origin, "terminals": terminals, "port markers": ports})
+pd.DataFrame(summary)
+"""
+
+GALLERY_FIGURE = """
+# %% hide input
+figure = make_subplots(rows=1, cols=3, subplot_titles=sorted(CLASSES), horizontal_spacing=0.06)
+for column, component in enumerate(sorted(CLASSES), start=1):
+    traces, origin, terminals, ports = role_traces(representatives[component], show_legend=column == 1)
+    for trace in traces:
+        figure.add_trace(trace, row=1, col=column)
+    figure.update_xaxes(title_text="x (um)", row=1, col=column)
+    figure.update_yaxes(scaleanchor=f"x{'' if column == 1 else column}", scaleratio=1, row=1, col=column)
+figure.update_yaxes(title_text="y (um)", row=1, col=1)
+figure.update_layout(
+    title="One design from each family, coloured by the role universal-geometry-v2 assigns",
+    template="plotly_white", height=470,
+)
+figure.show()
+"""
+
+SIMILARITY_INTRO = """
+## 11. The closest and farthest shapes, by cosine similarity
+
+Section 9 measured the similarity metric as a correlation. This section shows it
+as geometry. For each of the six family pairings - three within a family and
+three across - we find the pair of designs with the **highest** cosine similarity
+and the pair with the **lowest**, and draw all four.
+
+Use the slider to change pairing. The question to ask of each panel is whether
+the pair the metric calls closest actually looks like it should behave alike, and
+whether the pair it calls farthest really is unrelated.
+"""
+
+SIMILARITY_CODE = """
+reference = v2.astype(np.float64)
+centre, scale = reference.mean(axis=0), reference.std(axis=0)
+keep = scale > 1e-8
+standardized = (reference[:, keep] - centre[keep]) / scale[keep]
+UNIT = standardized / np.maximum(np.linalg.norm(standardized, axis=1, keepdims=True), 1e-12)
+
+names = sorted(CLASSES)
+rng = np.random.default_rng(SEED)
+extremes, mean_cosine = {}, np.zeros((len(names), len(names)))
+for i, first in enumerate(names):
+    for j, second in enumerate(names):
+        if j < i:
+            continue
+        left_pool = np.flatnonzero(components == first)
+        right_pool = np.flatnonzero(components == second)
+        left = rng.choice(left_pool, 40000)
+        right = rng.choice(right_pool, 40000)
+        valid = left != right
+        left, right = left[valid], right[valid]
+        similarity = np.sum(UNIT[left] * UNIT[right], axis=1)
+        mean_cosine[i, j] = mean_cosine[j, i] = float(similarity.mean())
+        best, worst = int(np.argmax(similarity)), int(np.argmin(similarity))
+        extremes[(first, second)] = {
+            "closest": (int(left[best]), int(right[best]), float(similarity[best])),
+            "farthest": (int(left[worst]), int(right[worst]), float(similarity[worst])),
+        }
+
+rows = []
+for (first, second), entry in extremes.items():
+    label = f"within {first}" if first == second else f"{first} vs {second}"
+    rows.append({
+        "pairing": label,
+        "max cosine": round(entry["closest"][2], 4),
+        "min cosine": round(entry["farthest"][2], 4),
+        "mean cosine": round(mean_cosine[names.index(first), names.index(second)], 4),
+    })
+pd.DataFrame(rows)
+"""
+
+SIMILARITY_FIGURE = """
+# %% hide input
+pairings = list(extremes)
+figure = make_subplots(
+    rows=1, cols=4,
+    subplot_titles=["closest: design A", "closest: design B", "farthest: design A", "farthest: design B"],
+    horizontal_spacing=0.035,
+)
+counts = []
+for first, second in pairings:
+    entry = extremes[(first, second)]
+    before = len(figure.data)
+    for column, (row_index, _kind) in enumerate(
+        [(entry["closest"][0], "c"), (entry["closest"][1], "c"),
+         (entry["farthest"][0], "f"), (entry["farthest"][1], "f")], start=1
+    ):
+        traces, _, _, _ = role_traces(data.iloc[row_index]["design_id"])
+        for trace in traces:
+            figure.add_trace(trace, row=1, col=column)
+    counts.append(len(figure.data) - before)
+
+start = 0
+steps = []
+for index, (first, second) in enumerate(pairings):
+    visible = [False] * len(figure.data)
+    for offset in range(counts[index]):
+        visible[start + offset] = True
+    start += counts[index]
+    entry = extremes[(first, second)]
+    label = f"within {first[:14]}" if first == second else f"{first[:12]} vs {second[:12]}"
+    steps.append({
+        "label": label, "method": "update",
+        "args": [{"visible": visible},
+                 {"title": f"{label}   closest cosine {entry['closest'][2]:.4f}   "
+                           f"farthest cosine {entry['farthest'][2]:.4f}"}],
+    })
+for index in range(len(figure.data)):
+    figure.data[index].visible = index < counts[0]
+first, second = pairings[0]
+entry = extremes[(first, second)]
+for column in range(1, 5):
+    figure.update_yaxes(scaleanchor=f"x{'' if column == 1 else column}", scaleratio=1, row=1, col=column)
+figure.update_layout(
+    title=f"within {first[:14]}   closest cosine {entry['closest'][2]:.4f}   "
+          f"farthest cosine {entry['farthest'][2]:.4f}",
+    template="plotly_white", height=430, showlegend=False,
+    sliders=[{"active": 0, "currentvalue": {"prefix": "pairing: "}, "pad": {"t": 68}, "steps": steps}],
+)
+figure.show()
+"""
+
+SIMILARITY_MATRIX = """
+# %% hide input
+figure = go.Figure(go.Heatmap(
+    z=mean_cosine, x=names, y=names, colorscale="Viridis", zmid=0,
+    text=[[f"{value:.3f}" for value in row] for row in mean_cosine],
+    texttemplate="%{text}", colorbar={"title": "mean cosine"},
+    hovertemplate="%{y}<br>%{x}<br>mean cosine=%{z:.4f}<extra></extra>",
+))
+figure.update_layout(
+    title="Mean standardized cosine similarity between and within families",
+    template="plotly_white", height=470, margin={"l": 210, "b": 150},
+)
+figure.show()
+"""
+
+SIMILARITY_READING = """
+### Reading the shapes
+
+The mean-cosine matrix is now strongly diagonal: 0.72 within `CapNInterdigitalTee`,
+0.91 within `TransmonCross`, and 0.23 within `GeneralizedCapNInterdigital`,
+against -0.20 and -0.44 for the two cross-family pairs involving the generalized
+coupler. Designs resemble their own family far more than another.
+
+The slider shows what that means geometrically. Within a family the closest pair
+reaches cosine 0.999 and is typically two designs differing in one swept
+dimension, while the farthest pair sits at opposite ends of the sweep.
+
+Across families the maxima are much lower: 0.343 between the two coupler
+families and only **0.044** between the generalized coupler and the transmon. A
+transmon cross and an interdigital comb share almost no shape vocabulary, so what
+the metric ranks across that boundary is overall scale and metal fraction rather
+than anything that sets the capacitance. That is the same weakness the held-out
+`TransmonCross` rotation reports as a number, seen directly.
 """
 
 
@@ -720,9 +950,22 @@ CHECKPOINTS.mkdir(parents=True, exist_ok=True)
 
 # The multi-family v2 table is built locally with the same command as Tutorial 18,
 # but without --component-name so every family is encoded.
-V2_TABLE = Path(os.getenv("SQUADDS_V2_ALL_TABLE", CHECKPOINTS / "universal-geometry-v2-all.parquet"))
+# Prefer the port-complete build when it is present.  Its CapNInterdigitalTee
+# and TransmonCross rows come from the regenerated QMetal GDS; the
+# GeneralizedCapNInterdigital rows are the published ones.  Concatenating them is
+# valid precisely because universal-geometry-v2 uses no catalogue statistics.
+PORT_COMPLETE_TABLE = CHECKPOINTS / "universal-geometry-v2-portcomplete.parquet"
+V2_TABLE = Path(os.getenv("SQUADDS_V2_ALL_TABLE", PORT_COMPLETE_TABLE))
+if not V2_TABLE.is_file():
+    V2_TABLE = CHECKPOINTS / "universal-geometry-v2-all.parquet"
 if not V2_TABLE.is_file():
     raise FileNotFoundError(f"Build the multi-family v2 table first; expected {V2_TABLE}.")
+LAYOUT_RELEASE = "port-complete" if V2_TABLE == PORT_COMPLETE_TABLE else "published-portless"
+
+PORT_COMPLETE_ROOT = os.getenv(
+    "SQUADDS_PORT_COMPLETE_ROOT",
+    str(Path.home() / "Documents/New project/SQuADDS-port-gds-artifacts/layout-dataset"),
+)
 
 v0_path = Path(
     hf_hub_download("SQuADDS/SQuADDS_Layout_Embeddings", "metadata/static-embedding-v0.parquet", repo_type="dataset")
@@ -732,6 +975,7 @@ database = {
     for name, spec in CLASSES.items()
 }
 print("v2 table:", V2_TABLE.name)
+print("layout release:", LAYOUT_RELEASE)
 for name, path in database.items():
     print(f"  {name:30s} {path.name}")
 """
@@ -973,6 +1217,11 @@ REPRESENTATIONS = {
     "v2 geometry only": v2[:, GEOMETRY_COLUMNS],
 }
 EXPERIMENT = {
+    "layout_release": LAYOUT_RELEASE,
+    # The port-complete and portless cohorts contain the same design_id values,
+    # so a row count alone would not change the fingerprint and stale results
+    # would be silently reused.  Hash the vectors instead.
+    "matrix_sha256": hashlib.sha256(v2.tobytes()).hexdigest()[:16],
     "rows": int(len(data)),
     "repeats": REPEATS,
     "fractions": FRACTIONS,
@@ -1387,6 +1636,14 @@ figure.update_layout(
 figure.show()
 """
     ),
+    markdown(GALLERY_INTRO),
+    code(GALLERY_CODE),
+    code(GALLERY_FIGURE),
+    markdown(SIMILARITY_INTRO),
+    code(SIMILARITY_CODE),
+    code(SIMILARITY_FIGURE),
+    code(SIMILARITY_MATRIX),
+    markdown(SIMILARITY_READING),
     markdown(CONCLUSIONS),
 ]
 
