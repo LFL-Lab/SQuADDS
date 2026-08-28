@@ -24,6 +24,7 @@ from .geometry_v2 import (
     V2_DIMENSIONS,
     classify_parameter,
     encode,
+    scale_conditioned_coupling,
     universal_v2_schema,
 )
 from .layer_semantics import (
@@ -83,6 +84,7 @@ __all__ = [
     "V2_DIMENSIONS",
     "classify_parameter",
     "encode",
+    "scale_conditioned_coupling",
     "universal_v2_schema",
     "LayoutClient",
     "LayoutEmbeddingClient",

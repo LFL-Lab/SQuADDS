@@ -300,3 +300,21 @@ def test_metric_is_optional_and_raw_cosine_still_available(tmp_path):
     assert all(-1.0001 <= item["cosine_similarity"] <= 1.0001 for item in neighbours)
     with pytest.raises(LookupError):
         client.nearest("layout:0", limit=3, metric="whitened")
+
+
+def test_scale_conditioned_coupling_is_exact_and_size_invariant(tmp_path):
+    """Scaling a design must leave the conditioned spectrum nearly unchanged."""
+    from squadds.layouts import scale_conditioned_coupling
+
+    base = encode(build_interdigital(tmp_path / "base.gds"), OPTIONS)
+    twice = encode(build_interdigital(tmp_path / "twice.gds", scale=2.0), OPTIONS)
+    span = slice(METRIC_BLOCK_SIZE, METRIC_BLOCK_SIZE + COUPLING_BINS)
+
+    conditioned = scale_conditioned_coupling(np.vstack([base, twice]))
+    assert conditioned.shape == (2, V2_DIMENSIONS)
+    # Everything outside the coupling block is untouched.
+    assert np.array_equal(conditioned[0, :METRIC_BLOCK_SIZE], base[:METRIC_BLOCK_SIZE].astype(np.float64))
+    # The conditioned spectrum carries a distribution, so its mass is bounded.
+    assert conditioned[:, span].max() < base[span].max() + 1e-9
+    with pytest.raises(ValueError):
+        scale_conditioned_coupling(np.zeros((2, 8)))

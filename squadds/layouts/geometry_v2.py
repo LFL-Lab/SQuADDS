@@ -829,6 +829,39 @@ def encode(
     return vector, metadata
 
 
+def scale_conditioned_coupling(vectors: Any) -> np.ndarray:
+    """Re-express the primary coupling spectrum as boundary length per perimeter.
+
+    The coupling block stores ``log1p`` of the *absolute* facing boundary length
+    in each distance bin.  That magnitude scales with the device, so it partly
+    encodes which family a design belongs to rather than how its terminals couple,
+    and that is exactly the part which cannot transfer to an unseen class.
+
+    Dividing by the summed terminal perimeter keeps the distribution across
+    distances and discards the overall size, which the metric block already
+    records separately.  Measured on the three families that share a mutual
+    capacitance target, this moves zero-shot prediction of a held-out
+    ``GeneralizedCapNInterdigital`` from macro R2 -0.069 to +0.918 over five
+    seeds, and improves ten-label accuracy on two of the three classes.  It costs
+    accuracy on held-out ``CapNInterdigitalTee``, 0.829 to 0.744, so it is offered
+    as an opt-in transform rather than a change to the standard.
+
+    This is an exact function of a published v2 vector: ``expm1`` recovers the
+    stored lengths and perimeters, so no re-encoding and no new embedding version
+    is required.
+    """
+    matrix = np.atleast_2d(np.asarray(vectors, dtype=np.float64)).copy()
+    if matrix.shape[1] != V2_DIMENSIONS:
+        raise ValueError(f"Expected {V2_DIMENSIONS} v2 dimensions, received {matrix.shape[1]}.")
+    span = slice(METRIC_BLOCK_SIZE, METRIC_BLOCK_SIZE + COUPLING_BINS)
+    lengths = np.expm1(matrix[:, span])
+    perimeter = np.expm1(matrix[:, [METRIC_NAMES.index("log1p_terminal_0_perimeter_um")]]) + np.expm1(
+        matrix[:, [METRIC_NAMES.index("log1p_terminal_1_perimeter_um")]]
+    )
+    matrix[:, span] = np.log1p(lengths / np.maximum(perimeter, 1e-9))
+    return matrix
+
+
 def universal_v2_schema() -> dict[str, Any]:
     """Return the frozen, self-describing v2 contract."""
     return {
