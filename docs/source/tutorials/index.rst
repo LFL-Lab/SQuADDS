@@ -21,6 +21,8 @@ Tutorials
    Tutorial-16_Geometry_Domain_Transfer_Learning.ipynb
    Tutorial-16b_Balanced_Geometry_Domain_Transfer_Learning.ipynb
    Tutorial-17_Cross_Component_Transfer_Learning.ipynb
+   Tutorial-18_Universal_Geometry_v2_Embeddings.ipynb
+   Tutorial-19_How_Universal_Geometry_v2_Works.ipynb
 
 .. note::
 

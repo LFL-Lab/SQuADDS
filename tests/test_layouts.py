@@ -341,7 +341,7 @@ def test_universal_v1_embeddings_are_compact_versioned_and_controllable(tmp_path
     assert client.schema()["dimensions"] == 1024
     assert client.schema()["embedding_schema_version"] == "1.1.0"
     assert set(client.control_map()["parameter_name"]) == {"finger_count", "finger_width"}
-    assert client.available_versions() == ("v0", "v1")
+    assert client.available_versions() == ("v0", "v1", "v2")
     assert (output / "models" / "universal-geometry-v1" / "schema.json").is_file()
     assert (output / "models" / "universal-geometry-v1" / "control-map.parquet").is_file()
     release_manifest = json.loads((output / "models" / "universal-geometry-v1" / "release-manifest.json").read_text())

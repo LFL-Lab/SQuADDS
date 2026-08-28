@@ -14,6 +14,17 @@ from .embeddings import (
     rasterize_functional_shape,
 )
 from .features import GEOMETRY_FEATURE_SCHEMA_VERSION, build_geometry_features, geometry_feature_record
+from .geometry_v2 import (
+    COUPLING_EDGES,
+    DISTANCE_RANGE_UM,
+    METRIC_NAMES,
+    UNIVERSAL_V2_MODEL,
+    UNIVERSAL_V2_SCHEMA_VERSION,
+    V2_DIMENSIONS,
+    classify_parameter,
+    encode,
+    universal_v2_schema,
+)
 from .manifest import (
     DEFAULT_LAYOUT_REPOSITORY,
     build_layout_record,
@@ -54,7 +65,16 @@ __all__ = [
     "EMBEDDING_FILENAMES",
     "EMBEDDING_SCHEMA_FILENAMES",
     "EMBEDDING_DIMENSIONS",
+    "COUPLING_EDGES",
+    "DISTANCE_RANGE_UM",
     "GEOMETRY_FEATURE_SCHEMA_VERSION",
+    "METRIC_NAMES",
+    "UNIVERSAL_V2_MODEL",
+    "UNIVERSAL_V2_SCHEMA_VERSION",
+    "V2_DIMENSIONS",
+    "classify_parameter",
+    "encode",
+    "universal_v2_schema",
     "LayoutClient",
     "LayoutEmbeddingClient",
     "LayoutReference",

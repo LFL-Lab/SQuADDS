@@ -22,10 +22,12 @@ STATIC_EMBEDDING_SCHEMA_VERSION = "0.1.0"
 EMBEDDING_FILENAMES = {
     "v0": "metadata/static-embedding-v0.parquet",
     "v1": "metadata/universal-geometry-v1.parquet",
+    "v2": "metadata/universal-geometry-v2.parquet",
 }
 EMBEDDING_SCHEMA_FILENAMES = {
     "v0": "metadata/static-embedding-v0.schema.json",
     "v1": "models/universal-geometry-v1/schema.json",
+    "v2": "models/universal-geometry-v2/schema.json",
 }
 SHAPE_SIZE = 96
 GEOMETRIC_MOMENT_NAMES = [
