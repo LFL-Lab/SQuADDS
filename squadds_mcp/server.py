@@ -144,6 +144,7 @@ def create_server() -> FastMCP:
     from squadds_mcp.tools.database import register_database_tools
     from squadds_mcp.tools.generation import register_generation_tools
     from squadds_mcp.tools.interpolation import register_interpolation_tools
+    from squadds_mcp.tools.layouts import register_layout_tools
     from squadds_mcp.tools.simulations import register_simulation_tools
 
     register_database_tools(mcp)
@@ -152,6 +153,7 @@ def create_server() -> FastMCP:
     register_contribution_tools(mcp)
     register_generation_tools(mcp)
     register_simulation_tools(mcp)
+    register_layout_tools(mcp)
 
     # -- Register resources --
     from squadds_mcp.resources.ansys_simulation_guide import register_ansys_simulation_resources
