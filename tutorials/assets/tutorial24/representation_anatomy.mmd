@@ -1,0 +1,19 @@
+flowchart LR
+    GDS["Port-complete planar GDS<br/>ground + metal islands + terminal markers"] --> CAN["Remove coordinate choices<br/>translation, rotation, reflection, outer crop"]
+    CAN --> GRAPH["Conductor graph"]
+    GRAPH --> NODE["Node features<br/>one row per metal island"]
+    GRAPH --> EDGE["Edge features<br/>gap, facing, screening for every pair"]
+    GRAPH --> GLOBAL["Global features<br/>device-scale and topology summaries"]
+    NODE --> LAYOUT["Permutation-invariant<br/>layout view"]
+    EDGE --> PAIR["Reciprocal pair-query view<br/>for a requested capacitance"]
+    GLOBAL --> LAYOUT
+    GLOBAL --> PAIR
+    LAYOUT --> MAP["atlas / retrieval / collision audit"]
+    PAIR --> CAP["capacitance model"]
+
+    classDef input fill:#e8f1f8,stroke:#27689d,color:#172033;
+    classDef graphStyle fill:#e5f1e8,stroke:#4a8f54,color:#172033;
+    classDef view fill:#eee7f4,stroke:#6f4c8b,color:#172033;
+    class GDS,CAN input;
+    class GRAPH,NODE,EDGE,GLOBAL graphStyle;
+    class LAYOUT,PAIR,MAP,CAP view;

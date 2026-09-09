@@ -22,6 +22,38 @@ def _normalized_component_name(component_name: str) -> str:
     return component_name.replace("_", "").replace("-", "").lower()
 
 
+def get_component_class(component_name: str) -> type[QComponent]:
+    """Return a locally supported Qiskit Metal component implementation.
+
+    This registry is intentionally broader than :func:`get_coupler_spec`.
+    Components such as ``GeneralizedCapStar`` have a design-dependent number
+    of pins, so forcing them into the fixed route/exposed-pin coupler contract
+    would discard useful topology information.
+    """
+    normalized = _normalized_component_name(component_name)
+    if normalized == "generalizedcapninterdigital":
+        from squadds.components.generalized_ncap_interdigital import GeneralizedCapNInterdigital
+
+        return GeneralizedCapNInterdigital
+    if normalized in {"generalizedcapconcentric", "capconcentric", "concentriccap"}:
+        from squadds.components.generalized_cap_concentric import GeneralizedCapConcentric
+
+        return GeneralizedCapConcentric
+    if normalized in {"generalizedcapstar", "capstar", "starcap"}:
+        from squadds.components.generalized_cap_star import GeneralizedCapStar
+
+        return GeneralizedCapStar
+    if normalized in {"capn", "ncap", "capninterdigitaltee"}:
+        from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import CapNInterdigitalTee
+
+        return CapNInterdigitalTee
+    if normalized in {"clt", "coupledlinetee"}:
+        from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
+
+        return CoupledLineTee
+    raise ValueError(f"Unsupported component: {component_name}")
+
+
 def get_coupler_spec(component_name: str) -> CouplerSpec:
     """Return the implementation and pin roles for a coupler name."""
     normalized = _normalized_component_name(component_name)
@@ -64,12 +96,23 @@ def create_coupler(component_name: str, design, name: str, options: dict[str, An
     return spec.component_class(design, name, options=options or {})
 
 
+def create_component(
+    component_name: str,
+    design,
+    name: str,
+    options: dict[str, Any] | None = None,
+) -> QComponent:
+    """Instantiate any component registered by dataset-facing class name."""
+    component_class = get_component_class(component_name)
+    return component_class(design, name, options=options or {})
+
+
 def build_component_from_design(design, row: dict[str, Any], name: str = "cplr") -> QComponent:
     """Build the exact component declared by a SQuADDS dataset row.
 
     Both nested Hugging Face records and second-level flattened API records are
-    accepted. GeneralizedCapNInterdigital is intentionally resolved only from
-    ``squadds.components``.
+    accepted. Local generalized components are intentionally resolved only
+    from ``squadds.components``.
     """
     design_record = row.get("design", row)
     component_name = (
@@ -79,4 +122,4 @@ def build_component_from_design(design, row: dict[str, Any], name: str = "cplr")
         raise ValueError("Dataset row does not declare a component class or coupler type.")
 
     options = design_record.get("design_options", row.get("design_options", {}))
-    return create_coupler(component_name, design, name, options)
+    return create_component(component_name, design, name, options)

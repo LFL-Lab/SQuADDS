@@ -25,6 +25,9 @@ Tutorials
    Tutorial-19_How_Universal_Geometry_v2_Works.ipynb
    Tutorial-20_Cross_Class_Transfer_with_v2.ipynb
    Tutorial-21_Balanced_Geometry_Domains_with_v2.ipynb
+   Tutorial-22_Geometry_Similarity_and_Capacitance_with_v2.ipynb
+   Tutorial-23_Capacitance_Operator_v3.ipynb
+   Tutorial-24_Embedding_Representation_Acceptance.ipynb
 
 .. note::
 
