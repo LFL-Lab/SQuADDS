@@ -90,8 +90,13 @@ class GeneralizedCapNInterdigital(QComponent):
         if p.finger_length > 0.0:
             assert p.finger_count > 0, "finger_count must be greater than 0 if finger_length is greater than 0"
 
-            assert p.finger_radius <= p.finger_width / 2, (
-                f"finger_radius must be <= half the finger_width (= {p.finger_width / 2 * 1000} um)"
+            minimum_finger_width = min(
+                self._side_finger_width("north"),
+                self._side_finger_width("south"),
+            )
+            assert p.finger_radius <= minimum_finger_width / 2, (
+                "finger_radius must be <= half the narrowest terminal finger width "
+                f"(= {minimum_finger_width / 2 * 1000} um)"
             )
             assert (p.finger_length - (p.finger_radius + p.finger_etch_radius)) >= -1e-6, (
                 "Must have finger_length >= finger_radius + finger_etch_radius in order to render"
@@ -172,10 +177,30 @@ class GeneralizedCapNInterdigital(QComponent):
             gap=p.north_cpw_gap,
         )
 
+    def _side_finger_width(self, side: str) -> float:
+        """Return an optional terminal-specific finger/paddle width.
+
+        The original symmetric behavior remains the default.  The explicit
+        north/south options reproduce the asymmetric two-pad sweep exported by
+        ``squadds2-helpers`` without changing existing design dictionaries.
+        """
+        key = f"{side}_finger_width"
+        if key in self.options:
+            return float(getattr(self.p, key))
+        return float(self.p.finger_width)
+
     def _initialize_calculated_variables(self):
         p = self.p
 
-        self.cap_width = p.finger_count * p.finger_width + (p.finger_count - 1) * p.finger_gap_east_west
+        north_finger_width = self._side_finger_width("north")
+        south_finger_width = self._side_finger_width("south")
+        self.north_cap_width = (
+            p.finger_count * north_finger_width + (p.finger_count - 1) * p.finger_gap_east_west
+        )
+        self.south_cap_width = (
+            p.finger_count * south_finger_width + (p.finger_count - 1) * p.finger_gap_east_west
+        )
+        self.cap_width = max(self.north_cap_width, self.south_cap_width)
         self.cap_height = p.south_spine_width + p.finger_length + p.finger_gap_north_south + p.north_spine_width
 
         self.south_cpw_left_edge_x = p.south_cpw_xpos_offset - p.south_cpw_width / 2
@@ -300,7 +325,7 @@ class GeneralizedCapNInterdigital(QComponent):
     def _get_finger_coords(self, start_coord, exclude_left_ledge=False, exclude_right_ledge=False):
         p = self.p
         length = p.finger_length
-        width = p.finger_width
+        width = getattr(self, "_active_finger_width", p.finger_width)
         rf = p.finger_radius
         re = p.finger_etch_radius
         gap_width = self.finger_gap_width
@@ -449,6 +474,24 @@ class GeneralizedCapNInterdigital(QComponent):
         )
 
     def _make_cap_body(self, is_body_south, finger_count, gap_first=False):
+        saved_cap_width = self.cap_width
+        saved_finger_gap_width = self.finger_gap_width
+        saved_active_width = getattr(self, "_active_finger_width", None)
+        active_width = self._side_finger_width("south" if is_body_south else "north")
+        self.cap_width = self.south_cap_width if is_body_south else self.north_cap_width
+        self.finger_gap_width = active_width + 2 * self.p.finger_gap_east_west
+        self._active_finger_width = active_width
+        try:
+            return self._make_cap_body_impl(is_body_south, finger_count, gap_first)
+        finally:
+            self.cap_width = saved_cap_width
+            self.finger_gap_width = saved_finger_gap_width
+            if saved_active_width is None:
+                del self._active_finger_width
+            else:
+                self._active_finger_width = saved_active_width
+
+    def _make_cap_body_impl(self, is_body_south, finger_count, gap_first=False):
         p = self.p
         if is_body_south:
             spine_width = p.south_spine_width
@@ -600,7 +643,7 @@ class GeneralizedCapNInterdigital(QComponent):
                     self._append_spine_ledge_left_simplified(cap_body_coords, y)
                 else:
                     self._append_spine_ledge_left_tangent(cap_body_coords, y)
-                x = x + p.finger_width + p.finger_gap_east_west - self.finger_gap_width / 2
+                x = x + self._active_finger_width + p.finger_gap_east_west - self.finger_gap_width / 2
 
             for i in range(finger_count):
                 coords, x, y = self._get_finger_coords(

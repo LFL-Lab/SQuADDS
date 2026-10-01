@@ -1,0 +1,17 @@
+flowchart LR
+    DATA["Three swept families<br/>894 designs each"] --> SPLIT["Split by design identity<br/>fixed 20% target test set"]
+    SPLIT --> NEST["Nested target labels<br/>1, 5, 10, 50, 100"]
+    NEST --> T["Target-only"]
+    NEST --> P["Pool source + target"]
+    NEST --> R["Source model +<br/>target residual correction"]
+    T --> M["Same held-out rows<br/>R2 log(1+C), RMSE, MedAE"]
+    P --> M
+    R --> M
+    M --> CLAIM["Claim transfer only if it beats<br/>target-only at matched label count"]
+
+    classDef data fill:#e8f1f8,stroke:#27689d,color:#172033;
+    classDef method fill:#eee7f4,stroke:#6f4c8b,color:#172033;
+    classDef decision fill:#e5f1e8,stroke:#4a8f54,color:#172033;
+    class DATA,SPLIT,NEST data;
+    class T,P,R method;
+    class M,CLAIM decision;

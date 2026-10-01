@@ -865,6 +865,51 @@ class SQuADDS_DB(metaclass=SingletonMeta):
 
         return build_component_from_design(design, row, name=name)
 
+    @staticmethod
+    def get_layout_ref(row, layout_client=None):
+        """Resolve the GDS artifact associated with a simulation dataset row."""
+        from squadds.layouts import LayoutClient, canonical_design_id, infer_layout_component_name
+
+        notes = row.get("notes", {}) if hasattr(row, "get") else {}
+        source_id = notes.get("source_id") if isinstance(notes, dict) else None
+        source_id = source_id or (row.get("source_id") if hasattr(row, "get") else None)
+        client = layout_client or LayoutClient()
+        if source_id:
+            return client.find(source_id=source_id)
+
+        design = row.get("design", {}) if hasattr(row, "get") else {}
+        if not isinstance(design, dict) or not design:
+            design_options = row.get("design_options") if hasattr(row, "get") else None
+            if isinstance(design_options, dict):
+                design = {
+                    "design_options": design_options,
+                    "component_name": row.get("component_name") if hasattr(row, "get") else None,
+                    "coupler_type": row.get("coupler_type") if hasattr(row, "get") else None,
+                }
+        component_name = infer_layout_component_name(design) if isinstance(design, dict) else None
+        design_options = design.get("design_options") if isinstance(design, dict) else None
+        if not component_name or not isinstance(design_options, dict):
+            raise ValueError("Dataset row has neither a layout source_id nor a component design definition.")
+        return client.find(design_id=canonical_design_id(component_name, design_options))
+
+    @staticmethod
+    def download_gds(row, layout_client=None):
+        """Download the checksum-verified GDS artifact associated with a dataset row."""
+        from squadds.layouts import LayoutClient
+
+        client = layout_client or LayoutClient()
+        reference = SQuADDS_DB.get_layout_ref(row, layout_client=client)
+        return client.download(reference)
+
+    @staticmethod
+    def get_layout_embedding(row, layout_client=None, embedding_client=None, embedding_version="v0"):
+        """Return a versioned layout embedding for a dataset row."""
+        from squadds.layouts import LayoutClient, LayoutEmbeddingClient
+
+        reference = SQuADDS_DB.get_layout_ref(row, layout_client=layout_client or LayoutClient())
+        client = embedding_client or LayoutEmbeddingClient(version=embedding_version)
+        return client.get(reference.layout_id)
+
     def create_system_df(self, parallelize=False, num_cpu=None):
         """
         Creates and returns a DataFrame based on the selected system.

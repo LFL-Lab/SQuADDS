@@ -1,0 +1,16 @@
+flowchart LR
+    A["Module A<br/>left + shared"] --> WRONG["Raw vector A + B"]
+    B["Module B<br/>shared + right"] --> WRONG
+    WRONG --> FAIL["Fails: shared node and<br/>global summaries are double-counted"]
+    A --> MERGE["Match port/net identity<br/>place geometry and merge shared metal"]
+    B --> MERGE
+    MERGE --> JOIN["Joined three-conductor GDS"]
+    JOIN --> ENC["Re-encode one conductor graph"]
+    ENC --> MATRIX["4 x 4 operator<br/>3 conductors + ground"]
+
+    classDef bad fill:#f7e7e2,stroke:#d85832,color:#172033;
+    classDef good fill:#e5f1e8,stroke:#4a8f54,color:#172033;
+    classDef neutral fill:#e8f1f8,stroke:#27689d,color:#172033;
+    class WRONG,FAIL bad;
+    class MERGE,JOIN,ENC,MATRIX good;
+    class A,B neutral;
