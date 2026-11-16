@@ -67,8 +67,6 @@ def register_metadata_resources(mcp: FastMCP) -> None:
   title = {{QCap}: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout},
   author = {Shanto, Sadman Ahmed and Das, Saikat and Levenson-Falk, Eli},
   year = {2026},
-  eprint = {<arXiv id>},
-  archivePrefix = {arXiv},
   url = {https://lfl-lab.github.io/SQuADDS/ml-paper/paper/}
 }"""
 

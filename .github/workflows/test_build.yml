@@ -134,6 +134,68 @@ jobs:
       - name: Run ML integration tests
         run: uv run pytest -q -m integration --ignore=tests/mvp_test.py --tb=short -rs
 
+  tutorials:
+    # Runs Tutorials 11-15 top to bottom as a user would (pip extras [ml,gds], no Hugging Face token) and fails on any
+    # cell error or failing shell line (scripts/run_tutorials.py). Cells tagged skip-ci need the all-data training shards
+    # and hours of training (Tutorial 14's collective retrain). Tutorial 16 screens thousands of layouts with 8 worker
+    # processes (about 8 min on an 18-core laptop) and is not run here.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON((inputs.os == '' || inputs.os == 'all') && '["ubuntu-latest", "macos-latest", "windows-latest"]' || format('["{0}"]', inputs.os)) }}
+    env:
+      MPLBACKEND: Agg
+      QISKIT_METAL_HEADLESS: "1"
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: "1"
+      UV_PYTHON: "3.12"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libopengl0 libglu1-mesa
+
+      - name: Install dependencies
+        run: |
+          uv sync --extra ml --extra gds
+          uv pip install nbclient ipykernel
+        shell: bash
+
+      - name: Run Tutorials 11-15
+        working-directory: tutorials
+        run: >-
+          uv run --no-sync python ../scripts/run_tutorials.py
+          Tutorial-11_Predicting_Capacitance_Matrices_from_GDS.ipynb
+          Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.ipynb
+          Tutorial-13_From_Layout_to_Hamiltonian_with_ML.ipynb
+          Tutorial-14_Training_on_Your_Own_Designs.ipynb
+          Tutorial-15_Contributing_Capacitance_Data_and_Models.ipynb
+          --timeout 1800 --out ../executed_tutorials
+        shell: bash
+
+      - name: Upload the executed notebooks
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: executed-tutorials-${{ matrix.os }}
+          path: executed_tutorials/
+          if-no-files-found: ignore
+
   integration-smoke:
     runs-on: ubuntu-latest
     env:

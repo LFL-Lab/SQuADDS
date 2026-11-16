@@ -32,7 +32,7 @@
 
 # %% [markdown]
 # <div class="admonition note">
-# <p class="admonition-title">New in SQuADDS 1.0: ML capacitance estimates</p>
+# <p class="admonition-title">New in SQuADDS 0.5: ML capacitance estimates</p>
 # <p>The ML capacitance models predict the Maxwell matrix of a layout straight from its GDS in seconds (<a href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-11_Predicting_Capacitance_Matrices_from_GDS.html">Tutorial 11</a>). Use them to screen designs, and a field solve like this one to confirm layouts outside the families the models were validated on.</p>
 # </div>
 

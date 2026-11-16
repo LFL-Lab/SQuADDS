@@ -1,7 +1,8 @@
 """Client of the SQuADDS ML inference API (``squadds.ml.client``).
 
-The unit tests replace ``requests.get`` / ``requests.post`` with fakes that record each call. The live test (marker
-``integration``) calls the hosted API: listing, a model contract and a prediction with the contract's example request.
+The unit tests replace ``requests.get`` / ``requests.post`` with fakes that record each call. The live tests (marker
+``integration``) call the hosted API: listing, model contracts, a prediction with the contract's example request, and
+QCap / QCap-Fast predictions of bundled layouts, checked against the local model when it can be loaded.
 """
 
 from __future__ import annotations
@@ -9,7 +10,9 @@ from __future__ import annotations
 import json
 import math
 import time
+from pathlib import Path
 
+import numpy as np
 import pytest
 import requests
 
@@ -136,3 +139,58 @@ def test_live_hosted_api_lists_describes_and_predicts():
     for name, value in row.items():
         assert contract["output_units"][name] == "m"
         assert math.isfinite(value) and 1e-7 < value < 1e-2, (name, value)
+
+
+QCAP = {"qcap": "QCap", "qcap-fast": "QCap-Fast"}
+CAPML = Path(__file__).parent / "data" / "capml" / "parity"
+LAYOUTS = ("exp13_q3d_cap_0414.gds", "random_v1_q3d_cap_0000.gds")  # first sent as a path, second as bytes
+
+
+@pytest.fixture(scope="module")
+def live_qcap():
+    """The hosted QCap and QCap-Fast predictions of the bundled layouts, one request each."""
+    _wait_until_up()
+    return {
+        (mid, f): client.predict(mid, file=CAPML / f if i == 0 else (CAPML / f).read_bytes(), timeout=600)
+        for mid in QCAP
+        for i, f in enumerate(LAYOUTS)
+    }
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("model_id", list(QCAP))
+def test_live_hosted_qcap_lists_describes_and_predicts(live_qcap, model_id):
+    models = {m["id"]: m for m in client.list_models(timeout=60)}
+    assert models[model_id]["status"] == "ready"
+
+    contract = client.get_model(model_id)
+    assert contract["display_name"] == contract["model"]["name"] == QCAP[model_id]
+    assert contract["input_kind"] == "file" and contract["units"] == "fF"
+
+    for f in LAYOUTS:
+        envelope = live_qcap[(model_id, f)]
+        assert envelope["model_id"] == model_id and envelope["revision"] == contract["revision"], f
+        assert envelope["metadata"]["weights_sha256"] == contract["model"]["weights_sha256"], f
+        names, C = envelope["outputs"]["names"], np.array(envelope["outputs"]["matrix_fF"])
+        assert names[0] == "G" and all(n.startswith("C") for n in names[1:]), (f, names)
+        assert C.shape == (len(names), len(names)), f
+        np.testing.assert_allclose(C, C.T, rtol=0, atol=1e-9)
+        off = C[~np.eye(len(names), dtype=bool)]
+        assert np.all(off < 0) and np.all(np.diag(C) > 0), (f, C)
+        assert envelope["metadata"]["checks"]["passed"], (f, envelope["metadata"]["checks"])
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("model_id", list(QCAP))
+def test_live_hosted_qcap_matches_local_model(live_qcap, released_capml_model, model_id):
+    """The Space (x86, 2 threads) and this runner agree to 5e-3 relative on every matrix entry."""
+    from squadds.ml.capacitance import CapacitancePredictor
+
+    p = CapacitancePredictor(released_capml_model(QCAP[model_id]))
+    for f in LAYOUTS:
+        out = live_qcap[(model_id, f)]["outputs"]
+        res = p.predict(str(CAPML / f))
+        assert res.names == out["names"], f
+        A = np.array(out["matrix_fF"])
+        rel = float(np.max(np.abs(res.matrix_fF - A) / np.maximum(np.abs(A), 1e-12)))
+        assert rel <= 5e-3, (f, rel)

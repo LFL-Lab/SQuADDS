@@ -313,7 +313,7 @@ print(base_summary["layouts"] - shard_summary(base_clean)["layouts"], "of our de
     (
         "py",
         """gds = designs[-1].gds
-qcap = CapacitancePredictor(load_model("QCap", tier="accurate"), threads=2).predict(gds)
+qcap = CapacitancePredictor(load_model("QCap"), threads=2).predict(gds)
 retrained = CapacitancePredictor(collective, threads=2).predict(gds)""",
     ),
     (

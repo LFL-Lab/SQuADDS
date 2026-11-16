@@ -240,7 +240,7 @@ plot_layout(qubit_layout, qubit_names, qubit.pins, title="TransmonCross: what th
 
 `MLSimulator` has the same call and the same result shape as the capacitance path of `AnsysSimulator` (Tutorial 2), so the rest of the SQuADDS workflow does not care where the numbers came from. Every result carries a **fidelity label**, `"ml:accurate"` or `"ml:fast"`, so a prediction can never be mistaken for a simulation.
 
-**How far can we trust it?** The released model (*QCap*, `tier="accurate"`) runs two thin-film method-of-moments field solves and corrects them with a small graph neural network. It was trained on **all** the data, so it has no held-out score of its own. Its recipe, trained on the TRAIN split only (the *paper* model), scores against Q3D (median relative error over the coupling entries, with MAE and RMSE):
+**How far can we trust it?** The released model (*QCap*) runs two thin-film method-of-moments field solves and corrects them with a small graph neural network. It was trained on **all** the data, so it has no held-out score of its own. Its recipe, trained on the TRAIN split only (the *paper* model), scores against Q3D (median relative error over the coupling entries, with MAE and RMSE):
 
 | test set | median % | MAE (fF) | RMSE (fF) |
 |---|---|---|---|
@@ -254,7 +254,7 @@ It costs about 1 s per small component (median 0.845 s on 2 CPUs of an x86 clust
 **Note:** if you have a local copy of the models, point `SQUADDS_CAPML_MODELS` at its folder and nothing is downloaded.""",
     ),
     ("py", "from squadds.ml.capacitance.bridge import MLSimulator"),
-    ("py", 'ml = MLSimulator(tier="accurate")\nml'),
+    ("py", "ml = MLSimulator()\nml"),
     ("md", "We can hand it the Qiskit Metal component directly:"),
     ("py", 'ml_result = ml.predict(qubit)\nml_result["fidelity"], ml_result["timing"]'),
     (
@@ -399,7 +399,7 @@ The closest design is never exactly on target, so Tutorial 1 used the physics-in
         """interpolated_qubit = pd.DataFrame(
     [{"design_options": design_df.iloc[0]["design_options_qubit"], "component_class": "TransmonCross"}]
 )
-interpolated_ml = analyzer.predict_capacitance(interpolated_qubit, tier="accurate")
+interpolated_ml = analyzer.predict_capacitance(interpolated_qubit)
 interpolated_ml.filter(regex="cross_to_claw_ml|cross_to_ground_ml|fidelity|ml_total_s")""",
     ),
     (
@@ -481,7 +481,7 @@ xmon_results[["design_id", "qubit_frequency_GHz", "anharmonicity_MHz", "EC", "C_
     ),
     (
         "py",
-        """xmon_ml = MLSimulator(analyzer, best_xmon, tier="accurate").simulate()
+        """xmon_ml = MLSimulator(analyzer, best_xmon).simulate()
 xmon_ml["fidelity"], round(xmon_ml["timing"]["wall_s"], 2)""",
     ),
     ("py", "compare(best_xmon, xmon_ml)"),
@@ -519,7 +519,7 @@ pocket_results[["design_id", "qubit_frequency_GHz", "anharmonicity_MHz", "EC", "
     ("py", 'best_pocket = pocket_results.iloc[0]\nlook_at(build_component(best_pocket), "closest TransmonPocket");'),
     (
         "py",
-        """pocket_ml = MLSimulator(analyzer, best_pocket, tier="accurate").simulate()
+        """pocket_ml = MLSimulator(analyzer, best_pocket).simulate()
 C_pocket = maxwell_df(pocket_ml)
 C_pocket.round(3)""",
     ),
@@ -557,7 +557,7 @@ star_results[["design_id", "star_to_pad_0", "star_to_ground", "pad_0_to_ground"]
     ),
     (
         "py",
-        """star_ml = analyzer.predict_capacitance(tier="accurate")
+        """star_ml = analyzer.predict_capacitance()
 star_results[["design_id", "star_to_pad_0"]].join(star_ml[["star_to_pad_0_ml", "fidelity", "ml_total_s"]])""",
     ),
     (
@@ -566,11 +566,11 @@ star_results[["design_id", "star_to_pad_0"]].join(star_ml[["star_to_pad_0_ml", "
 
 ### What about the Fast tier?
 
-There is also `tier="fast"`, which replaces the field solves with a learned surrogate and is roughly ten times faster. **Use it only for quick screening of the families it was trained on.** On new designs of a trained family it was *worse than the physics alone*: 3.175 % (MAE 0.583 fF / RMSE 0.824 fF) against 1.765 % (MAE 0.275 fF / RMSE 0.376 fF), and on a held-out family 3.11 % (MAE 0.533 fF / RMSE 0.633 fF) against 1.55 % (MAE 0.166 fF / RMSE 0.205 fF). Use Accurate for anything that matters.""",
+There is also `model="QCap-Fast"`, which replaces the field solves with a learned surrogate and is roughly ten times faster. **Use it only for quick screening of the families it was trained on.** On new designs of a trained family it was *worse than the physics alone*: 3.175 % (MAE 0.583 fF / RMSE 0.824 fF) against 1.765 % (MAE 0.275 fF / RMSE 0.376 fF), and on a held-out family 3.11 % (MAE 0.533 fF / RMSE 0.633 fF) against 1.55 % (MAE 0.166 fF / RMSE 0.205 fF). Use Accurate for anything that matters.""",
     ),
     (
         "py",
-        """fast_star = MLSimulator(tier="fast").predict(best_star)
+        """fast_star = MLSimulator(model="QCap-Fast").predict(best_star)
 fast_star["fidelity"], fast_star["sim_results"]["star_to_pad_0"], star_ml.iloc[0]["star_to_pad_0_ml"]""",
     ),
     (
