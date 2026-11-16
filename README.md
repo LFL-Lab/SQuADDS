@@ -12,7 +12,7 @@ SQuADDS also predicts the full Maxwell capacitance matrix of any planar supercon
 
 **Capacitance Paper Link:** [QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/)
 
-**Capacitance Paper Page:** [https://lfl-lab.github.io/SQuADDS/ml-paper/](https://lfl-lab.github.io/SQuADDS/ml-paper/), with the explainer videos and the tutorials
+**Capacitance Paper Page:** [https://lfl-lab.github.io/SQuADDS/qcap/](https://lfl-lab.github.io/SQuADDS/qcap/), with the explainer videos and the tutorials
 
 **Docsite Link:** [https://lfl-lab.github.io/SQuADDS/](https://lfl-lab.github.io/SQuADDS/)
 
@@ -496,7 +496,7 @@ Both models are trained on all of our data. The error is the median relative err
 - Dataset: [SQuADDS/SQuADDS_PlanarCapacitance](https://huggingface.co/datasets/SQuADDS/SQuADDS_PlanarCapacitance)
 - Browser demo: [SQuADDS/planar-capacitance](https://huggingface.co/spaces/SQuADDS/planar-capacitance)
 - Guide: [ML Models](https://lfl-lab.github.io/SQuADDS/source/ml_models.html#planar-capacitance-models), and Tutorials 11-16 above
-- Paper: [QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/), with explainer videos on the [paper page](https://lfl-lab.github.io/SQuADDS/ml-paper/)
+- Paper: [QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/), with explainer videos on the [paper page](https://lfl-lab.github.io/SQuADDS/qcap/)
 
 ### TransmonCross Hamiltonian-to-geometry model
 

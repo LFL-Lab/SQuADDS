@@ -24,7 +24,7 @@ exclude_patterns = [
     "_extra",
 ]
 
-# Standalone pages copied as-is into the built site: _extra/ml-paper/ -> <site>/ml-paper/ (the paper's explainer videos)
+# Standalone pages copied as-is into the built site: _extra/qcap/ -> <site>/qcap/ (the QCap paper page; /ml-paper/ redirects there) (the paper's explainer videos)
 html_extra_path = ["_extra"]
 
 extensions = [
@@ -122,7 +122,7 @@ html_sidebars = {
     "**": ["paper-outline"],
 }
 html_context = {
-    "theme_announcement": "Preprint coming very soon. Check out our <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/'>docsite</a> now",
+    "theme_announcement": "Preprint coming very soon. Check out our <a href='https://lfl-lab.github.io/SQuADDS/qcap/'>docsite</a> now",
     "expandable_sidebar": True,
     "google_analytics_id": "G-R5QKJDWM2W",
     "footer": "_footer.html",  # Add this line to reference your custom footer
