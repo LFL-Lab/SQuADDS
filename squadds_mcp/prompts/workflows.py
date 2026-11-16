@@ -275,7 +275,7 @@ Use `RouteAnchors` to avoid forced 90° turns.
     def repeat_drivenmodal_tutorial_via_mcp(
         tutorial_focus: str = "capacitance",
     ) -> str:
-        """Guide HFSS Tutorial-10/11 parity using MCP docs + Python entry points.
+        """Guide HFSS Tutorial-9/10 parity using MCP docs + Python entry points.
 
         MCP cannot invoke Ansys. This prompt directs agents through resources/tools
         (`squadds://drivenmodal-workflow`, `get_drivenmodal_playbook_json`, Maxwell helper)

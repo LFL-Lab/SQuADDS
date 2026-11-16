@@ -15,6 +15,17 @@ on:
       - master
       - main
   workflow_dispatch:
+    inputs:
+      os:
+        description: 'Runner OS for the test matrix (all = Linux, macOS and Windows)'
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
 
 jobs:
   test:
@@ -22,18 +33,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        os: ${{ fromJSON((inputs.os == '' || inputs.os == 'all') && '["ubuntu-latest", "macos-latest", "windows-latest"]' || format('["{0}"]', inputs.os)) }}
+        python-version: ['3.11', '3.12', '3.13']
     env:
       MPLBACKEND: Agg
       QISKIT_METAL_HEADLESS: "1"
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      UV_PYTHON: ${{ matrix.python-version }}  # overrides .python-version so each cell tests its own Python
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 
@@ -47,15 +60,79 @@ jobs:
           sudo apt-get install -y libegl1 libopengl0 libglu1-mesa
 
       - name: Install dependencies
-        run: uv sync --extra dev --extra mcp
+        run: uv sync --extra dev --extra mcp --extra ml
 
       - name: Set up environment file
         run: |
           echo "HUGGINGFACE_API_KEY=${{ secrets.HUGGINGFACE_API_KEY }}" > .env
+          if [ -n "$HF_TOKEN" ]; then echo "HF_TOKEN secret: present"; else echo "HF_TOKEN secret: absent (Hub model tests skip)"; fi
+        shell: bash
+
+      - name: Show what the Hugging Face token can read
+        if: env.HF_TOKEN != ''
+        run: |
+          uv run python - <<'PY' || true
+          from huggingface_hub import whoami
+          w = whoami()
+          a = w.get("auth", {}).get("accessToken", {})
+          print("token owner:", w.get("name"), "| role:", a.get("role"))
+          for s in (a.get("fineGrained") or {}).get("scoped", []):
+              print("  scope:", s.get("entity", {}).get("type"), s.get("entity", {}).get("name"), s.get("permissions"))
+          PY
         shell: bash
 
       - name: Run pytest
-        run: uv run pytest -q -m "not integration" --tb=short
+        run: |
+          uv run python -c "import sys; print('Python', sys.version)"
+          uv run pytest -q -m "not integration" --tb=short
+
+  ml-integration:
+    # The heavy ML checks (marker "integration"): both released models against the Space code on public layouts, the
+    # substrate route, the Analyzer bridge, the planar dataset source, exact component rebuilds of dataset records and the
+    # live hosted inference API. The training-reproduction gates need the training data and skip here.
+    # Needs HF_TOKEN; pull requests from forks get no secrets, so they skip this job.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON((inputs.os == '' || inputs.os == 'all') && '["ubuntu-latest", "macos-latest", "windows-latest"]' || format('["{0}"]', inputs.os)) }}
+    env:
+      MPLBACKEND: Agg
+      QISKIT_METAL_HEADLESS: "1"
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      UV_PYTHON: "3.12"
+      SQUADDS_REQUIRE_HUB_MODELS: "1"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libopengl0 libglu1-mesa
+
+      - name: Install dependencies
+        run: uv sync --extra dev --extra mcp --extra ml --extra gds
+
+      - name: Set up environment file
+        run: |
+          if [ -z "$HF_TOKEN" ]; then echo "::error::HF_TOKEN secret is missing; the ML integration tests need it"; exit 1; fi
+          echo "HUGGINGFACE_API_KEY=${{ secrets.HUGGINGFACE_API_KEY }}" > .env
+        shell: bash
+
+      - name: Run ML integration tests
+        run: uv run pytest -q -m integration --ignore=tests/mvp_test.py --tb=short -rs
 
   integration-smoke:
     runs-on: ubuntu-latest
@@ -66,10 +143,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 
@@ -99,10 +176,10 @@ jobs:
       QISKIT_METAL_HEADLESS: "1"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 

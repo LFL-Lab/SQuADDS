@@ -34,18 +34,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.11', '3.12', '3.13']
       fail-fast: false
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}  # overrides .python-version so each cell tests its own Python
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install headless libs for Qt/Matplotlib via qiskit_metal imports
         run: sudo apt-get update && sudo apt-get install -y xvfb libegl1 libxkbcommon0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 
@@ -81,13 +83,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install headless libs for Qt/Matplotlib via qiskit_metal imports
         run: sudo apt-get update && sudo apt-get install -y xvfb libegl1 libxkbcommon0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 
@@ -107,7 +109,7 @@ jobs:
 
       - name: Create issue on failure
         if: steps.compat_test.outcome == 'failure'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { owner, repo } = context.repo;

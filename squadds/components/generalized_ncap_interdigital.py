@@ -8,6 +8,16 @@ from shapely.geometry import LineString, Polygon
 
 
 class GeneralizedCapNInterdigital(QComponent):
+    """Two-body interdigital capacitor (north and south spines with interleaved fingers) fed by CPW stubs.
+
+    Optional options, not in ``default_options`` so existing designs are unchanged when they are absent:
+        * ``north_finger_width`` / ``south_finger_width``: strip width of one body (paddles, ``finger_length=0``);
+          each falls back to ``finger_width``.
+        * ``spine_ledge_rule``: ``"auto"`` (default) rounds the outer spine ledge with simple arcs when the edge fillet
+          and the finger etch circle overlap, else with the tangent construction; ``"tangent"`` always uses the tangent
+          construction, the first squadds2-helpers rule with which the exp6 and exp7 sweeps were generated.
+    """
+
     @staticmethod
     def _clean_geometry(geom, precision=1e-6):
         """Repair potentially invalid polygons before/after precision snapping."""
@@ -172,10 +182,21 @@ class GeneralizedCapNInterdigital(QComponent):
             gap=p.north_cpw_gap,
         )
 
+    def _side_finger_width(self, side: str) -> float:
+        """Strip width of one body (``north``/``south``); ``finger_width`` when the side option is unset."""
+        value = self.options.get(f"{side}_finger_width")
+        if value is None or (isinstance(value, str) and not value.strip()):
+            return float(self.p.finger_width)
+        return float(self.parse_value(value))
+
     def _initialize_calculated_variables(self):
         p = self.p
 
-        self.cap_width = p.finger_count * p.finger_width + (p.finger_count - 1) * p.finger_gap_east_west
+        nfw = self._side_finger_width("north")
+        sfw = self._side_finger_width("south")
+        self.north_cap_width = p.finger_count * nfw + (p.finger_count - 1) * p.finger_gap_east_west
+        self.south_cap_width = p.finger_count * sfw + (p.finger_count - 1) * p.finger_gap_east_west
+        self.cap_width = max(self.north_cap_width, self.south_cap_width)
         self.cap_height = p.south_spine_width + p.finger_length + p.finger_gap_north_south + p.north_spine_width
 
         self.south_cpw_left_edge_x = p.south_cpw_xpos_offset - p.south_cpw_width / 2
@@ -330,6 +351,12 @@ class GeneralizedCapNInterdigital(QComponent):
 
         return coords, x, y
 
+    def _tangent_ledge_only(self) -> bool:
+        rule = str(self.options.get("spine_ledge_rule", "auto") or "auto").strip().lower()
+        if rule not in ("auto", "tangent"):
+            raise ValueError(f"spine_ledge_rule must be 'auto' or 'tangent', got {rule!r}")
+        return rule == "tangent"
+
     def _spine_ledge_geometry(self, side: str, y: float) -> dict:
         """Circle/fillet centers for the spine ledge at the outer finger gap."""
         p = self.p
@@ -347,6 +374,8 @@ class GeneralizedCapNInterdigital(QComponent):
         if radicand >= 0:
             fillet_center_y = circ_center_y - np.sqrt(radicand)
             fillet_upper_y = fillet_center_y + p.finger_edge_gap_radius
+        elif self._tangent_ledge_only():
+            fillet_center_y = fillet_upper_y = np.nan  # legacy rule: NaN vertices, dropped by _clean_geometry
         return {
             "circ_center_x": circ_center_x,
             "circ_center_y": circ_center_y,
@@ -363,6 +392,8 @@ class GeneralizedCapNInterdigital(QComponent):
         Simplified path when the fillet top is at or above the etch-circle bottom
         (within 1e-6 mm). Otherwise use tangent fillet + etch-arc construction.
         """
+        if self._tangent_ledge_only():
+            return False
         geom = self._spine_ledge_geometry(side, y)
         if geom["radicand"] < 0:
             return True
@@ -449,6 +480,14 @@ class GeneralizedCapNInterdigital(QComponent):
         )
 
     def _make_cap_body(self, is_body_south, finger_count, gap_first=False):
+        saved = self.cap_width
+        self.cap_width = self.south_cap_width if is_body_south else self.north_cap_width
+        try:
+            return self._make_cap_body_impl(is_body_south, finger_count, gap_first)
+        finally:
+            self.cap_width = saved
+
+    def _make_cap_body_impl(self, is_body_south, finger_count, gap_first=False):
         p = self.p
         if is_body_south:
             spine_width = p.south_spine_width
@@ -893,7 +932,7 @@ class GeneralizedCapNInterdigital(QComponent):
             raise NotImplementedError
 
         # NORTH WEST CORNER
-        if p.south_cpw_length > p.south_gap_ground:
+        if p.north_cpw_length > p.north_gap_ground:
             x = self.etch_left_edge_x
             y = self.etch_height
 
@@ -909,7 +948,7 @@ class GeneralizedCapNInterdigital(QComponent):
 
             if not any([nwr_partial_valid, nwl_partial_valid, nw_equality_valid]):
                 # fill pi/2 rotations for both curves
-                if self.etch_right_edge_x > south_cpw_etch_right_edge_x:  # cpw fully connected to spine
+                if self.etch_left_edge_x < north_cpw_etch_left_edge_x:  # cpw fully connected to spine
                     cap_etch_coords.extend(
                         self._get_rounded_corner_coords(p.north_west_spine_etch_radius, "nw", (x, y), clockwise=True)
                     )
@@ -1028,13 +1067,13 @@ class GeneralizedCapNInterdigital(QComponent):
             y = self.etch_height + north_cpw_etch_length
             cap_etch_coords.append((x, y))
 
-        elif p.south_cpw_length > 0.0 and (p.south_cpw_length < p.south_gap_ground):
-            south_cpw_etch_left_edge_x = self.south_cpw_left_edge_x - p.south_cpw_gap
+        elif p.north_cpw_length > 0.0 and (p.north_cpw_length < p.north_gap_ground):
+            north_cpw_etch_left_edge_x = self.north_cpw_left_edge_x - p.north_cpw_gap
 
-            if south_cpw_etch_left_edge_x < self.etch_width / 2:
+            if north_cpw_etch_left_edge_x < self.etch_width / 2:
                 raise NotImplementedError
 
-        elif p.south_cpw_length < 1e-6:
+        elif p.north_cpw_length < 1e-6:
             raise NotImplementedError
 
         # NORTH EAST CORNER

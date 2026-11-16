@@ -33,6 +33,36 @@ from squadds_mcp.schemas import (
 from squadds_mcp.utils import dataframe_to_records, sanitize_for_json
 
 
+def sources_info(db) -> dict:
+    """Enabled / available ``SQuADDS_DB`` sources and the configs each extra source adds."""
+    from squadds.core.db_sources import available_sources
+
+    extra = getattr(db, "_extra_sources", {})
+    return {
+        "enabled": db.enabled_sources(),
+        "available": available_sources(),
+        "configs_by_source": {name: src.configs() for name, src in extra.items()},
+        "default_configs": len(getattr(db, "_default_configs", db.configs)),
+        "total_configs": len(db.configs),
+    }
+
+
+def enable_source(db, source: str, revision: str | None = None, local_dir: str | None = None) -> dict:
+    """Enable an extra source on ``db``; an error payload instead of raising."""
+    options = {k: v for k, v in {"revision": revision, "local_dir": local_dir}.items() if v}
+    try:
+        db.enable_source(source, **options)
+    except Exception as e:  # noqa: BLE001
+        return {"error": f"{type(e).__name__}: {e}"}
+    src = getattr(db, "_extra_sources", {}).get(source)
+    return {
+        "enabled": db.enabled_sources(),
+        "added_configs": src.configs() if src is not None else [],
+        "total_configs": len(db.configs),
+        "note": "rows are read lazily on first use (the first get_dataset / find_closest_designs call downloads them)",
+    }
+
+
 def register_database_tools(mcp: FastMCP) -> None:
     """Register all database-browsing tools on the given MCP server.
 
@@ -120,6 +150,17 @@ def register_database_tools(mcp: FastMCP) -> None:
         """
         db = ctx.request_context.lifespan_context.db
         config = f"{component}-{component_name}-{data_type}"
+
+        if config not in getattr(db, "_default_configs", [config]):
+            df = db.get_dataset(data_type=data_type, component=component, component_name=component_name)
+            rows = 0 if df is None else len(df)
+            return DatasetInfoResult(
+                config=config,
+                num_rows=rows,
+                features={c: str(t) for c, t in ({} if df is None else df.dtypes.items())},
+                description=f"rows from the enabled extra source(s) {db.enabled_sources()[1:]} (flattened columns)",
+                size_bytes=None if df is None else int(df.memory_usage(deep=True).sum()),
+            )
 
         dataset = load_dataset(db.repo_name, config)["train"]
         features = {name: str(feat) for name, feat in dataset.features.items()}
@@ -441,3 +482,43 @@ def register_database_tools(mcp: FastMCP) -> None:
                 "Quarter-wave has more data in SQuADDS and is the standard in most qubit architectures."
             ),
         }
+
+    @mcp.tool()
+    async def list_squadds_db_sources(ctx: Context) -> dict:
+        """List the data sources of ``SQuADDS_DB``: which are enabled and the configs each one adds.
+
+        ``default`` is ``SQuADDS/SQuADDS_DB``. ``planar_capacitance`` (on by default) adds the configs of the new families: ``coupler-GeneralizedCapConcentric-cap_matrix``,
+        ``coupler-GeneralizedCapStar-cap_matrix``, ``coupler-ShieldedCapConcentric-cap_matrix``,
+        ``qubit-Xmon-cap_matrix``, ``qubit-TransmonPocket-cap_matrix`` and more rows for
+        ``coupler-GeneralizedCapNInterdigital-cap_matrix``. Re-enable it with ``enable_squadds_db_source`` if it was disabled.
+        """
+        return sources_info(ctx.request_context.lifespan_context.db)
+
+    @mcp.tool()
+    async def enable_squadds_db_source(
+        ctx: Context,
+        source: str = "planar_capacitance",
+        revision: str | None = None,
+        local_dir: str | None = None,
+    ) -> dict:
+        """Enable an extra ``SQuADDS_DB`` data source for every following tool call (``list_configs``, ``get_dataset``,
+        ``get_capacitance_data``, ``find_closest_designs``, ``interpolate_design``).
+
+        ``planar_capacitance`` reads ``SQuADDS/SQuADDS_PlanarCapacitance`` (or ``local_dir`` /
+        ``SQUADDS_PLANAR_CAP_DATA`` pointing at a local copy). Its configs then work
+        like any other: e.g. ``find_closest_designs(system_type="qubit", qubit="Xmon", ...)`` or
+        ``find_closest_designs(system_type="coupler", coupler="GeneralizedCapConcentric",
+        target_params={"north_to_south": 25.0})``. Rows of a config both sources hold are appended after the default rows.
+
+        Args:
+            source: source name (see ``list_squadds_db_sources``).
+            revision: dataset revision (commit sha) to pin. local_dir: a local copy of the dataset.
+        """
+        return enable_source(ctx.request_context.lifespan_context.db, source, revision, local_dir)
+
+    @mcp.tool()
+    async def disable_squadds_db_source(ctx: Context, source: str = "planar_capacitance") -> dict:
+        """Disable an extra ``SQuADDS_DB`` data source; the configs return to the default ones plus any other source."""
+        db = ctx.request_context.lifespan_context.db
+        db.disable_source(source)
+        return {"enabled": db.enabled_sources(), "total_configs": len(db.configs)}

@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from squadds.calcs.floating_transmon import qubit_hamiltonian_class
 from squadds.calcs.transmon_cross import TransmonCrossHamiltonian
 from squadds.core.analysis_enrichment import (
     extract_coupler_options,
@@ -163,7 +164,7 @@ class Analyzer:
 
         #! TODO: make this more general and read the param keys from the database
         if self.selected_system == "qubit":
-            qubit_H = TransmonCrossHamiltonian(self)
+            qubit_H = self._qubit_hamiltonian()
             qubit_H.add_qubit_H_params()
             self.df = qubit_H.df
         elif self.selected_system == "cavity_claw":
@@ -172,7 +173,7 @@ class Analyzer:
             pass
         elif (self.selected_system == ["qubit", "cavity_claw"]) or (self.selected_system == ["cavity_claw", "qubit"]):
             self._fix_cavity_claw_df()
-            qubit_H = TransmonCrossHamiltonian(self)
+            qubit_H = self._qubit_hamiltonian()
             start = time.time()
             qubit_H.add_cavity_coupled_H_params()
             end = time.time()
@@ -180,6 +181,10 @@ class Analyzer:
             self.df = qubit_H.df
         else:
             raise ValueError("Invalid system.")
+
+    def _qubit_hamiltonian(self):
+        """Hamiltonian of the selected qubit class (``Xmon``, ``TransmonPocket``); ``TransmonCross`` otherwise."""
+        return (qubit_hamiltonian_class(self.selected_qubit) or TransmonCrossHamiltonian)(self)
 
     def _fix_cavity_claw_df(self):
         """
@@ -494,6 +499,31 @@ class Analyzer:
         Dict[str, List[Any]]: A dictionary containing lists of the extracted coupler options.
         """
         return extract_coupler_options(df)
+
+    def predict_capacitance(self, results_df=None, model="QCap", **kwargs):
+        """
+        Predicts the capacitance matrix of designs with the planar capacitance models (needs ``squadds[ml]``).
+
+        Each row (default: ``self.closest_df``; also an interpolated-design DataFrame or dict) is rebuilt with its
+        Qiskit Metal component, exported to GDS and predicted.
+
+        Args:
+            results_df (pd.DataFrame or dict, optional): designs to predict. Defaults to ``self.closest_df``.
+            model: ``"QCap"`` (default), ``"QCap-Fast"`` or a loaded model.
+            **kwargs: passed to ``squadds.ml.capacitance.bridge.MLSimulator`` (``threads``, ``clearance_um``, ...).
+
+        Returns:
+            pd.DataFrame: per row the predicted ``sim_results`` (``<a>_to_<b>_ml``), ``maxwell_matrix_ml``,
+            ``fidelity`` (``ml:<model>``), ``ml_total_s`` and the full result in ``ml_result``.
+        """
+        from squadds.ml.capacitance.bridge import predict_dataframe
+
+        if results_df is None:
+            results_df = self.closest_df
+        if results_df is None:
+            raise ValueError("No designs to predict: run find_closest() first or pass results_df.")
+        name = self.selected_coupler or self.selected_component_name
+        return predict_dataframe(results_df, model=model, component_name=name, **kwargs)
 
     def get_Ljs(self, df: pd.DataFrame):
         """

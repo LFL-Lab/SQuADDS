@@ -59,7 +59,7 @@ def register_simulation_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_maxwell_capacitance_conventions() -> str:
-        """Table describing Maxwell-matrix interpretation for Tutorial-10 style capacitances.
+        """Table describing Maxwell-matrix interpretation for Tutorial-9 style capacitances.
 
         Prevents incorrect double-counting when agents translate HFSS Maxwell matrices into pair capacitors.
 

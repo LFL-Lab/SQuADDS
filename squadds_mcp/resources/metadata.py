@@ -47,8 +47,9 @@ def register_metadata_resources(mcp: FastMCP) -> None:
 
     @mcp.resource("squadds://citation")
     async def get_citation() -> str:
-        """BibTeX citation for SQuADDS. Please cite this when using SQuADDS results."""
-        return """@article{Shanto2024squaddsvalidated,
+        """BibTeX citations: the 2024 SQuADDS paper, and the 2026 paper for the planar capacitance models or their dataset."""
+        return """% Cite this for SQuADDS. If you use the planar capacitance models or their dataset, also cite the second entry.
+@article{Shanto2024squaddsvalidated,
   doi = {10.22331/q-2024-09-09-1465},
   url = {https://doi.org/10.22331/q-2024-09-09-1465},
   title = {{SQ}u{ADDS}: {A} validated design database and simulation workflow for superconducting qubit design},
@@ -60,6 +61,15 @@ def register_metadata_resources(mcp: FastMCP) -> None:
   pages = {1465},
   month = sep,
   year = {2024}
+}
+
+@misc{Shanto2026planarcapacitance,
+  title = {{QCap}: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout},
+  author = {Shanto, Sadman Ahmed and Das, Saikat and Levenson-Falk, Eli},
+  year = {2026},
+  eprint = {<arXiv id>},
+  archivePrefix = {arXiv},
+  url = {https://lfl-lab.github.io/SQuADDS/ml-paper/paper/}
 }"""
 
     @mcp.resource("squadds://components")
@@ -127,7 +137,20 @@ parameters, it finds the closest matching design geometries.
    - `get_capacitance_data(component="coupler", component_name="NCap")` → NCap coupler caps
    - Capacitance determines E_C (charging energy) → qubit freq + anharmonicity
 
-### 5. Inspect Reference Devices
+### 5. Planar Capacitance ML (GDS -> full Maxwell matrix; needs `squadds[ml]`)
+   - Read `squadds://planar-capacitance-guide` (models, accuracy with MAE / RMSE, time, conventions, workflows)
+   - `inspect_capacitance_layout` → conductors and ground the model reads (one-layer files: detected ground)
+   - `predict_capacitance_from_gds` / `predict_capacitance_from_design` → N x N matrix (fF, ground first; `eps_r`,
+     `thickness_um` for other substrates)
+   - `capacitance_to_hamiltonian` → C_sigma, E_C, E_J, f_q, alpha, g, L_j
+   - `predict_closest_designs_ml` → closest rows predicted by the models next to their stored simulation
+   - `get_planar_capacitance_design` / `nearest_planar_capacitance_designs` → one dataset design in detail, nearest designs
+   - `enable_squadds_db_source("planar_capacitance")` (on by default) → Xmon, TransmonPocket, concentric, star, shielded configs
+   - `generate_component_gds`, `plan_capacitance_training`, `score_capacitance_model`,
+     `contribute_capacitance_data` / `contribute_capacitance_model` (dry run by default)
+   - Tutorials 11-16: `squadds://planar-capacitance-tutorials`
+
+### 6. Inspect Reference Devices
    - `list_measured_devices` → all experimental devices
    - `get_reference_device(component, name, data_type)` → validation source
    - `get_fabrication_recipe(device_name)` → how to build it
@@ -136,6 +159,7 @@ parameters, it finds the closest matching design geometries.
    - `qubit` — standalone qubit (params: qubit_frequency_GHz, anharmonicity_MHz)
    - `cavity_claw` — standalone cavity (params: cavity_frequency_GHz, kappa_kHz)
    - `qubit_cavity` — coupled system (all params above + g_MHz)
+   - `coupler` — planar capacitance coupler families (capacitance targets in fF, e.g. north_to_south)
 
 ## Resonator Types (CRITICAL for coupled systems)
    - `quarter` (default) — λ/4 resonator with CLT coupler. Most common.

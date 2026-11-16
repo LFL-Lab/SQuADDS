@@ -1,0 +1,225 @@
+{
+ "manifest_version": 2,
+ "source": "tl-squadds deploy/registry.yaml (version 2), flagship_tiers accurate/fast (served as models qcap/qcap-fast), paper_hub.prior_stacks corrected",
+ "registry_version": 2,
+ "training_stack": {
+  "substrate": "Si (cryogenic)",
+  "eps_r": 11.45,
+  "thickness_um": 350.0,
+  "layers": {
+   "ground": [
+    1,
+    0
+   ],
+   "conductor": [
+    1,
+    10
+   ]
+  }
+ },
+ "prior_stacks": {
+  "corrected": {
+   "title": "corrected prior with substrate far field",
+   "version": "v2m_sf_fc_dipfill_margin_slabfar",
+   "patches": [
+    "priorv2m_sf"
+   ],
+   "mode": "exact_compiled",
+   "module_sha256": "1a0bdcb71500c7f11e63238afe531c18caabd5c9f6f7aaa73d9b7dcd0ad61f8c",
+   "farfield_sha256": "6c877b47c2894fe78a38ad4199b29e450b610c2c45a261c8cf4d53efc1912836",
+   "speed_package_sha256": "4fff680f35cb8b098de6c9b1b6fc55780064362ffc829bb47bf69a77454ce38a",
+   "value_changing_approved": "user 2026-10-17 (v2m, gnn_models.GNN); user 2026-10-20: adopted arm (b) of agents/farfield (substrate dipole for far pairs in different ground pockets; pre-declared rule met, agents/farfield/RESULTS.md; adoption agents/farfield/ADOPTION.md)",
+   "speed_approved": "user 2026-10-17 (gnn_models.GNN)",
+   "previous": "corrected_halfspace"
+  }
+ },
+ "alpha": 0.49685219816506904,
+ "models": {
+  "qcap": {
+   "repo_id": "SQuADDS/QCap",
+   "revision": "25bdbb19ea3a17b2e86b08baea7b320e2d06d3a0",
+   "training_layouts": 45771,
+   "title": "QCap (~1 s): extrapolated physics R(1.5, 3) on the corrected prior + residual networks, compiled solver",
+   "paper_name": "Accurate",
+   "route": "Accurate",
+   "kind": "gnn",
+   "arm": "full_gnn",
+   "embedding": {
+    "far_k": 64,
+    "d_far_um": 100.0
+   },
+   "stack": "corrected",
+   "ppg": [
+    1.5,
+    3.0
+   ],
+   "summary": "Two thin-film method-of-moments solves (corrected prior with substrate far field, 1.5 and 3 panels per gap), Richardson-extrapolated, corrected by a 3-seed ensemble of residual networks (89,858 parameters per seed, bounded residual) with a learned row-sum closure: the complete Maxwell matrix, self terms included. Networks retrained on all 45,771 on-stack Q3D layouts (2026-10-20, on the corrected prior with substrate far field).",
+   "reference": {
+    "recipe": "the paper's version of this model (same architecture and prior stack at inference; its networks were trained on the 35,354 TRAIN layouts only, on the uncorrected prior; retrained on the corrected prior, as here, they score validation 0.218 % (0.0774 / 0.0888 fF)). These held-out numbers belong to the paper's version, not to this release, whose networks were retrained on every labelled design, the paper's test split included",
+    "val": {
+     "median_pct": 0.229,
+     "mae_ff": 0.0674,
+     "rmse_ff": 0.0792
+    },
+    "test_infamily": {
+     "median_pct": 0.177,
+     "mae_ff": 0.0203,
+     "rmse_ff": 0.025
+    },
+    "test_zeroshot": {
+     "median_pct": 0.587,
+     "mae_ff": 1.092,
+     "rmse_ff": 1.152
+    },
+    "heldout_family": {
+     "median_pct": 0.408,
+     "mae_ff": 0.049,
+     "rmse_ff": 0.059
+    }
+   },
+   "own": {
+    "insample": {
+     "set": "in-sample, all 45,771 training layouts (TRAIN + VAL + the paper's test split; it was trained on them)",
+     "median_pct": 0.207,
+     "mae_ff": 0.0679,
+     "rmse_ff": 0.077
+    }
+   },
+   "b5": {
+    "median_pct": 1.05,
+    "mae_ff": 0.132,
+    "rmse_ff": 0.188
+   },
+   "b5_physics": {
+    "name": "physics alone C^R = R(1.5, 3)",
+    "median_pct": 1.765,
+    "mae_ff": 0.275,
+    "rmse_ff": 0.376
+   },
+   "time_space": "interdigital 0.47 s, xmon 0.91 s, 1-qubit lattice (N 15) 19.0 s, 16-conductor layout 9.9 s, 9-qubit lattice (N 67) 154 s (server time, one request, Docker build 2026-10-20; a repeated request is answered from the cache in ~0.01 s)",
+   "time_x86": "0.845 / 5.96 s in family, 1.75 / 18.1 s zero-shot (median / p90; x86 cluster, 2 CPUs); B5 0.99 s median (1.14 s on the 2026-10-20 re-run, Xeon E5-2640 v4)",
+   "checkpoints": [
+    {
+     "name": "acc_v2m_sf_s0",
+     "path": "qcap/acc_v2m_sf_s0.pt",
+     "sha256": "cc69c5818f5028c26177159b88239116520abbb290743d6a6c091657e8dbf1c5",
+     "source": "data_local/flagship_v4/hpc/runs/acc_v2m_sf_s0/model.pt"
+    },
+    {
+     "name": "acc_v2m_sf_s1",
+     "path": "qcap/acc_v2m_sf_s1.pt",
+     "sha256": "2f88606dbec5c599550d088213a4c37af3b3ad5134ebad2e60519fb534553a57",
+     "source": "data_local/flagship_v4/hpc/runs/acc_v2m_sf_s1/model.pt"
+    },
+    {
+     "name": "acc_v2m_sf_s2",
+     "path": "qcap/acc_v2m_sf_s2.pt",
+     "sha256": "d13bafc6b2eb7cadcd97a387d791c0210976db1a9d618f9acc1b614e3701daed",
+     "source": "data_local/flagship_v4/hpc/runs/acc_v2m_sf_s2/model.pt"
+    }
+   ]
+  },
+  "qcap-fast": {
+   "repo_id": "SQuADDS/QCap",
+   "revision": "25bdbb19ea3a17b2e86b08baea7b320e2d06d3a0",
+   "training_layouts": 45771,
+   "title": "QCap-Fast (~0.1 s): learned prior surrogate + residual networks, no field solve (trained component families only)",
+   "paper_name": "Fast",
+   "route": "Fast",
+   "kind": "gnn",
+   "arm": "full_gnn",
+   "embedding": {
+    "far_k": 64,
+    "d_far_um": 100.0
+   },
+   "stack": null,
+   "summary": "An improved release of the paper's fast model, same architecture: a learned surrogate (1.02M parameters) predicts the two uncorrected-prior solves at 1.5 and 3 panels per gap and residual networks correct them. The surrogate is trained on more generated layouts (the prior of every on-stack layout plus 432,697 generated layouts labelled by the prior alone, against 385,593 for the paper's) and the networks are retrained on every labelled design (all 45,771 on-stack layouts, the paper's test split included). No field solve: the time is the geometric embedding.",
+   "warning": "Use QCap-Fast only for quick screening of the component families it was trained on (interdigital, paddle, concentric, star, multipad star, Xmon, TransmonPocket, shielded concentric, two-net, random, procedurally generated and synthetic campaign layouts). On new designs of a trained family (B5) it was worse than the physics alone, 3.175 % (MAE 0.583 / RMSE 0.824 fF) against 1.765 % (0.275 / 0.376 fF), and the paper's version of it was worse than the physics alone on a held-out family too, 3.11 % (0.533 / 0.633 fF) against 1.55 % (0.166 / 0.205 fF). Use QCap for anything that matters.",
+   "reference": {
+    "recipe": "the paper's version of the fast model (surrogate t100_norm trained on 385,593 generated layouts + the TRAIN geometry; networks trained on the 35,354 TRAIN layouts only). These held-out numbers belong to the paper's version, not to this release, which was trained on the paper's test split too",
+    "val": {
+     "median_pct": 0.846,
+     "mae_ff": 0.491,
+     "rmse_ff": 0.549
+    },
+    "test_infamily": {
+     "median_pct": 0.63,
+     "mae_ff": 0.113,
+     "rmse_ff": 0.1414
+    },
+    "test_zeroshot": {
+     "median_pct": 3.576,
+     "mae_ff": 4.608,
+     "rmse_ff": 5.058
+    },
+    "heldout_family": {
+     "median_pct": 3.113,
+     "mae_ff": 0.533,
+     "rmse_ff": 0.633
+    },
+    "heldout_family_physics": {
+     "median_pct": 1.554,
+     "mae_ff": 0.166,
+     "rmse_ff": 0.205
+    },
+    "val_same_surrogate": {
+     "median_pct": 0.722,
+     "mae_ff": 0.387,
+     "rmse_ff": 0.436,
+     "note": "this release's surrogate recipe trained without the validation layouts (P6 SUR-ALL) + the paper's TRAIN-only networks, held out (agents/surcov_p6/RESULTS_P6.md)"
+    }
+   },
+   "own": {
+    "insample": {
+     "set": "in-sample, all 45,771 training layouts (TRAIN + VAL + the paper's test split; it was trained on them)",
+     "median_pct": 0.671,
+     "mae_ff": 0.353,
+     "rmse_ff": 0.395
+    }
+   },
+   "b5": {
+    "median_pct": 3.175,
+    "mae_ff": 0.583,
+    "rmse_ff": 0.824
+   },
+   "b5_physics": {
+    "name": "physics alone C^R = R(1.5, 3) (worse than the physics: QCap-Fast is behind it here)",
+    "median_pct": 1.765,
+    "mae_ff": 0.275,
+    "rmse_ff": 0.376
+   },
+   "time_space": "interdigital 0.036 s, xmon 0.11 s, 1-qubit lattice (N 15) 0.82 s, 16-conductor layout 0.49 s, 9-qubit lattice (N 67) 3.9 s (server time, one request, Docker build 2026-10-20; a repeated request is answered from the cache in ~0.01 s)",
+   "time_x86": "0.091 / 0.274 s in family, 0.30 / 2.45 s zero-shot (median / p90; x86 cluster, 2 CPUs); B5 0.24 s median",
+   "checkpoints": [
+    {
+     "name": "acc_v1_s0",
+     "path": "qcap-fast/acc_v1_s0.pt",
+     "sha256": "9dff20ade26619e7713c2d145dada65e4554a623780290673cfe9452cf9b64ba",
+     "source": "data_local/flagship_v4/hpc/runs/acc_v1_s0/model.pt"
+    },
+    {
+     "name": "acc_v1_s1",
+     "path": "qcap-fast/acc_v1_s1.pt",
+     "sha256": "f1ad2ca065dd650ccabcad73a3c6ad2ac1042f4f68bb828893bbdecc47411ffe",
+     "source": "data_local/flagship_v4/hpc/runs/acc_v1_s1/model.pt"
+    },
+    {
+     "name": "acc_v1_s2",
+     "path": "qcap-fast/acc_v1_s2.pt",
+     "sha256": "8cbada211724df5cc05a7b4fdd232607de047b248a43993d3844bd68ff8060c4",
+     "source": "data_local/flagship_v4/hpc/runs/acc_v1_s2/model.pt"
+    }
+   ],
+   "learned_prior": {
+    "name": "sall_all_s0",
+    "checkpoint": {
+     "name": "sall_all_s0",
+     "path": "qcap-fast/sall_all_s0.pt",
+     "sha256": "132d6f389eda798d31bd5654a96e24cce18fa750134a9fb2a9725eafed339dac",
+     "source": "data_local/flagship_v4/hpc/sur/sall_all_s0/model.pt"
+    }
+   }
+  }
+ },
+ "default_model": "qcap"
+}

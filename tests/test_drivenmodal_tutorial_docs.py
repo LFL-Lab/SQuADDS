@@ -5,8 +5,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TUTORIAL_NAMES = [
-    "Tutorial-10_DrivenModal_Capacitance_Extraction",
-    "Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction",
+    "Tutorial-9_DrivenModal_Capacitance_Extraction",
+    "Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction",
 ]
 
 
