@@ -1,0 +1,936 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tutorial 10: Unified Driven-Modal Hamiltonian Extraction &#8212; SQuADDS v1.0.0</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/paper.css?v=73a8cae5" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"equationNumbers": {"autoNumber": "AMS", "useLabelIds": true}}, "tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area", "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}})</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/paper.js?v=1ab245fa"></script>
+    <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Tutorial 11: Predicting Capacitance Matrices from a GDS file using ML" href="Tutorial-11_Predicting_Capacitance_Matrices_from_GDS.html" />
+    <link rel="prev" title="Tutorial 9: Driven-Modal Capacitance Extraction" href="Tutorial-9_DrivenModal_Capacitance_Extraction.html" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Read our latest <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/paper/'>preprint</a> and check out its <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/'>docsite</a></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+     
+  
+
+<a class="navbar-brand logo" href="https://lfl-lab.github.io/SQuADDS/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/squadds_mark_light.png" class="logo__image only-light" alt=""/>
+    <img src="../../_static/squadds_mark_dark.png" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">SQuADDS</p>
+  
+</a>
+<span class="paper-version" title="SQuADDS 1.0.0">1.0.0</span></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="paper-nav" aria-label="Main">
+  <ul class="bd-navbar-elements navbar-nav">
+    <li class="nav-item"><a class="nav-link nav-internal" href="../getting_started.html">Install</a></li>
+    <li class="nav-item current active"><a class="nav-link nav-internal" href="index.html" aria-current="page">Tutorials</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../ml_models.html">ML models</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../mcp_server.html">MCP server</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../apidocs/index.html">API reference</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../resources/contribute.html">Contribute</a></li>
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a" title="SQuADDS datasets on Hugging Face" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/images/hf-logo.svg" class="icon-link-image" alt="SQuADDS datasets on Hugging Face"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api" title="SQuADDS ML inference API" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-code fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">SQuADDS ML inference API</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="Chat with SQuADDS" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-regular fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Chat with SQuADDS</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav class="paper-nav" aria-label="Main">
+  <ul class="bd-navbar-elements navbar-nav">
+    <li class="nav-item"><a class="nav-link nav-internal" href="../getting_started.html">Install</a></li>
+    <li class="nav-item current active"><a class="nav-link nav-internal" href="index.html" aria-current="page">Tutorials</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../ml_models.html">ML models</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../mcp_server.html">MCP server</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../apidocs/index.html">API reference</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../resources/contribute.html">Contribute</a></li>
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a" title="SQuADDS datasets on Hugging Face" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/images/hf-logo.svg" class="icon-link-image" alt="SQuADDS datasets on Hugging Face"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api" title="SQuADDS ML inference API" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-code fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">SQuADDS ML inference API</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="Chat with SQuADDS" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-regular fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Chat with SQuADDS</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links paper-outline" aria-label="Documentation">
+  <p class="bd-links__title" role="heading" aria-level="1">Documentation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started with SQuADDS</a></li>
+
+
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Tutorials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-0_Using_the_SQuADDS_WebUI.html">Tutorial 0: Using the SQuADDS Web UI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1_Getting_Started_with_SQuADDS.html">Tutorial 1: Getting Started with SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-2_Simulate_interpolated_designs.html">Tutorial 2: Simulating Interpolated Designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html">Tutorial 3: Contributing Experimentally Validated Simulation Data to SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html">Tutorial 4: Contributing Measured Devices’ Data to the SQuADDS Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.html">Tutorial 5: Designing a “fab-ready” chip with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-6_Adding_Airbridges.html">Tutorial 6: Adding Airbridges</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-7_Simulate_designs_with_palace.html">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-8_ML_interpolation_in_SQuADDS.html">Tutorial 8: Machine Learning with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-9_DrivenModal_Capacitance_Extraction.html">Tutorial 9: Driven-Modal Capacitance Extraction</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Tutorial 10: Unified Driven-Modal Hamiltonian Extraction</a><div class="paper-local"><ul>
+<li><a class="reference internal" href="#">Tutorial 10: Unified Driven-Modal Hamiltonian Extraction</a><ul>
+<li><a class="reference internal" href="#Imports">Imports</a></li>
+<li><a class="reference internal" href="#Query-a-Target-Design">Query a Target Design</a></li>
+<li><a class="reference internal" href="#Build-the-Driven-Modal-Requests">Build the Driven-Modal Requests</a></li>
+<li><a class="reference internal" href="#State-dependent-Josephson-inductance">State-dependent Josephson inductance</a></li>
+<li><a class="reference internal" href="#Run-the-Simulation">Run the Simulation</a></li>
+<li><a class="reference internal" href="#Post-Process-the-Same-Network">Post-Process the Same Network</a><ul>
+<li><a class="reference internal" href="#1.-Resonator-frequency-and-kappa">1. Resonator frequency and kappa</a></li>
+<li><a class="reference internal" href="#2.-Qubit-frequency-and-anharmonicity">2. Qubit frequency and anharmonicity</a></li>
+<li><a class="reference internal" href="#3.-Coupling-from-chi">3. Coupling from chi</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#What-the-Comparison-Means">What the Comparison Means</a></li>
+<li><a class="reference internal" href="#License">License</a></li>
+</ul>
+</li>
+</ul>
+</div></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-11_Predicting_Capacitance_Matrices_from_GDS.html">Tutorial 11: Predicting Capacitance Matrices from a GDS file using ML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.html">Tutorial 12: Planar Capacitance Families in SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-13_From_Layout_to_Hamiltonian_with_ML.html">Tutorial 13: From Layout to Hamiltonian with ML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-14_Training_on_Your_Own_Designs.html">Tutorial 14: Training on Your Own Designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-15_Contributing_Capacitance_Data_and_Models.html">Tutorial 15: Contributing Capacitance Data and Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-16_Inverse_Design_by_ML_Screening.html">Tutorial 16: Inverse Design by ML Screening</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../mcp_server.html">MCP Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ml_models.html">ML Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ml_local.html">Run ML Models Locally</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apidocs/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources/contribute.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources/simulations.html">Simulation Lessons</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="../resources/concepts.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/index.html">References</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/lfl-lab/SQuADDS">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/pdf/2312.13483.pdf">Paper</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://dornsife.usc.edu/lfl/">LFL Lab ✌️</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="paper-crumbs d-print-none">
+  <ol>
+    <li><a href="../../index.html">SQuADDS</a></li>
+    <li><a href="index.html">Tutorials</a></li>
+    <li aria-current="page">Tutorial 10: Unified Driven-Modal Hamiltonian Extraction</li>
+  </ol>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Tutorial-10:-Unified-Driven-Modal-Hamiltonian-Extraction">
+<h1>Tutorial 10: Unified Driven-Modal Hamiltonian Extraction<a class="headerlink" href="#Tutorial-10:-Unified-Driven-Modal-Hamiltonian-Extraction" title="Link to this heading">#</a></h1>
+<p>In Tutorial 9 we used driven-modal HFSS to reproduce capacitance-style quantities. Here we use the same idea for a complete qubit-cavity system. The point of this tutorial is not just to press “solve” in Ansys. The point is to show how SQuADDS turns one database geometry into one electromagnetic network model, and how different post-processing views of that same network recover the Hamiltonian parameters users care about.</p>
+<p>The workflow is:</p>
+<ol class="arabic simple">
+<li><p>ask SQuADDS for a qubit-cavity design near a target Hamiltonian,</p></li>
+<li><p>render that one coupled geometry into HFSS,</p></li>
+<li><p>sweep finely around the qubit band and the resonator band,</p></li>
+<li><p>extract <span class="math notranslate nohighlight">\(f_q\)</span>, <span class="math notranslate nohighlight">\(\alpha\)</span>, <span class="math notranslate nohighlight">\(f_r\)</span>, <span class="math notranslate nohighlight">\(\kappa\)</span>, <span class="math notranslate nohighlight">\(\chi\)</span>, and <span class="math notranslate nohighlight">\(g\)</span>, and</p></li>
+<li><p>compare the driven-modal result against the SQuADDS reference row.</p></li>
+</ol>
+<p>The workflow is deliberately split into two phases:</p>
+<ul class="simple">
+<li><p><strong>Simulation declaration</strong>: choose the geometry, layer stack, ports, adaptive setup, and frequency sweeps. This produces portable request objects.</p></li>
+<li><p><strong>Physics extraction</strong>: read the exported S/Y-parameters, terminate the unused ports in physically meaningful ways, and convert the resulting resonances into Hamiltonian parameters.</p></li>
+</ul>
+<div class="admonition note"><p class="admonition-title"><p>Why this tutorial exists</p>
+</p><p><p>Earlier SQuADDS tutorials teach the traditional split workflow: capacitances from Q3D and mode frequencies/couplings from eigenmode simulations. This tutorial shows the driven-modal alternative. We render one coupled qubit-cavity-feedline network, keep all three physical ports in the exported HFSS network, and use post-processing to ask several physics questions of the same EM data.</p>
+</p></div><section id="Imports">
+<h2>Imports<a class="headerlink" href="#Imports" title="Link to this heading">#</a></h2>
+<p>The important point is that the notebook uses SQuADDS-level objects. We do not build Qiskit Metal components or Ansys COM calls by hand here.</p>
+<p>The imported helper functions are the public API surface for this tutorial:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">build_segmented_coupled_system_requests(...)</span></code> creates the HFSS request objects for the qubit, bridge, and resonator frequency windows.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">coupled_reference_summary(...)</span></code> normalizes the SQuADDS row into the reference Hamiltonian fields and JJ quantities needed for post-processing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default_hamiltonian_setup(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">segmented_hamiltonian_sweeps(...)</span></code> provide tested defaults, while still leaving the important knobs visible.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hamiltonian_comparison_table(...)</span></code> formats the final driven-modal versus SQuADDS comparison.</p></li>
+</ul>
+<p>The lower-level heavy lifting is still visible through these objects: <code class="docutils literal notranslate"><span class="pre">DrivenModalSetupSpec</span></code> maps to the HFSS adaptive setup, <code class="docutils literal notranslate"><span class="pre">DrivenModalSweepSpec</span></code> maps to the exported frequency sweep, and the request payload contains the Qiskit Metal component options, layer stack, and port mapping.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analyzer</span><span class="p">,</span> <span class="n">SQuADDS_DB</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">build_segmented_coupled_system_requests</span><span class="p">,</span>
+    <span class="n">coupled_hamiltonian_from_prepared_runs</span><span class="p">,</span>
+    <span class="n">coupled_reference_summary</span><span class="p">,</span>
+    <span class="n">default_hamiltonian_setup</span><span class="p">,</span>
+    <span class="n">hamiltonian_comparison_table</span><span class="p">,</span>
+    <span class="n">segmented_hamiltonian_sweeps</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">display</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+</section>
+<section id="Query-a-Target-Design">
+<h2>Query a Target Design<a class="headerlink" href="#Query-a-Target-Design" title="Link to this heading">#</a></h2>
+<p>This follows the same pattern as Tutorial 1 and Tutorial 5: select a system, choose target Hamiltonian parameters, and let the <code class="docutils literal notranslate"><span class="pre">Analyzer</span></code> return the best matching SQuADDS design.</p>
+<p>The database calls below define the design family:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">select_system([&quot;qubit&quot;,</span> <span class="pre">&quot;cavity_claw&quot;])</span></code> asks for a coupled qubit-resonator dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_qubit(&quot;TransmonCross&quot;)</span></code> fixes the transmon layout component.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_cavity_claw(&quot;RouteMeander&quot;)</span></code> fixes the readout resonator family.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_resonator_type(&quot;quarter&quot;)</span></code> selects a quarter-wave resonator.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">Analyzer.find_closest(...)</span></code> then searches that system dataframe for rows whose simulated Hamiltonian parameters are close to <code class="docutils literal notranslate"><span class="pre">target_params</span></code>. The returned row contains both the Qiskit Metal design options and the reference simulation results that we will compare against later.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stdout</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()):</span>
+    <span class="n">system_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+
+<span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">4.0</span><span class="p">,</span>
+    <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">130</span><span class="p">,</span>
+    <span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">8.9</span><span class="p">,</span>
+    <span class="s2">&quot;kappa_kHz&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+    <span class="s2">&quot;g_MHz&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="s2">&quot;resonator_type&quot;</span><span class="p">:</span> <span class="s2">&quot;quarter&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stdout</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()):</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span> <span class="n">num_top</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">)</span>
+<span class="n">reference_row</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">system_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+<span class="n">display</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+   index_qc  ...                                     design_options
+0         0  ...  {&#39;cavity_claw_options&#39;: {&#39;coupler_type&#39;: &#39;CLT&#39;...
+1         0  ...  {&#39;cavity_claw_options&#39;: {&#39;coupler_type&#39;: &#39;CLT&#39;...
+2         0  ...  {&#39;cavity_claw_options&#39;: {&#39;coupler_type&#39;: &#39;CLT&#39;...
+3         0  ...  {&#39;cavity_claw_options&#39;: {&#39;coupler_type&#39;: &#39;CLT&#39;...
+4         0  ...  {&#39;cavity_claw_options&#39;: {&#39;coupler_type&#39;: &#39;CLT&#39;...
+
+[5 rows x 31 columns]
+       index_qc  cross_to_ground  ...  anharmonicity_MHz      g_MHz
+16088      1402        159.52633  ...        -127.794520  50.116660
+16093      1402        159.52633  ...        -127.794520  50.150523
+14776      1288        153.31148  ...        -133.068055  51.685967
+
+[3 rows x 36 columns]
+</pre></div></div>
+</div>
+</section>
+<section id="Build-the-Driven-Modal-Requests">
+<h2>Build the Driven-Modal Requests<a class="headerlink" href="#Build-the-Driven-Modal-Requests" title="Link to this heading">#</a></h2>
+<p>A coupled-system driven-modal solve is a 3-port network:</p>
+<ol class="arabic simple">
+<li><p>feedline input,</p></li>
+<li><p>feedline output, and</p></li>
+<li><p>the Josephson junction port.</p></li>
+</ol>
+<p>These are not three separate devices. They are three ports on one rendered qubit-claw-resonator-feedline geometry. SQuADDS uses the port mapping inside the request to connect the feedline ends and the JJ cut to HFSS lumped ports. The ports are created as 50 ohm renormalizable lumped ports. That reference impedance is how HFSS normalizes the exported S-parameters; because the full multiport network is exported, SQuADDS can later change external loads, short/open a port, or attach a
+Josephson-junction surrogate in post-processing without rerendering the geometry.</p>
+<p><code class="docutils literal notranslate"><span class="pre">coupled_reference_summary(reference_row)</span></code> extracts the database reference values in a consistent unit convention:</p>
+<ul class="simple">
+<li><p>qubit frequency in GHz,</p></li>
+<li><p>anharmonicity in MHz,</p></li>
+<li><p>cavity frequency in GHz,</p></li>
+<li><p>linewidth <span class="math notranslate nohighlight">\(\kappa / 2\pi\)</span> in MHz,</p></li>
+<li><p>coupling <span class="math notranslate nohighlight">\(g / 2\pi\)</span> in MHz, and</p></li>
+<li><p>the bare and state-dependent JJ inductance values used for terminations.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">default_hamiltonian_setup(...)</span></code> controls the adaptive mesh. The important knobs are <code class="docutils literal notranslate"><span class="pre">freq_ghz</span></code>, <code class="docutils literal notranslate"><span class="pre">max_delta_s</span></code>, <code class="docutils literal notranslate"><span class="pre">min_converged</span></code>, <code class="docutils literal notranslate"><span class="pre">max_passes</span></code>, and <code class="docutils literal notranslate"><span class="pre">basis_order</span></code>. The default centers the adaptive solve near the expected cavity frequency and uses the production driven-modal settings validated for this flow: <code class="docutils literal notranslate"><span class="pre">max_delta_s=0.005</span></code>, <code class="docutils literal notranslate"><span class="pre">min_converged=7</span></code>, <code class="docutils literal notranslate"><span class="pre">basis_order=-1</span></code> (mixed order), and up to 20 adaptive passes.</p>
+<p><code class="docutils literal notranslate"><span class="pre">segmented_hamiltonian_sweeps(...)</span></code> controls the exported frequency samples. This is where the dense/coarse/dense structure is declared:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">qubit_count</span></code> samples the qubit band where the JJ-port admittance crossing determines <span class="math notranslate nohighlight">\(f_q\)</span> and <span class="math notranslate nohighlight">\(\alpha\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bridge_count</span></code> samples the middle band more coarsely. It keeps the exported network continuous without spending most of the solve budget away from the resonances.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resonator_count</span></code> samples the readout band where the feedline response gives <span class="math notranslate nohighlight">\(f_r\)</span>, <span class="math notranslate nohighlight">\(\kappa\)</span>, <span class="math notranslate nohighlight">\(\chi\)</span>, and <span class="math notranslate nohighlight">\(g\)</span>.</p></li>
+</ul>
+<p>The dataframe printed after the cell is worth reading carefully: it is the explicit frequency plan that will be sent to HFSS.</p>
+<div class="admonition important"><p class="admonition-title"><p>One EM model, segmented sweeps</p>
+</p><p><p>The physics object is one 3-port coupled system. SQuADDS stores the qubit, bridge, and resonator windows as separate request records so each window can be checkpointed, inspected, and rerun independently. On the Ansys side these records use the same geometry, layer stack, ports, and adaptive setup.</p>
+</p></div><div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reference</span> <span class="o">=</span> <span class="n">coupled_reference_summary</span><span class="p">(</span><span class="n">reference_row</span><span class="p">)</span>
+
+<span class="n">setup</span> <span class="o">=</span> <span class="n">default_hamiltonian_setup</span><span class="p">(</span><span class="n">freq_ghz</span><span class="o">=</span><span class="n">reference</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">])</span>
+<span class="n">sweeps</span> <span class="o">=</span> <span class="n">segmented_hamiltonian_sweeps</span><span class="p">(</span>
+    <span class="n">reference</span><span class="p">,</span>
+    <span class="n">qubit_count</span><span class="o">=</span><span class="mi">22_000</span><span class="p">,</span>
+    <span class="n">bridge_count</span><span class="o">=</span><span class="mi">4_001</span><span class="p">,</span>
+    <span class="n">resonator_count</span><span class="o">=</span><span class="mi">22_000</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">requests</span> <span class="o">=</span> <span class="n">build_segmented_coupled_system_requests</span><span class="p">(</span>
+    <span class="n">reference_row</span><span class="p">,</span>
+    <span class="n">resonator_type</span><span class="o">=</span><span class="s2">&quot;quarter&quot;</span><span class="p">,</span>
+    <span class="n">run_id</span><span class="o">=</span><span class="s2">&quot;tutorial10-quarter-wave&quot;</span><span class="p">,</span>
+    <span class="n">reference</span><span class="o">=</span><span class="n">reference</span><span class="p">,</span>
+    <span class="n">setup</span><span class="o">=</span><span class="n">setup</span><span class="p">,</span>
+    <span class="n">sweeps</span><span class="o">=</span><span class="n">sweeps</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">sweep_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;band&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;start_GHz&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">start_ghz</span><span class="p">,</span>
+            <span class="s2">&quot;stop_GHz&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">stop_ghz</span><span class="p">,</span>
+            <span class="s2">&quot;points&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">count</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">sweep_type</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">request</span> <span class="ow">in</span> <span class="n">requests</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">sweep_table</span><span class="p">)</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+             band  start_GHz  stop_GHz  points           type
+0      qubit_band   3.468333  4.468333   22000  Interpolating
+1     bridge_band   4.468333  8.576342    4001           Fast
+2  resonator_band   8.576342  9.576342   22000  Interpolating
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">setup</span><span class="o">.</span><span class="n">to_renderer_kwargs</span><span class="p">()])</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;HFSS setup value&quot;</span><span class="p">}))</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+                HFSS setup value
+name            DrivenModalSetup
+freq_ghz                9.076342
+max_delta_s                0.005
+max_passes                    20
+min_passes                     2
+min_converged                  7
+pct_refinement                30
+basis_order                   -1
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">port_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">port_name</span><span class="p">,</span> <span class="o">**</span><span class="n">port_spec</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_spec</span> <span class="ow">in</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">design_payload</span><span class="p">[</span><span class="s2">&quot;port_mapping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">port_table</span><span class="p">)</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+              port  ...                                           metadata
+0   feedline_input  ...                                                NaN
+1  feedline_output  ...                                                NaN
+2               jj  ...  {&#39;hfss_target&#39;: &#39;junction&#39;, &#39;draw_inductor&#39;: F...
+
+[3 rows x 4 columns]
+</pre></div></div>
+</div>
+</section>
+<section id="State-dependent-Josephson-inductance">
+<h2>State-dependent Josephson inductance<a class="headerlink" href="#State-dependent-Josephson-inductance" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">LJ_bare_nH</span></code> is the linear Josephson inductance from the transmon design options (<code class="docutils literal notranslate"><span class="pre">aedt_q3d_inductance</span></code> / <code class="docutils literal notranslate"><span class="pre">Lj</span></code> / <code class="docutils literal notranslate"><span class="pre">LJ</span></code>). The ground-state and excited-state columns use the same workflow as <code class="docutils literal notranslate"><span class="pre">coupled_reference_summary(...)</span></code>: helper <code class="docutils literal notranslate"><span class="pre">transmon_state_inductances(...)</span></code> in <code class="docutils literal notranslate"><span class="pre">squadds.simulations.drivenmodal.workflows</span></code> builds a zero-temperature <code class="docutils literal notranslate"><span class="pre">scqubits.Transmon</span></code> with <span class="math notranslate nohighlight">\(E_J\)</span> from the bare <span class="math notranslate nohighlight">\(L_J\)</span> and <span class="math notranslate nohighlight">\(E_C\)</span> from the qubit shunt capacitance (via the database
+<code class="docutils literal notranslate"><span class="pre">cross_to_ground</span></code> and <code class="docutils literal notranslate"><span class="pre">cross_to_claw</span></code> pair capacitances in fF). It then evaluates the transmon <code class="docutils literal notranslate"><span class="pre">cos_phi_operator</span></code> in the ground and first-excited eigenstates. The effective inductances are <span class="math notranslate nohighlight">\(L_J^{(g)} = L_{J,\mathrm{bare}} / \langle \cos\phi \rangle_g\)</span> and <span class="math notranslate nohighlight">\(L_J^{(e)} = L_{J,\mathrm{bare}} / \langle \cos\phi \rangle_e\)</span>, matching how the coupled driven-modal workflow assigns JJ terminations when it reduces the exported multiport network.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">jj_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;EJ_GHz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;ej_ghz&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;EC_GHz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;ec_ghz&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;LJ_bare_nH&quot;</span><span class="p">:</span> <span class="mf">1e9</span> <span class="o">*</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;lj_bare_h&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;LJ_ground_nH&quot;</span><span class="p">:</span> <span class="mf">1e9</span> <span class="o">*</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;lj_ground_h&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;LJ_excited_nH&quot;</span><span class="p">:</span> <span class="mf">1e9</span> <span class="o">*</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;lj_excited_h&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">jj_table</span><span class="p">)</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+      EJ_GHz    EC_GHz  LJ_bare_nH  LJ_ground_nH  LJ_excited_nH
+0  16.346151  0.118811        10.0     10.641689      12.209995
+</pre></div></div>
+</div>
+</section>
+<section id="Run-the-Simulation">
+<h2>Run the Simulation<a class="headerlink" href="#Run-the-Simulation" title="Link to this heading">#</a></h2>
+<p>A production driven-modal sweep can take hours, so this notebook uses the environment variable <code class="docutils literal notranslate"><span class="pre">SQUADDS_RUN_ANSYS</span></code> as the switch between documentation mode and solver mode. With <code class="docutils literal notranslate"><span class="pre">SQUADDS_RUN_ANSYS=1</span></code>, the cell renders and solves the three frequency windows on the Windows Ansys workstation. With the variable unset, the notebook remains executable on machines without Ansys and still shows the exact sweep plan and reference target.</p>
+<p><code class="docutils literal notranslate"><span class="pre">run_drivenmodal_request(...)</span></code> is the notebook-facing entry point for the Ansys execution contract. For each request, the Ansys executor uses that contract to:</p>
+<ul class="simple">
+<li><p>builds the Qiskit Metal <code class="docutils literal notranslate"><span class="pre">QubitCavity</span></code> layout from the selected SQuADDS row,</p></li>
+<li><p>applies the SQuADDS HFSS layer-stack preset with PEC metal and cryogenic silicon metadata,</p></li>
+<li><p>renders the coupled system into a fresh HFSS driven-modal design,</p></li>
+<li><p>places the two feedline ports and the JJ lumped port,</p></li>
+<li><p>creates the adaptive setup and requested sweep, and</p></li>
+<li><p>exports Touchstone/Y-parameter data plus a manifest.</p></li>
+</ul>
+<p>The Touchstone export is where <code class="docutils literal notranslate"><span class="pre">scikit-rf</span></code> enters the workflow. HFSS gives us frequency-dependent S/Y/Z matrices; <code class="docutils literal notranslate"><span class="pre">scikit-rf</span></code> preserves the frequency axis, port order, complex S-parameters, and reference impedance metadata in a standard multiport <code class="docutils literal notranslate"><span class="pre">Network</span></code>. SQuADDS uses that representation to write <code class="docutils literal notranslate"><span class="pre">.s3p</span></code> files, reduce the 3-port network into loaded 2-port or 1-port views, and keep the port normalization explicit rather than hidden in a plot.</p>
+<p>The run writes a self-contained provenance bundle under <code class="docutils literal notranslate"><span class="pre">CHECKPOINT_ROOT</span></code>. That bundle contains the request payload, layer stack, rendered-geometry diagnostics, exported network data, and post-processing tables. The bundle is what lets the physics extraction be rerun without launching HFSS again.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">RUN_ANSYS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SQUADDS_RUN_ANSYS&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span>
+<span class="n">CHECKPOINT_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorials/runtime/drivenmodal_combined_hamiltonian/checkpoints&quot;</span><span class="p">)</span>
+
+<span class="n">prepared_runs</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">if</span> <span class="n">RUN_ANSYS</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.drivenmodal.hfss_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_drivenmodal_request</span>
+
+    <span class="n">prepared_runs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">band</span><span class="p">:</span> <span class="n">run_drivenmodal_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">checkpoint_dir</span><span class="o">=</span><span class="n">CHECKPOINT_ROOT</span><span class="p">)</span> <span class="k">for</span> <span class="n">band</span><span class="p">,</span> <span class="n">request</span> <span class="ow">in</span> <span class="n">requests</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">band</span><span class="p">,</span> <span class="n">prepared</span> <span class="ow">in</span> <span class="n">prepared_runs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">prepared</span><span class="p">[</span><span class="s1">&#39;manifest&#39;</span><span class="p">][</span><span class="s1">&#39;run_dir&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+</section>
+<section id="Post-Process-the-Same-Network">
+<h2>Post-Process the Same Network<a class="headerlink" href="#Post-Process-the-Same-Network" title="Link to this heading">#</a></h2>
+<p>The HFSS output is a frequency-dependent 3-port network. SQuADDS post-processes the same exported data in three views. The views are different mathematical reductions of one exported network, not three unrelated simulations.</p>
+<section id="1.-Resonator-frequency-and-kappa">
+<h3>1. Resonator frequency and kappa<a class="headerlink" href="#1.-Resonator-frequency-and-kappa" title="Link to this heading">#</a></h3>
+<p>The readout mode is read from feedline transmission. SQuADDS terminates the JJ port with a chosen JJ load, converts the reduced admittance back to a 2-port S-parameter network, and searches the loaded <span class="math notranslate nohighlight">\(S_{21}\)</span> response for the resonance feature. The feature position gives <span class="math notranslate nohighlight">\(f_r\)</span> and the linewidth gives <span class="math notranslate nohighlight">\(\kappa\)</span>.</p>
+</section>
+<section id="2.-Qubit-frequency-and-anharmonicity">
+<h3>2. Qubit frequency and anharmonicity<a class="headerlink" href="#2.-Qubit-frequency-and-anharmonicity" title="Link to this heading">#</a></h3>
+<p>The qubit mode is read from the JJ port. Raw Y-parameters assume all other ports are shorted, so SQuADDS first terminates the feedline ports with the intended external loads using a Schur-complement network reduction. It then adds the linear JJ surrogate admittance</p>
+<div class="math notranslate nohighlight">
+\[Y_\mathrm{JJ}(\omega) = \frac{1}{R_J} + j\omega C_J + \frac{1}{j\omega L_J}.\]</div>
+<p>The linear qubit resonance is the positive-slope zero crossing of <span class="math notranslate nohighlight">\(\operatorname{Im}(Y_\mathrm{env} + Y_\mathrm{JJ})\)</span>. The local slope gives the effective shunt capacitance seen by the junction,</p>
+<div class="math notranslate nohighlight">
+\[C_\Sigma = \frac{1}{2}\frac{\partial \operatorname{Im}(Y)}{\partial \omega}.\]</div>
+<p>SQuADDS then passes <span class="math notranslate nohighlight">\(E_J\)</span> and <span class="math notranslate nohighlight">\(E_C\)</span> to <code class="docutils literal notranslate"><span class="pre">scqubits.Transmon</span></code>. We use scqubits for <span class="math notranslate nohighlight">\(f_q\)</span> and <span class="math notranslate nohighlight">\(\alpha\)</span> rather than relying on a hand-written transmon expansion. The state-dependent inductances in the table above also come from scqubits: SQuADDS evaluates the transmon <code class="docutils literal notranslate"><span class="pre">cos_phi_operator</span></code> in the ground and excited eigenstates and uses those expectation values to turn the bare Josephson inductance into effective ground/excited loads.</p>
+</section>
+<section id="3.-Coupling-from-chi">
+<h3>3. Coupling from chi<a class="headerlink" href="#3.-Coupling-from-chi" title="Link to this heading">#</a></h3>
+<p>SQuADDS repeats the feedline reduction twice: once with the ground-state effective inductance and once with the excited-state effective inductance. The resonance positions of those two <span class="math notranslate nohighlight">\(S_{21}\)</span> traces give the dispersive shift <span class="math notranslate nohighlight">\(\chi\)</span>. With <span class="math notranslate nohighlight">\(f_q\)</span>, <span class="math notranslate nohighlight">\(\alpha\)</span>, <span class="math notranslate nohighlight">\(f_r\)</span>, and <span class="math notranslate nohighlight">\(\chi\)</span> known, SQuADDS estimates <span class="math notranslate nohighlight">\(g\)</span> using the dispersive transmon relation, including the non-RWA correction used by the helper.</p>
+<p>The table below is the Hamiltonian-level object users should expect from this workflow. In documentation mode it is initialized from the selected SQuADDS reference row so the notebook can be rendered without HFSS. In solver mode the same table is generated from the exported driven-modal network data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">RUN_ANSYS</span><span class="p">:</span>
+    <span class="n">drivenmodal_hamiltonian</span> <span class="o">=</span> <span class="n">coupled_hamiltonian_from_prepared_runs</span><span class="p">(</span><span class="n">prepared_runs</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">drivenmodal_hamiltonian</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_ghz&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;anharmonicity_mhz&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_ghz&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;kappa_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;kappa_mhz&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;g_mhz&quot;</span><span class="p">:</span> <span class="n">reference</span><span class="p">[</span><span class="s2">&quot;g_mhz&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;chi_mhz&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span>
+    <span class="p">}</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">hamiltonian_comparison_table</span><span class="p">(</span><span class="n">drivenmodal</span><span class="o">=</span><span class="n">drivenmodal_hamiltonian</span><span class="p">,</span> <span class="n">squadds</span><span class="o">=</span><span class="n">reference</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="What-the-Comparison-Means">
+<h2>What the Comparison Means<a class="headerlink" href="#What-the-Comparison-Means" title="Link to this heading">#</a></h2>
+<p>The SQuADDS row is the pre-simulated reference. The driven-modal row is a full-wave re-simulation of the same geometry with a different electromagnetic observable.</p>
+<p>A good result should satisfy three sanity checks:</p>
+<ol class="arabic simple">
+<li><p>the rendered HFSS geometry includes the qubit, claw, resonator, and feedline ports,</p></li>
+<li><p>silicon is set to the cryogenic value used by the Q3D/eigenmode flows, and</p></li>
+<li><p>the Hamiltonian table agrees within the accuracy expected from the sweep resolution and the chosen JJ termination model.</p></li>
+</ol>
+<p>If the resonator frequency shifts below the bare SQuADDS cavity frequency, that is not automatically a bug: the driven-modal model includes capacitive loading from the qubit.</p>
+<p>The port-normalization point is worth repeating. HFSS exports the network normalized to the 50 ohm port references. During post-processing SQuADDS converts between S and Y representations, changes the mathematical load on a port, and then converts back to whichever view is most useful. That is why we can ask “what does the feedline see when the JJ is in its ground-state inductive load?” without rerunning HFSS.</p>
+<p>Useful customization points:</p>
+<ul class="simple">
+<li><p>Increase <code class="docutils literal notranslate"><span class="pre">qubit_count</span></code> or <code class="docutils literal notranslate"><span class="pre">resonator_count</span></code> when the resonance is narrow and the fitted frequency is resolution-limited.</p></li>
+<li><p>Increase the frequency padding when the resonance is outside the expected band.</p></li>
+<li><p>Use a finite <code class="docutils literal notranslate"><span class="pre">cj_f</span></code> or <code class="docutils literal notranslate"><span class="pre">rj_ohms</span></code> in the local post-processing if you want a fuller Dolan-junction surrogate. The EM simulation still supplies the large geometric capacitance of the transmon pads.</p></li>
+<li><p>Keep the layer-stack preset aligned with the Q3D/eigenmode flows before comparing numbers; material drift is an easy way to create misleading Hamiltonian disagreement.</p></li>
+</ul>
+<div class="admonition warning"><p class="admonition-title"><p>Geometry sanity checks are not optional</p>
+</p><p><p>Before trusting a driven-modal Hamiltonian table, inspect the rendered Qiskit Metal and HFSS screenshots. The coupled qubit, claw, resonator, and feedline must all be present; metal sheets must be assigned to PEC; the substrate should use the cryogenic silicon permittivity <span class="math notranslate nohighlight">\(11.45\)</span>; and the lumped ports should land on the feedline ends and the JJ cut, not on launchers or unrelated metal.</p>
+</p></div></section>
+<section id="License">
+<h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
+<div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>© Copyright 2026.</p>
+</p></div></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Tutorial-9_DrivenModal_Capacitance_Extraction.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Tutorial 9: Driven-Modal Capacitance Extraction</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="Tutorial-11_Predicting_Capacitance_Matrices_from_GDS.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Tutorial 11: Predicting Capacitance Matrices from a GDS file using ML</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item"><div class="paper-footer">
+  <p>© 2026 Sadman Ahmed Shanto &amp; Eli Levenson-Falk · Levenson-Falk Lab, University of Southern California</p>
+  <p class="paper-footer__links"><a href="https://github.com/LFL-Lab/SQuADDS">GitHub</a><a href="https://pypi.org/project/SQuADDS/">PyPI</a><a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB">Hugging Face</a><a href="https://deepwiki.com/LFL-Lab/SQuADDS">DeepWiki</a><a href="https://dornsife.usc.edu/lfl/">LFL Lab</a></p>
+</div></div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

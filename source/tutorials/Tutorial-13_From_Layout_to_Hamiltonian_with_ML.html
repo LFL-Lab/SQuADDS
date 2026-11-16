@@ -1,0 +1,2520 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tutorial 13: From Layout to Hamiltonian with ML &#8212; SQuADDS v1.0.0</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/paper.css?v=73a8cae5" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"equationNumbers": {"autoNumber": "AMS", "useLabelIds": true}}, "tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area", "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}})</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/paper.js?v=1ab245fa"></script>
+    <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Tutorial 14: Training on Your Own Designs" href="Tutorial-14_Training_on_Your_Own_Designs.html" />
+    <link rel="prev" title="Tutorial 12: Planar Capacitance Families in SQuADDS" href="Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.html" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Read our latest <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/paper/'>preprint</a> and check out its <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/'>docsite</a></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item"><a class="navbar-brand logo paper-logo-qcap" href="https://lfl-lab.github.io/SQuADDS/" title="SQuADDS documentation">
+  <img src="../../_static/images/qcap_compact_light.svg" class="logo__image only-light" alt="QCap"/>
+  <img src="../../_static/images/qcap_compact_dark.svg" class="logo__image only-dark pst-js-only" alt="QCap"/>
+</a>
+<span class="paper-version" title="SQuADDS 1.0.0">SQuADDS 1.0.0</span></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="paper-nav" aria-label="Main">
+  <ul class="bd-navbar-elements navbar-nav">
+    <li class="nav-item"><a class="nav-link nav-internal" href="../getting_started.html">Install</a></li>
+    <li class="nav-item current active"><a class="nav-link nav-internal" href="index.html" aria-current="page">Tutorials</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../ml_models.html">ML models</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../mcp_server.html">MCP server</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../apidocs/index.html">API reference</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../resources/contribute.html">Contribute</a></li>
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a" title="SQuADDS datasets on Hugging Face" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/images/hf-logo.svg" class="icon-link-image" alt="SQuADDS datasets on Hugging Face"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api" title="SQuADDS ML inference API" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-code fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">SQuADDS ML inference API</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="Chat with SQuADDS" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-regular fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Chat with SQuADDS</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav class="paper-nav" aria-label="Main">
+  <ul class="bd-navbar-elements navbar-nav">
+    <li class="nav-item"><a class="nav-link nav-internal" href="../getting_started.html">Install</a></li>
+    <li class="nav-item current active"><a class="nav-link nav-internal" href="index.html" aria-current="page">Tutorials</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../ml_models.html">ML models</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../mcp_server.html">MCP server</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../apidocs/index.html">API reference</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../resources/contribute.html">Contribute</a></li>
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a" title="SQuADDS datasets on Hugging Face" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/images/hf-logo.svg" class="icon-link-image" alt="SQuADDS datasets on Hugging Face"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api" title="SQuADDS ML inference API" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-code fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">SQuADDS ML inference API</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="Chat with SQuADDS" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-regular fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Chat with SQuADDS</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links paper-outline" aria-label="Documentation">
+  <p class="bd-links__title" role="heading" aria-level="1">Documentation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started with SQuADDS</a></li>
+
+
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Tutorials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-0_Using_the_SQuADDS_WebUI.html">Tutorial 0: Using the SQuADDS Web UI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1_Getting_Started_with_SQuADDS.html">Tutorial 1: Getting Started with SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-2_Simulate_interpolated_designs.html">Tutorial 2: Simulating Interpolated Designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html">Tutorial 3: Contributing Experimentally Validated Simulation Data to SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html">Tutorial 4: Contributing Measured Devices’ Data to the SQuADDS Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.html">Tutorial 5: Designing a “fab-ready” chip with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-6_Adding_Airbridges.html">Tutorial 6: Adding Airbridges</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-7_Simulate_designs_with_palace.html">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-8_ML_interpolation_in_SQuADDS.html">Tutorial 8: Machine Learning with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-9_DrivenModal_Capacitance_Extraction.html">Tutorial 9: Driven-Modal Capacitance Extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.html">Tutorial 10: Unified Driven-Modal Hamiltonian Extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-11_Predicting_Capacitance_Matrices_from_GDS.html">Tutorial 11: Predicting Capacitance Matrices from a GDS file using ML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.html">Tutorial 12: Planar Capacitance Families in SQuADDS</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Tutorial 13: From Layout to Hamiltonian with ML</a><div class="paper-local"><ul>
+<li><a class="reference internal" href="#">Tutorial 13: From Layout to Hamiltonian with ML</a><ul>
+<li><a class="reference internal" href="#The-design-problem">The design problem</a></li>
+<li><a class="reference internal" href="#Query-the-SQuADDS-Database">Query the SQuADDS Database</a></li>
+<li><a class="reference internal" href="#Render-the-design-in-quantum-metal">Render the design in quantum-metal</a></li>
+<li><a class="reference internal" href="#Look-at-the-metal-(and-the-ports)-first">Look at the metal (and the ports) first</a></li>
+<li><a class="reference internal" href="#Predict-the-capacitance-matrix-with-MLSimulator">Predict the capacitance matrix with <code class="docutils literal notranslate"><span class="pre">MLSimulator</span></code></a></li>
+<li><a class="reference internal" href="#How-close-is-it-to-Q3D?">How close is it to Q3D?</a></li>
+<li><a class="reference internal" href="#From-capacitance-to-the-Hamiltonian">From capacitance to the Hamiltonian</a></li>
+<li><a class="reference internal" href="#An-interpolated-design-that-nobody-has-simulated">An interpolated design that nobody has simulated</a></li>
+<li><a class="reference internal" href="#New-families:-the-planar-capacitance-dataset">New families: the planar capacitance dataset</a><ul>
+<li><a class="reference internal" href="#An-Xmon-with-a-target-frequency-and-anharmonicity">An Xmon with a target frequency and anharmonicity</a></li>
+<li><a class="reference internal" href="#A-floating-transmon:-TransmonPocket">A floating transmon: <code class="docutils literal notranslate"><span class="pre">TransmonPocket</span></code></a></li>
+<li><a class="reference internal" href="#A-coupler-with-a-capacitance-target:-GeneralizedCapStar">A coupler with a capacitance target: <code class="docutils literal notranslate"><span class="pre">GeneralizedCapStar</span></code></a></li>
+<li><a class="reference internal" href="#What-about-QCap-Fast?">What about QCap-Fast?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Next-Steps...">Next Steps…</a></li>
+<li><a class="reference internal" href="#License">License</a></li>
+</ul>
+</li>
+</ul>
+</div></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-14_Training_on_Your_Own_Designs.html">Tutorial 14: Training on Your Own Designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-15_Contributing_Capacitance_Data_and_Models.html">Tutorial 15: Contributing Capacitance Data and Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-16_Inverse_Design_by_ML_Screening.html">Tutorial 16: Inverse Design by ML Screening</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../mcp_server.html">MCP Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ml_models.html">ML Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ml_local.html">Run ML Models Locally</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apidocs/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources/contribute.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources/simulations.html">Simulation Lessons</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="../resources/concepts.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/index.html">References</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/lfl-lab/SQuADDS">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/pdf/2312.13483.pdf">Paper</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://dornsife.usc.edu/lfl/">LFL Lab ✌️</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="paper-crumbs d-print-none">
+  <ol>
+    <li><a href="../../index.html">SQuADDS</a></li>
+    <li><a href="index.html">Tutorials</a></li>
+    <li aria-current="page">Tutorial 13: From Layout to Hamiltonian with ML</li>
+  </ol>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Tutorial-13:-From-Layout-to-Hamiltonian-with-ML">
+<h1>Tutorial 13: From Layout to Hamiltonian with ML<a class="headerlink" href="#Tutorial-13:-From-Layout-to-Hamiltonian-with-ML" title="Link to this heading">#</a></h1>
+<p>In <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-1_Getting_Started_with_SQuADDS.html">Tutorial 1</a> and <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-2_Simulate_interpolated_designs.html">Tutorial 2</a>, checking a design against its Hamiltonian targets meant an Ansys Q3D run: a licence, a Windows machine and minutes per design. In this tutorial we walk through the same design flow, but replace the Q3D capacitance simulation with a machine-learning prediction that
+takes about a second. We then use it to check an interpolated design that nobody has simulated, and to query the new qubit and coupler families of SQuADDS.</p>
+<p><strong>Note:</strong> the ML models need the optional extras, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;squadds[ml,gds]&quot;</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<p>We’ll use quantum-metal without its GUI in this tutorial, so let’s tell it that before importing anything. We’ll also silence the (many) deprecation warnings that quantum-metal and Shapely like to print.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;QISKIT_METAL_HEADLESS&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;httpx&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="The-design-problem">
+<h2>The design problem<a class="headerlink" href="#The-design-problem" title="Link to this heading">#</a></h2>
+<p>Let’s say we want a transmon with</p>
+<ul class="simple">
+<li><p>a qubit frequency <span class="math notranslate nohighlight">\(f_q = 4\)</span> GHz and an anharmonicity <span class="math notranslate nohighlight">\(\alpha = -200\)</span> MHz,</p></li>
+<li><p>read out through a quarter-wave resonator at <span class="math notranslate nohighlight">\(f_r = 6.2\)</span> GHz with <span class="math notranslate nohighlight">\(\kappa = 120\)</span> kHz,</p></li>
+<li><p>with a qubit-resonator coupling <span class="math notranslate nohighlight">\(g = 70\)</span> MHz.</p></li>
+</ul>
+<p>Every one of these numbers except <span class="math notranslate nohighlight">\(f_r\)</span> and <span class="math notranslate nohighlight">\(\kappa\)</span> is set by <strong>capacitance</strong>. For a grounded transmon (an Xmon-style cross) with total capacitance <span class="math notranslate nohighlight">\(C_\Sigma\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[E_C = \frac{e^2}{2 C_\Sigma}, \qquad f_q \approx \sqrt{8 E_J E_C} - E_C, \qquad \alpha \approx -E_C ,\]</div>
+<p>and the coupling grows with the claw-to-cross capacitance <span class="math notranslate nohighlight">\(C_g\)</span> roughly as <span class="math notranslate nohighlight">\(g \propto (C_g / C_\Sigma)\, (E_J/E_C)^{1/4}\)</span>.</p>
+<p>Instead of a Q3D run per candidate, we’ll ask a model trained on about 45,000 Q3D simulations.</p>
+</section>
+<section id="Query-the-SQuADDS-Database">
+<h2>Query the SQuADDS Database<a class="headerlink" href="#Query-the-SQuADDS-Database" title="Link to this heading">#</a></h2>
+<p>Let’s first find the closest qubit-cavity design in SQuADDS, exactly as in Tutorial 1.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analyzer</span><span class="p">,</span> <span class="n">SQuADDS_DB</span>
+</pre></div>
+</div>
+</div>
+<p>Importing SQuADDS (through scqubits) switches the inline figures to a vector format, so let’s switch them back to PNG.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib_inline.backend_inline</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_matplotlib_formats</span>
+
+<span class="n">set_matplotlib_formats</span><span class="p">(</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">([</span><span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;cavity_claw&quot;</span><span class="p">])</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_cavity_claw</span><span class="p">(</span><span class="s2">&quot;RouteMeander&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_resonator_type</span><span class="p">(</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">show_selections</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Selected qubit:  TransmonCross
+Selected cavity:  RouteMeander
+Selected coupler to feedline:  CLT
+Selected resonator type:  quarter
+Selected system:  [&#39;qubit&#39;, &#39;cavity_claw&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Our Hamiltonian targets:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">6.2</span><span class="p">,</span>
+    <span class="s2">&quot;kappa_kHz&quot;</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span>
+    <span class="s2">&quot;resonator_type&quot;</span><span class="p">:</span> <span class="s2">&quot;quarter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">200</span><span class="p">,</span>
+    <span class="s2">&quot;g_MHz&quot;</span><span class="p">:</span> <span class="mi">70</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target_params</span><span class="p">,</span> <span class="n">num_top</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;Euclidean&quot;</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Time taken to add the coupled H params: 1.3436923027038574 seconds
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>index_qc</th>
+      <th>cross_to_ground</th>
+      <th>claw_to_ground</th>
+      <th>cross_to_claw</th>
+      <th>cross_to_cross</th>
+      <th>claw_to_claw</th>
+      <th>ground_to_ground</th>
+      <th>units_qubit</th>
+      <th>setup</th>
+      <th>renderer_options</th>
+      <th>...</th>
+      <th>resonator_type</th>
+      <th>design_tool_cavity_claw</th>
+      <th>notes_cavity_claw</th>
+      <th>contributor</th>
+      <th>design_options</th>
+      <th>EC</th>
+      <th>EJ</th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>g_MHz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>16535</th>
+      <td>1441</td>
+      <td>112.70740</td>
+      <td>107.65111</td>
+      <td>5.75841</td>
+      <td>112.70740</td>
+      <td>113.99245</td>
+      <td>274.49373</td>
+      <td>fF</td>
+      <td>{'name': 'sweep_setup', 'reuse_selected_design...</td>
+      <td>{'Lj': '10nH', 'Cj': 0, '_Rj': 0, 'max_mesh_le...</td>
+      <td>...</td>
+      <td>quarter</td>
+      <td>qiskit-metal</td>
+      <td>{}</td>
+      <td>{"group":"LFL","PI":"Eli Levenson-Falk, PhD","...</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+      <td>0.163509</td>
+      <td>12.278081</td>
+      <td>3.836546</td>
+      <td>-182.146811</td>
+      <td>67.608428</td>
+    </tr>
+    <tr>
+      <th>9252</th>
+      <td>812</td>
+      <td>100.41444</td>
+      <td>99.80185</td>
+      <td>5.38260</td>
+      <td>100.41444</td>
+      <td>105.76081</td>
+      <td>251.82560</td>
+      <td>fF</td>
+      <td>{'name': 'sweep_setup', 'reuse_selected_design...</td>
+      <td>{'Lj': '10nH', 'Cj': 0, '_Rj': 0, 'max_mesh_le...</td>
+      <td>...</td>
+      <td>quarter</td>
+      <td>qiskit-metal</td>
+      <td>{}</td>
+      <td>{"group":"LFL","PI":"Eli Levenson-Falk, PhD","...</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+      <td>0.183089</td>
+      <td>12.278081</td>
+      <td>4.048674</td>
+      <td>-205.519307</td>
+      <td>69.751635</td>
+    </tr>
+    <tr>
+      <th>13522</th>
+      <td>1180</td>
+      <td>105.83609</td>
+      <td>103.57639</td>
+      <td>5.68548</td>
+      <td>105.83609</td>
+      <td>109.80541</td>
+      <td>261.84982</td>
+      <td>fF</td>
+      <td>{'name': 'sweep_setup', 'reuse_selected_design...</td>
+      <td>{'Lj': '10nH', 'Cj': 0, '_Rj': 0, 'max_mesh_le...</td>
+      <td>...</td>
+      <td>quarter</td>
+      <td>qiskit-metal</td>
+      <td>{}</td>
+      <td>{"group":"LFL","PI":"Eli Levenson-Falk, PhD","...</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+      <td>0.173690</td>
+      <td>12.278081</td>
+      <td>3.948501</td>
+      <td>-194.261783</td>
+      <td>70.474117</td>
+    </tr>
+  </tbody>
+</table>
+<p>3 rows × 36 columns</p>
+</div></div>
+</div>
+<p>Let’s keep the closest design and look at its own (Q3D-based) numbers. <code class="docutils literal notranslate"><span class="pre">EC</span></code> and <code class="docutils literal notranslate"><span class="pre">EJ</span></code> are in GHz, and <code class="docutils literal notranslate"><span class="pre">cross_to_claw</span></code> / <code class="docutils literal notranslate"><span class="pre">cross_to_ground</span></code> are the capacitances (fF) that Q3D gave the contributor of this row.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">best</span><span class="p">[[</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">,</span> <span class="s2">&quot;g_MHz&quot;</span><span class="p">,</span> <span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">,</span> <span class="s2">&quot;EC&quot;</span><span class="p">,</span> <span class="s2">&quot;EJ&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;cross_to_claw&quot;</span><span class="p">,</span> <span class="s2">&quot;cross_to_ground&quot;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+qubit_frequency_GHz       3.836546
+anharmonicity_MHz      -182.146811
+g_MHz                    67.608428
+cavity_frequency_GHz      6.429384
+EC                        0.163509
+EJ                       12.278081
+cross_to_claw              5.75841
+cross_to_ground           112.7074
+Name: 16535, dtype: object
+</pre></div></div>
+</div>
+<p>The qubit part of the design lives in <code class="docutils literal notranslate"><span class="pre">design_options_qubit</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_options</span> <span class="o">=</span> <span class="n">best</span><span class="p">[</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">]</span>
+<span class="n">qubit_options</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;pos_x&#39;: &#39;-1500um&#39;,
+ &#39;pos_y&#39;: &#39;1200um&#39;,
+ &#39;orientation&#39;: &#39;-90&#39;,
+ &#39;chip&#39;: &#39;main&#39;,
+ &#39;layer&#39;: &#39;1&#39;,
+ &#39;connection_pads&#39;: {&#39;readout&#39;: {&#39;connector_type&#39;: &#39;0&#39;,
+   &#39;claw_length&#39;: &#39;210um&#39;,
+   &#39;ground_spacing&#39;: &#39;10um&#39;,
+   &#39;claw_width&#39;: &#39;15um&#39;,
+   &#39;claw_gap&#39;: &#39;5.1um&#39;,
+   &#39;claw_cpw_length&#39;: &#39;40um&#39;,
+   &#39;claw_cpw_width&#39;: &#39;10um&#39;,
+   &#39;connector_location&#39;: &#39;90&#39;}},
+ &#39;cross_width&#39;: &#39;30um&#39;,
+ &#39;cross_length&#39;: &#39;230um&#39;,
+ &#39;cross_gap&#39;: &#39;30um&#39;,
+ &#39;hfss_inductance&#39;: 9.7e-09,
+ &#39;hfss_capacitance&#39;: 0,
+ &#39;hfss_resistance&#39;: 0,
+ &#39;hfss_mesh_kw_jj&#39;: 7e-06,
+ &#39;q3d_inductance&#39;: &#39;10nH&#39;,
+ &#39;q3d_capacitance&#39;: 0,
+ &#39;q3d_resistance&#39;: 0,
+ &#39;q3d_mesh_kw_jj&#39;: 7e-06,
+ &#39;gds_cell_name&#39;: &#39;my_other_junction&#39;,
+ &#39;aedt_q3d_inductance&#39;: 1e-08,
+ &#39;aedt_q3d_capacitance&#39;: 0,
+ &#39;aedt_hfss_inductance&#39;: 9.7e-09,
+ &#39;aedt_hfss_capacitance&#39;: 0}
+</pre></div></div>
+</div>
+</section>
+<section id="Render-the-design-in-quantum-metal">
+<h2>Render the design in quantum-metal<a class="headerlink" href="#Render-the-design-in-quantum-metal" title="Link to this heading">#</a></h2>
+<p>We pass these options to a <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> (as in Tutorial 1) and rebuild the design. No GUI window opens since we are running headless.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">designs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.qubits.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCross</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">design</span> <span class="o">=</span> <span class="n">designs</span><span class="o">.</span><span class="n">DesignPlanar</span><span class="p">({},</span> <span class="n">overwrite_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">qubit</span> <span class="o">=</span> <span class="n">TransmonCross</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">qubit_options</span><span class="p">)</span>
+<span class="n">design</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>The capacitance models read a GDS with two layers: the <strong>ground plane on layer 1/0</strong> and <strong>every signal conductor on layer 1/10</strong>. Each connected body is one conductor, and nets are never merged. <code class="docutils literal notranslate"><span class="pre">render_gds</span></code> exports a quantum-metal design in that convention. It is the same rendering <code class="docutils literal notranslate"><span class="pre">MLSimulator</span></code> uses internally.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance.bridge</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_gds</span>
+
+<span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorial13_files&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">qubit_gds</span> <span class="o">=</span> <span class="n">render_gds</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;tutorial13_files/transmon_cross.gds&quot;</span><span class="p">)</span>
+<span class="n">qubit_gds</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+PosixPath(&#39;tutorial13_files/transmon_cross.gds&#39;)
+</pre></div></div>
+</div>
+</section>
+<section id="Look-at-the-metal-(and-the-ports)-first">
+<h2>Look at the metal (and the ports) first<a class="headerlink" href="#Look-at-the-metal-(and-the-ports)-first" title="Link to this heading">#</a></h2>
+<p>Since the input to the model is the layout, let’s look at what the model sees before we ask for any number. <code class="docutils literal notranslate"><span class="pre">prepare_layout</span></code> reads a GDS exactly the way the predictor does: the ground is one net, and every conductor body gets a name <code class="docutils literal notranslate"><span class="pre">C1</span></code>, <code class="docutils literal notranslate"><span class="pre">C2</span></code>, … in file order.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare_layout</span>
+
+<span class="n">qubit_layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">qubit_gds</span><span class="p">))</span>
+<span class="n">qubit_layout</span><span class="o">.</span><span class="n">names</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;C1&#39;, &#39;C2&#39;]
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">C1</span></code> and <code class="docutils literal notranslate"><span class="pre">C2</span></code> are not very telling, so here is a small helper that names every body after the quantum-metal shape it overlaps the most.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">affinity</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">name_conductors</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">layout</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;{predictor name: Qiskit Metal shape name} for every conductor body.&quot;&quot;&quot;</span>
+    <span class="n">shapes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">qgeometry</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;subtract&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;helper&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)]</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">geometry</span> <span class="k">if</span> <span class="n">table</span> <span class="o">==</span> <span class="s2">&quot;poly&quot;</span> <span class="k">else</span> <span class="n">row</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">cap_style</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">shapes</span><span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">affinity</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># Metal mm -&gt; GDS µm</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">body</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">layout</span><span class="o">.</span><span class="n">conductors</span><span class="p">):</span>
+        <span class="n">names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">shapes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">shapes</span><span class="p">[</span><span class="n">s</span><span class="p">])</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">names</span>
+</pre></div>
+</div>
+</div>
+<p>And one that draws the ground in grey (its etch in white), every conductor in its own color, and the quantum-metal <strong>pins</strong> of the component as red arrows. The pins are the ports, where a resonator, a feed line or a bus attaches in the full chip.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_layout</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ground in grey, every conductor in its own color, and the component&#39;s pins (ports) as red arrows.&quot;&quot;&quot;</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span> <span class="ow">or</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">poly</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">ground</span><span class="p">,</span> <span class="s2">&quot;geoms&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">layout</span><span class="o">.</span><span class="n">ground</span><span class="p">]):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">*</span><span class="n">poly</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">xy</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;0.82&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">poly</span><span class="o">.</span><span class="n">interiors</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">*</span><span class="n">hole</span><span class="o">.</span><span class="n">xy</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">layout</span><span class="o">.</span><span class="n">conductors</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">poly</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s2">&quot;geoms&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">body</span><span class="p">])):</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="p">(</span><span class="n">names</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">*</span><span class="n">poly</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">xy</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span><span class="p">(</span><span class="n">k</span> <span class="o">%</span> <span class="mi">10</span><span class="p">),</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">pin_name</span><span class="p">,</span> <span class="n">pin</span> <span class="ow">in</span> <span class="p">(</span><span class="n">pins</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1e3</span> <span class="o">*</span> <span class="n">pin</span><span class="p">[</span><span class="s2">&quot;middle&quot;</span><span class="p">],</span> <span class="mi">60</span> <span class="o">*</span> <span class="n">pin</span><span class="p">[</span><span class="s2">&quot;normal&quot;</span><span class="p">]</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;port &#39;</span><span class="si">{</span><span class="n">pin_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">dx</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+                    <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;&lt;-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x (µm)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qubit_names</span> <span class="o">=</span> <span class="n">name_conductors</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">qubit_layout</span><span class="p">)</span>
+<span class="n">plot_layout</span><span class="p">(</span><span class="n">qubit_layout</span><span class="p">,</span> <span class="n">qubit_names</span><span class="p">,</span> <span class="n">qubit</span><span class="o">.</span><span class="n">pins</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;TransmonCross: what the model sees&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_29_0.png" src="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_29_0.png" />
+</div>
+</div>
+<p>Great! Two conductors and the ground: the <strong>cross</strong> (the qubit island) and the <strong>claw</strong> of the readout connector. The junction goes from the cross to ground and is not part of the capacitance problem. The <code class="docutils literal notranslate"><span class="pre">readout</span></code> port is where the resonator attaches. That is the metal we expect, so now we can ask for numbers.</p>
+</section>
+<section id="Predict-the-capacitance-matrix-with-MLSimulator">
+<h2>Predict the capacitance matrix with <code class="docutils literal notranslate"><span class="pre">MLSimulator</span></code><a class="headerlink" href="#Predict-the-capacitance-matrix-with-MLSimulator" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">MLSimulator</span></code> has the same call and the same result shape as the capacitance path of <code class="docutils literal notranslate"><span class="pre">AnsysSimulator</span></code> (Tutorial 2), so the rest of the SQuADDS workflow does not care where the numbers came from. Every result carries a <strong>fidelity label</strong>, <code class="docutils literal notranslate"><span class="pre">&quot;ml:QCap&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;ml:QCap-Fast&quot;</span></code>, so a prediction can never be mistaken for a simulation.</p>
+<p><strong>How far can we trust it?</strong> The default model, <code class="docutils literal notranslate"><span class="pre">QCap</span></code>, runs two thin-film method-of-moments field solves and corrects them with a small graph neural network. It was trained on <strong>all</strong> the data, so it has no held-out score of its own. The paper’s version of it (same recipe, networks trained on the TRAIN split only) scores against Q3D (median relative error over the coupling entries, with MAE and RMSE):</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>test set</p></th>
+<th class="head"><p>median %</p></th>
+<th class="head"><p>MAE (fF)</p></th>
+<th class="head"><p>RMSE (fF)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>test, families seen in training (4,009 layouts)</p></td>
+<td><p>0.177 %</p></td>
+<td><p>0.0203</p></td>
+<td><p>0.025</p></td>
+</tr>
+<tr class="row-odd"><td><p>a whole family held out of training (4,071 layouts)</p></td>
+<td><p>0.408 %</p></td>
+<td><p>0.049</p></td>
+<td><p>0.059</p></td>
+</tr>
+<tr class="row-even"><td><p>zero-shot, unseen kinds of layouts (1,878 layouts)</p></td>
+<td><p>0.587 %</p></td>
+<td><p>1.092</p></td>
+<td><p>1.152</p></td>
+</tr>
+<tr class="row-odd"><td><p>fresh check of QCap on 39 new layouts</p></td>
+<td><p>1.05 %</p></td>
+<td><p>0.132</p></td>
+<td><p>0.188</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>It costs about 1 s per small component (median 0.845 s on 2 CPUs of an x86 cluster node, 1.37 s on an Apple M5 Pro laptop for up to 4 conductors). It was trained on one stack: silicon (<span class="math notranslate nohighlight">\(\varepsilon_r = 11.45\)</span>), 350 µm thick, zero-thickness metal. For another substrate, pass <code class="docutils literal notranslate"><span class="pre">eps_r</span></code> and <code class="docutils literal notranslate"><span class="pre">thickness_um</span></code> to <code class="docutils literal notranslate"><span class="pre">predict</span></code>: <code class="docutils literal notranslate"><span class="pre">QCap</span></code> then solves its physics prior on your stack.</p>
+<p><strong>Note:</strong> if you have a local copy of the models, point <code class="docutils literal notranslate"><span class="pre">SQUADDS_CAPML_MODELS</span></code> at its folder and nothing is downloaded.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance.bridge</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLSimulator</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ml</span> <span class="o">=</span> <span class="n">MLSimulator</span><span class="p">()</span>
+<span class="n">ml</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+MLSimulator(model=&#39;QCap&#39;)
+</pre></div></div>
+</div>
+<p>We can hand it the quantum-metal component directly:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ml_result</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
+<span class="n">ml_result</span><span class="p">[</span><span class="s2">&quot;fidelity&quot;</span><span class="p">],</span> <span class="n">ml_result</span><span class="p">[</span><span class="s2">&quot;timing&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&#39;ml:QCap&#39;,
+ {&#39;render_s&#39;: 0.007670043996768072,
+  &#39;prepare_s&#39;: 1.1577998520806432e-05,
+  &#39;load_s&#39;: 0.6325546239968389,
+  &#39;geometry_s&#39;: 0.4905749980098335,
+  &#39;prior_s&#39;: 1.8774226699897554,
+  &#39;prior_levels_s&#39;: {&#39;1.5&#39;: 0.9462087409920059, &#39;3&#39;: 0.9275481049990049},
+  &#39;network_s&#39;: 0.005776858000899665,
+  &#39;total_s&#39;: 2.3737745260004885,
+  &#39;cache_hits&#39;: {&#39;embedding&#39;: False, &#39;prior&#39;: False},
+  &#39;threads&#39;: 2,
+  &#39;wall_s&#39;: 8.11429808298999})
+</pre></div></div>
+</div>
+<p>The first call of a session is slow: it loads the model and compiles the numerical kernels once (<code class="docutils literal notranslate"><span class="pre">load_s</span></code> and most of <code class="docutils literal notranslate"><span class="pre">geometry_s</span></code> above). Let’s ask again. SQuADDS remembers layouts it has already seen, so a repeated design is answered from a cache almost instantly. A <strong>new</strong> layout takes about a second, as we’ll see below.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ml_result</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
+<span class="nb">round</span><span class="p">(</span><span class="n">ml_result</span><span class="p">[</span><span class="s2">&quot;timing&quot;</span><span class="p">][</span><span class="s2">&quot;wall_s&quot;</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.03
+</pre></div></div>
+</div>
+<p>The result has the familiar <code class="docutils literal notranslate"><span class="pre">design</span></code> / <code class="docutils literal notranslate"><span class="pre">sim_options</span></code> / <code class="docutils literal notranslate"><span class="pre">sim_results</span></code> keys of <code class="docutils literal notranslate"><span class="pre">AnsysSimulator</span></code>, with the <code class="docutils literal notranslate"><span class="pre">sim_results</span></code> named just like the SQuADDS database rows:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ml_result</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;cross_to_cross&#39;: 120.95360565185547,
+ &#39;cross_to_claw&#39;: 5.7873616218566895,
+ &#39;cross_to_ground&#39;: 113.3360824584961,
+ &#39;claw_to_claw&#39;: 114.9999771118164,
+ &#39;claw_to_ground&#39;: 108.2668685913086,
+ &#39;ground_to_ground&#39;: 270.2359924316406,
+ &#39;maxwell_matrix&#39;: {&#39;C_G_G&#39;: 270.2359924316406,
+  &#39;C_G_S&#39;: -113.3360824584961,
+  &#39;C_G_N&#39;: -108.2668685913086,
+  &#39;C_S_G&#39;: -113.3360824584961,
+  &#39;C_S_S&#39;: 120.95360565185547,
+  &#39;C_S_N&#39;: -5.7873616218566895,
+  &#39;C_N_G&#39;: -108.2668685913086,
+  &#39;C_N_S&#39;: -5.7873616218566895,
+  &#39;C_N_N&#39;: 114.9999771118164},
+ &#39;units&#39;: &#39;fF&#39;}
+</pre></div></div>
+</div>
+<p>It also tells us whether the predicted matrix passed its physics checks (symmetry, signs, closure, positive definiteness) and whether anything looked unusual about the layout:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ml_result</span><span class="p">[</span><span class="s2">&quot;checks&quot;</span><span class="p">],</span> <span class="n">ml_result</span><span class="p">[</span><span class="s2">&quot;warnings&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+({&#39;symmetric_max_abs&#39;: 0.0,
+  &#39;symmetric&#39;: True,
+  &#39;diagonal_positive&#39;: True,
+  &#39;offdiag_all_negative&#39;: True,
+  &#39;closure_min_row_sum&#39;: 0.945746898651123,
+  &#39;closure&#39;: True,
+  &#39;signal_block_min_eig&#39;: 111.46872118089837,
+  &#39;positive_definite&#39;: True,
+  &#39;passed&#39;: True},
+ [])
+</pre></div></div>
+</div>
+<p>The full Maxwell matrix (fF) is in <code class="docutils literal notranslate"><span class="pre">sim_results[&quot;maxwell_matrix&quot;]</span></code>, keyed by the conductor labels. Let’s put it in a DataFrame with readable names. The diagonal entries are positive self capacitances, and the off-diagonal entries are <span class="math notranslate nohighlight">\(-C^{\rm mutual}_{ij}\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">maxwell_df</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The signed Maxwell matrix (fF) of an MLSimulator result, named like the SQuADDS sim_results.&quot;&quot;&quot;</span>
+    <span class="n">nets</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;net_names&quot;</span><span class="p">]</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;maxwell_matrix&quot;</span><span class="p">]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nets</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">M</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;C_</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">nets</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">nets</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
+
+
+<span class="n">maxwell_df</span><span class="p">(</span><span class="n">ml_result</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ground</th>
+      <th>cross</th>
+      <th>claw</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ground</th>
+      <td>270.236</td>
+      <td>-113.336</td>
+      <td>-108.267</td>
+    </tr>
+    <tr>
+      <th>cross</th>
+      <td>-113.336</td>
+      <td>120.954</td>
+      <td>-5.787</td>
+    </tr>
+    <tr>
+      <th>claw</th>
+      <td>-108.267</td>
+      <td>-5.787</td>
+      <td>115.000</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="How-close-is-it-to-Q3D?">
+<h2>How close is it to Q3D?<a class="headerlink" href="#How-close-is-it-to-Q3D?" title="Link to this heading">#</a></h2>
+<p>This design <strong>is</strong> in the database, so we can compare the prediction with the row’s own Q3D numbers. Here is a helper that lines them up in fF and in %. It summarizes the mutual (off-diagonal) entries with the median relative error, the MAE and the RMSE, the metric of the accuracy table above.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">compare</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Q3D (database row) vs ML for every capacitance both carry, in fF and in %.&quot;&quot;&quot;</span>
+    <span class="n">sr</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">]</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">sr</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">index</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;maxwell_matrix&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">k</span><span class="p">])]</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;Q3D (fF)&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">],</span> <span class="s2">&quot;ML (fF)&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">sr</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]},</span> <span class="n">index</span><span class="o">=</span><span class="n">keys</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;ML - Q3D (fF)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;ML (fF)&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;Q3D (fF)&quot;</span><span class="p">]</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;ML - Q3D (%)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;ML - Q3D (fF)&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;Q3D (fF)&quot;</span><span class="p">]</span>
+    <span class="n">mutual</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_to_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">k</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_to_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mutual</span><span class="p">,</span> <span class="s2">&quot;ML - Q3D (fF)&quot;</span><span class="p">]</span>
+    <span class="n">pct</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mutual</span><span class="p">,</span> <span class="s2">&quot;Q3D (fF)&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mutual entries: median </span><span class="si">{</span><span class="n">pct</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> % | MAE </span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> fF | &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;RMSE </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">d</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> fF | n = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mutual</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">compare</span><span class="p">(</span><span class="n">best</span><span class="p">,</span> <span class="n">ml_result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+mutual entries: median 0.56 % | MAE 0.424 fF | RMSE 0.508 fF | n = 3
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Q3D (fF)</th>
+      <th>ML (fF)</th>
+      <th>ML - Q3D (fF)</th>
+      <th>ML - Q3D (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>cross_to_cross</th>
+      <td>112.707</td>
+      <td>120.954</td>
+      <td>8.246</td>
+      <td>7.316</td>
+    </tr>
+    <tr>
+      <th>cross_to_claw</th>
+      <td>5.758</td>
+      <td>5.787</td>
+      <td>0.029</td>
+      <td>0.503</td>
+    </tr>
+    <tr>
+      <th>cross_to_ground</th>
+      <td>112.707</td>
+      <td>113.336</td>
+      <td>0.629</td>
+      <td>0.558</td>
+    </tr>
+    <tr>
+      <th>claw_to_claw</th>
+      <td>113.992</td>
+      <td>115.000</td>
+      <td>1.008</td>
+      <td>0.884</td>
+    </tr>
+    <tr>
+      <th>claw_to_ground</th>
+      <td>107.651</td>
+      <td>108.267</td>
+      <td>0.616</td>
+      <td>0.572</td>
+    </tr>
+    <tr>
+      <th>ground_to_ground</th>
+      <td>274.494</td>
+      <td>270.236</td>
+      <td>-4.258</td>
+      <td>-1.551</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The coupling we care about most, cross to claw, agrees closely with Q3D. Keep in mind that this is <strong>one</strong> design, so it is a sanity check, not an accuracy score (the table above is the accuracy score). The comparison is also not quite like for like.</p>
+<details><summary><p>Why this comparison is not like for like</p>
+</summary><ul class="simple">
+<li><p>The SQuADDS <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> rows were simulated by their contributor with their own Q3D setup. Their rows record no layer stack. The quantum-metal / SQuADDS default substrate is 750 µm thick, while the model serves 350 µm, so the difference above mixes the model error with this stack difference.</p></li>
+<li><p>The rendered chip is not the contributor’s chip either: <code class="docutils literal notranslate"><span class="pre">render_gds</span></code> draws a square ground domain around the component. Entries that involve the ground feel that most. The cross-to-claw coupling is the most like-for-like number.</p></li>
+<li><p>In these database rows <code class="docutils literal notranslate"><span class="pre">cross_to_cross</span></code> is stored equal to <code class="docutils literal notranslate"><span class="pre">cross_to_ground</span></code>, so it is not the Maxwell diagonal the model predicts. That is why the self terms are left out of the summary line. (SQuADDS builds the <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> <span class="math notranslate nohighlight">\(C_\Sigma\)</span> from <code class="docutils literal notranslate"><span class="pre">cross_to_ground</span></code> and <code class="docutils literal notranslate"><span class="pre">cross_to_claw</span></code>, so the Hamiltonian below is not affected.)</p></li>
+<li><p>These <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> geometries are not in the model’s training data (the planar capacitance dataset has its own <code class="docutils literal notranslate"><span class="pre">Xmon</span></code> family, which we’ll meet below).</p></li>
+</ul>
+</details></section>
+<section id="From-capacitance-to-the-Hamiltonian">
+<h2>From capacitance to the Hamiltonian<a class="headerlink" href="#From-capacitance-to-the-Hamiltonian" title="Link to this heading">#</a></h2>
+<p>Now let’s turn the prediction into Hamiltonian parameters with the same functions SQuADDS uses for Q3D rows (<code class="docutils literal notranslate"><span class="pre">squadds.calcs.transmon_cross</span></code>). For the <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code>, SQuADDS uses <span class="math notranslate nohighlight">\(C_\Sigma = C_{\rm cross,ground} + C_{\rm cross,claw}\)</span>, so</p>
+<div class="math notranslate nohighlight">
+\[E_C = \frac{e^2}{2\,(C_{\rm cross,ground} + C_{\rm cross,claw})} .\]</div>
+<p>We keep the Josephson energy <span class="math notranslate nohighlight">\(E_J\)</span> that SQuADDS picked for our target (the <code class="docutils literal notranslate"><span class="pre">EJ</span></code> column), get <span class="math notranslate nohighlight">\(f_q\)</span> and <span class="math notranslate nohighlight">\(\alpha\)</span> from scqubits, and compute <span class="math notranslate nohighlight">\(g\)</span> from the capacitance matrix with the resonator frequency of the closest design:</p>
+<div class="math notranslate nohighlight">
+\[g = \frac{C_g}{\sqrt{C_\Sigma}} \sqrt{\frac{\hbar\, \omega_r\, e^2}{\det C}} \left(\frac{E_J}{8 E_C}\right)^{1/4} \Big/ \hbar .\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.calcs.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_transmon_E01_alpha</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance.bridge</span><span class="w"> </span><span class="kn">import</span> <span class="n">EC_MHz</span><span class="p">,</span> <span class="n">g_MHz</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EJ</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="s2">&quot;EJ&quot;</span><span class="p">])</span>  <span class="c1"># GHz</span>
+<span class="n">f_r</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">])</span>
+<span class="n">EC_ml</span> <span class="o">=</span> <span class="n">EC_MHz</span><span class="p">(</span><span class="n">ml_result</span><span class="p">)</span>  <span class="c1"># MHz</span>
+<span class="n">f_q_ml</span><span class="p">,</span> <span class="n">alpha_ml</span> <span class="o">=</span> <span class="n">get_transmon_E01_alpha</span><span class="p">(</span><span class="n">EJ</span><span class="p">,</span> <span class="n">EC_ml</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">)</span>
+<span class="n">g_ml</span> <span class="o">=</span> <span class="n">g_MHz</span><span class="p">(</span><span class="n">ml_result</span><span class="p">,</span> <span class="n">EJ_GHz</span><span class="o">=</span><span class="n">EJ</span><span class="p">,</span> <span class="n">f_r_GHz</span><span class="o">=</span><span class="n">f_r</span><span class="p">,</span> <span class="n">res_type</span><span class="o">=</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s line up the target, the database row (Q3D) and the ML prediction:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hamiltonian</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">],</span> <span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">],</span> <span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">]],</span>
+        <span class="s2">&quot;closest design, Q3D&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e3</span> <span class="o">*</span> <span class="n">best</span><span class="p">[</span><span class="s2">&quot;EC&quot;</span><span class="p">],</span> <span class="n">best</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">],</span> <span class="n">best</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">],</span> <span class="n">best</span><span class="p">[</span><span class="s2">&quot;g_MHz&quot;</span><span class="p">]],</span>
+        <span class="s2">&quot;closest design, ML&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">EC_ml</span><span class="p">,</span> <span class="n">f_q_ml</span><span class="p">,</span> <span class="n">alpha_ml</span><span class="p">,</span> <span class="n">g_ml</span><span class="p">],</span>
+    <span class="p">},</span>
+    <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;E_C (MHz)&quot;</span><span class="p">,</span> <span class="s2">&quot;f_q (GHz)&quot;</span><span class="p">,</span> <span class="s2">&quot;alpha (MHz)&quot;</span><span class="p">,</span> <span class="s2">&quot;g (MHz)&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">hamiltonian</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>target</th>
+      <th>closest design, Q3D</th>
+      <th>closest design, ML</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>E_C (MHz)</th>
+      <td>NaN</td>
+      <td>163.509</td>
+      <td>162.606</td>
+    </tr>
+    <tr>
+      <th>f_q (GHz)</th>
+      <td>4.0</td>
+      <td>3.837</td>
+      <td>3.826</td>
+    </tr>
+    <tr>
+      <th>alpha (MHz)</th>
+      <td>-200.0</td>
+      <td>-182.147</td>
+      <td>-181.076</td>
+    </tr>
+    <tr>
+      <th>g (MHz)</th>
+      <td>70.0</td>
+      <td>67.608</td>
+      <td>67.664</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Awesome! In about a second we went from a layout to the qubit’s Hamiltonian, and it agrees with what Q3D told the database within the differences we saw in the capacitances. Let’s plot the comparison:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;f_q (GHz)&quot;</span><span class="p">,</span> <span class="s2">&quot;alpha (MHz)&quot;</span><span class="p">,</span> <span class="s2">&quot;g (MHz)&quot;</span><span class="p">]):</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">hamiltonian</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">vals</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;0.6&quot;</span><span class="p">,</span> <span class="s2">&quot;tab:blue&quot;</span><span class="p">,</span> <span class="s2">&quot;tab:orange&quot;</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_54_0.png" src="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_54_0.png" />
+</div>
+</div>
+</section>
+<section id="An-interpolated-design-that-nobody-has-simulated">
+<h2>An interpolated design that nobody has simulated<a class="headerlink" href="#An-interpolated-design-that-nobody-has-simulated" title="Link to this heading">#</a></h2>
+<p>The closest design is never exactly on target, so Tutorial 1 used the physics-inspired <code class="docutils literal notranslate"><span class="pre">ScalingInterpolator</span></code> to scale the geometry towards our targets. That gives a <strong>new</strong> design, and in Tutorial 2 the next step was a Q3D run to check it. Let’s check it with the model instead.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.interpolations.physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScalingInterpolator</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interpolator</span> <span class="o">=</span> <span class="n">ScalingInterpolator</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">target_params</span><span class="p">)</span>
+<span class="n">design_df</span> <span class="o">=</span> <span class="n">interpolator</span><span class="o">.</span><span class="n">get_design</span><span class="p">()</span>
+<span class="n">design_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+==================================================
+Kappa scaling: 1.0025568750809213
+g scaling: 0.9969935576236629
+alpha scaling: 1.007757814178385
+resonator scaling: 1.0055694290983872
+==================================================
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>coupler_type</th>
+      <th>design_options_qubit</th>
+      <th>design_options_cavity_claw</th>
+      <th>setup_qubit</th>
+      <th>setup_cavity_claw</th>
+      <th>design_options</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CLT</td>
+      <td>{'pos_x': '-1500um', 'pos_y': '1200um', 'orien...</td>
+      <td>{'claw_opts': {'connection_pads': {'readout': ...</td>
+      <td>None</td>
+      <td>{'name': 'sweep_setup', 'reuse_selected_design...</td>
+      <td>{'cavity_claw_options': {'coupler_type': 'CLT'...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The interpolated row holds the whole qubit-cavity system. <code class="docutils literal notranslate"><span class="pre">MLSimulator</span></code> predicts single components, so we hand <code class="docutils literal notranslate"><span class="pre">Analyzer.predict_capacitance</span></code> the qubit part and tell it which component class to build:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interpolated_qubit</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[{</span><span class="s2">&quot;design_options&quot;</span><span class="p">:</span> <span class="n">design_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;design_options_qubit&quot;</span><span class="p">],</span> <span class="s2">&quot;component_class&quot;</span><span class="p">:</span> <span class="s2">&quot;TransmonCross&quot;</span><span class="p">}]</span>
+<span class="p">)</span>
+<span class="n">interpolated_ml</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">predict_capacitance</span><span class="p">(</span><span class="n">interpolated_qubit</span><span class="p">)</span>
+<span class="n">interpolated_ml</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s2">&quot;cross_to_claw_ml|cross_to_ground_ml|fidelity|ml_total_s&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cross_to_claw_ml</th>
+      <th>cross_to_ground_ml</th>
+      <th>fidelity</th>
+      <th>ml_total_s</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>5.313089</td>
+      <td>103.74128</td>
+      <td>ml:QCap</td>
+      <td>1.381011</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Before we trust its numbers, let’s look at the interpolated cross next to the closest one. We’ll wrap the render-and-plot steps from above in one small function, since we’ll use it a few more times.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance.bridge</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_component</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">look_at</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render a component to GDS, then plot its metal and ports (returns the GDS path).&quot;&quot;&quot;</span>
+    <span class="n">gds</span> <span class="o">=</span> <span class="n">render_gds</span><span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorial13_files&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">title</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.gds&quot;</span><span class="p">))</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">gds</span><span class="p">))</span>
+    <span class="n">plot_layout</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">name_conductors</span><span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">layout</span><span class="p">),</span> <span class="n">component</span><span class="o">.</span><span class="n">pins</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">gds</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interpolated_component</span> <span class="o">=</span> <span class="n">build_component</span><span class="p">(</span><span class="n">interpolated_qubit</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">))</span>
+<span class="n">look_at</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="s2">&quot;closest design&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">look_at</span><span class="p">(</span><span class="n">interpolated_component</span><span class="p">,</span> <span class="s2">&quot;interpolated design&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_62_0.png" src="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_62_0.png" />
+</div>
+</div>
+<p>Now the Hamiltonian of the interpolated design, with the same <span class="math notranslate nohighlight">\(E_J\)</span>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interpolated_result</span> <span class="o">=</span> <span class="n">interpolated_ml</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;ml_result&quot;</span><span class="p">]</span>
+<span class="n">EC_interp</span> <span class="o">=</span> <span class="n">EC_MHz</span><span class="p">(</span><span class="n">interpolated_result</span><span class="p">)</span>
+<span class="n">f_q_interp</span><span class="p">,</span> <span class="n">alpha_interp</span> <span class="o">=</span> <span class="n">get_transmon_E01_alpha</span><span class="p">(</span><span class="n">EJ</span><span class="p">,</span> <span class="n">EC_interp</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">)</span>
+<span class="n">g_interp</span> <span class="o">=</span> <span class="n">g_MHz</span><span class="p">(</span><span class="n">interpolated_result</span><span class="p">,</span> <span class="n">EJ_GHz</span><span class="o">=</span><span class="n">EJ</span><span class="p">,</span> <span class="n">f_r_GHz</span><span class="o">=</span><span class="n">target_params</span><span class="p">[</span><span class="s2">&quot;cavity_frequency_GHz&quot;</span><span class="p">],</span> <span class="n">res_type</span><span class="o">=</span><span class="s2">&quot;quarter&quot;</span><span class="p">)</span>
+<span class="n">hamiltonian</span><span class="p">[</span><span class="s2">&quot;interpolated design, ML&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">EC_interp</span><span class="p">,</span> <span class="n">f_q_interp</span><span class="p">,</span> <span class="n">alpha_interp</span><span class="p">,</span> <span class="n">g_interp</span><span class="p">]</span>
+<span class="n">hamiltonian</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>target</th>
+      <th>closest design, Q3D</th>
+      <th>closest design, ML</th>
+      <th>interpolated design, ML</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>E_C (MHz)</th>
+      <td>NaN</td>
+      <td>163.509</td>
+      <td>162.606</td>
+      <td>177.620</td>
+    </tr>
+    <tr>
+      <th>f_q (GHz)</th>
+      <td>4.0</td>
+      <td>3.837</td>
+      <td>3.826</td>
+      <td>3.991</td>
+    </tr>
+    <tr>
+      <th>alpha (MHz)</th>
+      <td>-200.0</td>
+      <td>-182.147</td>
+      <td>-181.076</td>
+      <td>-198.960</td>
+    </tr>
+    <tr>
+      <th>g (MHz)</th>
+      <td>70.0</td>
+      <td>67.608</td>
+      <td>67.664</td>
+      <td>64.058</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Interesting! The interpolation pulled <span class="math notranslate nohighlight">\(f_q\)</span> and <span class="math notranslate nohighlight">\(\alpha\)</span> right onto our targets, but by the model’s numbers <span class="math notranslate nohighlight">\(g\)</span> came out a few MHz short of 70 MHz. That is exactly the kind of thing we want to catch <em>before</em> we spend a Q3D run (a slightly longer claw would be our next try).</p>
+<p>This check used to need a Q3D run per candidate. Now that it takes about a second, we can check every candidate we are curious about, and keep the Q3D (or Palace) runs for the one design we are about to fabricate.</p>
+</section>
+<section id="New-families:-the-planar-capacitance-dataset">
+<h2>New families: the planar capacitance dataset<a class="headerlink" href="#New-families:-the-planar-capacitance-dataset" title="Link to this heading">#</a></h2>
+<p>The models were trained on the <strong>planar capacitance dataset</strong> (<a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.html">Tutorial 12</a>): about 45,000 Q3D-labelled layouts of interdigital, concentric, star and shielded capacitors, Xmon and <code class="docutils literal notranslate"><span class="pre">TransmonPocket</span></code> qubits and more, every one with its full capacitance matrix. SQuADDS can show these rows in its usual format as a second data source. It is on by default, and a local copy works too,
+pointed to by the environment variable <code class="docutils literal notranslate"><span class="pre">SQUADDS_PLANAR_CAP_DATA</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="s2">&quot;planar_capacitance&quot;</span><span class="p">))</span>
+<span class="n">db</span><span class="o">.</span><span class="n">enabled_sources</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;default&#39;, &#39;planar_capacitance&#39;]
+</pre></div></div>
+</div>
+<p>The new configurations show up next to the existing ones:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">get_configs</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qubit-TransmonCross-cap_matrix&#39;,
+ &#39;cavity_claw-RouteMeander-eigenmode&#39;,
+ &#39;coupler-NCap-cap_matrix&#39;,
+ &#39;coupler-CapNInterdigitalTee-cap_matrix&#39;,
+ &#39;coupler-GeneralizedCapNInterdigital-cap_matrix&#39;,
+ &#39;coupler-GeneralizedCapConcentric-cap_matrix&#39;,
+ &#39;coupler-GeneralizedCapStar-cap_matrix&#39;,
+ &#39;coupler-ShieldedCapConcentric-cap_matrix&#39;,
+ &#39;qubit-Xmon-cap_matrix&#39;,
+ &#39;qubit-TransmonPocket-cap_matrix&#39;]
+</pre></div></div>
+</div>
+<section id="An-Xmon-with-a-target-frequency-and-anharmonicity">
+<h3>An Xmon with a target frequency and anharmonicity<a class="headerlink" href="#An-Xmon-with-a-target-frequency-and-anharmonicity" title="Link to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Xmon</span></code> rows are a cross in a ground pocket with one or two claws. For these, SQuADDS takes <span class="math notranslate nohighlight">\(C_\Sigma\)</span> as the full Maxwell diagonal of the cross, so a second claw is counted too.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">unselect_all</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;Xmon&quot;</span><span class="p">)</span>
+<span class="n">xmon_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">xmon_df</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(197, 41)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+<span class="n">xmon_results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">({</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">4.5</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">200</span><span class="p">},</span> <span class="n">num_top</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">xmon_results</span><span class="p">[[</span><span class="s2">&quot;design_id&quot;</span><span class="p">,</span> <span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">,</span> <span class="s2">&quot;EC&quot;</span><span class="p">,</span> <span class="s2">&quot;C_sigma_fF&quot;</span><span class="p">,</span> <span class="s2">&quot;cross_to_claw&quot;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>design_id</th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>EC</th>
+      <th>C_sigma_fF</th>
+      <th>cross_to_claw</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>32</th>
+      <td>ref/exp13/q3d_cap_0563</td>
+      <td>4.505992</td>
+      <td>-200.608575</td>
+      <td>0.181315</td>
+      <td>106.832206</td>
+      <td>6.345272</td>
+    </tr>
+    <tr>
+      <th>64</th>
+      <td>ref/exp13/q3d_cap_0632</td>
+      <td>4.509329</td>
+      <td>-200.938054</td>
+      <td>0.181596</td>
+      <td>106.666675</td>
+      <td>1.557704</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>ref/exp13/q3d_cap_0673</td>
+      <td>4.483355</td>
+      <td>-198.382118</td>
+      <td>0.179415</td>
+      <td>107.963389</td>
+      <td>1.768689</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Let’s look at the closest Xmon first. <code class="docutils literal notranslate"><span class="pre">build_component</span></code> rebuilds a database row with its quantum-metal class:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best_xmon</span> <span class="o">=</span> <span class="n">xmon_results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">look_at</span><span class="p">(</span><span class="n">build_component</span><span class="p">(</span><span class="n">best_xmon</span><span class="p">),</span> <span class="s2">&quot;closest Xmon&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_74_0.png" src="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_74_0.png" />
+</div>
+</div>
+<p>And now the prediction, with exactly the call we would use for <code class="docutils literal notranslate"><span class="pre">AnsysSimulator(analyzer,</span> <span class="pre">best_device).simulate()</span></code> in Tutorial 2:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xmon_ml</span> <span class="o">=</span> <span class="n">MLSimulator</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">best_xmon</span><span class="p">)</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+<span class="n">xmon_ml</span><span class="p">[</span><span class="s2">&quot;fidelity&quot;</span><span class="p">],</span> <span class="nb">round</span><span class="p">(</span><span class="n">xmon_ml</span><span class="p">[</span><span class="s2">&quot;timing&quot;</span><span class="p">][</span><span class="s2">&quot;wall_s&quot;</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&#39;ml:QCap&#39;, 1.8)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">compare</span><span class="p">(</span><span class="n">best_xmon</span><span class="p">,</span> <span class="n">xmon_ml</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+mutual entries: median 0.49 % | MAE 0.247 fF | RMSE 0.348 fF | n = 6
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Q3D (fF)</th>
+      <th>ML (fF)</th>
+      <th>ML - Q3D (fF)</th>
+      <th>ML - Q3D (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>cross_to_cross</th>
+      <td>106.832</td>
+      <td>107.270</td>
+      <td>0.437</td>
+      <td>0.409</td>
+    </tr>
+    <tr>
+      <th>cross_to_claw</th>
+      <td>6.345</td>
+      <td>6.329</td>
+      <td>-0.016</td>
+      <td>-0.249</td>
+    </tr>
+    <tr>
+      <th>cross_to_bus_claw</th>
+      <td>3.386</td>
+      <td>3.368</td>
+      <td>-0.018</td>
+      <td>-0.519</td>
+    </tr>
+    <tr>
+      <th>cross_to_ground</th>
+      <td>95.552</td>
+      <td>95.991</td>
+      <td>0.438</td>
+      <td>0.459</td>
+    </tr>
+    <tr>
+      <th>claw_to_claw</th>
+      <td>88.970</td>
+      <td>88.972</td>
+      <td>0.003</td>
+      <td>0.003</td>
+    </tr>
+    <tr>
+      <th>claw_to_bus_claw</th>
+      <td>0.300</td>
+      <td>0.294</td>
+      <td>-0.006</td>
+      <td>-1.895</td>
+    </tr>
+    <tr>
+      <th>claw_to_ground</th>
+      <td>81.752</td>
+      <td>81.381</td>
+      <td>-0.371</td>
+      <td>-0.454</td>
+    </tr>
+    <tr>
+      <th>bus_claw_to_bus_claw</th>
+      <td>66.120</td>
+      <td>65.814</td>
+      <td>-0.306</td>
+      <td>-0.462</td>
+    </tr>
+    <tr>
+      <th>bus_claw_to_ground</th>
+      <td>62.008</td>
+      <td>61.378</td>
+      <td>-0.630</td>
+      <td>-1.017</td>
+    </tr>
+    <tr>
+      <th>ground_to_ground</th>
+      <td>279.653</td>
+      <td>277.604</td>
+      <td>-2.049</td>
+      <td>-0.733</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p><strong>Careful:</strong> every row of the planar capacitance dataset was part of QCap’s training data, so this agreement is a consistency check of the plumbing (rows, rendering, naming), not a measure of accuracy. For accuracy, look at the table further up.</p>
+<p>Here is the charging energy from the predicted matrix, with every claw included:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance.bridge</span><span class="w"> </span><span class="kn">import</span> <span class="n">EC_MHz_from_matrix</span>
+
+<span class="n">C_xmon</span> <span class="o">=</span> <span class="n">maxwell_df</span><span class="p">(</span><span class="n">xmon_ml</span><span class="p">)</span>
+<span class="n">EC_MHz_from_matrix</span><span class="p">(</span><span class="n">C_xmon</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">C_xmon</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;cross&quot;</span><span class="p">),</span> <span class="mf">1e3</span> <span class="o">*</span> <span class="n">best_xmon</span><span class="p">[</span><span class="s2">&quot;EC&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(180.57507032099102, 181.31451147234225)
+</pre></div></div>
+</div>
+</section>
+<section id="A-floating-transmon:-TransmonPocket">
+<h3>A floating transmon: <code class="docutils literal notranslate"><span class="pre">TransmonPocket</span></code><a class="headerlink" href="#A-floating-transmon:-TransmonPocket" title="Link to this heading">#</a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">TransmonPocket</span></code> has two pads and no grounded island, so the qubit is the <strong>differential</strong> mode of the two pads. With the coupler pads held at ground (their resonators are much larger capacitors),</p>
+<div class="math notranslate nohighlight">
+\[\frac{1}{C_{\rm eff}} = (C^{-1})_{11} + (C^{-1})_{22} - 2\,(C^{-1})_{12}, \qquad E_C = \frac{e^2}{2 C_{\rm eff}},\]</div>
+<p>where <span class="math notranslate nohighlight">\(C\)</span> is the two-pad block of the Maxwell matrix. SQuADDS uses this for <code class="docutils literal notranslate"><span class="pre">TransmonPocket</span></code> targets.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonPocket&quot;</span><span class="p">)</span>
+<span class="n">pocket_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+<span class="n">pocket_results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">({</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">5.3</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">250</span><span class="p">},</span> <span class="n">num_top</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">pocket_results</span><span class="p">[[</span><span class="s2">&quot;design_id&quot;</span><span class="p">,</span> <span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">,</span> <span class="s2">&quot;EC&quot;</span><span class="p">,</span> <span class="s2">&quot;C_sigma_fF&quot;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>design_id</th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>EC</th>
+      <th>C_sigma_fF</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>275</th>
+      <td>ref/exp14/q3d_cap_0446</td>
+      <td>5.272124</td>
+      <td>-247.075229</td>
+      <td>0.222108</td>
+      <td>87.210713</td>
+    </tr>
+    <tr>
+      <th>62</th>
+      <td>ref/exp14/q3d_cap_0233</td>
+      <td>5.342846</td>
+      <td>-254.535302</td>
+      <td>0.228404</td>
+      <td>84.806791</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>ref/exp14/q3d_cap_0217</td>
+      <td>5.451886</td>
+      <td>-266.309057</td>
+      <td>0.238302</td>
+      <td>81.284464</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best_pocket</span> <span class="o">=</span> <span class="n">pocket_results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">look_at</span><span class="p">(</span><span class="n">build_component</span><span class="p">(</span><span class="n">best_pocket</span><span class="p">),</span> <span class="s2">&quot;closest TransmonPocket&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_82_0.png" src="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_82_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pocket_ml</span> <span class="o">=</span> <span class="n">MLSimulator</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">best_pocket</span><span class="p">)</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+<span class="n">C_pocket</span> <span class="o">=</span> <span class="n">maxwell_df</span><span class="p">(</span><span class="n">pocket_ml</span><span class="p">)</span>
+<span class="n">C_pocket</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ground</th>
+      <th>pad_top</th>
+      <th>pad_bot</th>
+      <th>readout_pad</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ground</th>
+      <td>189.179</td>
+      <td>-56.193</td>
+      <td>-61.100</td>
+      <td>-28.756</td>
+    </tr>
+    <tr>
+      <th>pad_top</th>
+      <td>-56.193</td>
+      <td>125.519</td>
+      <td>-52.692</td>
+      <td>-13.646</td>
+    </tr>
+    <tr>
+      <th>pad_bot</th>
+      <td>-61.100</td>
+      <td>-52.692</td>
+      <td>118.470</td>
+      <td>-1.220</td>
+    </tr>
+    <tr>
+      <th>readout_pad</th>
+      <td>-28.756</td>
+      <td>-13.646</td>
+      <td>-1.220</td>
+      <td>44.344</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EC_MHz_from_matrix</span><span class="p">(</span><span class="n">C_pocket</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">C_pocket</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;pad_top&quot;</span><span class="p">,</span> <span class="s2">&quot;pad_bot&quot;</span><span class="p">]),</span> <span class="mf">1e3</span> <span class="o">*</span> <span class="n">best_pocket</span><span class="p">[</span><span class="s2">&quot;EC&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(221.99927692671767, 222.10836985197966)
+</pre></div></div>
+</div>
+</section>
+<section id="A-coupler-with-a-capacitance-target:-GeneralizedCapStar">
+<h3>A coupler with a capacitance target: <code class="docutils literal notranslate"><span class="pre">GeneralizedCapStar</span></code><a class="headerlink" href="#A-coupler-with-a-capacitance-target:-GeneralizedCapStar" title="Link to this heading">#</a></h3>
+<p>Couplers don’t have a Hamiltonian of their own, so we query them with a capacitance target directly. Let’s ask for a star coupler with about 2 fF between the star and its first pad.</p>
+<p>Some star rows (all of one collection and a few others) were labelled on a GDS that their stored options do not reproduce exactly. They carry <code class="docutils literal notranslate"><span class="pre">geometry_reproducible</span> <span class="pre">=</span> <span class="pre">False</span></code>, and we leave them out whenever we want to rebuild a design from its options.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">unselect_all</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;coupler&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_coupler</span><span class="p">(</span><span class="s2">&quot;GeneralizedCapStar&quot;</span><span class="p">)</span>
+<span class="n">star_df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+<span class="n">analyzer</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">analyzer</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;geometry_reproducible&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)]</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">star_df</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">analyzer</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:DeprecationWarning: select_coupler() is deprecated and will be removed in a future release. Use select_resonator_type() instead.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(3411, 1758)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star_results</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">({</span><span class="s2">&quot;star_to_pad_0&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span> <span class="n">num_top</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">star_results</span><span class="p">[[</span><span class="s2">&quot;design_id&quot;</span><span class="p">,</span> <span class="s2">&quot;star_to_pad_0&quot;</span><span class="p">,</span> <span class="s2">&quot;star_to_ground&quot;</span><span class="p">,</span> <span class="s2">&quot;pad_0_to_ground&quot;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>design_id</th>
+      <th>star_to_pad_0</th>
+      <th>star_to_ground</th>
+      <th>pad_0_to_ground</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1210</th>
+      <td>ref/exp11/q3d_cap_1355</td>
+      <td>2.006605</td>
+      <td>35.361054</td>
+      <td>8.802020</td>
+    </tr>
+    <tr>
+      <th>535</th>
+      <td>ref/exp11/q3d_cap_0593</td>
+      <td>1.985574</td>
+      <td>25.130047</td>
+      <td>10.070085</td>
+    </tr>
+    <tr>
+      <th>341</th>
+      <td>ref/exp11/q3d_cap_0380</td>
+      <td>2.018742</td>
+      <td>27.027778</td>
+      <td>10.493924</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best_star</span> <span class="o">=</span> <span class="n">star_results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">look_at</span><span class="p">(</span><span class="n">build_component</span><span class="p">(</span><span class="n">best_star</span><span class="p">),</span> <span class="s2">&quot;closest GeneralizedCapStar&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_88_0.png" src="../../_images/source_tutorials_Tutorial-13_From_Layout_to_Hamiltonian_with_ML_88_0.png" />
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Analyzer.predict_capacitance</span></code> predicts every row of the last <code class="docutils literal notranslate"><span class="pre">find_closest</span></code> result in one go (and works the same way on interpolated designs, as we saw above):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star_ml</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">predict_capacitance</span><span class="p">()</span>
+<span class="n">star_results</span><span class="p">[[</span><span class="s2">&quot;design_id&quot;</span><span class="p">,</span> <span class="s2">&quot;star_to_pad_0&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">star_ml</span><span class="p">[[</span><span class="s2">&quot;star_to_pad_0_ml&quot;</span><span class="p">,</span> <span class="s2">&quot;fidelity&quot;</span><span class="p">,</span> <span class="s2">&quot;ml_total_s&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>design_id</th>
+      <th>star_to_pad_0</th>
+      <th>star_to_pad_0_ml</th>
+      <th>fidelity</th>
+      <th>ml_total_s</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1210</th>
+      <td>ref/exp11/q3d_cap_1355</td>
+      <td>2.006605</td>
+      <td>2.017028</td>
+      <td>ml:QCap</td>
+      <td>0.835758</td>
+    </tr>
+    <tr>
+      <th>535</th>
+      <td>ref/exp11/q3d_cap_0593</td>
+      <td>1.985574</td>
+      <td>2.000915</td>
+      <td>ml:QCap</td>
+      <td>0.809971</td>
+    </tr>
+    <tr>
+      <th>341</th>
+      <td>ref/exp11/q3d_cap_0380</td>
+      <td>2.018742</td>
+      <td>2.023173</td>
+      <td>ml:QCap</td>
+      <td>0.818348</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>These rows are training data of QCap too, so again: plumbing check, not accuracy.</p>
+</section>
+<section id="What-about-QCap-Fast?">
+<h3>What about QCap-Fast?<a class="headerlink" href="#What-about-QCap-Fast?" title="Link to this heading">#</a></h3>
+<p>There is also <code class="docutils literal notranslate"><span class="pre">QCap-Fast</span></code>, an improved release of the paper’s fast model. It replaces the field solves with a learned surrogate and is roughly ten times faster, but it is only roughly right. Use it to screen many candidates of the families it was trained on and find the region of parameter space worth a closer look, then run the fine sweep there with <code class="docutils literal notranslate"><span class="pre">QCap</span></code>.</p>
+<details><summary><p>How much less accurate is QCap-Fast?</p>
+</summary><p>On new designs of a trained family, <code class="docutils literal notranslate"><span class="pre">QCap-Fast</span></code> was <em>worse than the physics alone</em>: 3.175 % (MAE 0.583 fF / RMSE 0.824 fF) against 1.765 % (MAE 0.275 fF / RMSE 0.376 fF). The paper’s version of it, on a held-out family, gave 3.11 % (MAE 0.533 fF / RMSE 0.633 fF) against 1.55 % (MAE 0.166 fF / RMSE 0.205 fF). Use <code class="docutils literal notranslate"><span class="pre">QCap</span></code> for anything that matters.</p>
+</details><div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fast_star</span> <span class="o">=</span> <span class="n">MLSimulator</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;QCap-Fast&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">best_star</span><span class="p">)</span>
+<span class="n">fast_star</span><span class="p">[</span><span class="s2">&quot;fidelity&quot;</span><span class="p">],</span> <span class="n">fast_star</span><span class="p">[</span><span class="s2">&quot;sim_results&quot;</span><span class="p">][</span><span class="s2">&quot;star_to_pad_0&quot;</span><span class="p">],</span> <span class="n">star_ml</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;star_to_pad_0_ml&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&#39;ml:QCap-Fast&#39;, 1.940557599067688, 2.0170276165008545)
+</pre></div></div>
+</div>
+<p>Finally, let’s see what every prediction in this tutorial cost (wall time per design with 2 threads, on the machine this notebook ran on):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">timing</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;TransmonCross (closest, repeated: cache)&quot;</span><span class="p">:</span> <span class="n">ml_result</span><span class="p">[</span><span class="s2">&quot;timing&quot;</span><span class="p">][</span><span class="s2">&quot;wall_s&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;TransmonCross (interpolated)&quot;</span><span class="p">:</span> <span class="n">interpolated_ml</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;ml_total_s&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;Xmon&quot;</span><span class="p">:</span> <span class="n">xmon_ml</span><span class="p">[</span><span class="s2">&quot;timing&quot;</span><span class="p">][</span><span class="s2">&quot;wall_s&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;TransmonPocket&quot;</span><span class="p">:</span> <span class="n">pocket_ml</span><span class="p">[</span><span class="s2">&quot;timing&quot;</span><span class="p">][</span><span class="s2">&quot;wall_s&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;GeneralizedCapStar (QCap)&quot;</span><span class="p">:</span> <span class="n">star_ml</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;ml_total_s&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;GeneralizedCapStar (QCap-Fast, first call: loads the model)&quot;</span><span class="p">:</span> <span class="n">fast_star</span><span class="p">[</span><span class="s2">&quot;timing&quot;</span><span class="p">][</span><span class="s2">&quot;wall_s&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">timing</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;wall time (s)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+TransmonCross (closest, repeated: cache)                       0.03
+TransmonCross (interpolated)                                   1.38
+Xmon                                                           1.80
+TransmonPocket                                                 1.09
+GeneralizedCapStar (QCap)                                      0.84
+GeneralizedCapStar (QCap-Fast, first call: loads the model)    0.98
+Name: wall time (s), dtype: float64
+</pre></div></div>
+</div>
+<p>Congrats for making it to the end of this tutorial! 🤗🎉 You have now learned how to go from a set of target Hamiltonian parameters to a rendered layout, its full capacitance matrix and its Hamiltonian in about a second per design, how to check interpolated designs without a Q3D run, and how to query the new qubit and coupler families of SQuADDS. Just remember the fidelity label: an <code class="docutils literal notranslate"><span class="pre">ml:QCap</span></code> number is a prediction, and the design you send to the fab still deserves one real simulation.</p>
+</section>
+</section>
+<section id="Next-Steps...">
+<h2>Next Steps…<a class="headerlink" href="#Next-Steps..." title="Link to this heading">#</a></h2>
+<p>In the next <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-14_Training_on_Your_Own_Designs.html">tutorial</a>, we will learn how to train the capacitance models on your own designs and simulations.</p>
+</section>
+<section id="License">
+<h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
+<div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>This tutorial is written by Sadman Ahmed Shanto and Claude Opus 5.5</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2026.</p>
+</p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Tutorial 12: Planar Capacitance Families in SQuADDS</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="Tutorial-14_Training_on_Your_Own_Designs.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Tutorial 14: Training on Your Own Designs</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item"><div class="paper-footer">
+  <p>© 2026 Sadman Ahmed Shanto &amp; Eli Levenson-Falk · Levenson-Falk Lab, University of Southern California</p>
+  <p class="paper-footer__links"><a href="https://github.com/LFL-Lab/SQuADDS">GitHub</a><a href="https://pypi.org/project/SQuADDS/">PyPI</a><a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB">Hugging Face</a><a href="https://deepwiki.com/LFL-Lab/SQuADDS">DeepWiki</a><a href="https://dornsife.usc.edu/lfl/">LFL Lab</a></p>
+</div></div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,2265 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tutorial 11: Predicting Capacitance Matrices from a GDS file using ML &#8212; SQuADDS v1.0.0</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/paper.css?v=73a8cae5" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"equationNumbers": {"autoNumber": "AMS", "useLabelIds": true}}, "tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area", "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}})</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/paper.js?v=1ab245fa"></script>
+    <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Tutorial 12: Planar Capacitance Families in SQuADDS" href="Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.html" />
+    <link rel="prev" title="Tutorial 10: Unified Driven-Modal Hamiltonian Extraction" href="Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.html" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Read our latest <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/paper/'>preprint</a> and check out its <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/'>docsite</a></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item"><a class="navbar-brand logo paper-logo-qcap" href="https://lfl-lab.github.io/SQuADDS/" title="SQuADDS documentation">
+  <img src="../../_static/images/qcap_compact_light.svg" class="logo__image only-light" alt="QCap"/>
+  <img src="../../_static/images/qcap_compact_dark.svg" class="logo__image only-dark pst-js-only" alt="QCap"/>
+</a>
+<span class="paper-version" title="SQuADDS 1.0.0">SQuADDS 1.0.0</span></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="paper-nav" aria-label="Main">
+  <ul class="bd-navbar-elements navbar-nav">
+    <li class="nav-item"><a class="nav-link nav-internal" href="../getting_started.html">Install</a></li>
+    <li class="nav-item current active"><a class="nav-link nav-internal" href="index.html" aria-current="page">Tutorials</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../ml_models.html">ML models</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../mcp_server.html">MCP server</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../apidocs/index.html">API reference</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../resources/contribute.html">Contribute</a></li>
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a" title="SQuADDS datasets on Hugging Face" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/images/hf-logo.svg" class="icon-link-image" alt="SQuADDS datasets on Hugging Face"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api" title="SQuADDS ML inference API" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-code fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">SQuADDS ML inference API</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="Chat with SQuADDS" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-regular fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Chat with SQuADDS</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav class="paper-nav" aria-label="Main">
+  <ul class="bd-navbar-elements navbar-nav">
+    <li class="nav-item"><a class="nav-link nav-internal" href="../getting_started.html">Install</a></li>
+    <li class="nav-item current active"><a class="nav-link nav-internal" href="index.html" aria-current="page">Tutorials</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../ml_models.html">ML models</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../mcp_server.html">MCP server</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../apidocs/index.html">API reference</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../resources/contribute.html">Contribute</a></li>
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a" title="SQuADDS datasets on Hugging Face" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/images/hf-logo.svg" class="icon-link-image" alt="SQuADDS datasets on Hugging Face"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api" title="SQuADDS ML inference API" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-code fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">SQuADDS ML inference API</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="Chat with SQuADDS" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-regular fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Chat with SQuADDS</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links paper-outline" aria-label="Documentation">
+  <p class="bd-links__title" role="heading" aria-level="1">Documentation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started with SQuADDS</a></li>
+
+
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Tutorials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-0_Using_the_SQuADDS_WebUI.html">Tutorial 0: Using the SQuADDS Web UI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1_Getting_Started_with_SQuADDS.html">Tutorial 1: Getting Started with SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-2_Simulate_interpolated_designs.html">Tutorial 2: Simulating Interpolated Designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html">Tutorial 3: Contributing Experimentally Validated Simulation Data to SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html">Tutorial 4: Contributing Measured Devices’ Data to the SQuADDS Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.html">Tutorial 5: Designing a “fab-ready” chip with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-6_Adding_Airbridges.html">Tutorial 6: Adding Airbridges</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-7_Simulate_designs_with_palace.html">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-8_ML_interpolation_in_SQuADDS.html">Tutorial 8: Machine Learning with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-9_DrivenModal_Capacitance_Extraction.html">Tutorial 9: Driven-Modal Capacitance Extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.html">Tutorial 10: Unified Driven-Modal Hamiltonian Extraction</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Tutorial 11: Predicting Capacitance Matrices from a GDS file using ML</a><div class="paper-local"><ul>
+<li><a class="reference internal" href="#">Tutorial 11: Predicting Capacitance Matrices from a GDS file using ML</a><ul>
+<li><a class="reference internal" href="#Why-the-Maxwell-capacitance-matrix?">Why the Maxwell capacitance matrix?</a></li>
+<li><a class="reference internal" href="#Setting-up">Setting up</a></li>
+<li><a class="reference internal" href="#Drawing-a-multipad-star">Drawing a multipad star</a></li>
+<li><a class="reference internal" href="#The-input-GDS-to-the-model">The input GDS to the model</a></li>
+<li><a class="reference internal" href="#Predicting-the-capacitance-matrix">Predicting the capacitance matrix</a><ul>
+<li><a class="reference internal" href="#Physical-checks">Physical checks</a></li>
+<li><a class="reference internal" href="#Timing">Timing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#How-good-is-it?">How good is it?</a></li>
+<li><a class="reference internal" href="#QCap-vs-QCap-Fast">QCap vs QCap-Fast</a></li>
+<li><a class="reference internal" href="#Physics-priors-vs-the-model">Physics priors vs the model</a></li>
+<li><a class="reference internal" href="#A-second-component:-an-Xmon-with-two-claws">A second component: an Xmon with two claws</a><ul>
+<li><a class="reference internal" href="#Ground-and-conductors-on-one-layer">Ground and conductors on one layer</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Batch-prediction-and-threads">Batch prediction and threads</a></li>
+<li><a class="reference internal" href="#From-a-matrix-to-a-charging-energy">From a matrix to a charging energy</a></li>
+<li><a class="reference internal" href="#A-prediction-as-a-SQuADDS_DB-row">A prediction as a SQuADDS_DB row</a></li>
+<li><a class="reference internal" href="#From-the-command-line">From the command line</a></li>
+<li><a class="reference internal" href="#The-geometric-embedding">The geometric embedding</a></li>
+<li><a class="reference internal" href="#Next-Steps...">Next Steps…</a></li>
+<li><a class="reference internal" href="#License">License</a></li>
+</ul>
+</li>
+</ul>
+</div></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.html">Tutorial 12: Planar Capacitance Families in SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-13_From_Layout_to_Hamiltonian_with_ML.html">Tutorial 13: From Layout to Hamiltonian with ML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-14_Training_on_Your_Own_Designs.html">Tutorial 14: Training on Your Own Designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-15_Contributing_Capacitance_Data_and_Models.html">Tutorial 15: Contributing Capacitance Data and Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-16_Inverse_Design_by_ML_Screening.html">Tutorial 16: Inverse Design by ML Screening</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../mcp_server.html">MCP Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ml_models.html">ML Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ml_local.html">Run ML Models Locally</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apidocs/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources/contribute.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources/simulations.html">Simulation Lessons</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="../resources/concepts.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/index.html">References</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/lfl-lab/SQuADDS">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/pdf/2312.13483.pdf">Paper</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://dornsife.usc.edu/lfl/">LFL Lab ✌️</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="paper-crumbs d-print-none">
+  <ol>
+    <li><a href="../../index.html">SQuADDS</a></li>
+    <li><a href="index.html">Tutorials</a></li>
+    <li aria-current="page">Tutorial 11: Predicting Capacitance Matrices from a GDS file using ML</li>
+  </ol>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Tutorial-11:-Predicting-Capacitance-Matrices-from-a-GDS-file-using-ML">
+<h1>Tutorial 11: Predicting Capacitance Matrices from a GDS file using ML<a class="headerlink" href="#Tutorial-11:-Predicting-Capacitance-Matrices-from-a-GDS-file-using-ML" title="Link to this heading">#</a></h1>
+<p>In our latest paper, <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/ml-paper/paper/">“QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout”</a>, we have shown how we developed a capacitance foundation model that can be used to predict the Maxwell capacitance matrix of ANY planar superconducting device layout on ANY substrate. The results are within 1% agreement with its counterpart accurate Q3D simulation and run in seconds on a CPU. The
+<a class="reference external" href="https://lfl-lab.github.io/SQuADDS/ml-paper/">paper page</a> also has videos and more tutorials.</p>
+<p><strong>Note:</strong> the models need the optional ML extra, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;squadds[ml]&quot;</span></code>, and the GDS export from quantum-metal needs the <code class="docutils literal notranslate"><span class="pre">gds</span></code> extra, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;squadds[gds]&quot;</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<section id="Why-the-Maxwell-capacitance-matrix?">
+<h2>Why the Maxwell capacitance matrix?<a class="headerlink" href="#Why-the-Maxwell-capacitance-matrix?" title="Link to this heading">#</a></h2>
+<p>Capacitors are the workhorse of any superconducting processor and are structures that designers spend a lot of time optimizing layouts for. The hope of this ML model is to reduce the iteration times of device design lifecycle.</p>
+<p>Now, as for why the Maxwell matrix, we motivate that by the following example that we will walk through in this tutorial:</p>
+<p>Let’s say we are laying out a coupler that has to talk to three qubits at once: a five-fingered star in a circular ground pocket, with a pad sitting in three of its valleys (a <em>multipad star</em>). Before we send it to the fab, we want to know:</p>
+<ol class="arabic simple">
+<li><p>the coupling capacitance between the star and each pad (it sets the coupling strength <span class="math notranslate nohighlight">\(g\)</span>),</p></li>
+<li><p>the self capacitance of every island (it sets the charging energies <span class="math notranslate nohighlight">\(E_C\)</span>), and</p></li>
+<li><p>the pad-to-pad capacitances we never asked for (they set the crosstalk).</p></li>
+</ol>
+<p>All of these are entries of <strong>one</strong> matrix. For <span class="math notranslate nohighlight">\(N\)</span> conductors (ground included), the charges and the voltages are related by the Maxwell capacitance matrix</p>
+<div class="math notranslate nohighlight">
+\[Q_i = \sum_{j} C_{ij} V_j .\]</div>
+<p>The diagonal entry <span class="math notranslate nohighlight">\(C_{ii} &gt; 0\)</span> is the self capacitance of conductor <span class="math notranslate nohighlight">\(i\)</span> (its charge when it sits at 1 V and everything else is grounded), and the off-diagonal entries are negative, <span class="math notranslate nohighlight">\(C_{ij} = -C^{\rm mutual}_{ij} &lt; 0\)</span>. Every signal row sums to a small non-negative number (the field lines that escape to infinity), so <span class="math notranslate nohighlight">\(C_{ii} \geq \sum_{j \neq i} |C_{ij}|\)</span>.</p>
+<p>A circuit Hamiltonian needs every entry at once: the charging energy of island <span class="math notranslate nohighlight">\(i\)</span> is <span class="math notranslate nohighlight">\(E_{C,i} = \frac{e^2}{2}\,(C^{-1})_{ii}\)</span>, where <span class="math notranslate nohighlight">\(C\)</span> is the signal block (ground removed), and an inverse mixes every entry of the matrix. One two-terminal simulation per pair does not give us that.</p>
+<p>Throughout SQuADDS the matrix is in <strong>fF</strong>, with <strong>ground first</strong> (row and column 0, named <code class="docutils literal notranslate"><span class="pre">G</span></code>).</p>
+</section>
+<section id="Setting-up">
+<h2>Setting up<a class="headerlink" href="#Setting-up" title="Link to this heading">#</a></h2>
+<p>We’ll use quantum-metal without its GUI, so let’s tell it that before importing anything.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;QISKIT_METAL_HEADLESS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</pre></div>
+</div>
+</div>
+<p>We’ll keep every file we write in one folder next to this notebook.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">work</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorial11_files&quot;</span><span class="p">)</span>
+<span class="n">work</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Drawing-a-multipad-star">
+<h2>Drawing a multipad star<a class="headerlink" href="#Drawing-a-multipad-star" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> includes the quantum-metal component for every family of the planar capacitance dataset used to train the model. The multipad star is <code class="docutils literal notranslate"><span class="pre">GeneralizedCapStar</span></code>: <code class="docutils literal notranslate"><span class="pre">pad_enables</span></code> switches a pad on (<code class="docutils literal notranslate"><span class="pre">1</span></code>) or off (<code class="docutils literal notranslate"><span class="pre">0</span></code>) in each valley, and the star has a short feed line (<code class="docutils literal notranslate"><span class="pre">cpw_length</span></code>) to the north.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">designs</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneralizedCapStar</span>
+</pre></div>
+</div>
+</div>
+<p>Importing SQuADDS also loads scqubits, which switches the inline figures of the notebook to vector formats. Let’s switch them back to PNG so the plots stay light.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib_inline.backend_inline</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_matplotlib_formats</span>
+
+<span class="n">set_matplotlib_formats</span><span class="p">(</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">n_points</span><span class="o">=</span><span class="s2">&quot;5&quot;</span><span class="p">,</span>
+    <span class="n">star_outer_radius</span><span class="o">=</span><span class="s2">&quot;136.4um&quot;</span><span class="p">,</span>
+    <span class="n">star_inner_radius</span><span class="o">=</span><span class="s2">&quot;59.04um&quot;</span><span class="p">,</span>
+    <span class="n">tip_radius</span><span class="o">=</span><span class="s2">&quot;2.73um&quot;</span><span class="p">,</span>
+    <span class="n">valley_radius</span><span class="o">=</span><span class="s2">&quot;8.8um&quot;</span><span class="p">,</span>
+    <span class="n">star_rotation</span><span class="o">=</span><span class="s2">&quot;54&quot;</span><span class="p">,</span>
+    <span class="n">gap</span><span class="o">=</span><span class="s2">&quot;18um&quot;</span><span class="p">,</span>
+    <span class="n">pocket_radius</span><span class="o">=</span><span class="s2">&quot;160.35um&quot;</span><span class="p">,</span>
+    <span class="n">pad_side_gap</span><span class="o">=</span><span class="s2">&quot;6um&quot;</span><span class="p">,</span>
+    <span class="n">pad_enables</span><span class="o">=</span><span class="s2">&quot;1,1,0,1,0&quot;</span><span class="p">,</span>
+    <span class="n">cpw_length</span><span class="o">=</span><span class="s2">&quot;30um&quot;</span><span class="p">,</span>
+    <span class="n">cpw_width</span><span class="o">=</span><span class="s2">&quot;10um&quot;</span><span class="p">,</span>
+    <span class="n">cpw_gap</span><span class="o">=</span><span class="s2">&quot;6um&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star_design</span> <span class="o">=</span> <span class="n">designs</span><span class="o">.</span><span class="n">DesignPlanar</span><span class="p">({},</span> <span class="n">overwrite_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">GeneralizedCapStar</span><span class="p">(</span><span class="n">star_design</span><span class="p">,</span> <span class="s2">&quot;star&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">star_options</span><span class="p">)</span>
+<span class="n">star_design</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Now let’s export it with <code class="docutils literal notranslate"><span class="pre">squadds.layouts.qmetal_gds</span></code>. With <code class="docutils literal notranslate"><span class="pre">include_ground_domain=True</span></code> it writes the layer convention the models read: a square ground plane on 1/0 that reaches 169 µm past the metal, with the component’s own etch cut out of it, and every piece of signal metal on 1/10. <code class="docutils literal notranslate"><span class="pre">minimum_ground_clearance_um</span></code> only closes the open end of the feed line (we use the CPW gap, 6 µm).</p>
+<details><summary><p>Using a GDS that was not drawn with SQuADDS</p>
+</summary><p>Any GDS works. <code class="docutils literal notranslate"><span class="pre">prepare_layout</span></code> and <code class="docutils literal notranslate"><span class="pre">predict</span></code> only need to know which metal is the ground and which metal are the conductors, and they take the same arguments:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>your file</p></th>
+<th class="head"><p>what to pass</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ground and conductors on other layers</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ground_layers=[(5,</span> <span class="pre">0)],</span> <span class="pre">conductor_layers=[(6,</span> <span class="pre">0),</span> <span class="pre">(7,</span> <span class="pre">0)]</span></code> (several layers are fine)</p></td>
+</tr>
+<tr class="row-odd"><td><p>ground and conductors on one layer</p></td>
+<td><p>that layer for both; the ground is detected for you (see <em>Ground and conductors on one layer</em> below)</p></td>
+</tr>
+<tr class="row-even"><td><p>several cells in the file</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell=&quot;name&quot;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>only part of a chip</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">select=[...]</span></code> (conductor indices in file order) or <code class="docutils literal notranslate"><span class="pre">select_box=(x0,</span> <span class="pre">y0,</span> <span class="pre">x1,</span> <span class="pre">y1)</span></code> in µm, with <code class="docutils literal notranslate"><span class="pre">margin_um</span></code> to crop the ground around them</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Metal on any other layer (labels, port markers, junctions) is not modelled. Layers you pass in <code class="docutils literal notranslate"><span class="pre">ignore_layers</span></code> are skipped silently.</p>
+<p><code class="docutils literal notranslate"><span class="pre">prepare_layout</span></code> also repairs what breaks the convention and tells you about it in <code class="docutils literal notranslate"><span class="pre">layout.warnings</span></code>: touching or overlapping polygons on the conductor layer become one conductor, a conductor that touches the ground is merged into the ground net, and zero-area polygons are dropped. So always plot the prepared layout before you trust a number.</p>
+</details><div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.layouts.qmetal_gds</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_qgeometry_gds</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star_gds</span> <span class="o">=</span> <span class="n">work</span> <span class="o">/</span> <span class="s2">&quot;multipad_star.gds&quot;</span>
+<span class="n">export_qgeometry_gds</span><span class="p">(</span><span class="n">star_design</span><span class="p">,</span> <span class="n">star_gds</span><span class="p">,</span> <span class="n">include_ground_domain</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minimum_ground_clearance_um</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">star_gds</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+PosixPath(&#39;tutorial11_files/multipad_star.gds&#39;)
+</pre></div></div>
+</div>
+</section>
+<section id="The-input-GDS-to-the-model">
+<h2>The input GDS to the model<a class="headerlink" href="#The-input-GDS-to-the-model" title="Link to this heading">#</a></h2>
+<p>Since the input to the model is the GDS file, let’s look at what the model sees.</p>
+<p><code class="docutils literal notranslate"><span class="pre">prepare_layout</span></code> reads a GDS exactly the way the predictor does: the ground is one net, and every connected body on the conductor layer is one conductor, named <code class="docutils literal notranslate"><span class="pre">C1</span></code>, <code class="docutils literal notranslate"><span class="pre">C2</span></code>, … in file order.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare_layout</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star_layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="n">star_gds</span><span class="p">)</span>
+<span class="n">star_layout</span><span class="o">.</span><span class="n">names</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;C1&#39;, &#39;C2&#39;, &#39;C3&#39;, &#39;C4&#39;]
+</pre></div></div>
+</div>
+<p>The prepared layout draws itself with <code class="docutils literal notranslate"><span class="pre">.plot()</span></code>: the ground in grey and every conductor in its own colour, named as the predictions name it.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star_layout</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;multipad star: what the model sees&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_21_0.png" src="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_21_0.png" />
+</div>
+</div>
+<p>Four conductors and the ground, the star (with its feed line) and three pads. <code class="docutils literal notranslate"><span class="pre">C1</span></code>, <code class="docutils literal notranslate"><span class="pre">C2</span></code>, … are not very telling, so let’s name every body after the quantum-metal shape it overlaps the most.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">affinity</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">name_conductors</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">layout</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;{predictor name: quantum-metal shape name} for every conductor body (ground -&gt; &quot;ground&quot;).&quot;&quot;&quot;</span>
+    <span class="n">shapes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">qgeometry</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;subtract&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;helper&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)]</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">geometry</span> <span class="k">if</span> <span class="n">table</span> <span class="o">==</span> <span class="s2">&quot;poly&quot;</span> <span class="k">else</span> <span class="n">row</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">cap_style</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">shapes</span><span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">affinity</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># Metal mm -&gt; GDS µm</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;G&quot;</span><span class="p">:</span> <span class="s2">&quot;ground&quot;</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">body</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">layout</span><span class="o">.</span><span class="n">conductors</span><span class="p">):</span>
+        <span class="n">names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">shapes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">shapes</span><span class="p">[</span><span class="n">s</span><span class="p">])</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">names</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star_names</span> <span class="o">=</span> <span class="n">name_conductors</span><span class="p">(</span><span class="n">star_design</span><span class="p">,</span> <span class="n">star_layout</span><span class="p">)</span>
+<span class="n">star_names</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;G&#39;: &#39;ground&#39;, &#39;C1&#39;: &#39;star&#39;, &#39;C2&#39;: &#39;pad_0&#39;, &#39;C3&#39;: &#39;pad_1&#39;, &#39;C4&#39;: &#39;pad_3&#39;}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star_layout</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">star_names</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;multipad star&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_25_0.png" src="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_25_0.png" />
+</div>
+</div>
+</section>
+<section id="Predicting-the-capacitance-matrix">
+<h2>Predicting the capacitance matrix<a class="headerlink" href="#Predicting-the-capacitance-matrix" title="Link to this heading">#</a></h2>
+<p>The models are open-source and available on Hugging Face (<code class="docutils literal notranslate"><span class="pre">SQuADDS/QCap</span></code>).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">load_model</span></code> method downloads the checkpoints once, checks the sha256 of every file against the manifest shipped inside SQuADDS and refuses anything that does not match. If you already have a local copy of the models, point the environment variable <code class="docutils literal notranslate"><span class="pre">SQUADDS_CAPML_MODELS</span></code> at its folder and nothing is downloaded.</p>
+<p>We release two models, both trained on <strong>all</strong> the data, and we pick one by its name:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>what it does</p></th>
+<th class="head"><p>use it for</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">QCap</span></code> (default)</p></td>
+<td><p>solves the physics of the layout, then corrects it with the networks</p></td>
+<td><p>every number you build on</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">QCap-Fast</span></code></p></td>
+<td><p>skips the field solve: a learned surrogate stands in for the physics</p></td>
+<td><p>screening large design spaces</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">QCap</span></code> is the released version of the main model of our paper.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapacitancePredictor</span><span class="p">,</span> <span class="n">load_model</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qcap</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;QCap&quot;</span><span class="p">)</span>
+<span class="n">qcap</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">qcap</span><span class="o">.</span><span class="n">title</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&#39;QCap&#39;,
+ &#39;QCap (~1 s): extrapolated physics R(1.5, 3) on the corrected prior + residual networks, compiled solver&#39;)
+</pre></div></div>
+</div>
+<p>A <code class="docutils literal notranslate"><span class="pre">CapacitancePredictor</span></code> wraps a model. <code class="docutils literal notranslate"><span class="pre">threads</span></code> is the number of CPU threads per prediction (2 by default; for a given machine and thread count the results are deterministic).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predictor</span> <span class="o">=</span> <span class="n">CapacitancePredictor</span><span class="p">(</span><span class="n">qcap</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">predictor</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CapacitancePredictor(&#39;QCap&#39;, threads=2)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">star_gds</span><span class="p">)</span>
+<span class="n">res</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CapacitanceResult(QCap, N=5, names=[&#39;G&#39;, &#39;C1&#39;, &#39;C2&#39;, &#39;C3&#39;, &#39;C4&#39;], total 2.45 s, checks passed)
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">res.to_dataframe()</span></code> gives the matrix as a table (fF, ground first). Let’s put our names on it.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">C</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">star_names</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">star_names</span><span class="p">)</span>
+<span class="n">C</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ground</th>
+      <th>star</th>
+      <th>pad_0</th>
+      <th>pad_1</th>
+      <th>pad_3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ground</th>
+      <td>131.929</td>
+      <td>-40.698</td>
+      <td>-18.814</td>
+      <td>-18.800</td>
+      <td>-19.061</td>
+    </tr>
+    <tr>
+      <th>star</th>
+      <td>-40.698</td>
+      <td>70.779</td>
+      <td>-9.386</td>
+      <td>-9.364</td>
+      <td>-9.562</td>
+    </tr>
+    <tr>
+      <th>pad_0</th>
+      <td>-18.814</td>
+      <td>-9.386</td>
+      <td>29.278</td>
+      <td>-0.594</td>
+      <td>-0.119</td>
+    </tr>
+    <tr>
+      <th>pad_1</th>
+      <td>-18.800</td>
+      <td>-9.364</td>
+      <td>-0.594</td>
+      <td>29.248</td>
+      <td>-0.118</td>
+    </tr>
+    <tr>
+      <th>pad_3</th>
+      <td>-19.061</td>
+      <td>-9.562</td>
+      <td>-0.119</td>
+      <td>-0.118</td>
+      <td>29.215</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The diagonal holds the self capacitance of every island, the off-diagonal entries are minus the mutual capacitances, and the ground row and column come first, exactly as a Q3D export would give them.</p>
+<p>Let’s plot the mutual capacitances on a log scale.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mut</span> <span class="o">=</span> <span class="o">-</span><span class="n">C</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">))</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">))</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">mut</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)),</span> <span class="n">C</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)),</span> <span class="n">C</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mut</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;log10 mutual capacitance (fF)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;multipad star: mutual capacitances (fF)&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_35_0.png" src="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_35_0.png" />
+</div>
+</div>
+<section id="Physical-checks">
+<h3>Physical checks<a class="headerlink" href="#Physical-checks" title="Link to this heading">#</a></h3>
+<p>Every prediction comes with the checks a physical Maxwell matrix must pass:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">symmetric</span></code>: <span class="math notranslate nohighlight">\(C_{ij} = C_{ji}\)</span>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">diagonal_positive</span></code> and <code class="docutils literal notranslate"><span class="pre">offdiag_all_negative</span></code>: the Maxwell signs,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">closure</span></code>: every signal row sums to a value <span class="math notranslate nohighlight">\(\geq 0\)</span>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">positive_definite</span></code>: the signal block has only positive eigenvalues (otherwise the electrostatic energy <span class="math notranslate nohighlight">\(\frac{1}{2} V^T C V\)</span> could be negative).</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">checks</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+symmetric_max_abs            0.0
+symmetric                   True
+diagonal_positive           True
+offdiag_all_negative        True
+closure_min_row_sum     0.354715
+closure                     True
+signal_block_min_eig    23.08647
+positive_definite           True
+passed                      True
+dtype: object
+</pre></div></div>
+</div>
+</section>
+<section id="Timing">
+<h3>Timing<a class="headerlink" href="#Timing" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">res.timing_s</span></code> breaks the wall time into the stages of the pipeline: reading the layout, the geometric embedding (<code class="docutils literal notranslate"><span class="pre">geometry_s</span></code>), the extrapolated physics prior (<code class="docutils literal notranslate"><span class="pre">prior_s</span></code>, two thin-film field solves) and the networks (<code class="docutils literal notranslate"><span class="pre">network_s</span></code>).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">timing_s</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;cache_hits&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+prepare_s                                                  0.007313
+load_s                                                     0.607775
+geometry_s                                                 0.573389
+prior_s                                                    1.875108
+prior_levels_s    {&#39;1.5&#39;: 0.5190075790014816, &#39;3&#39;: 1.35353186399...
+network_s                                                  0.006179
+total_s                                                    2.454677
+threads                                                           2
+dtype: object
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res</span><span class="o">.</span><span class="n">machine</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">threads</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&#39;Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHz, 20 CPUs, Linux x86_64&#39;, 2)
+</pre></div></div>
+</div>
+<p>The very first prediction in a fresh Python session also compiles the field solver (numba), so it is slower than the ones that follow. Let’s clear the in-memory caches and time it again.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance.predictor</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_cache</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">star_gds</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s1">&#39;total_s&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> s with </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">threads</span><span class="si">}</span><span class="s2"> threads on </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">machine</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2.25 s with 2 threads on Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHz, 20 CPUs, Linux x86_64
+</pre></div></div>
+</div>
+<p>And asking for the same layout again comes straight from the cache:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">again</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">star_gds</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="mf">1e3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">again</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s1">&#39;total_s&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> ms, served from the cache: </span><span class="si">{</span><span class="n">again</span><span class="o">.</span><span class="n">cached</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+4.8 ms, served from the cache: True
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="How-good-is-it?">
+<h2>How good is it?<a class="headerlink" href="#How-good-is-it?" title="Link to this heading">#</a></h2>
+<p>The released models are trained on <strong>all</strong> the data, so we checked them on 39 generated layouts that no part of any model ever saw: a ring with a neighbour, with 3 or 4 conductors. Every error is the median relative error over the mutual capacitances, with the mean absolute error (MAE) and the root-mean-square error (RMSE) in fF. The times are medians on two CPUs of an Intel Xeon E5-2640 v4 node.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>on the 39 new layouts</p></th>
+<th class="head"><p>median error</p></th>
+<th class="head"><p>MAE (fF)</p></th>
+<th class="head"><p>RMSE (fF)</p></th>
+<th class="head"><p>median time</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">QCap</span></code></p></td>
+<td><p>1.05 %</p></td>
+<td><p>0.132</p></td>
+<td><p>0.188</p></td>
+<td><p>1.1 s</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">QCap-Fast</span></code></p></td>
+<td><p>3.175 %</p></td>
+<td><p>0.583</p></td>
+<td><p>0.824</p></td>
+<td><p>0.24 s</p></td>
+</tr>
+<tr class="row-even"><td><p>extrapolated physics prior alone</p></td>
+<td><p>1.765 %</p></td>
+<td><p>0.275</p></td>
+<td><p>0.376</p></td>
+<td><p>most of QCap’s time</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>So <code class="docutils literal notranslate"><span class="pre">QCap-Fast</span></code> is for quick screening of the component families it was trained on, and <code class="docutils literal notranslate"><span class="pre">QCap</span></code> is for everything else. The browser demo also runs QCap-Lite, a model in between.</p>
+</section>
+<section id="QCap-vs-QCap-Fast">
+<h2>QCap vs QCap-Fast<a class="headerlink" href="#QCap-vs-QCap-Fast" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">QCap-Fast</span></code> replaces the two field solves of the extrapolated physics prior by a learned surrogate, so it needs no field solve at all. That makes it about ten times faster, but it comes with a warning that we should read before using it:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">qcap_fast</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;QCap-Fast&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">qcap_fast</span><span class="o">.</span><span class="n">warning</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Use QCap-Fast only for quick screening of the component families it was trained on (interdigital, paddle, concentric, star, multipad star, Xmon, TransmonPocket, shielded concentric, two-net, random, procedurally generated and synthetic campaign layouts). On new designs of a trained family (B5) it was worse than the physics alone, 3.175 % (MAE 0.583 / RMSE 0.824 fF) against 1.765 % (0.275 / 0.376 fF), and the paper&#39;s version of it was worse than the physics alone on a held-out family too, 3.11 % (0.533 / 0.633 fF) against 1.55 % (0.166 / 0.205 fF). Use QCap for anything that matters.
+</pre></div></div>
+</div>
+<p>Let’s predict the star with <code class="docutils literal notranslate"><span class="pre">QCap-Fast</span></code> too (once to load it, then once more from cold caches for a fair time).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fast_predictor</span> <span class="o">=</span> <span class="n">CapacitancePredictor</span><span class="p">(</span><span class="n">qcap_fast</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">fast_predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">star_gds</span><span class="p">)</span>
+<span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">res_fast</span> <span class="o">=</span> <span class="n">fast_predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">star_gds</span><span class="p">)</span>
+<span class="n">res_fast</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CapacitanceResult(QCap-Fast, N=5, names=[&#39;G&#39;, &#39;C1&#39;, &#39;C2&#39;, &#39;C3&#39;, &#39;C4&#39;], total 0.198 s, checks passed)
+</pre></div></div>
+</div>
+<p>Here is a small helper that lists the mutual capacitances of a matrix, one row per pair of conductors.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">mutuals</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The mutual capacitances (fF, positive) of a Maxwell matrix, one entry per pair of conductors.&quot;&quot;&quot;</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="o">-</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">))</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">))})</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">star_names</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">names</span><span class="p">]</span>
+<span class="n">both</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;QCap (fF)&quot;</span><span class="p">:</span> <span class="n">mutuals</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">matrix_fF</span><span class="p">,</span> <span class="n">names</span><span class="p">),</span> <span class="s2">&quot;QCap-Fast (fF)&quot;</span><span class="p">:</span> <span class="n">mutuals</span><span class="p">(</span><span class="n">res_fast</span><span class="o">.</span><span class="n">matrix_fF</span><span class="p">,</span> <span class="n">names</span><span class="p">)})</span>
+<span class="n">both</span><span class="p">[</span><span class="s2">&quot;QCap-Fast vs QCap (%)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">both</span><span class="p">[</span><span class="s2">&quot;QCap-Fast (fF)&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">both</span><span class="p">[</span><span class="s2">&quot;QCap (fF)&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">both</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>QCap (fF)</th>
+      <th>QCap-Fast (fF)</th>
+      <th>QCap-Fast vs QCap (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ground to star</th>
+      <td>40.6977</td>
+      <td>41.3814</td>
+      <td>1.6798</td>
+    </tr>
+    <tr>
+      <th>ground to pad_0</th>
+      <td>18.8137</td>
+      <td>18.8130</td>
+      <td>-0.0037</td>
+    </tr>
+    <tr>
+      <th>ground to pad_1</th>
+      <td>18.7999</td>
+      <td>18.8125</td>
+      <td>0.0668</td>
+    </tr>
+    <tr>
+      <th>ground to pad_3</th>
+      <td>19.0606</td>
+      <td>19.0306</td>
+      <td>-0.1574</td>
+    </tr>
+    <tr>
+      <th>star to pad_0</th>
+      <td>9.3863</td>
+      <td>9.1189</td>
+      <td>-2.8492</td>
+    </tr>
+    <tr>
+      <th>star to pad_1</th>
+      <td>9.3638</td>
+      <td>9.1351</td>
+      <td>-2.4422</td>
+    </tr>
+    <tr>
+      <th>star to pad_3</th>
+      <td>9.5621</td>
+      <td>9.2147</td>
+      <td>-3.6326</td>
+    </tr>
+    <tr>
+      <th>pad_0 to pad_1</th>
+      <td>0.5940</td>
+      <td>0.5529</td>
+      <td>-6.9129</td>
+    </tr>
+    <tr>
+      <th>pad_0 to pad_3</th>
+      <td>0.1194</td>
+      <td>0.1133</td>
+      <td>-5.1094</td>
+    </tr>
+    <tr>
+      <th>pad_1 to pad_3</th>
+      <td>0.1185</td>
+      <td>0.1130</td>
+      <td>-4.6011</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s2">&quot;QCap&quot;</span><span class="p">:</span> <span class="n">res</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s2">&quot;total_s&quot;</span><span class="p">],</span> <span class="s2">&quot;QCap-Fast&quot;</span><span class="p">:</span> <span class="n">res_fast</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s2">&quot;total_s&quot;</span><span class="p">]},</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;wall time (s)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+QCap         2.251150
+QCap-Fast    0.197606
+Name: wall time (s), dtype: float64
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">QCap-Fast</span></code> is about ten times faster than <code class="docutils literal notranslate"><span class="pre">QCap</span></code> and lands within a few percent of it, as the table shows. That is close enough to map out a large design space and find the region worth keeping. It is not close enough to build on, so the workflow is: screen many candidates with <code class="docutils literal notranslate"><span class="pre">QCap-Fast</span></code>, then sweep the promising region finely with <code class="docutils literal notranslate"><span class="pre">QCap</span></code> and take the final numbers from it.</p>
+</section>
+<section id="Physics-priors-vs-the-model">
+<h2>Physics priors vs the model<a class="headerlink" href="#Physics-priors-vs-the-model" title="Link to this heading">#</a></h2>
+<p>Under the hood, <code class="docutils literal notranslate"><span class="pre">QCap</span></code> starts from physics. A thin-film method-of-moments solver computes the capacitance matrix of the layout on a mesh with <span class="math notranslate nohighlight">\(p\)</span> panels per gap, and the networks learn only the small residual that the thin-film physics misses. SQuADDS exposes two thin-film priors on their own:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">physics_prior</span></code>: the physics prior, one coarse solve at <span class="math notranslate nohighlight">\(p = 0.375\)</span> panels per gap (cheap and rough),</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">optimized_physics_prior</span></code>: the extrapolated (optimized) prior <span class="math notranslate nohighlight">\(C^{R}\)</span>, two solves at <span class="math notranslate nohighlight">\(p = 1.5\)</span> and <span class="math notranslate nohighlight">\(p = 3\)</span>, extrapolated entry by entry, <span class="math notranslate nohighlight">\(C^{R} = \exp\left(2 \log C_{3} - \log C_{1.5}\right)\)</span>. This is the prior <code class="docutils literal notranslate"><span class="pre">QCap</span></code> starts from.</p></li>
+</ul>
+<p>Neither has a learned parameter. Let’s compute both from cold caches and time them.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance</span><span class="w"> </span><span class="kn">import</span> <span class="n">optimized_physics_prior</span><span class="p">,</span> <span class="n">physics_prior</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">coarse</span> <span class="o">=</span> <span class="n">physics_prior</span><span class="p">(</span><span class="n">star_gds</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">optimized</span> <span class="o">=</span> <span class="n">optimized_physics_prior</span><span class="p">(</span><span class="n">star_gds</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ladder</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;physics prior (fF)&quot;</span><span class="p">:</span> <span class="n">mutuals</span><span class="p">(</span><span class="n">coarse</span><span class="o">.</span><span class="n">C_fF</span><span class="p">,</span> <span class="n">names</span><span class="p">),</span>
+    <span class="s2">&quot;extrapolated prior (fF)&quot;</span><span class="p">:</span> <span class="n">mutuals</span><span class="p">(</span><span class="n">optimized</span><span class="o">.</span><span class="n">C_fF</span><span class="p">,</span> <span class="n">names</span><span class="p">),</span>
+    <span class="s2">&quot;QCap (fF)&quot;</span><span class="p">:</span> <span class="n">mutuals</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">matrix_fF</span><span class="p">,</span> <span class="n">names</span><span class="p">),</span>
+<span class="p">})</span>
+<span class="n">ladder</span><span class="p">[</span><span class="s2">&quot;network correction (%)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">ladder</span><span class="p">[</span><span class="s2">&quot;QCap (fF)&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">ladder</span><span class="p">[</span><span class="s2">&quot;extrapolated prior (fF)&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ladder</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>physics prior (fF)</th>
+      <th>extrapolated prior (fF)</th>
+      <th>QCap (fF)</th>
+      <th>network correction (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ground to star</th>
+      <td>39.4375</td>
+      <td>40.0447</td>
+      <td>40.6977</td>
+      <td>1.6309</td>
+    </tr>
+    <tr>
+      <th>ground to pad_0</th>
+      <td>17.2994</td>
+      <td>18.7966</td>
+      <td>18.8137</td>
+      <td>0.0910</td>
+    </tr>
+    <tr>
+      <th>ground to pad_1</th>
+      <td>18.1606</td>
+      <td>18.6599</td>
+      <td>18.7999</td>
+      <td>0.7503</td>
+    </tr>
+    <tr>
+      <th>ground to pad_3</th>
+      <td>18.7807</td>
+      <td>18.8974</td>
+      <td>19.0606</td>
+      <td>0.8636</td>
+    </tr>
+    <tr>
+      <th>star to pad_0</th>
+      <td>9.0644</td>
+      <td>9.3864</td>
+      <td>9.3863</td>
+      <td>-0.0014</td>
+    </tr>
+    <tr>
+      <th>star to pad_1</th>
+      <td>8.9652</td>
+      <td>9.3759</td>
+      <td>9.3638</td>
+      <td>-0.1285</td>
+    </tr>
+    <tr>
+      <th>star to pad_3</th>
+      <td>9.0595</td>
+      <td>9.5894</td>
+      <td>9.5621</td>
+      <td>-0.2849</td>
+    </tr>
+    <tr>
+      <th>pad_0 to pad_1</th>
+      <td>0.5754</td>
+      <td>0.5866</td>
+      <td>0.5940</td>
+      <td>1.2646</td>
+    </tr>
+    <tr>
+      <th>pad_0 to pad_3</th>
+      <td>0.1110</td>
+      <td>0.1101</td>
+      <td>0.1194</td>
+      <td>8.3766</td>
+    </tr>
+    <tr>
+      <th>pad_1 to pad_3</th>
+      <td>0.1108</td>
+      <td>0.1096</td>
+      <td>0.1185</td>
+      <td>8.1089</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span>
+    <span class="s2">&quot;physics prior&quot;</span><span class="p">:</span> <span class="n">coarse</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s2">&quot;total_s&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;extrapolated prior&quot;</span><span class="p">:</span> <span class="n">optimized</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s2">&quot;total_s&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;QCap (embedding + prior + networks)&quot;</span><span class="p">:</span> <span class="n">res</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s2">&quot;total_s&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;QCap-Fast (no field solve)&quot;</span><span class="p">:</span> <span class="n">res_fast</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s2">&quot;total_s&quot;</span><span class="p">],</span>
+<span class="p">},</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;wall time (s), </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">threads</span><span class="si">}</span><span class="s2"> threads&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+physics prior                          0.095392
+extrapolated prior                     1.793726
+QCap (embedding + prior + networks)    2.251150
+QCap-Fast (no field solve)             0.197606
+Name: wall time (s), 2 threads, dtype: float64
+</pre></div></div>
+</div>
+<p>The physics prior (the coarse column) is quick but rough. The extrapolated (optimized) prior was tuned for both time and accuracy, which is why <code class="docutils literal notranslate"><span class="pre">QCap</span></code> builds on it: it takes most of <code class="docutils literal notranslate"><span class="pre">QCap</span></code>’s time, and the networks then only add small corrections on top. How close each column is to the truth is what the numbers above (and the Q3D comparison in Tutorial 14) tell us.</p>
+</section>
+<section id="A-second-component:-an-Xmon-with-two-claws">
+<h2>A second component: an Xmon with two claws<a class="headerlink" href="#A-second-component:-an-Xmon-with-two-claws" title="Link to this heading">#</a></h2>
+<p>Let’s draw a second device with a different number of conductors: an Xmon cross (<code class="docutils literal notranslate"><span class="pre">Xmon</span></code> in <code class="docutils literal notranslate"><span class="pre">squadds.components</span></code>, the cross without its junction) with a readout claw on the north arm and a bus claw on the west arm (<code class="docutils literal notranslate"><span class="pre">connector_location=&quot;0&quot;</span></code>).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">Xmon</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">claw</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">connector_type</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">claw_width</span><span class="o">=</span><span class="s2">&quot;19.6um&quot;</span><span class="p">,</span> <span class="n">claw_gap</span><span class="o">=</span><span class="s2">&quot;8.07um&quot;</span><span class="p">,</span> <span class="n">ground_spacing</span><span class="o">=</span><span class="s2">&quot;10.9um&quot;</span><span class="p">,</span>
+            <span class="n">claw_cpw_length</span><span class="o">=</span><span class="s2">&quot;26.5um&quot;</span><span class="p">,</span> <span class="n">claw_cpw_width</span><span class="o">=</span><span class="s2">&quot;10um&quot;</span><span class="p">)</span>
+<span class="n">xmon_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">cross_length</span><span class="o">=</span><span class="s2">&quot;303.7um&quot;</span><span class="p">,</span>
+    <span class="n">cross_width</span><span class="o">=</span><span class="s2">&quot;22.6um&quot;</span><span class="p">,</span>
+    <span class="n">cross_gap</span><span class="o">=</span><span class="s2">&quot;28.3um&quot;</span><span class="p">,</span>
+    <span class="n">connection_pads</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">readout</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">connector_location</span><span class="o">=</span><span class="s2">&quot;90&quot;</span><span class="p">,</span> <span class="n">claw_length</span><span class="o">=</span><span class="s2">&quot;82.3um&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">claw</span><span class="p">),</span>
+        <span class="n">bus</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">connector_location</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">claw_length</span><span class="o">=</span><span class="s2">&quot;121.5um&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">claw</span><span class="p">),</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xmon_design</span> <span class="o">=</span> <span class="n">designs</span><span class="o">.</span><span class="n">DesignPlanar</span><span class="p">({},</span> <span class="n">overwrite_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Xmon</span><span class="p">(</span><span class="n">xmon_design</span><span class="p">,</span> <span class="s2">&quot;xmon&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">xmon_options</span><span class="p">)</span>
+<span class="n">xmon_design</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+<span class="n">xmon_gds</span> <span class="o">=</span> <span class="n">work</span> <span class="o">/</span> <span class="s2">&quot;xmon_two_claws.gds&quot;</span>
+<span class="n">export_qgeometry_gds</span><span class="p">(</span><span class="n">xmon_design</span><span class="p">,</span> <span class="n">xmon_gds</span><span class="p">,</span> <span class="n">include_ground_domain</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minimum_ground_clearance_um</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xmon_layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="n">xmon_gds</span><span class="p">)</span>
+<span class="n">xmon_names</span> <span class="o">=</span> <span class="n">name_conductors</span><span class="p">(</span><span class="n">xmon_design</span><span class="p">,</span> <span class="n">xmon_layout</span><span class="p">)</span>
+<span class="n">xmon_layout</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">xmon_names</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Xmon with two claws&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_64_0.png" src="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_64_0.png" />
+</div>
+</div>
+<p>And a third one that is much bigger: a five-qubit lattice from the examples that ship with this tutorial. It has 34 conductors plus ground, so it is a <span class="math notranslate nohighlight">\(35 \times 35\)</span> matrix with 595 mutual capacitances.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lattice_gds</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/tutorial11/lattice_5q.gds&quot;</span><span class="p">)</span>
+<span class="n">lattice_layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="n">lattice_gds</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lattice_layout</span><span class="o">.</span><span class="n">names</span><span class="p">),</span> <span class="s2">&quot;conductors plus ground&quot;</span><span class="p">)</span>
+<span class="n">lattice_layout</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;five-qubit lattice&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+34 conductors plus ground
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_66_1.png" src="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_66_1.png" />
+</div>
+</div>
+<section id="Ground-and-conductors-on-one-layer">
+<h3>Ground and conductors on one layer<a class="headerlink" href="#Ground-and-conductors-on-one-layer" title="Link to this heading">#</a></h3>
+<p>Many layout tools draw the ground plane and the conductors on the same GDS layer. Pass that layer as both <code class="docutils literal notranslate"><span class="pre">ground_layers</span></code> and <code class="docutils literal notranslate"><span class="pre">conductor_layers</span></code> (a file with a single metal layer is handled the same way with the defaults): the metal is split into connected pieces and the ground is picked automatically, with a warning. The conductors are numbered in file order and the detected ground comes last; conductor piece k is named Ck everywhere, so the names are those of the two-layer file.
+<code class="docutils literal notranslate"><span class="pre">inspect_layout</span></code> shows the pick before you predict: the reason, a confidence and a figure with every piece numbered. Let’s move the Xmon’s ground and conductors onto layer 2/0 and look.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">gdstk</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance</span><span class="w"> </span><span class="kn">import</span> <span class="n">inspect_layout</span>
+
+<span class="n">lib</span> <span class="o">=</span> <span class="n">gdstk</span><span class="o">.</span><span class="n">read_gds</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">xmon_gds</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">lib</span><span class="o">.</span><span class="n">cells</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">poly</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">polygons</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">poly</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)]:</span>
+            <span class="n">poly</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">poly</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span>
+<span class="n">xmon_one_layer</span> <span class="o">=</span> <span class="n">work</span> <span class="o">/</span> <span class="s2">&quot;xmon_one_layer.gds&quot;</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">write_gds</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">xmon_one_layer</span><span class="p">),</span> <span class="n">max_points</span><span class="o">=</span><span class="mi">8190</span><span class="p">)</span>
+
+<span class="n">info</span> <span class="o">=</span> <span class="n">inspect_layout</span><span class="p">(</span><span class="n">xmon_one_layer</span><span class="p">,</span> <span class="n">ground_layers</span><span class="o">=</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="n">conductor_layers</span><span class="o">=</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ground = piece&quot;</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;ground_pieces&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;(confidence </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;confidence&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">info</span><span class="p">[</span><span class="s2">&quot;figure&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+ground = piece [4] (confidence high): it encloses every other piece (they sit in its openings)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_68_1.png" src="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_68_1.png" />
+</div>
+</div>
+<p>The ground is the piece that encloses the others, as it should be. Had the pick been wrong, we would pass the right piece numbers with <code class="docutils literal notranslate"><span class="pre">ground_pieces=[...]</span></code> (several pieces make one ground net). The prediction is the same, bit for bit, as from the two-layer file:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">one_layer</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ground_layers</span><span class="o">=</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="n">conductor_layers</span><span class="o">=</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="n">ground_pieces</span><span class="o">=</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;ground_pieces&quot;</span><span class="p">])</span>
+<span class="n">res_one</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xmon_one_layer</span><span class="p">,</span> <span class="o">**</span><span class="n">one_layer</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;identical to the two-layer file:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">res_one</span><span class="o">.</span><span class="n">matrix_fF</span><span class="p">,</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xmon_gds</span><span class="p">)</span><span class="o">.</span><span class="n">matrix_fF</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+identical to the two-layer file: True
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Batch-prediction-and-threads">
+<h2>Batch prediction and threads<a class="headerlink" href="#Batch-prediction-and-threads" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">predict</span></code> also takes a list of layouts and returns a list of results.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">layouts</span> <span class="o">=</span> <span class="p">[</span><span class="n">star_gds</span><span class="p">,</span> <span class="n">xmon_gds</span><span class="p">,</span> <span class="n">lattice_gds</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="n">batch</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">layouts</span><span class="p">)</span>
+<span class="n">serial_s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;layout&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">layouts</span><span class="p">],</span>
+    <span class="s2">&quot;conductors with ground&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">n_conductors</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">],</span>
+    <span class="s2">&quot;total (s)&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s2">&quot;total_s&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">],</span>
+    <span class="s2">&quot;checks passed&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">checks</span><span class="p">[</span><span class="s2">&quot;passed&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">],</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>layout</th>
+      <th>conductors with ground</th>
+      <th>total (s)</th>
+      <th>checks passed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>multipad_star.gds</td>
+      <td>5</td>
+      <td>1.959801</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>xmon_two_claws.gds</td>
+      <td>4</td>
+      <td>1.590090</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>lattice_5q.gds</td>
+      <td>35</td>
+      <td>33.522604</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>With <code class="docutils literal notranslate"><span class="pre">workers=3</span></code>, the three layouts are predicted in three processes at once, each with <code class="docutils literal notranslate"><span class="pre">threads</span></code> threads. Starting the processes costs a few seconds, and here the lattice alone takes most of the time, so do not expect miracles on this list: workers pay off for long lists of layouts of similar size.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="n">batch_parallel</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">layouts</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">parallel_s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;serial: </span><span class="si">{</span><span class="n">serial_s</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> s, 3 workers: </span><span class="si">{</span><span class="n">parallel_s</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> s (wall time, including starting the workers)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+serial: 37.2 s, 3 workers: 40.6 s (wall time, including starting the workers)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">same</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">matrix_fF</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">matrix_fF</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">batch_parallel</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;identical matrices:&quot;</span><span class="p">,</span> <span class="n">same</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+identical matrices: True
+</pre></div></div>
+</div>
+<p>For one big layout, it is the threads that help. Let’s predict the lattice with 1, 2 and 4 threads, from cold caches each time.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="n">clear_cache</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">lattice_gds</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;threads&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span> <span class="s2">&quot;total (s)&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s2">&quot;total_s&quot;</span><span class="p">],</span> <span class="s2">&quot;prior (s)&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s2">&quot;prior_s&quot;</span><span class="p">],</span>
+                 <span class="s2">&quot;network (s)&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">timing_s</span><span class="p">[</span><span class="s2">&quot;network_s&quot;</span><span class="p">]})</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>threads</th>
+      <th>total (s)</th>
+      <th>prior (s)</th>
+      <th>network (s)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>52.32</td>
+      <td>49.57</td>
+      <td>0.01</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>34.55</td>
+      <td>32.61</td>
+      <td>0.01</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>4</td>
+      <td>22.40</td>
+      <td>22.26</td>
+      <td>0.02</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>On this node (Intel Xeon E5-2640 v4), the 35-conductor lattice takes 52 s with 1 thread, 35 s with 2 and 22 s with 4. Nearly all of it is the field solve of the extrapolated physics prior; the networks take about 10 ms.</p>
+</section>
+<section id="From-a-matrix-to-a-charging-energy">
+<h2>From a matrix to a charging energy<a class="headerlink" href="#From-a-matrix-to-a-charging-energy" title="Link to this heading">#</a></h2>
+<p>Let’s put the Xmon’s matrix to work. With our names on it:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res_xmon</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">Cx</span> <span class="o">=</span> <span class="n">res_xmon</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">xmon_names</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">xmon_names</span><span class="p">)</span>
+<span class="n">Cx</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ground</th>
+      <th>cross</th>
+      <th>readout_connector_arm</th>
+      <th>bus_connector_arm</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ground</th>
+      <td>330.189</td>
+      <td>-145.438</td>
+      <td>-59.351</td>
+      <td>-72.298</td>
+    </tr>
+    <tr>
+      <th>cross</th>
+      <td>-145.438</td>
+      <td>152.084</td>
+      <td>-1.874</td>
+      <td>-2.803</td>
+    </tr>
+    <tr>
+      <th>readout_connector_arm</th>
+      <td>-59.351</td>
+      <td>-1.874</td>
+      <td>61.853</td>
+      <td>-0.036</td>
+    </tr>
+    <tr>
+      <th>bus_connector_arm</th>
+      <td>-72.298</td>
+      <td>-2.803</td>
+      <td>-0.036</td>
+      <td>75.812</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The charging energy of the cross depends on what the claws are connected to. Two textbook limits:</p>
+<ul class="simple">
+<li><p>the claws are held at ground (a low-impedance line): <span class="math notranslate nohighlight">\(E_C = \frac{e^2}{2 C_\Sigma}\)</span> with <span class="math notranslate nohighlight">\(C_\Sigma = C_{\rm cross, cross}\)</span>, the diagonal entry,</p></li>
+<li><p>the claws are floating islands: <span class="math notranslate nohighlight">\(E_C = \frac{e^2}{2} (C^{-1})_{\rm cross, cross}\)</span> with the inverse of the full signal block.</p></li>
+</ul>
+<p>Both need the full matrix row of the cross, and the second needs every entry.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">e</span><span class="p">,</span> <span class="n">h</span>
+
+<span class="n">signal</span> <span class="o">=</span> <span class="n">Cx</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;ground&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;ground&quot;</span><span class="p">)</span>
+<span class="n">i</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;cross&quot;</span><span class="p">)</span>
+<span class="n">EC_grounded_MHz</span> <span class="o">=</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">signal</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e-15</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span> <span class="o">/</span> <span class="mf">1e6</span>
+<span class="n">EC_floating_MHz</span> <span class="o">=</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e-15</span><span class="p">)[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">h</span> <span class="o">/</span> <span class="mf">1e6</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;E_C/h = </span><span class="si">{</span><span class="n">EC_grounded_MHz</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MHz (claws grounded), </span><span class="si">{</span><span class="n">EC_floating_MHz</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MHz (claws floating)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+E_C/h = 127.4 MHz (claws grounded), 127.5 MHz (claws floating)
+</pre></div></div>
+</div>
+<p>The two limits differ by only about 0.1 MHz here because the claws couple weakly to the cross (1.9 fF and 2.8 fF, against a self capacitance of 152 fF). On a design with strong couplers they would not, and only the full matrix tells you which case you are in.</p>
+</section>
+<section id="A-prediction-as-a-SQuADDS_DB-row">
+<h2>A prediction as a SQuADDS_DB row<a class="headerlink" href="#A-prediction-as-a-SQuADDS_DB-row" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">to_sim_results</span></code> returns the <code class="docutils literal notranslate"><span class="pre">sim_results</span></code> shape of the capacitance rows of <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB</span></code>: positive magnitudes <code class="docutils literal notranslate"><span class="pre">&lt;a&gt;_to_&lt;b&gt;</span></code> (the self capacitances on the diagonal, the ground named <code class="docutils literal notranslate"><span class="pre">ground</span></code>), the signed Maxwell matrix as <code class="docutils literal notranslate"><span class="pre">C_&lt;a&gt;_&lt;b&gt;</span></code>, and the units. This means the calculators in <code class="docutils literal notranslate"><span class="pre">squadds.calcs</span></code> take an ML prediction the same way they take a Q3D simulation.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">to_sim_results</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">star_names</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;G&quot;</span><span class="p">})</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sim</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;maxwell_matrix&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+star_to_star         70.778732
+star_to_pad_0         9.386298
+star_to_pad_1         9.363807
+star_to_pad_3         9.562051
+star_to_ground       40.697727
+pad_0_to_pad_0        29.27846
+pad_0_to_pad_1        0.594011
+pad_0_to_pad_3        0.119355
+pad_0_to_ground      18.813667
+pad_1_to_pad_1       29.247648
+pad_1_to_pad_3        0.118482
+pad_1_to_ground      18.799917
+pad_3_to_pad_3       29.215242
+pad_3_to_ground       19.06064
+ground_to_ground    131.928726
+units                       fF
+dtype: object
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">sim</span><span class="p">[</span><span class="s2">&quot;maxwell_matrix&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+C_G_G           131.928726
+C_G_star        -40.697727
+C_G_pad_0       -18.813667
+C_G_pad_1       -18.799917
+C_G_pad_3       -19.060640
+C_star_G        -40.697727
+C_star_star      70.778732
+C_star_pad_0     -9.386298
+dtype: float64
+</pre></div></div>
+</div>
+</section>
+<section id="From-the-command-line">
+<h2>From the command line<a class="headerlink" href="#From-the-command-line" title="Link to this heading">#</a></h2>
+<p>Everything above is also one shell command away:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>squadds-ml<span class="w"> </span>predict<span class="w"> </span>my_chip.gds<span class="w">                      </span><span class="c1"># QCap, CSV to stdout</span>
+squadds-ml<span class="w"> </span>predict<span class="w"> </span>a.gds<span class="w"> </span>b.gds<span class="w"> </span>--workers<span class="w"> </span><span class="m">2</span><span class="w">          </span><span class="c1"># several files</span>
+squadds-ml<span class="w"> </span>predict<span class="w"> </span>my_chip.gds<span class="w"> </span>--model<span class="w"> </span>QCap-Fast<span class="w"> </span>--format<span class="w"> </span>json
+</pre></div>
+</div>
+<p>Let’s try it on our star with <code class="docutils literal notranslate"><span class="pre">QCap-Fast</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>squadds-ml<span class="w"> </span>predict<span class="w"> </span>tutorial11_files/multipad_star.gds<span class="w"> </span>--model<span class="w"> </span>QCap-Fast
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+# tutorial11_files/multipad_star.gds: QCap-Fast, 1.25 s (2 threads, Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHz, 20 CPUs, Linux x86_64)
+# warning: Use QCap-Fast only for quick screening of the component families it was trained on (interdigital, paddle, concentric, star, multipad star, Xmon, TransmonPocket, shielded concentric, two-net, random, procedurally generated and synthetic campaign layouts). On new designs of a trained family (B5) it was worse than the physics alone, 3.175 % (MAE 0.583 / RMSE 0.824 fF) against 1.765 % (0.275 / 0.376 fF), and the paper&#39;s version of it was worse than the physics alone on a held-out family too, 3.11 % (0.533 / 0.633 fF) against 1.55 % (0.166 / 0.205 fF). Use QCap for anything that matters.
+,G,C1,C2,C3,C4
+G,131.876,-41.3814,-18.813,-18.8125,-19.0306
+C1,-41.3814,70.7831,-9.11886,-9.13512,-9.2147
+C2,-18.813,-9.11886,29.016,-0.552948,-0.113256
+C3,-18.8125,-9.13512,-0.552948,29.0319,-0.113031
+C4,-19.0306,-9.2147,-0.113256,-0.113031,28.8689
+
+</pre></div></div>
+</div>
+</section>
+<section id="The-geometric-embedding">
+<h2>The geometric embedding<a class="headerlink" href="#The-geometric-embedding" title="Link to this heading">#</a></h2>
+<p>A network cannot read polygons directly. The same metal can be drawn in many ways in a GDS, and a network needs inputs of a fixed size that change smoothly when the geometry does. So before the networks see a layout, we turn it into a <strong>geometric embedding</strong> (<code class="docutils literal notranslate"><span class="pre">planar-capacitance-graph-v1</span></code>), a graph with one vector per conductor and one per pair of conductors:</p>
+<ul class="simple">
+<li><p>60 shape and context features per conductor (its outline, size and surroundings),</p></li>
+<li><p>42 features per pair of conductors (how close they come and how their separations are distributed),</p></li>
+<li><p>4 global features of the chip.</p></li>
+</ul>
+<p>It is available on its own in <code class="docutils literal notranslate"><span class="pre">squadds.layouts</span></code>, for example to compare designs or to train your own models.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[60]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.layouts</span><span class="w"> </span><span class="kn">import</span> <span class="n">CAPACITANCE_GRAPH_VERSION</span><span class="p">,</span> <span class="n">encode_capacitance_graph</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb</span> <span class="o">=</span> <span class="n">encode_capacitance_graph</span><span class="p">(</span><span class="n">star_gds</span><span class="p">)</span>
+<span class="n">CAPACITANCE_GRAPH_VERSION</span><span class="p">,</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">emb</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">)}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&#39;planar-capacitance-graph-v1&#39;,
+ {&#39;node_features&#39;: (5, 60),
+  &#39;pair_features&#39;: (10, 42),
+  &#39;pairs&#39;: (10, 2),
+  &#39;global_features&#39;: (4,)})
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">emb</span><span class="p">[</span><span class="s2">&quot;node_features&quot;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">star_names</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">emb</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">]],</span>
+                     <span class="n">columns</span><span class="o">=</span><span class="n">emb</span><span class="p">[</span><span class="s2">&quot;node_feature_names&quot;</span><span class="p">])</span>
+<span class="n">nodes</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>compactness</th>
+      <th>fourier_00</th>
+      <th>fourier_01</th>
+      <th>fourier_02</th>
+      <th>fourier_03</th>
+      <th>fourier_04</th>
+      <th>fourier_05</th>
+      <th>fourier_06</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ground</th>
+      <td>0.696</td>
+      <td>0.004</td>
+      <td>0.032</td>
+      <td>0.121</td>
+      <td>0.094</td>
+      <td>0.391</td>
+      <td>0.007</td>
+      <td>0.169</td>
+    </tr>
+    <tr>
+      <th>star</th>
+      <td>0.360</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>0.618</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>0.000</td>
+    </tr>
+    <tr>
+      <th>pad_0</th>
+      <td>0.393</td>
+      <td>0.021</td>
+      <td>0.159</td>
+      <td>0.099</td>
+      <td>0.096</td>
+      <td>0.207</td>
+      <td>0.203</td>
+      <td>0.150</td>
+    </tr>
+    <tr>
+      <th>pad_1</th>
+      <td>0.393</td>
+      <td>0.021</td>
+      <td>0.159</td>
+      <td>0.099</td>
+      <td>0.096</td>
+      <td>0.207</td>
+      <td>0.203</td>
+      <td>0.149</td>
+    </tr>
+    <tr>
+      <th>pad_3</th>
+      <td>0.393</td>
+      <td>0.021</td>
+      <td>0.159</td>
+      <td>0.100</td>
+      <td>0.096</td>
+      <td>0.207</td>
+      <td>0.204</td>
+      <td>0.149</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">nodes</span> <span class="o">-</span> <span class="n">nodes</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mf">2.6</span><span class="p">))</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;RdBu_r&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)),</span> <span class="n">z</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;conductor feature index&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;z-score across conductors&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;multipad star: the 60 conductor features&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_95_0.png" src="../../_images/source_tutorials_Tutorial-11_Predicting_Capacitance_Matrices_from_GDS_95_0.png" />
+</div>
+</div>
+</section>
+<section id="Next-Steps...">
+<h2>Next Steps…<a class="headerlink" href="#Next-Steps..." title="Link to this heading">#</a></h2>
+<p>How do you know the model is good enough for <strong>your</strong> designs? In <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-14_Training_on_Your_Own_Designs.html">Tutorial 14</a>, we will score it against Q3D simulations of our own designs and learn when (and how) to train on them.</p>
+</section>
+<section id="License">
+<h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
+<div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>This tutorial is written by Sadman Ahmed Shanto and Claude Opus 5.5</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2026.</p>
+</p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Tutorial 10: Unified Driven-Modal Hamiltonian Extraction</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Tutorial 12: Planar Capacitance Families in SQuADDS</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item"><div class="paper-footer">
+  <p>© 2026 Sadman Ahmed Shanto &amp; Eli Levenson-Falk · Levenson-Falk Lab, University of Southern California</p>
+  <p class="paper-footer__links"><a href="https://github.com/LFL-Lab/SQuADDS">GitHub</a><a href="https://pypi.org/project/SQuADDS/">PyPI</a><a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB">Hugging Face</a><a href="https://deepwiki.com/LFL-Lab/SQuADDS">DeepWiki</a><a href="https://dornsife.usc.edu/lfl/">LFL Lab</a></p>
+</div></div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

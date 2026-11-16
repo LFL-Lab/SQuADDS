@@ -1,0 +1,1981 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tutorial 15: Contributing Capacitance Data and Models &#8212; SQuADDS v1.0.0</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/paper.css?v=73a8cae5" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"equationNumbers": {"autoNumber": "AMS", "useLabelIds": true}}, "tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area", "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}})</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/paper.js?v=1ab245fa"></script>
+    <link rel="icon" href="../../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Tutorial 16: Inverse Design by ML Screening" href="Tutorial-16_Inverse_Design_by_ML_Screening.html" />
+    <link rel="prev" title="Tutorial 14: Training on Your Own Designs" href="Tutorial-14_Training_on_Your_Own_Designs.html" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Read our latest <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/paper/'>preprint</a> and check out its <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/'>docsite</a></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item"><a class="navbar-brand logo paper-logo-qcap" href="https://lfl-lab.github.io/SQuADDS/" title="SQuADDS documentation">
+  <img src="../../_static/images/qcap_compact_light.svg" class="logo__image only-light" alt="QCap"/>
+  <img src="../../_static/images/qcap_compact_dark.svg" class="logo__image only-dark pst-js-only" alt="QCap"/>
+</a>
+<span class="paper-version" title="SQuADDS 1.0.0">SQuADDS 1.0.0</span></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="paper-nav" aria-label="Main">
+  <ul class="bd-navbar-elements navbar-nav">
+    <li class="nav-item"><a class="nav-link nav-internal" href="../getting_started.html">Install</a></li>
+    <li class="nav-item current active"><a class="nav-link nav-internal" href="index.html" aria-current="page">Tutorials</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../ml_models.html">ML models</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../mcp_server.html">MCP server</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../apidocs/index.html">API reference</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../resources/contribute.html">Contribute</a></li>
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a" title="SQuADDS datasets on Hugging Face" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/images/hf-logo.svg" class="icon-link-image" alt="SQuADDS datasets on Hugging Face"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api" title="SQuADDS ML inference API" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-code fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">SQuADDS ML inference API</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="Chat with SQuADDS" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-regular fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Chat with SQuADDS</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav class="paper-nav" aria-label="Main">
+  <ul class="bd-navbar-elements navbar-nav">
+    <li class="nav-item"><a class="nav-link nav-internal" href="../getting_started.html">Install</a></li>
+    <li class="nav-item current active"><a class="nav-link nav-internal" href="index.html" aria-current="page">Tutorials</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../ml_models.html">ML models</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../mcp_server.html">MCP server</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../apidocs/index.html">API reference</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="../resources/contribute.html">Contribute</a></li>
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a" title="SQuADDS datasets on Hugging Face" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/images/hf-logo.svg" class="icon-link-image" alt="SQuADDS datasets on Hugging Face"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api" title="SQuADDS ML inference API" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-code fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">SQuADDS ML inference API</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="Chat with SQuADDS" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-regular fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Chat with SQuADDS</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links paper-outline" aria-label="Documentation">
+  <p class="bd-links__title" role="heading" aria-level="1">Documentation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started with SQuADDS</a></li>
+
+
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Tutorials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-0_Using_the_SQuADDS_WebUI.html">Tutorial 0: Using the SQuADDS Web UI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-1_Getting_Started_with_SQuADDS.html">Tutorial 1: Getting Started with SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-2_Simulate_interpolated_designs.html">Tutorial 2: Simulating Interpolated Designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html">Tutorial 3: Contributing Experimentally Validated Simulation Data to SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial_4_Contributing_Measured_Data_to_SQuADDS.html">Tutorial 4: Contributing Measured Devices’ Data to the SQuADDS Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS.html">Tutorial 5: Designing a “fab-ready” chip with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-6_Adding_Airbridges.html">Tutorial 6: Adding Airbridges</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-7_Simulate_designs_with_palace.html">Tutorial 7: Simulating Qiskit Metal <code class="docutils literal notranslate"><span class="pre">design</span></code> objects with <code class="docutils literal notranslate"><span class="pre">palace</span></code> using <code class="docutils literal notranslate"><span class="pre">SQDMetal</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-8_ML_interpolation_in_SQuADDS.html">Tutorial 8: Machine Learning with <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-9_DrivenModal_Capacitance_Extraction.html">Tutorial 9: Driven-Modal Capacitance Extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.html">Tutorial 10: Unified Driven-Modal Hamiltonian Extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-11_Predicting_Capacitance_Matrices_from_GDS.html">Tutorial 11: Predicting Capacitance Matrices from a GDS file using ML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.html">Tutorial 12: Planar Capacitance Families in SQuADDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-13_From_Layout_to_Hamiltonian_with_ML.html">Tutorial 13: From Layout to Hamiltonian with ML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-14_Training_on_Your_Own_Designs.html">Tutorial 14: Training on Your Own Designs</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Tutorial 15: Contributing Capacitance Data and Models</a><div class="paper-local"><ul>
+<li><a class="reference internal" href="#">Tutorial 15: Contributing Capacitance Data and Models</a><ul>
+<li><a class="reference internal" href="#Why-contribute?">Why contribute?</a></li>
+<li><a class="reference internal" href="#The-story">The story</a></li>
+<li><a class="reference internal" href="#Look-at-the-metal-(and-the-ports)-first">Look at the metal (and the ports) first</a></li>
+<li><a class="reference internal" href="#Reading-the-Q3D-export">Reading the Q3D export</a></li>
+<li><a class="reference internal" href="#Filling-the-contribution-template">Filling the contribution template</a><ul>
+<li><a class="reference internal" href="#The-manifest">The manifest</a></li>
+<li><a class="reference internal" href="#The-designs,-the-GDS-files-and-the-simulations">The designs, the GDS files and the simulations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Validating-the-contribution">Validating the contribution</a></li>
+<li><a class="reference internal" href="#Catching-a-broken-label">Catching a broken label</a><ul>
+<li><a class="reference internal" href="#A-flipped-sign">A flipped sign</a></li>
+<li><a class="reference internal" href="#A-pF-/-fF-mix-up">A pF / fF mix-up</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#What-the-pull-request-would-add">What the pull request would add</a></li>
+<li><a class="reference internal" href="#Contributing-a-model">Contributing a model</a><ul>
+<li><a class="reference internal" href="#Our-model">Our model</a></li>
+<li><a class="reference internal" href="#Validating-the-model">Validating the model</a></li>
+<li><a class="reference internal" href="#Why-test-scores-are-maintainer-run,-once">Why test scores are maintainer-run, once</a></li>
+<li><a class="reference internal" href="#What-the-model-pull-request-would-add">What the model pull request would add</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Next-Steps...">Next Steps…</a></li>
+<li><a class="reference internal" href="#License">License</a></li>
+</ul>
+</li>
+</ul>
+</div></li>
+<li class="toctree-l2"><a class="reference internal" href="Tutorial-16_Inverse_Design_by_ML_Screening.html">Tutorial 16: Inverse Design by ML Screening</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../mcp_server.html">MCP Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ml_models.html">ML Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ml_local.html">Run ML Models Locally</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apidocs/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources/contribute.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources/simulations.html">Simulation Lessons</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="../resources/concepts.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references/index.html">References</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/lfl-lab/SQuADDS">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/pdf/2312.13483.pdf">Paper</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://dornsife.usc.edu/lfl/">LFL Lab ✌️</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="paper-crumbs d-print-none">
+  <ol>
+    <li><a href="../../index.html">SQuADDS</a></li>
+    <li><a href="index.html">Tutorials</a></li>
+    <li aria-current="page">Tutorial 15: Contributing Capacitance Data and Models</li>
+  </ol>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Tutorial-15:-Contributing-Capacitance-Data-and-Models">
+<h1>Tutorial 15: Contributing Capacitance Data and Models<a class="headerlink" href="#Tutorial-15:-Contributing-Capacitance-Data-and-Models" title="Link to this heading">#</a></h1>
+<p>The planar capacitance models are only as good as the layouts they have seen, and every Q3D solve we run on our own designs is a layout they have not. In this tutorial, we will give our own Q3D simulations (and, if we have one, our own trained model) back to SQuADDS, so that the next designer starts from a better model. By the end of this tutorial, you will be able to: package and validate a contribution, catch broken labels with the validator, and see exactly what a pull request would add.</p>
+<p><strong>Note:</strong> this tutorial needs the optional ML extra, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;squadds[ml]&quot;</span></code>. Nothing is uploaded in this tutorial: every contribution call runs with <code class="docutils literal notranslate"><span class="pre">dry_run=True</span></code>. It builds on <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html">Tutorial 3</a> (the contributor setup) and <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-14_Training_on_Your_Own_Designs.html">Tutorial 14</a> (training a model).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<section id="Why-contribute?">
+<h2>Why contribute?<a class="headerlink" href="#Why-contribute?" title="Link to this heading">#</a></h2>
+<p>The models learned the map from a GDS layout to the full Maxwell capacitance matrix from about 45,000 Ansys Q3D simulations, each of which cost somebody minutes to an hour of solver time. A family of shapes that nobody has simulated yet is exactly where they are least reliable. If we give our simulations back:</p>
+<ol class="arabic simple">
+<li><p>the next retraining of the collective model sees our shapes, and gets better on them (and on everything that looks like them),</p></li>
+<li><p>our simulations get a citable home on Hugging Face, with our name on them, and</p></li>
+<li><p>nobody has to pay for the same solves again.</p></li>
+</ol>
+<p>The catch is that a single broken label (a flipped sign, a wrong unit, two nets swapped) quietly poisons a training set. So every contribution goes through a validator first, and then through a maintainer’s review.</p>
+</section>
+<section id="The-story">
+<h2>The story<a class="headerlink" href="#The-story" title="Link to this heading">#</a></h2>
+<p>Let’s say we simulated three <strong>concentric</strong> capacitors in Q3D: a round island inside a ring, both inside a round pocket in the ground plane. The ring is fed by a short CPW stub from the north, and the island by one from the south, through a gap in the ring. For each design, Q3D gave us the GDS we solved, the options that generated it (JSON) and the capacitance export <code class="docutils literal notranslate"><span class="pre">cap_matrix.csv</span></code>.</p>
+<p>For this tutorial, our three designs are real Q3D simulations from the SQuADDS planar capacitance dataset (family <code class="docutils literal notranslate"><span class="pre">exp10</span></code>, all three in its <strong>training</strong> split) that ship in <code class="docutils literal notranslate"><span class="pre">data/tutorial15/</span></code>. We’ll see below that the validator notices they are already in the dataset.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;QISKIT_METAL_HEADLESS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">gdstk</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">squadds</span>
+</pre></div>
+</div>
+</div>
+<p>Importing SQuADDS switches the inline figures of a notebook to PDF / SVG (a setting it inherits from scqubits), so let’s switch back to PNG.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib_inline.backend_inline</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_matplotlib_formats</span>
+
+<span class="n">set_matplotlib_formats</span><span class="p">(</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We’ll write everything into one folder, and start from a clean one.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">work</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tutorial15_files&quot;</span><span class="p">)</span>
+<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">work</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Here is what Q3D left us with: one folder per design.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/tutorial15&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span>
+<span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;q3d_cap_0300&#39;: [&#39;cap_0300.gds&#39;, &#39;cap_0300.json&#39;, &#39;cap_matrix.csv&#39;],
+ &#39;q3d_cap_0301&#39;: [&#39;cap_0301.gds&#39;, &#39;cap_0301.json&#39;, &#39;cap_matrix.csv&#39;],
+ &#39;q3d_cap_0302&#39;: [&#39;cap_0302.gds&#39;, &#39;cap_0302.json&#39;, &#39;cap_matrix.csv&#39;]}
+</pre></div></div>
+</div>
+<p>And here are the knobs we turned (µm), straight from the generator options:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">read_text</span><span class="p">())[</span><span class="s2">&quot;cap_options&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">}</span>
+<span class="n">knobs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;inner_radius_x&quot;</span><span class="p">,</span> <span class="s2">&quot;outer_inner_radius_x&quot;</span><span class="p">,</span> <span class="s2">&quot;outer_outer_radius_x&quot;</span><span class="p">,</span> <span class="s2">&quot;ground_inner_radius_x&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;north_cpw_length&quot;</span><span class="p">,</span> <span class="s2">&quot;south_cpw_length&quot;</span><span class="p">]</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">d</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">o</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;um&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">knobs</span><span class="p">}</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>inner_radius_x</th>
+      <th>outer_inner_radius_x</th>
+      <th>outer_outer_radius_x</th>
+      <th>ground_inner_radius_x</th>
+      <th>north_cpw_length</th>
+      <th>south_cpw_length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>q3d_cap_0300</th>
+      <td>91.47</td>
+      <td>119.70</td>
+      <td>135.10</td>
+      <td>171.57</td>
+      <td>25.0</td>
+      <td>30.0</td>
+    </tr>
+    <tr>
+      <th>q3d_cap_0301</th>
+      <td>44.13</td>
+      <td>73.28</td>
+      <td>86.95</td>
+      <td>132.29</td>
+      <td>25.0</td>
+      <td>30.0</td>
+    </tr>
+    <tr>
+      <th>q3d_cap_0302</th>
+      <td>90.45</td>
+      <td>103.30</td>
+      <td>122.31</td>
+      <td>145.05</td>
+      <td>25.0</td>
+      <td>20.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Look-at-the-metal-(and-the-ports)-first">
+<h2>Look at the metal (and the ports) first<a class="headerlink" href="#Look-at-the-metal-(and-the-ports)-first" title="Link to this heading">#</a></h2>
+<p>Before we hand anything to anybody, let’s look at what we simulated. A planar capacitance contribution uses the same layer map as the models: the <strong>ground plane on layer 1/0</strong> and <strong>every signal conductor on layer 1/10</strong>. Each connected body on 1/10 is one conductor and its own net. Nets are never merged.</p>
+<p>These GDS files also carry two tiny port stubs, on layers 2/0 (north) and 3/0 (south). Q3D used them to name the nets (<code class="docutils literal notranslate"><span class="pre">N</span></code> and <code class="docutils literal notranslate"><span class="pre">S</span></code>). The validator ignores any layer that is not in the layer map.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span>
+
+<span class="n">PORTS</span> <span class="o">=</span> <span class="p">{(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="s2">&quot;north port&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="s2">&quot;south port&quot;</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_gds</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ground in grey, every conductor in its own color (labelled with its net name), port stubs in black.&quot;&quot;&quot;</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">gdstk</span><span class="o">.</span><span class="n">read_gds</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span><span class="o">.</span><span class="n">top_level</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">poly</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">polygons</span><span class="p">:</span>
+        <span class="n">xy</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">poly</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">*</span><span class="n">xy</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;0.82&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">*</span><span class="n">xy</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span><span class="o">.</span><span class="n">representative_point</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">)</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">PORTS</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">*</span><span class="n">xy</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">PORTS</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">xy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">textcoords</span><span class="o">=</span><span class="s2">&quot;offset points&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;x (µm)&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">k</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">raw</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">plot_gds</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.gds&quot;</span><span class="p">)),</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">],</span> <span class="n">ax</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> conductors, ground included&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-15_Contributing_Capacitance_Data_and_Models_15_0.png" src="../../_images/source_tutorials_Tutorial-15_Contributing_Capacitance_Data_and_Models_15_0.png" />
+</div>
+</div>
+<p>Three conductors each, ground included: <span class="math notranslate nohighlight">\(N = 3\)</span> (the ring <code class="docutils literal notranslate"><span class="pre">N</span></code>, the island <code class="docutils literal notranslate"><span class="pre">S</span></code> and the ground <code class="docutils literal notranslate"><span class="pre">G</span></code>). So each Q3D export must be a full <span class="math notranslate nohighlight">\(3 \times 3\)</span> Maxwell matrix over <code class="docutils literal notranslate"><span class="pre">G</span></code>, <code class="docutils literal notranslate"><span class="pre">N</span></code> and <code class="docutils literal notranslate"><span class="pre">S</span></code>. The conductors on layer 1/10 come in the GDS file in the order <code class="docutils literal notranslate"><span class="pre">N</span></code>, <code class="docutils literal notranslate"><span class="pre">S</span></code>, which is the order we will declare (ground first, then the conductors in GDS file order).</p>
+</section>
+<section id="Reading-the-Q3D-export">
+<h2>Reading the Q3D export<a class="headerlink" href="#Reading-the-Q3D-export" title="Link to this heading">#</a></h2>
+<p>Q3D writes one row per adaptive pass, with one column per matrix entry, here in pF. <code class="docutils literal notranslate"><span class="pre">read_cap_matrix</span></code> from the QC module reads every pass and converts it to fF, the unit used everywhere in SQuADDS.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance</span><span class="w"> </span><span class="kn">import</span> <span class="n">qc</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="o">=</span> <span class="n">qc</span><span class="o">.</span><span class="n">read_cap_matrix</span><span class="p">(</span><span class="n">raw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="s2">&quot;cap_matrix.csv&quot;</span><span class="p">)</span>
+<span class="n">export</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">],</span> <span class="n">export</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">export</span><span class="p">[</span><span class="s2">&quot;passes&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+([&#39;G&#39;, &#39;N&#39;, &#39;S&#39;], [&#39;pF&#39;], 16)
+</pre></div></div>
+</div>
+<p>The label is the last complete pass. For <span class="math notranslate nohighlight">\(N\)</span> conductors, the charges and voltages are related by <span class="math notranslate nohighlight">\(Q_i = \sum_j C_{ij} V_j\)</span>: the diagonal is positive (self capacitance), the off-diagonal entries are negative (<span class="math notranslate nohighlight">\(C_{ij} = -C^{\rm mutual}_{ij}\)</span>), and the matrix is symmetric.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">last_pass</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">export</span><span class="p">[</span><span class="s2">&quot;passes&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">export</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">export</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>G</th>
+      <th>N</th>
+      <th>S</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>G</th>
+      <td>113.847</td>
+      <td>-57.877</td>
+      <td>-34.890</td>
+    </tr>
+    <tr>
+      <th>N</th>
+      <td>-57.877</td>
+      <td>96.897</td>
+      <td>-35.844</td>
+    </tr>
+    <tr>
+      <th>S</th>
+      <td>-34.890</td>
+      <td>-35.844</td>
+      <td>74.114</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>It is worth a glance at how the mutual capacitances settled over the passes:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">:</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">qc</span><span class="o">.</span><span class="n">read_cap_matrix</span><span class="p">(</span><span class="n">f</span> <span class="o">/</span> <span class="s2">&quot;cap_matrix.csv&quot;</span><span class="p">)</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">),</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;passes&quot;</span><span class="p">]],</span> <span class="p">[</span><span class="o">-</span><span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">M</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;passes&quot;</span><span class="p">]],</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;adaptive pass&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$C_</span><span class="si">{NS}</span><span class="s2">^{</span><span class="se">\\</span><span class="s2">rm mutual}$ (fF)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-15_Contributing_Capacitance_Data_and_Models_22_0.png" src="../../_images/source_tutorials_Tutorial-15_Contributing_Capacitance_Data_and_Models_22_0.png" />
+</div>
+</div>
+</section>
+<section id="Filling-the-contribution-template">
+<h2>Filling the contribution template<a class="headerlink" href="#Filling-the-contribution-template" title="Link to this heading">#</a></h2>
+<p>SQuADDS ships a template folder for planar capacitance contributions. Let’s copy it and look inside.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">squadds</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;database&quot;</span> <span class="o">/</span> <span class="s2">&quot;templates&quot;</span> <span class="o">/</span> <span class="s2">&quot;planar_capacitance_contribution&quot;</span>
+<span class="n">contrib</span> <span class="o">=</span> <span class="n">work</span> <span class="o">/</span> <span class="s2">&quot;my_contribution&quot;</span>
+<span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">contrib</span><span class="p">)</span>
+<span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">contrib</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;README.md&#39;, &#39;designs.csv&#39;, &#39;manifest.yaml&#39;]
+</pre></div></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">README.md</span></code> in the template explains every file. In short:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>manifest.yaml                           who, licence, solver, stack, setup, layer map, units, generator, family
+designs.csv                             one row per design
+gds/&lt;design&gt;.gds                        the solved file, as solved (not re-saved)
+sims/&lt;design&gt;/&lt;sim_tag&gt;/cap_matrix.csv  the Q3D export as is (one row per adaptive pass)
+</pre></div>
+</div>
+<section id="The-manifest">
+<h3>The manifest<a class="headerlink" href="#The-manifest" title="Link to this heading">#</a></h3>
+<p>The manifest says who we are, under which licence we share the data (the dataset accepts <strong>CC-BY-4.0</strong> or <strong>CC0-1.0</strong>), how we solved it and how to read it. Let’s fill it in.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">manifest</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">((</span><span class="n">contrib</span> <span class="o">/</span> <span class="s2">&quot;manifest.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="n">manifest</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="n">org</span><span class="o">=</span><span class="s2">&quot;squadds-tutorial&quot;</span><span class="p">,</span>
+    <span class="n">batch</span><span class="o">=</span><span class="s2">&quot;2026-11-concentric&quot;</span><span class="p">,</span>
+    <span class="n">contributor</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Jane Doe&quot;</span><span class="p">,</span> <span class="s2">&quot;affiliation&quot;</span><span class="p">:</span> <span class="s2">&quot;Example University&quot;</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;jane@example.edu&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;email_public&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="n">licence</span><span class="o">=</span><span class="s2">&quot;CC-BY-4.0&quot;</span><span class="p">,</span>
+    <span class="n">family</span><span class="o">=</span><span class="s2">&quot;concentric&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The solver, its setup, the stack and the units come straight from our Q3D project (the JSON options record the setup, and you can add the solver version when you know it). Our designs are on the standard stack: silicon (<span class="math notranslate nohighlight">\(\varepsilon_r = 11.45\)</span>), 350 µm thick, with the metal solved as a thin sheet.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">q3d</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">raw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">read_text</span><span class="p">())[</span><span class="s2">&quot;ansys_gds&quot;</span><span class="p">][</span><span class="s2">&quot;q3d_signal&quot;</span><span class="p">][</span><span class="s2">&quot;setup&quot;</span><span class="p">]</span>
+<span class="n">q3d</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;AdaptiveFreq&#39;: &#39;13GHz&#39;,
+ &#39;Cap&#39;: {&#39;AutoIncreaseSolutionOrder&#39;: True,
+  &#39;MaxPass&#39;: 40,
+  &#39;MinConvPass&#39;: 3,
+  &#39;MinPass&#39;: 1,
+  &#39;PerError&#39;: 0.05,
+  &#39;PerRefine&#39;: 30,
+  &#39;SolutionOrder&#39;: &#39;Higher&#39;,
+  &#39;Solver Type&#39;: &#39;Iterative&#39;},
+ &#39;Enabled&#39;: True,
+ &#39;SaveFields&#39;: True}
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;solver&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ansys Q3D Extractor&quot;</span><span class="p">}</span>
+<span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;freq_GHz&quot;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span> <span class="s2">&quot;PerError&quot;</span><span class="p">:</span> <span class="n">q3d</span><span class="p">[</span><span class="s2">&quot;Cap&quot;</span><span class="p">][</span><span class="s2">&quot;PerError&quot;</span><span class="p">],</span> <span class="s2">&quot;MinConvPass&quot;</span><span class="p">:</span> <span class="n">q3d</span><span class="p">[</span><span class="s2">&quot;Cap&quot;</span><span class="p">][</span><span class="s2">&quot;MinConvPass&quot;</span><span class="p">],</span>
+                     <span class="s2">&quot;MaxPass&quot;</span><span class="p">:</span> <span class="n">q3d</span><span class="p">[</span><span class="s2">&quot;Cap&quot;</span><span class="p">][</span><span class="s2">&quot;MaxPass&quot;</span><span class="p">],</span> <span class="s2">&quot;PerRefine&quot;</span><span class="p">:</span> <span class="n">q3d</span><span class="p">[</span><span class="s2">&quot;Cap&quot;</span><span class="p">][</span><span class="s2">&quot;PerRefine&quot;</span><span class="p">],</span> <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span>
+                     <span class="s2">&quot;solver_type&quot;</span><span class="p">:</span> <span class="s2">&quot;iterative&quot;</span><span class="p">}</span>
+<span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;stack&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;substrate_material&quot;</span><span class="p">:</span> <span class="s2">&quot;silicon&quot;</span><span class="p">,</span> <span class="s2">&quot;eps_r&quot;</span><span class="p">:</span> <span class="mf">11.45</span><span class="p">,</span> <span class="s2">&quot;substrate_um&quot;</span><span class="p">:</span> <span class="mi">350</span><span class="p">,</span>
+                     <span class="s2">&quot;metal_model&quot;</span><span class="p">:</span> <span class="s2">&quot;thin_sheet&quot;</span><span class="p">,</span> <span class="s2">&quot;metal_t_um&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span>
+<span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;layer_map&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ground&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="s2">&quot;conductor&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]}</span>
+<span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gds_unit_m&quot;</span><span class="p">:</span> <span class="mf">1.0e-9</span><span class="p">,</span> <span class="s2">&quot;capacitance&quot;</span><span class="p">:</span> <span class="s2">&quot;pF&quot;</span><span class="p">}</span>
+<span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;qiskit-metal GeneralizedCapConcentric sweep&quot;</span><span class="p">}</span>
+<span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Concentric capacitors (island + ring in a round ground pocket, north and south CPW feeds), &quot;</span>
+                           <span class="s2">&quot;three Q3D solves from a radius sweep.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">contrib</span> <span class="o">/</span> <span class="s2">&quot;manifest.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">((</span><span class="n">contrib</span> <span class="o">/</span> <span class="s2">&quot;manifest.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+org: squadds-tutorial
+batch: 2026-11-concentric
+contributor:
+  name: Jane Doe
+  affiliation: Example University
+  email: jane@example.edu
+  email_public: false
+licence: CC-BY-4.0
+solver:
+  name: Ansys Q3D Extractor
+stack:
+  substrate_material: silicon
+  eps_r: 11.45
+  substrate_um: 350
+  metal_model: thin_sheet
+  metal_t_um: 0.0
+setup:
+  freq_GHz: 13
+  PerError: 0.05
+  MinConvPass: 3
+  MaxPass: 40
+  PerRefine: 30
+  order: high
+  solver_type: iterative
+layer_map:
+  ground:
+  - - 1
+    - 0
+  conductor:
+  - - 1
+    - 10
+ground_net_name: G
+units:
+  gds_unit_m: 1.0e-09
+  capacitance: pF
+generator:
+  name: qiskit-metal GeneralizedCapConcentric sweep
+family: concentric
+description: Concentric capacitors (island + ring in a round ground pocket, north
+  and south CPW feeds), three Q3D solves from a radius sweep.
+known_defects: []
+
+</pre></div></div>
+</div>
+</section>
+<section id="The-designs,-the-GDS-files-and-the-simulations">
+<h3>The designs, the GDS files and the simulations<a class="headerlink" href="#The-designs,-the-GDS-files-and-the-simulations" title="Link to this heading">#</a></h3>
+<p>Each design gets a name, its GDS under <code class="docutils literal notranslate"><span class="pre">gds/</span></code>, its Q3D export under <code class="docutils literal notranslate"><span class="pre">sims/&lt;design&gt;/q3d/</span></code> and one row in <code class="docutils literal notranslate"><span class="pre">designs.csv</span></code>. Here <code class="docutils literal notranslate"><span class="pre">q3d</span></code> is the <em>sim tag</em>: a second solve of the same layout, e.g. on another stack, would get its own tag. The <code class="docutils literal notranslate"><span class="pre">net_order</span></code> column is the promise we make about the matrix: <code class="docutils literal notranslate"><span class="pre">G</span></code> first, then the conductors in GDS file order.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">:</span>
+    <span class="n">design</span> <span class="o">=</span> <span class="s2">&quot;concentric_&quot;</span> <span class="o">+</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="p">(</span><span class="n">contrib</span> <span class="o">/</span> <span class="s2">&quot;gds&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.gds&quot;</span><span class="p">)),</span> <span class="n">contrib</span> <span class="o">/</span> <span class="s2">&quot;gds&quot;</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">design</span><span class="si">}</span><span class="s2">.gds&quot;</span><span class="p">)</span>
+    <span class="n">sim</span> <span class="o">=</span> <span class="n">contrib</span> <span class="o">/</span> <span class="s2">&quot;sims&quot;</span> <span class="o">/</span> <span class="n">design</span> <span class="o">/</span> <span class="s2">&quot;q3d&quot;</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">f</span> <span class="o">/</span> <span class="s2">&quot;cap_matrix.csv&quot;</span><span class="p">,</span> <span class="n">sim</span> <span class="o">/</span> <span class="s2">&quot;cap_matrix.csv&quot;</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">options</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">knobs</span><span class="p">}</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="n">design</span><span class="p">,</span> <span class="s2">&quot;gds&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;gds/</span><span class="si">{</span><span class="n">design</span><span class="si">}</span><span class="s2">.gds&quot;</span><span class="p">,</span> <span class="s2">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;concentric&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;params_json&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="s2">&quot;net_order&quot;</span><span class="p">:</span> <span class="s2">&quot;G;N;S&quot;</span><span class="p">,</span> <span class="s2">&quot;notes&quot;</span><span class="p">:</span> <span class="s2">&quot;inner feed&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">designs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+<span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="p">(</span><span class="n">contrib</span> <span class="o">/</span> <span class="s2">&quot;designs.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)]</span>
+<span class="p">(</span><span class="n">contrib</span> <span class="o">/</span> <span class="s2">&quot;designs.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">designs</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="n">designs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>design</th>
+      <th>gds</th>
+      <th>family</th>
+      <th>params_json</th>
+      <th>net_order</th>
+      <th>notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>concentric_0300</td>
+      <td>gds/concentric_0300.gds</td>
+      <td>concentric</td>
+      <td>{"inner_radius_x": "91.47um", "outer_inner_rad...</td>
+      <td>G;N;S</td>
+      <td>inner feed</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>concentric_0301</td>
+      <td>gds/concentric_0301.gds</td>
+      <td>concentric</td>
+      <td>{"inner_radius_x": "44.13um", "outer_inner_rad...</td>
+      <td>G;N;S</td>
+      <td>inner feed</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>concentric_0302</td>
+      <td>gds/concentric_0302.gds</td>
+      <td>concentric</td>
+      <td>{"inner_radius_x": "90.45um", "outer_inner_rad...</td>
+      <td>G;N;S</td>
+      <td>inner feed</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Here is the folder we are about to validate:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">contrib</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">contrib</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;README.md&#39;,
+ &#39;designs.csv&#39;,
+ &#39;gds/concentric_0300.gds&#39;,
+ &#39;gds/concentric_0301.gds&#39;,
+ &#39;gds/concentric_0302.gds&#39;,
+ &#39;manifest.yaml&#39;,
+ &#39;sims/concentric_0300/q3d/cap_matrix.csv&#39;,
+ &#39;sims/concentric_0301/q3d/cap_matrix.csv&#39;,
+ &#39;sims/concentric_0302/q3d/cap_matrix.csv&#39;]
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Validating-the-contribution">
+<h2>Validating the contribution<a class="headerlink" href="#Validating-the-contribution" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">validate_capacitance_contribution</span></code> runs the same checks the maintainers run when the pull request arrives. It <strong>reports</strong> instead of raising: errors block a submission, and warnings are recorded in the report for the reviewer. Per design it checks the layout, the label and duplicates. For the whole folder it checks the manifest fields, the licence, the units and the stack.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">check_prior=True</span></code>, it also compares every label entry with <code class="docutils literal notranslate"><span class="pre">optimized_physics_prior</span></code> of the layout (a thin-film method-of-moments solve, a few seconds per layout). This physics sanity check flags entries off by more than a factor of 2.</p>
+<details><summary><p>The per-design checks in detail</p>
+</summary><ul class="simple">
+<li><p><strong>The layout:</strong> the GDS reads back, one top cell, the declared layers, valid polygons, and the number of conductors <span class="math notranslate nohighlight">\(N\)</span> counted from the metal itself (it must equal the matrix size: no merged nets).</p></li>
+<li><p><strong>The label:</strong> square over <code class="docutils literal notranslate"><span class="pre">net_order</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code> first, symmetric, diagonal <span class="math notranslate nohighlight">\(&gt; 0\)</span>, off-diagonal <span class="math notranslate nohighlight">\(&lt; 0\)</span>, the signal block positive definite, the label equal to the last complete pass, and the row closure <span class="math notranslate nohighlight">\(|\sum_j C_{ij}| / C_{ii}\)</span> (a warning above 5 %).</p></li>
+<li><p><strong>Duplicates:</strong> the geometry hash of each layout against every design already in the dataset. A copy of a held-out <strong>test</strong> design is an error (it would leak a test label). A copy of any other design is a warning.</p></li>
+</ul>
+<p>The duplicate check needs the dataset’s designs table. <code class="docutils literal notranslate"><span class="pre">reference=&quot;auto&quot;</span></code> (the default) reads it with <code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB</span></code>, from Hugging Face or from the local copy that the environment variable <code class="docutils literal notranslate"><span class="pre">SQUADDS_PLANAR_CAP_DATA</span></code> points to.</p>
+</details><div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance.contribute</span><span class="w"> </span><span class="kn">import</span> <span class="n">contribute_capacitance</span><span class="p">,</span> <span class="n">validate_capacitance_contribution</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">report</span> <span class="o">=</span> <span class="n">validate_capacitance_contribution</span><span class="p">(</span><span class="n">contrib</span><span class="p">,</span> <span class="n">check_prior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">report</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+QCReport(&#39;contribution my_contribution&#39;, ok=True, errors=0, warnings=1)
+</pre></div></div>
+</div>
+<p>No errors. Let’s read the full report, exactly as the reviewer will see it in the pull request:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">to_markdown</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+# QC report: contribution my_contribution
+
+**Result: PASS** (0 errors, 1 warnings)
+
+## Warnings
+- duplicates: exact duplicates of dataset designs (kept, same group): [&#34;concentric_0300 = [&#39;ref/exp10/q3d_cap_0300&#39;] (train)&#34;, &#34;concentric_0302 = [&#39;ref/exp10/q3d_cap_0302&#39;] (train)&#34;, &#34;concentric_0301 = [&#39;ref/exp10/q3d_cap_0301&#39;] (train)&#34;]
+
+## Fixed automatically
+- manifest.contributor.email removed (email_public is not true)
+
+## Measured
+- `licence`: CC-BY-4.0
+- `eps_r`: 11.45
+- `substrate_um`: 350
+- `freq_GHz`: 13
+- `training_stack`: True
+- `dataset_duplicates`: 3
+- `designs`: 3
+- `designs_ok`: 3
+- `simulations`: 3
+- `family`: concentric
+
+## concentric_0300: pass
+
+### Measured
+- `top_cells`: [&#39;main&#39;]
+- `unit_m`: 1e-09
+- `precision_m`: 1e-09
+- `layers`: [[1, 0], [1, 10], [2, 0], [3, 0]]
+- `n_polygons`: 3
+- `n_conductors`: 3
+- `n_conductors_raw`: 3
+- `min_gap_um`: 2
+- `geom_hash`: sha256:8ed46129bcde91104f08131e08a1f62b1a0993b57e81d73b924a39e7fffee26a
+- `simulations`: 1
+- `net_order`: [&#39;G&#39;, &#39;N&#39;, &#39;S&#39;]
+- `symmetry_rel`: 0
+- `closure_max_rel`: 0.0456018
+- `signal_block_min_eig_fF`: 47.8949
+- `passes`: 16
+- `last_pass_change_max_pct`: 0.00879357
+- `prior_median_rel_diff_pct`: 2.35602
+- `prior_mae_fF`: 0.939846
+- `prior_rmse_fF`: 0.944727
+- `prior_version`: v2m_sf_fc_dipfill_margin_slabfar
+- `prior_s`: 39.0696
+- `prior_machine`: Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHz, 20 CPUs, Linux x86_64
+- `prior_threads`: 2
+
+## concentric_0301: pass
+
+### Measured
+- `top_cells`: [&#39;main&#39;]
+- `unit_m`: 1e-09
+- `precision_m`: 1e-09
+- `layers`: [[1, 0], [1, 10], [2, 0], [3, 0]]
+- `n_polygons`: 3
+- `n_conductors`: 3
+- `n_conductors_raw`: 3
+- `min_gap_um`: 2
+- `geom_hash`: sha256:d5658abc1028d228d4d878203956c82a5a35585e0145f54f1382c9b861adcad5
+- `simulations`: 1
+- `net_order`: [&#39;G&#39;, &#39;N&#39;, &#39;S&#39;]
+- `symmetry_rel`: 0
+- `closure_max_rel`: 0.0342939
+- `signal_block_min_eig_fF`: 29.8443
+- `passes`: 14
+- `last_pass_change_max_pct`: 0.0197304
+- `prior_median_rel_diff_pct`: 2.68409
+- `prior_mae_fF`: 0.587189
+- `prior_rmse_fF`: 0.71088
+- `prior_version`: v2m_sf_fc_dipfill_margin_slabfar
+- `prior_s`: 6.41587
+- `prior_machine`: Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHz, 20 CPUs, Linux x86_64
+- `prior_threads`: 2
+
+## concentric_0302: pass
+
+### Measured
+- `top_cells`: [&#39;main&#39;]
+- `unit_m`: 1e-09
+- `precision_m`: 1e-09
+- `layers`: [[1, 0], [1, 10], [2, 0], [3, 0]]
+- `n_polygons`: 3
+- `n_conductors`: 3
+- `n_conductors_raw`: 3
+- `min_gap_um`: 2
+- `geom_hash`: sha256:a24ce5309e69e3c5182607d2077d58505242b02547ede70f4b68294f751d36fc
+- `simulations`: 1
+- `net_order`: [&#39;G&#39;, &#39;N&#39;, &#39;S&#39;]
+- `symmetry_rel`: 0
+- `closure_max_rel`: 0.0406094
+- `signal_block_min_eig_fF`: 46.7074
+- `passes`: 16
+- `last_pass_change_max_pct`: 0.0263143
+- `prior_median_rel_diff_pct`: 1.73872
+- `prior_mae_fF`: 0.929804
+- `prior_rmse_fF`: 0.942985
+- `prior_version`: v2m_sf_fc_dipfill_margin_slabfar
+- `prior_s`: 10.0193
+- `prior_machine`: Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHz, 20 CPUs, Linux x86_64
+- `prior_threads`: 2
+
+</pre></div></div>
+</div>
+<p>A few things to read in there:</p>
+<ul class="simple">
+<li><p><strong>Conductor count:</strong> the validator counted <span class="math notranslate nohighlight">\(N = 3\)</span> from the metal of each GDS, the same as the three nets of each matrix.</p></li>
+<li><p><strong>Label QC:</strong> symmetric to machine precision, Maxwell signs, a positive-definite signal block, and the label is the last of the passes Q3D wrote.</p></li>
+<li><p><strong>Duplicates:</strong> our three layouts are <em>exact</em> copies of dataset designs in the <code class="docutils literal notranslate"><span class="pre">train</span></code> split (we borrowed them, after all). With layouts of your own, this line stays empty. Had one of them been a copy of a <strong>test</strong> design, the report would say FAIL.</p></li>
+<li><p><strong>Stack:</strong> the standard stack, so the label can be used by the released models directly. A different stack is accepted and recorded as off-stack.</p></li>
+<li><p><strong>Fixed automatically:</strong> Jane’s e-mail is dropped from what gets uploaded, because <code class="docutils literal notranslate"><span class="pre">email_public</span></code> is false. Absolute paths would be stripped too.</p></li>
+</ul>
+<p>The physics sanity numbers are easier to compare in a table. For each design: the median relative difference between the Q3D mutual capacitances and the physics prior, with the MAE and RMSE in fF, and the time of the prior (with the machine and the threads it ran on).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;n_conductors&quot;</span><span class="p">,</span> <span class="s2">&quot;closure_max_rel&quot;</span><span class="p">,</span> <span class="s2">&quot;prior_median_rel_diff_pct&quot;</span><span class="p">,</span> <span class="s2">&quot;prior_mae_fF&quot;</span><span class="p">,</span> <span class="s2">&quot;prior_rmse_fF&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prior_s&quot;</span><span class="p">,</span> <span class="s2">&quot;prior_threads&quot;</span><span class="p">]</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">c</span><span class="o">.</span><span class="n">subject</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">}</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">children</span><span class="p">})</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>n_conductors</th>
+      <th>closure_max_rel</th>
+      <th>prior_median_rel_diff_pct</th>
+      <th>prior_mae_fF</th>
+      <th>prior_rmse_fF</th>
+      <th>prior_s</th>
+      <th>prior_threads</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>concentric_0300</th>
+      <td>3.0</td>
+      <td>0.045602</td>
+      <td>2.356024</td>
+      <td>0.939846</td>
+      <td>0.944727</td>
+      <td>39.069625</td>
+      <td>2.0</td>
+    </tr>
+    <tr>
+      <th>concentric_0301</th>
+      <td>3.0</td>
+      <td>0.034294</td>
+      <td>2.684088</td>
+      <td>0.587189</td>
+      <td>0.710880</td>
+      <td>6.415868</td>
+      <td>2.0</td>
+    </tr>
+    <tr>
+      <th>concentric_0302</th>
+      <td>3.0</td>
+      <td>0.040609</td>
+      <td>1.738719</td>
+      <td>0.929804</td>
+      <td>0.942985</td>
+      <td>10.019342</td>
+      <td>2.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">report</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prior_machine&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHz, 20 CPUs, Linux x86_64&#39;
+</pre></div></div>
+</div>
+<p>The prior is a cheap physics model, not the truth, so a few % between it and Q3D is normal. The first layout took longer because it also paid a one-time compilation of the solver. What the sanity check looks for is an entry off by a <em>factor</em>. That almost always means a unit, a sign or a net assignment went wrong somewhere. Let’s break a label on purpose and see.</p>
+</section>
+<section id="Catching-a-broken-label">
+<h2>Catching a broken label<a class="headerlink" href="#Catching-a-broken-label" title="Link to this heading">#</a></h2>
+<section id="A-flipped-sign">
+<h3>A flipped sign<a class="headerlink" href="#A-flipped-sign" title="Link to this heading">#</a></h3>
+<p>Let’s say our post-processing script dropped the minus sign of the <code class="docutils literal notranslate"><span class="pre">N</span></code>-<code class="docutils literal notranslate"><span class="pre">S</span></code> entry of one design (it happens more often than one would like). We make a copy of the contribution and flip it in every pass of <code class="docutils literal notranslate"><span class="pre">concentric_0301</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">broken</span> <span class="o">=</span> <span class="n">work</span> <span class="o">/</span> <span class="s2">&quot;broken_sign&quot;</span>
+<span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">contrib</span><span class="p">,</span> <span class="n">broken</span><span class="p">)</span>
+<span class="n">csv_path</span> <span class="o">=</span> <span class="n">broken</span> <span class="o">/</span> <span class="s2">&quot;sims&quot;</span> <span class="o">/</span> <span class="s2">&quot;concentric_0301&quot;</span> <span class="o">/</span> <span class="s2">&quot;q3d&quot;</span> <span class="o">/</span> <span class="s2">&quot;cap_matrix.csv&quot;</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_path</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;C(N,S) [pF]&quot;</span><span class="p">,</span> <span class="s2">&quot;C(S,N) [pF]&quot;</span><span class="p">]:</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">csv_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bad</span> <span class="o">=</span> <span class="n">validate_capacitance_contribution</span><span class="p">(</span><span class="n">broken</span><span class="p">,</span> <span class="n">check_prior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">bad</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+QCReport(&#39;contribution broken_sign&#39;, ok=False, errors=1, warnings=2)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bad</span><span class="o">.</span><span class="n">all_errors</span><span class="p">()))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+concentric_0301: sim q3d: positive off-diagonal entries (Maxwell signs need C_ij &lt; 0): [&#39;N-S (17.19 fF)&#39;]
+</pre></div></div>
+</div>
+<p>Caught, and named: a positive off-diagonal entry is not a Maxwell matrix. A broken contribution cannot even be submitted, since <code class="docutils literal notranslate"><span class="pre">contribute_capacitance</span></code> validates again and refuses it.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">contribute_capacitance</span><span class="p">(</span><span class="n">broken</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+the contribution failed validation:
+- concentric_0301: sim q3d: positive off-diagonal entries (Maxwell signs need C_ij &lt; 0): [&#39;N-S (17.19 fF)&#39;]
+</pre></div></div>
+</div>
+</section>
+<section id="A-pF-/-fF-mix-up">
+<h3>A pF / fF mix-up<a class="headerlink" href="#A-pF-/-fF-mix-up" title="Link to this heading">#</a></h3>
+<p>A sneakier one: the manifest says the matrices are in pF, but one of our exports was written in fF (the same numbers, 1000 times larger). Every entry is still symmetric with the right signs, so the label QC alone cannot tell. The physics sanity check can.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mixed</span> <span class="o">=</span> <span class="n">work</span> <span class="o">/</span> <span class="s2">&quot;broken_unit&quot;</span>
+<span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">contrib</span><span class="p">,</span> <span class="n">mixed</span><span class="p">)</span>
+<span class="n">csv_path</span> <span class="o">=</span> <span class="n">mixed</span> <span class="o">/</span> <span class="s2">&quot;sims&quot;</span> <span class="o">/</span> <span class="s2">&quot;concentric_0302&quot;</span> <span class="o">/</span> <span class="s2">&quot;q3d&quot;</span> <span class="o">/</span> <span class="s2">&quot;cap_matrix.csv&quot;</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_path</span><span class="p">)</span>
+<span class="n">entries</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;C(&quot;</span><span class="p">)]</span>
+<span class="n">df</span><span class="p">[</span><span class="n">entries</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">entries</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e3</span>
+<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">csv_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">unit_check</span> <span class="o">=</span> <span class="n">validate_capacitance_contribution</span><span class="p">(</span><span class="n">mixed</span><span class="p">,</span> <span class="n">check_prior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">unit_check</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+QCReport(&#39;contribution broken_unit&#39;, ok=True, errors=0, warnings=2)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">unit_check</span><span class="o">.</span><span class="n">all_warnings</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;physics prior&quot;</span> <span class="ow">in</span> <span class="n">w</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+concentric_0302: sim q3d: 6 label entries outside x0.5..x2 of the physics prior (check nets / units): [&#39;G-G: label 1.097e+05 fF, prior 144.1 fF (x761)&#39;, &#39;G-N: label -5.875e+04 fF, prior -57.75 fF (x1.02e+03)&#39;, &#39;G-S: label -3.224e+04 fF, prior -31.16 fF (x1.03e+03)&#39;, &#39;N-N: label 1.071e+05 fF, prior 108.1 fF (x990)&#39;, &#39;N-S: label -4.553e+04 fF, prior -44.82 fF (x1.02e+03)&#39;]
+</pre></div></div>
+</div>
+<p>Every entry of <code class="docutils literal notranslate"><span class="pre">concentric_0302</span></code> sits about a factor of 1000 away from the physics prior. This one is a <strong>warning</strong>, not an error. Physics sanity never rejects on its own, since a genuinely new kind of layout can disagree with a cheap prior. That is why we always read the warnings before submitting, and why a maintainer reads them again.</p>
+</section>
+</section>
+<section id="What-the-pull-request-would-add">
+<h2>What the pull request would add<a class="headerlink" href="#What-the-pull-request-would-add" title="Link to this heading">#</a></h2>
+<p>Back to our clean contribution. <code class="docutils literal notranslate"><span class="pre">contribute_capacitance</span></code> validates the folder again and builds a pull request on the dataset repository <code class="docutils literal notranslate"><span class="pre">SQuADDS/SQuADDS_PlanarCapacitance</span></code>. With <code class="docutils literal notranslate"><span class="pre">dry_run=True</span></code>, it stops right before the network call and tells us exactly what it would upload.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plan</span> <span class="o">=</span> <span class="n">contribute_capacitance</span><span class="p">(</span><span class="n">contrib</span><span class="p">,</span> <span class="n">check_prior</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plan</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">],</span> <span class="n">plan</span><span class="p">[</span><span class="s2">&quot;pr_url&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&#39;contrib/squadds-tutorial-2026-11-concentric&#39;, None)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plan</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;contrib/squadds-tutorial-2026-11-concentric/manifest.yaml&#39;,
+ &#39;contrib/squadds-tutorial-2026-11-concentric/designs.csv&#39;,
+ &#39;contrib/squadds-tutorial-2026-11-concentric/validation_report.md&#39;,
+ &#39;contrib/squadds-tutorial-2026-11-concentric/submission.json&#39;,
+ &#39;contrib/squadds-tutorial-2026-11-concentric/gds/concentric_0300.gds&#39;,
+ &#39;contrib/squadds-tutorial-2026-11-concentric/gds/concentric_0301.gds&#39;,
+ &#39;contrib/squadds-tutorial-2026-11-concentric/gds/concentric_0302.gds&#39;,
+ &#39;contrib/squadds-tutorial-2026-11-concentric/sims/concentric_0300/q3d/cap_matrix.csv&#39;,
+ &#39;contrib/squadds-tutorial-2026-11-concentric/sims/concentric_0301/q3d/cap_matrix.csv&#39;,
+ &#39;contrib/squadds-tutorial-2026-11-concentric/sims/concentric_0302/q3d/cap_matrix.csv&#39;]
+</pre></div></div>
+</div>
+<p>Everything lands in one folder, <code class="docutils literal notranslate"><span class="pre">contrib/&lt;org&gt;-&lt;batch&gt;/</span></code>: our manifest (sanitized), <code class="docutils literal notranslate"><span class="pre">designs.csv</span></code>, the GDS files and the simulations as we exported them, plus two files the tool writes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">validation_report.md</span></code>: the report we just read, so the reviewer sees the same checks</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">submission.json</span></code>: who submitted it, from the contributor block of the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file at the root of SQuADDS</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">.env</span></code> contributor block is the one we set up in <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html">Tutorial 3</a> (with <code class="docutils literal notranslate"><span class="pre">create_contributor_info()</span></code>), together with a Hugging Face token:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>GROUP_NAME = &quot;...&quot;
+PI_NAME = &quot;...&quot;
+INSTITUTION = &quot;...&quot;
+USER_NAME = &quot;...&quot;
+CONTRIB_MISC = &quot;...&quot;
+HUGGINGFACE_API_KEY = &quot;...&quot;
+</pre></div>
+</div>
+<p>The token is used to open the pull request and is never written into it. Here is the submitter record on this machine (we have not filled one in, so it is mostly empty):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance.contribute</span><span class="w"> </span><span class="kn">import</span> <span class="n">submitter_record</span>
+
+<span class="n">submitter_record</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;group&#39;: None,
+ &#39;PI&#39;: None,
+ &#39;institution&#39;: None,
+ &#39;uploader&#39;: None,
+ &#39;misc&#39;: None,
+ &#39;date_created&#39;: &#39;2026-10-29 222311&#39;}
+</pre></div></div>
+</div>
+<p>When we are happy with the report, the real submission is the same call without <code class="docutils literal notranslate"><span class="pre">dry_run</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">contribute_capacitance</span><span class="p">(</span><span class="s2">&quot;tutorial15_files/my_contribution&quot;</span><span class="p">,</span> <span class="n">check_prior</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">result</span><span class="p">[</span><span class="s2">&quot;pr_url&quot;</span><span class="p">]</span>  <span class="c1"># the pull request on huggingface.co/datasets/SQuADDS/SQuADDS_PlanarCapacitance</span>
+</pre></div>
+</div>
+<p>It opens a <strong>pull request</strong> and nothing more. Nothing is merged until a maintainer has reviewed it. After the merge, the maintainers compute the physics priors and the embeddings of our layouts on their cluster, so that every row of the dataset is computed the same way. They add them to the dataset with <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">=</span> <span class="pre">&quot;community&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">split</span> <span class="pre">=</span> <span class="pre">&quot;none&quot;</span></code>: community data is used for training and never becomes part of the held-out test set.</p>
+</section>
+<section id="Contributing-a-model">
+<h2>Contributing a model<a class="headerlink" href="#Contributing-a-model" title="Link to this heading">#</a></h2>
+<p>Now the other half. Let’s say we followed <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-14_Training_on_Your_Own_Designs.html">Tutorial 14</a>, trained a model and pushed its checkpoints to a model repository of our own on Hugging Face. SQuADDS keeps a <strong>model zoo</strong>: a <code class="docutils literal notranslate"><span class="pre">model_zoo.yaml</span></code> file in the dataset repository that lists contributed models next to the released ones. Each is pinned to an exact revision with the sha256 of every checkpoint.</p>
+<p>A model repository for the zoo holds the <code class="docutils literal notranslate"><span class="pre">*.pt</span></code> checkpoints (the run folders of <code class="docutils literal notranslate"><span class="pre">squadds-ml</span> <span class="pre">train</span></code>) and a <code class="docutils literal notranslate"><span class="pre">squadds_model.yaml</span></code> file that answers four questions:</p>
+<ol class="arabic simple">
+<li><p><strong>Who made it, and under which licence?</strong> (<code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">title</span></code>, <code class="docutils literal notranslate"><span class="pre">licence</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>)</p></li>
+<li><p><strong>What was it trained on?</strong> (<code class="docutils literal notranslate"><span class="pre">training_data</span></code>: the sha256 of the training shards and the split used: <code class="docutils literal notranslate"><span class="pre">train</span></code>, <code class="docutils literal notranslate"><span class="pre">train+val</span></code>, <code class="docutils literal notranslate"><span class="pre">all</span></code> or <code class="docutils literal notranslate"><span class="pre">custom</span></code>)</p></li>
+<li><p><strong>How good is it?</strong> (<code class="docutils literal notranslate"><span class="pre">val_score</span></code>: the median % error on the <strong>validation</strong> split, always with the MAE and RMSE in fF, and the number of layouts)</p></li>
+<li><p><strong>How fast is it?</strong> (the time per layout, with the machine and the number of threads it was measured on)</p></li>
+</ol>
+<section id="Our-model">
+<h3>Our model<a class="headerlink" href="#Our-model" title="Link to this heading">#</a></h3>
+<p>So that this tutorial does not have to train anything, we stand in for our own model with one whose answers we know: the released <code class="docutils literal notranslate"><span class="pre">QCap</span></code> model. <code class="docutils literal notranslate"><span class="pre">load_model</span></code> gives us a verified local copy.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model</span>
+
+<span class="n">qcap</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;QCap&quot;</span><span class="p">)</span>
+<span class="n">qcap</span><span class="o">.</span><span class="n">repo_id</span><span class="p">,</span> <span class="n">qcap</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span> <span class="n">qcap</span><span class="o">.</span><span class="n">title</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&#39;SQuADDS/QCap&#39;,
+ &#39;25bdbb19ea3a17b2e86b08baea7b320e2d06d3a0&#39;,
+ &#39;QCap (~1 s): extrapolated physics R(1.5, 3) on the corrected prior + residual networks, compiled solver&#39;)
+</pre></div></div>
+</div>
+<p>We put its checkpoints into a folder of our own, laid out like a model repository:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_model</span> <span class="o">=</span> <span class="n">work</span> <span class="o">/</span> <span class="s2">&quot;my_model&quot;</span>
+<span class="p">(</span><span class="n">my_model</span> <span class="o">/</span> <span class="s2">&quot;qcap&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">qcap</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;qcap&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.pt&quot;</span><span class="p">)):</span>
+    <span class="p">(</span><span class="n">my_model</span> <span class="o">/</span> <span class="s2">&quot;qcap&quot;</span> <span class="o">/</span> <span class="n">pt</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
+<span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">my_model</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">my_model</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.pt&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qcap/acc_v2m_sf_s0.pt&#39;,
+ &#39;qcap/acc_v2m_sf_s1.pt&#39;,
+ &#39;qcap/acc_v2m_sf_s2.pt&#39;]
+</pre></div></div>
+</div>
+<p>The training data hash pins the exact data the model saw. Checkpoints written by the SQuADDS trainer record the sha256 of every training shard (<code class="docutils literal notranslate"><span class="pre">data_sha</span></code>), so we hash that map:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="n">data_sha</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">my_model</span> <span class="o">/</span> <span class="s2">&quot;accurate&quot;</span> <span class="o">/</span> <span class="s2">&quot;acc_v2m_sf_s0.pt&quot;</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">&quot;data_sha&quot;</span><span class="p">]</span>
+<span class="n">training_sha</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data_sha</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+<span class="n">training_sha</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;671583ead040bc0bad0ff8ed085a0a2c965579e42dfe38b382426f28e256bba8&#39;
+</pre></div></div>
+</div>
+<p>Now the metadata. <code class="docutils literal notranslate"><span class="pre">QCap</span></code> was trained on all the data, so it has no validation score of its own: we report its one never-seen check instead (B5, 39 layouts that no part of the model saw) and the time per layout from its model card:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;tutorial15-qcap-copy&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Tutorial 15 stand-in: QCap&#39;s checkpoints&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;licence&quot;</span><span class="p">:</span> <span class="s2">&quot;MIT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;base&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;QCap&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;contributor&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Jane Doe&quot;</span><span class="p">,</span> <span class="s2">&quot;affiliation&quot;</span><span class="p">:</span> <span class="s2">&quot;Example University&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;training_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="n">training_sha</span><span class="p">,</span> <span class="s2">&quot;split_used&quot;</span><span class="p">:</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;all 45,771 on-stack layouts of the SQuADDS planar capacitance dataset&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;val_score&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;median_pct&quot;</span><span class="p">:</span> <span class="mf">1.05</span><span class="p">,</span> <span class="s2">&quot;mae_fF&quot;</span><span class="p">:</span> <span class="mf">0.132</span><span class="p">,</span> <span class="s2">&quot;rmse_fF&quot;</span><span class="p">:</span> <span class="mf">0.188</span><span class="p">,</span> <span class="s2">&quot;layouts&quot;</span><span class="p">:</span> <span class="mi">39</span><span class="p">,</span> <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="s2">&quot;B5 (never seen)&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;seconds_per_layout&quot;</span><span class="p">:</span> <span class="mf">0.845</span><span class="p">,</span> <span class="s2">&quot;machine&quot;</span><span class="p">:</span> <span class="s2">&quot;x86_64 cluster node&quot;</span><span class="p">,</span> <span class="s2">&quot;threads&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                  <span class="s2">&quot;note&quot;</span><span class="p">:</span> <span class="s2">&quot;from the model card (B5 check); time = median prediction time per layout&quot;</span><span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>We write it next to the checkpoints, and our model repository is ready:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">my_model</span> <span class="o">/</span> <span class="s2">&quot;squadds_model.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">my_model</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">my_model</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;qcap/acc_v2m_sf_s0.pt&#39;,
+ &#39;qcap/acc_v2m_sf_s1.pt&#39;,
+ &#39;qcap/acc_v2m_sf_s2.pt&#39;,
+ &#39;squadds_model.yaml&#39;]
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">base:</span> <span class="pre">{name:</span> <span class="pre">QCap}</span></code> tells the validator that these checkpoints use the architecture of a released model, so it loads them with <code class="docutils literal notranslate"><span class="pre">load_model(&quot;QCap&quot;,</span> <span class="pre">path=...)</span></code>. For run folders from <code class="docutils literal notranslate"><span class="pre">squadds-ml</span> <span class="pre">train</span></code>, leave <code class="docutils literal notranslate"><span class="pre">base</span></code> out.</p>
+</section>
+<section id="Validating-the-model">
+<h3>Validating the model<a class="headerlink" href="#Validating-the-model" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">validate_model</span></code> checks that the metadata is complete, takes the sha256 of every checkpoint, <strong>loads</strong> the checkpoints, and builds the entry for the zoo. With <code class="docutils literal notranslate"><span class="pre">local_dir</span></code>, it works on a local copy and needs no download. The real call resolves the revision of the Hugging Face repository to a full commit sha.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance.contribute</span><span class="w"> </span><span class="kn">import</span> <span class="n">contribute_model</span><span class="p">,</span> <span class="n">validate_model</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_report</span><span class="p">,</span> <span class="n">entry</span> <span class="o">=</span> <span class="n">validate_model</span><span class="p">(</span><span class="n">qcap</span><span class="o">.</span><span class="n">repo_id</span><span class="p">,</span> <span class="n">qcap</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span> <span class="n">local_dir</span><span class="o">=</span><span class="n">my_model</span><span class="p">)</span>
+<span class="n">model_report</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+QCReport(&#39;model SQuADDS/QCap@25bdbb19ea3a17b2e86b08baea7b320e2d06d3a0&#39;, ok=True, errors=0, warnings=2)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">model_report</span><span class="o">.</span><span class="n">to_markdown</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+# QC report: model SQuADDS/QCap@25bdbb19ea3a17b2e86b08baea7b320e2d06d3a0
+
+**Result: PASS** (0 errors, 2 warnings)
+
+## Warnings
+- trained on test layouts: the model is listed without any test score (not eligible for maintainer scoring)
+- validation score self-reported (pass val_data to compute it here)
+
+## Measured
+- `arm`: full_gnn
+- `files`: 3
+- `val_median_pct`: 1.05
+- `val_mae_fF`: 0.132
+
+</pre></div></div>
+</div>
+<p>It passes, with two warnings: the model was trained on test layouts, and the validation score is <em>self-reported</em>. Passing <code class="docutils literal notranslate"><span class="pre">val_data=</span></code> (a validation shard folder) makes <code class="docutils literal notranslate"><span class="pre">validate_model</span></code> score the model itself with <code class="docutils literal notranslate"><span class="pre">benchmark.score</span></code> and replace the self-reported numbers. Here is the zoo entry it built:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+id: tutorial15-qcap-copy
+repo_id: SQuADDS/QCap
+revision: 25bdbb19ea3a17b2e86b08baea7b320e2d06d3a0
+title: &#39;Tutorial 15 stand-in: QCap&#39;&#39;s checkpoints&#39;
+arm: full_gnn
+base:
+  name: QCap
+licence: MIT
+contributor:
+  name: Jane Doe
+  affiliation: Example University
+files:
+- path: qcap/acc_v2m_sf_s0.pt
+  sha256: cc69c5818f5028c26177159b88239116520abbb290743d6a6c091657e8dbf1c5
+- path: qcap/acc_v2m_sf_s1.pt
+  sha256: 2f88606dbec5c599550d088213a4c37af3b3ad5134ebad2e60519fb534553a57
+- path: qcap/acc_v2m_sf_s2.pt
+  sha256: d13bafc6b2eb7cadcd97a387d791c0210976db1a9d618f9acc1b614e3701daed
+training_data:
+  sha256: 671583ead040bc0bad0ff8ed085a0a2c965579e42dfe38b382426f28e256bba8
+  split_used: all
+  description: all 45,771 on-stack layouts of the SQuADDS planar capacitance dataset
+val_score:
+  median_pct: 1.05
+  mae_fF: 0.132
+  rmse_fF: 0.188
+  layouts: 39
+  split: B5 (never seen)
+  seconds_per_layout: 0.845
+  machine: x86_64 cluster node
+  threads: 2
+  note: from the model card (B5 check); time = median prediction time per layout
+  source: self-reported
+test_eligible: false
+validated:
+  date: &#39;2026-11-14&#39;
+  by: squadds 1.0.0
+
+</pre></div></div>
+</div>
+<p>Note <code class="docutils literal notranslate"><span class="pre">test_eligible:</span> <span class="pre">false</span></code>: the model was trained on all the data, test layouts included, so it is listed without any test score. Such a model can still be the best one to <em>use</em>, it just cannot be benchmarked on the test set.</p>
+</section>
+<section id="Why-test-scores-are-maintainer-run,-once">
+<h3>Why test scores are maintainer-run, once<a class="headerlink" href="#Why-test-scores-are-maintainer-run,-once" title="Link to this heading">#</a></h3>
+<p>The held-out test set is the only number that says how good a model is on layouts nobody tuned anything on. That only stays true if nobody looks at it while developing. Every time we score on the test set and then change something, the test set quietly becomes part of our validation set. So:</p>
+<ul class="simple">
+<li><p>the zoo takes a <strong>validation</strong> score from us, never a test score</p></li>
+<li><p>the maintainers score each declared model on the test set <strong>once</strong>, and only if it was trained on the TRAIN split (a model that saw test layouts during training cannot have an honest test score at all)</p></li>
+</ul>
+<p>Let’s check that the validator enforces both. First, a test score passed off as a validation score:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cheat</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">meta</span><span class="p">,</span> <span class="s2">&quot;val_score&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;val_score&quot;</span><span class="p">],</span> <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span><span class="p">}}</span>
+<span class="n">rep</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">validate_model</span><span class="p">(</span><span class="n">qcap</span><span class="o">.</span><span class="n">repo_id</span><span class="p">,</span> <span class="n">qcap</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span> <span class="n">local_dir</span><span class="o">=</span><span class="n">my_model</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">cheat</span><span class="p">)</span>
+<span class="n">rep</span><span class="o">.</span><span class="n">ok</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">all_errors</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(False,
+ [&#39;val_score is a test score: test scores are maintainer-run only, report the validation split&#39;])
+</pre></div></div>
+</div>
+<p>And the same checkpoints declared as trained on the TRAIN split only, as a model of our own trained on <code class="docutils literal notranslate"><span class="pre">train</span></code> would be:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train_only</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">meta</span><span class="p">,</span> <span class="s2">&quot;training_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;training_data&quot;</span><span class="p">],</span> <span class="s2">&quot;split_used&quot;</span><span class="p">:</span> <span class="s2">&quot;train&quot;</span><span class="p">}}</span>
+<span class="n">rep</span><span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">validate_model</span><span class="p">(</span><span class="n">qcap</span><span class="o">.</span><span class="n">repo_id</span><span class="p">,</span> <span class="n">qcap</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span> <span class="n">local_dir</span><span class="o">=</span><span class="n">my_model</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">train_only</span><span class="p">)</span>
+<span class="n">rep</span><span class="o">.</span><span class="n">ok</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="s2">&quot;test_eligible&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">rep</span><span class="o">.</span><span class="n">all_warnings</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;test&quot;</span> <span class="ow">in</span> <span class="n">w</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(True, True, [])
+</pre></div></div>
+</div>
+<p>Accepted, and eligible for one maintainer-run test score. The validator cannot check <code class="docutils literal notranslate"><span class="pre">split_used</span></code> against the checkpoints, so the maintainers also check the training keys a checkpoint records against the test layouts before they score it.</p>
+</section>
+<section id="What-the-model-pull-request-would-add">
+<h3>What the model pull request would add<a class="headerlink" href="#What-the-model-pull-request-would-add" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">contribute_model</span></code> runs the same validation and builds a pull request that adds our entry to <code class="docutils literal notranslate"><span class="pre">model_zoo.yaml</span></code> and our validation report next to it. With <code class="docutils literal notranslate"><span class="pre">dry_run=True</span></code> and a <code class="docutils literal notranslate"><span class="pre">local_dir</span></code>, nothing touches the network:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_plan</span> <span class="o">=</span> <span class="n">contribute_model</span><span class="p">(</span><span class="n">qcap</span><span class="o">.</span><span class="n">repo_id</span><span class="p">,</span> <span class="n">qcap</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span> <span class="n">local_dir</span><span class="o">=</span><span class="n">my_model</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">model_plan</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">],</span> <span class="n">model_plan</span><span class="p">[</span><span class="s2">&quot;pr_url&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+([&#39;model_zoo.yaml&#39;, &#39;model_zoo/tutorial15-qcap-copy/validation_report.md&#39;],
+ None)
+</pre></div></div>
+</div>
+<p>For a model of our own, the real call points at our Hugging Face model repository and its revision (the checkpoints are downloaded and verified again, and a duplicate <code class="docutils literal notranslate"><span class="pre">repo&#64;revision</span></code> is refused):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">contribute_model</span><span class="p">(</span><span class="s2">&quot;my-lab/my-capacitance-model&quot;</span><span class="p">,</span> <span class="n">revision</span><span class="o">=</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
+<span class="n">result</span><span class="p">[</span><span class="s2">&quot;pr_url&quot;</span><span class="p">]</span>  <span class="c1"># a pull request adding the entry to model_zoo.yaml</span>
+</pre></div>
+</div>
+<p>Like the data, it is a pull request that the maintainers review before anything is listed.</p>
+<p>Thank you a BUNCH for your interest in contributing to SQuADDS!!!</p>
+</section>
+</section>
+<section id="Next-Steps...">
+<h2>Next Steps…<a class="headerlink" href="#Next-Steps..." title="Link to this heading">#</a></h2>
+<p>The <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/ml_models.html">ML Models</a> page collects everything about the planar capacitance models: the released models, their accuracy and time, the dataset and how contributions are reviewed. If you also have simulation data for the other SQuADDS components (qubits, cavities, couplers), <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-3_Contributing_Validated_Simulation_Data_to_SQuADDS.html">Tutorial 3</a> shows how to contribute it to the
+SQuADDS database.</p>
+</section>
+<section id="License">
+<h2>License<a class="headerlink" href="#License" title="Link to this heading">#</a></h2>
+<div style="width: 100%; background-color:#3cb1c2;color:#324344;padding-left: 10px; padding-bottom: 10px; padding-right: 10px; padding-top: 5px"><h3><p>This code is a part of SQuADDS</p>
+</h3><p><p>Developed by Sadman Ahmed Shanto</p>
+</p><p><p>This tutorial is written by Sadman Ahmed Shanto and Claude Opus 5.5</p>
+</p><p><p>© Copyright Sadman Ahmed Shanto &amp; Eli Levenson-Falk 2026.</p>
+</p><p><p>This code is licensed under the MIT License. You may obtain a copy of this license in the LICENSE.txt file in the root directory of this source tree.</p>
+</p><p><p>Any modifications or derivative works of this code must retain thiscopyright notice, and modified files need to carry a notice indicatingthat they have been altered from the originals.</p>
+</p></div></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Tutorial-14_Training_on_Your_Own_Designs.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Tutorial 14: Training on Your Own Designs</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="Tutorial-16_Inverse_Design_by_ML_Screening.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Tutorial 16: Inverse Design by ML Screening</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item"><div class="paper-footer">
+  <p>© 2026 Sadman Ahmed Shanto &amp; Eli Levenson-Falk · Levenson-Falk Lab, University of Southern California</p>
+  <p class="paper-footer__links"><a href="https://github.com/LFL-Lab/SQuADDS">GitHub</a><a href="https://pypi.org/project/SQuADDS/">PyPI</a><a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB">Hugging Face</a><a href="https://deepwiki.com/LFL-Lab/SQuADDS">DeepWiki</a><a href="https://dornsife.usc.edu/lfl/">LFL Lab</a></p>
+</div></div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

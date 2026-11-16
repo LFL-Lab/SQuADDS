@@ -13,9 +13,14 @@ Tutorials
    Tutorial-6_Adding_Airbridges.ipynb
    Tutorial-7_Simulate_designs_with_palace.ipynb
    Tutorial-8_ML_interpolation_in_SQuADDS.ipynb
-   Tutorial-9_Learing_the_Inverse_Design_Map.ipynb
-   Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb
-   Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb
+   Tutorial-9_DrivenModal_Capacitance_Extraction.ipynb
+   Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.ipynb
+   Tutorial-11_Predicting_Capacitance_Matrices_from_GDS.ipynb
+   Tutorial-12_Planar_Capacitance_Families_in_SQuADDS.ipynb
+   Tutorial-13_From_Layout_to_Hamiltonian_with_ML.ipynb
+   Tutorial-14_Training_on_Your_Own_Designs.ipynb
+   Tutorial-15_Contributing_Capacitance_Data_and_Models.ipynb
+   Tutorial-16_Inverse_Design_by_ML_Screening.ipynb
 
 .. note::
 

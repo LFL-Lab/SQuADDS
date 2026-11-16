@@ -1,0 +1,971 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>squadds.ml package &#8212; SQuADDS v1.0.0</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/paper.css?v=73a8cae5" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/paper.js?v=1ab245fa"></script>
+    <link rel="icon" href="../_static/squadds_logo_dark.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="squadds.ml.capacitance package" href="squadds.ml.capacitance.html" />
+    <link rel="prev" title="squadds.layouts package" href="squadds.layouts.html" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5QKJDWM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R5QKJDWM2W');
+</script>
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Read our latest <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/paper/'>preprint</a> and check out its <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/'>docsite</a></div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+     
+  
+
+<a class="navbar-brand logo" href="https://lfl-lab.github.io/SQuADDS/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/squadds_mark_light.png" class="logo__image only-light" alt=""/>
+    <img src="../_static/squadds_mark_dark.png" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">SQuADDS</p>
+  
+</a>
+<span class="paper-version" title="SQuADDS 1.0.0">1.0.0</span></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="paper-nav" aria-label="Main">
+  <ul class="bd-navbar-elements navbar-nav">
+    <li class="nav-item"><a class="nav-link nav-internal" href="getting_started.html">Install</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="tutorials/index.html">Tutorials</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="ml_models.html">ML models</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="mcp_server.html">MCP server</a></li>
+    <li class="nav-item current active"><a class="nav-link nav-internal" href="apidocs/index.html" aria-current="page">API reference</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="resources/contribute.html">Contribute</a></li>
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a" title="SQuADDS datasets on Hugging Face" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/images/hf-logo.svg" class="icon-link-image" alt="SQuADDS datasets on Hugging Face"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api" title="SQuADDS ML inference API" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-code fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">SQuADDS ML inference API</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="Chat with SQuADDS" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-regular fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Chat with SQuADDS</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav class="paper-nav" aria-label="Main">
+  <ul class="bd-navbar-elements navbar-nav">
+    <li class="nav-item"><a class="nav-link nav-internal" href="getting_started.html">Install</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="tutorials/index.html">Tutorials</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="ml_models.html">ML models</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="mcp_server.html">MCP server</a></li>
+    <li class="nav-item current active"><a class="nav-link nav-internal" href="apidocs/index.html" aria-current="page">API reference</a></li>
+    <li class="nav-item"><a class="nav-link nav-internal" href="resources/contribute.html">Contribute</a></li>
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/LFL-Lab/SQuADDS" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a" title="SQuADDS datasets on Hugging Face" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/images/hf-logo.svg" class="icon-link-image" alt="SQuADDS datasets on Hugging Face"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api" title="SQuADDS ML inference API" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-code fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">SQuADDS ML inference API</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://deepwiki.com/LFL-Lab/SQuADDS" title="Chat with SQuADDS" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-regular fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Chat with SQuADDS</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links paper-outline" aria-label="Documentation">
+  <p class="bd-links__title" role="heading" aria-level="1">Documentation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started with SQuADDS</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcp_server.html">MCP Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ml_models.html">ML Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ml_local.html">Run ML Models Locally</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="apidocs/index.html">API Reference</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="modules.html">SQuADDS</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active has-children"><a class="reference internal" href="squadds.html">squadds package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="squadds.calcs.html">squadds.calcs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.components.html">squadds.components package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.core.html">squadds.core package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.database.html">squadds.database package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.datasets.html">squadds.datasets package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.gds.html">squadds.gds package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.interpolations.html">squadds.interpolations package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.layouts.html">squadds.layouts package</a></li>
+<li class="toctree-l4 current active has-children"><a class="current reference internal" href="#">squadds.ml package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l5"><a class="reference internal" href="squadds.ml.capacitance.html">squadds.ml.capacitance package</a></li>
+</ul>
+</details></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.simulations.html">squadds.simulations package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ui.html">squadds.ui package</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds_mcp.html">squadds_mcp package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_plan.html">test_plan module</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="resources/contribute.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer/index.html">Developer Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources/simulations.html">Simulation Lessons</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="resources/concepts.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release_notes.html">Release Logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references/index.html">References</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/lfl-lab/SQuADDS">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/pdf/2312.13483.pdf">Paper</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://dornsife.usc.edu/lfl/">LFL Lab ✌️</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="paper-crumbs d-print-none">
+  <ol>
+    <li><a href="../index.html">SQuADDS</a></li>
+    <li><a href="apidocs/index.html">API Reference</a></li>
+    <li><a href="modules.html">SQuADDS</a></li>
+    <li><a href="squadds.html">squadds package</a></li>
+    <li aria-current="page">squadds.ml package</li>
+  </ol>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="squadds-ml-package">
+<h1>squadds.ml package<a class="headerlink" href="#squadds-ml-package" title="Link to this heading">#</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="squadds.ml.capacitance.html">squadds.ml.capacitance package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.benchmark">squadds.ml.capacitance.benchmark module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.ScoreReport"><code class="docutils literal notranslate"><span class="pre">ScoreReport</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.ScoreReport.by_family"><code class="docutils literal notranslate"><span class="pre">ScoreReport.by_family</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.ScoreReport.headline"><code class="docutils literal notranslate"><span class="pre">ScoreReport.headline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.ScoreReport.layouts"><code class="docutils literal notranslate"><span class="pre">ScoreReport.layouts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.ScoreReport.model"><code class="docutils literal notranslate"><span class="pre">ScoreReport.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.ScoreReport.overall"><code class="docutils literal notranslate"><span class="pre">ScoreReport.overall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.ScoreReport.split"><code class="docutils literal notranslate"><span class="pre">ScoreReport.split</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.ScoreReport.timing"><code class="docutils literal notranslate"><span class="pre">ScoreReport.timing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.ScoreReport.to_dict"><code class="docutils literal notranslate"><span class="pre">ScoreReport.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.checkpoint_paths"><code class="docutils literal notranslate"><span class="pre">checkpoint_paths()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.entry_kinds"><code class="docutils literal notranslate"><span class="pre">entry_kinds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.layout_rows"><code class="docutils literal notranslate"><span class="pre">layout_rows()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.load_checkpoints"><code class="docutils literal notranslate"><span class="pre">load_checkpoints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.paired_difference"><code class="docutils literal notranslate"><span class="pre">paired_difference()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.predict_arrays"><code class="docutils literal notranslate"><span class="pre">predict_arrays()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.score"><code class="docutils literal notranslate"><span class="pre">score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.benchmark.summarize"><code class="docutils literal notranslate"><span class="pre">summarize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.bridge">squadds.ml.capacitance.bridge module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.EC_MHz"><code class="docutils literal notranslate"><span class="pre">EC_MHz()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.EC_MHz_from_matrix"><code class="docutils literal notranslate"><span class="pre">EC_MHz_from_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.MLSimulator"><code class="docutils literal notranslate"><span class="pre">MLSimulator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.MLSimulator.fidelity"><code class="docutils literal notranslate"><span class="pre">MLSimulator.fidelity</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.MLSimulator.predict"><code class="docutils literal notranslate"><span class="pre">MLSimulator.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.MLSimulator.predictor"><code class="docutils literal notranslate"><span class="pre">MLSimulator.predictor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.MLSimulator.simulate"><code class="docutils literal notranslate"><span class="pre">MLSimulator.simulate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.body_labels"><code class="docutils literal notranslate"><span class="pre">body_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.build_component"><code class="docutils literal notranslate"><span class="pre">build_component()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.component_class"><code class="docutils literal notranslate"><span class="pre">component_class()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.default_clearance_um"><code class="docutils literal notranslate"><span class="pre">default_clearance_um()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.g_MHz"><code class="docutils literal notranslate"><span class="pre">g_MHz()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.predict_dataframe"><code class="docutils literal notranslate"><span class="pre">predict_dataframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.render_gds"><code class="docutils literal notranslate"><span class="pre">render_gds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.row_notes"><code class="docutils literal notranslate"><span class="pre">row_notes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.row_options_and_class"><code class="docutils literal notranslate"><span class="pre">row_options_and_class()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.bridge.transmon_cross_capacitances"><code class="docutils literal notranslate"><span class="pre">transmon_cross_capacitances()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.cli">squadds.ml.capacitance.cli module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.cli.cmd_predict"><code class="docutils literal notranslate"><span class="pre">cmd_predict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.cli.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.contribute">squadds.ml.capacitance.contribute module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.contribute.contribute_capacitance"><code class="docutils literal notranslate"><span class="pre">contribute_capacitance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.contribute.contribute_model"><code class="docutils literal notranslate"><span class="pre">contribute_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.contribute.load_manifest"><code class="docutils literal notranslate"><span class="pre">load_manifest()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.contribute.parse_net_order"><code class="docutils literal notranslate"><span class="pre">parse_net_order()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.contribute.read_designs"><code class="docutils literal notranslate"><span class="pre">read_designs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.contribute.read_sim"><code class="docutils literal notranslate"><span class="pre">read_sim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.contribute.sanitized_manifest"><code class="docutils literal notranslate"><span class="pre">sanitized_manifest()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.contribute.submitter_record"><code class="docutils literal notranslate"><span class="pre">submitter_record()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.contribute.validate_capacitance_contribution"><code class="docutils literal notranslate"><span class="pre">validate_capacitance_contribution()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.contribute.validate_model"><code class="docutils literal notranslate"><span class="pre">validate_model()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.dataset">squadds.ml.capacitance.dataset module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.designs"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.designs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.embedding"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.embedding()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.files"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.gds_path"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.gds_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.label_passes"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.label_passes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.labels"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.labels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.model_input"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.model_input()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.nearest"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.nearest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.optimized_physics_prior"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.optimized_physics_prior()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.params"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.physics_prior"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.physics_prior()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.pooled_embedding"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.pooled_embedding()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.read"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.simulations"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.simulations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.PlanarCapacitanceDB.tables"><code class="docutils literal notranslate"><span class="pre">PlanarCapacitanceDB.tables()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.dataset.long_to_matrix"><code class="docutils literal notranslate"><span class="pre">long_to_matrix()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.models">squadds.ml.capacitance.models module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.entry"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.entry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.key"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.learned_prior_sha256"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.learned_prior_sha256</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.name"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.registry"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.registry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.repo_id"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.repo_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.revision"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.revision</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.root"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.root</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.sha256"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.sha256</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.title"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.title</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.warning"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.warning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.CapacitanceModel.weights_sha256"><code class="docutils literal notranslate"><span class="pre">CapacitanceModel.weights_sha256</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.ModelIntegrityError"><code class="docutils literal notranslate"><span class="pre">ModelIntegrityError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.is_model_name"><code class="docutils literal notranslate"><span class="pre">is_model_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.list_models"><code class="docutils literal notranslate"><span class="pre">list_models()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.load_model"><code class="docutils literal notranslate"><span class="pre">load_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.model_files"><code class="docutils literal notranslate"><span class="pre">model_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.model_key"><code class="docutils literal notranslate"><span class="pre">model_key()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.no_tier"><code class="docutils literal notranslate"><span class="pre">no_tier()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.registry_view"><code class="docutils literal notranslate"><span class="pre">registry_view()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.sha256_file"><code class="docutils literal notranslate"><span class="pre">sha256_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.models.verify"><code class="docutils literal notranslate"><span class="pre">verify()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.network">squadds.ml.capacitance.network module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.network.build_model"><code class="docutils literal notranslate"><span class="pre">build_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.network.build_surrogate"><code class="docutils literal notranslate"><span class="pre">build_surrogate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.predictor">squadds.ml.capacitance.predictor module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.predictor.CapacitancePredictor"><code class="docutils literal notranslate"><span class="pre">CapacitancePredictor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.predictor.CapacitancePredictor.predict"><code class="docutils literal notranslate"><span class="pre">CapacitancePredictor.predict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.predictor.clear_cache"><code class="docutils literal notranslate"><span class="pre">clear_cache()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.predictor.quiet"><code class="docutils literal notranslate"><span class="pre">quiet()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.predictor.run_scene"><code class="docutils literal notranslate"><span class="pre">run_scene()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.priors">squadds.ml.capacitance.priors module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult"><code class="docutils literal notranslate"><span class="pre">PriorResult</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.C_fF"><code class="docutils literal notranslate"><span class="pre">PriorResult.C_fF</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.alpha"><code class="docutils literal notranslate"><span class="pre">PriorResult.alpha</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.kind"><code class="docutils literal notranslate"><span class="pre">PriorResult.kind</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.layout_hash"><code class="docutils literal notranslate"><span class="pre">PriorResult.layout_hash</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.levels_ppg"><code class="docutils literal notranslate"><span class="pre">PriorResult.levels_ppg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.machine"><code class="docutils literal notranslate"><span class="pre">PriorResult.machine</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.names"><code class="docutils literal notranslate"><span class="pre">PriorResult.names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.prior_version"><code class="docutils literal notranslate"><span class="pre">PriorResult.prior_version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.solves_fF"><code class="docutils literal notranslate"><span class="pre">PriorResult.solves_fF</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.stack"><code class="docutils literal notranslate"><span class="pre">PriorResult.stack</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.threads"><code class="docutils literal notranslate"><span class="pre">PriorResult.threads</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.timing_s"><code class="docutils literal notranslate"><span class="pre">PriorResult.timing_s</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.to_dataframe"><code class="docutils literal notranslate"><span class="pre">PriorResult.to_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.to_dict"><code class="docutils literal notranslate"><span class="pre">PriorResult.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.PriorResult.units"><code class="docutils literal notranslate"><span class="pre">PriorResult.units</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.optimized_physics_prior"><code class="docutils literal notranslate"><span class="pre">optimized_physics_prior()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.physics_prior"><code class="docutils literal notranslate"><span class="pre">physics_prior()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.priors.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.qc">squadds.ml.capacitance.qc module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport"><code class="docutils literal notranslate"><span class="pre">QCReport</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.all_errors"><code class="docutils literal notranslate"><span class="pre">QCReport.all_errors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.all_warnings"><code class="docutils literal notranslate"><span class="pre">QCReport.all_warnings()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.children"><code class="docutils literal notranslate"><span class="pre">QCReport.children</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.error"><code class="docutils literal notranslate"><span class="pre">QCReport.error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.errors"><code class="docutils literal notranslate"><span class="pre">QCReport.errors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.extend"><code class="docutils literal notranslate"><span class="pre">QCReport.extend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.fixes"><code class="docutils literal notranslate"><span class="pre">QCReport.fixes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.info"><code class="docutils literal notranslate"><span class="pre">QCReport.info</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.ok"><code class="docutils literal notranslate"><span class="pre">QCReport.ok</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.subject"><code class="docutils literal notranslate"><span class="pre">QCReport.subject</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.to_dict"><code class="docutils literal notranslate"><span class="pre">QCReport.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.to_markdown"><code class="docutils literal notranslate"><span class="pre">QCReport.to_markdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.warn"><code class="docutils literal notranslate"><span class="pre">QCReport.warn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.QCReport.warnings"><code class="docutils literal notranslate"><span class="pre">QCReport.warnings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.conductor_count_qc"><code class="docutils literal notranslate"><span class="pre">conductor_count_qc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.duplicate_qc"><code class="docutils literal notranslate"><span class="pre">duplicate_qc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.gds_qc"><code class="docutils literal notranslate"><span class="pre">gds_qc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.geom_hash"><code class="docutils literal notranslate"><span class="pre">geom_hash()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.label_qc"><code class="docutils literal notranslate"><span class="pre">label_qc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.prior_sanity"><code class="docutils literal notranslate"><span class="pre">prior_sanity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.read_cap_matrix"><code class="docutils literal notranslate"><span class="pre">read_cap_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.read_conv"><code class="docutils literal notranslate"><span class="pre">read_conv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.reference_hashes"><code class="docutils literal notranslate"><span class="pre">reference_hashes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.stack_qc"><code class="docutils literal notranslate"><span class="pre">stack_qc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.to_fF"><code class="docutils literal notranslate"><span class="pre">to_fF()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.qc.unit_plausibility"><code class="docutils literal notranslate"><span class="pre">unit_plausibility()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.result">squadds.ml.capacitance.result module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.cached"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.cached</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.checks"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.checks</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.convention"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.convention</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.ground_detection"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.ground_detection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.layout_hash"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.layout_hash</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.learned_prior_sha256"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.learned_prior_sha256</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.machine"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.machine</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.matrix_fF"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.matrix_fF</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.model"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.n_conductors"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.n_conductors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.names"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.package"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.package</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.prior_stack"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.prior_stack</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.prior_version"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.prior_version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.source"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.source</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.substrate"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.substrate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.threads"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.threads</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.timing_s"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.timing_s</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.title"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.title</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.to_dataframe"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.to_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.to_dict"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.to_sim_results"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.to_sim_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.units"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.warnings"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.warnings</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.CapacitanceResult.weights_sha256"><code class="docutils literal notranslate"><span class="pre">CapacitanceResult.weights_sha256</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.physical_checks"><code class="docutils literal notranslate"><span class="pre">physical_checks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.result.physical_warning"><code class="docutils literal notranslate"><span class="pre">physical_warning()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.serving">squadds.ml.capacitance.serving module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.Adapter"><code class="docutils literal notranslate"><span class="pre">Adapter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.Adapter.InputModel"><code class="docutils literal notranslate"><span class="pre">Adapter.InputModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.Adapter.describe"><code class="docutils literal notranslate"><span class="pre">Adapter.describe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.Adapter.input_kind"><code class="docutils literal notranslate"><span class="pre">Adapter.input_kind</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.Adapter.predict"><code class="docutils literal notranslate"><span class="pre">Adapter.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.Adapter.warm"><code class="docutils literal notranslate"><span class="pre">Adapter.warm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.CapacitanceInputs"><code class="docutils literal notranslate"><span class="pre">CapacitanceInputs</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.CapacitanceInputs.conductor_layer"><code class="docutils literal notranslate"><span class="pre">CapacitanceInputs.conductor_layer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.CapacitanceInputs.eps_r"><code class="docutils literal notranslate"><span class="pre">CapacitanceInputs.eps_r</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.CapacitanceInputs.file_base64"><code class="docutils literal notranslate"><span class="pre">CapacitanceInputs.file_base64</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.CapacitanceInputs.ground_layer"><code class="docutils literal notranslate"><span class="pre">CapacitanceInputs.ground_layer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.CapacitanceInputs.ground_pieces"><code class="docutils literal notranslate"><span class="pre">CapacitanceInputs.ground_pieces</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.CapacitanceInputs.model_config"><code class="docutils literal notranslate"><span class="pre">CapacitanceInputs.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.CapacitanceInputs.thickness_um"><code class="docutils literal notranslate"><span class="pre">CapacitanceInputs.thickness_um</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.TooLarge"><code class="docutils literal notranslate"><span class="pre">TooLarge</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.serving.TooLarge.too_large"><code class="docutils literal notranslate"><span class="pre">TooLarge.too_large</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.slurm">squadds.ml.capacitance.slurm module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.slurm.write_slurm_array"><code class="docutils literal notranslate"><span class="pre">write_slurm_array()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.train">squadds.ml.capacitance.train module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.InFamilyResult"><code class="docutils literal notranslate"><span class="pre">InFamilyResult</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.InFamilyResult.chosen"><code class="docutils literal notranslate"><span class="pre">InFamilyResult.chosen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.InFamilyResult.decision"><code class="docutils literal notranslate"><span class="pre">InFamilyResult.decision</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.InFamilyResult.model"><code class="docutils literal notranslate"><span class="pre">InFamilyResult.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.InFamilyResult.out_dir"><code class="docutils literal notranslate"><span class="pre">InFamilyResult.out_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.InFamilyResult.report"><code class="docutils literal notranslate"><span class="pre">InFamilyResult.report</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.InFamilyResult.timing"><code class="docutils literal notranslate"><span class="pre">InFamilyResult.timing</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig"><code class="docutils literal notranslate"><span class="pre">TrainConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.grad_clip"><code class="docutils literal notranslate"><span class="pre">TrainConfig.grad_clip</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.huber_delta"><code class="docutils literal notranslate"><span class="pre">TrainConfig.huber_delta</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.log_every"><code class="docutils literal notranslate"><span class="pre">TrainConfig.log_every</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.lr"><code class="docutils literal notranslate"><span class="pre">TrainConfig.lr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.lr_min"><code class="docutils literal notranslate"><span class="pre">TrainConfig.lr_min</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.max_batch"><code class="docutils literal notranslate"><span class="pre">TrainConfig.max_batch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.pair_budget"><code class="docutils literal notranslate"><span class="pre">TrainConfig.pair_budget</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.standardise_clip"><code class="docutils literal notranslate"><span class="pre">TrainConfig.standardise_clip</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.steps"><code class="docutils literal notranslate"><span class="pre">TrainConfig.steps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.w_ground_self"><code class="docutils literal notranslate"><span class="pre">TrainConfig.w_ground_self</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.w_signal_self"><code class="docutils literal notranslate"><span class="pre">TrainConfig.w_signal_self</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.weight_decay"><code class="docutils literal notranslate"><span class="pre">TrainConfig.weight_decay</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.TrainConfig.width"><code class="docutils literal notranslate"><span class="pre">TrainConfig.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.add_train_subcommand"><code class="docutils literal notranslate"><span class="pre">add_train_subcommand()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.cmd_train"><code class="docutils literal notranslate"><span class="pre">cmd_train()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.fit"><code class="docutils literal notranslate"><span class="pre">fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.fit_in_family"><code class="docutils literal notranslate"><span class="pre">fit_in_family()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.fit_seeds"><code class="docutils literal notranslate"><span class="pre">fit_seeds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.release_eligible"><code class="docutils literal notranslate"><span class="pre">release_eligible()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.release_environment_diff"><code class="docutils literal notranslate"><span class="pre">release_environment_diff()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.retrain_collective"><code class="docutils literal notranslate"><span class="pre">retrain_collective()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.trained_model"><code class="docutils literal notranslate"><span class="pre">trained_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.train.training_environment"><code class="docutils literal notranslate"><span class="pre">training_environment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance.training_data">squadds.ml.capacitance.training_data module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design"><code class="docutils literal notranslate"><span class="pre">Design</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.conductor_layers"><code class="docutils literal notranslate"><span class="pre">Design.conductor_layers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.family"><code class="docutils literal notranslate"><span class="pre">Design.family</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.gds"><code class="docutils literal notranslate"><span class="pre">Design.gds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.ground_layers"><code class="docutils literal notranslate"><span class="pre">Design.ground_layers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.key"><code class="docutils literal notranslate"><span class="pre">Design.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.label_names"><code class="docutils literal notranslate"><span class="pre">Design.label_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.labels"><code class="docutils literal notranslate"><span class="pre">Design.labels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.meta"><code class="docutils literal notranslate"><span class="pre">Design.meta</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.names"><code class="docutils literal notranslate"><span class="pre">Design.names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.resolved_key"><code class="docutils literal notranslate"><span class="pre">Design.resolved_key()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.Design.split"><code class="docutils literal notranslate"><span class="pre">Design.split</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.LabelQCError"><code class="docutils literal notranslate"><span class="pre">LabelQCError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.as_design"><code class="docutils literal notranslate"><span class="pre">as_design()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.base_schema"><code class="docutils literal notranslate"><span class="pre">base_schema()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.build_shards"><code class="docutils literal notranslate"><span class="pre">build_shards()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.design_json_names"><code class="docutils literal notranslate"><span class="pre">design_json_names()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.embed_design"><code class="docutils literal notranslate"><span class="pre">embed_design()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.label_qc"><code class="docutils literal notranslate"><span class="pre">label_qc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.labels_of"><code class="docutils literal notranslate"><span class="pre">labels_of()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.merge_shards"><code class="docutils literal notranslate"><span class="pre">merge_shards()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.pairs_of"><code class="docutils literal notranslate"><span class="pre">pairs_of()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.read_names"><code class="docutils literal notranslate"><span class="pre">read_names()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.read_q3d_csv"><code class="docutils literal notranslate"><span class="pre">read_q3d_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.read_schema"><code class="docutils literal notranslate"><span class="pre">read_schema()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.read_shards"><code class="docutils literal notranslate"><span class="pre">read_shards()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.resolve_dataset_names"><code class="docutils literal notranslate"><span class="pre">resolve_dataset_names()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.scene_of"><code class="docutils literal notranslate"><span class="pre">scene_of()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.sha256_file"><code class="docutils literal notranslate"><span class="pre">sha256_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.shard_files"><code class="docutils literal notranslate"><span class="pre">shard_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.shard_summary"><code class="docutils literal notranslate"><span class="pre">shard_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.shards_from_model_input"><code class="docutils literal notranslate"><span class="pre">shards_from_model_input()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.subset_shards"><code class="docutils literal notranslate"><span class="pre">subset_shards()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="squadds.ml.capacitance.html#squadds.ml.capacitance.training_data.write_shards"><code class="docutils literal notranslate"><span class="pre">write_shards()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="squadds.ml.capacitance.html#module-squadds.ml.capacitance">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
+</section>
+<section id="module-squadds.ml.client">
+<span id="squadds-ml-client-module"></span><h2>squadds.ml.client module<a class="headerlink" href="#module-squadds.ml.client" title="Link to this heading">#</a></h2>
+<p>Client of the SQuADDS ML API (the models hosted on the SQuADDS Hugging Face Space).</p>
+<blockquote>
+<div><p>from squadds.ml import client
+client.list_models()
+client.get_model(“transmon_cross_hamiltonian_inverse”)     # inputs, outputs, units, limits, example request
+client.predict(“transmon_cross_hamiltonian_inverse”, inputs={“qubit_frequency_GHz”: 4.85, “anharmonicity_MHz”: -205.0})
+client.predict(“&lt;file model id&gt;”, file=”chip.gds”, inputs={“ground_layer”: “1/0”})</p>
+</div></blockquote>
+<p>The base URL is <code class="docutils literal notranslate"><span class="pre">SQUADDS_ML_API_URL</span></code> when set, else <code class="docutils literal notranslate"><span class="pre">DEFAULT_URL</span></code>. Gated models need a Hugging Face token of a member
+of the SQuADDS organization (<code class="docutils literal notranslate"><span class="pre">token=</span></code> or <code class="docutils literal notranslate"><span class="pre">HF_TOKEN</span></code>).</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="squadds.ml.client.get_model">
+<span class="sig-prename descclassname"><span class="pre">squadds.ml.client.</span></span><span class="sig-name descname"><span class="pre">get_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml/client.html#get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.client.get_model" title="Link to this definition">#</a></dt>
+<dd><p>One model’s listing entry and contract (<code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/v1/models/{model_id}</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="squadds.ml.client.list_models">
+<span class="sig-prename descclassname"><span class="pre">squadds.ml.client.</span></span><span class="sig-name descname"><span class="pre">list_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml/client.html#list_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.client.list_models" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="squadds.ml.client.predict">
+<span class="sig-prename descclassname"><span class="pre">squadds.ml.client.</span></span><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml/client.html#predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.client.predict" title="Link to this definition">#</a></dt>
+<dd><p>The response envelope (<code class="docutils literal notranslate"><span class="pre">outputs</span></code>, <code class="docutils literal notranslate"><span class="pre">metadata</span></code>, <code class="docutils literal notranslate"><span class="pre">timing_s</span></code>, <code class="docutils literal notranslate"><span class="pre">cached</span></code>). <code class="docutils literal notranslate"><span class="pre">file</span></code>: a path or bytes (file models).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-squadds.ml">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-squadds.ml" title="Link to this heading">#</a></h2>
+<p>Machine-learning models for SQuADDS (optional extra: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">squadds[ml]</span></code>).</p>
+<p>Submodules import torch / gdstk / numba lazily, so <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">squadds</span></code> works without the extra.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="squadds.ml.missing_ml_dependencies">
+<span class="sig-prename descclassname"><span class="pre">squadds.ml.</span></span><span class="sig-name descname"><span class="pre">missing_ml_dependencies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml.html#missing_ml_dependencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.missing_ml_dependencies" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="squadds.ml.require_ml">
+<span class="sig-prename descclassname"><span class="pre">squadds.ml.</span></span><span class="sig-name descname"><span class="pre">require_ml</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml.html#require_ml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.require_ml" title="Link to this definition">#</a></dt>
+<dd><p>Raise ImportError naming the missing packages when the <code class="docutils literal notranslate"><span class="pre">[ml]</span></code> extra is not installed.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="squadds.layouts.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">squadds.layouts package</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="squadds.ml.capacitance.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">squadds.ml.capacitance package</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-squadds.ml.client">squadds.ml.client module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.client.get_model"><code class="docutils literal notranslate"><span class="pre">get_model()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.client.list_models"><code class="docutils literal notranslate"><span class="pre">list_models()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.client.predict"><code class="docutils literal notranslate"><span class="pre">predict()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-squadds.ml">Module contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.missing_ml_dependencies"><code class="docutils literal notranslate"><span class="pre">missing_ml_dependencies()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.require_ml"><code class="docutils literal notranslate"><span class="pre">require_ml()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item"><div class="paper-footer">
+  <p>© 2026 Sadman Ahmed Shanto &amp; Eli Levenson-Falk · Levenson-Falk Lab, University of Southern California</p>
+  <p class="paper-footer__links"><a href="https://github.com/LFL-Lab/SQuADDS">GitHub</a><a href="https://pypi.org/project/SQuADDS/">PyPI</a><a href="https://huggingface.co/datasets/SQuADDS/SQuADDS_DB">Hugging Face</a><a href="https://deepwiki.com/LFL-Lab/SQuADDS">DeepWiki</a><a href="https://dornsife.usc.edu/lfl/">LFL Lab</a></p>
+</div></div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>
