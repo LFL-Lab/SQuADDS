@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Tutorial 15: Contributing Capacitance Data and Models &#8212; SQuADDS v1.0.0</title>
+    <title>Tutorial 15: Contributing Capacitance Data and Models &#8212; SQuADDS v0.5.0</title>
   
   
   
@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -113,7 +113,7 @@
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
 <aside class="bd-header-announcement" aria-label="Announcement">
-  <div class="bd-header-announcement__content">Read our latest <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/paper/'>preprint</a> and check out its <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/'>docsite</a></div>
+  <div class="bd-header-announcement__content">Preprint coming very soon. Check out our <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/'>docsite</a> now</div>
 </aside>
 
   
@@ -130,7 +130,7 @@
   <img src="../../_static/images/qcap_compact_light.svg" class="logo__image only-light" alt="QCap"/>
   <img src="../../_static/images/qcap_compact_dark.svg" class="logo__image only-dark pst-js-only" alt="QCap"/>
 </a>
-<span class="paper-version" title="SQuADDS 1.0.0">SQuADDS 1.0.0</span></div>
+<span class="paper-version" title="SQuADDS 0.5.0">SQuADDS 0.5.0</span></div>
     
   </div>
   
@@ -1616,7 +1616,7 @@ HUGGINGFACE_API_KEY = &quot;...&quot;
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_model</span> <span class="o">=</span> <span class="n">work</span> <span class="o">/</span> <span class="s2">&quot;my_model&quot;</span>
 <span class="p">(</span><span class="n">my_model</span> <span class="o">/</span> <span class="s2">&quot;qcap&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">qcap</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;qcap&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.pt&quot;</span><span class="p">)):</span>
-    <span class="p">(</span><span class="n">my_model</span> <span class="o">/</span> <span class="s2">&quot;qcap&quot;</span> <span class="o">/</span> <span class="n">pt</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">my_model</span> <span class="o">/</span> <span class="s2">&quot;qcap&quot;</span> <span class="o">/</span> <span class="n">pt</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 <span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">my_model</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">my_model</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.pt&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -1641,7 +1641,7 @@ HUGGINGFACE_API_KEY = &quot;...&quot;
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="n">data_sha</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">my_model</span> <span class="o">/</span> <span class="s2">&quot;accurate&quot;</span> <span class="o">/</span> <span class="s2">&quot;acc_v2m_sf_s0.pt&quot;</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">&quot;data_sha&quot;</span><span class="p">]</span>
+<span class="n">data_sha</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">my_model</span> <span class="o">/</span> <span class="s2">&quot;qcap&quot;</span> <span class="o">/</span> <span class="s2">&quot;acc_v2m_sf_s0.pt&quot;</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">&quot;data_sha&quot;</span><span class="p">]</span>
 <span class="n">training_sha</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data_sha</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
 <span class="n">training_sha</span>
 </pre></div>
@@ -1808,7 +1808,7 @@ val_score:
 test_eligible: false
 validated:
   date: &#39;2026-11-14&#39;
-  by: squadds 1.0.0
+  by: squadds 0.5.0
 
 </pre></div></div>
 </div>

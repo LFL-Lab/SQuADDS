@@ -11,7 +11,7 @@ SQuADDS
 
    <div class="paper-titleblock">
      <p class="paper-sub">A validated design database and simulation workflow for superconducting qubits</p>
-     <p class="paper-abstract">SQuADDS gives you a well-characterised starting point for superconducting hardware. Ask for the Hamiltonian you want and get the closest pre-simulated designs from an experimentally validated database, an interpolated best guess, and, from version 1.0, the full capacitance matrix of any planar layout straight from its GDS file.</p>
+     <p class="paper-abstract">SQuADDS gives you a well-characterised starting point for superconducting hardware. Ask for the Hamiltonian you want and get the closest pre-simulated designs from an experimentally validated database, an interpolated best guess, and, from version 0.5, the full capacitance matrix of any planar layout straight from its GDS file.</p>
      <div class="paper-install">
        <div class="paper-cmd"><pre><code>pip install SQuADDS</code></pre><button class="paper-copy" type="button" data-copy="pip install SQuADDS">Copy</button></div>
        <p class="paper-install__alt">Python 3.11 or newer. For the capacitance models: <code class="docutils literal notranslate"><span class="pre">pip install "squadds[ml]"</span></code>. From source with <code class="docutils literal notranslate"><span class="pre">uv sync</span></code>: <a href="source/getting_started.html">installation guide</a>.</p>
@@ -178,12 +178,12 @@ Contents
 
 .. _citation:
 
-Citing SQuADDS
---------------
+Citing SQuADDS and QCap
+-----------------------
 
-If SQuADDS helps your research, please support its continued development and maintenance by citing the paper: Shanto *et al.*, *Quantum* **8**, 1465 (2024).
+If SQuADDS helps your research, please support its continued development and maintenance by citing the paper: `Shanto et al., Quantum 8, 1465 (2024) <https://doi.org/10.22331/q-2024-09-09-1465>`__. If you use QCap (the planar capacitance models or their dataset), please also cite `Shanto, Das and Levenson-Falk (2026) <https://lfl-lab.github.io/SQuADDS/ml-paper/paper/>`__.
 
-.. code-block:: latex
+.. code-block:: bibtex
 
    @article{Shanto2024squaddsvalidated,
      doi = {10.22331/q-2024-09-09-1465},
@@ -197,4 +197,11 @@ If SQuADDS helps your research, please support its continued development and mai
      pages = {1465},
      month = sep,
      year = {2024}
+   }
+
+   @misc{Shanto2026planarcapacitance,
+     title = {{QCap}: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout},
+     author = {Shanto, Sadman Ahmed and Das, Saikat and Levenson-Falk, Eli},
+     year = {2026},
+     url = {https://lfl-lab.github.io/SQuADDS/ml-paper/paper/}
    }

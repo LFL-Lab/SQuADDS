@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-1.0.0 (2026-11-14)
+0.5.0 (2026-11-16)
 ------------------
 
 **Planar capacitance models** (optional extra ``pip install "squadds[ml]"``). Guide: :doc:`ml_models`.
