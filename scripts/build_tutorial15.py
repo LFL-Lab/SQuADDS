@@ -459,7 +459,7 @@ qcap.repo_id, qcap.revision, qcap.title""",
         """my_model = work / "my_model"
 (my_model / "qcap").mkdir(parents=True)
 for pt in sorted((qcap.root / "qcap").glob("*.pt")):
-    (my_model / "qcap" / pt.name).symlink_to(pt.resolve())
+    shutil.copy2(pt, my_model / "qcap" / pt.name)
 sorted(p.relative_to(my_model).as_posix() for p in my_model.rglob("*.pt"))""",
     ),
     (

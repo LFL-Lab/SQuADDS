@@ -2,7 +2,7 @@
   <img src="docs/_static/images/squadds_not_transparent.png" width="100%" alt="SQuADDS Logo" />
 </center>
 
-# Superconducting Qubit And Device Design and Simulation Database ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) ![Pepy Total Downloads](https://img.shields.io/pepy/dt/squadds) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) [![arXiv](https://img.shields.io/badge/arXiv-2312.13483-<COLOR>.svg)](https://arxiv.org/abs/2312.13483)
+# Superconducting Qubit And Device Design and Simulation Database ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) ![Pepy Total Downloads](https://img.shields.io/pepy/dt/squadds) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) [![arXiv](https://img.shields.io/badge/arXiv-2312.13483-b31b1b.svg)](https://arxiv.org/abs/2312.13483) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/LFL-Lab/SQuADDS)
 
 The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Project is an open-source resource aimed at advancing research in superconducting quantum device designs. It provides a robust workflow for generating and simulating superconducting quantum device designs, facilitating the accurate prediction of Hamiltonian parameters across a wide range of design geometries.
 
@@ -45,7 +45,7 @@ SQuADDS also predicts the full Maxwell capacitance matrix of any planar supercon
 
 ## Citation
 
-If you use SQuADDS in your research, please cite our 2024 paper. If you use the planar capacitance models or their dataset, please also cite our 2026 paper.
+If SQuADDS helps your research, please support its continued development and maintenance by citing the paper: [Shanto et al., Quantum 8, 1465 (2024)](https://doi.org/10.22331/q-2024-09-09-1465). If you use QCap (the planar capacitance models or their dataset), please also cite [Shanto, Das and Levenson-Falk (2026)](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/).
 
 ```bibtex
 @article{Shanto2024squaddsvalidated,
@@ -66,8 +66,6 @@ If you use SQuADDS in your research, please cite our 2024 paper. If you use the 
   title = {{QCap}: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout},
   author = {Shanto, Sadman Ahmed and Das, Saikat and Levenson-Falk, Eli},
   year = {2026},
-  eprint = {<arXiv id>},
-  archivePrefix = {arXiv},
   url = {https://lfl-lab.github.io/SQuADDS/ml-paper/paper/}
 }
 ```

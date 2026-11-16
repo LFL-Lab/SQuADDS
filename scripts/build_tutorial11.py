@@ -214,12 +214,12 @@ The models live on Hugging Face (`SQuADDS/QCap`). `load_model` downloads the che
 There are two models, both trained on **all** the data: `QCap` (the default) and `QCap-Fast`.""",
     ),
     ("py", "from squadds.ml.capacitance import CapacitancePredictor, list_models, load_model"),
-    ("py", 'accurate = load_model("QCap", tier="accurate")\naccurate.key, accurate.title'),
+    ("py", 'qcap = load_model("QCap")\nqcap.name, qcap.title'),
     (
         "md",
         """A `CapacitancePredictor` wraps a model. `threads` is the number of CPU threads per prediction (2 by default; for a given machine and thread count the results are deterministic).""",
     ),
-    ("py", "predictor = CapacitancePredictor(accurate, threads=2)\npredictor"),
+    ("py", "predictor = CapacitancePredictor(qcap, threads=2)\npredictor"),
     ("py", "res = predictor.predict(star_gds)\nres"),
     (
         "md",
@@ -322,14 +322,14 @@ pd.DataFrame(rows)""",
 
 The Fast tier replaces the two field solves of the physics prior by a learned surrogate, so it needs no field solve at all. That makes it about ten times faster, but it comes with a warning that we should read before using it:""",
     ),
-    ("py", 'fast = load_model("QCap", tier="fast")\nprint(fast.warning)'),
+    ("py", 'qcap_fast = load_model("QCap-Fast")\nprint(qcap_fast.warning)'),
     (
         "md",
         "Let's predict the star with Fast too (once to load it, then once more from cold caches for a fair time).",
     ),
     (
         "py",
-        """fast_predictor = CapacitancePredictor(fast, threads=2)
+        """fast_predictor = CapacitancePredictor(qcap_fast, threads=2)
 fast_predictor.predict(star_gds)
 clear_cache()
 res_fast = fast_predictor.predict(star_gds)
@@ -556,12 +556,12 @@ Everything above is also one shell command away:
 ```bash
 squadds-ml predict my_chip.gds                      # QCap, Accurate tier, CSV to stdout
 squadds-ml predict a.gds b.gds --workers 2          # several files
-squadds-ml predict my_chip.gds --tier fast --format json
+squadds-ml predict my_chip.gds --model QCap-Fast --format json
 ```
 
 Let's try it on our star with the Fast tier.""",
     ),
-    ("py", "!squadds-ml predict tutorial11_files/multipad_star.gds --tier fast"),
+    ("py", "!squadds-ml predict tutorial11_files/multipad_star.gds --model QCap-Fast"),
     (
         "md",
         """## The geometric embedding
