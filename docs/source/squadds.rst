@@ -13,6 +13,8 @@ Subpackages
    squadds.interpolations
    squadds.components
    squadds.simulations
+   squadds.layouts
+   squadds.ml.capacitance
 
 Module contents
 ---------------

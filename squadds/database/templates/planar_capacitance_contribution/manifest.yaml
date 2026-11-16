@@ -1,0 +1,46 @@
+# Planar capacitance contribution manifest (SQuADDS/SQuADDS_PlanarCapacitance).
+# Fill every field; validate with:
+#   from squadds.ml.capacitance.contribute import validate_capacitance_contribution
+#   print(validate_capacitance_contribution("path/to/this/folder").to_markdown())
+org: my-lab                     # folder name on the dataset: contrib/<org>-<batch>/
+batch: 2026-11-a
+contributor:
+  name: Jane Doe
+  affiliation: Example University
+  orcid: 0000-0000-0000-0000    # optional
+  email: jane@example.edu       # optional; uploaded only when email_public is true
+  email_public: false
+licence: CC-BY-4.0              # CC-BY-4.0 or CC0-1.0
+solver:
+  name: Ansys Q3D Extractor
+  version: 2025 R2
+stack:
+  substrate_material: silicon
+  eps_r: 11.45                  # the released models were trained on Si 11.45, 350 um
+  substrate_um: 350
+  metal_model: thin_sheet       # thin_sheet | thick
+  metal_t_um: 0.0
+setup:
+  freq_GHz: 13
+  PerError: 0.05
+  MinConvPass: 1
+  MaxPass: 40
+  PerRefine: 30
+  order: high
+  solver_type: iterative
+layer_map:                      # GDS (layer, datatype) pairs
+  ground: [[1, 0]]
+  conductor: [[1, 10]]
+ground_net_name: G              # renamed to G on ingest when different
+units:
+  gds_unit_m: 1.0e-9
+  capacitance: pF               # unit of the matrix files: F | nF | pF | fF | aF | pF*1e15 (values = pF x 1e15)
+generator:
+  name: my-generator
+  url: https://example.org/my-generator   # optional
+  commit: abc1234                          # optional
+  seed: 0                                  # optional
+family: interdigital            # interdigital | paddle | concentric | star | xmon | transmon_pocket | random | ... or a new name
+description: >
+  What the designs are, how they were generated and swept, and anything a reader needs to reuse them.
+known_defects: []               # optional, e.g. ["design_0007: not converged (0.06 % vs 0.05 %)"]

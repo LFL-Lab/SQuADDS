@@ -22,6 +22,50 @@ def _normalized_component_name(component_name: str) -> str:
     return component_name.replace("_", "").replace("-", "").lower()
 
 
+def get_component_class(component_name: str) -> type[QComponent]:
+    """Return a locally supported Qiskit Metal component implementation.
+
+    This registry is intentionally broader than :func:`get_coupler_spec`.
+    Components such as ``GeneralizedCapStar`` have a design-dependent number
+    of pins, so forcing them into the fixed route/exposed-pin coupler contract
+    would discard useful topology information.
+    """
+    normalized = _normalized_component_name(component_name)
+    if normalized == "generalizedcapninterdigital":
+        from squadds.components.generalized_ncap_interdigital import GeneralizedCapNInterdigital
+
+        return GeneralizedCapNInterdigital
+    if normalized in {"generalizedcapconcentric", "capconcentric", "concentriccap"}:
+        from squadds.components.generalized_cap_concentric import GeneralizedCapConcentric
+
+        return GeneralizedCapConcentric
+    if normalized in {"generalizedcapstar", "capstar", "starcap"}:
+        from squadds.components.generalized_cap_star import GeneralizedCapStar
+
+        return GeneralizedCapStar
+    if normalized in {"shieldedcapconcentric", "shieldedconcentric"}:
+        from squadds.components.shielded_cap_concentric import ShieldedCapConcentric
+
+        return ShieldedCapConcentric
+    if normalized == "xmon":
+        from squadds.components.xmon import Xmon
+
+        return Xmon
+    if normalized == "transmonpocket":
+        from qiskit_metal.qlibrary.qubits.transmon_pocket import TransmonPocket
+
+        return TransmonPocket
+    if normalized in {"capn", "ncap", "capninterdigitaltee"}:
+        from qiskit_metal.qlibrary.couplers.cap_n_interdigital_tee import CapNInterdigitalTee
+
+        return CapNInterdigitalTee
+    if normalized in {"clt", "coupledlinetee"}:
+        from qiskit_metal.qlibrary.couplers.coupled_line_tee import CoupledLineTee
+
+        return CoupledLineTee
+    raise ValueError(f"Unsupported component: {component_name}")
+
+
 def get_coupler_spec(component_name: str) -> CouplerSpec:
     """Return the implementation and pin roles for a coupler name."""
     normalized = _normalized_component_name(component_name)
@@ -33,6 +77,16 @@ def get_coupler_spec(component_name: str) -> CouplerSpec:
             route_pin="south_end",
             exposed_pins=("north_end",),
             instance_suffix="generalized_ncap_coupler",
+        )
+
+    if normalized in {"generalizedcapconcentric", "capconcentric", "concentriccap"}:
+        from squadds.components.generalized_cap_concentric import GeneralizedCapConcentric
+
+        return CouplerSpec(
+            component_class=GeneralizedCapConcentric,
+            route_pin="south_end",
+            exposed_pins=("north_end",),
+            instance_suffix="generalized_concentric_coupler",
         )
 
     if normalized in {"capn", "ncap", "capninterdigitaltee"}:
@@ -64,12 +118,23 @@ def create_coupler(component_name: str, design, name: str, options: dict[str, An
     return spec.component_class(design, name, options=options or {})
 
 
+def create_component(
+    component_name: str,
+    design,
+    name: str,
+    options: dict[str, Any] | None = None,
+) -> QComponent:
+    """Instantiate any component registered by dataset-facing class name."""
+    component_class = get_component_class(component_name)
+    return component_class(design, name, options=options or {})
+
+
 def build_component_from_design(design, row: dict[str, Any], name: str = "cplr") -> QComponent:
     """Build the exact component declared by a SQuADDS dataset row.
 
     Both nested Hugging Face records and second-level flattened API records are
-    accepted. GeneralizedCapNInterdigital is intentionally resolved only from
-    ``squadds.components``.
+    accepted. Local generalized components are intentionally resolved only
+    from ``squadds.components``.
     """
     design_record = row.get("design", row)
     component_name = (
@@ -79,4 +144,35 @@ def build_component_from_design(design, row: dict[str, Any], name: str = "cplr")
         raise ValueError("Dataset row does not declare a component class or coupler type.")
 
     options = design_record.get("design_options", row.get("design_options", {}))
-    return create_coupler(component_name, design, name, options)
+    options = _with_campaign_defaults(component_name, options, row)
+    return create_component(component_name, design, name, options)
+
+
+# SQuADDS_DB GeneralizedCapNInterdigital campaigns simulated on the first squadds2-helpers spine-ledge geometry
+TANGENT_LEDGE_CAMPAIGNS = frozenset({"exp6", "exp7"})
+
+
+def row_campaign(row: dict[str, Any]) -> str | None:
+    """Simulation campaign of a nested or flattened dataset row (``source_campaign``, ``collection`` or the
+    ``source_id`` prefix of its notes), or ``None``."""
+    notes = row.get("notes")
+    notes = notes if isinstance(notes, dict) else row
+    for key in ("source_campaign", "collection"):
+        value = notes.get(key)
+        if isinstance(value, str) and value:
+            return value
+    source_id = notes.get("source_id")
+    if isinstance(source_id, str) and "/" in source_id:
+        return source_id.split("/", 1)[0]
+    return None
+
+
+def _with_campaign_defaults(component_name: str, options, row: dict[str, Any]):
+    """Options as simulated: exp6/exp7 interdigital rows get ``spine_ledge_rule="tangent"`` unless they set it."""
+    if (
+        _normalized_component_name(component_name) == "generalizedcapninterdigital"
+        and row_campaign(row) in TANGENT_LEDGE_CAMPAIGNS
+        and not (options or {}).get("spine_ledge_rule")
+    ):
+        return {**(options or {}), "spine_ledge_rule": "tangent"}
+    return options

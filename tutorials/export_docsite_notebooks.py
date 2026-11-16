@@ -24,13 +24,12 @@ class NotebookExport:
 
 EXPORTS = [
     NotebookExport(
-        source_py=TUTORIALS_DIR / "Tutorial-10_DrivenModal_Capacitance_Extraction.py",
-        notebook_name="Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb",
+        source_py=TUTORIALS_DIR / "Tutorial-9_DrivenModal_Capacitance_Extraction.py",
+        notebook_name="Tutorial-9_DrivenModal_Capacitance_Extraction.ipynb",
     ),
     NotebookExport(
-        source_py=TUTORIALS_DIR / "Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py",
-        notebook_name="Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb",
-        replacements=(("Tutorial 13:", "Tutorial 11:"),),
+        source_py=TUTORIALS_DIR / "Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.py",
+        notebook_name="Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.ipynb",
     ),
 ]
 

@@ -45,6 +45,14 @@ from squadds.core.db_selection import (
     resolve_resonator_coupler,
     resolve_system_selection,
 )
+from squadds.core.db_sources import (
+    DEFAULT_SOURCE,
+    DEFAULT_SOURCES,
+    SOURCE_ACCESS_ERRORS,
+    create_source,
+    merge_config_names,
+    sources_owning,
+)
 from squadds.core.db_state import (
     format_selection_lines,
     get_unselect_attr_name,
@@ -61,7 +69,18 @@ if sys.platform == "darwin":  # Checks if the operating system is macOS
     warnings.filterwarnings("ignore", category=UserWarning, module="pyaedt")  # ANSYS is not a mac product
 
 
-class SQuADDS_DB(metaclass=SingletonMeta):
+class _SourceAwareSingletonMeta(SingletonMeta):
+    """``SingletonMeta`` that also applies ``sources=`` / ``source_options=`` when the singleton already exists."""
+
+    def __call__(cls, *args, **kwargs):
+        existed = cls in cls._instances
+        instance = super().__call__(*args, **kwargs)
+        if existed and (args or kwargs):
+            instance._apply_sources(*args, **kwargs)
+        return instance
+
+
+class SQuADDS_DB(metaclass=_SourceAwareSingletonMeta):
     """
     A class representing the SQuADDS database.
 
@@ -86,9 +105,17 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         select_cavity_claw(cavity): Select a cavity.
     """
 
-    def __init__(self):
+    def __init__(self, sources=None, source_options=None):
         """
         Constructor for the SQuADDS_DB class.
+
+        Args:
+            sources (tuple, optional): data sources to enable. Default ``("default", "planar_capacitance")``:
+                ``SQuADDS/SQuADDS_DB`` and the planar capacitance dataset. ``("default",)`` gives ``SQuADDS/SQuADDS_DB``
+                only. If an extra source cannot be read, it is disabled with a warning and the default rows are
+                returned. See ``squadds.core.db_sources``.
+            source_options (dict, optional): per-source keyword arguments, e.g.
+                ``{"planar_capacitance": {"revision": "<sha>", "local_dir": "<dir>"}}``.
 
         Attributes:
             repo_name (str): The name of the repository.
@@ -133,6 +160,93 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             "claw_length"
         ]  # 07/2024 -> claw_length is the only parameter that is common between qubit and cavity
         self.ncap_merger_terms = ["prime_width", "prime_gap", "second_width", "second_gap"]
+        self._default_configs = list(self.configs)
+        self._extra_sources = {}
+        self._apply_sources(sources, source_options)
+
+    def _apply_sources(self, sources=None, source_options=None):
+        """Enable exactly ``sources`` (``DEFAULT_SOURCES`` when None); other extra sources are disabled."""
+        if sources is None:
+            sources = DEFAULT_SOURCES
+        if isinstance(sources, str):
+            sources = (sources,)
+        wanted = [name for name in sources if name != DEFAULT_SOURCE]
+        for name in [n for n in self._extra_sources if n not in wanted]:
+            self.disable_source(name)
+        for name in wanted:
+            self.enable_source(name, **(source_options or {}).get(name, {}))
+
+    def enable_source(self, name, **options):
+        """
+        Enable an extra data source (e.g. ``"planar_capacitance"``); its configs join ``self.configs``.
+
+        Args:
+            name (str): source name (see ``squadds.core.db_sources.available_sources()``).
+            **options: source options (``revision``, ``local_dir``, ``token``).
+
+        Returns:
+            SQuADDS_DB: self.
+        """
+        if name == DEFAULT_SOURCE:
+            return self
+        self._extra_sources[name] = create_source(name, **options)
+        self.configs = merge_config_names(self._default_configs, self._extra_sources)
+        return self
+
+    def disable_source(self, name):
+        """Disable an extra data source; ``self.configs`` returns to the default configs plus the other sources."""
+        self._extra_sources.pop(name, None)
+        self.configs = merge_config_names(self._default_configs, self._extra_sources)
+        return self
+
+    def enabled_sources(self):
+        """Names of the enabled data sources (``"default"`` first)."""
+        return [DEFAULT_SOURCE, *getattr(self, "_extra_sources", {})]
+
+    def _source_rows(self, config):
+        """Rows of ``config`` from the enabled extra sources (nested SQuADDS_DB schema), or None if none holds it. A source
+        that cannot be read is disabled with a warning and adds no rows."""
+        owners = sources_owning(config, getattr(self, "_extra_sources", {}))
+        if not owners:
+            return None
+        frames = []
+        for src in owners:
+            try:
+                frames.append(src.load(config))
+            except SOURCE_ACCESS_ERRORS as e:
+                self._source_unavailable(src, e)
+        return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+    def _source_unavailable(self, src, error):
+        self.disable_source(src.name)
+        warnings.warn(
+            f"SQuADDS_DB: the {src.name!r} data source could not be read ({type(error).__name__}: {error}). "
+            f"It is disabled for this session and only the SQuADDS/SQuADDS_DB rows are used. Check the network "
+            f"connection, or point SQUADDS_PLANAR_CAP_DATA at a local copy, then call "
+            f"SQuADDS_DB().enable_source({src.name!r}).",
+            RuntimeWarning,
+            stacklevel=4,
+        )
+
+    def _load_with_sources(self, config, extra, set_target_keys):
+        """Default rows (unchanged, if the default repo has the config) followed by the extra-source rows."""
+        frames = []
+        if config in self._default_configs:
+            df = load_dataset(self.repo_name, config, cache_dir=None)["train"].to_pandas()
+            if set_target_keys:
+                self._set_target_param_keys(df)
+            frames.append(flatten_df_second_level(df))
+        elif set_target_keys and len(extra):
+            self._set_target_param_keys(extra)
+        if len(extra):
+            frames.append(flatten_df_second_level(extra))
+        return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+    def _select_source_component(self, component, component_name):
+        """Selecting a component held by an extra source also sets its component name and data type."""
+        config = f"{component}-{component_name}-cap_matrix"
+        if self.selected_system == component and sources_owning(config, getattr(self, "_extra_sources", {})):
+            self.selected_component_name, self.selected_data_type = component_name, "cap_matrix"
 
     def check_login(self):
         """
@@ -740,7 +854,10 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         Returns:
             None
         """
-        if not self._internal_call:
+        standalone = self.selected_system == "coupler" and sources_owning(
+            f"coupler-{coupler}-cap_matrix", getattr(self, "_extra_sources", {})
+        )
+        if not self._internal_call and not standalone:
             print(
                 "WARNING:DeprecationWarning: select_coupler() is deprecated and will be removed in a future release. Use select_resonator_type() instead."
             )
@@ -762,6 +879,7 @@ class SQuADDS_DB(metaclass=SingletonMeta):
             print(f"Coupler `{self.selected_coupler}` not supported. Available couplers are:")
             self.view_component_names("coupler")
             return
+        self._select_source_component("coupler", coupler)
 
     def see_dataset(self, data_type=None, component=None, component_name=None):
         """
@@ -804,6 +922,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         # Construct the configuration string based on the provided or default values
         config = build_dataset_config(component, component_name, data_type)
         try:
+            extra = self._source_rows(config)
+            if extra is not None:
+                return self._load_with_sources(config, extra, set_target_keys=False)
             df = load_dataset(self.repo_name, config)["train"].to_pandas()
             return flatten_df_second_level(df)
         except Exception as e:
@@ -851,6 +972,9 @@ class SQuADDS_DB(metaclass=SingletonMeta):
         # Construct the configuration string based on the provided or default values
         config = build_dataset_config(component, component_name, data_type)
         try:
+            extra = self._source_rows(config)
+            if extra is not None:
+                return self._load_with_sources(config, extra, set_target_keys=True)
             df = load_dataset(self.repo_name, config, cache_dir=None)["train"].to_pandas()
             self._set_target_param_keys(df)
             return flatten_df_second_level(df)

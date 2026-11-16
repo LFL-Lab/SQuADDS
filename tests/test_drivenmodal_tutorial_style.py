@@ -5,10 +5,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DRIVENMODAL_NOTEBOOKS = [
-    ROOT / "tutorials" / "Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb",
-    ROOT / "tutorials" / "Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb",
-    ROOT / "docs" / "source" / "tutorials" / "Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb",
-    ROOT / "docs" / "source" / "tutorials" / "Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb",
+    ROOT / "tutorials" / "Tutorial-9_DrivenModal_Capacitance_Extraction.ipynb",
+    ROOT / "tutorials" / "Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.ipynb",
+    ROOT / "docs" / "source" / "tutorials" / "Tutorial-9_DrivenModal_Capacitance_Extraction.ipynb",
+    ROOT / "docs" / "source" / "tutorials" / "Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.ipynb",
 ]
 
 

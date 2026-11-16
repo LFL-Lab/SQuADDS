@@ -1,0 +1,428 @@
+{
+ "note": "Frozen inference stage of the tl-squadds Spaces (deploy/geomgnn/src/geomgnn, deploy/tlsq_infer/src/tlsq_infer/layout.py), namespaced under squadds.ml.capacitance._core. Edits: import lines; the network builder moved to squadds.ml.capacitance.network (verbatim from pilot_p2.build_model); spawned worker pools start through _spawn.boot (same worker functions and arguments, the squadds package __init__ is not executed in the workers). Numerics unchanged. User-facing strings that named a model that is not served were rewritten (rewrites of kind user_text).",
+ "tl_squadds_repo": "github.com/shanto268/tl-squadds (private), branch paper-backup",
+ "files": {
+  "api.py": {
+   "source": "deploy/geomgnn/src/geomgnn/api.py",
+   "source_sha256": "7905e805e48377dc36f60241e042a597bb7afb5491b5f4c89d8a0a5b28ff975f",
+   "sha256": "d884d4fe466c5351a52d16b3ba4a40a78e628dbc13700fa0651ea52e0d802a63",
+   "rewrites": [
+    {
+     "pattern": "module=r\"geomgnn\\\\\\.fastprior_pkg\"",
+     "replacement": "module=r\"squadds\\.ml\\.capacitance\\._core\\.fastprior_pkg\"",
+     "count": 1
+    },
+    {
+     "pattern": "from tlsq_infer\\.layout import prepare",
+     "replacement": "from .layout import prepare",
+     "count": 1
+    },
+    {
+     "pattern": "\\ \\ \\ \\ \"only\\ and\\ correct\\ it\\ unchanged\\.\\ A\\ bounded\\-error\\ route,\\ not\\ training\\-stack\\ accuracy:\\ on\\ 15\\ held\\-out\\ DoE\\ designs\\ \\(paper\\ model\\)\\ \"",
+     "replacement": "    \"only and correct it unchanged. A bounded-error route, not training-stack accuracy: on 15 held-out DoE designs (networks trained on the TRAIN split) \"",
+     "count": 1,
+     "kind": "user_text"
+    },
+    {
+     "pattern": "\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \"\\(flagship\\ /\\ Accurate,\\ or\\ the\\ paper's\\ model\\)\\ is\\ the\\ safer\\ choice,\\ especially\\ outside\\ the\\ trained\\ component\\ families\\.\"\\)",
+     "replacement": "            \"(flagship / Accurate) is the safer choice, especially outside the trained component families.\")",
+     "count": 1,
+     "kind": "user_text"
+    }
+   ]
+  },
+  "paper.py": {
+   "source": "deploy/geomgnn/src/geomgnn/paper.py",
+   "source_sha256": "ff85b10abc4d520f86b7d84bcfdc9ea02dd9cf6b140b3858ae170bbca0393020",
+   "sha256": "26c5fa3618b76f1a0a3e589a3ed5b1113f549494280c06a5b4cf7a92dc4ce42d",
+   "rewrites": [
+    {
+     "pattern": "from tlsq_infer\\.layout import prepare",
+     "replacement": "from .layout import prepare",
+     "count": 1
+    },
+    {
+     "pattern": "\"\"\"Paper\\ Space\\ arms\\ \\(deploy/registry\\.yaml:\\ paper_hub,\\ paper_arms;\\ deploy/GNN_SPACE\\.md\\ \"Paper\\ Space\"\\)\\.",
+     "replacement": "\"\"\"Model arms: the shared inference stage of the released models (frozen copy, provenance in SOURCES.json).",
+     "count": 1,
+     "kind": "user_text"
+    },
+    {
+     "pattern": "Every\\ arm\\ of\\ the\\ paper's\\ ladder\\ and\\ routes\\ tables\\ that\\ runs\\ from\\ a\\ layout\\ file\\ on\\ a\\ CPU,\\ through\\ one\\ code\\ path:",
+     "replacement": "Every arm runs from a layout file on a CPU, through one code path:",
+     "count": 1,
+     "kind": "user_text"
+    }
+   ]
+  },
+  "flagship.py": {
+   "source": "deploy/geomgnn/src/geomgnn/flagship.py",
+   "source_sha256": "f86bf5bab11dbedbdd1e07626b172dae4d4f53ed356f47e26da18bd008df448b",
+   "sha256": "3ee82f51a71fe2967672fcb67ce15a0c84660f3d0c74f2ad6d0ab220fa418849",
+   "rewrites": [
+    {
+     "pattern": "\"\"\"Flagship\\ Space\\ tiers\\ \\(deploy/registry\\.yaml:\\ flagship_hub,\\ flagship_tiers;\\ deploy/GNN_SPACE\\.md\\ \"Flagship\\ Space\"\\)\\.",
+     "replacement": "\"\"\"Flagship tiers (registry keys flagship_hub, flagship_tiers).",
+     "count": 1,
+     "kind": "user_text"
+    },
+    {
+     "pattern": "The\\ tiers\\ run\\ through\\ the\\ paper\\ Space's\\ code\\ path\\ \\(geomgnn\\.paper:\\ scene\\ \\->\\ embedding\\ \\->\\ priors\\ under\\ the\\ tier's\\ prior\\ stack,\\ or\\ the",
+     "replacement": "The tiers run through the shared arm code path (``_core.paper``: scene -> embedding -> priors under the tier's prior stack, or the",
+     "count": 1,
+     "kind": "user_text"
+    },
+    {
+     "pattern": "flagship_tiers\\ /\\ flagship_hub,\\ so\\ every\\ geomgnn\\.paper\\ function\\ serves\\ the\\ tiers\\ as\\ arms\\.",
+     "replacement": "flagship_tiers / flagship_hub, so every ``_core.paper`` function serves the tiers as arms.",
+     "count": 1,
+     "kind": "user_text"
+    },
+    {
+     "pattern": "\\ \\ \\ \\ \"\"\"Full\\ N\\ x\\ N\\ Maxwell\\ matrix\\ \\(fF;\\ ground\\ row/column\\ 0\\)\\ of\\ a\\ prepared\\ layout\\ with\\ a\\ flagship\\ tier\\ \\(geomgnn\\.paper\\.predict\\)\\.\"\"\"",
+     "replacement": "    \"\"\"Full N x N Maxwell matrix (fF; ground row/column 0) of a prepared layout with a flagship tier (``_core.paper.predict``).\"\"\"",
+     "count": 1,
+     "kind": "user_text"
+    }
+   ]
+  },
+  "infer.py": {
+   "source": "deploy/geomgnn/src/geomgnn/infer.py",
+   "source_sha256": "cee37e8ed6f229363801b9a8118aea9dfb4ce5f476e6e2d8ff13cfa734e87b96",
+   "sha256": "ed77e7456af217a4ee438068c4ee1c7b07a9e1768424156e64a40e5480bc9376",
+   "rewrites": [
+    {
+     "pattern": "from \\.pilot_p2 import build_model",
+     "replacement": "from ..network import build_model",
+     "count": 1
+    }
+   ]
+  },
+  "x1_core.py": {
+   "source": "deploy/geomgnn/src/geomgnn/x1_core.py",
+   "source_sha256": "0a4be5ec3b8819bdc6d6314775c7f8acf46f4a54569d975011726ec1912c5100",
+   "sha256": "0a4be5ec3b8819bdc6d6314775c7f8acf46f4a54569d975011726ec1912c5100",
+   "rewrites": []
+  },
+  "farfield.py": {
+   "source": "deploy/geomgnn/src/geomgnn/farfield.py",
+   "source_sha256": "6c877b47c2894fe78a38ad4199b29e450b610c2c45a261c8cf4d53efc1912836",
+   "sha256": "6c877b47c2894fe78a38ad4199b29e450b610c2c45a261c8cf4d53efc1912836",
+   "rewrites": []
+  },
+  "fastprior_pkg.py": {
+   "source": "deploy/geomgnn/src/geomgnn/fastprior_pkg.py",
+   "source_sha256": "4fff680f35cb8b098de6c9b1b6fc55780064362ffc829bb47bf69a77454ce38a",
+   "sha256": "258d28da16e7cdbe5e74e1b1875e6e11ed2dda8c0be63f20178348053efd6175",
+   "rewrites": [
+    {
+     "pattern": "from geomgnn\\._tlsq",
+     "replacement": "from squadds.ml.capacitance._core._tlsq",
+     "count": 1
+    },
+    {
+     "pattern": "\"geomgnn\\._tlsq\\.embed\\.fastprior\" in sys\\.modules",
+     "replacement": "\"squadds.ml.capacitance._core._tlsq.embed.fastprior\" in sys.modules",
+     "count": 1
+    }
+   ]
+  },
+  "priorv2.py": {
+   "source": "deploy/geomgnn/src/geomgnn/priorv2.py",
+   "source_sha256": "64057e92e37a04a0231dfdc34df52a20542f88c2b2a3e8c2cc00a32d9ec1d21b",
+   "sha256": "64057e92e37a04a0231dfdc34df52a20542f88c2b2a3e8c2cc00a32d9ec1d21b",
+   "rewrites": []
+  },
+  "rejtail_fv.py": {
+   "source": "deploy/geomgnn/src/geomgnn/rejtail_fv.py",
+   "source_sha256": "35659484c44f1c84e3767b33979bb78b972f03d64c05810d81635ee4409ce3ba",
+   "sha256": "35659484c44f1c84e3767b33979bb78b972f03d64c05810d81635ee4409ce3ba",
+   "rewrites": []
+  },
+  "learned_prior.py": {
+   "source": "deploy/geomgnn/src/geomgnn/learned_prior.py",
+   "source_sha256": "de9d1351dfbaa93ef1be18ed18f3a3628ba2b477955f58c58db80758163156dc",
+   "sha256": "de9d1351dfbaa93ef1be18ed18f3a3628ba2b477955f58c58db80758163156dc",
+   "rewrites": []
+  },
+  "lp_surrogate.py": {
+   "source": "deploy/geomgnn/src/geomgnn/lp_surrogate.py",
+   "source_sha256": "55804c9349a2ca4a74f3ae821a19c4637dbaf16d25b65c8ee70c746b767d2707",
+   "sha256": "55804c9349a2ca4a74f3ae821a19c4637dbaf16d25b65c8ee70c746b767d2707",
+   "rewrites": []
+  },
+  "levelpar.py": {
+   "source": "deploy/geomgnn/src/geomgnn/levelpar.py",
+   "source_sha256": "69e7d1199e9642cfef399d5ee6737f4bcd768ef863372065d60082d81398eb22",
+   "sha256": "e929ecf97131d45533b2bd3b2bec4645935df1fbb13824375f55d10f5dc36729",
+   "rewrites": [
+    {
+     "pattern": "from geomgnn\\._tlsq",
+     "replacement": "from squadds.ml.capacitance._core._tlsq",
+     "count": 2
+    },
+    {
+     "pattern": "from geomgnn import",
+     "replacement": "from squadds.ml.capacitance._core import",
+     "count": 3
+    },
+    {
+     "pattern": "here = os\\.path\\.dirname\\(os\\.path\\.dirname\\(os\\.path\\.abspath\\(__file__\\)\\)\\)",
+     "replacement": "here = os.path.abspath(os.path.join(os.path.dirname(__file__), *[os.pardir] * 4))  # the directory holding squadds",
+     "count": 1
+    },
+    {
+     "pattern": "ex = ProcessPoolExecutor\\(n, mp_context=get_context\\(\\\"spawn\\\"\\), initializer=_init,\\n\\s*initargs=\\(\\[here\\], A._STATE\\[\\\"prior_impl\\\"\\], A._STATE\\[\\\"pr\\\"\\], threads\\)\\)",
+     "replacement": "from ._spawn import boot\n            ini, args = boot(_init, [here], A._STATE[\"prior_impl\"], A._STATE[\"pr\"], threads)\n            ex = ProcessPoolExecutor(n, mp_context=get_context(\"spawn\"), initializer=ini, initargs=args)",
+     "count": 1
+    }
+   ]
+  },
+  "overlap.py": {
+   "source": "deploy/geomgnn/src/geomgnn/overlap.py",
+   "source_sha256": "30cb40ead9146603b9c0a32cebc7d79bc762b79c1526b95be3b6deefc3419753",
+   "sha256": "cf226d87b9a099ca5543d6f4dd4f3706f8fc13bb6d0f2bbb1e76fc52b3630cfb",
+   "rewrites": [
+    {
+     "pattern": "from geomgnn\\._tlsq",
+     "replacement": "from squadds.ml.capacitance._core._tlsq",
+     "count": 5
+    },
+    {
+     "pattern": "here = os\\.path\\.dirname\\(os\\.path\\.dirname\\(os\\.path\\.abspath\\(__file__\\)\\)\\)",
+     "replacement": "here = os.path.abspath(os.path.join(os.path.dirname(__file__), *[os.pardir] * 4))  # the directory holding squadds",
+     "count": 1
+    },
+    {
+     "pattern": "ex = ProcessPoolExecutor\\(1, mp_context=get_context\\(\\\"spawn\\\"\\), initializer=_init, initargs=\\(threads, \\[here\\]\\)\\)",
+     "replacement": "from ._spawn import boot\n            ini, args = boot(_init, threads, [here])\n            ex = ProcessPoolExecutor(1, mp_context=get_context(\"spawn\"), initializer=ini, initargs=args)",
+     "count": 1
+    }
+   ]
+  },
+  "winpool.py": {
+   "source": "deploy/geomgnn/src/geomgnn/winpool.py",
+   "source_sha256": "c726a7c86737058660600f9f40276843add598f6245d586eb32e206a660f342f",
+   "sha256": "56e7142019e44e872c65ce283ad9afbd27f4a664cb53c1656295062c4a1d657a",
+   "rewrites": [
+    {
+     "pattern": "from geomgnn\\._tlsq",
+     "replacement": "from squadds.ml.capacitance._core._tlsq",
+     "count": 2
+    },
+    {
+     "pattern": "from geomgnn import",
+     "replacement": "from squadds.ml.capacitance._core import",
+     "count": 1
+    },
+    {
+     "pattern": "here = os\\.path\\.dirname\\(os\\.path\\.dirname\\(os\\.path\\.abspath\\(__file__\\)\\)\\)",
+     "replacement": "here = os.path.abspath(os.path.join(os.path.dirname(__file__), *[os.pardir] * 4))  # the directory holding squadds",
+     "count": 1
+    },
+    {
+     "pattern": "super\\(\\).__init__\\(max_workers, mp_context=get_context\\(\\\"spawn\\\"\\), initializer=_init,\\n\\s*initargs=\\(\\[here\\], A._STATE\\[\\\"prior_impl\\\"\\], A._STATE\\[\\\"pr\\\"\\], state\\)\\)",
+     "replacement": "from ._spawn import boot\n        ini, args = boot(_init, [here], A._STATE[\"prior_impl\"], A._STATE[\"pr\"], state)\n        super().__init__(max_workers, mp_context=get_context(\"spawn\"), initializer=ini, initargs=args)",
+     "count": 1
+    }
+   ]
+  },
+  "fastmom.py": {
+   "source": "deploy/geomgnn/src/geomgnn/fastmom.py",
+   "source_sha256": "7447474366ddae654100467125c84ddb7fb503a1c9d4fd1264825bde164de951",
+   "sha256": "7447474366ddae654100467125c84ddb7fb503a1c9d4fd1264825bde164de951",
+   "rewrites": []
+  },
+  "schema_p2d.json": {
+   "source": "deploy/geomgnn/src/geomgnn/schema_p2d.json",
+   "source_sha256": "17eba5f7b5d01668019df9301507133dfe4e38689acbde5256f3ade2107df8e9",
+   "sha256": "17eba5f7b5d01668019df9301507133dfe4e38689acbde5256f3ade2107df8e9",
+   "rewrites": []
+  },
+  "_tlsq/__init__.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/__init__.py",
+   "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/__init__.py",
+    "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rewrites": []
+   }
+  },
+  "_tlsq/embed/__init__.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/embed/__init__.py",
+   "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/embed/__init__.py",
+    "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rewrites": []
+   }
+  },
+  "_tlsq/embed/fastprior.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/embed/fastprior.py",
+   "source_sha256": "1755668ca197bc56bcc4ef1d23a01464df75ba27e79eb2f447c8f147152cbbf1",
+   "sha256": "1755668ca197bc56bcc4ef1d23a01464df75ba27e79eb2f447c8f147152cbbf1",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/embed/fastprior.py",
+    "source_sha256": "1755668ca197bc56bcc4ef1d23a01464df75ba27e79eb2f447c8f147152cbbf1",
+    "sha256": "1755668ca197bc56bcc4ef1d23a01464df75ba27e79eb2f447c8f147152cbbf1",
+    "rewrites": []
+   }
+  },
+  "_tlsq/embed/fastprior_loc.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/embed/fastprior_loc.py",
+   "source_sha256": "3642ebac602a0767cad2cdd51e04dc602055c0045022b71f14d93298af943a2b",
+   "sha256": "3642ebac602a0767cad2cdd51e04dc602055c0045022b71f14d93298af943a2b",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/embed/fastprior_loc.py",
+    "source_sha256": "3642ebac602a0767cad2cdd51e04dc602055c0045022b71f14d93298af943a2b",
+    "sha256": "3642ebac602a0767cad2cdd51e04dc602055c0045022b71f14d93298af943a2b",
+    "rewrites": []
+   }
+  },
+  "_tlsq/embed/proxy.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/embed/proxy.py",
+   "source_sha256": "f87a0f1614ca93b73aac0747d0acdafbd9b8c243f69c68c98d8919e158a57b28",
+   "sha256": "f87a0f1614ca93b73aac0747d0acdafbd9b8c243f69c68c98d8919e158a57b28",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/embed/proxy.py",
+    "source_sha256": "78d8dffd2fac75632a91ebee151247afe4157716ffb11e624e6b2932c618c86e",
+    "sha256": "78d8dffd2fac75632a91ebee151247afe4157716ffb11e624e6b2932c618c86e",
+    "rewrites": []
+   }
+  },
+  "_tlsq/geometry.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/geometry.py",
+   "source_sha256": "0bb8d3ead358870a026eebf8e26a212bdf1a838565bd30251a684fab7c97c99b",
+   "sha256": "0bb8d3ead358870a026eebf8e26a212bdf1a838565bd30251a684fab7c97c99b",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/geometry.py",
+    "source_sha256": "0bb8d3ead358870a026eebf8e26a212bdf1a838565bd30251a684fab7c97c99b",
+    "sha256": "0bb8d3ead358870a026eebf8e26a212bdf1a838565bd30251a684fab7c97c99b",
+    "rewrites": []
+   }
+  },
+  "_tlsq/uge/__init__.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/uge/__init__.py",
+   "source_sha256": "2c9ab4995b49e228e84ff19f44c79f944a3f5d0489db0a688ccaf76546995c22",
+   "sha256": "2c9ab4995b49e228e84ff19f44c79f944a3f5d0489db0a688ccaf76546995c22",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/uge/__init__.py",
+    "source_sha256": "2c9ab4995b49e228e84ff19f44c79f944a3f5d0489db0a688ccaf76546995c22",
+    "sha256": "2c9ab4995b49e228e84ff19f44c79f944a3f5d0489db0a688ccaf76546995c22",
+    "rewrites": []
+   }
+  },
+  "_tlsq/uge/blocks.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/uge/blocks.py",
+   "source_sha256": "a30c62b8be382b48d41e3ac9ff09e8be7df7ae55041b90b2fbd2e62ee2063a3c",
+   "sha256": "a30c62b8be382b48d41e3ac9ff09e8be7df7ae55041b90b2fbd2e62ee2063a3c",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/LFL/tl_squadds/src/tlsq/uge/blocks.py",
+    "source_sha256": "a30c62b8be382b48d41e3ac9ff09e8be7df7ae55041b90b2fbd2e62ee2063a3c",
+    "sha256": "a30c62b8be382b48d41e3ac9ff09e8be7df7ae55041b90b2fbd2e62ee2063a3c",
+    "rewrites": [],
+    "note": "agents/embedspeed (2026-10-20): the training-source copy src/tlsq/uge (byte-identical). Exact batched embedding, numba NN kernel, edge table, numex / far-decimation / cache modes; in the default bitwise mode every feature is bit-identical to the frozen stage file (deploy/tests/test_embed_parity.py, tests/test_embed_parity_src.py, deploy/tests/test_embed_regression.py).",
+    "frozen_stage_source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/uge/blocks.py",
+    "frozen_stage_sha256": "c58313f167f7df0ef0de6b321ab6b7214a661aef10b461e2bf90a60999fb4632"
+   }
+  },
+  "_tlsq/uge/graph.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/uge/graph.py",
+   "source_sha256": "979002b1b6c4068553ca014f4078f396166b16d2148b60b7587cb27b878309fa",
+   "sha256": "979002b1b6c4068553ca014f4078f396166b16d2148b60b7587cb27b878309fa",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/LFL/tl_squadds/src/tlsq/uge/graph.py",
+    "source_sha256": "979002b1b6c4068553ca014f4078f396166b16d2148b60b7587cb27b878309fa",
+    "sha256": "979002b1b6c4068553ca014f4078f396166b16d2148b60b7587cb27b878309fa",
+    "rewrites": [],
+    "note": "agents/embedspeed (2026-10-20): the training-source copy src/tlsq/uge (byte-identical). Exact batched embedding, numba NN kernel, edge table, numex / far-decimation / cache modes; in the default bitwise mode every feature is bit-identical to the frozen stage file (deploy/tests/test_embed_parity.py, tests/test_embed_parity_src.py, deploy/tests/test_embed_regression.py).",
+    "frozen_stage_source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/uge/graph.py",
+    "frozen_stage_sha256": "aeb8c58cf6c1d2169eab8a58fba362634d7489f3414f260a9fc55a02048217ee"
+   }
+  },
+  "_tlsq/uge/localtok.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/uge/localtok.py",
+   "source_sha256": "c0226dc8920f6cdf9c7b6a7c6d1d872b3490b0725ed93e70378af29bb74cbccd",
+   "sha256": "c0226dc8920f6cdf9c7b6a7c6d1d872b3490b0725ed93e70378af29bb74cbccd",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/LFL/tl_squadds/src/tlsq/uge/localtok.py",
+    "source_sha256": "c0226dc8920f6cdf9c7b6a7c6d1d872b3490b0725ed93e70378af29bb74cbccd",
+    "sha256": "c0226dc8920f6cdf9c7b6a7c6d1d872b3490b0725ed93e70378af29bb74cbccd",
+    "rewrites": [],
+    "note": "agents/embedspeed (2026-10-20): the training-source copy src/tlsq/uge (byte-identical). Exact batched embedding, numba NN kernel, edge table, numex / far-decimation / cache modes; in the default bitwise mode every feature is bit-identical to the frozen stage file (deploy/tests/test_embed_parity.py, tests/test_embed_parity_src.py, deploy/tests/test_embed_regression.py).",
+    "frozen_stage_source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/uge/localtok.py",
+    "frozen_stage_sha256": "8b47bd454353709a29ad996243d0f8b4b0d94991ee43715145af41a912dd9319"
+   }
+  },
+  "_tlsq/uge/nnk.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/uge/nnk.py",
+   "source_sha256": "646e48eec701cb11cf5bff7e9f045b2e853d1b8346bda8be94204d3ae960fe84",
+   "sha256": "646e48eec701cb11cf5bff7e9f045b2e853d1b8346bda8be94204d3ae960fe84",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/LFL/tl_squadds/src/tlsq/uge/nnk.py",
+    "source_sha256": "646e48eec701cb11cf5bff7e9f045b2e853d1b8346bda8be94204d3ae960fe84",
+    "sha256": "646e48eec701cb11cf5bff7e9f045b2e853d1b8346bda8be94204d3ae960fe84",
+    "rewrites": [],
+    "note": "agents/embedspeed (2026-10-20): the training-source copy src/tlsq/uge (byte-identical). Exact batched embedding, numba NN kernel, edge table, numex / far-decimation / cache modes; in the default bitwise mode every feature is bit-identical to the frozen stage file (deploy/tests/test_embed_parity.py, tests/test_embed_parity_src.py, deploy/tests/test_embed_regression.py)."
+   }
+  },
+  "_tlsq/uge/proxies.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/uge/proxies.py",
+   "source_sha256": "1726d068105f88f2654fd84a07919b7ecd9852cc5f826f6dd812109e6ce55b38",
+   "sha256": "1726d068105f88f2654fd84a07919b7ecd9852cc5f826f6dd812109e6ce55b38",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/uge/proxies.py",
+    "source_sha256": "1726d068105f88f2654fd84a07919b7ecd9852cc5f826f6dd812109e6ce55b38",
+    "sha256": "1726d068105f88f2654fd84a07919b7ecd9852cc5f826f6dd812109e6ce55b38",
+    "rewrites": []
+   }
+  },
+  "_tlsq/uge/scene.py": {
+   "source": "deploy/geomgnn/src/geomgnn/_tlsq/uge/scene.py",
+   "source_sha256": "f990d3028092ca59e4bbb274bcc181eb52cc7d0c73c158cbc1b23003d0368285",
+   "sha256": "f990d3028092ca59e4bbb274bcc181eb52cc7d0c73c158cbc1b23003d0368285",
+   "rewrites": [],
+   "upstream": {
+    "source": "/Users/shanto/Documents/ChatGPT/transfer_learning/geomfast_stage/vendor/tlsq/uge/scene.py",
+    "source_sha256": "f990d3028092ca59e4bbb274bcc181eb52cc7d0c73c158cbc1b23003d0368285",
+    "sha256": "f990d3028092ca59e4bbb274bcc181eb52cc7d0c73c158cbc1b23003d0368285",
+    "rewrites": []
+   }
+  },
+  "layout.py": {
+   "source": "deploy/tlsq_infer/src/tlsq_infer/layout.py",
+   "source_sha256": "2f88d25f7984f470a7fc361e54bf054e98c682d667383a6991c59760a08c7113",
+   "sha256": "3cd0601522056ee82630d2ea829c14bca0e172e7a24a6391433af9b8038fbe95",
+   "rewrites": [
+    {
+     "pattern": "from \\._vendor\\.scene import _valid",
+     "replacement": "from ._tlsq.uge.scene import _valid",
+     "count": 1
+    }
+   ]
+  },
+  "../network.py": {
+   "source": "deploy/geomgnn/src/geomgnn/pilot_p2.py",
+   "source_sha256": "c38264c43ab342ba64338892edf23c8abd4b88503b99bce322431efb7db77c77",
+   "extract": "build_model (lines 89-117), verbatim",
+   "extract_sha256": "e64a9482d41562c8de1c795a25f63ff21c3db1e19b8e8e60dc585feda2c2fbfa",
+   "upstream": "scripts/geomfast/pilot_p2.py (frozen geomfast stage)"
+  }
+ }
+}

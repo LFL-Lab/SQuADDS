@@ -1,6 +1,82 @@
 Release Notes
 =============
 
+1.0.0 (2026-11-14)
+------------------
+
+**Planar capacitance models** (optional extra ``pip install "squadds[ml]"``). Guide: :doc:`ml_models`.
+
+- New ``squadds.ml.capacitance``: GDS layout -> full N x N Maxwell capacitance matrix (fF, ground first, any N, nets never
+  merged). models picked by name: ``load_model("QCap")`` (default), ``load_model("QCap-Fast")``, ``CapacitancePredictor``,
+  ``CapacitanceResult`` (checks, timing, ``to_sim_results()``), the physics priors ``physics_prior`` and
+  ``optimized_physics_prior``, and the ``squadds-ml predict`` command. Downloads pin a revision and verify sha256.
+- The physics prior keeps its memory low at thin substrates (a 10 µm Xmon peaks at about 1.6 GiB) and caches are bounded
+  (``SQUADDS_CAPML_CACHE_BYTES``, 1 GiB each by default).
+- The capacitance models use all usable cores by default (at most one per 2.5 GB of RAM and 32); ``threads=``,
+  ``--threads`` or ``SQUADDS_CAPML_THREADS`` limit it. The 3x3 qubit grid takes 12.5 s on an 18-core Apple M5 Pro
+  instead of 24 s at the old 2-thread default, with the same results to rounding.
+- ``import squadds`` is lighter: ``Analyzer`` and ``SQuADDS_DB`` load on first use (0.03 s and 32 MiB instead of 1.4 s and
+  447 MiB), and importing SQuADDS no longer sets the root logger to INFO.
+- Retraining on any compute: ``build_shards``, ``fit``, ``fit_in_family``, ``retrain_collective``, ``squadds-ml train``
+  (with a generic SLURM array writer) and validation scoring (``benchmark.score``; test scoring maintainer-only).
+- ``PlanarCapacitanceDB`` (``squadds.ml.capacitance.dataset``; no ``[ml]`` extra needed) reads the new
+  ``SQuADDS/SQuADDS_PlanarCapacitance`` dataset: raw tables (designs, layouts, simulations, labels, label passes) and
+  processed tables (geometric embedding, ``physics_prior``, ``optimized_physics_prior``, model input). Reads are
+  pinned to dataset commit ``c7995331`` by default (``DATASET_REVISION``; ``revision="main"`` for the latest), also through
+  the ``planar_capacitance`` SQuADDS_DB source. GDS locations come from ``layouts.path``: the exp8 / exp9 GDS sit in
+  sub-folders of 5,000 (``gds/exp8/<id // 5000>/``) because Hugging Face caps a folder at 10,000 files.
+- ``SQuADDS_DB()`` adds the new families with a Qiskit Metal component as SQuADDS_DB configs (the
+  ``planar_capacitance`` source, on by default; ``SQuADDS_DB(sources=("default",))`` gives the previous behaviour, and
+  an unreachable dataset falls back to the default rows with one warning); existing rows are unchanged. Existing exp6 / exp7 interdigital rows rebuild with
+  ``spine_ledge_rule="tangent"`` automatically.
+- ``MLSimulator`` (``squadds.ml.capacitance.bridge``) gives ``AnsysSimulator``-shaped capacitance results from the models;
+  ``Analyzer.predict_capacitance`` predicts the closest or interpolated designs.
+- The Analyzer supports TransmonPocket and Xmon qubit targets (``squadds.calcs.floating_transmon``):
+  ``FloatingTransmonHamiltonian`` (pad-to-pad mode, coupler pads held at ground, C_eff = C12 + C1Σ C2Σ / (C1Σ + C2Σ), g by
+  capacitive division) and ``XmonHamiltonian`` (C_Σ = the cross's Maxwell diagonal, so every claw counts; two-claw E_C
+  differs from the ``TransmonCross`` convention).
+- Data and model contributions: label / layout QC (``squadds.ml.capacitance.qc``), the contribution template
+  (``squadds/database/templates/planar_capacitance_contribution``), ``validate_capacitance_contribution``,
+  ``contribute_capacitance`` and ``contribute_model`` (Hugging Face pull requests).
+- ``squadds.layouts``: versioned layout client, port-complete GDS export, the ``planar-capacitance-graph-v1`` embedding and
+  ``export_dataset_gds`` (the dataset's own export: per-family chip margins, layers, port stubs), which ``MLSimulator``
+  uses by default so predictions on rebuilt components match predictions on the dataset GDS.
+- New components for every dataset family: ``GeneralizedCapConcentric``, ``GeneralizedCapStar`` (with the star export
+  styles of ``squadds.components.export_fixups``), ``Xmon``, ``ShieldedCapConcentric``; ``GeneralizedCapNInterdigital``
+  gains per-side finger widths (paddles) and an optional tangent spine-ledge rule. Existing geometry is unchanged.
+- Tutorials 11–15: predicting capacitance matrices from GDS, the new families in SQuADDS, from layout to Hamiltonian with
+  ML, training on your own designs, and contributing capacitance data and models.
+- Two coupled transmons with half-wave readout: ``squadds.calcs.coupled_transmons`` (exact transmons and the coupled
+  Hamiltonian without the rotating-wave approximation, targets to capacitances and E_J) and ``squadds.layouts.two_transmon``
+  (two-Xmon layouts with a gap or interdigital coupler), with MCP tools; a Q3D runner and stored Q3D solves of two final
+  layouts in ``scripts/planar_capacitance/two_transmon_q3d/``.
+- Known limitation: the scene builder's ``shapely.make_valid`` default (``method="linework"``) drops a ground sliver
+  (0.011-0.53 % of the ground area) on 7 of the 60,093 dataset layouts (``largen`` star_multibody test layouts, N 8-12);
+  priors, embeddings and the released models use it consistently. ``method="structure"`` would move QCap
+  predictions on those 7 by a median of 0.050 % per entry (MAE 0.089 fF, RMSE 0.459 fF; max 14.2 %, 7.61 fF) and is
+  planned for a future release.
+- The paper's synthetic dataset (surrogate set and generic set, physics-only targets) is a separate download,
+  ``SQuADDS/SQuADDS_PlanarCapacitance-Synthetic``; the SQuADDS API does not read it.
+- Other substrates: ``predict(..., eps_r=, thickness_um=)``. QCap solves the physics prior at
+  the requested stack and correct it with the unchanged networks (calibrated route, recorded in ``result.substrate``); on 15
+  held-out designs 0.21-1.02 % (MAE 0.07-0.33 fF, RMSE 0.09-0.45 fF) on every tested stack (Si 10-1000 um, eps_r 3.8-24 at
+  350 um), against 0.23 % (0.080 / 0.111 fF) on the training stack: a bounded error, not training-stack accuracy (self
+  terms up to 1.22 % (0.79 / 0.86 fF)). Untested combinations warn. QCap-Fast keeps a (1 + eps_r) / (1 + 11.45)
+  rescaling of its training-stack prediction and warns on every off-stack call. Training-stack outputs are unchanged
+  (bit-identical). There is no ``substrate_rescale`` option.
+- Ground and conductors on one GDS layer: the metal is split into numbered pieces and the ground is detected automatically
+  (``result.ground_detection``, with a warning and a confidence); ``inspect_layout`` shows the pick on a numbered figure and
+  ``ground_pieces=[...]`` (``--ground-pieces``, MCP ``ground_pieces``) overrides it. Two-layer files are unchanged; flattened
+  test layouts give bit-identical matrices.
+- Every prediction whose physical checks fail (symmetry, signs, closure, positive definiteness) says so in its warnings and
+  raises a ``UserWarning``. The model cards and docs quote each model's own in-sample fit and B5 check, and label the
+  paper's held-out numbers as the paper's versions; ``QCap-Fast`` is an improved release of the paper's fast model.
+- MCP server: ``list_capacitance_models``, ``predict_capacitance_from_gds``, ``query_planar_capacitance``,
+  ``get_planar_capacitance_conventions`` and ``validate_capacitance_contribution`` (clear message without ``[ml]``).
+- Python 3.11 or newer is required. Python 3.10 reached its end of life in October 2026, and on current macOS its last
+  SciPy release (1.15.3) cannot load ``scipy.sparse.linalg``. CI tests Python 3.11, 3.12 and 3.13 on Linux, macOS and
+  Windows.
+
 Version 0.4.5
 --------------
 
@@ -69,13 +145,13 @@ Version 0.4.4 (2026-04-19)
 **Documentation**
 
 - Added runnable driven-modal tutorial scripts to ``tutorials/``:
-   - ``Tutorial-10_DrivenModal_Capacitance_Extraction.py`` (NCap and qubit-claw capacitance extraction from driven-modal Y-parameters).
-   - ``Tutorial-12_DrivenModal_Qubit_Port_Admittance.py`` (qubit ``Y33`` extraction with model-sweep / feedline-termination sensitivity analysis).
-   - ``Tutorial-13_DrivenModal_Combined_Hamiltonian_Extraction.py`` (single render, segmented qubit/bridge/resonator sweeps, end-to-end Hamiltonian comparison table).
+   - ``Tutorial-9_DrivenModal_Capacitance_Extraction.py`` (NCap and qubit-claw capacitance extraction from driven-modal Y-parameters).
+   - ``Tutorial-10b_DrivenModal_Qubit_Port_Admittance.py`` (qubit ``Y33`` extraction with model-sweep / feedline-termination sensitivity analysis).
+   - ``Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.py`` (single render, segmented qubit/bridge/resonator sweeps, end-to-end Hamiltonian comparison table).
 - Added a ``tutorials/export_docsite_notebooks.py`` utility that converts the ``# %%`` script tutorials into ``.ipynb`` notebooks for both the ``tutorials/`` directory and the public docsite.
 - Published the two production-ready notebooks to the docsite tutorial index:
-   - ``Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb``.
-   - ``Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb`` (docsite-facing renumbering of Tutorial 13).
+   - ``Tutorial-9_DrivenModal_Capacitance_Extraction.ipynb``.
+   - ``Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.ipynb`` (docsite-facing renumbering of Tutorial 12).
 - Added a regression test (``tests/test_drivenmodal_tutorial_docs.py``) that fails if the shipped notebook artifacts disappear or lose the Tutorial 5-style title/license/footer cell structure.
 - Added MCP server unit tests (43 tests covering schemas, utilities, and server creation).
 

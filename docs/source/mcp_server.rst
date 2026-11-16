@@ -203,6 +203,15 @@ Database Tools
    * - ``get_simulation_results``
      - Simulation results for a device
      - ``device_name``
+   * - ``list_squadds_db_sources``
+     - Enabled / available ``SQuADDS_DB`` sources and the configs each adds
+     - —
+   * - ``enable_squadds_db_source``
+     - Enable an extra source (``planar_capacitance``: Xmon, TransmonPocket, concentric, star, shielded configs) for the following calls
+     - ``source``, ``revision``, ``local_dir``
+   * - ``disable_squadds_db_source``
+     - Disable an extra source
+     - ``source``
 
 Analysis Tools
 ^^^^^^^^^^^^^^
@@ -218,8 +227,11 @@ Analysis Tools
      - Valid target parameter keys
      - ``system_type``
    * - ``find_closest_designs``
-     - **Primary search tool** — find closest designs
-     - ``system_type``, ``target_params``, ``num_results``, ``metric``
+     - **Primary search tool** — find closest designs (``system_type="coupler"`` with capacitance targets in fF for the planar capacitance couplers)
+     - ``system_type``, ``target_params``, ``num_results``, ``metric``, ``qubit``, ``coupler``
+   * - ``predict_closest_designs_ml``
+     - Closest single-component designs (``qubit`` / ``coupler``) predicted with the planar capacitance models next to their stored simulation (``Analyzer.predict_capacitance``; needs ``squadds[ml]``)
+     - ``system_type``, ``target_params``, ``num_results``, ``qubit``, ``coupler``, ``model``, ``eps_r``, ``thickness_um``
 
 Interpolation Tools
 ^^^^^^^^^^^^^^^^^^^
@@ -256,6 +268,142 @@ Contribution Tools
      - —
 
 
+Hosted ML API tools
+^^^^^^^^^^^^^^^^^^^
+
+``list_hosted_ml_models`` lists the models the SQuADDS ML API serves (``GET /v1/models``, with each model's inputs and
+units) and ``predict_with_hosted_ml_model`` runs one with JSON ``inputs`` and ``options``. No ``[ml]`` extra is needed. See
+:ref:`hosted-inference`.
+
+Planar Capacitance Tools
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Running a model needs the optional ML extra (``pip install "squadds[ml]"``); without it the tools return an install hint.
+Start with
+the resource ``squadds://planar-capacitance-guide``; details in :doc:`ml_models`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 50 25
+
+   * - Tool
+     - Description
+     - Key Parameters
+   * - ``list_capacitance_models``
+     - Released planar capacitance models (``QCap`` is the default; ``QCap-Fast`` is for screening trained families)
+     - —
+   * - ``predict_capacitance_from_gds``
+     - Full N x N Maxwell capacitance matrix (fF, ground first) from a GDS layout, with physical checks and timing; other
+       substrates solve the prior at the stack (QCap; QCap-Fast rescales and warns), see :doc:`ml_models`; ground and
+       conductors on one layer: the ground is detected automatically (``ground_detection``), ``ground_pieces`` overrides it
+     - ``gds_path``, ``model``, ``threads``, ``eps_r``, ``thickness_um``, ``ground_pieces``
+   * - ``query_planar_capacitance``
+     - Query the planar capacitance dataset by family, conductor count or split
+     - ``family``, ``n_conductors``, ``split``, ``collection``
+   * - ``get_planar_capacitance_conventions``
+     - Units, Maxwell signs, layer map, training stack and the off-stack routes, models and physics priors
+     - —
+   * - ``validate_capacitance_contribution``
+     - Validate a local capacitance data contribution folder before opening a pull request
+     - ``path``, ``check_prior``, ``reference``
+   * - ``compute_capacitance_prior``
+     - Physics-only Maxwell matrix of a GDS (optimized or coarse thin-film prior), a baseline for the model; returns each solve, the ground detection and the warnings
+     - ``gds_path``, ``prior``, ``threads``, ``eps_r``, ``thickness_um``, ``ground_pieces``
+   * - ``inspect_capacitance_layout``
+     - The conductors and ground a prediction would read, without predicting: count, areas, ground area in the file vs read, numbered pieces and the detected ground for one-layer files, optional PNG
+     - ``gds_path``, ``ground_layers``, ``conductor_layers``, ``ground_pieces``, ``png_path``
+   * - ``get_planar_capacitance_design``
+     - One dataset design in detail: options, Q3D solve with QC flags and convergence, label, adaptive passes, stored priors, GDS path
+     - ``design_id``, ``parts``
+   * - ``nearest_planar_capacitance_designs``
+     - Dataset designs geometrically closest to a design (pooled embedding; not a capacitance distance)
+     - ``design_id``, ``k``, ``family``, ``split``
+
+Design: component, GDS and Hamiltonian
+""""""""""""""""""""""""""""""""""""""
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 50 25
+
+   * - Tool
+     - Description
+     - Key Parameters
+   * - ``get_capacitance_component_info``
+     - Families, Qiskit Metal classes, SQuADDS configs, net names; default options of one class
+     - ``component_class``
+   * - ``generate_component_gds``
+     - Component class + options -> GDS in the dataset export (returns the path and a layout readback)
+     - ``component_class``, ``design_options``, ``out_path``, ``export``
+   * - ``predict_capacitance_from_design``
+     - Component class + options -> Maxwell matrix with SQuADDS net names (``MLSimulator``)
+     - ``component_class``, ``design_options``, ``model``, ``save_gds_dir``, ``eps_r``, ``thickness_um``
+   * - ``capacitance_to_hamiltonian``
+     - Maxwell matrix (or a GDS) -> C_sigma, C_g, E_C, E_J/E_C, L_j, f_q, alpha, g (grounded or floating transmon)
+     - ``matrix_fF``, ``names`` or ``gds_path`` (with ``model``, layers, ``eps_r``, ``thickness_um``, ``ground_pieces``), ``qubit_type``, ``qubit_nodes``, ``coupler``, ``EJ_GHz``
+   * - ``solve_coupled_transmon_hamiltonian``
+     - Two coupled transmons + two half-wave resonators (the two-transmon example): targets (f_q, eta, f_r, kappa, J, chi) -> E_J, E_C, L_J, g, J and the target 5 x 5 Maxwell matrix (full Hamiltonian, no RWA); evaluates a predicted layout matrix; resonator lines 50 ohm (fixed)
+     - ``targets``, ``reference_matrix_fF``, ``layout_matrix_fF``
+   * - ``generate_two_transmon_gds``
+     - The two-Xmon layout (gap or interdigital coupler) -> GDS, optionally with its predicted Maxwell matrix (outside the trained families) and a ground-area check
+     - ``p``, ``variant``, ``out_path``, ``predict``, ``model``, ``eps_r``, ``thickness_um``
+   * - ``correct_half_wave_resonator``
+     - A SQuADDS half-wave row adapted to your claw (the two-transmon example's resonator step): the row's claw capacitance (predicted), resonator length and kappa
+     - ``row_frequency_GHz``, ``row_kappa_kHz``, ``row_length_um``, ``f_r_GHz``, ``line_frequency_GHz``, ``node_capacitance_fF``, ``claw_options``
+
+Training, scoring and label QC
+""""""""""""""""""""""""""""""
+
+Long runs never execute inside the server: ``plan_capacitance_training`` writes a driver and a generic SLURM script for your own compute. In-process work is bounded (16 designs for shards, 500 steps for a smoke fit, 20 layouts for end-to-end scoring).
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 50 25
+
+   * - Tool
+     - Description
+     - Key Parameters
+   * - ``check_capacitance_label``
+     - Label QC of a Q3D ``cap_matrix.csv`` or a matrix (symmetry, signs, closure, PD, units, passes)
+     - ``path`` or ``matrix_fF`` + ``names``
+   * - ``build_capacitance_training_shards``
+     - A few GDS + labels -> training shards (embedding + physics priors)
+     - ``designs``, ``out_dir``
+   * - ``plan_capacitance_training``
+     - Driver + SLURM scripts for ``build`` / ``fit`` / ``in_family`` / ``collective`` retraining
+     - ``mode``, ``out_dir``, ``script_dir``, ``shard_dir``, ``designs_json``, ``partition``, ``account``
+   * - ``run_capacitance_fit_smoke``
+     - Short in-process fit (<= 500 steps) to check a shard dir end to end
+     - ``shard_dir``, ``out_dir``, ``steps``
+   * - ``score_capacitance_model``
+     - Validation score: median % with MAE and RMSE in fF, per family, with time, machine, threads (test scoring refused)
+     - ``model``, ``data`` or ``layouts``, ``split``
+
+Contributing data and models
+""""""""""""""""""""""""""""
+
+Every outward-facing tool is a dry run by default; a pull request is opened only with ``dry_run=False`` **and** ``confirm=True``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 50 25
+
+   * - Tool
+     - Description
+     - Key Parameters
+   * - ``init_capacitance_contribution``
+     - Copy the contribution template (manifest.yaml, designs.csv, README) to a folder
+     - ``dest_dir``
+   * - ``contribute_capacitance_data``
+     - Validate a contribution folder and plan (or, with confirm, open) the dataset pull request
+     - ``path``, ``dry_run``, ``confirm``
+   * - ``validate_capacitance_model``
+     - Validate a model repository: checkpoints, sha256, metadata, validation score
+     - ``model_repo_id``, ``revision``, ``local_dir``, ``val_data``
+   * - ``contribute_capacitance_model``
+     - Validate and plan (or, with confirm, open) the model-zoo pull request
+     - ``model_repo_id``, ``dry_run``, ``confirm``
+
 Available Resources
 -------------------
 
@@ -277,6 +425,10 @@ Available Resources
      - Dataset summary table
    * - ``squadds://guide``
      - Quick reference for AI agents
+   * - ``squadds://planar-capacitance-guide``
+     - Planar capacitance models (QCap, QCap-Fast): accuracy (median % with MAE and RMSE in fF), time, conventions, the predict -> Hamiltonian, design, retrain and contribute workflows
+   * - ``squadds://planar-capacitance-tutorials``
+     - Tutorials 11-15 with the MCP tools that reproduce each
 
 
 Available Prompts
@@ -298,6 +450,21 @@ Available Prompts
    * - ``find_optimal_design``
      - Natural-language design search
      - ``parameter_description``
+   * - ``gds_to_hamiltonian``
+     - GDS -> Maxwell matrix -> transmon Hamiltonian parameters, compared with SQuADDS
+     - ``gds_path``, ``qubit_type``, target f_q / alpha, resonator
+   * - ``design_planar_capacitor_to_target``
+     - Design a component of a planar capacitance family to target capacitances (GDS -> predict -> iterate)
+     - ``component_class``, ``target_capacitances_fF``, ``tolerance_pct``
+   * - ``retrain_capacitance_model``
+     - Retrain on your own data on your own compute (label QC, shards, smoke fit, SLURM plan, scoring)
+     - ``data_description``, ``mode``, ``cluster``
+   * - ``contribute_capacitance_data_or_model``
+     - Contribute data or a model through a Hugging Face pull request (dry run first)
+     - ``kind``, ``path_or_repo``
+   * - ``design_coupled_transmons``
+     - Two coupled transmons with half-wave readout, targets -> Hamiltonian -> GDS -> prediction -> iteration -> SQuADDS resonators, with the validity caveats (the two-transmon example)
+     - ``targets_GHz``, ``variant``, ``tolerance_pct``
 
 
 Environment Variables
@@ -322,6 +489,15 @@ Environment Variables
    * - ``SQUADDS_MCP_PORT``
      - ``8000``
      - HTTP port (only for HTTP transport)
+   * - ``SQUADDS_MCP_SOURCES``
+     - ``default,planar_capacitance``
+     - ``SQuADDS_DB`` sources enabled at startup (``default`` = ``SQuADDS/SQuADDS_DB`` only)
+   * - ``SQUADDS_PLANAR_CAP_DATA``
+     - —
+     - Local copy of the planar capacitance dataset
+   * - ``SQUADDS_CAPML_MODELS``
+     - —
+     - Local planar capacitance model bundle (instead of the Hugging Face download)
 
 
 Testing with MCP Inspector

@@ -560,8 +560,8 @@ def test_run_drivenmodal_sweep_supports_interpolating_sweep_advanced_options():
 
 
 def test_safe_ansys_design_name_is_short_and_stable():
-    first = safe_ansys_design_name("tutorial10-qubit-claw-000-v1")
-    second = safe_ansys_design_name("tutorial10-qubit-claw-000-v1")
+    first = safe_ansys_design_name("tutorial9-qubit-claw-000-v1")
+    second = safe_ansys_design_name("tutorial9-qubit-claw-000-v1")
 
     assert first == second
     assert first.startswith("dm_")

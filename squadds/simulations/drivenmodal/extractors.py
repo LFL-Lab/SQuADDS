@@ -156,5 +156,5 @@ def coupled_hamiltonian_from_prepared_runs(prepared_runs: Mapping[str, Any]) -> 
         "No coupled summary.json found in expected locations. Searched:\n  - "
         + detail
         + "\nRun coupled post-processing so it writes summary.json next to y_parameters.pkl "
-        "(see tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py)."
+        "(see tutorials/Tutorial-10a_DrivenModal_Coupled_System_Postprocessing.py)."
     )

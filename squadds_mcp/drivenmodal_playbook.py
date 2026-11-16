@@ -17,11 +17,11 @@ def build_drivenmodal_playbook() -> dict[str, Any]:
         "squadds_package": {
             "root": "squadds.simulations.drivenmodal",
             "tutorial_notebooks_repo_paths": [
-                "tutorials/Tutorial-10_DrivenModal_Capacitance_Extraction.ipynb",
-                "tutorials/Tutorial-11_DrivenModal_Combined_Hamiltonian_Extraction.ipynb",
-                "tutorials/Tutorial-11_DrivenModal_Coupled_System_Postprocessing.py",
-                "tutorials/Tutorial-12_DrivenModal_Qubit_Port_Admittance.py",
-                "paired .py companions under tutorials/: Tutorial-10_*_Extraction.py, Tutorial-13_*_Extraction.py",
+                "tutorials/Tutorial-9_DrivenModal_Capacitance_Extraction.ipynb",
+                "tutorials/Tutorial-10_DrivenModal_Combined_Hamiltonian_Extraction.ipynb",
+                "tutorials/Tutorial-10a_DrivenModal_Coupled_System_Postprocessing.py",
+                "tutorials/Tutorial-10b_DrivenModal_Qubit_Port_Admittance.py",
+                "paired .py companions under tutorials/: Tutorial-9_*_Extraction.py, Tutorial-10_*_Extraction.py",
             ],
             "prerequisites": (
                 "Local Ansys HFSS + qiskit-metal + pyEPR stack; HDF5/pandas/skrf/scipy/scqubits "

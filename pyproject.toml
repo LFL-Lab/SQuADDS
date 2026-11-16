@@ -1,16 +1,16 @@
 [project]
 name = "SQuADDS"
-version = "0.4.5"
+version = "1.0.0"
 description = "Open-source database of programmatically generated and experimentally validated superconducting quantum device designs, accessible through a user-friendly interface."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Sadman Ahmed Shanto", email = "shanto@usc.edu" }]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Development Status :: 4 - Beta",
@@ -21,11 +21,13 @@ classifiers = [
 dependencies = [
     # === Data & HuggingFace ===
     "datasets>=4.8.1",
+    "pyarrow>=14",
     "huggingface-hub>=0.21",
     # === Scientific Computing ===
-    "numpy>=1.16.6,<2.0",
+    "numpy>=1.16.6",
     "pandas>=1.5,<3.0",
     "scipy>=1.10",
+    "scipy>=1.15; sys_platform == 'darwin'",   # scqubits 4.3 caps scipy at 1.13 (OpenBLAS) on macOS arm64; 1.15+ uses Accelerate (2x faster physics prior)
     "numba>=0.60",
     "scqubits>=4.0",
     "scikit-rf>=1.2",
@@ -81,14 +83,24 @@ contrib = [
     "pygithub>=2.4",
     "gitpython>=3.1",
 ]
+ml = [
+    # Planar capacitance ML (GDS -> Maxwell capacitance matrix): models, physics priors, training
+    "torch>=2.1",
+    "gdstk>=0.9",
+    "numba==0.68.0",
+    "llvmlite==0.50.0",
+    "threadpoolctl>=3.0",
+    "pyyaml>=6.0",
+]
 mcp = [
-    "mcp[cli]>=1.9",
+    "mcp[cli]>=1.9,<2",  # mcp 2 renamed FastMCP
     "pydantic>=2.0",
 ]
-all = ["SQuADDS[gds,docs,dev,contrib,mcp]"]
+all = ["SQuADDS[gds,docs,dev,contrib,mcp,ml]"]
 
 [project.scripts]
 squadds-mcp = "squadds_mcp.server:main"
+squadds-ml = "squadds.ml.capacitance.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/LFL-Lab/SQuADDS"
@@ -113,7 +125,7 @@ include = [
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py311"
 exclude = [
     "docs/",
     "tutorials/",
@@ -122,6 +134,7 @@ exclude = [
     "build",
     "dist",
 ]
+extend-exclude = ["squadds/ml/capacitance/_core"]
 
 [tool.ruff.lint]
 select = [

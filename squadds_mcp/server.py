@@ -15,10 +15,14 @@ Architecture:
     │  Server      │
     ├─────────────┤
     │  Tools       │  database.py, analysis.py, interpolation.py, contribution.py,
-    │              │  generation.py, simulations.py (unified playbook: Q3D, eigenmode, driven-modal)
+    │              │  generation.py, simulations.py (unified playbook: Q3D, eigenmode, driven-modal),
+    │              │  capacitance_ml.py (GDS -> Maxwell matrix models, planar capacitance dataset),
+    │              │  capacitance_design.py (component -> GDS -> matrix -> Hamiltonian),
+    │              │  capacitance_training.py (label QC, shards, retraining plans, scoring),
+    │              │  capacitance_contribution.py (data / model PRs, dry run by default)
     │  Resources   │  metadata.py, layout_guide.py, drivenmodal_guide.py,
-    │              │  ansys_simulation_guide.py
-    │  Prompts     │  workflows.py
+    │              │  ansys_simulation_guide.py, planar_capacitance_guide.py
+    │  Prompts     │  workflows.py, capacitance_workflows.py
     ├─────────────┤
     │  Lifespan    │  Initializes SQuADDS_DB once at startup
     └──────┬──────┘
@@ -78,6 +82,13 @@ class SQuADDSContext:
     db: object  # squadds.core.db.SQuADDS_DB
 
 
+def startup_sources() -> tuple[str, ...] | None:
+    """``SQuADDS_DB`` sources to enable at startup from ``SQUADDS_MCP_SOURCES`` (comma-separated, e.g. ``default`` for
+    the hub alone); None when unset, which enables the ``SQuADDS_DB`` default sources (``default,planar_capacitance``)."""
+    names = tuple(x.strip() for x in os.environ.get("SQUADDS_MCP_SOURCES", "").split(",") if x.strip())
+    return names or None
+
+
 @asynccontextmanager
 async def app_lifespan(server: FastMCP) -> AsyncIterator[SQuADDSContext]:
     """Manage the SQuADDS MCP server lifecycle.
@@ -95,7 +106,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[SQuADDSContext]:
     # SQuADDS_DB.__init__ fetches config info from HuggingFace.
     from squadds.core.db import SQuADDS_DB
 
-    db = SQuADDS_DB()
+    db = SQuADDS_DB(sources=startup_sources())
     try:
         yield SQuADDSContext(db=db)
     finally:
@@ -133,6 +144,8 @@ def create_server() -> FastMCP:
             "explore the database, get interpolated layouts, and follow documented "
             "Ansys-class simulations (Q3D LOM capacitance, HFSS eigenmode, driven-modal) via "
             "`squadds://ansys-simulation-overview` plus `get_squadds_simulation_playbook`. "
+            "Planar capacitance ML (GDS -> full Maxwell capacitance matrix, Hamiltonian parameters, new component "
+            "families, retraining, contributions): read `squadds://planar-capacitance-guide`. "
             "Start by reading `squadds://guide` for MCP tool orientation."
         ),
         lifespan=app_lifespan,
@@ -140,9 +153,14 @@ def create_server() -> FastMCP:
 
     # -- Register tools (grouped by domain) --
     from squadds_mcp.tools.analysis import register_analysis_tools
+    from squadds_mcp.tools.capacitance_contribution import register_capacitance_contribution_tools
+    from squadds_mcp.tools.capacitance_design import register_capacitance_design_tools
+    from squadds_mcp.tools.capacitance_ml import register_capacitance_ml_tools
+    from squadds_mcp.tools.capacitance_training import register_capacitance_training_tools
     from squadds_mcp.tools.contribution import register_contribution_tools
     from squadds_mcp.tools.database import register_database_tools
     from squadds_mcp.tools.generation import register_generation_tools
+    from squadds_mcp.tools.hosted_ml import register_hosted_ml_tools
     from squadds_mcp.tools.interpolation import register_interpolation_tools
     from squadds_mcp.tools.simulations import register_simulation_tools
 
@@ -152,22 +170,31 @@ def create_server() -> FastMCP:
     register_contribution_tools(mcp)
     register_generation_tools(mcp)
     register_simulation_tools(mcp)
+    register_capacitance_ml_tools(mcp)
+    register_capacitance_design_tools(mcp)
+    register_capacitance_training_tools(mcp)
+    register_capacitance_contribution_tools(mcp)
+    register_hosted_ml_tools(mcp)
 
     # -- Register resources --
     from squadds_mcp.resources.ansys_simulation_guide import register_ansys_simulation_resources
     from squadds_mcp.resources.drivenmodal_guide import register_drivenmodal_resources
     from squadds_mcp.resources.layout_guide import register_layout_resources
     from squadds_mcp.resources.metadata import register_metadata_resources
+    from squadds_mcp.resources.planar_capacitance_guide import register_planar_capacitance_resources
 
     register_metadata_resources(mcp)
     register_layout_resources(mcp)
     register_ansys_simulation_resources(mcp)
     register_drivenmodal_resources(mcp)
+    register_planar_capacitance_resources(mcp)
 
     # -- Register prompts --
+    from squadds_mcp.prompts.capacitance_workflows import register_capacitance_workflow_prompts
     from squadds_mcp.prompts.workflows import register_workflow_prompts
 
     register_workflow_prompts(mcp)
+    register_capacitance_workflow_prompts(mcp)
 
     return mcp
 
@@ -186,6 +213,7 @@ def main() -> None:
         - SQUADDS_MCP_TRANSPORT: "stdio" (default) or "streamable-http"
         - SQUADDS_MCP_HOST: HTTP host (default "0.0.0.0")
         - SQUADDS_MCP_PORT: HTTP port (default 8000)
+        - SQUADDS_MCP_SOURCES: SQuADDS_DB sources enabled at startup (unset: "default,planar_capacitance")
     """
     transport = os.environ.get("SQUADDS_MCP_TRANSPORT", "stdio")
     server = create_server()

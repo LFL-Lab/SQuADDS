@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 
 # Set the path to the root of the project
@@ -8,8 +9,8 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'SQuADDS'
 copyright = '2026, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
-version = "0.4.5"
-release = "0.4.5"
+version = "1.0.0"
+release = "1.0.0"
 
 # General configuration
 exclude_patterns = [
@@ -20,7 +21,11 @@ exclude_patterns = [
     "README.md",
     "imports_test.py",
     "CONTRIBUTING.md",
+    "_extra",
 ]
+
+# Standalone pages copied as-is into the built site: _extra/ml-paper/ -> <site>/ml-paper/ (the paper's explainer videos)
+html_extra_path = ["_extra"]
 
 extensions = [
     'sphinx.ext.autodoc',
@@ -64,42 +69,60 @@ html_favicon = "./_static/images/squadds_logo_dark.png"
 
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
+# "Paper" look: the docs set like the paper (STIX Two Text, running head, outline sidebar, journal tables)
+html_css_files = ["css/paper.css"]
+html_js_files = ["js/paper.js"]
 html_theme_options = {
     "logo": {
-        "alt_text": "SQuADDS Logo",
-        "image_light": "_static/images/squadds_logo_light_name.png",
-        "image_dark": "_static/images/squadds_logo_dark_name.png",
+        "text": "SQuADDS",
+        "alt_text": "",
+        "image_light": "_static/images/squadds_mark_light.png",
+        "image_dark": "_static/images/squadds_mark_dark.png",
         "link": "https://lfl-lab.github.io/SQuADDS/"
     },
-    "github_url": "https://github.com/LFL-Lab/SQuADDS",
     "icon_links": [
         {
-            "name": "PyPI",
-            "url": "https://pypi.org/project/SQuADDS/",
-            "icon": "fab fa-python",
+            "name": "GitHub",
+            "url": "https://github.com/LFL-Lab/SQuADDS",
+            "icon": "fa-brands fa-github",
         },
         {
-            "name": "HuggingFace",
-            "url": "https://huggingface.co/datasets/SQuADDS/SQuADDS_DB",
-            "icon": "fas fa-face-smile",
+            "name": "SQuADDS datasets on Hugging Face",
+            "url": "https://huggingface.co/collections/SQuADDS/squadds-datasets-6a65152b857f8efa5620880a",
+            "icon": "_static/images/hf-logo.svg",
+            "type": "local",
         },
         {
-            "name": "DeepWiki",
+            "name": "SQuADDS ML inference API",
+            "url": "https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api",
+            "icon": "fa-solid fa-code",
+        },
+        {
+            "name": "Chat with SQuADDS",
             "url": "https://deepwiki.com/LFL-Lab/SQuADDS",
-            "icon": "fas fa-robot",
-        }
-        # {
-            # "name": "LFL Lab",
-            # "url": "https://dornsife.usc.edu/lfl/",
-            # "icon": "fas fa-hand-peace",
-        # },
+            "icon": "fa-regular fa-comments",
+        },
     ],
+    "navbar_start": ["paper-logo"],
+    "navbar_center": ["paper-nav"],
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "navbar_persistent": ["search-button-field"],
+    "article_header_start": ["paper-crumbs"],
+    "primary_sidebar_end": [],
+    "secondary_sidebar_items": {"source/squadds*": ["page-toc"], "source/modules": ["page-toc"]},
+    "footer_start": ["paper-footer"],
+    "footer_center": [],
+    "footer_end": [],
     "navigation_depth": 5,
     "show_nav_level": 3,
     "collapse_navigation": True,
 }
+html_sidebars = {
+    "index": [],
+    "**": ["paper-outline"],
+}
 html_context = {
-    "theme_announcement": "Read our <a href='https://quantum-journal.org/papers/q-2024-09-09-1465/'>paper</a>",
+    "theme_announcement": "Read our latest <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/paper/'>preprint</a> and check out its <a href='https://lfl-lab.github.io/SQuADDS/ml-paper/'>docsite</a>",
     "expandable_sidebar": True,
     "google_analytics_id": "G-R5QKJDWM2W",
     "footer": "_footer.html",  # Add this line to reference your custom footer
@@ -136,6 +159,18 @@ rst_prolog = f"""
 
 # Enable nitpicky mode to warn about broken references
 nitpicky = True
+nitpick_ignore = [
+    ("py:class", "numpy.ndarray"),
+    ("py:class", "np.ndarray"),
+    ("py:class", "pathlib.Path"),
+    ("py:class", "Path"),
+    ("py:class", "pandas.core.frame.DataFrame"),
+    ("py:class", "pd.DataFrame"),
+    ("py:class", "squadds.ml.capacitance.models._Registry"),
+    ("py:class", "squadds.calcs.floating_transmon._MaxwellTransmonHamiltonian"),
+    ("py:class", "qiskit_metal.qlibrary.core.QComponent"),
+    ("py:class", "qiskit_metal.qlibrary.qubits.transmon_cross.TransmonCross"),
+]
 
 # Ensure that MathJax knows to look for LaTeX delimiters
 mathjax_config = {
@@ -150,3 +185,32 @@ html_meta = {
     "description": "SQuADDS: A Python package for design and simulation of superconducting quantum devices",
     "keywords": "qiskit, qiskit-metal, qubit, Transmon, design, ansys, hfss, KLayout, superconducting, quantum, computing, SQuADDS, IBM, CPW, Hamiltonian, Sadman Ahmed Shanto, Eli Levenson-Falk, LFL Lab, USC Physics, USC, University of Southern California",
 }
+
+
+# Left outline ("Paper" look): the site's contents like PDF bookmarks, with the current page opened to its sections
+_OUTLINE_SKIP = ("source/squadds", "source/modules", "genindex", "py-modindex", "search")
+
+
+def _paper_outline(app, pagename, templatename, context, doctree):
+    def outline():
+        nav = str(
+            context["generate_toctree_html"](
+                "sidebar", startdepth=0, show_nav_level=1, maxdepth=5, collapse=True, includehidden=True, titles_only=True
+            )
+        )
+        local = context.get("toc", "")
+        if pagename.startswith(_OUTLINE_SKIP) or local.count("<li") < 2:
+            return nav
+        return re.sub(
+            r'(<a class="current reference internal" href="#">.*?</a>)',
+            lambda m: m.group(1) + '<div class="paper-local">' + local + "</div>",
+            nav,
+            count=1,
+            flags=re.S,
+        )
+
+    context["paper_outline"] = outline
+
+
+def setup(app):
+    app.connect("html-page-context", _paper_outline)

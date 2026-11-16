@@ -1,0 +1,29 @@
+{# Running head: the six places most readers go. The full contents live in the left outline. #}
+{%- set paper_links = [
+  ("Install", "source/getting_started"),
+  ("Tutorials", "source/tutorials/index"),
+  ("ML models", "source/ml_models"),
+  ("MCP server", "source/mcp_server"),
+  ("API reference", "source/apidocs/index"),
+  ("Contribute", "source/resources/contribute"),
+] %}
+{%- set paper_sections = {
+  "source/getting_started": "source/getting_started",
+  "source/tutorials/": "source/tutorials/index",
+  "source/ml_models": "source/ml_models",
+  "source/ml_local": "source/ml_models",
+  "source/mcp_server": "source/mcp_server",
+  "source/apidocs/": "source/apidocs/index",
+  "source/squadds": "source/apidocs/index",
+  "source/modules": "source/apidocs/index",
+  "source/resources/contribute": "source/resources/contribute",
+} %}
+{%- set ns = namespace(cur="") %}
+{%- for prefix, target in paper_sections.items() %}{% if pagename.startswith(prefix) %}{% set ns.cur = target %}{% endif %}{% endfor %}
+<nav class="paper-nav" aria-label="{{ _('Main') }}">
+  <ul class="bd-navbar-elements navbar-nav">
+  {%- for label, doc in paper_links %}
+    <li class="nav-item{% if ns.cur == doc %} current active{% endif %}"><a class="nav-link nav-internal" href="{{ pathto(doc) }}"{% if ns.cur == doc %} aria-current="page"{% endif %}>{{ label }}</a></li>
+  {%- endfor %}
+  </ul>
+</nav>
