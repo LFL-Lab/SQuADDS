@@ -45,7 +45,9 @@ def _require_klayout():
     try:
         import klayout.db as kdb
     except ImportError as exc:  # pragma: no cover - depends on optional extra
-        raise ImportError("GDS generation requires `uv sync --extra gds`.") from exc
+        raise ImportError(
+            "GDS generation needs the gds extra: pip install 'squadds[gds]' (with uv: uv sync --extra gds)"
+        ) from exc
     return kdb
 
 

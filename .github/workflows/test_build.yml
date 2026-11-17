@@ -196,8 +196,45 @@ jobs:
           path: executed_tutorials/
           if-no-files-found: ignore
 
-  integration-smoke:
+  old-glibc-install:
+    # A plain pip install of squadds[ml] on glibc 2.28 Linux (the RHEL / Rocky 8 class of many clusters), then QCap and
+    # QCap-Fast predictions with the public models and no token. PySide6 >= 6.10 has no wheel below glibc 2.34, which is
+    # why pyproject.toml asks for pyside6>=6.8.
     runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux_2_28_x86_64
+    defaults:
+      run:
+        shell: bash
+    env:
+      MPLBACKEND: Agg
+      QISKIT_METAL_HEADLESS: "1"
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: "1"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install with pip
+        run: |
+          ldd --version | sed -n 1p  # sed reads to the end: head would SIGPIPE ldd under pipefail
+          /opt/python/cp312-cp312/bin/python -m venv /tmp/venv
+          /tmp/venv/bin/python -m pip install --upgrade pip
+          /tmp/venv/bin/python -m pip install ".[ml]"
+          /tmp/venv/bin/python -m pip list | grep -i -E "^(pyside6|torch|shapely|squadds) "
+
+      - name: Import and predict
+        run: |
+          /tmp/venv/bin/python -c "import squadds, squadds.ml.capacitance; print('squadds', squadds.__version__)"
+          /tmp/venv/bin/squadds-ml predict tests/data/capml/parity/exp13_q3d_cap_0414.gds
+          /tmp/venv/bin/squadds-ml predict tests/data/capml/parity/exp13_q3d_cap_0414.gds --model QCap-Fast
+
+  integration-smoke:
+    # The SQuADDS MVP calls and the QCap user contract (tests/mvp_test.py) on every OS, with the [ml] extra.
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON((inputs.os == '' || inputs.os == 'all') && '["ubuntu-latest", "macos-latest", "windows-latest"]' || format('["{0}"]', inputs.os)) }}
     env:
       MPLBACKEND: Agg
       QISKIT_METAL_HEADLESS: "1"
@@ -222,7 +259,7 @@ jobs:
           sudo apt-get install -y libegl1 libopengl0 libglu1-mesa
 
       - name: Install dependencies
-        run: uv sync --extra dev --extra mcp
+        run: uv sync --extra dev --extra mcp --extra ml
 
       - name: Set up environment file
         run: |
