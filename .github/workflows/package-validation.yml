@@ -26,6 +26,11 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  # A newer push to the same pull request cancels the older run; pushes to master each finish.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build-distributions:
     runs-on: ubuntu-latest

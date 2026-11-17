@@ -5,6 +5,14 @@ on:
     branches:
       - main
       - master
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'squadds/**'
+      - 'squadds_mcp/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/docker-build.yml'
   release:
     types: [published]
   workflow_dispatch:
@@ -12,6 +20,11 @@ on:
 permissions:
   packages: write
   contents: read
+
+concurrency:
+  # A newer commit supersedes an image build still running for the same branch.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'release' }}
 
 jobs:
   build:
