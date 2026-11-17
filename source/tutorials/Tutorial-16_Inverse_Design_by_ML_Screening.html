@@ -562,7 +562,7 @@ winner to confirm it.</p>
 </tbody>
 </table>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">WORKERS</span></code> processes run at once, each with <code class="docutils literal notranslate"><span class="pre">THREADS</span></code> CPU threads.</p>
+<p><code class="docutils literal notranslate"><span class="pre">WORKERS</span></code> processes run at once, each with <code class="docutils literal notranslate"><span class="pre">THREADS</span></code> CPU threads. <code class="docutils literal notranslate"><span class="pre">WORKERS</span></code> is 8, or the number of CPU cores on a machine with fewer.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -571,7 +571,7 @@ winner to confirm it.</p>
 <span class="n">N_POCKET</span> <span class="o">=</span> <span class="mi">300</span>  <span class="c1"># paper: 5000</span>
 <span class="n">TOP</span><span class="p">,</span> <span class="n">PER</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">8</span>  <span class="c1"># paper: 20, 50 (round 1) then 40</span>
 <span class="n">JITTER</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]</span>  <span class="c1"># one entry per refinement round</span>
-<span class="n">WORKERS</span><span class="p">,</span> <span class="n">THREADS</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span>
+<span class="n">WORKERS</span><span class="p">,</span> <span class="n">THREADS</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">1</span>
 <span class="n">SEED</span> <span class="o">=</span> <span class="mi">16</span>
 <span class="n">WORKDIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;tutorial16_&quot;</span><span class="p">))</span>  <span class="c1"># thousands of small GDS files; point it elsewhere to keep them</span>
 <span class="n">WORKDIR</span>
