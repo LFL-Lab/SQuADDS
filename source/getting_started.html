@@ -384,6 +384,7 @@
 <li><a class="reference internal" href="#faqs">FAQs</a><ul>
 <li><a class="reference internal" href="#id1">Installation</a></li>
 <li><a class="reference internal" href="#accessing-the-database">Accessing the Database</a></li>
+<li><a class="reference internal" href="#designs-and-simulations">Designs and Simulations</a></li>
 <li><a class="reference internal" href="#planar-capacitance-models">Planar Capacitance Models</a></li>
 <li><a class="reference internal" href="#citing-ai-agents-and-compute">Citing, AI Agents and Compute</a></li>
 <li><a class="reference internal" href="#env-file"><code class="docutils literal notranslate"><span class="pre">.env</span></code> File</a></li>
@@ -582,6 +583,23 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <p><strong>A:</strong> <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB()</span></code> loads the planar capacitance dataset next to the original database by default. <code class="docutils literal notranslate"><span class="pre">SQuADDS_DB(sources=(&quot;default&quot;,))</span></code> gives the original database alone. If the planar capacitance dataset cannot be read, <code class="docutils literal notranslate"><span class="pre">SQuADDS</span></code> warns once and returns the original rows.</p>
 <p><strong>Q: Can I use the capacitance models and dataset offline, or from my own copy?</strong></p>
 <p><strong>A:</strong> Yes. Point <code class="docutils literal notranslate"><span class="pre">SQUADDS_PLANAR_CAP_DATA</span></code> at a local copy of the planar capacitance dataset and <code class="docutils literal notranslate"><span class="pre">SQUADDS_CAPML_MODELS</span></code> at a directory of model bundles. Downloads from Hugging Face pin a revision and check the sha256 of every file.</p>
+</section>
+<section id="designs-and-simulations">
+<h2>Designs and Simulations<a class="headerlink" href="#designs-and-simulations" title="Link to this heading">#</a></h2>
+<p><strong>Q: Can I give a list of values for a design parameter (e.g. the claw length)?</strong></p>
+<p><strong>A:</strong> Yes. Any design option can be a list, and every combination is simulated:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnsysSimulator</span><span class="p">,</span> <span class="n">expand_design_options</span>
+
+<span class="n">simulator</span> <span class="o">=</span> <span class="n">AnsysSimulator</span><span class="p">(</span><span class="n">analyzer</span><span class="p">,</span> <span class="n">best_device</span><span class="p">)</span>
+<span class="n">simulator</span><span class="o">.</span><span class="n">update_design_parameters</span><span class="p">(</span><span class="n">claw_length</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;150um&quot;</span><span class="p">,</span> <span class="s2">&quot;200um&quot;</span><span class="p">],</span> <span class="n">cross_length</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;200um&quot;</span><span class="p">,</span> <span class="s2">&quot;250um&quot;</span><span class="p">])</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>  <span class="c1"># four designs, one result each</span>
+
+<span class="n">designs</span> <span class="o">=</span> <span class="n">expand_design_options</span><span class="p">({</span><span class="s2">&quot;cross_length&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;200um&quot;</span><span class="p">,</span> <span class="s2">&quot;250um&quot;</span><span class="p">],</span> <span class="s2">&quot;cross_gap&quot;</span><span class="p">:</span> <span class="s2">&quot;30um&quot;</span><span class="p">})</span>  <span class="c1"># two design dicts</span>
+</pre></div>
+</div>
+<p>A parameter that appears in both the qubit and the cavity options (such as <code class="docutils literal notranslate"><span class="pre">claw_length</span></code>) takes one value per design. Use a tuple for an option whose value must stay a fixed sequence.</p>
+<p><strong>Q: How do I build a flux-tunable</strong> <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> <strong>with a SQUID loop?</strong></p>
+<p><strong>A:</strong> Set <code class="docutils literal notranslate"><span class="pre">style=&quot;SQUID_LOOP_Dolan&quot;</span></code> and configure the loop with <code class="docutils literal notranslate"><span class="pre">SQUID_LOOP=dict(SQUID_width=&quot;40um&quot;,</span> <span class="pre">SQUID_length=&quot;5um&quot;,</span> <span class="pre">SQUID_offset=&quot;5um&quot;,</span> <span class="pre">JJ_width=&quot;150nm&quot;,</span> <span class="pre">JJ_flip=False)</span></code>. The loop and its two Dolan junctions are added as the component <code class="docutils literal notranslate"><span class="pre">&lt;qubit</span> <span class="pre">name&gt;_SQUID_LOOP_Dolan</span></code>. <code class="docutils literal notranslate"><span class="pre">style=&quot;JJ_Dolan&quot;</span></code> with <code class="docutils literal notranslate"><span class="pre">Dolan_JJ=dict(JJ_width=...,</span> <span class="pre">JJ_flip=...)</span></code> draws a single Dolan junction (see Tutorial 5).</p>
 </section>
 <section id="planar-capacitance-models">
 <h2>Planar Capacitance Models<a class="headerlink" href="#planar-capacitance-models" title="Link to this heading">#</a></h2>

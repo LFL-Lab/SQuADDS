@@ -455,6 +455,7 @@
     <span class="n">simulate_single_design</span><span class="p">,</span>
     <span class="n">simulate_whole_device</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.sweeper_helperfunctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">expand_design_options</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">squadds.simulations.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_a_fq</span>
 
 
@@ -719,7 +720,8 @@
 <span class="sd">        Smartly searches for the keys in &#39;design_options&#39;, &#39;design_options_qubit&#39;, etc.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            **kwargs: Key-value pairs of design parameters to update (e.g., cross_length=&quot;300um&quot;).</span>
+<span class="sd">            **kwargs: Key-value pairs of design parameters to update (e.g., cross_length=&quot;300um&quot;). A list</span>
+<span class="sd">                (e.g., claw_length=[&quot;150um&quot;, &quot;200um&quot;]) makes :meth:`simulate` run one design per value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Single design</span>
@@ -818,7 +820,8 @@
 <span class="sd">            run_async (bool): If True, runs the simulation asynchronously.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pandas.DataFrame or concurrent.futures.Future: The simulation results or a Future object.</span>
+<span class="sd">            pandas.DataFrame or concurrent.futures.Future: The simulation results or a Future object. When a</span>
+<span class="sd">            design parameter is a list (see ``expand_design_options``), a list with one result per design.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Use stored device_dict if none provided</span>
         <span class="k">if</span> <span class="n">device_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -839,6 +842,14 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">design_keys</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;design_options&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options_qubit&quot;</span><span class="p">,</span> <span class="s2">&quot;design_options_cavity_claw&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">device_dict</span>
+        <span class="p">]</span>
+        <span class="n">variants</span> <span class="o">=</span> <span class="n">expand_design_options</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">device_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">design_keys</span><span class="p">})</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">variants</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[cyan]List-valued design parameters: simulating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">variants</span><span class="p">)</span><span class="si">}</span><span class="s2"> designs[/cyan]&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">simulate</span><span class="p">({</span><span class="o">**</span><span class="n">device_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">variant</span><span class="p">},</span> <span class="n">run_async</span><span class="o">=</span><span class="n">run_async</span><span class="p">)</span> <span class="k">for</span> <span class="n">variant</span> <span class="ow">in</span> <span class="n">variants</span><span class="p">]</span>
+
         <span class="k">if</span> <span class="n">run_async</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;Ansys-native parallel simulation (run_async=True) is not yet implemented. &quot;</span>

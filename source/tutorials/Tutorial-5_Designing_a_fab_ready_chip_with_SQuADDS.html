@@ -1009,7 +1009,17 @@ array([5.48, 6.48, 7.48, 8.48])
 </pre></div>
 </div>
 </div>
-<p>Before designing the chip, we need to think about our requirements, resources and constraints.</p>
+<div class="admonition note"><p class="admonition-title"><p>Flux-tunable qubits: a SQUID loop instead of a single junction</p>
+</p><p><p>TransmonCross draws its junction from options.style: “default” (a junction line for simulation), “JJ_Dolan” (one Dolan junction, configured by Dolan_JJ) or “SQUID_LOOP_Dolan” (a loop with two Dolan junctions at the south end of the cross, configured by SQUID_LOOP). For a SQUID loop, replace the style and Dolan_JJ entries in create_qubit with:</p>
+</p><pre>
+style="SQUID_LOOP_Dolan",
+SQUID_LOOP=Dict(SQUID_width="40um",   # inner loop width (x)
+                SQUID_length="5um",   # inner loop length (y)
+                SQUID_offset="5um",   # loop distance from the ground plane
+                JJ_width=f"{jj_width}nm",
+                JJ_flip=JJ_flip),
+</pre><p><p>The loop and its two junctions are added to the design as &lt;qubit name&gt;_SQUID_LOOP_Dolan. Each junction then carries half of the SQUID’s critical current, so size JJ_width for 2*LJ per junction.</p>
+</p></div><p>Before designing the chip, we need to think about our requirements, resources and constraints.</p>
 <p>Let’s start with our board - since we are planning to have 4 qubits each with its own drive line and measure in transmission (2 ports), we need to ensure that we have have a total of 6 ports.</p>
 <div style="text-align: center;"><div style="display: inline-flex; justify-content: center; align-items: center; gap: 20px;"><div style="flex: 1; text-align: center;"><p><img alt="Figure 1" src="../../_images/board.png" /></p>
 </div></div></div><p>The board cut out is about 5.4mm x 5.4mm so we need to ensure our chip size is less than that and give ourselves enough room for chip packaging and removal safely (and without much stress) with a tweezer.</p>
@@ -1086,7 +1096,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_47_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_47_0.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_48_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_48_0.png" style="width: 500px;" />
 </div>
 </div>
 <p>Let’s start with a rough sketch of what we want the design to look like.</p>
@@ -1219,7 +1229,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_52_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_52_1.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_53_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_53_1.png" style="width: 500px;" />
 </div>
 </div>
 <p>Lets zoom in on a qubit and its JJ to see how it looks.</p>
@@ -1239,14 +1249,14 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_54_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_54_0.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_55_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_55_0.png" style="width: 500px;" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_54_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_54_1.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_55_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_55_1.png" style="width: 500px;" />
 </div>
 </div>
 <p>Awesome the junctions and the qubits look great. However, as we can see there are some “kinks” in some of the CPW lines - lets take a closer look</p>
@@ -1263,7 +1273,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_56_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_56_0.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_57_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_57_0.png" style="width: 500px;" />
 </div>
 </div>
 <p>We can fix this by changing the <code class="docutils literal notranslate"><span class="pre">lead.end_straight</span></code> and <code class="docutils literal notranslate"><span class="pre">lead.start_straigh</span></code> parameters. These numbers are to be adjusted until the issue is resolved.</p>
@@ -1288,14 +1298,14 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_58_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_58_0.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_59_0.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_59_0.png" style="width: 500px;" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_58_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_58_1.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_59_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_59_1.png" style="width: 500px;" />
 </div>
 </div>
 <p>Great that fixed it!</p>
@@ -1419,7 +1429,7 @@ array([5.48, 6.48, 7.48, 8.48])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_64_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_64_1.png" style="width: 500px;" />
+<img alt="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_65_1.png" class="no-scaled-link" src="../../_images/source_tutorials_Tutorial-5_Designing_a_fab_ready_chip_with_SQuADDS_65_1.png" style="width: 500px;" />
 </div>
 </div>
 </section>

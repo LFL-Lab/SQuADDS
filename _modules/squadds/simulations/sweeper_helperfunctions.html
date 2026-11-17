@@ -438,18 +438,70 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="n">NestedDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;expand_design_options&quot;</span><span class="p">,</span>
     <span class="s2">&quot;extract_QSweep_parameters&quot;</span><span class="p">,</span>
     <span class="s2">&quot;extract_parameters&quot;</span><span class="p">,</span>
     <span class="s2">&quot;extract_values&quot;</span><span class="p">,</span>
     <span class="s2">&quot;generate_combinations&quot;</span><span class="p">,</span>
     <span class="s2">&quot;create_dict_list&quot;</span><span class="p">,</span>
 <span class="p">]</span>
+
+
+<div class="viewcode-block" id="expand_design_options">
+<a class="viewcode-back" href="../../../source/squadds.simulations.html#squadds.simulations.sweeper_helperfunctions.expand_design_options">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">expand_design_options</span><span class="p">(</span><span class="n">options</span><span class="p">:</span> <span class="n">NestedDict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">NestedDict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Expand list-valued design parameters into one design per combination.</span>
+
+<span class="sd">    Every list at a leaf of ``options`` is a parameter to sweep, and the result is the grid of all combinations</span>
+<span class="sd">    (cartesian product, last list fastest). Leaves with the same name and the same list are swept together, so a</span>
+<span class="sd">    parameter that appears in several blocks (e.g. ``claw_length`` in both the qubit and the cavity options of a</span>
+<span class="sd">    coupled design) keeps one value per design. Everything else is copied unchanged; use a tuple to pass a value that</span>
+<span class="sd">    must stay a list-like constant. Options without lists return ``[copy of options]``.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        designs = expand_design_options(</span>
+<span class="sd">            {&quot;cross_length&quot;: [&quot;200um&quot;, &quot;250um&quot;], &quot;connection_pads&quot;: {&quot;readout&quot;: {&quot;claw_length&quot;: [&quot;150um&quot;, &quot;200um&quot;]}}}</span>
+<span class="sd">        )</span>
+<span class="sd">        len(designs)  # 4; designs[1] == {&quot;cross_length&quot;: &quot;200um&quot;, &quot;connection_pads&quot;: {&quot;readout&quot;: {&quot;claw_length&quot;: &quot;200um&quot;}}}</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if a list is empty.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">groups</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">paths</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">walk</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">NestedDict</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">walk</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="o">*</span><span class="n">path</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Empty list for design parameter &#39;</span><span class="si">{</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="o">*</span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">))</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+                <span class="n">group</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="n">groups</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="n">paths</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="o">*</span><span class="n">path</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+
+    <span class="n">walk</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="p">())</span>
+    <span class="n">designs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">combination</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+        <span class="n">design</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">group</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">groups</span><span class="p">,</span> <span class="n">combination</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">[</span><span class="n">group</span><span class="p">]:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">design</span>
+                <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="p">[</span><span class="n">part</span><span class="p">]</span>
+                <span class="n">target</span><span class="p">[</span><span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">designs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">designs</span></div>
+
 
 
 <div class="viewcode-block" id="extract_QSweep_parameters">

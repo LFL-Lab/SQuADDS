@@ -176,6 +176,29 @@ Accessing the Database
 
 **A:** Yes. Point ``SQUADDS_PLANAR_CAP_DATA`` at a local copy of the planar capacitance dataset and ``SQUADDS_CAPML_MODELS`` at a directory of model bundles. Downloads from Hugging Face pin a revision and check the sha256 of every file.
 
+Designs and Simulations
+-----------------------
+
+**Q: Can I give a list of values for a design parameter (e.g. the claw length)?**
+
+**A:** Yes. Any design option can be a list, and every combination is simulated:
+
+.. code-block:: python
+
+   from squadds.simulations import AnsysSimulator, expand_design_options
+
+   simulator = AnsysSimulator(analyzer, best_device)
+   simulator.update_design_parameters(claw_length=["150um", "200um"], cross_length=["200um", "250um"])
+   results = simulator.simulate()  # four designs, one result each
+
+   designs = expand_design_options({"cross_length": ["200um", "250um"], "cross_gap": "30um"})  # two design dicts
+
+A parameter that appears in both the qubit and the cavity options (such as ``claw_length``) takes one value per design. Use a tuple for an option whose value must stay a fixed sequence.
+
+**Q: How do I build a flux-tunable** ``TransmonCross`` **with a SQUID loop?**
+
+**A:** Set ``style="SQUID_LOOP_Dolan"`` and configure the loop with ``SQUID_LOOP=dict(SQUID_width="40um", SQUID_length="5um", SQUID_offset="5um", JJ_width="150nm", JJ_flip=False)``. The loop and its two Dolan junctions are added as the component ``<qubit name>_SQUID_LOOP_Dolan``. ``style="JJ_Dolan"`` with ``Dolan_JJ=dict(JJ_width=..., JJ_flip=...)`` draws a single Dolan junction (see Tutorial 5).
+
 Planar Capacitance Models
 -------------------------
 
