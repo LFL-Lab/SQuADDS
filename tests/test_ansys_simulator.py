@@ -195,3 +195,35 @@ def test_run_drivenmodal_initializes_checkpoint_manifest(headless_qiskit_environ
     assert result["request"]["system_kind"] == "qubit_claw"
     assert result["manifest"]["run_id"] == "qubit-claw-demo"
     assert (tmp_path / "qubit-claw-demo" / "manifest.json").exists()
+
+
+def test_simulate_runs_one_design_per_list_value(monkeypatch, headless_qiskit_environment):
+    simulator = AnsysSimulator(
+        DummyAnalyzer("qubit"),
+        {
+            "design_options": {"cross_length": "200um", "connection_pads": {"readout": {"claw_length": "100um"}}},
+            "setup": {"max_passes": 1},
+        },
+    )
+    simulator.update_design_parameters(claw_length=["150um", "200um"], cross_length=["200um", "300um"])
+    seen = []
+
+    def fake_simulate_single_design(design, device_dict, **kwargs):
+        options = device_dict["design_options"]
+        seen.append((options["cross_length"], options["connection_pads"]["readout"]["claw_length"]))
+        return {"ok": True}, None, None
+
+    monkeypatch.setattr(ansys_simulator_module, "simulate_single_design", fake_simulate_single_design)
+
+    results = simulator.simulate()
+
+    assert results == [{"ok": True}] * 4
+    assert seen == [("200um", "150um"), ("200um", "200um"), ("300um", "150um"), ("300um", "200um")]
+    assert simulator.device_dict["design_options"]["cross_length"] == ["200um", "300um"]
+
+
+def test_simulate_single_design_still_returns_one_result(monkeypatch, headless_qiskit_environment):
+    simulator = AnsysSimulator(DummyAnalyzer("qubit"), {"design_options": {"cross_length": "200um"}, "setup": {}})
+    monkeypatch.setattr(ansys_simulator_module, "simulate_single_design", lambda *a, **k: ({"ok": True}, None, None))
+
+    assert simulator.simulate() == {"ok": True}

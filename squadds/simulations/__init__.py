@@ -26,6 +26,7 @@ from .drivenmodal import (
     maxwell_matrix_interpretation,
     segmented_hamiltonian_sweeps,
 )
+from .sweeper_helperfunctions import expand_design_options
 
 __all__ = [
     "AnsysSimulator",
@@ -49,6 +50,7 @@ __all__ = [
     "default_capacitance_sweep",
     "default_hamiltonian_setup",
     "default_layer_stack",
+    "expand_design_options",
     "hamiltonian_comparison_table",
     "maxwell_matrix_interpretation",
     "segmented_hamiltonian_sweeps",

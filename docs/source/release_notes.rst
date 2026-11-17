@@ -6,6 +6,13 @@ Unreleased
 
 - The MCP server reports version 0.2.0 (it was 0.1.0 through SQuADDS 0.5.0, which added the planar capacitance, dataset-source,
   two-transmon and hosted-model tools: 52 tools in all).
+- ``TransmonCross(style="SQUID_LOOP_Dolan")`` builds its SQUID loop again (it failed with ``name 'SQUID_LOOP_Dolan' is
+  not defined``); the Dolan junction styles survive ``design.rebuild()``, the ``default`` junction follows the qubit's
+  orientation, and Tutorial 5 shows the SQUID options (#34).
+- Design parameters can be lists: ``squadds.simulations.expand_design_options`` turns list-valued options into one design
+  per combination, the sweeps use it, and ``AnsysSimulator.simulate`` returns one result per design (#4).
+- Tutorial 16 sizes its worker pool from the CPUs the job may use, not the node's core count, so a 4-CPU Slurm job no
+  longer starts 8 processes and runs out of memory.
 
 0.5.0 (2026-11-16)
 ------------------

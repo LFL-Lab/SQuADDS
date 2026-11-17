@@ -19,7 +19,7 @@ from squadds.simulations.result_normalization import (
     normalize_simulation_results,
 )
 
-from .sweeper_helperfunctions import extract_QSweep_parameters
+from .sweeper_helperfunctions import expand_design_options
 from .utils import (
     create_claw,
     create_clt_coupler,
@@ -502,7 +502,7 @@ def run_sweep(design, sweep_opts, emode_options, lom_options, filename="default_
         None
         Saves each sweep iteration to a JSON file with the specified filename.
     """
-    for param in extract_QSweep_parameters(sweep_opts["geometry_dict"]):
+    for param in expand_design_options(sweep_opts["geometry_dict"]):
         print(param)
         return_df, _, __ = simulate_single_design(design, param, emode_options, lom_options, sweep_opts["coupler_type"])
         filename = f"filename_{datetime.now().strftime('%d%m%Y_%H.%M.%S')}"
@@ -524,7 +524,7 @@ def run_qubit_cavity_sweep(design, device_options, emode_setup=None, lom_setup=N
         Returns:"""
 
     simulated_params_list = []
-    for param in extract_QSweep_parameters(device_options):
+    for param in expand_design_options(device_options):
         cpw_claw_qubit_df, _, _ = simulate_whole_device(design, param, emode_setup, lom_setup)
         filename = f"filename_{datetime.now().strftime('%d%m%Y_%H.%M.%S')}"
         simulated_params_list.append(cpw_claw_qubit_df)
