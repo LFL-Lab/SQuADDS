@@ -62,7 +62,9 @@ def _require_klayout():
     try:
         import klayout.db as kdb
     except ImportError as exc:
-        raise ImportError("GDS inspection requires the optional dependency group: uv sync --extra gds") from exc
+        raise ImportError(
+            "GDS inspection needs the gds extra: pip install 'squadds[gds]' (with uv: uv sync --extra gds)"
+        ) from exc
     return kdb
 
 

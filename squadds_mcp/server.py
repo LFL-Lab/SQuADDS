@@ -150,6 +150,9 @@ def create_server() -> FastMCP:
         ),
         lifespan=app_lifespan,
     )
+    from squadds_mcp import __version__
+
+    mcp._mcp_server.version = __version__  # serverInfo.version: FastMCP takes no version argument
 
     # -- Register tools (grouped by domain) --
     from squadds_mcp.tools.analysis import register_analysis_tools

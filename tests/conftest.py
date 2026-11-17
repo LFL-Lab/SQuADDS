@@ -17,13 +17,13 @@ def headless_qiskit_environment():
     configure_headless_matplotlib_and_qiskit_metal()
 
 
-ARTIFACTS = os.environ.get("SQUADDS_ML_ARTIFACTS", "/Users/shanto/LFL/squadds_ml_artifacts")
+ARTIFACTS = os.environ.get("SQUADDS_ML_ARTIFACTS", "")
 
 
 @pytest.fixture(scope="session")
 def released_capml_model():
     """``load_model(name)`` for the released capacitance models: the local bundle under ``SQUADDS_ML_ARTIFACTS/models`` when
-    present, else the Hugging Face Hub (``HF_TOKEN``). A repo that cannot be read skips the test, or fails it when
+    that variable is set, else the Hugging Face Hub release. A repo that cannot be read skips the test, or fails it when
     ``SQUADDS_REQUIRE_HUB_MODELS=1`` (the ml-integration CI job)."""
     pytest.importorskip("torch")
     from pathlib import Path
@@ -31,8 +31,8 @@ def released_capml_model():
     from squadds.ml.capacitance import load_model
     from squadds.ml.capacitance.models import ENV_MODELS
 
-    local = Path(ARTIFACTS) / "models"
-    if local.is_dir() and not os.environ.get(ENV_MODELS):
+    local = Path(ARTIFACTS) / "models" if ARTIFACTS else None
+    if local is not None and local.is_dir() and not os.environ.get(ENV_MODELS):
         os.environ[ENV_MODELS] = str(local)
     cache = {}
 
