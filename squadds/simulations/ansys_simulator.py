@@ -19,6 +19,7 @@ from squadds.simulations.objects import (
     simulate_single_design,
     simulate_whole_device,
 )
+from squadds.simulations.sweeper_helperfunctions import expand_design_options
 from squadds.simulations.utils import find_a_fq
 
 
@@ -273,7 +274,8 @@ class AnsysSimulator:
         Smartly searches for the keys in 'design_options', 'design_options_qubit', etc.
 
         Args:
-            **kwargs: Key-value pairs of design parameters to update (e.g., cross_length="300um").
+            **kwargs: Key-value pairs of design parameters to update (e.g., cross_length="300um"). A list
+                (e.g., claw_length=["150um", "200um"]) makes :meth:`simulate` run one design per value.
         """
         targets = []
         # Single design
@@ -363,7 +365,8 @@ class AnsysSimulator:
             run_async (bool): If True, runs the simulation asynchronously.
 
         Returns:
-            pandas.DataFrame or concurrent.futures.Future: The simulation results or a Future object.
+            pandas.DataFrame or concurrent.futures.Future: The simulation results or a Future object. When a
+            design parameter is a list (see ``expand_design_options``), a list with one result per design.
         """
         # Use stored device_dict if none provided
         if device_dict is None:
@@ -384,6 +387,14 @@ class AnsysSimulator:
         Raises:
             None
         """
+        design_keys = [
+            k for k in ("design_options", "design_options_qubit", "design_options_cavity_claw") if k in device_dict
+        ]
+        variants = expand_design_options({k: device_dict[k] for k in design_keys})
+        if len(variants) > 1:
+            self.console.print(f"[cyan]List-valued design parameters: simulating {len(variants)} designs[/cyan]")
+            return [self.simulate({**device_dict, **variant}, run_async=run_async) for variant in variants]
+
         if run_async:
             raise NotImplementedError(
                 "Ansys-native parallel simulation (run_async=True) is not yet implemented. "

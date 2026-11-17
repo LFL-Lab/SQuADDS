@@ -78,10 +78,16 @@ def build_legacy_ansys_simulation_outline() -> dict[str, Any]:
                 ),
             },
             "parameter_sweeps": {
-                "symbols": ["squadds.simulations.objects.run_sweep", "AnsysSimulator.sweep"],
+                "symbols": [
+                    "squadds.simulations.objects.run_sweep",
+                    "AnsysSimulator.sweep",
+                    "squadds.simulations.expand_design_options",
+                ],
                 "description": (
                     "`run_sweep` iterates simulator parameter dictionaries, invoking `simulate_single_design` "
-                    "(or equivalents) — filenames split by CLT vs NCap vs legacy xmon sweeps."
+                    "(or equivalents) — filenames split by CLT vs NCap vs legacy xmon sweeps. Any design parameter "
+                    "may be a list: `expand_design_options` turns list-valued options into one design per "
+                    "combination, and `AnsysSimulator.simulate` returns one result per design."
                 ),
             },
             "simulate_method_guardrails": (

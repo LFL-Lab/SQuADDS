@@ -2,7 +2,7 @@ import numpy as np
 from qiskit_metal import Dict, draw
 from qiskit_metal.qlibrary.core import BaseQubit
 
-from .jjs import JjDolan
+from .jjs import JjDolan, SquidLoopDolan
 
 
 class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
@@ -59,7 +59,7 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
                              Choose from the following:
                              * 'default' -- Used for simulation in Ansys
                              * 'SQUID_LOOP_Dolan' -- Makes a SQUID loop in Dolan style. Use 'SQUID_LOOP' for options.
-                             * 'Dolan_JJ' -- Makes a Josephson Junction in Dolan style. Use 'Dolan_JJ' for options.
+                             * 'JJ_Dolan' -- Makes a Josephson Junction in Dolan style. Use 'Dolan_JJ' for options.
        * SQUID_LOOP: Dict
            * SQUID_width: '40um' -- Interior width (x-axis) of the SQUID LOOP
            * SQUID_length: '5um' -- Interior length (y-axis) of the SQUID LOOP
@@ -140,7 +140,7 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
             jj = draw.LineString([(0, -cross_length), (0, -cross_length - cross_gap)])
 
             rect_jj = draw.rotate(jj, p.orientation, origin=(0, 0))
-            rect_jj = draw.translate(jj, p.pos_x, p.pos_y)
+            rect_jj = draw.translate(rect_jj, p.pos_x, p.pos_y)
 
             self.add_qgeometry("junction", dict(rect_jj=rect_jj), width=cross_width, chip=chip)
 
@@ -209,7 +209,7 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
                     JJ_width=sl.JJ_width,
                 )
 
-                SQUID_LOOP_Dolan(self.design, self.name + "_SQUID_LOOP_Dolan", options=jj_options)
+                self._make_child(SquidLoopDolan, self.name + "_SQUID_LOOP_Dolan", jj_options)
 
                 ### Add to QGeometry
                 polys = T_pin2
@@ -245,7 +245,7 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
                 if pj.JJ_flip:
                     jj_options.orientation = p.orientation + 180
 
-                JjDolan(self.design, self.name + "_JJ_Dolan", options=jj_options)
+                self._make_child(JjDolan, self.name + "_JJ_Dolan", jj_options)
 
                 ### Add QGeometries
                 polys = T_pin2
@@ -271,6 +271,17 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
         # generate qgeometry
         self.add_qgeometry("poly", dict(cross=cross), chip=chip)
         self.add_qgeometry("poly", dict(cross_etch=cross_etch), subtract=True, chip=chip)
+
+    def _make_child(self, cls, name, options):
+        """Create the junction sub-component, or update and rebuild it when the qubit is rebuilt."""
+        if name in self.design.name_to_id:
+            child = self.design.components[name]
+            if isinstance(child, cls):
+                child.options.update(options)
+                child.rebuild()
+                return child
+            self.design.delete_component(name, force=True)
+        return cls(self.design, name, options=options)
 
     ############################CONNECTORS##################################################################################################
 

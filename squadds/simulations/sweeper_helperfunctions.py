@@ -2,18 +2,67 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from itertools import product
 from typing import Any
 
 NestedDict = dict[str, Any]
 
 __all__ = [
+    "expand_design_options",
     "extract_QSweep_parameters",
     "extract_parameters",
     "extract_values",
     "generate_combinations",
     "create_dict_list",
 ]
+
+
+def expand_design_options(options: NestedDict) -> list[NestedDict]:
+    """Expand list-valued design parameters into one design per combination.
+
+    Every list at a leaf of ``options`` is a parameter to sweep, and the result is the grid of all combinations
+    (cartesian product, last list fastest). Leaves with the same name and the same list are swept together, so a
+    parameter that appears in several blocks (e.g. ``claw_length`` in both the qubit and the cavity options of a
+    coupled design) keeps one value per design. Everything else is copied unchanged; use a tuple to pass a value that
+    must stay a list-like constant. Options without lists return ``[copy of options]``.
+
+    Example::
+
+        designs = expand_design_options(
+            {"cross_length": ["200um", "250um"], "connection_pads": {"readout": {"claw_length": ["150um", "200um"]}}}
+        )
+        len(designs)  # 4; designs[1] == {"cross_length": "200um", "connection_pads": {"readout": {"claw_length": "200um"}}}
+
+    Raises:
+        ValueError: if a list is empty.
+    """
+    groups: dict[tuple[str, str], list] = {}
+    paths: dict[tuple[str, str], list[tuple[str, ...]]] = {}
+
+    def walk(node: NestedDict, path: tuple[str, ...]) -> None:
+        for key, value in node.items():
+            if isinstance(value, dict):
+                walk(value, (*path, key))
+            elif isinstance(value, list):
+                if not value:
+                    raise ValueError(f"Empty list for design parameter '{'.'.join((*path, key))}'.")
+                group = (key, repr(value))
+                groups.setdefault(group, value)
+                paths.setdefault(group, []).append((*path, key))
+
+    walk(options, ())
+    designs = []
+    for combination in product(*groups.values()):
+        design = deepcopy(options)
+        for group, value in zip(groups, combination, strict=True):
+            for path in paths[group]:
+                target = design
+                for part in path[:-1]:
+                    target = target[part]
+                target[path[-1]] = value
+        designs.append(design)
+    return designs
 
 
 def extract_QSweep_parameters(parameters: NestedDict) -> list[NestedDict]:

@@ -1,5 +1,8 @@
+import pytest
+
 from squadds.simulations.sweeper_helperfunctions import (
     create_dict_list,
+    expand_design_options,
     extract_parameters,
     extract_QSweep_parameters,
     extract_values,
@@ -97,3 +100,56 @@ def test_extract_qsweep_parameters_builds_all_nested_combinations():
             "claw_opts": {"connection_pads": {"readout": {"claw_length": "20um"}}},
         },
     ]
+
+
+def test_expand_design_options_builds_grid_of_list_valued_parameters():
+    options = {
+        "cross_length": ["200um", "250um"],
+        "cross_gap": "30um",
+        "connection_pads": {"readout": {"claw_length": ["150um", "200um", "250um"], "claw_gap": "5um"}},
+        "notes": {},
+    }
+
+    designs = expand_design_options(options)
+
+    assert len(designs) == 6
+    assert designs[1] == {
+        "cross_length": "200um",
+        "cross_gap": "30um",
+        "connection_pads": {"readout": {"claw_length": "200um", "claw_gap": "5um"}},
+        "notes": {},
+    }
+    assert {(d["cross_length"], d["connection_pads"]["readout"]["claw_length"]) for d in designs} == {
+        (c, w) for c in ("200um", "250um") for w in ("150um", "200um", "250um")
+    }
+    assert options["cross_length"] == ["200um", "250um"]
+
+
+def test_expand_design_options_without_lists_returns_a_copy():
+    options = {"cross_length": "200um", "jog": ("R90", "50um")}
+
+    designs = expand_design_options(options)
+
+    assert designs == [options]
+    assert designs[0] is not options
+
+
+def test_expand_design_options_sweeps_shared_parameter_together():
+    claw = ["150um", "200um"]
+    options = {
+        "design_options_qubit": {"connection_pads": {"readout": {"claw_length": claw}}},
+        "design_options_cavity_claw": {"claw_opts": {"connection_pads": {"readout": {"claw_length": list(claw)}}}},
+    }
+
+    designs = expand_design_options(options)
+
+    assert len(designs) == 2
+    for design in designs:
+        qubit = design["design_options_qubit"]["connection_pads"]["readout"]["claw_length"]
+        cavity = design["design_options_cavity_claw"]["claw_opts"]["connection_pads"]["readout"]["claw_length"]
+        assert qubit == cavity
+
+
+def test_expand_design_options_rejects_empty_list():
+    with pytest.raises(ValueError, match="cross_length"):
+        expand_design_options({"cross_length": []})
