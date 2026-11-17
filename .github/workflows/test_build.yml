@@ -7,9 +7,13 @@ on:
       - main
     paths:
       - 'squadds/**'
+      - 'squadds_mcp/**'
       - 'tests/**'
+      - 'tutorials/**'
+      - 'scripts/run_tutorials.py'
       - 'pyproject.toml'
       - 'uv.lock'
+      - '.github/workflows/test_build.yml'
   pull_request:
     branches:
       - master
@@ -27,8 +31,44 @@ on:
           - macos-latest
           - windows-latest
 
+concurrency:
+  # A newer push to the same pull request cancels the older run; pushes to master each finish.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+  changes:
+    # Does this run touch code? Pull requests that change only docs, the README or other text skip the jobs below;
+    # "CI result" still reports, so it can be the single required check in branch protection.
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed="$(git diff --name-only "$BASE...$HEAD")"
+          echo "Changed files:"
+          echo "$changed"
+          if echo "$changed" | grep -qE '^(squadds/|squadds_mcp/|tests/|tutorials/|scripts/run_tutorials\.py$|pyproject\.toml$|uv\.lock$|\.github/workflows/test_build\.yml$)'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
   test:
+    needs: changes
+    if: (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -91,7 +131,8 @@ jobs:
     # substrate route, the Analyzer bridge, the planar dataset source, exact component rebuilds of dataset records and the
     # live hosted inference API. The training-reproduction gates need the training data and skip here.
     # Needs HF_TOKEN; pull requests from forks get no secrets, so they skip this job.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    needs: changes
+    if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -139,7 +180,8 @@ jobs:
     # cell error or failing shell line (scripts/run_tutorials.py). Cells tagged skip-ci need the all-data training shards
     # and hours of training (Tutorial 14's collective retrain). Tutorial 16 screens thousands of layouts with 8 worker
     # processes (about 8 min on an 18-core laptop) and is not run here.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    needs: changes
+    if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     strategy:
@@ -200,6 +242,8 @@ jobs:
     # A plain pip install of squadds[ml] on glibc 2.28 Linux (the RHEL / Rocky 8 class of many clusters), then QCap and
     # QCap-Fast predictions with the public models and no token. PySide6 >= 6.10 has no wheel below glibc 2.34, which is
     # why pyproject.toml asks for pyside6>=6.8.
+    needs: changes
+    if: (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
     runs-on: ubuntu-latest
     container: quay.io/pypa/manylinux_2_28_x86_64
     defaults:
@@ -230,6 +274,8 @@ jobs:
 
   integration-smoke:
     # The SQuADDS MVP calls and the QCap user contract (tests/mvp_test.py) on every OS, with the [ml] extra.
+    needs: changes
+    if: (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -270,6 +316,8 @@ jobs:
         run: uv run pytest -s -vv tests/mvp_test.py --tb=short -ra
 
   lint:
+    needs: changes
+    if: (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
     runs-on: ubuntu-latest
     env:
       QISKIT_METAL_HEADLESS: "1"
@@ -295,3 +343,19 @@ jobs:
       - name: Run Ruff formatter check
         run: uv run ruff format --check .
         continue-on-error: true
+
+  ci-result:
+    # The one check to require in branch protection: green when every job above passed, or was skipped because the
+    # pull request changes no code (docs or README only) or comes from a fork without secrets.
+    name: CI result
+    if: always()
+    needs: [changes, test, ml-integration, tutorials, old-glibc-install, integration-smoke, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "At least one job failed or was cancelled."
+          exit 1
+      - name: Summary
+        run: echo "All jobs passed, or were skipped because nothing they test changed."
