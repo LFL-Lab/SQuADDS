@@ -8,11 +8,11 @@ The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Pr
 
 SQuADDS also predicts the full Maxwell capacitance matrix of any planar superconducting circuit layout straight from its GDS file. The models behind this are physics-corrected graph neural networks trained on our Q3D dataset, and they run on your own machine in about a second per layout.
 
-**Paper Link:** [SQuADDS: A Database for Superconducting Quantum Device Design and Simulation](https://quantum-journal.org/papers/q-2024-09-09-1465/)
+**SQuADDS Paper Link:** [SQuADDS: A Database for Superconducting Quantum Device Design and Simulation](https://quantum-journal.org/papers/q-2024-09-09-1465/)
 
-**Capacitance Paper Link:** [QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/)
+**QCap Paper Link:** [QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/)
 
-**Capacitance Paper Page:** [https://lfl-lab.github.io/SQuADDS/qcap/](https://lfl-lab.github.io/SQuADDS/qcap/), with the explainer videos and the tutorials
+**QCap Paper Page:** [https://lfl-lab.github.io/SQuADDS/qcap/](https://lfl-lab.github.io/SQuADDS/qcap/), with the explainer videos and the tutorials
 
 **Docsite Link:** [https://lfl-lab.github.io/SQuADDS/](https://lfl-lab.github.io/SQuADDS/)
 
