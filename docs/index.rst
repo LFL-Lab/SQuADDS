@@ -106,8 +106,8 @@ Learn more about our latest paper
 .. raw:: html
 
    <figure class="paper-video">
-     <video controls preload="none" playsinline poster="ml-paper/media/v1_summary.jpg" width="1280" height="720" aria-label="Summary video of the paper"><source src="ml-paper/media/v1_summary.mp4" type="video/mp4"></video>
-     <figcaption><a href="ml-paper/">QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout</a></figcaption>
+     <video controls preload="none" playsinline poster="qcap/media/v1_summary.jpg" width="1280" height="720" aria-label="Summary video of the paper"><source src="qcap/media/v1_summary.mp4" type="video/mp4"></video>
+     <figcaption><a href="qcap/">QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout</a></figcaption>
    </figure>
 
 Tutorials

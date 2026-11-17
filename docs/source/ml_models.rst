@@ -24,13 +24,13 @@ Planar capacitance models
 Resources
 ^^^^^^^^^
 
-- **Paper:** `QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout <../ml-paper/>`_, with a short video for each section. By topic:
+- **Paper:** `QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout <../qcap/>`_, with a short video for each section. By topic:
 
-  - how a layout becomes a graph: `Sec. II B <../ml-paper/#sec-emb-geometric>`_; the physics prior: `Sec. II C <../ml-paper/#sec-emb-prior>`_
-  - the network and the released models: `Sec. III A <../ml-paper/#sec-ml-network>`_ and `Sec. III B <../ml-paper/#sec-ml-models>`_
-  - accuracy: `Sec. IV A <../ml-paper/#sec-res-sota>`_; families the model never saw: `Sec. IV B <../ml-paper/#sec-res-zeroshot>`_
-  - other substrates: `Sec. IV C 1 <../ml-paper/#sec-res-stack>`_; large chips: `Sec. IV C 2 <../ml-paper/#sec-res-windows>`_
-  - design workflows: `Sec. IV D <../ml-paper/#sec-res-workflows>`_
+  - how a layout becomes a graph: `Sec. II B <../qcap/#sec-emb-geometric>`_; the physics prior: `Sec. II C <../qcap/#sec-emb-prior>`_
+  - the network and the released models: `Sec. III A <../qcap/#sec-ml-network>`_ and `Sec. III B <../qcap/#sec-ml-models>`_
+  - accuracy: `Sec. IV A <../qcap/#sec-res-sota>`_; families the model never saw: `Sec. IV B <../qcap/#sec-res-zeroshot>`_
+  - other substrates: `Sec. IV C 1 <../qcap/#sec-res-stack>`_; large chips: `Sec. IV C 2 <../qcap/#sec-res-windows>`_
+  - design workflows: `Sec. IV D <../qcap/#sec-res-workflows>`_
 
 - **Models:** `SQuADDS/QCap <https://huggingface.co/SQuADDS/QCap>`_
 - **Dataset:** `SQuADDS/SQuADDS_PlanarCapacitance <https://huggingface.co/datasets/SQuADDS/SQuADDS_PlanarCapacitance>`_
