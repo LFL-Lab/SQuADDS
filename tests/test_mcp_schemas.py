@@ -154,7 +154,7 @@ class TestVersionResult:
     def test_basic(self):
         result = VersionResult(
             squadds_version="0.5.0",
-            mcp_server_version="0.1.0",
+            mcp_server_version="0.2.0",
             repo_name="SQuADDS/SQuADDS_DB",
         )
         assert result.squadds_version == "0.5.0"

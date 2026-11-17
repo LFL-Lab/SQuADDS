@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Unreleased
+----------
+
+- The MCP server reports version 0.2.0 (it was 0.1.0 through SQuADDS 0.5.0, which added the planar capacitance, dataset-source,
+  two-transmon and hosted-model tools: 52 tools in all).
+
 0.5.0 (2026-11-16)
 ------------------
 
