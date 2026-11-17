@@ -45,19 +45,26 @@ jobs:
       code: ${{ steps.filter.outputs.code }}
     steps:
       - uses: actions/checkout@v5
-      - id: filter
-        uses: dorny/paths-filter@v3
         with:
-          filters: |
-            code:
-              - 'squadds/**'
-              - 'squadds_mcp/**'
-              - 'tests/**'
-              - 'tutorials/**'
-              - 'scripts/run_tutorials.py'
-              - 'pyproject.toml'
-              - 'uv.lock'
-              - '.github/workflows/test_build.yml'
+          fetch-depth: 0
+      - id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed="$(git diff --name-only "$BASE...$HEAD")"
+          echo "Changed files:"
+          echo "$changed"
+          if echo "$changed" | grep -qE '^(squadds/|squadds_mcp/|tests/|tutorials/|scripts/run_tutorials\.py$|pyproject\.toml$|uv\.lock$|\.github/workflows/test_build\.yml$)'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
 
   test:
     needs: changes
