@@ -181,7 +181,7 @@ Contents
 Citing SQuADDS and QCap
 -----------------------
 
-If SQuADDS helps your research, please support its continued development and maintenance by citing the paper: `Shanto et al., Quantum 8, 1465 (2024) <https://doi.org/10.22331/q-2024-09-09-1465>`__. If you use QCap (the planar capacitance models or their dataset), please also cite `Shanto, Das and Levenson-Falk (2026) <https://lfl-lab.github.io/SQuADDS/ml-paper/paper/>`__.
+If SQuADDS helps your research, please support its continued development and maintenance by citing the paper: `Shanto et al., Quantum 8, 1465 (2024) <https://doi.org/10.22331/q-2024-09-09-1465>`__. If you use QCap (the planar capacitance models or their dataset), please also cite `Shanto, Das and Levenson-Falk (2026) <https://arxiv.org/abs/2611.22057>`__.
 
 .. code-block:: bibtex
 
@@ -203,5 +203,8 @@ If SQuADDS helps your research, please support its continued development and mai
      title = {{QCap}: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout},
      author = {Shanto, Sadman Ahmed and Das, Saikat and Levenson-Falk, Eli},
      year = {2026},
-     url = {https://lfl-lab.github.io/SQuADDS/ml-paper/paper/}
+     eprint = {2611.22057},
+     archivePrefix = {arXiv},
+     primaryClass = {quant-ph},
+     url = {https://arxiv.org/abs/2611.22057}
    }

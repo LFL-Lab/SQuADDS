@@ -2,7 +2,7 @@
   <img src="docs/_static/images/squadds_not_transparent.png" width="100%" alt="SQuADDS Logo" />
 </center>
 
-# Superconducting Qubit And Device Design and Simulation Database ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) ![Pepy Total Downloads](https://img.shields.io/pepy/dt/squadds) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) [![SQuADDS paper: Quantum 8, 1465 (2024)](https://img.shields.io/badge/SQuADDS-Quantum%208%2C%201465%20(2024)-6c3483?logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y%2BmAAAAD1BMVEUAAAD8%2FPzd3d39%2Ff3FxcWSJ2tMAAAAAXRSTlMAQObYZgAAAJxJREFUKM%2BlUgsOxSAIs2X3P%2FMQ5vholrw8ligWSgljjP8NdMMphM1bVgCwxnpu9Z2JPQpsZfG%2B0etKADNJJKgQCQU6IIvmiQxm6qGgQO7XbizYT60ElzWvBqem2uVXYw5Pf6gZDqGsGe25ph5cmqlpTiWKflOdaczm89VkmkFvLD9iKFpO%2BXL6oZbOh9dW4WNNvhfMi9pmHkK%2F2w0FJAFaMySzJgAAAABJRU5ErkJggg%3D%3D)](https://quantum-journal.org/papers/q-2024-09-09-1465/) [![QCap paper: arXiv (coming soon)](https://img.shields.io/badge/QCap-arXiv%20(coming%20soon)-b31b1b?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMjAuMzQgMy45NEExMS42IDExLjYgMCAxIDAgMjAuMzQgMjAuMDZMMTguMDQgMTcuODRBOC40IDguNCAwIDEgMSAxOC4wNCA2LjE2WiIgZmlsbD0iI2ZmZmZmZiIvPjxwYXRoIGQ9Ik02IDZoM3YzaC0zWiIgZmlsbD0iI2ZmZmZmZiIvPjxwYXRoIGQ9Ik0xMCAxMGgzdjNoLTNaIiBmaWxsPSIjZmZmZmZmIi8%2BPHBhdGggZD0iTTE0IDE0aDN2M2gtM1oiIGZpbGw9IiNmZmZmZmYiLz48cGF0aCBkPSJNMTAgNmgzdjNoLTNaIiBmaWxsPSIjOWE5YTlhIi8%2BPHBhdGggZD0iTTE0IDZoM3YzaC0zWiIgZmlsbD0iIzlhOWE5YSIvPjxwYXRoIGQ9Ik02IDEwaDN2M2gtM1oiIGZpbGw9IiM5YTlhOWEiLz48cGF0aCBkPSJNNiAxNGgzdjNoLTNaIiBmaWxsPSIjOWE5YTlhIi8%2BPC9zdmc%2BCg%3D%3D)](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/) [![Ask DeepWiki](https://img.shields.io/badge/Ask-DeepWiki-1f6feb)](https://deepwiki.com/LFL-Lab/SQuADDS)
+# Superconducting Qubit And Device Design and Simulation Database ![Version](https://img.shields.io/github/v/release/LFL-Lab/SQuADDS) ![Pepy Total Downloads](https://img.shields.io/pepy/dt/squadds) ![Build Status](https://img.shields.io/github/actions/workflow/status/LFL-Lab/SQuADDS/ci.yml?branch=master) ![License](https://img.shields.io/github/license/LFL-Lab/SQuADDS) [![SQuADDS paper: Quantum 8, 1465 (2024)](https://img.shields.io/badge/SQuADDS-Quantum%208%2C%201465%20(2024)-6c3483?logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y%2BmAAAAD1BMVEUAAAD8%2FPzd3d39%2Ff3FxcWSJ2tMAAAAAXRSTlMAQObYZgAAAJxJREFUKM%2BlUgsOxSAIs2X3P%2FMQ5vholrw8ligWSgljjP8NdMMphM1bVgCwxnpu9Z2JPQpsZfG%2B0etKADNJJKgQCQU6IIvmiQxm6qGgQO7XbizYT60ElzWvBqem2uVXYw5Pf6gZDqGsGe25ph5cmqlpTiWKflOdaczm89VkmkFvLD9iKFpO%2BXL6oZbOh9dW4WNNvhfMi9pmHkK%2F2w0FJAFaMySzJgAAAABJRU5ErkJggg%3D%3D)](https://quantum-journal.org/papers/q-2024-09-09-1465/) [![QCap paper: arXiv:2611.22057](https://img.shields.io/badge/QCap-arXiv%3A2611.22057-b31b1b?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMjAuMzQgMy45NEExMS42IDExLjYgMCAxIDAgMjAuMzQgMjAuMDZMMTguMDQgMTcuODRBOC40IDguNCAwIDEgMSAxOC4wNCA2LjE2WiIgZmlsbD0iI2ZmZmZmZiIvPjxwYXRoIGQ9Ik02IDZoM3YzaC0zWiIgZmlsbD0iI2ZmZmZmZiIvPjxwYXRoIGQ9Ik0xMCAxMGgzdjNoLTNaIiBmaWxsPSIjZmZmZmZmIi8%2BPHBhdGggZD0iTTE0IDE0aDN2M2gtM1oiIGZpbGw9IiNmZmZmZmYiLz48cGF0aCBkPSJNMTAgNmgzdjNoLTNaIiBmaWxsPSIjOWE5YTlhIi8%2BPHBhdGggZD0iTTE0IDZoM3YzaC0zWiIgZmlsbD0iIzlhOWE5YSIvPjxwYXRoIGQ9Ik02IDEwaDN2M2gtM1oiIGZpbGw9IiM5YTlhOWEiLz48cGF0aCBkPSJNNiAxNGgzdjNoLTNaIiBmaWxsPSIjOWE5YTlhIi8%2BPC9zdmc%2BCg%3D%3D)](https://arxiv.org/abs/2611.22057) [![Ask DeepWiki](https://img.shields.io/badge/Ask-DeepWiki-1f6feb)](https://deepwiki.com/LFL-Lab/SQuADDS)
 
 The SQuADDS (Superconducting Qubit And Device Design and Simulation) Database Project is an open-source resource aimed at advancing research in superconducting quantum device designs. It provides a robust workflow for generating and simulating superconducting quantum device designs, facilitating the accurate prediction of Hamiltonian parameters across a wide range of design geometries.
 
@@ -10,7 +10,7 @@ SQuADDS also predicts the full Maxwell capacitance matrix of any planar supercon
 
 **SQuADDS Paper Link:** [SQuADDS: A Database for Superconducting Quantum Device Design and Simulation](https://quantum-journal.org/papers/q-2024-09-09-1465/)
 
-**QCap Paper Link:** [QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/)
+**QCap Paper Link:** [QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout](https://arxiv.org/abs/2611.22057)
 
 **QCap Paper Page:** [https://lfl-lab.github.io/SQuADDS/qcap/](https://lfl-lab.github.io/SQuADDS/qcap/), with the explainer videos and the tutorials
 
@@ -45,7 +45,7 @@ SQuADDS also predicts the full Maxwell capacitance matrix of any planar supercon
 
 ## Citation
 
-If SQuADDS helps your research, please support its continued development and maintenance by citing the paper: [Shanto et al., Quantum 8, 1465 (2024)](https://doi.org/10.22331/q-2024-09-09-1465). If you use QCap (the planar capacitance models or their dataset), please also cite [Shanto, Das and Levenson-Falk (2026)](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/).
+If SQuADDS helps your research, please support its continued development and maintenance by citing the paper: [Shanto et al., Quantum 8, 1465 (2024)](https://doi.org/10.22331/q-2024-09-09-1465). If you use QCap (the planar capacitance models or their dataset), please also cite [Shanto, Das and Levenson-Falk (2026)](https://arxiv.org/abs/2611.22057).
 
 ```bibtex
 @article{Shanto2024squaddsvalidated,
@@ -66,7 +66,10 @@ If SQuADDS helps your research, please support its continued development and mai
   title = {{QCap}: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout},
   author = {Shanto, Sadman Ahmed and Das, Saikat and Levenson-Falk, Eli},
   year = {2026},
-  url = {https://lfl-lab.github.io/SQuADDS/ml-paper/paper/}
+  eprint = {2611.22057},
+  archivePrefix = {arXiv},
+  primaryClass = {quant-ph},
+  url = {https://arxiv.org/abs/2611.22057}
 }
 ```
 
@@ -488,7 +491,7 @@ Or upload a GDS to the [browser demo](https://huggingface.co/spaces/SQuADDS/plan
 | **`QCap`** (default) | 1.05 % (0.132 / 0.188 fF) | 0.845 s |
 | `QCap-Fast` | 3.175 % (0.583 / 0.824 fF) | 0.091 s |
 
-Both models are trained on all of our data. The error is the median relative error of the mutual capacitances on 39 layouts of a family that no part of either model saw in training (rings with a neighbour, 3 or 4 conductors). On that family `QCap-Fast` does worse than the physics prior alone, 1.765 % (0.275 / 0.376 fF), so use it only to screen the families it was trained on. The scores per family are in the [ML Models](https://lfl-lab.github.io/SQuADDS/source/ml_models.html#planar-capacitance-models) guide and the [paper](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/).
+Both models are trained on all of our data. The error is the median relative error of the mutual capacitances on 39 layouts of a family that no part of either model saw in training (rings with a neighbour, 3 or 4 conductors). On that family `QCap-Fast` does worse than the physics prior alone, 1.765 % (0.275 / 0.376 fF), so use it only to screen the families it was trained on. The scores per family are in the [ML Models](https://lfl-lab.github.io/SQuADDS/source/ml_models.html#planar-capacitance-models) guide and the [paper](https://arxiv.org/abs/2611.22057).
 
 #### Links
 
@@ -496,7 +499,7 @@ Both models are trained on all of our data. The error is the median relative err
 - Dataset: [SQuADDS/SQuADDS_PlanarCapacitance](https://huggingface.co/datasets/SQuADDS/SQuADDS_PlanarCapacitance)
 - Browser demo: [SQuADDS/planar-capacitance](https://huggingface.co/spaces/SQuADDS/planar-capacitance)
 - Guide: [ML Models](https://lfl-lab.github.io/SQuADDS/source/ml_models.html#planar-capacitance-models), and Tutorials 11-16 above
-- Paper: [QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout](https://lfl-lab.github.io/SQuADDS/ml-paper/paper/), with explainer videos on the [paper page](https://lfl-lab.github.io/SQuADDS/qcap/)
+- Paper: [QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout](https://arxiv.org/abs/2611.22057), with explainer videos on the [paper page](https://lfl-lab.github.io/SQuADDS/qcap/)
 
 ### TransmonCross Hamiltonian-to-geometry model
 

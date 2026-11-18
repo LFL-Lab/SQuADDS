@@ -9,8 +9,8 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'SQuADDS'
 copyright = '2026, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
-version = "0.5.0"
-release = "0.5.0"
+version = "0.5.1"
+release = "0.5.1"
 
 # General configuration
 exclude_patterns = [
@@ -122,7 +122,7 @@ html_sidebars = {
     "**": ["paper-outline"],
 }
 html_context = {
-    "theme_announcement": "Preprint coming very soon. Check out our <a href='https://lfl-lab.github.io/SQuADDS/qcap/'>docsite</a> now",
+    "theme_announcement": "Read our latest <a href='https://arxiv.org/abs/2611.22057'>preprint</a> and check out its <a href='https://lfl-lab.github.io/SQuADDS/qcap/'>docsite</a>",
     "expandable_sidebar": True,
     "google_analytics_id": "G-R5QKJDWM2W",
     "footer": "_footer.html",  # Add this line to reference your custom footer
