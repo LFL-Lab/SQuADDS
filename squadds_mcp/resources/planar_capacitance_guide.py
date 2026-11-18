@@ -153,8 +153,7 @@ and thread count.
 | `QCap-Fast` | improved release of the paper's fast model (same architecture; surrogate trained on more generated layouts, networks retrained on all 45,771 labelled layouts): no field solve, a learned surrogate predicts the prior | quick screening of trained families only |
 
 **QCap-Fast warning.** On new designs of a trained family `QCap-Fast` was worse than the physics prior alone: 3.175 % (MAE 0.583 fF /
-RMSE 0.824 fF) against 1.765 % (MAE 0.275 fF / RMSE 0.376 fF); the paper's version of it, on a held-out family, 3.11 % (MAE
-0.533 fF / RMSE 0.633 fF) against 1.55 % (MAE 0.166 fF / RMSE 0.205 fF). Use `QCap` for anything that matters.
+RMSE 0.824 fF) against 1.765 % (MAE 0.275 fF / RMSE 0.376 fF). Use `QCap` for anything that matters.
 
 **Physical checks.** When a check fails (symmetric, diagonal positive, off-diagonal negative, closure, positive-definite
 signal block), `checks.passed` is false and the first warning reads "physical check failed ... This matrix is not
