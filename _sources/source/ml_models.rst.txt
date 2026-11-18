@@ -56,12 +56,6 @@ Models
 
 Both are trained on all 45,771 Q3D layouts.
 
-.. warning::
-
-   On new designs ``QCap-Fast`` can lose to the physics prior alone: 3.175 % (MAE 0.583 fF / RMSE 0.824 fF) vs.
-   1.765 % (MAE 0.275 fF / RMSE 0.376 fF); for the paper's version on a held-out family,
-   3.11 % (MAE 0.533 fF / RMSE 0.633 fF) vs. 1.55 % (MAE 0.166 fF / RMSE 0.205 fF).
-
 Other substrates
 ^^^^^^^^^^^^^^^^
 
