@@ -9,8 +9,8 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'SQuADDS'
 copyright = '2026, Sadman Ahmed Shanto & Eli Levenson-Falk'
 author = 'Sadman Ahmed Shanto'
-version = "0.5.1"
-release = "0.5.1"
+version = "0.5.2"
+release = "0.5.2"
 
 # General configuration
 exclude_patterns = [
