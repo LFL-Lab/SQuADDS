@@ -241,6 +241,41 @@ Tutorials
 
 API reference: :doc:`squadds.ml.capacitance` and :doc:`squadds.layouts`. MCP tools: :doc:`mcp_server`.
 
+.. _planar-capacitance-citation:
+
+Citing
+^^^^^^
+
+If you use QCap or SQuADDS in your work, please cite both papers:
+`Shanto, Das and Levenson-Falk, arXiv:2611.22057 (2026) <https://arxiv.org/abs/2611.22057>`__ and
+`Shanto et al., Quantum 8, 1465 (2024) <https://doi.org/10.22331/q-2024-09-09-1465>`__.
+
+.. code-block:: bibtex
+
+   @article{Shanto2024squaddsvalidated,
+     doi = {10.22331/q-2024-09-09-1465},
+     url = {https://doi.org/10.22331/q-2024-09-09-1465},
+     title = {{SQ}u{ADDS}: {A} validated design database and simulation workflow for superconducting qubit design},
+     author = {Shanto, Sadman and Kuo, Andre and Miyamoto, Clark and Zhang, Haimeng and Maurya, Vivek and Vlachos, Evangelos and Hecht, Malida and Shum, Chung Wa and Levenson-Falk, Eli},
+     journal = {{Quantum}},
+     issn = {2521-327X},
+     publisher = {{Verein zur F{\"{o}}rderung des Open Access Publizierens in den Quantenwissenschaften}},
+     volume = {8},
+     pages = {1465},
+     month = sep,
+     year = {2024}
+   }
+
+   @misc{Shanto2026planarcapacitance,
+     title = {{QCap}: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout},
+     author = {Shanto, Sadman Ahmed and Das, Saikat and Levenson-Falk, Eli},
+     year = {2026},
+     eprint = {2611.22057},
+     archivePrefix = {arXiv},
+     primaryClass = {quant-ph},
+     url = {https://arxiv.org/abs/2611.22057}
+   }
+
 
 .. _hosted-inference:
 
