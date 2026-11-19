@@ -1,6 +1,7 @@
 """Machine-learning models for SQuADDS (optional extra: ``pip install squadds[ml]``).
 
-Submodules import torch / gdstk / numba lazily, so ``import squadds`` works without the extra.
+Submodules import torch / gdstk / numba lazily, so ``import squadds`` works without the extra. ``squadds.ml.inverse``
+(TransmonCross Hamiltonian to geometry) and ``squadds.ml.client`` (hosted API) need no extra.
 """
 
 from __future__ import annotations
@@ -28,6 +29,8 @@ def __getattr__(name):
     if name == "capacitance":
         require_ml()
         return importlib.import_module("squadds.ml.capacitance")
+    if name == "inverse":
+        return importlib.import_module("squadds.ml.inverse")
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

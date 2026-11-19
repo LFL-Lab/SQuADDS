@@ -509,10 +509,14 @@ Given a target qubit frequency and anharmonicity, the model returns the Transmon
 
 #### Run it locally
 
-The Keras checkpoint, its scalers and `inference_manifest.json` (input and output order, units) are in the model repo:
+No extra needed: SQuADDS runs it in numpy from the model repo (pinned revision, sha256 checked).
 
-```bash
-huggingface-cli download SQuADDS/transmon-cross-hamiltonian-inverse --local-dir transmon-cross-hamiltonian-inverse
+```python
+from squadds.ml.inverse import load_model
+
+model = load_model()
+model.predict(4.85, -205)                     # cross_length_um, claw_length_um, ground_spacing_um
+opts = model.design_options(4.85, -205, base=best["design_options"])   # TransmonCross options from a database design
 ```
 
 #### Run it on the hosted API
@@ -543,14 +547,14 @@ res["outputs"]["predictions"][0]                       # claw_length, ground_spa
 
 #### Accuracy and time
 
-Its accuracy is reported in the [paper](https://arxiv.org/abs/2607.20795).
+Its accuracy is reported in the [paper](https://arxiv.org/abs/2607.20795). Scored like a SQuADDS database row (E_J from the target, E_C from the Q3D data), its geometries miss the target anharmonicity by a median 14.4 % (MAE 36.6 MHz, RMSE 45.4 MHz over 40 targets), so use the geometry as a starting point: [Tutorial 8](https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-8_ML_interpolation_in_SQuADDS.html) fixes the cross length with a few QCap calls (about a second) and lands on target. A prediction takes about a millisecond on a laptop CPU.
 
 #### Links
 
 - Paper: [Component-Level Inverse Design of Transmon Qubits Using Neural Networks](https://arxiv.org/abs/2607.20795) (Seidel et al., 2026)
 - Model: [SQuADDS/transmon-cross-hamiltonian-inverse](https://huggingface.co/SQuADDS/transmon-cross-hamiltonian-inverse)
 - Training data: the `qubit-TransmonCross-cap_matrix` configuration of [SQuADDS_DB](https://huggingface.co/datasets/SQuADDS/SQuADDS_DB)
-- Guide: [ML Models](https://lfl-lab.github.io/SQuADDS/source/ml_models.html#hosted-inference-models)
+- Guide: [ML Models](https://lfl-lab.github.io/SQuADDS/source/ml_models.html#transmoncross-inverse-model), and Tutorial 8
 
 ### Hosted inference API
 
