@@ -637,7 +637,7 @@ For inquiries or support, please contact [Sadman Ahmed Shanto](mailto:shanto@usc
 | Firas Abouzahr        | Northwestern                       | Bug Hunter                           |
 
 ## Developers
-- [shanto268](https://github.com/shanto268) - 482 contributions
+- [shanto268](https://github.com/shanto268) - 484 contributions
 - [elizabethkunz](https://github.com/elizabethkunz) - 17 contributions
 - [LFL-Lab](https://github.com/LFL-Lab) - 9 contributions
 - [NxtGenLegend](https://github.com/NxtGenLegend) - 1 contributions
