@@ -8,6 +8,7 @@ at its pinned revision. Every file is checked against the sha256 in the package 
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
@@ -188,6 +189,15 @@ def verify(root, entry: dict) -> list[str]:
 def _download(entry: dict, revision: str, cache_dir=None, local_files_only: bool = False) -> Path:
     from huggingface_hub import hf_hub_download
 
+    # config.json is the file the Hub counts as a model download; it is not needed to load the model.
+    with contextlib.suppress(Exception):
+        hf_hub_download(
+            repo_id=entry["repo_id"],
+            filename="config.json",
+            revision=revision,
+            cache_dir=cache_dir,
+            local_files_only=local_files_only,
+        )
     root = None
     for rel, _ in model_files(entry):
         p = Path(

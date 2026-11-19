@@ -180,6 +180,8 @@ def test_load_model_downloads_from_hub_at_pinned_revision(fake_manifest, tmp_pat
 
     def fake_download(repo_id, filename, revision=None, cache_dir=None, local_files_only=False):
         calls.append((repo_id, filename, revision))
+        if filename == "config.json":
+            raise FileNotFoundError(filename)
         dst = tmp_path / "snapshots" / str(revision) / filename
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(fake_manifest / filename, dst)
@@ -189,7 +191,8 @@ def test_load_model_downloads_from_hub_at_pinned_revision(fake_manifest, tmp_pat
     m = load_model("QCap", revision="abc123")
     assert m.root == tmp_path / "snapshots" / "abc123" and m.revision == "abc123"
     assert {c[0] for c in calls} == {"SQuADDS/QCap"} and {c[2] for c in calls} == {"abc123"}
-    assert sorted(c[1] for c in calls) == [f"qcap/s{s}.pt" for s in range(3)]
+    assert calls[0][1] == "config.json"
+    assert sorted(c[1] for c in calls[1:]) == [f"qcap/s{s}.pt" for s in range(3)]
 
 
 @needs_ml

@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+0.5.2 (2026-11-18)
+------------------
+
+- ``load_model`` also fetches the model repository's ``config.json``, so Hugging Face counts each first download of QCap and
+  QCap-Fast on the model page. The weights are unchanged; the manifest pins the new revision ``086d76e``.
+
 0.5.1 (2026-11-17)
 ------------------
 
