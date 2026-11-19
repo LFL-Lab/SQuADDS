@@ -147,6 +147,15 @@ ol.tutorials .tn{font-variant:small-caps;letter-spacing:.04em;color:var(--ink-3)
 ol.tutorials .ext{color:var(--ink-3)}
 @media (max-width:520px){ol.tutorials a{grid-template-columns:1fr auto}ol.tutorials .tn{grid-column:1/-1}}
 
+/* citation */
+.cite .lead{text-align:center;color:var(--ink-2);margin:0 0 1.5rem}
+.cite .ref{margin:0 0 1.8rem}
+.cite .ref p{margin:0 0 .55rem;font-size:.95rem;line-height:1.45}
+.cite .bib{display:flex;flex-direction:column;align-items:flex-end;gap:.35rem}
+.cite pre{align-self:stretch;margin:0;padding:.85rem 1rem;background:var(--hover);border:1px solid var(--rule);border-radius:4px;font:.76rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere}
+.cite button.copy{font:inherit;font-size:.8rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink-2);border-radius:999px;padding:.12rem .65rem;cursor:pointer}
+.cite button.copy:hover{border-color:var(--accent);color:var(--accent)}
+
 footer{border-top:1px solid var(--rule);margin-top:4rem;padding-top:1.4rem;font-size:.86rem;color:var(--ink-3)}
 footer p{margin:0 0 .45rem}
 footer .credit{color:var(--ink-2)}
@@ -258,6 +267,49 @@ tut.innerHTML = `<h2 class="sec" id="tutorials">Tutorials</h2>
 body.appendChild(tut);
 outline.push({ depth: 0, num: "", title: "Tutorials", href: "#tutorials", id: "tutorials", video: false, tut: true });
 PAPER.tutorials.forEach(t => outline.push({ depth: 1, num: `${t.num}.`, title: t.title, href: t.href, ext: true, cls: "tl" }));
+
+// citation: the SQuADDS paper and the QCap paper
+const CITES = [
+  { ref: 'S. Shanto, A. Kuo, C. Miyamoto, H. Zhang, V. Maurya, E. Vlachos, M. Hecht, C. W. Shum and E. Levenson-Falk, “SQuADDS: A validated design database and simulation workflow for superconducting qubit design,” <i>Quantum</i> <b>8</b>, 1465 (2024), <a href="https://doi.org/10.22331/q-2024-09-09-1465">doi:10.22331/q-2024-09-09-1465</a>.',
+    bib: String.raw`@article{Shanto2024squaddsvalidated,
+  doi = {10.22331/q-2024-09-09-1465},
+  url = {https://doi.org/10.22331/q-2024-09-09-1465},
+  title = {{SQ}u{ADDS}: {A} validated design database and simulation workflow for superconducting qubit design},
+  author = {Shanto, Sadman and Kuo, Andre and Miyamoto, Clark and Zhang, Haimeng and Maurya, Vivek and Vlachos, Evangelos and Hecht, Malida and Shum, Chung Wa and Levenson-Falk, Eli},
+  journal = {{Quantum}},
+  issn = {2521-327X},
+  publisher = {{Verein zur F\"orderung des Open Access Publizierens in den Quantenwissenschaften}},
+  volume = {8},
+  pages = {1465},
+  month = sep,
+  year = {2024}
+}` },
+  { ref: 'S. A. Shanto, S. Das and E. Levenson-Falk, “QCap: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout,” <a href="https://arxiv.org/abs/2611.22057">arXiv:2611.22057</a> (2026).',
+    bib: String.raw`@misc{Shanto2026planarcapacitance,
+  title = {{QCap}: a physics-corrected graph neural network for the capacitance matrix of any planar superconducting device layout},
+  author = {Shanto, Sadman Ahmed and Das, Saikat and Levenson-Falk, Eli},
+  year = {2026},
+  eprint = {2611.22057},
+  archivePrefix = {arXiv},
+  primaryClass = {quant-ph},
+  url = {https://arxiv.org/abs/2611.22057}
+}` },
+];
+const cite = document.createElement("section"); cite.className = "sec cite";
+cite.innerHTML = `<h2 class="sec" id="cite">Cite</h2>
+  <p class="lead">If you use SQuADDS or QCap in your work, please cite:</p>
+  ${CITES.map(c => `<div class="ref"><p>${c.ref}</p><div class="bib"><button class="copy" type="button">Copy BibTeX</button><pre></pre></div></div>`).join("")}`;
+cite.querySelectorAll(".ref").forEach((r, i) => {
+  const pre = r.querySelector("pre"), btn = r.querySelector("button.copy");
+  pre.textContent = CITES[i].bib;
+  btn.onclick = () => {
+    const done = t => { btn.textContent = t; setTimeout(() => { btn.textContent = "Copy BibTeX"; }, 1600); };
+    const select = () => { const rg = document.createRange(); rg.selectNodeContents(pre); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rg); done("Selected"); };
+    navigator.clipboard ? navigator.clipboard.writeText(CITES[i].bib).then(() => done("Copied"), select) : select();
+  };
+});
+body.appendChild(cite);
+outline.push({ depth: 0, num: "", title: "Cite", href: "#cite", id: "cite", video: false, tut: true });
 
 function outlineHTML() {
   let html = `<h2>Outline</h2><ol>`, d = 0;
