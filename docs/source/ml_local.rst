@@ -134,3 +134,8 @@ per layout with QCap and 0.16 s with QCap-Fast.
 - More examples: `Tutorial 11: Predicting capacitance matrices from GDS
   <https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-11_Predicting_Capacitance_Matrices_from_GDS.html>`_ and
   the full reference in :doc:`ml_models`.
+
+8. Cite
+-------
+
+If you use QCap or SQuADDS in your work, please cite both papers: :ref:`planar-capacitance-citation` (BibTeX).
