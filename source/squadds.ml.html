@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>squadds.ml package &#8212; SQuADDS v0.5.2</title>
+    <title>squadds.ml package &#8212; SQuADDS v0.5.3</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=8e576371"></script>
+    <script src="../_static/documentation_options.js?v=2a2fe768"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -146,7 +146,7 @@
     <p class="title logo__title">SQuADDS</p>
   
 </a>
-<span class="paper-version" title="SQuADDS 0.5.2">0.5.2</span></div>
+<span class="paper-version" title="SQuADDS 0.5.3">0.5.3</span></div>
     
   </div>
   
@@ -846,10 +846,73 @@ of the SQuADDS organization (<code class="docutils literal notranslate"><span cl
 </dd></dl>
 
 </section>
+<section id="module-squadds.ml.inverse">
+<span id="squadds-ml-inverse-module"></span><h2>squadds.ml.inverse module<a class="headerlink" href="#module-squadds.ml.inverse" title="Link to this heading">#</a></h2>
+<p>TransmonCross Hamiltonian-to-geometry model of Seidel et al., arXiv:2607.20795 (2026): a target qubit frequency and
+anharmonicity in, the TransmonCross cross length, claw length and claw ground spacing out.</p>
+<p><code class="docutils literal notranslate"><span class="pre">load_model()</span></code> reads <code class="docutils literal notranslate"><span class="pre">squadds_mlp.json</span></code> (the network’s weights and scalers as numbers) from the model repository at a
+pinned revision, checks its sha256 and runs the network in numpy. No extra dependencies. Same numbers as the original Keras
+model and the hosted API (<code class="docutils literal notranslate"><span class="pre">squadds.ml.client</span></code>).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="squadds.ml.inverse.InverseModel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">squadds.ml.inverse.</span></span><span class="sig-name descname"><span class="pre">InverseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'transmon_cross_hamiltonian_inverse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">revision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml/inverse.html#InverseModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.inverse.InverseModel" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">predict</span></code> gives the geometry in µm; <code class="docutils literal notranslate"><span class="pre">design_options</span></code> gives TransmonCross options for quantum-metal.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="squadds.ml.inverse.InverseModel.design_options">
+<span class="sig-name descname"><span class="pre">design_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_frequency_GHz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anharmonicity_MHz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml/inverse.html#InverseModel.design_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.inverse.InverseModel.design_options" title="Link to this definition">#</a></dt>
+<dd><p>TransmonCross options for one target: <code class="docutils literal notranslate"><span class="pre">base</span></code> (e.g. a database row’s <code class="docutils literal notranslate"><span class="pre">design_options_qubit</span></code>) with the three
+predicted lengths put in, as strings in µm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="squadds.ml.inverse.InverseModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_frequency_GHz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anharmonicity_MHz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml/inverse.html#InverseModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.inverse.InverseModel.predict" title="Link to this definition">#</a></dt>
+<dd><p>Geometry (µm) for one target or arrays of targets. Warns for targets outside the training range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="squadds.ml.inverse.list_models">
+<span class="sig-prename descclassname"><span class="pre">squadds.ml.inverse.</span></span><span class="sig-name descname"><span class="pre">list_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml/inverse.html#list_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.inverse.list_models" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="squadds.ml.inverse.load_model">
+<span class="sig-prename descclassname"><span class="pre">squadds.ml.inverse.</span></span><span class="sig-name descname"><span class="pre">load_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'transmon_cross_hamiltonian_inverse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">revision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_files_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml/inverse.html#load_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.inverse.load_model" title="Link to this definition">#</a></dt>
+<dd><p>The released model, from <code class="docutils literal notranslate"><span class="pre">path</span></code> (a local copy of <code class="docutils literal notranslate"><span class="pre">squadds_mlp.json</span></code>) or the Hugging Face repository at the
+pinned revision. The file must match the pinned sha256 unless another <code class="docutils literal notranslate"><span class="pre">revision</span></code> is given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#squadds.ml.inverse.InverseModel" title="squadds.ml.inverse.InverseModel"><em>InverseModel</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-squadds.ml">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-squadds.ml" title="Link to this heading">#</a></h2>
 <p>Machine-learning models for SQuADDS (optional extra: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">squadds[ml]</span></code>).</p>
-<p>Submodules import torch / gdstk / numba lazily, so <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">squadds</span></code> works without the extra.</p>
+<p>Submodules import torch / gdstk / numba lazily, so <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">squadds</span></code> works without the extra. <code class="docutils literal notranslate"><span class="pre">squadds.ml.inverse</span></code>
+(TransmonCross Hamiltonian to geometry) and <code class="docutils literal notranslate"><span class="pre">squadds.ml.client</span></code> (hosted API) need no extra.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="squadds.ml.missing_ml_dependencies">
 <span class="sig-prename descclassname"><span class="pre">squadds.ml.</span></span><span class="sig-name descname"><span class="pre">missing_ml_dependencies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/squadds/ml.html#missing_ml_dependencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#squadds.ml.missing_ml_dependencies" title="Link to this definition">#</a></dt>
@@ -924,6 +987,16 @@ of the SQuADDS organization (<code class="docutils literal notranslate"><span cl
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.client.get_model"><code class="docutils literal notranslate"><span class="pre">get_model()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.client.list_models"><code class="docutils literal notranslate"><span class="pre">list_models()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.client.predict"><code class="docutils literal notranslate"><span class="pre">predict()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-squadds.ml.inverse">squadds.ml.inverse module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.inverse.InverseModel"><code class="docutils literal notranslate"><span class="pre">InverseModel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.inverse.InverseModel.design_options"><code class="docutils literal notranslate"><span class="pre">InverseModel.design_options()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.inverse.InverseModel.predict"><code class="docutils literal notranslate"><span class="pre">InverseModel.predict()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.inverse.list_models"><code class="docutils literal notranslate"><span class="pre">list_models()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#squadds.ml.inverse.load_model"><code class="docutils literal notranslate"><span class="pre">load_model()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-squadds.ml">Module contents</a><ul class="nav section-nav flex-column">

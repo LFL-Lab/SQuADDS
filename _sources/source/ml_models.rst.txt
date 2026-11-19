@@ -3,6 +3,8 @@ ML Models
 
 - **Planar capacitance models** (``squadds.ml.capacitance``): GDS in, Maxwell capacitance matrix out, on your
   machine. See :ref:`planar-capacitance-models`.
+- **TransmonCross inverse model** (``squadds.ml.inverse``): target qubit frequency and anharmonicity in, TransmonCross
+  geometry out, on your machine. See :ref:`transmon-cross-inverse`.
 - **Hosted models**: one HTTP API on our
   `Hugging Face Space <https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api>`_, for scripts and AI agents.
   See :ref:`hosted-inference`.
@@ -277,6 +279,56 @@ If you use QCap or SQuADDS in your work, please cite both papers:
    }
 
 
+.. _transmon-cross-inverse:
+
+TransmonCross inverse model
+---------------------------
+
+Target qubit frequency and anharmonicity in, TransmonCross geometry out: the cross length, the claw length and the
+claw's ground spacing. A small network trained on the SQuADDS TransmonCross data by Olivia Seidel and Firas Abouzahr
+(`Seidel et al., 2026 <https://arxiv.org/abs/2607.20795>`_). It runs in numpy, needs no extra and answers in about a
+millisecond.
+
+- **Paper:** `Component-Level Inverse Design of Transmon Qubits Using Neural Networks <https://arxiv.org/abs/2607.20795>`_
+- **Model:** `SQuADDS/transmon-cross-hamiltonian-inverse <https://huggingface.co/SQuADDS/transmon-cross-hamiltonian-inverse>`_
+- **Tutorial:** `Tutorial 8 <https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-8_ML_interpolation_in_SQuADDS.html>`_
+  (from target to geometry, then a QCap check)
+
+.. code-block:: python
+
+   from squadds.ml.inverse import load_model
+
+   model = load_model()          # pinned revision, sha256 checked
+   model.predict(4.85, -205)     # one row per target: cross_length_um, claw_length_um, ground_spacing_um
+   model.predict([4.5, 5.0], [-180, -220])
+   opts = model.design_options(4.85, -205, base=best["design_options"])   # best: a database design (Tutorial 1)
+
+``base=`` takes the other dimensions from a database design; the data keep them fixed (cross width and gap 30 um,
+claw width 15 um, claw gap 5.1 um). Trained on f_q 3.22 to 7.13 GHz and alpha -526 to -89 MHz; outside that range
+``predict`` warns. The data hold four ground spacings (4.1, 5, 9.1 and 10 um), so a predicted ground spacing in between
+is an extrapolation.
+
+Use the geometry as a starting point. Scored like a database row (E_J from the target, E_C from the SQuADDS Q3D data),
+its geometries miss the target anharmonicity by a median 14.4 % (MAE 36.6 MHz, RMSE 45.4 MHz over 40 targets).
+Tutorial 8 fixes the cross length with a few QCap calls (about a second), and the result lands on target. Simulate the
+final design before fabrication. The same model is on the hosted API (:ref:`hosted-live-model`).
+
+Developed with Taylor Patti, Nicola Pancotti, Enectali Figueroa-Feliciano, Sara Sussman, Abhishek Chakraborty, Olivia
+Seidel, Firas Abouzahr, Eli Levenson-Falk, and Sadman Ahmed Shanto. If you use it, please cite:
+
+.. code-block:: bibtex
+
+   @misc{Seidel2026inversedesign,
+     title = {Component-Level Inverse Design of Transmon Qubits Using Neural Networks},
+     author = {Seidel, Olivia and Abouzahr, Firas and Chakraborty, Abhishek and Shanto, Sadman Ahmed and Das, Saikat and Baxter, Daniel and Asaadi, Jonathan and Pancotti, Nicola and Yang, Haoyu and Khailany, Brucek and Sussman, Sara and Figueroa-Feliciano, Enectali and Levenson-Falk, Eli M. and Patti, Taylor L.},
+     year = {2026},
+     eprint = {2607.20795},
+     archivePrefix = {arXiv},
+     primaryClass = {quant-ph},
+     url = {https://arxiv.org/abs/2607.20795}
+   }
+
+
 .. _hosted-inference:
 
 Hosted inference models
@@ -376,15 +428,8 @@ The SQuADDS MCP server does the same with ``list_hosted_ml_models`` and ``predic
 TransmonCross Hamiltonian-to-geometry model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``transmon_cross_hamiltonian_inverse``: target ``qubit_frequency_GHz`` and ``anharmonicity_MHz`` in, TransmonCross
-claw length, ground spacing and cross length (meters) out. Convert to ``"...um"`` strings for ``design_options``.
-
-- **Paper:** `Component-Level Inverse Design of Transmon Qubits Using Neural Networks <https://arxiv.org/abs/2607.20795>`_ (Seidel et al., 2026)
-- **Model:** `SQuADDS/transmon-cross-hamiltonian-inverse <https://huggingface.co/SQuADDS/transmon-cross-hamiltonian-inverse>`_
-- **On the API:** `model page <https://squadds-squadds-ml-inference-api.hf.space/v1/models/transmon_cross_hamiltonian_inverse>`_
-
-Developed with Taylor Patti, Nicola Pancotti, Enectali Figueroa-Feliciano, Sara Sussman, Abhishek Chakraborty, Olivia
-Seidel, Firas Abouzahr, Eli Levenson-Falk, and Sadman Ahmed Shanto; **Olivia Seidel and Firas Abouzahr** trained it.
+``transmon_cross_hamiltonian_inverse``: the model of :ref:`transmon-cross-inverse`, served over HTTP. Same numbers,
+in meters (`model page <https://squadds-squadds-ml-inference-api.hf.space/v1/models/transmon_cross_hamiltonian_inverse>`_).
 
 Limitations
 ^^^^^^^^^^^

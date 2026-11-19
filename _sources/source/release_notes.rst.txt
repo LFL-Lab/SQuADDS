@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+0.5.3 (2026-11-19)
+------------------
+
+- ``squadds.ml.inverse``: the TransmonCross Hamiltonian-to-geometry model of Seidel et al.
+  (`arXiv:2607.20795 <https://arxiv.org/abs/2607.20795>`__) runs locally, in numpy, with no extra. ``load_model()``,
+  ``predict`` (geometry in um) and ``design_options`` (TransmonCross options). Guide: :ref:`transmon-cross-inverse`.
+- Tutorial 8 uses it: from a target to a geometry, checked and corrected with QCap.
+
 0.5.2 (2026-11-18)
 ------------------
 

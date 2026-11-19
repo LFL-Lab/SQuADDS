@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ML Models &#8212; SQuADDS v0.5.2</title>
+    <title>ML Models &#8212; SQuADDS v0.5.3</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=8e576371"></script>
+    <script src="../_static/documentation_options.js?v=2a2fe768"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -146,7 +146,7 @@
     <p class="title logo__title">SQuADDS</p>
   
 </a>
-<span class="paper-version" title="SQuADDS 0.5.2">0.5.2</span></div>
+<span class="paper-version" title="SQuADDS 0.5.3">0.5.3</span></div>
     
   </div>
   
@@ -389,6 +389,7 @@
 <li><a class="reference internal" href="#citing">Citing</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#transmoncross-inverse-model">TransmonCross inverse model</a></li>
 <li><a class="reference internal" href="#hosted-inference-models">Hosted inference models</a><ul>
 <li><a class="reference internal" href="#routes">Routes</a></li>
 <li><a class="reference internal" href="#predict">Predict</a></li>
@@ -466,6 +467,8 @@
 <ul class="simple">
 <li><p><strong>Planar capacitance models</strong> (<code class="docutils literal notranslate"><span class="pre">squadds.ml.capacitance</span></code>): GDS in, Maxwell capacitance matrix out, on your
 machine. See <a class="reference internal" href="#planar-capacitance-models"><span class="std std-ref">Planar capacitance models</span></a>.</p></li>
+<li><p><strong>TransmonCross inverse model</strong> (<code class="docutils literal notranslate"><span class="pre">squadds.ml.inverse</span></code>): target qubit frequency and anharmonicity in, TransmonCross
+geometry out, on your machine. See <a class="reference internal" href="#transmon-cross-inverse"><span class="std std-ref">TransmonCross inverse model</span></a>.</p></li>
 <li><p><strong>Hosted models</strong>: one HTTP API on our
 <a class="reference external" href="https://huggingface.co/spaces/SQuADDS/squadds-ml-inference-api">Hugging Face Space</a>, for scripts and AI agents.
 See <a class="reference internal" href="#hosted-inference"><span class="std std-ref">Hosted inference models</span></a>.</p></li>
@@ -491,15 +494,16 @@ See <a class="reference internal" href="#hosted-inference"><span class="std std-
 <li><p><a class="reference internal" href="#citing" id="id16">Citing</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#hosted-inference-models" id="id17">Hosted inference models</a></p>
+<li><p><a class="reference internal" href="#transmoncross-inverse-model" id="id17">TransmonCross inverse model</a></p></li>
+<li><p><a class="reference internal" href="#hosted-inference-models" id="id18">Hosted inference models</a></p>
 <ul>
-<li><p><a class="reference internal" href="#routes" id="id18">Routes</a></p></li>
-<li><p><a class="reference internal" href="#predict" id="id19">Predict</a></p></li>
-<li><p><a class="reference internal" href="#python-client" id="id20">Python client</a></p></li>
-<li><p><a class="reference internal" href="#for-ai-agents" id="id21">For AI agents</a></p></li>
-<li><p><a class="reference internal" href="#transmoncross-hamiltonian-to-geometry-model" id="id22">TransmonCross Hamiltonian-to-geometry model</a></p></li>
-<li><p><a class="reference internal" href="#limitations" id="id23">Limitations</a></p></li>
-<li><p><a class="reference internal" href="#contributing-a-model" id="id24">Contributing a model</a></p></li>
+<li><p><a class="reference internal" href="#routes" id="id19">Routes</a></p></li>
+<li><p><a class="reference internal" href="#predict" id="id20">Predict</a></p></li>
+<li><p><a class="reference internal" href="#python-client" id="id21">Python client</a></p></li>
+<li><p><a class="reference internal" href="#for-ai-agents" id="id22">For AI agents</a></p></li>
+<li><p><a class="reference internal" href="#transmoncross-hamiltonian-to-geometry-model" id="id23">TransmonCross Hamiltonian-to-geometry model</a></p></li>
+<li><p><a class="reference internal" href="#limitations" id="id24">Limitations</a></p></li>
+<li><p><a class="reference internal" href="#contributing-a-model" id="id25">Contributing a model</a></p></li>
 </ul>
 </li>
 </ul>
@@ -759,8 +763,50 @@ gives the original database alone.</p></li>
 </div>
 </section>
 </section>
+<section id="transmoncross-inverse-model">
+<span id="transmon-cross-inverse"></span><h2><a class="toc-backref" href="#id17" role="doc-backlink">TransmonCross inverse model</a><a class="headerlink" href="#transmoncross-inverse-model" title="Link to this heading">#</a></h2>
+<p>Target qubit frequency and anharmonicity in, TransmonCross geometry out: the cross length, the claw length and the
+claw’s ground spacing. A small network trained on the SQuADDS TransmonCross data by Olivia Seidel and Firas Abouzahr
+(<a class="reference external" href="https://arxiv.org/abs/2607.20795">Seidel et al., 2026</a>). It runs in numpy, needs no extra and answers in about a
+millisecond.</p>
+<ul class="simple">
+<li><p><strong>Paper:</strong> <a class="reference external" href="https://arxiv.org/abs/2607.20795">Component-Level Inverse Design of Transmon Qubits Using Neural Networks</a></p></li>
+<li><p><strong>Model:</strong> <a class="reference external" href="https://huggingface.co/SQuADDS/transmon-cross-hamiltonian-inverse">SQuADDS/transmon-cross-hamiltonian-inverse</a></p></li>
+<li><p><strong>Tutorial:</strong> <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-8_ML_interpolation_in_SQuADDS.html">Tutorial 8</a>
+(from target to geometry, then a QCap check)</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.inverse</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">()</span>          <span class="c1"># pinned revision, sha256 checked</span>
+<span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="mf">4.85</span><span class="p">,</span> <span class="o">-</span><span class="mi">205</span><span class="p">)</span>     <span class="c1"># one row per target: cross_length_um, claw_length_um, ground_spacing_um</span>
+<span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="mf">4.5</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="o">-</span><span class="mi">220</span><span class="p">])</span>
+<span class="n">opts</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">design_options</span><span class="p">(</span><span class="mf">4.85</span><span class="p">,</span> <span class="o">-</span><span class="mi">205</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">best</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">])</span>   <span class="c1"># best: a database design (Tutorial 1)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">base=</span></code> takes the other dimensions from a database design; the data keep them fixed (cross width and gap 30 um,
+claw width 15 um, claw gap 5.1 um). Trained on f_q 3.22 to 7.13 GHz and alpha -526 to -89 MHz; outside that range
+<code class="docutils literal notranslate"><span class="pre">predict</span></code> warns. The data hold four ground spacings (4.1, 5, 9.1 and 10 um), so a predicted ground spacing in between
+is an extrapolation.</p>
+<p>Use the geometry as a starting point. Scored like a database row (E_J from the target, E_C from the SQuADDS Q3D data),
+its geometries miss the target anharmonicity by a median 14.4 % (MAE 36.6 MHz, RMSE 45.4 MHz over 40 targets).
+Tutorial 8 fixes the cross length with a few QCap calls (about a second), and the result lands on target. Simulate the
+final design before fabrication. The same model is on the hosted API (<a class="reference internal" href="#hosted-live-model"><span class="std std-ref">TransmonCross Hamiltonian-to-geometry model</span></a>).</p>
+<p>Developed with Taylor Patti, Nicola Pancotti, Enectali Figueroa-Feliciano, Sara Sussman, Abhishek Chakraborty, Olivia
+Seidel, Firas Abouzahr, Eli Levenson-Falk, and Sadman Ahmed Shanto. If you use it, please cite:</p>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@misc</span><span class="p">{</span><span class="nl">Seidel2026inversedesign</span><span class="p">,</span>
+<span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Component-Level Inverse Design of Transmon Qubits Using Neural Networks}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Seidel, Olivia and Abouzahr, Firas and Chakraborty, Abhishek and Shanto, Sadman Ahmed and Das, Saikat and Baxter, Daniel and Asaadi, Jonathan and Pancotti, Nicola and Yang, Haoyu and Khailany, Brucek and Sussman, Sara and Figueroa-Feliciano, Enectali and Levenson-Falk, Eli M. and Patti, Taylor L.}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2026}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">eprint</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2607.20795}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">archivePrefix</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{arXiv}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">primaryClass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{quant-ph}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://arxiv.org/abs/2607.20795}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
 <section id="hosted-inference-models">
-<span id="hosted-inference"></span><h2><a class="toc-backref" href="#id17" role="doc-backlink">Hosted inference models</a><a class="headerlink" href="#hosted-inference-models" title="Link to this heading">#</a></h2>
+<span id="hosted-inference"></span><h2><a class="toc-backref" href="#id18" role="doc-backlink">Hosted inference models</a><a class="headerlink" href="#hosted-inference-models" title="Link to this heading">#</a></h2>
 <p>An HTTP API for the models on our <a class="reference external" href="https://huggingface.co/SQuADDS">Hugging Face org</a>. No install needed.</p>
 <ul class="simple">
 <li><p><strong>Host:</strong> <code class="docutils literal notranslate"><span class="pre">https://squadds-squadds-ml-inference-api.hf.space</span></code></p></li>
@@ -770,7 +816,7 @@ gives the original database alone.</p></li>
 <p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/v1/models</span></code> lists what is live (don’t hard-code ids). Today: <code class="docutils literal notranslate"><span class="pre">transmon_cross_hamiltonian_inverse</span></code>
 (see <a class="reference internal" href="#hosted-live-model"><span class="std std-ref">TransmonCross Hamiltonian-to-geometry model</span></a>), <code class="docutils literal notranslate"><span class="pre">qcap</span></code> and <code class="docutils literal notranslate"><span class="pre">qcap-fast</span></code>.</p>
 <section id="routes">
-<h3><a class="toc-backref" href="#id18" role="doc-backlink">Routes</a><a class="headerlink" href="#routes" title="Link to this heading">#</a></h3>
+<h3><a class="toc-backref" href="#id19" role="doc-backlink">Routes</a><a class="headerlink" href="#routes" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="table">
 <colgroup>
 <col style="width: 38.0%" />
@@ -802,7 +848,7 @@ gives the original database alone.</p></li>
 </div>
 </section>
 <section id="predict">
-<h3><a class="toc-backref" href="#id19" role="doc-backlink">Predict</a><a class="headerlink" href="#predict" title="Link to this heading">#</a></h3>
+<h3><a class="toc-backref" href="#id20" role="doc-backlink">Predict</a><a class="headerlink" href="#predict" title="Link to this heading">#</a></h3>
 <p>Send <code class="docutils literal notranslate"><span class="pre">{&quot;inputs&quot;:</span> <span class="pre">{...}}</span></code>; <code class="docutils literal notranslate"><span class="pre">inputs</span></code> may be a list for a batch. A file model (e.g. a GDS) also takes
 <code class="docutils literal notranslate"><span class="pre">multipart/form-data</span></code> with a <code class="docutils literal notranslate"><span class="pre">file</span></code> field.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
@@ -831,7 +877,7 @@ gives the original database alone.</p></li>
 SQuADDS org member. The old <code class="docutils literal notranslate"><span class="pre">/health</span></code>, <code class="docutils literal notranslate"><span class="pre">/models</span></code> and <code class="docutils literal notranslate"><span class="pre">/predict</span></code> routes still work; use <code class="docutils literal notranslate"><span class="pre">/v1</span></code>.</p>
 </section>
 <section id="python-client">
-<h3><a class="toc-backref" href="#id20" role="doc-backlink">Python client</a><a class="headerlink" href="#python-client" title="Link to this heading">#</a></h3>
+<h3><a class="toc-backref" href="#id21" role="doc-backlink">Python client</a><a class="headerlink" href="#python-client" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml</span><span class="w"> </span><span class="kn">import</span> <span class="n">client</span>
 
 <span class="n">client</span><span class="o">.</span><span class="n">list_models</span><span class="p">()</span>
@@ -846,7 +892,7 @@ SQuADDS org member. The old <code class="docutils literal notranslate"><span cla
 <p><code class="docutils literal notranslate"><span class="pre">SQUADDS_ML_API_URL</span></code> overrides the host; <code class="docutils literal notranslate"><span class="pre">token=</span></code> (or <code class="docutils literal notranslate"><span class="pre">HF_TOKEN</span></code>) is for gated models.</p>
 </section>
 <section id="for-ai-agents">
-<h3><a class="toc-backref" href="#id21" role="doc-backlink">For AI agents</a><a class="headerlink" href="#for-ai-agents" title="Link to this heading">#</a></h3>
+<h3><a class="toc-backref" href="#id22" role="doc-backlink">For AI agents</a><a class="headerlink" href="#for-ai-agents" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/v1/models</span></code> and pick a model whose <code class="docutils literal notranslate"><span class="pre">status</span></code> is <code class="docutils literal notranslate"><span class="pre">&quot;ready&quot;</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/v1/models/{model_id}/schema?format=tool</span></code> and register the result as a tool.</p></li>
@@ -856,24 +902,17 @@ SQuADDS org member. The old <code class="docutils literal notranslate"><span cla
 (<a class="reference internal" href="mcp_server.html"><span class="doc">MCP Server (AI Agent Integration)</span></a>).</p>
 </section>
 <section id="transmoncross-hamiltonian-to-geometry-model">
-<span id="hosted-live-model"></span><h3><a class="toc-backref" href="#id22" role="doc-backlink">TransmonCross Hamiltonian-to-geometry model</a><a class="headerlink" href="#transmoncross-hamiltonian-to-geometry-model" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">transmon_cross_hamiltonian_inverse</span></code>: target <code class="docutils literal notranslate"><span class="pre">qubit_frequency_GHz</span></code> and <code class="docutils literal notranslate"><span class="pre">anharmonicity_MHz</span></code> in, TransmonCross
-claw length, ground spacing and cross length (meters) out. Convert to <code class="docutils literal notranslate"><span class="pre">&quot;...um&quot;</span></code> strings for <code class="docutils literal notranslate"><span class="pre">design_options</span></code>.</p>
-<ul class="simple">
-<li><p><strong>Paper:</strong> <a class="reference external" href="https://arxiv.org/abs/2607.20795">Component-Level Inverse Design of Transmon Qubits Using Neural Networks</a> (Seidel et al., 2026)</p></li>
-<li><p><strong>Model:</strong> <a class="reference external" href="https://huggingface.co/SQuADDS/transmon-cross-hamiltonian-inverse">SQuADDS/transmon-cross-hamiltonian-inverse</a></p></li>
-<li><p><strong>On the API:</strong> <a class="reference external" href="https://squadds-squadds-ml-inference-api.hf.space/v1/models/transmon_cross_hamiltonian_inverse">model page</a></p></li>
-</ul>
-<p>Developed with Taylor Patti, Nicola Pancotti, Enectali Figueroa-Feliciano, Sara Sussman, Abhishek Chakraborty, Olivia
-Seidel, Firas Abouzahr, Eli Levenson-Falk, and Sadman Ahmed Shanto; <strong>Olivia Seidel and Firas Abouzahr</strong> trained it.</p>
+<span id="hosted-live-model"></span><h3><a class="toc-backref" href="#id23" role="doc-backlink">TransmonCross Hamiltonian-to-geometry model</a><a class="headerlink" href="#transmoncross-hamiltonian-to-geometry-model" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">transmon_cross_hamiltonian_inverse</span></code>: the model of <a class="reference internal" href="#transmon-cross-inverse"><span class="std std-ref">TransmonCross inverse model</span></a>, served over HTTP. Same numbers,
+in meters (<a class="reference external" href="https://squadds-squadds-ml-inference-api.hf.space/v1/models/transmon_cross_hamiltonian_inverse">model page</a>).</p>
 </section>
 <section id="limitations">
-<h3><a class="toc-backref" href="#id23" role="doc-backlink">Limitations</a><a class="headerlink" href="#limitations" title="Link to this heading">#</a></h3>
+<h3><a class="toc-backref" href="#id24" role="doc-backlink">Limitations</a><a class="headerlink" href="#limitations" title="Link to this heading">#</a></h3>
 <p>The Space runs on shared hardware and returns <code class="docutils literal notranslate"><span class="pre">429</span></code> when its queue is full. For large batches, run locally
 (<a class="reference internal" href="ml_local.html"><span class="doc">Run the capacitance models on your own computer</span></a>).</p>
 </section>
 <section id="contributing-a-model">
-<h3><a class="toc-backref" href="#id24" role="doc-backlink">Contributing a model</a><a class="headerlink" href="#contributing-a-model" title="Link to this heading">#</a></h3>
+<h3><a class="toc-backref" href="#id25" role="doc-backlink">Contributing a model</a><a class="headerlink" href="#contributing-a-model" title="Link to this heading">#</a></h3>
 <p>Push the weights to a Hugging Face model repo with an <code class="docutils literal notranslate"><span class="pre">inference_manifest.json</span></code> (input/output names, units, files).
 An existing family (<code class="docutils literal notranslate"><span class="pre">keras_tabular</span></code>, <code class="docutils literal notranslate"><span class="pre">planar_capacitance</span></code>) needs only a registry entry and an example request; a
 new kind needs one adapter class. Then open an issue or PR on

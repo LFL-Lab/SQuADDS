@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Tutorial 8: Machine Learning with SQuADDS &#8212; SQuADDS v0.5.2</title>
+    <title>Tutorial 8: Machine Learning with SQuADDS &#8212; SQuADDS v0.5.3</title>
   
   
   
@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=8e576371"></script>
+    <script src="../../_static/documentation_options.js?v=2a2fe768"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -150,7 +150,7 @@
     <p class="title logo__title">SQuADDS</p>
   
 </a>
-<span class="paper-version" title="SQuADDS 0.5.2">0.5.2</span></div>
+<span class="paper-version" title="SQuADDS 0.5.3">0.5.3</span></div>
     
   </div>
   
@@ -398,6 +398,12 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#Deploy-the-ML-Model-to-HuggingFace">Deploy the ML Model to HuggingFace</a></li>
+<li><a class="reference internal" href="#A-released-inverse-model:-TransmonCross-Hamiltonian-to-geometry">A released inverse model: TransmonCross Hamiltonian to geometry</a><ul>
+<li><a class="reference internal" href="#Check-the-geometry-with-QCap">Check the geometry with QCap</a></li>
+<li><a class="reference internal" href="#Fix-the-cross-length-with-QCap">Fix the cross length with QCap</a></li>
+<li><a class="reference internal" href="#References">References</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#Next-Steps...">Next Steps…</a></li>
 <li><a class="reference internal" href="#License">License</a></li>
 </ul>
@@ -1792,6 +1798,487 @@ Time taken to add the coupled H params: 3.9641311168670654 seconds
 </div>
 </div>
 <p>If your model is <strong>REALLYYYYY good</strong>, then send me an <a class="reference external" href="mailto:shanto&#37;&#52;&#48;usc&#46;edu">email</a> with the link to your model and I will add it to the SQuADDS ML model collection.</p>
+</section>
+<section id="A-released-inverse-model:-TransmonCross-Hamiltonian-to-geometry">
+<h2>A released inverse model: TransmonCross Hamiltonian to geometry<a class="headerlink" href="#A-released-inverse-model:-TransmonCross-Hamiltonian-to-geometry" title="Link to this heading">#</a></h2>
+<p>The model above maps Hamiltonian parameters to a design. Olivia Seidel and Firas Abouzahr trained one like it for the qubit alone, on the SQuADDS <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> data, and published it with the paper <em>Component-Level Inverse Design of Transmon Qubits Using Neural Networks</em> <a class="reference internal" href="#References"><span class="std std-ref">[1]</span></a>. It takes a target qubit frequency and anharmonicity and returns the cross length, the claw length and the claw’s ground spacing.</p>
+<p>SQuADDS ships it as <code class="docutils literal notranslate"><span class="pre">squadds.ml.inverse</span></code>. <code class="docutils literal notranslate"><span class="pre">load_model()</span></code> downloads its weights from <a class="reference external" href="https://huggingface.co/SQuADDS/transmon-cross-hamiltonian-inverse">Hugging Face</a> at a pinned revision, checks their sha256 and runs the network in numpy, so it needs no TensorFlow and no extra.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;QISKIT_METAL_HEADLESS&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.inverse</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">()</span>
+<span class="n">model</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+InverseModel(&#39;transmon_cross_hamiltonian_inverse&#39;, revision=&#39;7818074&#39;; trained on qubit_frequency_GHz in [3.219, 7.127], anharmonicity_MHz in [-525.8, -88.96])
+</pre></div></div>
+</div>
+<p>Let’s ask for the qubit of <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/tutorials/Tutorial-13_From_Layout_to_Hamiltonian_with_ML.html">Tutorial 13</a>: <span class="math notranslate nohighlight">\(f_q = 4\)</span> GHz and <span class="math notranslate nohighlight">\(\alpha = -200\)</span> MHz.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">:</span> <span class="mf">4.0</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">200</span><span class="p">}</span>
+<span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="o">**</span><span class="n">target</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>qubit_frequency_GHz</th>
+      <th>anharmonicity_MHz</th>
+      <th>claw_length_um</th>
+      <th>ground_spacing_um</th>
+      <th>cross_length_um</th>
+      <th>in_training_range</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>4.0</td>
+      <td>-200.0</td>
+      <td>98.673664</td>
+      <td>4.286439</td>
+      <td>248.407778</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>It takes arrays too, so a whole map of targets costs about a millisecond:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">f_grid</span><span class="p">,</span> <span class="n">a_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">,</span> <span class="mi">61</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">350</span><span class="p">,</span> <span class="o">-</span><span class="mi">120</span><span class="p">,</span> <span class="mi">47</span><span class="p">))</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">f_grid</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">a_grid</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">),</span> <span class="n">constrained_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;cross_length_um&quot;</span><span class="p">,</span> <span class="s2">&quot;claw_length_um&quot;</span><span class="p">,</span> <span class="s2">&quot;ground_spacing_um&quot;</span><span class="p">]):</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">f_grid</span><span class="p">,</span> <span class="n">a_grid</span><span class="p">,</span> <span class="n">grid</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">f_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_um&quot;</span><span class="p">,</span> <span class="s2">&quot; (µm)&quot;</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;qubit frequency (GHz)&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;anharmonicity (MHz)&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_tutorials_Tutorial-8_ML_interpolation_in_SQuADDS_74_0.png" src="../../_images/source_tutorials_Tutorial-8_ML_interpolation_in_SQuADDS_74_0.png" />
+</div>
+</div>
+<section id="Check-the-geometry-with-QCap">
+<h3>Check the geometry with QCap<a class="headerlink" href="#Check-the-geometry-with-QCap" title="Link to this heading">#</a></h3>
+<p>A predicted geometry is only a proposal, so let’s check it. <a class="reference external" href="https://lfl-lab.github.io/SQuADDS/source/ml_models.html">QCap</a> (Tutorials 11 and 13) gives the capacitance matrix of a layout in about a second, and from it the charging energy <span class="math notranslate nohighlight">\(E_C\)</span>. We score the design the way SQuADDS scores every database row: <span class="math notranslate nohighlight">\(E_J\)</span> comes from the target <span class="math notranslate nohighlight">\((f_q, \alpha)\)</span>, and <span class="math notranslate nohighlight">\(f_q\)</span> and <span class="math notranslate nohighlight">\(\alpha\)</span> of the design follow from that <span class="math notranslate nohighlight">\(E_J\)</span> and the design’s own <span class="math notranslate nohighlight">\(E_C\)</span>. Since
+<span class="math notranslate nohighlight">\(\alpha \approx -E_C\)</span>, the anharmonicity is set by the geometry.</p>
+<p>The model predicts three lengths; the rest of the <code class="docutils literal notranslate"><span class="pre">TransmonCross</span></code> (cross width and gap, claw width and gap) is fixed in the SQuADDS data. We take it from the closest database design, which is also our reference.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analyzer</span><span class="p">,</span> <span class="n">SQuADDS_DB</span>
+
+<span class="n">db</span> <span class="o">=</span> <span class="n">SQuADDS_DB</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_system</span><span class="p">(</span><span class="s2">&quot;qubit&quot;</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">select_qubit</span><span class="p">(</span><span class="s2">&quot;TransmonCross&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_system_df</span><span class="p">()</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">Analyzer</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+
+<span class="n">best</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">find_closest</span><span class="p">(</span><span class="n">target_params</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">num_top</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">best</span><span class="p">[[</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">,</span> <span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">,</span> <span class="s2">&quot;EC&quot;</span><span class="p">,</span> <span class="s2">&quot;EJ&quot;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/0e25705f54c343fb96571ff15b6fd8375ca899aa/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/0e25705f54c343fb96571ff15b6fd8375ca899aa/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/datasets/SQuADDS/SQuADDS_DB/revision/0e25705f54c343fb96571ff15b6fd8375ca899aa &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/0e25705f54c343fb96571ff15b6fd8375ca899aa/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/datasets/SQuADDS/SQuADDS_DB/tree/0e25705f54c343fb96571ff15b6fd8375ca899aa?recursive=false&amp;expand=false &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/0e25705f54c343fb96571ff15b6fd8375ca899aa/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/main/README.md &#34;HTTP/1.1 307 Temporary Redirect&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/SQuADDS/SQuADDS_DB/0e25705f54c343fb96571ff15b6fd8375ca899aa/README.md &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/0e25705f54c343fb96571ff15b6fd8375ca899aa/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/SQuADDS/SQuADDS_DB/SQuADDS/SQuADDS_DB.py &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/0e25705f54c343fb96571ff15b6fd8375ca899aa/.huggingface.yaml &#34;HTTP/1.1 404 Not Found&#34;
+INFO:httpx:HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=SQuADDS/SQuADDS_DB &#34;HTTP/1.1 200 OK&#34;
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/datasets/SQuADDS/SQuADDS_DB/resolve/0e25705f54c343fb96571ff15b6fd8375ca899aa/dataset_infos.json &#34;HTTP/1.1 404 Not Found&#34;
+Generating train split: 100%|██████████| 1934/1934 [00:00&lt;00:00, 24242.58 examples/s]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+qubit_frequency_GHz      4.013772
+anharmonicity_MHz     -201.551563
+EC                       0.179783
+EJ                      12.278081
+Name: 643, dtype: object
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scqubits.core.transmon</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transmon</span>
+
+<span class="n">EJ</span><span class="p">,</span> <span class="n">EC_target</span> <span class="o">=</span> <span class="n">Transmon</span><span class="o">.</span><span class="n">find_EJ_EC</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">],</span> <span class="n">target</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">)</span>  <span class="c1"># GHz</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;target: E_J = </span><span class="si">{</span><span class="n">EJ</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> GHz, E_C = </span><span class="si">{</span><span class="mf">1e3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">EC_target</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MHz&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+target: E_J = 12.278 GHz, E_C = 178.5 MHz
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal</span><span class="w"> </span><span class="kn">import</span> <span class="n">designs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_metal.qlibrary.qubits.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransmonCross</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.calcs.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_transmon_E01_alpha</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">squadds.ml.capacitance.bridge</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLSimulator</span><span class="p">,</span> <span class="n">EC_MHz</span>
+
+<span class="n">ml</span> <span class="o">=</span> <span class="n">MLSimulator</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;QCap&#39;s E_C of a TransmonCross, and the f_q and alpha it gives with the target&#39;s E_J.&quot;&quot;&quot;</span>
+    <span class="n">design</span> <span class="o">=</span> <span class="n">designs</span><span class="o">.</span><span class="n">DesignPlanar</span><span class="p">({},</span> <span class="n">overwrite_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">qubit</span> <span class="o">=</span> <span class="n">TransmonCross</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s2">&quot;qubit&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">design</span><span class="o">.</span><span class="n">rebuild</span><span class="p">()</span>
+    <span class="n">EC</span> <span class="o">=</span> <span class="n">EC_MHz</span><span class="p">(</span><span class="n">ml</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">qubit</span><span class="p">))</span>
+    <span class="n">f_q</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">get_transmon_E01_alpha</span><span class="p">(</span><span class="n">EJ</span><span class="p">,</span> <span class="n">EC</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">)</span>
+    <span class="n">readout</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;cross_length&quot;</span><span class="p">:</span> <span class="n">options</span><span class="p">[</span><span class="s2">&quot;cross_length&quot;</span><span class="p">],</span> <span class="s2">&quot;claw_length&quot;</span><span class="p">:</span> <span class="n">readout</span><span class="p">[</span><span class="s2">&quot;claw_length&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;ground_spacing&quot;</span><span class="p">:</span> <span class="n">readout</span><span class="p">[</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">],</span> <span class="s2">&quot;E_C (MHz)&quot;</span><span class="p">:</span> <span class="n">EC</span><span class="p">,</span> <span class="s2">&quot;f_q (GHz)&quot;</span><span class="p">:</span> <span class="n">f_q</span><span class="p">,</span> <span class="s2">&quot;alpha (MHz)&quot;</span><span class="p">:</span> <span class="n">alpha</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">model_options</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">design_options</span><span class="p">(</span><span class="o">**</span><span class="n">target</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">best</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">])</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;E_C (MHz)&quot;</span><span class="p">:</span> <span class="mf">1e3</span> <span class="o">*</span> <span class="n">EC_target</span><span class="p">,</span> <span class="s2">&quot;f_q (GHz)&quot;</span><span class="p">:</span> <span class="n">target</span><span class="p">[</span><span class="s2">&quot;qubit_frequency_GHz&quot;</span><span class="p">],</span>
+               <span class="s2">&quot;alpha (MHz)&quot;</span><span class="p">:</span> <span class="n">target</span><span class="p">[</span><span class="s2">&quot;anharmonicity_MHz&quot;</span><span class="p">]},</span>
+    <span class="s2">&quot;inverse model&quot;</span><span class="p">:</span> <span class="n">check</span><span class="p">(</span><span class="n">model_options</span><span class="p">),</span>
+    <span class="s2">&quot;closest database design&quot;</span><span class="p">:</span> <span class="n">check</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]),</span>
+<span class="p">})</span><span class="o">.</span><span class="n">T</span><span class="p">[[</span><span class="s2">&quot;cross_length&quot;</span><span class="p">,</span> <span class="s2">&quot;claw_length&quot;</span><span class="p">,</span> <span class="s2">&quot;ground_spacing&quot;</span><span class="p">,</span> <span class="s2">&quot;E_C (MHz)&quot;</span><span class="p">,</span> <span class="s2">&quot;f_q (GHz)&quot;</span><span class="p">,</span> <span class="s2">&quot;alpha (MHz)&quot;</span><span class="p">]]</span>
+<span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cross_length</th>
+      <th>claw_length</th>
+      <th>ground_spacing</th>
+      <th>E_C (MHz)</th>
+      <th>f_q (GHz)</th>
+      <th>alpha (MHz)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>target</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>178.487692</td>
+      <td>4.0</td>
+      <td>-200.0</td>
+    </tr>
+    <tr>
+      <th>inverse model</th>
+      <td>248.408um</td>
+      <td>98.674um</td>
+      <td>4.286um</td>
+      <td>149.828246</td>
+      <td>3.679866</td>
+      <td>-165.99627</td>
+    </tr>
+    <tr>
+      <th>closest database design</th>
+      <td>210um</td>
+      <td>190um</td>
+      <td>10um</td>
+      <td>178.574124</td>
+      <td>4.000919</td>
+      <td>-200.102742</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The closest database design lands on target, while the model’s geometry misses: its <span class="math notranslate nohighlight">\(E_C\)</span> is too small, so <span class="math notranslate nohighlight">\(\alpha\)</span> comes out too small in magnitude (and <span class="math notranslate nohighlight">\(f_q\)</span> too low). The two designs are also far apart in geometry, which is expected: many geometries share an <span class="math notranslate nohighlight">\(E_C\)</span>, and <span class="math notranslate nohighlight">\(f_q\)</span> is set by the junction, so the inverse problem has more than one answer.</p>
+<p>Is this one target unlucky? We can check many targets without QCap: predict the geometry, take the database design closest to it in geometry, and score that design’s own Q3D <span class="math notranslate nohighlight">\(E_C\)</span> in the same way.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">squadds.calcs.transmon_cross</span><span class="w"> </span><span class="kn">import</span> <span class="n">EC_numba</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">um</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;um&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+
+<span class="n">geom</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;cross&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">um</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;cross_length&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]],</span>
+    <span class="s2">&quot;claw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">um</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;claw_length&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]],</span>
+    <span class="s2">&quot;gs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">um</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;connection_pads&quot;</span><span class="p">][</span><span class="s2">&quot;readout&quot;</span><span class="p">][</span><span class="s2">&quot;ground_spacing&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;design_options&quot;</span><span class="p">]],</span>
+<span class="p">})</span>
+<span class="n">geom</span><span class="p">[</span><span class="s2">&quot;EC_MHz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1e3</span> <span class="o">*</span> <span class="n">EC_numba</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;cross_to_claw&quot;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;cross_to_ground&quot;</span><span class="p">])]</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">targets</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;f_q&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">,</span> <span class="mi">40</span><span class="p">),</span> <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">350</span><span class="p">,</span> <span class="o">-</span><span class="mi">120</span><span class="p">,</span> <span class="mi">40</span><span class="p">)})</span>
+<span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">targets</span><span class="p">[</span><span class="s2">&quot;f_q&quot;</span><span class="p">],</span> <span class="n">targets</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">])</span>
+<span class="n">alpha_err</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">targets</span><span class="o">.</span><span class="n">iterrows</span><span class="p">(),</span> <span class="n">pred</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">(((</span><span class="n">geom</span><span class="p">[</span><span class="s2">&quot;cross&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;cross_length_um&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">330</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="n">geom</span><span class="p">[</span><span class="s2">&quot;claw&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;claw_length_um&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">330</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+         <span class="o">+</span> <span class="p">((</span><span class="n">geom</span><span class="p">[</span><span class="s2">&quot;gs&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;ground_spacing_um&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mf">5.9</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">EJ_t</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Transmon</span><span class="o">.</span><span class="n">find_EJ_EC</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;f_q&quot;</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">)</span>
+    <span class="n">alpha_err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_transmon_E01_alpha</span><span class="p">(</span><span class="n">EJ_t</span><span class="p">,</span> <span class="n">geom</span><span class="p">[</span><span class="s2">&quot;EC_MHz&quot;</span><span class="p">][</span><span class="n">d</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()]</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">])</span>
+<span class="n">alpha_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">alpha_err</span><span class="p">)</span>
+<span class="n">rel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">alpha_err</span> <span class="o">/</span> <span class="n">targets</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alpha over </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span><span class="si">}</span><span class="s2"> targets: median </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">rel</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> % &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;(MAE </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">alpha_err</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MHz, RMSE </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">alpha_err</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MHz)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+alpha over 40 targets: median 14.4 % (MAE 36.6 MHz, RMSE 45.4 MHz)
+</pre></div></div>
+</div>
+<p>So the geometry is a good <strong>starting point</strong>, not a finished design. That is fine, because QCap is fast enough to finish the job.</p>
+</section>
+<section id="Fix-the-cross-length-with-QCap">
+<h3>Fix the cross length with QCap<a class="headerlink" href="#Fix-the-cross-length-with-QCap" title="Link to this heading">#</a></h3>
+<p><span class="math notranslate nohighlight">\(\alpha\)</span> follows <span class="math notranslate nohighlight">\(E_C\)</span>, and the cross length moves <span class="math notranslate nohighlight">\(E_C\)</span> the most. So we keep the model’s claw and ground spacing and solve for the cross length that gives the target <span class="math notranslate nohighlight">\(E_C\)</span>, one QCap call per step.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">brentq</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">with_cross</span><span class="p">(</span><span class="n">length_um</span><span class="p">):</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">model_options</span><span class="p">)</span>
+    <span class="n">options</span><span class="p">[</span><span class="s2">&quot;cross_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">length_um</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">um&quot;</span>
+    <span class="k">return</span> <span class="n">options</span>
+
+
+<span class="n">calls</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">ec_miss</span><span class="p">(</span><span class="n">length_um</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">calls</span>
+    <span class="n">calls</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">check</span><span class="p">(</span><span class="n">with_cross</span><span class="p">(</span><span class="n">length_um</span><span class="p">))[</span><span class="s2">&quot;E_C (MHz)&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1e3</span> <span class="o">*</span> <span class="n">EC_target</span>
+
+
+<span class="n">L0</span> <span class="o">=</span> <span class="n">um</span><span class="p">(</span><span class="n">model_options</span><span class="p">[</span><span class="s2">&quot;cross_length&quot;</span><span class="p">])</span>
+<span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">90.0</span><span class="p">,</span> <span class="n">L0</span><span class="p">)</span> <span class="k">if</span> <span class="n">ec_miss</span><span class="p">(</span><span class="n">L0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">L0</span><span class="p">,</span> <span class="mf">420.0</span><span class="p">)</span>  <span class="c1"># a bigger cross means more capacitance, so a smaller E_C</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="n">L</span> <span class="o">=</span> <span class="n">brentq</span><span class="p">(</span><span class="n">ec_miss</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cross length </span><span class="si">{</span><span class="n">L0</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">L</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> um in </span><span class="si">{</span><span class="n">calls</span><span class="si">}</span><span class="s2"> QCap calls (</span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> s)&quot;</span><span class="p">)</span>
+
+<span class="n">results</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;inverse model + QCap fix&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span><span class="n">with_cross</span><span class="p">(</span><span class="n">L</span><span class="p">))</span>
+<span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+cross length 248.4 -&gt; 210.7 um in 8 QCap calls (1.4 s)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cross_length</th>
+      <th>claw_length</th>
+      <th>ground_spacing</th>
+      <th>E_C (MHz)</th>
+      <th>f_q (GHz)</th>
+      <th>alpha (MHz)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>target</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>178.487692</td>
+      <td>4.0</td>
+      <td>-200.0</td>
+    </tr>
+    <tr>
+      <th>inverse model</th>
+      <td>248.408um</td>
+      <td>98.674um</td>
+      <td>4.286um</td>
+      <td>149.828246</td>
+      <td>3.679866</td>
+      <td>-165.99627</td>
+    </tr>
+    <tr>
+      <th>closest database design</th>
+      <td>210um</td>
+      <td>190um</td>
+      <td>10um</td>
+      <td>178.574124</td>
+      <td>4.000919</td>
+      <td>-200.102742</td>
+    </tr>
+    <tr>
+      <th>inverse model + QCap fix</th>
+      <td>210.725um</td>
+      <td>98.674um</td>
+      <td>4.286um</td>
+      <td>178.478872</td>
+      <td>3.999907</td>
+      <td>-199.988947</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The corrected design hits the target, after a handful of QCap calls. As always, simulate the final design (Tutorial 2) before you fabricate it.</p>
+</section>
+<section id="References">
+<h3>References<a class="headerlink" href="#References" title="Link to this heading">#</a></h3>
+<p>[1] O. Seidel, F. Abouzahr, A. Chakraborty, S. A. Shanto, S. Das, D. Baxter, J. Asaadi, N. Pancotti, H. Yang, B. Khailany, S. Sussman, E. Figueroa-Feliciano, E. M. Levenson-Falk and T. L. Patti, “Component-Level Inverse Design of Transmon Qubits Using Neural Networks,” <a class="reference external" href="https://arxiv.org/abs/2607.20795">arXiv:2607.20795</a> (2026).</p>
+<p>If you use this model, please cite:</p>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@misc</span><span class="p">{</span><span class="nl">Seidel2026inversedesign</span><span class="p">,</span>
+<span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Component-Level Inverse Design of Transmon Qubits Using Neural Networks}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Seidel, Olivia and Abouzahr, Firas and Chakraborty, Abhishek and Shanto, Sadman Ahmed and Das, Saikat and Baxter, Daniel and Asaadi, Jonathan and Pancotti, Nicola and Yang, Haoyu and Khailany, Brucek and Sussman, Sara and Figueroa-Feliciano, Enectali and Levenson-Falk, Eli M. and Patti, Taylor L.}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2026}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">eprint</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2607.20795}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">archivePrefix</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{arXiv}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">primaryClass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{quant-ph}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://arxiv.org/abs/2607.20795}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="Next-Steps...">
 <h2>Next Steps…<a class="headerlink" href="#Next-Steps..." title="Link to this heading">#</a></h2>
