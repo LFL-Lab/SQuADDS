@@ -21,6 +21,48 @@ def calculate_loaded_q(*, f_res_hz: float, fwhm_hz: float) -> float:
     return float(f_res_hz / fwhm_hz)
 
 
+def notch_half_power_linewidth(freqs_hz, s21, *, baseline_power: float | None = None) -> dict[str, float]:
+    """Resonance and linewidth of a notch (hanger) dip from where |S21|^2 is halfway between its minimum and baseline.
+
+    For a symmetric notch on a flat background this width equals kappa / 2pi. Half the dB depth does not:
+    it shrinks as sqrt(|S21|min) * kappa. 1 / (baseline - |S21|^2) of a Lorentzian dip is a parabola in frequency,
+    so a quadratic fit to the points inside the half-power band gives the centre and width between grid points.
+    Asymmetric or non-Lorentzian dips need a complex (circle) fit. The baseline defaults to the largest |S21|^2 in
+    the window, so the window should span many linewidths; pass ``baseline_power`` when it is known.
+    """
+    freqs = np.asarray(freqs_hz, dtype=float)
+    power = np.abs(np.asarray(s21, dtype=complex)) ** 2
+    if freqs.ndim != 1 or freqs.shape != power.shape or len(freqs) < 3:
+        raise ValueError("freqs_hz and s21 must be 1D arrays of the same length (at least 3 points).")
+
+    i_min = int(np.argmin(power))
+    p_min = float(power[i_min])
+    baseline = float(power.max()) if baseline_power is None else float(baseline_power)
+    level = (p_min + baseline) / 2
+
+    lo = i_min
+    while lo > 0 and power[lo] <= level:
+        lo -= 1
+    hi = i_min
+    while hi < len(freqs) - 1 and power[hi] <= level:
+        hi += 1
+    f_res, fwhm = float(freqs[i_min]), float("nan")
+    if hi - lo >= 2 and baseline > p_min:
+        x = freqs[lo : hi + 1] - freqs[i_min]
+        a, b, c = np.polyfit(x, 1.0 / np.maximum(baseline - power[lo : hi + 1], 1e-300), 2)
+        q_min = c - b * b / (4 * a) if a > 0 else -1.0
+        if q_min > 0:
+            f_res = float(freqs[i_min] - b / (2 * a))
+            fwhm = float(2 * np.sqrt(q_min / a))
+    return {
+        "f_res_hz": f_res,
+        "fwhm_hz": fwhm,
+        "f_min_sample_hz": float(freqs[i_min]),
+        "min_s21_db": float(10 * np.log10(max(p_min, 1e-300))),
+        "resonance_at_sweep_edge": float(i_min in {0, len(freqs) - 1}),
+    }
+
+
 def calculate_kappa_hz(*, f_res_hz: float, loaded_q: float) -> float:
     """Compute kappa / 2pi in Hz from loaded quality factor."""
     if f_res_hz <= 0:
@@ -39,7 +81,7 @@ def calculate_g_from_chi(*, f_r_hz: float, f_q_hz: float, chi_hz: float, alpha_h
     delta = omega_q - omega_r
     sigma = omega_q + omega_r
 
-    rwa_term = alpha / (delta * (delta - alpha))
+    rwa_term = alpha / (delta * (delta + alpha))
     non_rwa_term = alpha / (sigma * (sigma + alpha))
     denominator = 2 * (rwa_term + non_rwa_term)
     if denominator == 0:
@@ -74,9 +116,13 @@ def terminate_port_y(y_matrices, *, terminated_port: int, load_impedance_ohms) -
     y_ab = matrices[:, keep, terminated_port][:, :, np.newaxis]
     y_ba = matrices[:, terminated_port, keep][:, np.newaxis, :]
     y_bb = matrices[:, terminated_port, terminated_port]
-    y_load = 1.0 / load_impedance
+    # Y-parameters already assume the other ports are shorted, so a zero-ohm load leaves y_aa unchanged.
+    short = load_impedance == 0
+    y_load = np.divide(1.0, load_impedance, out=np.zeros_like(load_impedance), where=~short)
     denominator = (y_bb + y_load)[:, np.newaxis, np.newaxis]
-    return y_aa - (y_ab * y_ba) / denominator
+    reduced = y_aa - (y_ab * y_ba) / np.where(short[:, np.newaxis, np.newaxis], 1.0, denominator)
+    reduced[short] = y_aa[short]
+    return reduced
 
 
 def y_to_s(y_matrices, *, z0_ohms: float = 50.0) -> np.ndarray:

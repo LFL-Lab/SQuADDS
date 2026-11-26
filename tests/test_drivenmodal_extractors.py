@@ -2,6 +2,7 @@ import json
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from squadds.simulations.drivenmodal.extractors import (
     coupled_hamiltonian_from_prepared_runs,
@@ -56,6 +57,47 @@ def test_coupled_hamiltonian_from_prepared_runs_prefers_resonator_band_summary(t
         "bridge_band": {"manifest": {"run_dir": str(bridge)}},
         "resonator_band": {"manifest": {"run_dir": str(resonator)}},
     }
-    out = coupled_hamiltonian_from_prepared_runs(prepared)
+    with pytest.warns(UserWarning):
+        out = coupled_hamiltonian_from_prepared_runs(prepared)
     assert out["qubit_frequency_ghz"] == 3.0
     assert out["chi_mhz"] == 0.1
+
+
+def test_coupled_hamiltonian_joins_junction_port_qubit_values(tmp_path):
+    from squadds.simulations.drivenmodal.coupled_postprocess import calculate_g_from_chi
+
+    resonator, qubit = tmp_path / "res", tmp_path / "qubit"
+    for d in (resonator, qubit):
+        (d / "artifacts").mkdir(parents=True)
+    extracted = {
+        "qubit_frequency_ghz": 3.9,
+        "anharmonicity_mhz": -120.0,
+        "cavity_frequency_ghz": 8.9,
+        "chi_mhz": -0.03,
+        "g_mhz": 1.0,
+        "kappa_mhz": 0.3,
+    }
+    (resonator / "artifacts" / "summary.json").write_text(json.dumps({"extracted": extracted}))
+    qubit_summary = {"selected_model_extracted": {"qubit_frequency_ghz": 4.0, "anharmonicity_mhz": -130.0}}
+    (qubit / "artifacts" / "qubit_admittance_summary.json").write_text(json.dumps(qubit_summary))
+
+    out = coupled_hamiltonian_from_prepared_runs(
+        {
+            "qubit_band": {"manifest": {"run_dir": str(qubit)}},
+            "resonator_band": {"manifest": {"run_dir": str(resonator)}},
+        }
+    )
+
+    expected_g = calculate_g_from_chi(f_r_hz=8.9e9, f_q_hz=4.0e9, chi_hz=-0.03e6, alpha_hz=-130e6)
+    assert out["qubit_frequency_ghz"] == 4.0
+    assert out["anharmonicity_mhz"] == -130.0
+    assert np.isclose(out["g_mhz"], expected_g / (2 * np.pi * 1e6))
+    assert out["kappa_mhz"] == 0.3
+
+
+def test_coupled_hamiltonian_warns_without_junction_port_summary(tmp_path):
+    (tmp_path / "artifacts").mkdir()
+    (tmp_path / "artifacts" / "summary.json").write_text(json.dumps({"extracted": {"qubit_frequency_ghz": 3.0}}))
+
+    with pytest.warns(UserWarning, match="reference row"):
+        coupled_hamiltonian_from_prepared_runs({"resonator_band": {"manifest": {"run_dir": str(tmp_path)}}})

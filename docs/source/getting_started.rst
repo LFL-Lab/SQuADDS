@@ -244,6 +244,10 @@ If the ground and the conductors are on one layer, give that layer for both. The
 
 **A:** They need ``shapely`` older than 2.1. Install ``"shapely<2.1"`` for exact rebuilds.
 
+**Q: What is** ``cross_to_cross`` **in the TransmonCross table?**
+
+**A:** It holds the same value as ``cross_to_ground``, the cross-to-ground coupling, not the cross's total self-capacitance. SQuADDS builds the qubit's total capacitance as ``cross_to_ground + cross_to_claw``, so the Hamiltonian results do not use ``cross_to_cross``. A fresh Q3D solve of one row reproduced the stored entries within 0.4 % (MAE 0.27 fF, RMSE 0.32 fF) and put the full self-capacitance 6.75 % (8.0 fF) above the stored ``cross_to_cross``. About 2.2 fF of that is coupling to conductors the table does not list. The simulations used silicon with eps_r 11.45.
+
 Citing, AI Agents and Compute
 -----------------------------
 

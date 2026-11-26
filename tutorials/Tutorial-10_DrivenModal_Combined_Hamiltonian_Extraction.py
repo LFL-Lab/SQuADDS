@@ -238,8 +238,9 @@ display(port_table)
 # %% [markdown]
 # ## State-dependent Josephson inductance
 #
-# `LJ_bare_nH` is the linear Josephson inductance from the transmon design options
-# (`aedt_q3d_inductance` / `Lj` / `LJ`). The ground-state and excited-state
+# `LJ_bare_nH` is the linear Josephson inductance. It comes from the row's `EJ`
+# (the value that reproduces the database qubit frequency) when the row has one,
+# and otherwise from the transmon design options (`aedt_q3d_inductance` / `Lj` / `LJ`). The ground-state and excited-state
 # columns use the same workflow as `coupled_reference_summary(...)`: helper
 # `transmon_state_inductances(...)` in `squadds.simulations.drivenmodal.workflows`
 # builds a zero-temperature `scqubits.Transmon` with

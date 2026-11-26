@@ -88,3 +88,16 @@ def test_unknown_style_is_rejected():
     design = designs.DesignPlanar()
     with pytest.raises(ValueError, match="SQUID_LOOP_Dolan"):
         TransmonCross(design, "Q1", options=dict(style="SquidLoopDolan"))
+
+
+@pytest.mark.parametrize(
+    ("style", "layer_keys"),
+    [("JJ_Dolan", ("bridge_layer", "JJ_layer")), ("SQUID_LOOP_Dolan", ("SQUID_layer", "JJ_layer"))],
+)
+def test_junction_layers_follow_qubit_options(style, layer_keys):
+    opts_key, suffix, _cls, _n = STYLES[style]
+    design, _qubit = _build(style, **{opts_key: {layer_keys[0]: 3, layer_keys[1]: 6}})
+
+    child = design.components["Q1" + suffix]
+    polys = design.qgeometry.tables["poly"]
+    assert set(polys[polys["component"] == child.id]["layer"]) == {3, 6}

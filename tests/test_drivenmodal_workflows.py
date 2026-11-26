@@ -170,3 +170,36 @@ def test_hamiltonian_comparison_table_keeps_chi_reference_optional():
     assert list(table["quantity"])[-1] == "chi_mhz"
     assert math.isnan(table.iloc[-1]["squadds"])
     assert table.iloc[0]["percent_error"] == pytest.approx(-2.5)
+
+
+def _coupled_row(**extra):
+    return {
+        "design_options": {"qubit_options": {"aedt_q3d_inductance": 10.0}},
+        "sim_results": {
+            "qubit_frequency_GHz": 3.968,
+            "anharmonicity_MHz": -130.0,
+            "cavity_frequency_GHz": 8.9,
+            "kappa_kHz": 300.0,
+            "g_MHz": 50.0,
+            "cross_to_ground": 150.0,
+            "cross_to_claw": 5.0,
+        },
+        **extra,
+    }
+
+
+def test_coupled_reference_summary_takes_lj_from_row_ej():
+    from scipy import constants
+
+    from squadds.simulations.drivenmodal import coupled_reference_summary
+
+    nominal = coupled_reference_summary(_coupled_row())
+    assert nominal["lj_source"] == "qubit_options"
+    assert math.isclose(nominal["lj_bare_h"], 10e-9)
+
+    ej_ghz = 17.6
+    from_row = coupled_reference_summary(_coupled_row(EJ=ej_ghz))
+    lj_expected = (constants.hbar / (2 * constants.e)) ** 2 / (ej_ghz * 1e9 * constants.h)
+    assert from_row["lj_source"] == "row_EJ"
+    assert math.isclose(from_row["lj_bare_h"], lj_expected, rel_tol=1e-12)
+    assert math.isclose(from_row["ej_ghz"], ej_ghz, rel_tol=1e-9)

@@ -30,11 +30,23 @@ def _write_manifest(manifest: dict[str, Any], manifest_path: Path) -> dict[str, 
     return manifest
 
 
-def initialize_run_manifest(root_dir: str | Path, run_id: str, request_payload: dict[str, Any]) -> dict[str, Any]:
-    """Create a new run directory with an initial manifest."""
+def initialize_run_manifest(
+    root_dir: str | Path,
+    run_id: str,
+    request_payload: dict[str, Any],
+    *,
+    resume_existing: bool = False,
+) -> dict[str, Any]:
+    """Create a run directory with an initial manifest, or reuse an existing one when ``resume_existing``."""
     run_dir = Path(root_dir) / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = run_dir / "manifest.json"
+    if resume_existing and manifest_path.is_file():
+        manifest = load_run_manifest(manifest_path)
+        for stage_name in STAGE_NAMES:
+            manifest["stages"].setdefault(stage_name, {"status": "pending"})
+        manifest["request_payload"] = request_payload
+        return _write_manifest(manifest, manifest_path)
     manifest = {
         "run_id": run_id,
         "run_dir": str(run_dir),

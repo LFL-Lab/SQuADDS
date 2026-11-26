@@ -14,7 +14,10 @@ def run_drivenmodal_request(request, *, checkpoint_dir: str | Path | None = None
     resolved_layer_stack = resolve_layer_stack(request.layer_stack)
     root_dir = Path(checkpoint_dir or ".squadds_drivenmodal_runs")
     run_id = request.metadata.get("run_id", f"{request.__class__.__name__}-run")
-    manifest = initialize_run_manifest(root_dir, run_id=run_id, request_payload=request_payload)
+    resume_existing = bool(request_payload.get("artifacts", {}).get("resume_existing", False))
+    manifest = initialize_run_manifest(
+        root_dir, run_id=run_id, request_payload=request_payload, resume_existing=resume_existing
+    )
     manifest = mark_stage_complete(root_dir / run_id / "manifest.json", "prepared")
 
     return {

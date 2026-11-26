@@ -407,7 +407,8 @@ def bare_lj_h_from_qubit_options(qubit_options: Mapping[str, Any]) -> float:
     if raw is None:
         raise KeyError("Qubit options must include 'aedt_q3d_inductance', 'Lj', or 'LJ'.")
     value = float(raw)
-    return value if value > 1e-9 else value * 1e-9
+    # Values above 1 mH can only be nH; values in H are ~1e-8.
+    return value * 1e-9 if value > 1e-3 else value
 
 
 def transmon_state_inductances(
@@ -439,11 +440,19 @@ def transmon_state_inductances(
     }
 
 
-def coupled_reference_summary(row: Mapping[str, Any] | pd.Series) -> dict[str, float]:
+def coupled_reference_summary(row: Mapping[str, Any] | pd.Series) -> dict[str, Any]:
     """Extract the target/reference Hamiltonian and JJ data from a SQuADDS row."""
     design_options = coupled_design_payload(row)
     qubit_options = deserialize_json_like(design_options["qubit_options"])
-    lj_h = bare_lj_h_from_qubit_options(qubit_options)
+    # Analyzer rows store the E_J that reproduces their qubit frequency; prefer it over the layout's nominal L_J.
+    ej_ghz = _optional_row_value(row, "EJ")
+    if ej_ghz is not None and np.isfinite(float(ej_ghz)) and float(ej_ghz) > 0:
+        phi0_over_2pi = constants.hbar / (2 * constants.e)
+        lj_h = phi0_over_2pi**2 / (float(ej_ghz) * 1e9 * constants.h)
+        lj_source = "row_EJ"
+    else:
+        lj_h = bare_lj_h_from_qubit_options(qubit_options)
+        lj_source = "qubit_options"
     state_data = transmon_state_inductances(
         lj_h=lj_h,
         cross_to_ground_fF=_sim_float(row, "cross_to_ground"),
@@ -456,6 +465,7 @@ def coupled_reference_summary(row: Mapping[str, Any] | pd.Series) -> dict[str, f
         "kappa_mhz": _sim_float(row, "kappa_kHz", "kappa_khz") / 1000.0,
         "g_mhz": _sim_float(row, "g_MHz", "g_mhz"),
         **state_data,
+        "lj_source": lj_source,
     }
 
 

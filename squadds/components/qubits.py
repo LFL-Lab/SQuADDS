@@ -66,9 +66,12 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
            * SQUID_offset: '5um' -- Distance between the edge of the bottom pad and the grounding plane across of the cross
            * JJ_width: '150nm' -- Josephson Junction width. Governs Lj.
            * JJ_flip: False -- Switch the direction of the Josephson Junctions.
+           * SQUID_layer, JJ_layer: optional GDS layers for the loop and junctions (default 20 and 60).
        * Dolan_JJ: Dict
            * JJ_width: '150nm' -- Josephson Junction width. Governs Lj.
            * JJ_flip: False -- Switch the direction of the Josephson Junctions.
+           * bridge_layer, JJ_layer: optional GDS layers for the bridge and junction (default 20 and 60).
+       The qubit's own ``layer`` does not move the junction; set these to match the foundry layer map.
 
     """
 
@@ -208,6 +211,7 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
                     JJ_flip=sl.JJ_flip,
                     JJ_width=sl.JJ_width,
                 )
+                jj_options.update({k: sl[k] for k in ("SQUID_layer", "JJ_layer") if k in sl})
 
                 self._make_child(SquidLoopDolan, self.name + "_SQUID_LOOP_Dolan", jj_options)
 
@@ -244,6 +248,7 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
 
                 if pj.JJ_flip:
                     jj_options.orientation = p.orientation + 180
+                jj_options.update({k: pj[k] for k in ("bridge_layer", "JJ_layer") if k in pj})
 
                 self._make_child(JjDolan, self.name + "_JJ_Dolan", jj_options)
 

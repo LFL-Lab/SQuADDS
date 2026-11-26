@@ -1,6 +1,28 @@
 Release Notes
 =============
 
+Unreleased
+----------
+
+- ``calculate_g_from_chi`` used delta(delta - alpha) in the rotating term instead of delta(delta + alpha), with
+  delta = omega_q - omega_r. It returned g about 2.3 % low at the Tutorial 10 targets (48.86 MHz for a true 50 MHz).
+- Tutorial 10a took kappa from the notch width at half its dB depth, which is sqrt(|S21|min) times the linewidth. It now
+  uses ``notch_half_power_linewidth`` (|S21|^2 halfway between the dip and the baseline, from a Lorentzian fit between
+  grid points), which recovers kappa and the resonance centre on the default 22,000-point sweep.
+- ``resume_existing`` resumes: ``run_drivenmodal_request`` no longer resets a run's finished stages to pending.
+- ``terminate_port_y`` handles an ideal short (0 ohm) instead of returning NaN.
+- ``coupled_hamiltonian_from_prepared_runs`` takes f_q and alpha from the junction-port extraction (Tutorial 10b) when it
+  exists and recomputes g with them; otherwise it warns that they come from the reference row. Tutorial 10a labels its
+  f_q and alpha as reference values.
+- ``coupled_reference_summary`` takes L_J from the row's ``EJ`` when present (9.28 nH for the Tutorial 10 row, not the
+  layout's nominal 10 nH), so the qubit frequency it compares against is consistent. ``bare_lj_h_from_qubit_options``
+  reads a bare number such as ``10`` as nH (it returned 10 H).
+- ``TransmonCross`` passes ``Dolan_JJ.bridge_layer`` / ``JJ_layer`` and ``SQUID_LOOP.SQUID_layer`` / ``JJ_layer`` to its
+  junction; Tutorial 5 notes that the qubit's own layer does not move the junction.
+- Tutorial 5 rounds the junction width to the nearest 10 nm (413.9 nm gives 410 nm; it gave 420 nm).
+- The TransmonCross ``cross_to_cross`` field holds the cross-to-ground coupling, not the self-capacitance; the FAQ and
+  Tutorial 1 now say so. Hamiltonian results use ``cross_to_ground + cross_to_claw`` and are unaffected.
+
 0.5.3 (2026-11-19)
 ------------------
 

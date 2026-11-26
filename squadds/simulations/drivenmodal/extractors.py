@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import warnings
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,7 @@ from squadds.simulations.drivenmodal.capacitance import (
     capacitance_matrix_from_y,
     maxwell_capacitance_dataframe,
 )
+from squadds.simulations.drivenmodal.coupled_postprocess import calculate_g_from_chi
 from squadds.simulations.drivenmodal.hfss_data import parameter_dataframe_to_tensor
 from squadds.simulations.drivenmodal.workflows import (
     HAMILTONIAN_KEYS,
@@ -137,7 +139,11 @@ def hamiltonian_from_summary_json(summary_path: str | Path) -> dict[str, float]:
 
 
 def coupled_hamiltonian_from_prepared_runs(prepared_runs: Mapping[str, Any]) -> dict[str, float]:
-    """Load extracted Hamiltonian metrics from the first available band ``summary.json``."""
+    """Load extracted Hamiltonian metrics from the first available band ``summary.json``.
+
+    The coupled summary takes f_q and alpha from the reference row. When a band also has the junction-port
+    ``qubit_admittance_summary.json`` (Tutorial 10b), its f_q and alpha replace them and g is recomputed.
+    """
     band_preferences = ("resonator_band", "qubit_band", "bridge_band")
     tried: list[str] = []
     for band_name in band_preferences:
@@ -150,7 +156,7 @@ def coupled_hamiltonian_from_prepared_runs(prepared_runs: Mapping[str, Any]) -> 
         summary_path = run_dir / "artifacts" / "summary.json"
         tried.append(str(summary_path))
         if summary_path.is_file():
-            return hamiltonian_from_summary_json(summary_path)
+            return _join_qubit_admittance(hamiltonian_from_summary_json(summary_path), prepared_runs)
     detail = "\n  - ".join(tried) if tried else "(no segmented band entries were present)."
     raise FileNotFoundError(
         "No coupled summary.json found in expected locations. Searched:\n  - "
@@ -158,3 +164,34 @@ def coupled_hamiltonian_from_prepared_runs(prepared_runs: Mapping[str, Any]) -> 
         + "\nRun coupled post-processing so it writes summary.json next to y_parameters.pkl "
         "(see tutorials/Tutorial-10a_DrivenModal_Coupled_System_Postprocessing.py)."
     )
+
+
+def _join_qubit_admittance(hamiltonian: dict[str, float], prepared_runs: Mapping[str, Any]) -> dict[str, float]:
+    for band_name in ("qubit_band", "bridge_band", "resonator_band"):
+        if band_name not in prepared_runs:
+            continue
+        run_dir = Path(prepared_runs[band_name]["manifest"]["run_dir"])
+        path = run_dir / "artifacts" / "qubit_admittance_summary.json"
+        if not path.is_file():
+            continue
+        qubit = json.loads(path.read_text(encoding="utf-8")).get("selected_model_extracted") or {}
+        f_q_ghz = float(qubit.get("qubit_frequency_ghz", float("nan")))
+        alpha_mhz = float(qubit.get("anharmonicity_mhz", float("nan")))
+        if not (np.isfinite(f_q_ghz) and np.isfinite(alpha_mhz)):
+            continue
+        joined = dict(hamiltonian, qubit_frequency_ghz=f_q_ghz, anharmonicity_mhz=alpha_mhz)
+        if np.isfinite(joined["chi_mhz"]) and np.isfinite(joined["cavity_frequency_ghz"]):
+            g_rad_s = calculate_g_from_chi(
+                f_r_hz=joined["cavity_frequency_ghz"] * 1e9,
+                f_q_hz=f_q_ghz * 1e9,
+                chi_hz=joined["chi_mhz"] * 1e6,
+                alpha_hz=alpha_mhz * 1e6,
+            )
+            joined["g_mhz"] = g_rad_s / (2 * np.pi * 1e6)
+        return joined
+    warnings.warn(
+        "No qubit_admittance_summary.json found: qubit_frequency_ghz and anharmonicity_mhz (and g) use the "
+        "reference row, not the driven-modal network. Run the junction-port extraction (Tutorial 10b).",
+        stacklevel=3,
+    )
+    return hamiltonian

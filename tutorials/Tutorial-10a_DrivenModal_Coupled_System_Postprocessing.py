@@ -44,7 +44,6 @@ from qiskit_metal import Dict
 from qiskit_metal.qlibrary.terminations.open_to_ground import OpenToGround
 from qiskit_metal.qlibrary.tlines.straight_path import RouteStraight
 from qiskit_metal.renderers.renderer_ansys.hfss_renderer import QHFSSRenderer
-from scipy.signal import peak_widths
 
 from squadds import SQuADDS_DB
 from squadds.components.coupled_systems import QubitCavity
@@ -55,6 +54,7 @@ from squadds.simulations.drivenmodal.coupled_postprocess import (
     calculate_g_from_chi,
     calculate_kappa_hz,
     calculate_loaded_q,
+    notch_half_power_linewidth,
     terminate_port_y,
     y_to_s,
 )
@@ -489,22 +489,8 @@ def write_network_touchstone(network: rf.Network, output_path: Path) -> Path:
 
 
 def extract_notch_metrics(freqs_hz: np.ndarray, s21: np.ndarray) -> dict[str, float]:
-    s21_mag_db = 20 * np.log10(np.clip(np.abs(s21), 1e-15, None))
-    inverted = -s21_mag_db
-    min_idx = int(np.argmax(inverted))
-    widths, _heights, left_ips, right_ips = peak_widths(inverted, [min_idx], rel_height=0.5)
-    if len(freqs_hz) < 2:
-        raise ValueError("At least two frequency points are required to extract linewidth.")
-    step_hz = float(np.mean(np.diff(freqs_hz)))
-    fwhm_hz = float(widths[0] * step_hz)
-    return {
-        "f_res_hz": float(freqs_hz[min_idx]),
-        "fwhm_hz": fwhm_hz,
-        "left_index": float(left_ips[0]),
-        "right_index": float(right_ips[0]),
-        "min_s21_db": float(s21_mag_db[min_idx]),
-        "resonance_at_sweep_edge": float(min_idx in {0, len(freqs_hz) - 1}),
-    }
+    # Half-power width: |S21|^2 halfway between the dip and the baseline, which equals kappa / 2pi for a notch.
+    return notch_half_power_linewidth(freqs_hz, s21)
 
 
 def build_local_analysis_method_result(
@@ -1468,6 +1454,8 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
     ground_metrics = extract_notch_metrics(freqs_hz, s_ground[:, 1, 0])
     excited_metrics = extract_notch_metrics(freqs_hz, s_excited[:, 1, 0])
     postprocessing_warning = build_postprocessing_warning(ground_metrics, excited_metrics)
+    # f_q and alpha here come from the reference row, not the EM network; the junction-port extraction
+    # (Tutorial 10b) supplies network-derived values and coupled_hamiltonian_from_prepared_runs joins them.
     extracted = {
         "cavity_frequency_ghz": np.nan,
         "kappa_mhz": np.nan,
@@ -1505,6 +1493,7 @@ def run_coupled_demo(request: CoupledSystemDrivenModalRequest, reference: dict[s
         "excited_metrics": excited_metrics,
         "comparison_rows": comparison_df.to_dict(orient="records"),
         "postprocessing_warning": postprocessing_warning,
+        "qubit_source": "reference_row",
         "artifacts": {
             "raw_touchstone": str(s3p_path),
             "loaded_ground_touchstone": str(ground_s2p_path),

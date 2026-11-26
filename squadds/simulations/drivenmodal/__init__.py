@@ -10,6 +10,7 @@ from .coupled_postprocess import (
     calculate_g_from_chi,
     calculate_kappa_hz,
     calculate_loaded_q,
+    notch_half_power_linewidth,
     terminate_port_y,
     y_to_s,
 )
@@ -69,6 +70,7 @@ __all__ = [
     "calculate_chi_hz",
     "calculate_g_from_chi",
     "calculate_kappa_hz",
+    "notch_half_power_linewidth",
     "calculate_loaded_q",
     "capacitance_dataframe_from_y_sweep",
     "capacitance_matrix_from_y",
